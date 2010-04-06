@@ -1,0 +1,162 @@
+
+0.doc.tcl,81
+    foreach line [regexp -all -inline -line {^[ \t]*\#\|.*} $body]$body61,1646
+
+action.tcl,30
+proc qc::action_menu 55,2480
+
+args.tcl,20
+	set next 182,5314
+
+cast.tcl,798
+    if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day)s?( ago)?} $string]$string181,5310
+    if { [regexp {(^|[^0-9])(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})([^0-9]|$)} $string -> start year month day end]end190,5846
+    if { [regexp {(^|[^0-9])(\d{1,2})[/\.](\d{1,2})[/\.](\d{4}|\d{2}|\d)([^0-9]|$)} $string -> start day month year end]end193,6017
+    if { [regexp {(^|\W)(\d{1,2})[/\.](\d{1,2})(\W|$)} $string -> start day month end]end198,6257
+    if { [regexp {(^|[^0-9])(\d{4})([^0-9]|$)} $string -> start year end]end202,6455
+	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end]end206,6615
+
+csv.tcl,165
+	set field_value 41,1174
+	set csv [string replace $csv [lindex $field 0] [lindex $field 1] [string map [list , \0 \n \1 \"\" \2] $field_value]$field_value42,1247
+
+db.tcl,257
+	set qry 40,1994
+    regsub -all all45,2262
+    if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]$qry48,2380
+    if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value]$value68,2946
+    if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail]tail73,3074
+
+html.tcl,718
+	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9]*)$} $part -> id]id272,7088
+	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9]*)$} $part -> tag id]id275,7218
+    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html297,7785
+    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html308,8131
+	set element 362,9796
+	set attributes 363,9872
+	while { [regsub -all {(^| )([^= ]+) *= *([^\"' ]+)( |$)} $attributes {\1\2="\3"\4} attributes]attributes374,10175
+		[regexp -indices -start $start -- {</?[A-Z]+>} $html match]match404,11045
+	set replace 405,11111
+	set html [string replace $html [lindex $match 0] [lindex $match 1] $replace]$replace407,11215
+
+is.tcl,343
+    return [regexp {^[a-zA-Z0-9_\-.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]$email126,3088
+    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode]$postcode130,3209
+    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]$postcode130,3209
+
+reload.tcl,42
+    set files 8,155
+    set files 9,211
+
+style.tcl,75
+    foreach rule [regexp -all -inline {[^\{]+\{[^\}]+\}} $css]$css24,687
+
+url.tcl,25
+    append html 97,3404
+
+util.tcl,123
+proc xsplit 324,8205
+	    lappend list 329,8435
+	set str [string range $str [expr [lindex $match 1]+1] end]end332,8527
+
+xml.tcl,0
+
+widget.tcl,0
+
+util_list.tcl,0
+
+utf8.tcl,0
+
+up.tcl,0
+
+table.tcl,0
+
+sticky.tcl,0
+
+sql_where_in.tcl,0
+
+sql_where.tcl,0
+
+sql.tcl,0
+
+sourceproc.tcl,0
+
+sort.tcl,0
+
+session.tcl,0
+
+section.tcl,0
+
+return.tcl,0
+
+perm.tcl,0
+
+param.tcl,0
+
+ns_set.tcl,0
+
+multimap.tcl,0
+
+math.tcl,0
+
+lock.tcl,0
+
+ll.tcl,0
+
+ldict.tcl,0
+
+http.tcl,0
+
+html_table_sort.tcl,0
+
+html_table_scroll.tcl,0
+
+html_table_list.tcl,0
+
+html_table_doc.tcl,0
+
+html_table_db.tcl,0
+
+html_table.tcl,0
+
+html_options.tcl,0
+
+graph.tcl,0
+
+ftp.tcl,0
+
+format_timestamp.tcl,0
+
+format_date.tcl,0
+
+format.tcl,0
+
+form_layout.tcl,0
+
+form_db.tcl,0
+
+form.tcl,0
+
+file.tcl,0
+
+error.tcl,0
+
+email.tcl,0
+
+dict.tcl,0
+
+db_thread_cache.tcl,0
+
+db_cache.tcl,0
+
+date.tcl,0
+
+cookie.tcl,0
+
+conn.tcl,0
+
+check.tcl,0
+
+chart.tcl,0
+
+auth.tcl,0

@@ -1,0 +1,72 @@
+doc date {
+    Title "Date Handling"
+    Description {
+	<h3>Date Representation</h3>
+	Dates in qcode are represented using a limited ISO 8601 format of YYYY-MM-DD.<br>
+	This format matches the default postgresql <i>date</i> data type and should be unambiguous.<br>
+	Testing if a string is a valid date is done using [doc_link is_date].
+	<h3>Parsing Date Strings</h3>
+	The proc [doc_link cast_date] will try to convert a wide variety of date strings into an ISO date.<br>
+
+	<pre class="example">
+	% cast_date 12/5/07
+	2007-05-12
+	# At present dates in this format are assumed to be European DD/MM/YY
+	%
+	% cast_date yesterday
+	2007-05-11
+	%
+	% cast_date "June 23rd"
+	2007-06-23
+	</pre>
+	The proc [doc_link cast_epoch] does the real work of parsing date strings into a [html_a "unix epoch" http://en.wikipedia.org/wiki/Unix_time].
+	<h3>Date Calculations</h3>
+	TCL does a great job of parsing strings to carry out simple date calculations.
+	<pre class="example">
+	% cast_date "2007-06-05 + 3days"
+	2007-06-08
+	%
+	% cast_date "2007-06-05 - 2 months"
+	2007-04-05
+	</pre>
+	<h3>Date Helpers</h3>
+	<ul>
+	<li>[doc_link date_compare]</li>
+
+	<li>[doc_link date_day_name]</li>
+	<li>[doc_link date_day_shortname]</li>
+	<li>[doc_link date_dom]</li>
+
+	<li>[doc_link date_month]</li>
+	<li>[doc_link date_month_name]</li>
+	<li>[doc_link date_month_shortname]</li>
+	<li>[doc_link date_month_start]</li>
+	<li>[doc_link date_month_end]</li>
+
+	<li>[doc_link date_quarter]</li>
+	<li>[doc_link date_quarter_start]</li>
+	<li>[doc_link date_quarter_end]</li>
+
+	<li>[doc_link date_year]</li>
+
+	<li>[doc_link date_year_start]</li>
+	<li>[doc_link date_year_end]</li>
+
+	<li>[doc_link date_year_iso_start]</li>
+	<li>[doc_link date_year_iso_end]</li>
+
+
+	<li>[doc_link dates]</li>
+	</ul>
+	<h3>Formatting Dates</h3>
+	TCL provides a rich set of features to format dates but here are a few useful shortcuts.
+	<ul>
+	<li>[doc_link format_date]</li>
+	<li>[doc_link format_date_iso]</li>
+	<li>[doc_link format_date_letter]</li>
+	<li>[doc_link format_date_rel]</li>
+	<li>[doc_link format_date_uk]</li>
+	<li>[doc_link format_date_uk_long]</li>
+	</ul>
+    }
+}

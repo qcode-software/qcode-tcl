@@ -1,0 +1,232 @@
+doc db_sql_injection_attack {
+    Title "SQL Injection Attacks"
+    Parent db
+    Description {
+	SQL injection attacks take advantage of code that does not validate user input or properly escape (or quote) strings used in SQL queries.
+	<h3>Attack on column_id=$column_id</h3>
+	Lets say we have a page <code>mypage.html?user_id=1</code> which displays the greeting <i>"Jimmy's Page"</i><br>
+	The variable user_id is set to 1 and the page uses the insecure query 
+	<pre>select name from users where user_id=$user_id</pre>
+	If no validation takes place on the input for $user_id a SQL injection attach can be crafted to extract arbitary information from the database.
+	<p>
+	For example :-
+	<pre class="example">
+	% set user_id "1 UNION ALL select password as name from users where user_id=2 order by name DESC LIMIT 1"
+	% set qry "select name from users where user_id=$user_id"
+	% select name from users where user_id=1 UNION ALL select password as name from users where user_id=2 order by name LIMIT 1
+	</pre>
+	
+	When this query runs it returns
+	<pre>
+	name   
+	----------
+	conner23
+	(1 row)
+	</pre>
+	You might need to change the <code>order by</code> clause depending on the values in the database.
+	<p>
+	To pass this value of user_id to the page it needs to be url encoded
+	<pre class="example">
+	% set user_id "1 UNION ALL select password as name from users where user_id=2 order by name DESC LIMIT 1"
+	% url mypage.html user_id
+	mypage.html?user%5fid=1+UNION+ALL+select+password+as+name+from+users+where+user%5fid%3d2+order+by+name+DESC+LIMIT+1
+	</pre>
+	<p>
+	So the welcome message on the page will read <i>"conner23's Page"</i> and the password for user 2 is compromised.
+	<p>
+	Similar attacks can be used on UPDATE and INSERT queries to manipulate or destroy the database.
+	
+	<h3>Attack on column='$column'</h3>
+	A page uses the insecure qry <code>select name from users where email='$email'</code>
+	<pre class="example">
+	% set email "foo@bar.com' UNION ALL select password as name from users where user_id=2 order by name;--"
+	% set qry "select name from users where email='$email'"
+	select name from users where email='foo@bar.com' UNION ALL select password as name from users where user_id=2 order by name;--'
+	</pre>	
+    }
+}
+
+doc db {
+    Title "Database API"
+    Description {
+	<table>
+	<tr>
+	<td valign=top>
+
+	<h3>SELECT statements</h3>
+	<ul>
+	<li>[doc_link db_1row]</li>
+	<li>[doc_link db_0or1row] and</li>
+	<li>[doc_link db_foreach].</li>
+	<li>[doc_link db_select_table].</li>
+	</ul>
+	<h3>INSERT, UPDATE and other DML statements</h3>
+	<ul>
+	<li>[doc_link db_dml]</li>
+	</ul>
+	<h3>Database Transactions</h3>
+	<ul>
+	<li>[doc_link db_trans]</li>
+	</ul>
+	<h3>Sequences</h3>
+	<ul>
+	<li>[doc_link db_seq]</li>
+	</ul>
+	<h3>Bind Variables and Quoting</h3>
+	<ul>
+	<li>[doc_link db_qry_parse]</li>
+	<li>[doc_link db_quote]</li>
+	</ul>
+	
+	</td>
+	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	<td valign=top>
+
+	<h3>SQL Shortcuts</h3>
+	<ul>
+	<li>[doc_link sql_set]</li>
+	<li>[doc_link sql_insert]</li>
+	<li>[doc_link sql_order_by]</li>
+	</ul>
+	<h3>SQL WHERE helpers</h3>
+	<ul>
+	<li>[doc_link sql_where]</li>
+	<li>[doc_link sql_where_set]</li>
+	<li>[doc_link sql_where_cols_start]</li>
+	<li>[doc_link sql_where_col_starts]</li>
+	<li>[doc_link sql_where_like]</li>
+	<li>[doc_link sql_where_in]</li>
+	<li>[doc_link sql_where_in_not]</li>
+	</ul>
+	<h3>Caching</h3>
+	<ul>
+	<li>[doc_link db_cache]</li>
+	<li>[doc_link db_thread_cache]</li>
+	</td>
+	</table>
+	<hr>
+	<h2>Examples</h2>
+	Lets say we have a table users
+	<pre class="psql">
+	% CREATE table users (
+	    user_id integer primary key,
+	    name varchar(50),
+	    email varchar(100),
+	    password varchar(50)
+	);
+        NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "users_pkey" for table "users"
+        CREATE TABLE
+	% 
+	% insert into users (user_id,name,email,password) values (1,'Jimmy','jimmy@tarbuck.com','buz99');
+	% insert into users (user_id,name,email,password) values (2,'Des','des@oconner.com','conner23');
+	</pre>
+	<h3>Getting Data Out</h3>
+	The Database API sets local variables with names corresponding to the column names in the query.
+	<pre class="example">
+	% db_1row {select name,email from users where user_id=1}
+	% set name
+	Jimmy
+	% set email
+	jimmy@foo.com
+	</pre>
+	<h3>Bind Variables</h3>
+	Bind Variables are designed to prevent [html_a "SQL Injection Attacks" db_sql_injection_attack.html] and escape strings ready for the database.
+	<p>
+	Bind Variables are denoted by a colon followed by the name of the variable to be substituted e.g. <code>:foo or :bar</code>.The syntax is similar to ACS and [html_a OpenACS http://www.openacs.org]. Postgresql's psql program also uses this notation for substitution but without escaping values.
+	<p>
+	The work is done by [doc_link db_qry_parse] but it should not be neccessary to call this proc directly.
+	<pre class="example">
+	% set user_id 1
+	% set qry {select name from users where user_id=:user_id}
+	% db_qry_parse $qry
+	select name from users where user_id=1
+	</pre>
+	<p>
+	The procs [doc_link db_1row], [doc_link db_0or1row], [doc_link db_foreach],  [doc_link db_select_table] and [doc_link db_dml] all parse queries for bind variables before executing the query.<br>For example:-
+	<pre class="example">
+	% set user_id 1
+	% db_1row {select name from users where user_id=:user_id}
+	% set name
+	Jimmy
+	</pre>
+	<h3>Getting Data In</h3>
+	Lets say we have a sequence called user_id_seq to generate user_id numbers and we have a new user to add to the users table.<br>
+	The shortcut [doc_link sql_insert] provides a concise way of constructing an INSERT [doc_link db_dml] statement.
+	<pre class="example">
+	% set user_id [db_seq user_id_seq]
+	% set name Bob
+	% set email bob@monkhouse.com
+	% set password joker
+	%
+	% set qry "insert into users [sql_insert user_id name email password]"
+	insert into users (user_id,name,email,password) values (:user_id,:name,:email,:password)
+	%
+	% # So we can write
+	% db_dml "insert into users [sql_insert user_id name email password]"
+	</pre>
+	[doc_link sql_insert] also accepts a list of field names.
+	<pre class="example">
+	% set cols [list user_id name email password]
+	% set qry "insert into users [sql_insert $cols]"
+	insert into users (user_id,name,email,password) values (:user_id,:name,:email,:password)
+	</pre>
+	<h3>Updates</h3>
+	Another useful shortcut for update statements is [doc_link sql_set]
+	Lets say we want to update user#3  
+	<pre class="example">
+	% set user_id 3
+	% set name "Bob Monkhouse"
+	% set email "\"Bob Monkhouse\" <bob@monkhouse.com>"
+	%
+	% set qry "update users set [sql_set name email] where user_id=:user_id"
+	update users set name=:name,email=:email where user_id=3
+	% 
+	% # Shortcut form can be handed to db_dml
+	% db_dml "update users set [sql_set name email] where user_id=:user_id"
+	</pre>
+    }
+}
+
+doc db_qry_parse {
+    Parent db
+    Usage {db_qry_parse qry ?level?}
+    Description {
+	Escape and substitute bind variables in a SQL query. Bind variables are marked with a colon followed by the variable name e.g. :varname The parser will use values of corresponding TCL variables in this namespace or go up the number of levels defined. Values are escaped using db_quote e.g O'Conner becomes O''Conner. Variables that contain an empty string will be treated as NULL (see example below). 
+    }
+    Examples {
+	% set order_number 123
+	% db_qry_parse {select order_date from sales_order where order order_number=:order_number}
+	% select order_date from sales_order where order_number=123
+
+	% set name O'Conner
+	% db_qry_parse {select * from users where name=:name}
+	% select * from users where name='O''Conner'
+
+	% set name ""
+	% db_qry_parse {select * from users where name=:name}
+	% select * from users where name IS NULL
+    }
+}
+
+doc db_qry_parse_dml {
+    Parent db
+    Usage {db_qry_parse_dml qry ?level?}
+    Description {
+	Escape and substitute bind variables in a SQL dml query. Bind variables are marked with a colon followed by the variable name e.g. :varname The parser will use values of corresponding TCL variables in this namespace or go up the number of levels defined. Values are escaped using db_quote e.g O'Conner becomes O''Conner. Variables that contain an empty string will be treated as NULL (see example below). 
+    }
+    Examples {
+	% set customer_number 123
+	% db_qry_parse {update order set customer_number=:customer_number where order_number=789}
+	% update order set customer_number=123 where order_number=789
+
+	% set name O'Conner
+	% set user_id 2345
+	% db_qry_parse {update user set name=:name where user_id=:user_id}
+	% update user set name='O''Conner' where user_id=2345
+	
+	% set tel_number ""
+	% db_qry_parse {update order set tel_number=:tel_number where order_number=123}
+	% update order set tel_number=NULL where order_number=123
+    }
+}
+
