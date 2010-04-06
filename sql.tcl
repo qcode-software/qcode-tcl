@@ -23,7 +23,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# $Header: /home/bernhard/cvs/exf/tcl/qc::sales_order.tcl,v 1.13 2004/03/16 10:34:04 bernhard Exp $
 
 proc qc::sql_set {args} {
     foreach name $args {
