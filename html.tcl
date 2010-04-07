@@ -138,6 +138,23 @@ doc html_a {
     }
 }
 
+proc qc::html_a_replace { link url args } {
+    # Used to replace browser history state so browser back button will not record these urls.
+    return [html_a $link "javascript:location.replace('$url');" $args]
+}
+
+doc html_a {
+    Examples {
+	% html_a_replace Google http://www.google.co.uk 
+	<a href="javascript:location.replace('http://www.google.co.uk');">Google</a>
+	%
+	% html_a_replace Google http://www.google.co.uk title "Google Search" class highlight
+        <a title="Google Search" class="highlight" href="javascript:location.replace('http://www.google.co.uk');">Google</a>
+    }
+}
+
+
+
 proc qc::html_id { name {value UNDEF}} {
     #| Wrap value in span tag and give it an ID
     if {[string equal $value UNDEF]} {
