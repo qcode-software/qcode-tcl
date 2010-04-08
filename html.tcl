@@ -141,7 +141,7 @@ doc html_a {
 proc qc::html_a_replace { link url args } {
     # Used to replace browser history state so browser back button will not record these urls.
     lappend args onclick "location.replace(this.href);return false;"
-    return [html_a $link $args]
+    return [html_a $link $url $args]
 }
 
 doc html_a {
