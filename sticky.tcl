@@ -1,6 +1,10 @@
 proc sticky_save {args} {
     #args $args -url ? args
-    set url [url_path [ns_set iget [ns_conn headers] Referer]]
+    if { [form_var_exists sticky_url] } {
+	set url [form_var_get sticky_url]
+    } else {
+	set url [url_path [ns_set iget [ns_conn headers] Referer]]
+    }
     set employee_id [auth]
   
     if { [llength $args] == 0 } {
