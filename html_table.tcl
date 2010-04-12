@@ -494,7 +494,7 @@ proc qc::html_table_tbody_avg { tbodyVar index } {
 proc qc::html_table_format {table cols} {
     # format columns based on the column class or column format
     foreach col $cols colIndex [.. 0 [llength $cols]] {
-	dict2vars $col class format dp zeros sigfigs
+	dict2vars $col class format dp zeros sigfigs commify
 	if { [info exists class] } {
 	    switch -glob -- $class {
 		clsMoney* {default dp 2;default commify yes}
