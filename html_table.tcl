@@ -494,27 +494,29 @@ proc qc::html_table_tbody_avg { tbodyVar index } {
 proc qc::html_table_format {table cols} {
     # format columns based on the column class or column format
     foreach col $cols colIndex [.. 0 [llength $cols]] {
-	dict2vars $col class format dp zeros sigfigs commify
+	dict2vars $col class format dp zeros sigfigs commify percentage
 	if { [info exists class] } {
 	    switch -glob -- $class {
 		clsMoney* {default dp 2;default commify yes}
 		clsInteger* {default dp 0;default commify yes}
 		clsNumber* {default commify yes}
 		clsBool* {default format format_bool}
+		clsPerct {default percentage yes;default commify yes}
 	    }
 	}
 
-	if { [info exists dp] || [info exists sigfigs] || [info exists zeros] || [info exists commify] } {
+	if { [info exists dp] || [info exists sigfigs] || [info exists zeros] || [info exists commify] || [info exists percentage]} {
 	    default dp ""
 	    default sigfigs ""
 	    default commify no
 	    default zeros yes
+	    default percentage no
 	    foreach rowIndex [.. 0 [llength $table]] {
 		set cell [lindex $table $rowIndex $colIndex]
 		# Can't find a way to test if the cell exists to prevent an error when trying to lset
 		# Best try is to skip empty strings
 		if { [eq $cell ""] } {continue}
- 		lset table $rowIndex $colIndex [qc::html_table_format_cell_if_number $cell $dp $sigfigs $zeros $commify]
+ 		lset table $rowIndex $colIndex [qc::html_table_format_cell_if_number $cell $dp $sigfigs $zeros $commify $percentage]
 	    }
 	}
 	if { [info exists format] } {
@@ -528,21 +530,24 @@ proc qc::html_table_format {table cols} {
     return $table
 }
 
-proc qc::html_table_format_cell_if_number {html dp sigfigs zeros commify} {
+proc qc::html_table_format_cell_if_number {html dp sigfigs zeros commify percentage} {
     if { [regexp {(<[^>]+>)([^<]+)(<[^>]+>)} $html] } {
 	regsub -all {[][$\\]} $html {\\&} html
-	regsub -all {(<[^>]+>)([^<]+)(<[^>]+>)} $html "\\1\[qc::html_table_format_if_number {\\2} {$dp} {$sigfigs} {$zeros} {$commify}]\\3" html
+	regsub -all {(<[^>]+>)([^<]+)(<[^>]+>)} $html "\\1\[qc::html_table_format_if_number {\\2} {$dp} {$sigfigs} {$zeros} {$commify} {$percentage}]\\3" html
 	return [subst $html]
     } elseif { [is_decimal $html] } {
-	return [qc::html_table_format_if_number $html $dp $sigfigs $zeros $commify]
+	return [qc::html_table_format_if_number $html $dp $sigfigs $zeros $commify $percentage]
     } else {
 	return $html
     }
 }
 
-proc qc::html_table_format_if_number {value dp sigfigs zeros commify} {
+proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage} {
     #| If value is a number then commify
     if { [is_decimal $value] } {
+	if { [true $percentage] } {
+	    set value [expr {$value*100}]
+	}
 	if { [info exists sigfigs] && [is_integer $sigfigs]} {
 	    set value [sigfigs $value $sigfigs]
 	}
@@ -555,6 +560,9 @@ proc qc::html_table_format_if_number {value dp sigfigs zeros commify} {
 	if { [true $commify] } {
 	    set value [format_commify $value]
 	} 
+	if { [true $percentage] } {
+	    set value $value%
+	}
     }
     return $value
 }
