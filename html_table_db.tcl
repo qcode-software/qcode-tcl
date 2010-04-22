@@ -100,6 +100,7 @@ proc qc::html_table_db_flexgrid {args} {
     set class clsDbFlexGrid
     lappend varNames class id
     set dict [dict_from [lsort -unique $varNames]]
+
     append html [qc::html_table $dict]
     append html "</div>\n"
     return $html

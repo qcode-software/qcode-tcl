@@ -148,7 +148,7 @@ proc qc::sql_sort { args } {
             #formvar trumps everything
             set limit [form_var_get limit]
         } elseif { [info exists limit] } {
-            # -limit switched was used and limit is already set
+            # -limit option was used and limit is already set
         } elseif { [uplevel 1 {info exists limit}] } {
             #limit is set in callers namespace
             upcopy 1 limit limit

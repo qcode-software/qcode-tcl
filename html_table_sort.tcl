@@ -55,54 +55,45 @@ proc qc::html_table_sort_header { cols sortCols } {
 	} else {
 	    set label ""
 	}
-	if { [dict exists $col name] && [eq [dict get $col name] [lindex $sortCols 0]] } {
-	    # Primary sort col
-	    if { [eq [upper [dict get $sortCols [dict get $col name]]] DESC] } {
-		set sort_order DESC
-	    } else {
-		set sort_order ASC
-	    }
-	    if { [dict exists $col class] } {
-		set class [dict get $col class]
-	    } else {
-		set class ""
-	    }
-	    if { [eq $sort_order ASC] } {
-		if { [eq $class clsNumber] || [eq $class clsMoney] } {
-		    set indicator "Sorted Low to High"
-		} elseif { [eq $class clsDate] } {
-		    set indicator "Sorted Old to New"
+	if { [dict exists $col name] } {
+	    if { [eq [dict get $col name] [lindex $sortCols 0]] } {
+		# Primary sort col
+		if { [eq [upper [dict get $sortCols [dict get $col name]]] DESC] } {
+		    set sort_order DESC
 		} else {
-		    set indicator "Sorted A-Z"
+		    set sort_order ASC
 		}
-		lappend row "[html span $label class clsSort][html div $indicator class clsAsc]"
-	    } else {
-		if { [eq $class clsNumber] || [eq $class clsMoney] } {
-		    set indicator "Sorted High to Low"
-		} elseif { [eq $class clsDate] } {
-		    set indicator "Sorted New to Old"
+		if { [dict exists $col class] } {
+		    set class [dict get $col class]
 		} else {
-		    set indicator "Sorted Z-A"
+		    set class ""
 		}
-		lappend row "[html span $label class clsSort][html div $indicator class clsDesc]"
+		if { [eq $sort_order ASC] } {
+		    if { [eq $class clsNumber] || [eq $class clsMoney] } {
+			set indicator "Sorted Low to High"
+		    } elseif { [eq $class clsDate] } {
+			set indicator "Sorted Old to New"
+		    } else {
+			set indicator "Sorted A-Z"
+		    }
+		    lappend row "[html span $label class clsSort][html div $indicator class clsAsc]"
+		} else {
+		    if { [eq $class clsNumber] || [eq $class clsMoney] } {
+			set indicator "Sorted High to Low"
+		    } elseif { [eq $class clsDate] } {
+			set indicator "Sorted New to Old"
+		    } else {
+			set indicator "Sorted Z-A"
+		    }
+		    lappend row "[html span $label class clsSort][html div $indicator class clsDesc]"
+		}
+	    } else {
+		# Sortable col
+		lappend row [html span $label class clsSort]
 	    }
 	} else {
-	    if { 0 } {
-		if { [dict exists $col name] && [in $sortCols [dict get $col name]] } {
-		    lappend row [html span $label class clsSort]
-		} else {
-		    lappend row $label
-		}
-	    } else {
-		######## NOT SURE #######
-		if { ![dict exists $col name] || \
-			 ([dict exists $col sortable] && [false [dict get $col sortable]]) } {
-		    # No name or sortable is no
-		    lappend row $label
-		} else {
-		    lappend row [html span $label class clsSort]
-		} 
-	    }
+	    # Not sortable col
+	    lappend row $label
 	}
     }
     lappend thead $row

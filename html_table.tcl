@@ -164,16 +164,16 @@ proc qc::html_table { args } {
     # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable
     # Some col keys have special meaning :- label class format thClass tfoot sum
 
-    # sortable
-    if { [info exists sortable] && [true $sortable] } {
-	if { ![info exists sortCols] } {
-	    if { [form_var_exists sortCols] } {
-		set sortCols [form_var_get sortCols]
-	    } else {
-		set sortCols [qc::sortcols_from_cols $cols]
-	    }
-	}
+    if { [info exists sortCols] } {
+	default sortable yes
+    } else {
+	default sortable no
     }
+    if { [true $sortable] && [form_var_exists sortCols] } {
+	set sortCols [form_var_get sortCols]
+    }
+   
+    
     # QRY
     if { [info exists qry] && ![info exists table] && ![info exists tbody] } {
 	set table [qc::db_select_table [qc::db_qry_parse $qry 1]]	    
@@ -184,7 +184,8 @@ proc qc::html_table { args } {
 	set cols [qc::html_table_cols_from_table table $cols]
     }
     # sortable Header
-    if { [info exists cols] && [info exists sortCols] && ![info exists thead] } {
+    if { [info exists cols] && [true $sortable] && ![info exists thead] } {
+	default sortCols ""
 	set thead [qc::html_table_sort_header $cols $sortCols]
     }
     # Highlight th sorted
