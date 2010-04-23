@@ -80,3 +80,26 @@ proc qc::xml_ldict { li_tag ldict } {
     }
     return $xml
 }
+
+proc xml2dict { xml root_element } {
+
+    set dict ""
+    dom parse $xml doc
+    set subtree [$doc getElementsByTagName $root_element]
+    if { $subtree eq "" } {
+        error "XML parse error"
+    } else {
+        set node [lindex $subtree 0]
+        set nodes [$node childNodes]
+        foreach node $nodes {
+            if { [llength [$node childNodes]] > 1 } {
+                lappend dict [$node nodeName] [xml2dict $xml [$node nodeName]]
+            } else {
+                lappend dict [$node nodeName] [$node asText]
+            }
+        }
+    }
+    return $dict
+}
+
+
