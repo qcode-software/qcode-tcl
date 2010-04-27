@@ -2,7 +2,7 @@ proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection
     #| Trust that a reverse proxy like nginx is setup to pass an X-Forwarded-For header.
     set headers [ns_conn headers]
-    if { [ns_set find $headers X-Forwarded-For]!=-1 && ([eq [ns_conn peeraddr] 127.0.0.1] || [eq [ns_conn peeraddr] [ns_info address]]) } {
+    if { [ns_set find $headers X-Forwarded-For]!=-1 && ([eq [ns_conn peeraddr] 127.0.0.1] || [string match  192.168* [ns_conn peeraddr]] ||  [eq [ns_conn peeraddr] [ns_info address]]) } {
 	# Proxied so trust X-Forwarded-For
 	set forwarded [ns_set iget $headers X-Forwarded-For]
 	set ip $forwarded

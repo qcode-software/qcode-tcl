@@ -250,7 +250,7 @@ doc cast_epoch {
     }
 }
 
-proc qc::cast_boolean { string {true Y} {false N} } {
+proc qc::cast_boolean { string {true true} {false false} } {
     #| Cast a string as a boolean
     # strip html
     set string [ns_striphtml $string]

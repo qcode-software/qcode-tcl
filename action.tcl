@@ -61,10 +61,8 @@ proc qc::action_menu {conf object_state} {
     set usedkeys(s) 1
 
     foreach dict $conf {
-	set label [dict get $dict label]
-	set url [dict get $dict url]
-	set states [dict get $dict states]
-	
+	dict2vars $dict label url states type confirm
+	default confirm yes
 	# ActionKey
 	for {set i 0} {$i<[string length $label]} {incr i} {
 	    set letter [string index $label $i]
@@ -78,11 +76,15 @@ proc qc::action_menu {conf object_state} {
 		set link_label $label
 	    }
 	}
-	if { [in $states $object_state] } {
-	    if { [dict exists $dict type] && [string equal [dict get $dict type] print] } {
+	if { ![info exists states] || [in $states $object_state] } {
+	    if { [info exists type] && [eq $type print] } {
 		lappend lmenu [qc::action_print $link_label $url $actionKey]
 	    } else {
-		lappend lmenu [qc::action $link_label $url $actionKey]
+		if { $confirm } {
+		    lappend lmenu [qc::action $link_label $url $actionKey]
+		} else {
+		    lappend lmenu [html_a $link_label $url]
+		}
 	    }
 	}
     }
