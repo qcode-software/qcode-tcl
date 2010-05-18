@@ -73,13 +73,16 @@ proc qc::db_quote { value } {
     if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
 	return "${sign}0.${tail}"
     }
+    # scientific notation
+    if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)-?[0-9]+$} $value] } {
+	return $value
+    }
     # replace ' with '' and \ with \\ 
     # (tcl also uses slash to escape hence \\ in string map)
     if { [string first \\ $value]==-1 } {
 	return "'[string map {' ''} $value]'"
     } else {
 	return "E'[string map {' '' \\ \\\\} $value]'"
-
     }
 }
 
