@@ -74,7 +74,7 @@ proc qc::db_quote { value } {
 	return "${sign}0.${tail}"
     }
     # scientific notation
-    if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)-?[0-9]+$} $value] } {
+    if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
 	return $value
     }
     # replace ' with '' and \ with \\ 
