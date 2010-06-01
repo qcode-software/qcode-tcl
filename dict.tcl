@@ -77,18 +77,25 @@ proc qc::dict_unset { dictVariable key } {
     }
 }
 
-proc qc::dict_exists { dict key } {
-    # Check if a value exists for this key
+proc qc::dict_exists { args } {
+    args $args dict args
+
+    set key [lindex $args 0]
     set index [lsearch -exact $dict $key]
     while { $index%2!=0 && $index!=-1 && $index<[llength $dict]} {
-	incr index
-	set index [lsearch -exact -start $index $dict $key]
+    incr index
+    set index [lsearch -exact -start $index $dict $key]
     }
-    if { $index%2 == 0 } {
-	return 1
+    if { $index%2 == 0 && [llength $args] > 1 } {
+        # key has a value but there are more keys, so recurse with value and rest of keys
+        return [dict_exists [lindex $dict [expr {$index+1}]] {*}[lrange $args 1 end]]
+    } elseif { $index%2 == 0 && [llength $dict]%2 == 0} {
+        # key has value, this is a valid dict and there are no more keys. the end.
+        return 1
     } else {
-	return 0
-    } 
+        # key doesn't have value
+        return 0
+    }
 }
 
 proc qc::dict_incr {dictVariable key {value 1}} {
