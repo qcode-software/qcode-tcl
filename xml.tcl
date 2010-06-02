@@ -81,7 +81,7 @@ proc qc::xml_ldict { li_tag ldict } {
     return $xml
 }
 
-proc xml2dict { xml root_element } {
+proc qc::xml2dict { xml root_element } {
 
     set dict ""
     dom parse $xml doc
@@ -92,8 +92,13 @@ proc xml2dict { xml root_element } {
         set node [lindex $subtree 0]
         set nodes [$node childNodes]
         foreach node $nodes {
-            if { [llength [$node childNodes]] > 1 } {
+            if { [llength [$node childNodes]] > 1 \
+               || ([llength [$node childNodes]] == 1 \
+                  && [ne [[$node firstChild] nodeType] TEXT_NODE] ) } {
                 lappend dict [$node nodeName] [xml2dict $xml [$node nodeName]]
+            }  elseif { [llength [$node childNodes]] == 0 } {
+                # empty node
+                lappend dict [$node nodeName] {}
             } else {
                 lappend dict [$node nodeName] [$node asText]
             }
@@ -101,5 +106,3 @@ proc xml2dict { xml root_element } {
     }
     return $dict
 }
-
-
