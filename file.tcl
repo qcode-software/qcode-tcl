@@ -1,8 +1,8 @@
-proc qc::file_temp {text} {
+proc qc::file_temp {text {mode 0600}} {
     #| Write the text $text out into a temporary file
     #| and return the name of the file.
     set filename [ns_mktemp /tmp/ns.XXXXXX]
-    set out [open $filename w 0644]
+    set out [open $filename w $mode]
     puts -nonewline $out $text
     close $out
     return $filename

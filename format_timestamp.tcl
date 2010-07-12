@@ -27,7 +27,7 @@
 
 proc qc::format_timestamp_iso { string } {
     #| Format string as an ISO timestamp 
-    return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
+    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
 }
 
 doc format_timestamp_iso {
@@ -48,13 +48,18 @@ proc qc::format_timestamp_rel { string } {
     set epoch [cast_epoch $string]
     set epoch_now [clock seconds]
     # Today return time
-    if { [string equal [format_date_iso $epoch_now] [format_date_iso $epoch]] } {
+    if { [string equal [cast_date $epoch_now] [cast_date $epoch]] } {
         return [clock format $epoch -format "%H:%M"]
     }
+    # Same Week
     if { [string equal [clock format $epoch_now -format "%Y%U"] [clock format $epoch -format "%Y%U"]] } {
         return [clock format $epoch -format "%a %H:%M"]
     }
-    return [clock format $epoch -format "%Y-%m-%d %H:%M"]
+    # Same Year
+    if { [string equal [clock format $epoch_now -format "%Y"] [clock format $epoch -format "%Y"]] } {
+	return "[date_month_shortname $epoch] [format_ordinal [date_dom $epoch]]"
+    }
+    return [clock format $epoch -format "%Y-%m-%d"]
 }
 
 doc format_timestamp_rel {
@@ -68,6 +73,10 @@ doc format_timestamp_rel {
 	% format_timestamp_rel "next week"
 	2007-11-12 17:34
     }
+}
+
+proc qc::format_timestamp2hour { string } {
+    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
 }
 
 proc qc::format_timestamp { string } {

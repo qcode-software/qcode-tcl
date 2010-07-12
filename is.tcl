@@ -25,7 +25,7 @@
 #
 # $Header: /var/lib/cvs/exf/tcl/qc::validate.tcl,v 1.8 2003/03/27 11:26:23 nsadmin Exp $
 
-proc is_boolean {bool} {
+proc qc::is_boolean {bool} {
     return [in {Y N YES NO TRUE FALSE T F 0 1} [upper $bool]]
 }
 
@@ -38,7 +38,7 @@ proc qc::is_integer {int} {
 }
 
 proc qc::is_pos {number} {
-    if { $number>=0 } {
+    if { [is_decimal $number] && $number>=0 } {
 	return 1
     } else {
 	return 0
@@ -46,20 +46,13 @@ proc qc::is_pos {number} {
 }
 
 proc qc::is_pnz {number} {
-    if { $number>0 } {
+    if { [is_decimal $number] && $number>0 } {
 	return 1
     } else {
 	return 0
     }
 }
 
-proc qc::is_positive_integer {int} {
-    if { [is_integer $int] && $int>=0 } {
-	return 1
-    } else {
-	return 0
-    }
-}
 proc qc::is_non_zero_integer {int} {
     if { [is_integer $int] && $int!=0 } {
 	return 1
@@ -67,8 +60,9 @@ proc qc::is_non_zero_integer {int} {
 	return 0
     }
 }
+
 proc qc::is_non_zero {number} {
-    if { $number!=0 } {
+    if { [is_decimal $number] && $number!=0 } {
 	return 1
     } else {
 	return 0
@@ -138,7 +132,7 @@ proc qc::is_creditcard { no } {
 	return 0
     }
     foreach digit [lreverse [split $no ""]] {
-	if { ![is_positive_integer $digit] } {
+	if { ![is_integer $digit] } {
 	    return 0
 	}
 	set t [expr {$digit*$mult}]
@@ -195,6 +189,15 @@ proc is_decimal_castable {string} {
 proc is_date_castable {string} {
     try {
 	cast_date $string
+	return true
+    } {
+	return false
+    }
+}
+
+proc is_timestamp_castable {string} {
+    try {
+	cast_timestamp $string
 	return true
     } {
 	return false

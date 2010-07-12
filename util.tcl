@@ -549,7 +549,7 @@ proc md5 {string} {
     return $md5
 }
 
-proc .. {from to {step 1}} {
+proc .. {from to {step 1} {limit ""}} {
     set result {}
     # Check month lists
     set lists {}
@@ -563,11 +563,14 @@ proc .. {from to {step 1}} {
     foreach list $lists {
 	if { [in $list $from] && [in $list $to] } {
 	    set index [lsearch $list $from]
-	    while { ![string eq [lindex $list $index] $to] } {
+	    while { ($limit eq "" && [lindex $list $index] ne $to && [llength $result]<[llength $list]) \
+			|| ([llength $result]<$limit)} {
 		lappend result [lindex $list $index]
-		if { $index==11 } { set index 0 } else {incr index}
+		set index [expr {($index+$step)%[llength $list]}]
 	    }
-	    lappend result $to
+	    if { $limit eq "" && [lindex $list $index] eq $to} {
+		lappend result $to
+	    }
 	    return $result
 	}
     }
@@ -581,3 +584,4 @@ proc .. {from to {step 1}} {
 	return $result
     }
 }
+

@@ -1,7 +1,7 @@
 proc sticky_save {args} {
     #args $args -url ? args
     if { [form_var_exists sticky_url] } {
-	set url [form_var_get sticky_url]
+	set url [url_path [form_var_get sticky_url]]
     } else {
 	set url [url_path [ns_set iget [ns_conn headers] Referer]]
     }
@@ -44,3 +44,16 @@ proc sticky_set {employee_id url name value} {
     }
     return $value
 }
+
+proc qc::sticky2vars { args } {
+    foreach name $args {
+	if { [sticky_exists $name] } {
+	    upset 1 $name [sticky_get $name]
+	} else {
+	    if { [uplevel 1 [list info exists $name]] } {
+		uplevel 1 [list unset $name]
+	    }
+	}
+    }
+}
+

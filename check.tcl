@@ -3,57 +3,111 @@ proc qc::check {args} {
     #| If the variable cannot be cast into the given type then throw an error of type USER.
     #| Use the error message given or a default message for the given type.
     #| The empty string is treated as a NULL value and always treated as valid unless NOT NULL is specified in types.
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     switch -exact -- [llength $args] {
 	0 - 
 	1 {
 	    return -code error "wrong#args: Should be varName type ?type? ?type? ?errorMessage?"
 	}
-	2 {
-	    lassign $args varName types
-	}
 	default {
 	    set varName [lindex $args 0]
-	    if { [string first " " [lindex $args end]]!=-1 } {
-		set errorMessage [lindex $args end]
-		set types [lrange $args 1 end-1]
-	    } else {
-		set types [lrange $args 1 end]
+	    set args [lrange $args 1 end]
+	}
+    }
+   
+    # Parse
+    array set alias [list INT INTEGER BOOL BOOLEAN STRING VARCHAR NZ NON_ZERO]
+    set nulls yes
+    set html no
+    set TYPES {}
+    for {set index 0} {$index<[llength $args]} {incr index} {
+	set TYPE [upper [lindex $args $index]]
+	set type [lower $TYPE]
+	set NEXT_TYPE [upper [lindex $args [expr {$index+1}]]]
+	# This is an alias
+	if { [info exists alias($TYPE)] } {
+	    set TYPE $alias($TYPE)
+	    set type [lower $TYPE]
+	}
+	if { $TYPE eq "NOT" && $NEXT_TYPE eq "NULL" } {
+	    set nulls no
+	    incr index 
+	    continue
+	} elseif {$TYPE eq "HTML"} {
+	    set html yes
+	    continue
+	} elseif {[info commands is_$type] ne ""} {
+	    lappend TYPES $TYPE
+	    set n [llength [info args is_$type]]
+	    if {$n>1} {
+		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
+		incr index [expr {$n-1}]
 	    }
+	} elseif {$TYPE eq "PNZ"} {
+	    lappend TYPES POS NZ
+	    set nulls no
+	} elseif {$TYPE eq "PRICE"} {
+	    lappend TYPES DECIMAL PNZ 
+	    set nulls no
+	} elseif {$TYPE eq "QTY"} {
+	    lappend TYPES INTEGER PNZ
+	    set nulls no
+	} elseif {$index>0 && $index==[llength $args]-1} {
+	    set errorMessage [lindex $args end]
+	} else {
+	    error "Don't know how to check $TYPE"
 	}
     }
 
-    # Translations
-    set map {}
-    lappend map "NOT NULL" NOT_NULL
-    lappend map  PRICE "PNZ DECIMAL NOT_NULL"
-    lappend map QTY "PNZ INT NOT_NULL"
-    set types [string map $map [upper $types]]
-    
     upvar 1 $varName varValue
     # Exists
     if { ![info exists varValue] } {error "No such variable $varName"}
-    # NULL
-    if {![in $types NOT_NULL] && [string equal $varValue ""] } {
-	# Pass empty string NULL values
-	return ""
+    # NULLs
+    if { $nulls && [string equal $varValue ""] } {
+	# NULL values are OK
+	return true
+    }
+    if { !$nulls && [string equal $varValue ""] } {
+	default errorMessage "$varName is empty"
+	error $errorMessage {} USER
+    }
+    # HTML Markup OFF by default
+    if { !$html && [regexp {<[^>]+>} $varValue] } {
+	error "\"$varValue\" contains HTML which is not allowed for $varName" {} USER
     }
     
-    foreach type $types {
-	# Try to cast to the type specified
-	try {
-	    set varValue [check_cast $varValue $type]
-	} {
-	    # Failed to cast
-	    default errorMessage [check_msg $varName $varValue $type] 
-	    error $errorMessage {} USER
+    foreach TYPE $TYPES {
+	set type [lower $TYPE]
+	# Try to cast to the type specified if a proc exists
+	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
+	    # Implied cast
+	    try {set varValue [cast_decimal $varValue]}
+	} elseif { [info commands cast_$type] ne "" } {
+	    try {
+		if { [info exists type_args($TYPE)] } {
+		    set varValue [cast_$type $varValue {*}$type_args($TYPE)]
+		} else {
+		    set varValue [cast_$type $varValue]
+		}
+	    }
 	}
-	if { ![check_is_type $varValue $type] } {
-	    default errorMessage [check_msg $varName $varValue $type] 
+	# Check
+	if {!([info exists type_args($TYPE)] && [is_$type $varValue {*}$type_args($TYPE)])
+	    && 
+	    !(![info exists type_args($TYPE)] && [is_$type $varValue])} {
+	    # Failed
+	    if { [info commands not_$type] ne "" } { 
+		if { [info exists type_args($TYPE)] } {
+		    default errorMessage [not_$type $varName $varValue {*}$type_args($TYPE)] 
+		} else {
+		    default errorMessage [not_$type $varName $varValue] 
+		}
+	    } else {
+		default errorMessage "\"$varValue\" is not a valid $type for $varName"
+	    }
 	    error $errorMessage {} USER
 	}
     }
-    return 1
+    return true
 }
 
 doc check {
@@ -79,15 +133,15 @@ doc check {
 	%
 	# NULL VALUES are valid unless excluded
 	% set surname ""
-	% check surname STRING30
+	% check surname STRING 30
 	%
-	% check surname STRING30 NOT NULL
+	% check surname STRING 30 NOT NULL
 	surname is empty
 	%
 	# String length for use with varchar(n) database columns
-	# can be checked with STRINGn
+	# can be checked with STRING n
 	% set name "James Donald Alexander MacKenzie"
-	check name STRING30
+	check name STRING 30
 	"James Donald Alexander MacKenzie" is too long for name. The maximum length is 30 characters.
     }
 }
@@ -95,13 +149,17 @@ doc check {
 proc qc::checks { body } {
     # Call check foreach line of checks in the format
     # varName type ?type? ?type? ?errorMessage?
-    
+    global errorInfo errorCode
     set errors {}
     set lines [split $body \n]
     foreach line $lines {
 	set line [string trim $line]
-	if { [ne $line ""] && [catch [list uplevel 1 check $line] errorMessage] } {
-	    lappend errors $errorMessage
+	if { [ne $line ""] && [catch [list uplevel 1 [list check {*}$line]] errorMessage]==1 } {
+	    if {$errorCode eq "USER"} {
+		lappend errors $errorMessage
+	    } else {
+		error $errorMessage $errorInfo $errorCode
+	    }
 	}
     }
     if { [llength $errors] > 0 } {
@@ -133,96 +191,3 @@ doc checks {
     }
 }
 
-proc qc::check_cast {value type} {
-    #| Try to cast the value into the specified type
-    #| If the casting proc is not known look for a proc called "cast_$type"
-    #| Say for a type PRODUCT_CODE look for a proc cast_product_code
-    #| Otherwise return the value unchanged.
-    set TYPE [string toupper $type]
-    set type [string tolower $type]
-    ## BOOLEAN
-    if { [eq BOOL $TYPE] } {
-	return [qc::cast_boolean $value]
-    }
-    ## INTEGERS
-    if { [in {INT POS_INT NZ_INT PNZ_INT} $TYPE] } {
-	return [qc::cast_integer $value]
-    }
-    ## DECIMAL
-    if { [in {POS NZ DECIMAL POS_DECIMAL NZ_DECIMAL PNZ_DECIMAL} $TYPE] } {
-	return [qc::cast_decimal $value]
-    }
-    ## DATES
-    if { [eq DATE $TYPE] } {
-	return [qc::cast_date $value]
-    }
-    ## UK POSTCODES
-    if { [eq POSTCODE $TYPE] } {
-	return [cast_postcode $value]
-    }
-    ## OTHER
-    # Look for a proc named cast_$type
-    if { [eq [info procs "::qc::cast_$type"] "::qc::cast_$type"] } {
-	return ["::qc::cast_$type" $value]
-    } 
-    if { [eq [info procs "::cast_$type"] "::cast_$type"] } {
-	return ["cast_$type" $value]
-    } 
-    return $value
-}
-
-proc qc::check_is_type {value type} {
-    #| Check that the value is of the given type.
-    #| If this is an unknown type then look for 
-    #| a proc is_$type to check validity.
-    set type [string tolower $type]
-    set TYPE [string toupper $type]
-    switch -regexp -- $TYPE {
-	NOT_NULL      {return [ne $value ""]}
-	BOOL          {return [is_boolean $value]}
-	INT           {return [is_integer $value]}
-	POS           {return [is_pos $value]}
-	NZ            {return [is_non_zero $value]}
-	PNZ           {return [is_pnz $value]}
-	DECIMAL       {return [is_decimal $value]}
-	DATE          {return [is_date $value]}
-	EMAIL         {return [is_email $value]}
-	POSTCODE      {return [is_postcode $value]}
-	CREDITCARD    {return [is_creditcard $value]}
-	{STRING[0-9]+} {
-	    regexp {STRING([0-9]+)} $TYPE -> length
-	    return [expr {[string length $value]<=$length}]
-	}
-    }
-    # Look for a proc named is_$type
-    if { [eq [info procs "::qc::is_$type"] "::qc::is_$type"] } {
-	return ["::qc::is_$type" $value]
-    } 
-    if { [eq [info procs "::is_$type"] "::is_$type"] } {
-	return ["::is_$type" $value]
-    } 
-    error "Don't know how to check \"$TYPE\""
-}
-
-proc qc::check_msg {varName varValue type} {
-    #| Return the default error message for the given type.
-    set db {}
-    lappend db  NOT_NULL      "$varName is empty"
-    lappend db 	INT           "\"$varValue\" is not an integer for $varName"
-    lappend db 	POS           "\"$varValue\" is not a positive value for $varName"
-    lappend db 	NZ            "$varName cannot be zero"
-    lappend db 	PNZ           "\"$varValue\" is not a positive non-zero value for $varName"
-    lappend db 	DECIMAL       "\"$varValue\" is not a decimal value for $varName"
-    lappend db 	DATE          "\"$varValue\" is not a valid date for $varName"
-    lappend db 	EMAIL         "\"$varValue\" is not a valid email address"
-    lappend db 	POSTCODE      "\"$varValue\" is not a valid postcode"
-    lappend db 	CREDITCARD    "\"$varValue\" is not a valid creditcard number."
-
-    if { [regexp {STRING([0-9]+)} $type -> length] } {
-	return "\"$varValue\" is too long for $varName. The maximum length is $length characters."
-    } elseif { [dict exists $db $type] } {
-	return [dict get $db $type]
-    } else {
-	return "\"$varValue\" is not a valid $type for $varName"
-    }
-}

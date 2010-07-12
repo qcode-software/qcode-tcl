@@ -28,7 +28,7 @@
 proc qc::format_date { date } {
     #| Format a date for the user
     #| Will be customizable in future but at present chooses the ISO format.
-    return [format_date_iso $date]
+    return [string map [list - "&#8209;"] [clock format [cast_epoch $date] -format "%Y-%m-%d"]]
 }
 
 doc format_date {

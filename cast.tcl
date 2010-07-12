@@ -45,10 +45,6 @@ doc cast {
     }
 }
 
-proc qc::cast_int { string } {
-    return [qc::cast_integer $string]
-}
-
 proc qc::cast_integer {string} {
     #| Try to cast given string into an integer
     set original $string
@@ -85,6 +81,10 @@ doc cast_integer {
     }
 }
 
+proc qc::cast_int {string} {
+    return [qc::cast_integer $string]
+}
+
 proc qc::cast_decimal {string {precision ""}} {
     #| Try to cast given string into a decimal value
     set original $string
@@ -116,7 +116,7 @@ doc cast_decimal {
 
 proc qc::cast_date {string} {
     #| Try to convert the given string into an ISO date.
-    return [format_date_iso [qc::cast_epoch $string]]
+    return [clock format [cast_epoch $string] -format "%Y-%m-%d"]
 }
 
 doc cast_date {
@@ -142,12 +142,13 @@ doc cast_date {
 
 proc qc::cast_timestamp {string} {
     #| Try to convert the given string into an ISO datetime.
-    return [format_timestamp_iso [qc::cast_epoch $string]]
+    return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
 }
 
 proc qc::cast_epoch { string } {
     #| Try to convert the given string into an epoch
     #
+    set string [string map [list "&#8209;" -] $string]
     #### EXACT MATCHES ####
     if { [string equal $string ""] } {
 	error "Can't cast an empty string to epoch"
@@ -250,7 +251,7 @@ doc cast_epoch {
     }
 }
 
-proc qc::cast_boolean { string {true true} {false false} } {
+proc qc::cast_boolean { string {true t} {false f} } {
     #| Cast a string as a boolean
     # strip html
     set string [ns_striphtml $string]

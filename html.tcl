@@ -205,6 +205,7 @@ doc html_col_list {
 
 proc qc::html2text { html } {
     #| Wrapper for html2text 
+    set html [string map [list "&#8209;" -] $html]
     return [exec /usr/local/bin/html2text -nobs << $html]
 }
 
