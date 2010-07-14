@@ -1,6 +1,6 @@
 proc qc::http_post {args} {
-    # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-data data? url ?name value? ?name value?
-    args $args -timeout 60 -encoding utf-8 -content-type ? -soapaction ? -data ? url args
+    # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? url ?name value? ?name value?
+    args $args -timeout 60 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -data ? -valid_response_codes "100 200" url args
 
     # args is name value name value ... list
     if { [llength $args]==1 } {set args [lindex $args 0]}
@@ -14,8 +14,16 @@ proc qc::http_post {args} {
 
     }
     set httpheaders {}
+    if { [info exists authorization] } {
+	lappend httpheaders "Authorization: $authorization"
+    }
+
     if { [info exists content-type] } {
 	lappend httpheaders "Content-Type: ${content-type}"
+    }
+
+    if { [info exists accept] } {
+	lappend httpheaders "Accept: $accept"
     }
 
     if { [info exists soapaction] } {
@@ -28,16 +36,21 @@ proc qc::http_post {args} {
     catch { $curlHandle perform } curlErrorNumber
     set responsecode [$curlHandle getinfo responsecode]
     $curlHandle cleanup
-    switch $responsecode {
-	100 {
-	    ns_log Notice "HTTP/1.1 100 $html"
-	}
-	200 {
-	    # OK
-	}
-	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
-	500 {return -code error -errorcode CURL "SERVER ERROR $url $html"}
-	default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url $html"}
+puts "response $responsecode"
+    if { ![in $valid_response_codes $responsecode] } {
+        # we should raise an error
+        switch $responsecode {
+	    404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+	    500 {return -code error -errorcode CURL "SERVER ERROR $url $html"}
+	    default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url $html"}
+        }
+    } else {
+        # We should return the result
+        switch $responsecode {
+	    100 {
+	        ns_log Notice "HTTP/1.1 100 $html"
+	    }
+        }
     }
     switch $curlErrorNumber {
 	0 {
