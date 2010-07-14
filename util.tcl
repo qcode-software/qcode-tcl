@@ -574,6 +574,13 @@ proc .. {from to {step 1} {limit ""}} {
 	    return $result
 	}
     }
+    # Dates
+    if { [is_date $from] && [is_date $to] && [regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit] } {
+	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast_date "$i $sign $scaler $unit"]} {
+	    lappend result $i
+	}
+	return $result
+    }
     # Expression
     set from [eval expr $from]
     set to [eval expr $to]
