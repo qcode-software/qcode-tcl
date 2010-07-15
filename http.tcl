@@ -36,7 +36,7 @@ proc qc::http_post {args} {
     catch { $curlHandle perform } curlErrorNumber
     set responsecode [$curlHandle getinfo responsecode]
     $curlHandle cleanup
-puts "response $responsecode"
+
     if { ![in $valid_response_codes $responsecode] } {
         # we should raise an error
         switch $responsecode {
