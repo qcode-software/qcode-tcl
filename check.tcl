@@ -70,10 +70,6 @@ proc qc::check {args} {
 	default errorMessage "$varName is empty"
 	error $errorMessage {} USER
     }
-    # HTML Markup OFF by default
-    if { !$html && [regexp {<[^>]+>} $varValue] } {
-	error "\"$varValue\" contains HTML which is not allowed for $varName" {} USER
-    }
     
     foreach TYPE $TYPES {
 	set type [lower $TYPE]
@@ -107,6 +103,12 @@ proc qc::check {args} {
 	    error $errorMessage {} USER
 	}
     }
+
+    # HTML Markup OFF by default
+    if { !$html && [regexp {<[^>]+>} $varValue] } {
+	error "\"$varValue\" contains HTML which is not allowed for $varName" {} USER
+    }
+
     return true
 }
 
