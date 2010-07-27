@@ -54,6 +54,27 @@ doc sql_set {
     }
 }
 
+proc qc::sql_set_varchars_truncate {table args} {
+    foreach name $args {
+        lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
+    }
+    return [join $set_list ,]
+}
+
+doc sql_set_varchars_truncate {
+    Parent db
+    Usage {sql_set_varchars_truncate table_name ?varName1 varName2 varName3 ...?}
+    Description {
+	Take a list of varNames to be updated into varchar columns, and will construct a SQL set statement which will cast the values into the appropriate column's varchar size (effectively truncating the data if too long for the column).
+        Useful when the data is being supplied by a third party who's data model may not match the table's.
+    }
+    Examples {
+	% sql_set_varchars_truncate orders delivery_name delivery_address1
+	delivery_name=:delivery_name::varchar(50),delivery_address1=:delivery_address1::varchar(100)
+    }
+}
+
+
 proc sql_set_with {args} {
     foreach {name value} $args {
 	lappend set_list "\"$name\"=[db_quote $value]"

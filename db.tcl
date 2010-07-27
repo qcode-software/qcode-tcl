@@ -587,3 +587,40 @@ proc qc::db_select_dict { qry } {
     foreach key [lindex $table 0] value [lindex $table 1] { lappend dict $key $value }
     return $dict
 }
+
+proc db_col_varchar_length { table_name col_name } {
+    # Return the varchar length of a db table column
+    set qry "
+        SELECT
+                a.atttypmod-4 AS lengthvar,
+                t.typname AS type
+        FROM
+                pg_attribute a,
+                pg_class c,
+                pg_type t
+        WHERE
+                c.relname = :table_name
+                and a.attnum > 0
+                and a.attrelid = c.oid
+                and a.atttypid = t.oid
+                and a.attname = :col_name
+        ORDER BY a.attnum
+    "
+    db_0or1row $qry {
+    error "No such column \"$col_name\" in table \"$table_name\""
+    } 
+    if { [eq $type varchar] } {
+        return $lengthvar
+    } else {
+    error "Col \"$col_name\" is not type varchar it is type \"$type\""
+    }
+}
+
+doc db_col_varchar_length {
+    Parent db
+    Description {Returns the length of a varchar column}
+    Examples {
+	% db_col_varchar_length orders delivery_address1
+	100
+    }
+}
