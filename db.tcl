@@ -588,8 +588,8 @@ proc qc::db_select_dict { qry } {
     return $dict
 }
 
-proc db_col_varchar_length { table_name col_name } {
-    # Return the varchar length of a db table column
+proc qc::db_col_varchar_length { table_name col_name } {
+    #| Returns the varchar length of a db table column
     set qry "
         SELECT
                 a.atttypmod-4 AS lengthvar,
@@ -618,9 +618,9 @@ proc db_col_varchar_length { table_name col_name } {
 
 doc db_col_varchar_length {
     Parent db
-    Description {Returns the length of a varchar column}
     Examples {
-	% db_col_varchar_length orders delivery_address1
+	# A table sales_orders has column delivery_address1 type varchar(100)
+	% db_col_varchar_length sales_orders delivery_address1
 	100
     }
 }
