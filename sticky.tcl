@@ -19,16 +19,18 @@ proc sticky_save {args} {
     }
 }
 
-proc sticky_get {name} {
-    set employee_id [auth]
-    set url [url_path [qc::conn_url]]
+proc sticky_get {args} {
+    args $args -url ? -employee_id ? name
+    default employee_id [auth]
+    default url [url_path [qc::conn_url]]
     db_1row {select value from sticky where employee_id=:employee_id and url=:url and name=:name}
     return $value
 }
 
-proc sticky_exists {name} {
-    set employee_id [auth]
-    set url [url_path [qc::conn_url]]
+proc sticky_exists {args} {
+    args $args -url ? -employee_id ? name
+    default employee_id [auth]
+    default url [url_path [qc::conn_url]]
     db_0or1row {select value from sticky where employee_id=:employee_id and url=:url and name=:name} {
 	return 0
     } {
@@ -57,3 +59,12 @@ proc qc::sticky2vars { args } {
     }
 }
 
+proc qc::sticky_default {args} {
+    # Set var values using sticky values if not passed in form vars
+    set url [url_path [ns_set iget [ns_conn headers] Referer]]
+    foreach name $args {
+	if { ![form_var_exists $name] && [sticky_exists -url $url $name]} {
+	    upset 1 $name [sticky_get -url $url $name]
+	}
+    }
+}
