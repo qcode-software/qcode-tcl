@@ -1,3 +1,36 @@
+proc html2pdf { args } {
+    # usage html2pdf -encoding encoding html
+    args $args -encoding base64 html
+    if { ![in "base64 binary" $encoding] } {
+        error "HTML2PDF: Unknown encoding $encoding" {} USER
+    }
+
+    dict2vars [param pdfserver] server_name uri
+    set url "${server_name}${uri}"
+
+    set pdfDoc [qc::http_post -timeout 20 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
+
+    return $pdfDoc
+}
+
+doc html2pdf {
+    Examples {
+        % html2pdf -encoding base64 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
+        JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovUHJvZHVjZXIgKHdraHRtbHRvcGRmKQov
+        Q3JlYXRpb25EYXRlIChEOjIwMTAwODIwMTIzMjI1KQo+PgplbmRvYmoKNCAwIG9iago8PAovVHlw
+        ZSAvRXh0R1N0YXRlCi9TQSB0cnVlCi9TTSAwLjAyCi9jYSAxLjAKL0NBIDEuMAovQUlTIGZhbHNl
+        Ci9TTWFzayAvTm9uZT4+CmVuZG9iago1IDAgb2JqClsvUGF0dGVybiAvRGV2aWNlUkdCXQplbmRv
+        YmoKOCAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjYgMCBv
+        ...
+        % html2pdf -encoding binary "<html><p>This is an HTML file to be converted to a PDF</p></html>"
+        1 0 obj
+        <<
+        /Title (þÿ)
+        ...
+    }
+}
+
+
 proc qc::html {tagName nodeValue args} {
     #| Generate an html node
     if { [llength $args]==1 } {set args [lindex $args 0]}
