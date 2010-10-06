@@ -32,24 +32,34 @@ proc qc::db_qry_parse {qry {level 0} } {
     #| of $varname in the caller level $level's env
     incr level
 
-
-    # Escape colons embedded in quoted fields with \0
+    # Quoted fields: Escape colons with \0 and []$\\
     # regsub -all won't work because the regexp need to be applied repeatedly to anchor correctly
     set start 0
     while { $start<[string length $qry] && [regexp -indices -start $start -- {(^|[^'])'(([^']|'')*)'([^']|$)} $qry -> left field . right] } {
-	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \0} [string range $qry [lindex $field 0] [lindex $field 1]]]]
+	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $field 0] [lindex $field 1]]]]
 	set start [lindex $right 0]
     }
-    # Escape characters used by subst i.e. []$\ 
-    regsub -all {[][$\\]} $qry {\\&} qry
-    regsub -all {([^:]):([a-zA-Z_][a-zA-Z0-9_]*)} $qry {\1[db_quote [upset $level \2]]} qry
+    # SQL Arrays
+    # array[2:3]
+    regsub -all {\[([0-9]+:[0-9]+)\]} $qry {\\[\1\\]} qry
+    # array[2]
+    regsub -all {\[([0-9]+)\]} $qry {\\[\1\\]} qry
+    # array[:index] or array[$index]
+    regsub -all {\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\\[\1\\]} qry
+    # TODO: Dollar quoted string like $foo$ or $tag$foo$tag$
 
-    set qry [subst $qry]
+    # Colon variable substitution
+    regsub -all {([^:]):([a-zA-Z_][a-zA-Z0-9_]*)} $qry {\1[db_quote [set \2]]} qry
+
+    # Eval with uplevel
+    set qry [uplevel $level [list subst $qry]]
+
+    # =NULL to IS NULL
     if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]} {
 	# A select query
 	regsub -all {=NULL} $qry { IS NULL} qry
     }
-    return [string map {\0 :} $qry]
+    return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
 }
 
 proc qc::db_quote { value } {
@@ -192,7 +202,7 @@ proc qc::db_dml { args } {
 	ns_db dml $db $qry
     } {
 	global errorInfo
-	error "Failed to execute dml <code>$qry</code>." $errorInfo
+	error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" $errorInfo
     }
 }
 
@@ -508,7 +518,7 @@ proc qc::db_select_table {args} {
 	}
 	return $table
     } {
-	error "Failed to execute qry <code>$qry</code>"
+	error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
     }
 }
 
@@ -540,7 +550,7 @@ proc qc::db_select_csv { qry {level 0} } {
 	}
 	return [join $lines \r\n]
     } {
-	error "Failed to execute qry <code>$qry</code>"
+	error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
     }
 }
 

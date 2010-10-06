@@ -567,3 +567,16 @@ proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage}
     }
     return $value
 }
+
+proc qc::html_tbody_row {cols} {
+    set list {}
+    foreach col $cols {
+	if { [dict exists $col name] } {
+	    set name [dict get $col name]
+	    lappend list [upset 1 $name]
+	} else {
+	    lappend list ""
+	}
+    }
+    return $list
+}

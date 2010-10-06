@@ -97,6 +97,55 @@ proc qc::http_get {args} {
     }
 }
 
+proc qc::http_head {args} {
+    # usage http_head ?-timeout timeout? ?-useragent useragent? url
+    args $args -timeout 60 -useragent ? url
+    default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
+    #
+    set curlHandle [curl::init]
+    $curlHandle configure -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1
+    catch { $curlHandle perform } curlErrorNumber
+    set responsecode [$curlHandle getinfo responsecode]
+    $curlHandle cleanup
+    switch $responsecode {
+	200 { 
+	    # OK 
+	}
+	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+	500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+	default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+    }
+    switch $curlErrorNumber {
+	0 {
+	    # OK
+	    return [array get headers]
+	}
+	28 {
+	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
+proc qc::http_exists {args} {
+    # usage http_head ?-timeout timeout? ?-useragent useragent? url
+    args $args -timeout 60 -useragent ? -valid_response_codes {100 200} url
+    default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
+    #
+    set curlHandle [curl::init]
+    $curlHandle configure -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1
+    catch { $curlHandle perform } curlErrorNumber
+    set responsecode [$curlHandle getinfo responsecode]
+    $curlHandle cleanup
+    if { [in $valid_response_codes $responsecode] } {
+	return true
+    } else {
+	return false
+    }
+}
+
 proc qc::http_save {url file} {
     set curlHandle [curl::init]
     $curlHandle configure -url $url -file $file -sslverifypeer 0 -sslverifyhost 0
