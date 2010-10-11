@@ -66,12 +66,21 @@ proc qc::http_post {args} {
 }
 
 proc qc::http_get {args} {
-    # usage http_get ?-timeout timeout? ?-useragent useragent? url
-    args $args -timeout 60 -useragent ? url
+    # usage http_get ?-timeout timeout? ?-useragent useragent? ?-authorization authorization? ?-clientCustomerId ? url
+    args $args -timeout 60 -useragent ? -authorization ? -clientCustomerId ? url
+
+    set httpheaders {}
+    if { [info exists authorization] } {
+	lappend httpheaders "Authorization: $authorization"
+    }
+    if { [info exists clientCustomerId] } {
+	lappend httpheaders "clientCustomerId: $clientCustomerId"
+    }
+
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
     set curlHandle [curl::init]
-    $curlHandle configure -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -bodyvar html
+    $curlHandle configure -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html
     catch { $curlHandle perform } curlErrorNumber
     set responsecode [$curlHandle getinfo responsecode]
     $curlHandle cleanup
