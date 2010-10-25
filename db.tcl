@@ -125,27 +125,24 @@ proc qc::db_escape_regexp { string } {
     # So to find a match for a regex metacharacter
     # we need to escape the preceding slash.
     # For example "foo." becomes "foo\\."
-    regsub -all {\\} $string {\\\\} string
+    set list {
+	\\ \\\\ 
+	^ \\^ 
+	. \\. 
+	\[ \\\[ 
+	\] \\\] 
+	\$ \\\$ 
+	\( \\\( 
+	\) \\\) 
+	| \\| 
+	* \\* 
+	+ \\+ 
+	? \\? 
+	\{ \\\{
+	\} \\\}
+    } 
 
-    regsub -all {\^} $string {\\^} string
-    regsub -all {\.} $string {\\.} string
-
-    regsub -all {\[} $string {\\[} string
-    regsub -all {\]} $string {\\]} string
-
-    regsub -all {\$} $string {\\$} string
-
-    regsub -all {\(} $string {\\(} string
-    regsub -all {\)} $string {\\)} string
-
-    regsub -all {\|} $string {\\|} string
-    regsub -all {\*} $string {\\*} string
-    regsub -all {\+} $string {\\+} string
-    regsub -all {\?} $string {\\?} string
-    regsub -all {\{} $string {\\\{} string
-    regsub -all {\}} $string {\\\}} string
-
-    return $string
+    return [string map $list $string]
 }
 
 doc db_escape_regexp {
