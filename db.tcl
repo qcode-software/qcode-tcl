@@ -69,6 +69,10 @@ proc qc::db_quote { value } {
     if { [string equal $value ""] } {
 	return "NULL"
     }
+    # Reserved keywords
+    if { [in [list current_time current_timestamp] $value ] } {
+	return $value
+    }
     # integer no leading zeros
     # -123456
     if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {

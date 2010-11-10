@@ -108,18 +108,12 @@ proc qc::http_get {args} {
 
 proc httpheader2encoding { array_list } {
     array set return_headers $array_list
-    # Defaults to utf-8 if no encoding is found in header. 
-    set return_encoding "utf-8"
-    # TODO Strictly speaking we should assume iso8859-1 when no charset is specified according to RFC2616
-    # but perhaps utf-8 would be better for us these days?
-
+    # Defaults to iso-8859-1 as per RFC2616
+    set return_encoding "iso-8859-1"
     # Check for content-type in the return headers
     foreach x {Content-Type content-type} {
-        if { [in [array names return_headers] $x] } {
-            regexp -nocase {.*;.*charset=(.*)} $return_headers($x) match charset
-            if { [info exists charset] } {
-                set return_encoding [IANAEncoding2TclEncoding [string trim $charset]]
-            }
+        if { [in [array names return_headers] $x] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($x) -> charset] } {
+	    set return_encoding [IANAEncoding2TclEncoding [string trim $charset]]
             break
         }
     }

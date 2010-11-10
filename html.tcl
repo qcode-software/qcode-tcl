@@ -208,7 +208,7 @@ doc html_id {
 proc qc::html_menu { args } {
     #| Join items to form a horizontal menu
     if { [llength $args]==1 } {set args [lindex $args 0]}
-    return [join $args " &nbsp;|&nbsp; "]
+    return [join $args " &nbsp;<b>|</b>&nbsp; "]
 }
 
 doc html_menu {
