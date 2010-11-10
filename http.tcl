@@ -31,7 +31,7 @@ proc qc::http_post {args} {
     }
 
     set curlHandle [curl::init]
-    $curlHandle configure -url $url -sslverifypeer 0 -sslverifyhost 0 \
+    $curlHandle configure -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 \
         -timeout $timeout -bodyvar html -post 1 -httpheader $httpheaders -postfields $data
     catch { $curlHandle perform } curlErrorNumber
     set responsecode [$curlHandle getinfo responsecode]
@@ -54,7 +54,7 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-	    return $html
+	    return [encoding convertfrom [httpheader2encoding [array get return_headers]] $html]
 	}
 	28 {
 	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
@@ -80,7 +80,7 @@ proc qc::http_get {args} {
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
     set curlHandle [curl::init]
-    $curlHandle configure -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html
+    $curlHandle configure -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html
     catch { $curlHandle perform } curlErrorNumber
     set responsecode [$curlHandle getinfo responsecode]
     $curlHandle cleanup
@@ -95,7 +95,7 @@ proc qc::http_get {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-	    return $html
+	    return [encoding convertfrom [httpheader2encoding [array get return_headers]] $html]
 	}
 	28 {
 	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
@@ -105,6 +105,114 @@ proc qc::http_get {args} {
 	}
     }
 }
+
+proc httpheader2encoding { array_list } {
+    array set return_headers $array_list
+    # Defaults to utf-8 if no encoding is found in header. 
+    set return_encoding "utf-8"
+    # TODO Strictly speaking we should assume iso8859-1 when no charset is specified according to RFC2616
+    # but perhaps utf-8 would be better for us these days?
+
+    # Check for content-type in the return headers
+    foreach x {Content-Type content-type} {
+        if { [in [array names return_headers] $x] } {
+            regexp -nocase {.*;.*charset=(.*)} $return_headers($x) match charset
+            if { [info exists charset] } {
+                set return_encoding [IANAEncoding2TclEncoding [string trim $charset]]
+            }
+            break
+        }
+    }
+    return $return_encoding
+}
+
+#----------------------------------------------------------------------------
+#   IANAEncoding2TclEncoding
+#   From v0.82 tDom lib/tdom.tcl
+#----------------------------------------------------------------------------
+
+proc IANAEncoding2TclEncoding {IANAName} {
+    
+    switch [string tolower $IANAName] {
+        "us-ascii"    {return ascii}
+        "utf-8"       {return utf-8}
+        "utf-16"      {return unicode; # not sure about this}
+        "iso-8859-1"  {return iso8859-1}
+        "iso-8859-2"  {return iso8859-2}
+        "iso-8859-3"  {return iso8859-3}
+        "iso-8859-4"  {return iso8859-4}
+        "iso-8859-5"  {return iso8859-5}
+        "iso-8859-6"  {return iso8859-6}
+        "iso-8859-7"  {return iso8859-7}
+        "iso-8859-8"  {return iso8859-8}
+        "iso-8859-9"  {return iso8859-9}
+        "iso-8859-10" {return iso8859-10}
+        "iso-8859-13" {return iso8859-13}
+        "iso-8859-14" {return iso8859-14}
+        "iso-8859-15" {return iso8859-15}
+        "iso-8859-16" {return iso8859-16}
+        "iso-2022-kr" {return iso2022-kr}
+        "euc-kr"      {return euc-kr}
+        "iso-2022-jp" {return iso2022-jp}
+        "koi8-r"      {return koi8-r}
+        "shift_jis"   {return shiftjis}
+        "euc-jp"      {return euc-jp}
+        "gb2312"      {return gb2312}
+        "big5"        {return big5}
+        "cp866"       {return cp866}
+        "cp1250"      {return cp1250}
+        "cp1253"      {return cp1253}
+        "cp1254"      {return cp1254}
+        "cp1255"      {return cp1255}
+        "cp1256"      {return cp1256}
+        "cp1257"      {return cp1257}
+
+        "windows-1251" -
+        "cp1251"      {return cp1251}
+
+        "windows-1252" -
+        "cp1252"      {return cp1252}    
+
+        "iso_8859-1:1987" -
+        "iso-ir-100" -
+        "iso_8859-1" -
+        "latin1" -
+        "l1" -
+        "ibm819" -
+        "cp819" -
+        "csisolatin1" {return iso8859-1}
+        
+        "iso_8859-2:1987" -
+        "iso-ir-101" -
+        "iso_8859-2" -
+        "iso-8859-2" -
+        "latin2" -
+        "l2" -
+        "csisolatin2" {return iso8859-2}
+
+        "iso_8859-5:1988" -
+        "iso-ir-144" -
+        "iso_8859-5" -
+        "iso-8859-5" -
+        "cyrillic" -
+        "csisolatincyrillic" {return iso8859-5}
+
+        "ms_kanji" -
+        "csshiftjis"  {return shiftjis}
+        
+        "csiso2022kr" {return iso2022-kr}
+
+        "ibm866" -
+        "csibm866"    {return cp866}
+        
+        default {
+            error "Unrecognized encoding name '$IANAName'"
+        }
+    }
+}
+#----------------------------------------------------------------------------
+# End of tDom code
+#----------------------------------------------------------------------------
 
 proc qc::http_head {args} {
     # usage http_head ?-timeout timeout? ?-useragent useragent? url
