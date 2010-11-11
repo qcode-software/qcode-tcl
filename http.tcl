@@ -109,7 +109,7 @@ proc qc::http_get {args} {
 proc httpheader2encoding { array_list } {
     array set return_headers $array_list
     # Defaults to iso-8859-1 as per RFC2616
-    set return_encoding "iso-8859-1"
+    set return_encoding "iso8859-1"
     # Check for content-type in the return headers
     foreach x {Content-Type content-type} {
         if { [in [array names return_headers] $x] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($x) -> charset] } {
