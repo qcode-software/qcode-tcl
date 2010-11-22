@@ -92,12 +92,16 @@ proc qc::format_linebreak {string width} {
     #| Avoid splitting words
     set result {}
     while {[string length $string]>$width} {
-        set position [string wordstart $string $width]
-	if { $position == 0 } {
+	set position [string last " " $string $width]
+	if { $position <=0 } {
 	    set position $width
+	    lappend result [string range $string 0 [expr {$position-1}]]
+	    set string [string range $string $position end]
+	} else {
+	    lappend result [string range $string 0 [expr {$position-1}]]
+	    set string [string range $string [expr {$position+1}] end]
 	}
-        lappend result [string range $string 0 [expr {$position-1}]]
-        set string [string range $string $position end]
+      
     }
     lappend result $string
 }
