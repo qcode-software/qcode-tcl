@@ -68,3 +68,13 @@ proc qc::multimap_keys {multimap} {
     }
     return $keys
 }
+
+proc qc::multimap_get_all { multimap key } {
+    set list {}
+    foreach index [lsearch -all $multimap $key] {
+	if { $index%2 == 0 } {
+	    lappend list [lindex $multimap [expr {$index+1}]]
+	}
+    }
+    return $list
+}

@@ -238,7 +238,10 @@ doc html_col_list {
 proc qc::html2text { html } {
     #| Wrapper for html2text 
     set html [string map [list "&#8209;" -] $html]
+    # which is quite slow, need some sort of caching here.
+    # return [exec [exec which html2text] -nobs << $html]
     return [exec /usr/local/bin/html2text -nobs << $html]
+
 }
 
 proc qc::html_info_tables {args} {

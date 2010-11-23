@@ -54,7 +54,7 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-	    return [encoding convertfrom [httpheader2encoding [array get return_headers]] $html]
+	    return [encoding convertfrom [qc::http_header_encoding [array get return_headers]] $html]
 	}
 	28 {
 	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
@@ -66,18 +66,13 @@ proc qc::http_post {args} {
 }
 
 proc qc::http_get {args} {
-    # usage http_get ?-timeout timeout? ?-useragent useragent? ?-authorization authorization? ?-clientCustomerId ? url
-    args $args -timeout 60 -useragent ? -authorization ? -clientCustomerId ? url
+    # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? url
+    args $args -timeout 60 -headers {} url
 
     set httpheaders {}
-    if { [info exists authorization] } {
-	lappend httpheaders "Authorization: $authorization"
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
     }
-    if { [info exists clientCustomerId] } {
-	lappend httpheaders "clientCustomerId: $clientCustomerId"
-    }
-
-    default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
     set curlHandle [curl::init]
     $curlHandle configure -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html
@@ -95,7 +90,7 @@ proc qc::http_get {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-	    return [encoding convertfrom [httpheader2encoding [array get return_headers]] $html]
+	    return [encoding convertfrom [qc::http_header_encoding [array get return_headers]] $html]
 	}
 	28 {
 	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
@@ -106,18 +101,16 @@ proc qc::http_get {args} {
     }
 }
 
-proc httpheader2encoding { array_list } {
-    array set return_headers $array_list
-    # Defaults to iso-8859-1 as per RFC2616
-    set return_encoding "iso8859-1"
-    # Check for content-type in the return headers
-    foreach x {Content-Type content-type} {
-        if { [in [array names return_headers] $x] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($x) -> charset] } {
-	    set return_encoding [IANAEncoding2TclEncoding [string trim $charset]]
-            break
+proc qc::http_header_encoding { dict } {
+    array set return_headers $dict
+    foreach key {Content-Type content-type} {
+        if { [info exists return_headers($key)] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($key) -> charset] } {
+	    return [IANAEncoding2TclEncoding [string trim $charset]]
         }
     }
-    return $return_encoding
+    # Defaults to iso-8859-1 as per RFC2616
+    # Misspelt in TCL
+    return "iso8859-1"
 }
 
 #----------------------------------------------------------------------------
