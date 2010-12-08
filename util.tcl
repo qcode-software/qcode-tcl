@@ -592,3 +592,6 @@ proc .. {from to {step 1} {limit ""}} {
     }
 }
 
+proc debug {message} {
+    ns_log Debug $message
+}

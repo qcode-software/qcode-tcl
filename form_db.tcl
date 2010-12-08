@@ -4,6 +4,7 @@ proc qc::form_db { content args } {
     array set this $args
     set this(class) clsDbForm
     default this(id) oDbForm
+    default this(method) POST
     if { ![info exists this(formType)] } {
 	if {[info exists this(submitURL)]} {
 	    set this(formType) submit

@@ -56,10 +56,10 @@ proc qc::html_table_db {args} {
 	}
 	incr colIndex
     }
-
+    set class clsDbGrid
     # rowHeight
     if { [info exists rowHeight] } {
-	append html "<style type=\"text/css\">table.clsDbGrid tr { height:${rowHeight}px;vertical-align:top}</style>"
+	append html "<style type=\"text/css\">table.$class tr { height:${rowHeight}px;vertical-align:top}</style>"
     }
     default height 500
     default id oDbGrid
@@ -73,7 +73,7 @@ proc qc::html_table_db {args} {
 
     append html  "<div class=\"clsDbGridDiv\" style=\"height:$height\">\n"
 
-    set class clsDbGrid
+
     lappend varNames class id
     append html [qc::html_table [dict_from [lsort -unique $varNames]]]
     append html "</div>\n"
