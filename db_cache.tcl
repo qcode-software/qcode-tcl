@@ -213,14 +213,12 @@ proc qc::db_cache_select_table {ttl qry {level 0}} {
     #| as a table in the nsv db_cache 
     #| using the qry hash as index.
     incr level
-    set hash [ns_sha1 [db_qry_parse $qry $level]]
-    if { [nsv_exists db_cache $hash] && [nsv_exists db_cache_timestamp $hash] \
-	     && [expr {([clock seconds]-[nsv_get db_cache_timestamp $hash])<=$ttl}]} {
-	return [nsv_get db_cache $hash]
+    set hash [md5 [db_qry_parse $qry $level]]
+    if { [ne [ns_cache names db $hash] ""] } { 
+	return [ns_cache get db $hash]
     } else {
 	set table [db_select_table $qry $level]
-	nsv_set db_cache_timestamp $hash [clock seconds]
-	nsv_set db_cache $hash $table
+	ns_cache set db $hash $table
 	return $table
     }
 }
@@ -240,16 +238,11 @@ doc db_cache_select_table {
 proc qc::db_cache_clear { {qry ""} } {
     # clear the cache for the qry or all
     if { [eq $qry ""] } {
-	if {[nsv_array exists db_cache] } {
-	    nsv_unset db_cache
-	    nsv_unset db_cache_timestamp	    
-	} 
+	foreach key [ns_cache names db] {
+	    ns_cache flush db $key
+	}
     } else {
-	set hash [ns_sha1 [db_qry_parse $qry 1]]
-	if {[nsv_exists db_cache $hash] } {
-	    nsv_unset db_cache $hash
-	    nsv_unset db_cache_timestamp $hash
-	} 
+	ns_cache flush db [md5 [db_qry_parse $qry 1]
     }
 }
 
