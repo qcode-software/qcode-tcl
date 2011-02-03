@@ -78,4 +78,29 @@ proc qc::conn_url {} {
 	return [ns_conn url]
     }
 }
-    
+ 
+# Alexey Pechnikov
+proc _ns_conn {args} {
+    set host [string tolower [ns_set get [ns_conn headers] Host]]
+    if {[string match [lindex $args 0] "host"]} {
+	regexp {[^:]+} $host host
+	return $host
+    } elseif {[string match [lindex $args 0] "server"]} {
+	regexp {[^:\.]+} $host host
+	return $host
+    } elseif {[string match [lindex $args 0] "port"]} {
+	if { [regexp {:(\d+)} $host str port] == 1 } {
+	    return $port
+	}
+	return
+    } elseif {[string match [lindex $args 0] "protocol"]} {
+	if {[string equal [ns_set get [ns_conn headers] "X-Forwarded-Proto"] "https"]} {
+	    return https
+	}
+	return http
+    } elseif {[string match [lindex $args 0] "location"]} {
+	return [ns_conn protocol]://$host
+    } else {
+	return [_ns_conn {*}$args]
+    }
+}

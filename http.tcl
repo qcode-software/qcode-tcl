@@ -1,6 +1,52 @@
+proc qc::http_curl {args} {
+    #| This is a wrapper for TclCurl which is not thread-safe when using some SSL libraries
+    #| Uses ns_proxy to isolate.
+    set script {
+	proc main {args} {
+	    package require TclCurl
+	    set curlHandle [curl::init]
+	    $curlHandle configure {*}$args
+	    catch { $curlHandle perform } curlErrorNumber
+	    set responsecode [$curlHandle getinfo responsecode]
+	    $curlHandle cleanup
+	    set dict {}
+	    foreach var [info locals] {
+		switch -- $var {
+		    args -
+		    dict -
+		    curlHandle {}
+		    default {
+			if { [array exists $var] } {
+			    lappend dict $var [array get $var]
+			} else {
+			    lappend dict $var [set $var]
+			}
+		    }
+		}
+	    }
+	    return $dict
+	}
+    }
+    append script [list main {*}$args]
+
+    set handle [ns_proxy get myproxy]
+
+    if { [dict exists $args -timeout] } {
+	# The proxy may timeout first due to a dns lookup so double timeout
+	set timeout [expr {[dict get $args -timeout]*1000*2}]
+    } else {
+	# default timeout 60seconds
+	set timeout 60000
+    }
+    set dict [ns_proxy eval $handle $script $timeout]
+    ns_proxy release $handle
+    
+    return $dict
+}
+
 proc qc::http_post {args} {
     # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? url ?name value? ?name value?
-    args $args -timeout 60 -sslversion default -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -data ? -valid_response_codes {100 200} url args
+    args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -data ? -valid_response_codes {100 200} url args
 
     # args is name value name value ... list
     if { [llength $args]==1 } {set args [lindex $args 0]}
@@ -30,12 +76,8 @@ proc qc::http_post {args} {
 	lappend httpheaders "SOAPAction: $soapaction"
     }
 
-    set curlHandle [curl::init]
-    $curlHandle configure -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 \
-        -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data
-    catch { $curlHandle perform } curlErrorNumber
-    set responsecode [$curlHandle getinfo responsecode]
-    $curlHandle cleanup
+    dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
+
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
@@ -60,19 +102,15 @@ proc qc::http_post {args} {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? url
-    args $args -timeout 60 -sslversion default -headers {} url
+    args $args -timeout 60 -sslversion sslv3 -headers {} url
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders "$name: $value"
     }
-    #
-    set curlHandle [curl::init]
-    $curlHandle configure -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html
-    catch { $curlHandle perform } curlErrorNumber
-    set responsecode [$curlHandle getinfo responsecode]
-    $curlHandle cleanup
    
+    dict2vars [qc::http_curl  -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+
     switch $curlErrorNumber {
 	0 {
 	    switch $responsecode {
@@ -199,17 +237,15 @@ proc qc::http_head {args} {
     args $args -timeout 60 -useragent ? url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
-    set curlHandle [curl::init]
-    $curlHandle configure -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1
-    catch { $curlHandle perform } curlErrorNumber
-    set responsecode [$curlHandle getinfo responsecode]
-    $curlHandle cleanup
+    dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] headers responsecode curlErrorNumber
+
+
     switch $curlErrorNumber {
 	0 {
 	    switch $responsecode {
 		200 { 
 		    # OK 
-		    return [array get headers]
+		    return $headers
 		}
 		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
 		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
@@ -230,11 +266,8 @@ proc qc::http_exists {args} {
     args $args -timeout 60 -useragent ? -valid_response_codes {100 200} url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
-    set curlHandle [curl::init]
-    $curlHandle configure -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1
-    catch { $curlHandle perform } curlErrorNumber
-    set responsecode [$curlHandle getinfo responsecode]
-    $curlHandle cleanup
+    dict2vars [qc::http_curl  -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] responsecode curlErrorNumber
+
     if { [in $valid_response_codes $responsecode] } {
 	return true
     } else {
@@ -243,11 +276,7 @@ proc qc::http_exists {args} {
 }
 
 proc qc::http_save {url file} {
-    set curlHandle [curl::init]
-    $curlHandle configure -url $url -file $file -sslverifypeer 0 -sslverifyhost 0
-    catch { $curlHandle perform } curlErrorNumber
-    set responsecode [$curlHandle getinfo responsecode]
-    $curlHandle cleanup
+    dict2vars [qc::http_curl -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }

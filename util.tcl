@@ -202,25 +202,29 @@ proc qc::ne {a b} {
     if {[string equal $a $b]} {return 0} {return 1}
 }
 
-proc qc::call_proc { proc_name } {
-    # Call a proc using args of matching names to local variables.
-    foreach arg [info args $proc_name] {
-	upvar 1 $arg temp
-	if { [info default $proc_name $arg default_value] } {
-	    if { [info exists temp] } {
-		lappend largs $temp
-	    } else {
-		lappend largs $default_value
-	    }
+proc qc::call { proc_name args } {
+    if { [info args $proc_name] eq "args" } {
+	# Call the proc using a dict of corresponding local vars
+	if { $args ne "" } {
+	    return [uplevel 1 "$proc_name {*}\[dict_from $args\]"]
 	} else {
-	    if { [info exists temp] } {
+	    return [uplevel 1 $proc_name]
+	} 
+    } else {
+	# Call a proc using args of matching names to local variables.
+	foreach arg [info args $proc_name] {
+	    upvar 1 $arg temp
+	    if { [info default $proc_name $arg default_value] && ![info exists temp]} {
+		# No corresponding variable exists 
+		lappend largs $default_value
+	    } elseif { [info exists temp] } {
 		lappend largs $temp
 	    } else {
 		error "Cannot use variable \"$arg\" to call proc qc::\"$proc_name\":no such variable \"$arg\""
 	    }
 	}
+	return [uplevel 1 $proc_name $largs]
     }
-    return [uplevel 1 $proc_name $largs]
 }
 
 proc qc::margin { cost price {dec_places 1} } {

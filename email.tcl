@@ -430,4 +430,31 @@ proc email_header_fold {string} {
     return [string map {\r\n "\r\n "} [join $result \r\n]]
 }
 
+# Alternative approach to parsing email into mutimap adta structure
 
+proc qc::email2multimap_ALT {source} {
+    set dict {}
+    set token [mime::initialize -string $source]
+    set dict [qc::email_token2dict $token]
+    foreach header [lintersect [mime::getheader $token -names] {From To Subject Date}] {
+	lappend dict $header [lindex [mime::getheader $token $header] 0]
+    }
+    mime::finalize $token
+    return $dict
+}
+
+proc qc::email_token2dict {token} {
+    set dict {}
+    set mime_type [mime::getproperty $token content]
+    switch -glob -- $mime_type {
+	multipart/* {
+	    foreach part [mime::getproperty $token parts] {
+		lappend dict $mime_type [qc::email_token2dict $part]
+	    }
+	}
+	default {
+	    lappend dict $mime_type [mime::getbody $token]
+	}
+    }
+    return $dict
+}
