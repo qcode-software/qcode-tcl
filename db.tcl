@@ -46,6 +46,9 @@ proc qc::db_qry_parse {qry {level 0} } {
     regsub -all {\[([0-9]+)\]} $qry {\\[\1\\]} qry
     # array[:index] or array[$index]
     regsub -all {\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\\[\1\\]} qry
+    # array[sql_function(args)]
+    regsub -all {([a-zA-Z_]+)\[([a-zA-Z_]+\([^\)]+\))\]} $qry {\1\\[\2\\]} qry
+
     # TODO: Dollar quoted string like $foo$ or $tag$foo$tag$
 
     # Colon variable substitution

@@ -1,3 +1,4 @@
+# DEPRECATED
 proc chart_sales {x_labels values tips key_text} {
     set y_max [sigfigs_ceil [max $values] 2]
     set x_labels [chart_list2csv $x_labels]
@@ -39,11 +40,514 @@ proc chart_sales {x_labels values tips key_text} {
     }
     return [subst -nocommands -nobackslashes $html]
 }
-
+# DEPRECATED
 proc chart_list2csv {list} {
     set csv {}
     foreach item $list {
 	lappend csv [url_encode [regsub -all {,} $item "#comma#"]]
     }
     return [join $csv ,]
+}
+
+# New Charts by Daniel Clark 
+proc ofc_piechart {args} {
+
+    args $args -id -title {} -animate false -width 100% -height 50% -- data
+    
+    # if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
+    if { ![info exists id] } {
+	global ofc_id
+	set id graph[incr0 ofc_id 1]
+    }
+
+    # convert args into tson and then json for ofc
+    #
+    # values
+    set values {}
+    foreach datum $data {
+	dict2vars $datum label value tooltip
+	set list [list label [list string $label] value $value]
+	if { [info exists tooltip] } {
+	    lappend list tip [list string $tooltip]
+	}
+	lappend values [list object {*}$list]
+    }	
+    set values [list array {*}$values]
+
+    # title
+    dict2vars $title label font-size
+    if { [info exists label] } {
+	set title_style [style_set "" font-family "Arial,Helvetica,sans-serif" text-align center font-size 20px]
+	if { [info exists font-size] } {
+	    set title_style [style_set $title_style font-size ${font-size}]
+	}
+	set title [list object text [list string $label] style $title_style]
+    }
+    
+    # default colours
+    set no_of_elements [llength $data]
+    set colors [list array {*}[ofc_colors $no_of_elements]]
+
+    # construct tson that will be used to generate json loaded by ofc. 
+    set tson [list object \
+		  elements [list array \
+				[list object \
+				     type pie \
+				     animate $animate \
+				     values $values \
+				     colours $colors \
+				     font-size 14 \
+				     tip "#label#:<br>#val# of #total#<br>#percent#" \
+				     alpha 1 \
+				     starting-angle "35" \
+				     gradient-fill true \
+				     label-colour 0 \
+				     border 2 ]] \
+		  title $title \
+		  bg_colour #FAFAFA]
+
+    set html [ofc_html $id [tson2json $tson] $width $height]
+}
+
+doc ofc_piechart {
+    Usage {
+	ofc_piechart ?-id id? ?-title title? ?-animate animate? ?-width width? ?-height height? data
+    }
+    Description {
+	<h2>See Examples in Action</h2>
+	[html_a "Examples" "/doc_ofc_pie_examples.html"]
+    }
+    Examples {
+	set data [list {label "Label 1" value 12} {label "Label 2" value 14}]
+
+	Example 1: Minumum arguments usage.
+	qc::return_html [ofc_piechart $data]
+
+	Example 2: Full argument usage.   
+	set id chart2
+	set title {label "My Wizzzy Pie Chart" font-size 25px}  
+	set animate true
+	set width 50%
+	set height 50%  
+	qc::return_html [ofc_piechart -id $id -title $title -animate $animate -width $width -height $height -- $data]
+    }
+}
+
+proc /doc/ofc_pie_examples.html {} {
+    append html [html h2 "Piechart Examples"]
+
+    append html [html h4 {Minimum Argument Usage: "ofc_piechart {$data}"}]
+    set data [list {label "Label 1" value 12} {label "Label 2" value 14}]
+    append html [ofc_piechart $data]
+    
+    append html [html h4 {Full Argument Usage: "ofc_piechart -id $id -title $title -animate $animate -width $width -height $height -- $data"}]
+    set id chart2
+    set title {label "My Wizzzy Pie Chart" font-size 25px}  
+    set animate true
+    set width 50%
+    set height 50%  
+    set data [list {label "Label 1" value 12 tooltip "tip 1"} {label "Label 2" value 14 tooltip "tip 2"}]
+    append html [ofc_piechart -id $id -title $title -animate $animate -width $width -height $height -- $data]
+
+    qc::return_html $html
+}
+
+proc ofc_linechart {args} {
+
+    args $args -id -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- lines
+    
+    if { ![info exists id] } {
+	# if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
+	global ofc_id
+	set id graph[incr0 ofc_id 1]
+    }
+
+    set colors [ofc_colors]
+
+    # find min and max over all lines
+    lappend min_values 0
+    lappend max_values 0
+    set elements {}
+    set x_labels {}
+    foreach line $lines {
+ 	dict2vars $line label color data 
+	default color [lshift colors]
+	
+	lassign [ofc_line_element $label $color $data] tson x_labels min max 
+	lappend elements $tson
+	lappend max_values $max
+	lappend min_values $min
+    }
+
+    set elements [list array {*}$elements] 
+    set x_labels [list array {*}$x_labels]
+    set max_value [max $max_values]  
+    set min_value [min $min_values]  
+    
+    # title
+    dict2vars $title label font-size
+    if { [info exists label] } {
+	set title_style [style_set "" font-family "Arial,Helvetica,sans-serif" text-align center font-size 20px]
+	if { [info exists font-size] } {
+	    set title_style [style_set $title_style font-size ${font-size}]
+	}
+	set title [list object text [list string $label] style $title_style]
+    }
+
+    # x legend
+    dict2vars $x_axis label 
+    default label "" 
+    set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
+    set x_legend [list object style $style text [list string $label]]
+
+    # y legend
+    # Default y-axis with 10 steps.
+    dict2vars $y_axis label min max step 
+    default label "" 
+    set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
+    set y_legend [list object style $style text [list string $label]]
+    default min $min_value
+    default max $max_value  
+    default step [ofc_step $min $max] 
+    set min [expr {ceil(double($min/$step)) * $step}]
+    set max [expr {$min + (ceil(double($max-$min)/$step) * $step)}]
+
+    # Construct tson that will be used to generate json loaded by ofc. 
+    set tson [list object \
+		  elements $elements \
+		  x_legend $x_legend \
+		  x_axis [list object \
+			      offset false \
+			      stroke 1 \
+			      colour #c6d9fd \
+			      grid-colour #dddddd \
+			      labels [list object \
+					  size 13 \
+					  labels $x_labels]] \
+		  y_legend $y_legend \
+		  y_axis [list object \
+			      min $min \
+			      max $max \
+			      steps $step \
+			      stroke 1 \
+			      colour #c6d9fd \
+			      grid-colour #dddddd \
+			      labels [list object \
+					  size 13]] \
+		  title $title \
+		  bg_colour #FAFAFA]
+    
+    set html [ofc_html $id [tson2json $tson] $width $height]
+}
+
+doc ofc_linechart {
+    Usage {
+	ofc_linechart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? lines
+    }
+    Description {
+	<h2>See Examples in Action</h2>
+	[html_a "Examples" "/doc_ofc_line_examples.html"]
+    }
+    Examples {
+	set data1 [list Jan 500 Feb 550 Mar 700 Apr 670 May 730]
+	set data2 [list Jan 50 Feb 65 Mar -3 Apr 67 May 73]
+	set data3 [list Jan 500 Feb 605 Mar 700 Apr 607 May 703]
+
+	Example 1: Minimum Arguments Usage.
+	set lines [list \ 
+		   [list label "Direct" data $data1] \ 
+		   [list label "Adwords" data $data2] \ 
+		   [list label "Froogle" data $data3]]
+	qc::return_html [ofc_linechart $lines]
+
+	Example 2: Full Arguments Usage.
+	set id chart2
+	set title {label "My Wizzy Line Chart" font-size 20px}
+	set x_axis {label "Months"}
+	set y_axis {label "Orders" min 50 max 850 step 100} 
+	set width 50%
+	set height 25%  
+	set lines [list \ 
+		   [list label "Direct" color #00FF33 data $data1] \ 
+		   [list label "Adwords" color #FF0033 data $data2] \ 
+		   [list label "Froogle" color #3333CC data $data3]]
+	qc::return_html [ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines]
+    }
+}
+
+
+proc /doc/ofc_line_examples.html {} {   
+    set data1 [list Jan 500 Feb 550 Mar 700 Apr 670 May 730]
+    set data2 [list Jan 50 Feb 65 Mar -3 Apr 67 May 73]
+    set data3 [list Jan 500 Feb 605 Mar 700 Apr 607 May 703]
+
+    append html [html h2 "Linechart Examples"]
+
+    append html [html h4 {Minimum Arguments Usage: "ofc_linechart $lines"}]
+    set lines [list \
+		   [list label "Direct" data $data1] \
+		   [list label "Adwords" data $data2] \
+		   [list label "Froogle" data $data3]]
+    append html [ofc_linechart $lines]
+
+    append html [html h4 {Full Arguments Usage: "ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines"}]
+    set id chart2
+    set title {label "My Wizzy Line Chart" font-size 20px}
+    set x_axis {label "Months"}
+    set y_axis {label "Orders" min 50 max 850 step 100} 
+    set width 50%
+    set height 25%  
+    set lines [list \
+		   [list label "Direct" color #00FF33 data $data1] \
+		   [list label "Adwords" color #FF0033 data $data2] \
+		   [list label "Froogle" color #3333CC data $data3]]
+    append html [ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines]
+
+    qc::return_html $html
+}
+
+proc ofc_line_element {label color data} {
+    # return tson for the ofc element
+    # each ofc element describes one line
+
+    set x_labels {}
+    set y_values {}
+    foreach {x y} $data {
+	lappend x_labels [list string $x]
+	lappend y_values $y
+    }
+
+    set tson [list object \
+		  type line \
+		  text [list string $label] \
+		  colour $color \
+		  size 20 \
+		  values [list array {*}$y_values]]
+    
+    return [list $tson $x_labels [min $y_values] [max $y_values]]
+}
+
+proc ofc_barchart {args} {
+
+    args $args -id -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- bars
+    
+    if { ![info exists id] } {
+	# if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
+	global ofc_id
+	set id graph[incr0 ofc_id 1]
+    }
+
+    set colors [ofc_colors]
+    
+    # find min and max over all bars
+    lappend max_values 0
+    lappend min_values 0
+    set x_labels {}
+    set values {}
+    set tson_keys {}
+    foreach bar $bars {
+ 	dict2vars $bar label data 
+	lassign [ofc_bar2tson label $colors $data] tson_values tson_keys total neg_total 
+
+	lappend x_labels [list string $label]
+	lappend values $tson_values
+	lappend max_values $total
+	lappend min_values $neg_total
+    }
+    set max_value [max $max_values]
+    set min_value [min $min_values]
+    
+    # title
+    dict2vars $title label font-size
+    if { [info exists label] } {
+	set title_style [style_set "" font-family "Arial,Helvetica,sans-serif" text-align center font-size 20px]
+	if { [info exists font-size] } {
+	    set title_style [style_set $title_style font-size ${font-size}]
+	}
+	set title [list object text [list string $label] style $title_style]
+    }
+
+    # x legend
+    dict2vars $x_axis label 
+    default label "" 
+    set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
+    set x_legend [list object style $style text [list string $label]]
+
+    # y legend
+    # Default y-axis with 10 steps.
+    dict2vars $y_axis label min max step 
+    default label "" 
+    set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
+    set y_legend [list object style $style text [list string $label]]
+    default min $min_value
+    default max $max_value  
+    default step [ofc_step $min $max] 
+    set min [expr {ceil(double($min/$step)) * $step}]
+    set max [expr {$min + (ceil(double($max-$min)/$step) * $step)}]
+
+    # Construct tson that will be used to generate json loaded by ofc. 
+    set tson [list object \
+		  elements [list array \
+				[list object \
+				     type bar_stack \
+				     alpha 0.80 \
+				     colours [list array {*}$colors] \
+				     values [list array {*}$values] \
+				     keys [list array {*}$tson_keys] \
+				     tip "#val# of #total#"]] \
+		  x_legend $x_legend \
+		  x_axis [list object \
+			      colour #c6d9fd \
+			      grid-colour #dddddd \
+			      labels [list object \
+					  size 13 \
+					  labels [list array {*}$x_labels]]] \
+		  y_legend $y_legend \
+		  y_axis [list object \
+			      min $min \
+			      max $max \
+			      steps $step \
+			      stroke 1 \
+			      colour #c6d9fd \
+			      grid-colour #dddddd \
+			      labels [list object \
+					  size 13]] \
+		  title $title \
+		  tooltip [list object mouse 2] \
+		  bg_colour #FAFAFA]
+    
+    set html [ofc_html $id [tson2json $tson] $width $height]
+}
+
+doc ofc_barchart {
+    Usage {
+	ofc_barchart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? bars
+    }
+    Description {
+	<h2>See Examples in Action</h2>
+	[html_a "Examples" "/doc_ofc_bar_examples.html"]
+    }
+    Examples {
+	set data1 [list direct 500 adwords 350 froogle 70]
+	set data2 [list direct 560 adwords 395 froogle 50]
+	set data3 [list direct 600 adwords 360 froogle 450]
+	set bars [list \
+		      [list label Jan data $data1] \
+		      [list label Feb data $data2] \
+		      [list label March data $data3]]
+
+	Example 1: Minimum Arguments Usage.
+	qc::return_html [ofc_barchart $bars]
+
+	Example 2: Full Arguments Usage.
+	set id chart2
+	set title {label "My Wizzy Bar Chart" font-size 20px}
+	set x_axis {label "Months"}
+	set y_axis {label "Orders" min 0 max 1500 step 250} 
+	set width 50%
+	set height 25%  
+	qc::return_html [ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $bars]
+    }
+}
+
+proc /doc/ofc_bar_examples.html {} {   
+    set data1 [list direct 500 adwords 750 froogle 70]
+    set data2 [list direct 560 adwords 395 froogle 50]
+    set data3 [list direct 600 adwords 360 froogle 450]
+    set bars [list \
+		  [list label Jan data $data1] \
+		  [list label Feb data $data2] \
+		  [list label March data $data3]]
+
+    append html [html h2 "Barchart Examples"]
+
+    append html [html h4 {Minimum Arguments Usage: "ofc_barchart $bars"}]   
+    append html [ofc_barchart $bars]
+
+    append html [html h4 {Full Arguments Usage: "ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $bars"}]
+    set id chart2
+    set title {label "My Wizzy Bar Chart" font-size 20px}
+    set x_axis {label "Months"}
+    set y_axis {label "Orders" min 0 max 1500 step 250} 
+    set width 50%
+    set height 25%     
+    append html [ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $bars]
+
+    qc::return_html $html
+}
+
+proc ofc_bar2tson {label colors data} {
+    # return tson for the ofc element
+    # each ofc values describes one bar
+    
+    set tson_keys {}
+    set y_values {}
+    set total 0
+    set neg_total 0
+    foreach {x y} $data {
+	lappend tson_keys [list object text [list string $x] colour [lshift colors] font-size 13]
+	lappend y_values $y
+	incr total $y
+	if { $y < 0 } {
+	    incr neg_total $y
+	}
+    }
+    set tson_values [list array {*}$y_values]
+    
+    return [list $tson_values $tson_keys $total $neg_total]
+}
+
+proc ofc_step {min max} {
+    # Determine a step value to be used to display a chart with 10 divisions. 
+    # Step size should be rounded up to only one sig fig 
+    # in order to have nicer increments 
+    # eg. for max 960 min 0, step would be 100 instead of 96. 
+    if { $min == $max } { 
+	return 1 
+    } else {
+	set step [expr {double(abs($max - $min)) /10}]
+	return [sigfigs_ceil $step 1] 
+    }
+}
+
+proc ofc_colors {{no_of_elements 1}} {
+    # 10 preset web safe colours to colour chart elements, if number of elements is odd use 11 instead.
+    # #999999/*dark gray*/ #336699/*dark blue*/ #666600/*dark green*/ #CC9933/*dark orange*/ 
+    # #993366/*dark red*/ #CCCCCC/*light gray*/ #6699CC/*light blue*/ #999900/*light green*/ 
+    # #FFCC66/*light orange*/ #CC9999/*light red #669999/*aqua*/
+
+    set colors [list #000000 #336699 #666600 #CC9933 #993366 #CCCCCC #6699CC #999900 #FFCC66 #CC9999]
+
+    if { [expr $no_of_elements%2] ==  1 } {
+	lappend colors #669999
+    } 
+
+    return $colors
+}
+
+proc ofc_html {id json width height} {    
+    # html to construct ofc object.
+
+    sset html {
+	<script type="text/javascript" src="/JavaScript/swfobject.js"></script> 
+	<script type="text/javascript" src="/JavaScript/json2.js"></script> 
+	
+	<script type="text/javascript"> 
+	swfobject.embedSWF("/JavaScript/open-flash-chart.swf", "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
+	
+	function ofc_ready() {
+	    //  alert('ofc_ready');
+	}
+	
+	function get_data_${id}() {
+	    //  alert(JSON.stringify('reading data'));
+	    return JSON.stringify(data_$id);
+	}
+	var data_$id =$json
+	</script>
+    }
+    # add div element for ofc to be written into. 
+    append html [html div "" id $id]
+
+    return $html
 }
