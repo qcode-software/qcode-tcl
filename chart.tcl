@@ -529,18 +529,10 @@ proc ofc_html {id json width height} {
     # html to construct ofc object.
 
     sset html {
-	<script type="text/javascript" src="/JavaScript/swfobject.js"></script> 
-	<script type="text/javascript" src="/JavaScript/json2.js"></script> 
-	
 	<script type="text/javascript"> 
 	swfobject.embedSWF("/JavaScript/open-flash-chart.swf", "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
 	
-	function ofc_ready() {
-	    //  alert('ofc_ready');
-	}
-	
 	function get_data_${id}() {
-	    //  alert(JSON.stringify('reading data'));
 	    return JSON.stringify(data_$id);
 	}
 	var data_$id =$json
