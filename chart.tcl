@@ -1,3 +1,4 @@
+### chart.tcl ###
 # DEPRECATED
 proc chart_sales {x_labels values tips key_text} {
     set y_max [sigfigs_ceil [max $values] 2]
@@ -195,8 +196,11 @@ proc ofc_linechart {args} {
     }
 
     # x legend
-    dict2vars $x_axis label 
+    dict2vars $x_axis label grid_step label_step offset
+    default offset false
     default label "" 
+    default grid_step 1
+    default label_step $grid_step
     set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
     set x_legend [list object style $style text [list string $label]]
 
@@ -217,11 +221,14 @@ proc ofc_linechart {args} {
 		  elements $elements \
 		  x_legend $x_legend \
 		  x_axis [list object \
-			      offset false \
+			      steps $grid_step \
+			      offset $offset \
 			      stroke 1 \
-			      colour #c6d9fd \
+			      colour #000000 \
+			      width 6 \
 			      grid-colour #dddddd \
 			      labels [list object \
+					  visible-steps $label_step \
 					  size 13 \
 					  labels $x_labels]] \
 		  y_legend $y_legend \
@@ -230,7 +237,7 @@ proc ofc_linechart {args} {
 			      max $max \
 			      steps $step \
 			      stroke 1 \
-			      colour #c6d9fd \
+			      colour #000000 \
 			      grid-colour #dddddd \
 			      labels [list object \
 					  size 13]] \
@@ -249,9 +256,24 @@ doc ofc_linechart {
 	[html_a "Examples" "/doc_ofc_line_examples.html"]
     }
     Examples {
-	set data1 [list Jan 500 Feb 550 Mar 700 Apr 670 May 730]
-	set data2 [list Jan 50 Feb 65 Mar -3 Apr 67 May 73]
-	set data3 [list Jan 500 Feb 605 Mar 700 Apr 607 May 703]
+	set data1 [list \
+		       [list x Jan y 500] \
+		       [list x Feb y 550] \
+		       [list x Mar y 700] \
+		       [list x Apr y 670] \
+		       [list x May y 730]]
+	set data2 [list \
+		       [list x Jan y 50] \
+		       [list x Feb y 65] \
+		       [list x Mar y -3] \
+		       [list x Apr y 67] \
+		       [list x May y 73]]
+	set data3 [list \
+		       [list x Jan y 500] \
+		       [list x Feb y 605] \
+		       [list x Mar y 700] \
+		       [list x Apr y 607] \
+		       [list x May y 703]]
 
 	Example 1: Minimum Arguments Usage.
 	set lines [list \ 
@@ -275,11 +297,25 @@ doc ofc_linechart {
     }
 }
 
-
 proc /doc/ofc_line_examples.html {} {   
-    set data1 [list Jan 500 Feb 550 Mar 700 Apr 670 May 730]
-    set data2 [list Jan 50 Feb 65 Mar -3 Apr 67 May 73]
-    set data3 [list Jan 500 Feb 605 Mar 700 Apr 607 May 703]
+    set data1 [list \
+		   [list x Jan y 500] \
+		   [list x Feb y 550] \
+		   [list x Mar y 700] \
+		   [list x Apr y 670] \
+		   [list x May y 730]]
+    set data2 [list \
+		   [list x Jan y 50] \
+		   [list x Feb y 65] \
+		   [list x Mar y -3] \
+		   [list x Apr y 67] \
+		   [list x May y 73]]
+    set data3 [list \
+		   [list x Jan y 500] \
+		   [list x Feb y 605] \
+		   [list x Mar y 700] \
+		   [list x Apr y 607] \
+		   [list x May y 703]]
 
     append html [html h2 "Linechart Examples"]
 
@@ -288,13 +324,14 @@ proc /doc/ofc_line_examples.html {} {
 		   [list label "Direct" data $data1] \
 		   [list label "Adwords" data $data2] \
 		   [list label "Froogle" data $data3]]
-    append html [ofc_linechart $lines]
+    set x_axis [list grid_step 1]
+    append html [ofc_linechart -x_axis $x_axis -- $lines]
 
     append html [html h4 {Full Arguments Usage: "ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines"}]
     set id chart2
     set title {label "My Wizzy Line Chart" font-size 20px}
     set x_axis {label "Months"}
-    set y_axis {label "Orders" min 50 max 850 step 100} 
+    set y_axis {label "Orders" step 100} 
     set width 50%
     set height 25%  
     set lines [list \
@@ -312,9 +349,12 @@ proc ofc_line_element {label color data} {
 
     set x_labels {}
     set y_values {}
-    foreach {x y} $data {
+    foreach datum $data {
+	dict2vars $datum x y tip
+	default tip "#val#"
 	lappend x_labels [list string $x]
-	lappend y_values $y
+	lappend y_values [list object value $y tip $tip]
+	lappend values $y
     }
 
     set tson [list object \
@@ -324,7 +364,7 @@ proc ofc_line_element {label color data} {
 		  size 20 \
 		  values [list array {*}$y_values]]
     
-    return [list $tson $x_labels [min $y_values] [max $y_values]]
+    return [list $tson $x_labels [min $values] [max $values]]
 }
 
 proc ofc_barchart {args} {
@@ -347,11 +387,11 @@ proc ofc_barchart {args} {
     set tson_keys {}
     foreach bar $bars {
  	dict2vars $bar label data 
-	lassign [ofc_bar2tson label $colors $data] tson_values tson_keys total neg_total 
+	lassign [ofc_bar2tson label $colors $data] tson_values tson_keys pos_total neg_total 
 
 	lappend x_labels [list string $label]
 	lappend values $tson_values
-	lappend max_values $total
+	lappend max_values $pos_total
 	lappend min_values $neg_total
     }
     set max_value [max $max_values]
@@ -397,7 +437,7 @@ proc ofc_barchart {args} {
 				     tip "#val# of #total#"]] \
 		  x_legend $x_legend \
 		  x_axis [list object \
-			      colour #c6d9fd \
+			      colour #000000 \
 			      grid-colour #dddddd \
 			      labels [list object \
 					  size 13 \
@@ -408,7 +448,7 @@ proc ofc_barchart {args} {
 			      max $max \
 			      steps $step \
 			      stroke 1 \
-			      colour #c6d9fd \
+			      colour #000000 \
 			      grid-colour #dddddd \
 			      labels [list object \
 					  size 13]] \
@@ -487,14 +527,15 @@ proc ofc_bar2tson {label colors data} {
     foreach {x y} $data {
 	lappend tson_keys [list object text [list string $x] colour [lshift colors] font-size 13]
 	lappend y_values $y
-	incr total $y
-	if { $y < 0 } {
+	if { $y > 0 } {
+	    incr pos_total $y
+	} else {
 	    incr neg_total $y
 	}
     }
     set tson_values [list array {*}$y_values]
     
-    return [list $tson_values $tson_keys $total $neg_total]
+    return [list $tson_values $tson_keys $pos_total $neg_total]
 }
 
 proc ofc_step {min max} {
@@ -512,11 +553,11 @@ proc ofc_step {min max} {
 
 proc ofc_colors {{no_of_elements 1}} {
     # 10 preset web safe colours to colour chart elements, if number of elements is odd use 11 instead.
-    # #999999/*dark gray*/ #336699/*dark blue*/ #666600/*dark green*/ #CC9933/*dark orange*/ 
-    # #993366/*dark red*/ #CCCCCC/*light gray*/ #6699CC/*light blue*/ #999900/*light green*/ 
-    # #FFCC66/*light orange*/ #CC9999/*light red #669999/*aqua*/
+    # #336699/*dark blue*/ #666600/*dark green*/ #CC9933/*dark orange*/ #993366/*dark red*/ 
+    # #CCCCCC/*light gray*/ #6699CC/*light blue*/ #999900/*light green*/ #FFCC66/*light orange*/ 
+    # #CC9999/*light red*/ #000000/*black*/ #669999/*aqua*/
 
-    set colors [list #000000 #336699 #666600 #CC9933 #993366 #CCCCCC #6699CC #999900 #FFCC66 #CC9999]
+    set colors [list #336699 #666600 #CC9933 #993366 #CCCCCC #6699CC #999900 #FFCC66 #CC9999 #000000]
 
     if { [expr $no_of_elements%2] ==  1 } {
 	lappend colors #669999
@@ -532,7 +573,12 @@ proc ofc_html {id json width height} {
 	<script type="text/javascript"> 
 	swfobject.embedSWF("/JavaScript/open-flash-chart.swf", "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
 	
+	function ofc_ready() {
+	    //     alert('ofc_ready');
+	}
+	
 	function get_data_${id}() {
+	    //      alert(JSON.stringify('reading data'));
 	    return JSON.stringify(data_$id);
 	}
 	var data_$id =$json
