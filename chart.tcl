@@ -53,10 +53,10 @@ proc chart_list2csv {list} {
 # New Charts by Daniel Clark 
 proc ofc_piechart {args} {
 
-    args $args -id -title {} -animate false -width 100% -height 50% -- data
+    args $args -id "" -title {} -animate false -width 100% -height 50% -- data
     
     # if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
-    if { ![info exists id] } {
+    if { [eq $id ""] } {
 	global ofc_id
 	set id graph[incr0 ofc_id 1]
     }
@@ -116,7 +116,7 @@ doc ofc_piechart {
     }
     Description {
 	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc_ofc_pie_examples.html"]
+	[html_a "Examples" "/doc/ofc_pie_examples.html"]
     }
     Examples {
 	set data [list {label "Label 1" value 12} {label "Label 2" value 14}]
@@ -135,6 +135,11 @@ doc ofc_piechart {
 }
 
 proc /doc/ofc_pie_examples.html {} {
+    sset html {
+	<script type="text/javascript" src="/JavaScript/swfobject.js"></script> 
+	<script type="text/javascript" src="/JavaScript/json2.js"></script> 
+    }
+
     append html [html h2 "Piechart Examples"]
 
     append html [html h4 {Minimum Argument Usage: "ofc_piechart {$data}"}]
@@ -155,9 +160,9 @@ proc /doc/ofc_pie_examples.html {} {
 
 proc ofc_linechart {args} {
 
-    args $args -id -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- lines
+    args $args -id "" -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- lines
     
-    if { ![info exists id] } {
+    if { [eq $id ""] } {
 	# if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
 	global ofc_id
 	set id graph[incr0 ofc_id 1]
@@ -253,7 +258,7 @@ doc ofc_linechart {
     }
     Description {
 	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc_ofc_line_examples.html"]
+	[html_a "Examples" "/doc/ofc_line_examples.html"]
     }
     Examples {
 	set data1 [list \
@@ -263,17 +268,17 @@ doc ofc_linechart {
 		       [list x Apr y 670] \
 		       [list x May y 730]]
 	set data2 [list \
-		       [list x Jan y 50] \
-		       [list x Feb y 65] \
-		       [list x Mar y -3] \
-		       [list x Apr y 67] \
-		       [list x May y 73]]
+		       [list x Jan y 50 tooltip "Adwords (Jan)<br>50 Bananas"] \
+		       [list x Feb y 65 tooltip "Adwords (Feb)<br>65 Bananas"] \
+		       [list x Mar y -3 tooltip "Adwords (Mar)<br>-3 Bananas"] \
+		       [list x Apr y 67 tooltip "Adwords (Apr)<br>67 Bananas"] \
+		       [list x May y 73 tooltip "Adwords (May)<br>73 Bananas"]]
 	set data3 [list \
-		       [list x Jan y 500] \
-		       [list x Feb y 605] \
-		       [list x Mar y 700] \
-		       [list x Apr y 607] \
-		       [list x May y 703]]
+		       [list x Jan y 500 tooltip "Froogle (Jan)<br>500 Apples"] \
+		       [list x Feb y 605 tooltip "Froogle (Feb)<br>605 Apples"] \
+		       [list x Mar y 700 tooltip "Froogle (Mar)<br>700 Apples"] \
+		       [list x Apr y 607 tooltip "Froogle (Apr)<br>607 Apples"] \
+		       [list x May y 703 tooltip "Froogle (May)<br>703 Apples"]]
 
 	Example 1: Minimum Arguments Usage.
 	set lines [list \ 
@@ -285,8 +290,8 @@ doc ofc_linechart {
 	Example 2: Full Arguments Usage.
 	set id chart2
 	set title {label "My Wizzy Line Chart" font-size 20px}
-	set x_axis {label "Months"}
-	set y_axis {label "Orders" min 50 max 850 step 100} 
+	set x_axis {label "Months" grid_step 1 label_step 1}
+	set y_axis {label "Orders" min -100 max 800 step 100} 
 	set width 50%
 	set height 25%  
 	set lines [list \ 
@@ -297,7 +302,13 @@ doc ofc_linechart {
     }
 }
 
-proc /doc/ofc_line_examples.html {} {   
+proc /doc/ofc_line_examples.html {} { 
+
+    sset html {
+	<script type="text/javascript" src="/JavaScript/swfobject.js"></script> 
+	<script type="text/javascript" src="/JavaScript/json2.js"></script> 
+    }
+    
     set data1 [list \
 		   [list x Jan y 500] \
 		   [list x Feb y 550] \
@@ -305,17 +316,17 @@ proc /doc/ofc_line_examples.html {} {
 		   [list x Apr y 670] \
 		   [list x May y 730]]
     set data2 [list \
-		   [list x Jan y 50] \
-		   [list x Feb y 65] \
-		   [list x Mar y -3] \
-		   [list x Apr y 67] \
-		   [list x May y 73]]
+		   [list x Jan y 50 tooltip "Adwords (Jan)<br>50 Bananas"] \
+		   [list x Feb y 65 tooltip "Adwords (Feb)<br>65 Bananas"] \
+		   [list x Mar y -3 tooltip "Adwords (Mar)<br>-3 Bananas"] \
+		   [list x Apr y 67 tooltip "Adwords (Apr)<br>67 Bananas"] \
+		   [list x May y 73 tooltip "Adwords (May)<br>73 Bananas"]]
     set data3 [list \
-		   [list x Jan y 500] \
-		   [list x Feb y 605] \
-		   [list x Mar y 700] \
-		   [list x Apr y 607] \
-		   [list x May y 703]]
+		   [list x Jan y 500 tooltip "Froogle (Jan)<br>500 Apples"] \
+		   [list x Feb y 605 tooltip "Froogle (Feb)<br>605 Apples"] \
+		   [list x Mar y 700 tooltip "Froogle (Mar)<br>700 Apples"] \
+		   [list x Apr y 607 tooltip "Froogle (Apr)<br>607 Apples"] \
+		   [list x May y 703 tooltip "Froogle (May)<br>703 Apples"]]
 
     append html [html h2 "Linechart Examples"]
 
@@ -324,14 +335,13 @@ proc /doc/ofc_line_examples.html {} {
 		   [list label "Direct" data $data1] \
 		   [list label "Adwords" data $data2] \
 		   [list label "Froogle" data $data3]]
-    set x_axis [list grid_step 1]
-    append html [ofc_linechart -x_axis $x_axis -- $lines]
+    append html [ofc_linechart $lines]
 
     append html [html h4 {Full Arguments Usage: "ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines"}]
     set id chart2
     set title {label "My Wizzy Line Chart" font-size 20px}
-    set x_axis {label "Months"}
-    set y_axis {label "Orders" step 100} 
+    set x_axis {label "Months" grid_step 1 label_step 1}
+    set y_axis {label "Orders" min -100 max 800 step 100} 
     set width 50%
     set height 25%  
     set lines [list \
@@ -350,10 +360,10 @@ proc ofc_line_element {label color data} {
     set x_labels {}
     set y_values {}
     foreach datum $data {
-	dict2vars $datum x y tip
-	default tip "#val#"
+	dict2vars $datum x y tooltip
+	default tooltip "$label<br>#val#"
 	lappend x_labels [list string $x]
-	lappend y_values [list object value $y tip $tip]
+	lappend y_values [list object value $y tip [list string $tooltip]]
 	lappend values $y
     }
 
@@ -369,9 +379,9 @@ proc ofc_line_element {label color data} {
 
 proc ofc_barchart {args} {
 
-    args $args -id -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- bars
+    args $args -id "" -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- bars
     
-    if { ![info exists id] } {
+    if { [eq $id ""] } {
 	# if id not supplied use global counter to ensure id is unique to allow multiple charts on a html page. 
 	global ofc_id
 	set id graph[incr0 ofc_id 1]
@@ -387,7 +397,7 @@ proc ofc_barchart {args} {
     set tson_keys {}
     foreach bar $bars {
  	dict2vars $bar label data 
-	lassign [ofc_bar2tson label $colors $data] tson_values tson_keys pos_total neg_total 
+	lassign [ofc_bar2tson $label $colors $data] tson_values tson_keys pos_total neg_total 
 
 	lappend x_labels [list string $label]
 	lappend values $tson_values
@@ -407,9 +417,11 @@ proc ofc_barchart {args} {
 	set title [list object text [list string $label] style $title_style]
     }
 
-    # x legend
-    dict2vars $x_axis label 
+    # x legend 
+    dict2vars $x_axis label grid_step label_step 
     default label "" 
+    default grid_step 1
+    default label_step $grid_step
     set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
     set x_legend [list object style $style text [list string $label]]
 
@@ -433,13 +445,14 @@ proc ofc_barchart {args} {
 				     alpha 0.80 \
 				     colours [list array {*}$colors] \
 				     values [list array {*}$values] \
-				     keys [list array {*}$tson_keys] \
-				     tip "#val# of #total#"]] \
+				     keys [list array {*}$tson_keys]]] \
 		  x_legend $x_legend \
 		  x_axis [list object \
+			      steps $grid_step \
 			      colour #000000 \
 			      grid-colour #dddddd \
 			      labels [list object \
+					  steps $label_step \
 					  size 13 \
 					  labels [list array {*}$x_labels]]] \
 		  y_legend $y_legend \
@@ -465,12 +478,21 @@ doc ofc_barchart {
     }
     Description {
 	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc_ofc_bar_examples.html"]
+	[html_a "Examples" "/doc/ofc_bar_examples.html"]
     }
     Examples {
-	set data1 [list direct 500 adwords 350 froogle 70]
-	set data2 [list direct 560 adwords 395 froogle 50]
-	set data3 [list direct 600 adwords 360 froogle 450]
+	set data1 [list \
+		       [list x Direct y 500] \
+		       [list x Adwords y 750] \
+		       [list x Froogle y 70]]
+	set data2 [list \
+		       [list x Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \
+		       [list x Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \
+		       [list x Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
+	set data3 [list \
+		       [list x Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
+		       [list x Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
+		       [list x Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
 	set bars [list \
 		      [list label Jan data $data1] \
 		      [list label Feb data $data2] \
@@ -482,7 +504,7 @@ doc ofc_barchart {
 	Example 2: Full Arguments Usage.
 	set id chart2
 	set title {label "My Wizzy Bar Chart" font-size 20px}
-	set x_axis {label "Months"}
+	set x_axis {label "Months" grid_step 1 label_step 1}
 	set y_axis {label "Orders" min 0 max 1500 step 250} 
 	set width 50%
 	set height 25%  
@@ -490,10 +512,25 @@ doc ofc_barchart {
     }
 }
 
-proc /doc/ofc_bar_examples.html {} {   
-    set data1 [list direct 500 adwords 750 froogle 70]
-    set data2 [list direct 560 adwords 395 froogle 50]
-    set data3 [list direct 600 adwords 360 froogle 450]
+proc /doc/ofc_bar_examples.html {} { 
+
+    sset html {
+	<script type="text/javascript" src="/JavaScript/swfobject.js"></script> 
+	<script type="text/javascript" src="/JavaScript/json2.js"></script> 
+    }
+    
+    set data1 [list \
+		   [list x Direct y 500] \
+		   [list x Adwords y 750] \
+		   [list x Froogle y 70]]
+    set data2 [list \
+		   [list x Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \
+		   [list x Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \
+		   [list x Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
+    set data3 [list \
+		   [list x Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
+		   [list x Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
+		   [list x Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
     set bars [list \
 		  [list label Jan data $data1] \
 		  [list label Feb data $data2] \
@@ -507,7 +544,7 @@ proc /doc/ofc_bar_examples.html {} {
     append html [html h4 {Full Arguments Usage: "ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $bars"}]
     set id chart2
     set title {label "My Wizzy Bar Chart" font-size 20px}
-    set x_axis {label "Months"}
+    set x_axis {label "Months" grid_step 1 label_step 1}
     set y_axis {label "Orders" min 0 max 1500 step 250} 
     set width 50%
     set height 25%     
@@ -522,11 +559,13 @@ proc ofc_bar2tson {label colors data} {
     
     set tson_keys {}
     set y_values {}
-    set total 0
+    set pos_total 0
     set neg_total 0
-    foreach {x y} $data {
+    foreach datum $data {
+	dict2vars $datum x y tooltip
+	default tooltip "$x<br>#val# of #total#"
 	lappend tson_keys [list object text [list string $x] colour [lshift colors] font-size 13]
-	lappend y_values $y
+	lappend y_values [list object val $y tip [list string $tooltip]]
 	if { $y > 0 } {
 	    incr pos_total $y
 	} else {
@@ -566,19 +605,14 @@ proc ofc_colors {{no_of_elements 1}} {
     return $colors
 }
 
-proc ofc_html {id json width height} {    
-    # html to construct ofc object.
+proc ofc_html {id json width height} {   
 
+    # html to construct ofc object.
     sset html {
 	<script type="text/javascript"> 
-	swfobject.embedSWF("/JavaScript/open-flash-chart.swf", "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
-	
-	function ofc_ready() {
-	    //     alert('ofc_ready');
-	}
+	swfobject.embedSWF("/JavaScript/open-flash-chart.swf?"+Math.floor(Math.random()*10000), "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
 	
 	function get_data_${id}() {
-	    //      alert(JSON.stringify('reading data'));
 	    return JSON.stringify(data_$id);
 	}
 	var data_$id =$json

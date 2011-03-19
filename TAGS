@@ -1,162 +1,624 @@
 
-0.doc.tcl,81
-    foreach line [regexp -all -inline -line {^[ \t]*\#\|.*} $body]$body61,1646
+0.doc.tcl,585
+proc doc_linkdoc_link1,0
+proc doc_listdoc_list25,591
+proc tcl_proc_showtcl_proc_show33,734
+proc tcl_proc_doctcl_proc_doc58,1561
+proc tcl_proc_usagetcl_proc_usage67,1796
+proc docdoc79,2042
+proc doc_urhdoc_urh83,2106
+proc /doc/index.html/doc/index.html102,2588
+proc doc_proc2htmldoc_proc2html117,2951
+proc doc2htmldoc2html181,4955
+proc doc_parsedoc_parse244,6819
+proc doc_escape_pre_tcldoc_escape_pre_tcl282,7857
+proc doc_escape_pre_htmldoc_escape_pre_html296,8383
+proc wiki2html_listwiki2html_list310,8881
+proc doc_template_styledoc_template_style316,9044
 
-action.tcl,30
-proc qc::action_menu 55,2480
+action.tcl,184
+proc qc::actionqc::action28,1476
+proc qc::action_printqc::action_print36,1794
+proc qc::action_print_pageqc::action_print_page51,2368
+proc qc::action_menuqc::action_menu55,2480
 
-args.tcl,20
-	set next 182,5314
+args.tcl,326
+proc args2dictargs2dict1,0
+proc args2varsargs2vars49,1219
+proc arg_options_splitarg_options_split121,3311
+proc args_by_name2dictargs_by_name2dict143,3910
+proc args_by_name2varsargs_by_name2vars152,4243
+proc args_check_requiredargs_check_required163,4746
+proc args_splitargs_split174,5050
+proc argsargs208,6025
 
-cast.tcl,798
-    if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day)s?( ago)?} $string]$string181,5310
-    if { [regexp {(^|[^0-9])(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})([^0-9]|$)} $string -> start year month day end]end190,5846
-    if { [regexp {(^|[^0-9])(\d{1,2})[/\.](\d{1,2})[/\.](\d{4}|\d{2}|\d)([^0-9]|$)} $string -> start day month year end]end193,6017
-    if { [regexp {(^|\W)(\d{1,2})[/\.](\d{1,2})(\W|$)} $string -> start day month end]end198,6257
-    if { [regexp {(^|[^0-9])(\d{4})([^0-9]|$)} $string -> start year end]end202,6455
-	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end]end206,6615
+auth.tcl,324
+proc qc::authqc::auth25,2159
+proc qc::auth_checkqc::auth_check57,2989
+proc qc::auth_hbaqc::auth_hba80,3403
+proc qc::auth_hba_checkqc::auth_hba_check97,3807
+proc qc::auth_passwordqc::auth_password114,4142
+proc qc::auth_password_checkqc::auth_password_check129,4615
+proc qc::auth_sessionqc::auth_session143,5032
 
-csv.tcl,165
-	set field_value 41,1174
-	set csv [string replace $csv [lindex $field 0] [lindex $field 1] [string map [list , \0 \n \1 \"\" \2] $field_value]$field_value42,1247
+cast.tcl,466
+proc qc::cast_integerqc::cast_integer48,1867
+proc qc::cast_intqc::cast_int84,2677
+proc qc::cast_decimalqc::cast_decimal88,2747
+proc qc::cast_dateqc::cast_date117,3333
+proc qc::cast_timestampqc::cast_timestamp143,3805
+proc qc::cast_epochqc::cast_epoch148,3979
+proc qc::cast_booleanqc::cast_boolean254,8523
+proc qc::cast_boolqc::cast_bool281,9019
+proc qc::cast_postcodeqc::cast_postcode285,9124
+proc qc::cast_creditcardqc::cast_creditcard327,10137
 
-db.tcl,257
-	set qry 40,1994
-    regsub -all all45,2262
-    if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]$qry48,2380
-    if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value]$value68,2946
-    if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail]tail73,3074
+chart.tcl,600
+proc chart_saleschart_sales3,31
+proc chart_list2csvchart_list2csv45,1852
+proc ofc_piechartofc_piechart54,2045
+proc /doc/ofc_pie_examples.html/doc/ofc_pie_examples.html137,4462
+proc ofc_linechartofc_linechart161,5432
+proc /doc/ofc_line_examples.html/doc/ofc_line_examples.html305,10237
+proc ofc_line_elementofc_line_element356,12325
+proc ofc_barchartofc_barchart380,12927
+proc /doc/ofc_bar_examples.html/doc/ofc_bar_examples.html515,17380
+proc ofc_bar2tsonofc_bar2tson556,19027
+proc ofc_stepofc_step580,19686
+proc ofc_colorsofc_colors593,20093
+proc ofc_htmlofc_html608,20689
 
-html.tcl,718
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9]*)$} $part -> id]id272,7088
-	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9]*)$} $part -> tag id]id275,7218
-    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html297,7785
-    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html308,8131
-	set element 362,9796
-	set attributes 363,9872
-	while { [regsub -all {(^| )([^= ]+) *= *([^\"' ]+)( |$)} $attributes {\1\2="\3"\4} attributes]attributes374,10175
-		[regexp -indices -start $start -- {</?[A-Z]+>} $html match]match404,11045
-	set replace 405,11111
-	set html [string replace $html [lindex $match 0] [lindex $match 1] $replace]$replace407,11215
+check.tcl,65
+proc qc::checkqc::check1,0
+proc qc::checksqc::checks151,4343
 
-is.tcl,343
-    return [regexp {^[a-zA-Z0-9_\-.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]$email126,3088
-    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode]$postcode130,3209
-    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]$postcode130,3209
+conn.tcl,163
+proc qc::conn_remote_ipqc::conn_remote_ip1,0
+proc qc::conn_marshalqc::conn_marshal22,658
+proc qc::conn_urlqc::conn_url66,2081
+proc _ns_conn_ns_conn83,2492
 
-reload.tcl,42
-    set files 8,155
-    set files 9,211
+cookie.tcl,133
+proc qc::cookie_getqc::cookie_get9,200
+proc qc::cookie_existsqc::cookie_exists40,1150
+proc qc::cookie_setqc::cookie_set67,1717
 
-style.tcl,75
-    foreach rule [regexp -all -inline {[^\{]+\{[^\}]+\}} $css]$css24,687
+csv.tcl,100
+proc csv2listcsv2list1,0
+proc qc::csv2llqc::csv2ll5,65
+proc qc::OLDcsv2llqc::OLDcsv2ll80,2133
 
-url.tcl,25
-    append html 97,3404
+date.tcl,1494
+proc qc::date_month_startqc::date_month_start30,1483
+proc qc::date_month_endqc::date_month_end47,1853
+proc qc::date_year_startqc::date_year_start63,2171
+proc qc::date_year_endqc::date_year_end79,2478
+proc qc::date_year_iso_startqc::date_year_iso_start95,2776
+proc qc::date_year_iso_endqc::date_year_iso_end115,3351
+proc qc::date_iso_week_startqc::date_iso_week_start134,3891
+proc qc::date_iso_week_endqc::date_iso_week_end142,4096
+proc qc::date_iso_weekqc::date_iso_week146,4208
+proc qc::date_yesterdayqc::date_yesterday151,4353
+proc qc::date_tomorrowqc::date_tomorrow156,4459
+proc qc::date_monthqc::date_month161,4563
+proc qc::date_doyqc::date_doy177,4824
+proc qc::date_yearqc::date_year194,5084
+proc qc::date_domqc::date_dom210,5323
+proc qc::date_dowqc::date_dow226,5580
+proc qc::date_day_nameqc::date_day_name231,5720
+proc qc::date_day_shortnameqc::date_day_shortname247,6017
+proc qc::date_month_shortnameqc::date_month_shortname263,6332
+proc qc::date_month_nameqc::date_month_name279,6642
+proc qc::date_compareqc::date_compare295,6947
+proc qc::date_quarterqc::date_quarter322,7473
+proc qc::date_quarter_startqc::date_quarter_start335,7705
+proc qc::date_quarter_endqc::date_quarter_end350,8058
+proc qc::datesqc::dates365,8478
+proc qc::date_daysqc::date_days384,8958
+proc qc::yearsqc::years399,9276
+proc qc::year_monthsqc::year_months407,9466
+proc qc::year_quartersqc::year_quarters421,9888
+proc qc::time_hourqc::time_hour435,10337
 
-util.tcl,123
-proc xsplit 324,8205
-	    lappend list 329,8435
-	set str [string range $str [expr [lindex $match 1]+1] end]end332,8527
+db_cache.tcl,278
+proc qc::db_cache_1rowqc::db_cache_1row45,2357
+proc qc::db_cache_0or1rowqc::db_cache_0or1row73,3273
+proc qc::db_cache_foreachqc::db_cache_foreach129,4893
+proc qc::db_cache_select_tableqc::db_cache_select_table209,6883
+proc qc::db_cache_clearqc::db_cache_clear238,7965
 
-xml.tcl,0
+db.tcl,713
+proc qc::db_qry_parseqc::db_qry_parse29,1474
+proc qc::db_quoteqc::db_quote68,3033
+proc qc::db_escape_regexpqc::db_escape_regexp129,4499
+proc qc::db_get_handleqc::db_get_handle177,5442
+proc qc::db_dmlqc::db_dml200,6023
+proc qc::db_transqc::db_trans224,6611
+proc qc::db_1rowqc::db_1row299,8530
+proc qc::db_0or1rowqc::db_0or1row332,9614
+proc qc::db_foreachqc::db_foreach397,11457
+proc qc::db_seqqc::db_seq491,13971
+proc qc::db_select_tableqc::db_select_table509,14419
+proc qc::db_select_csvqc::db_select_csv542,15519
+proc qc::db_select_ldictqc::db_select_ldict573,16395
+proc qc::db_select_dictqc::db_select_dict589,16883
+proc qc::db_col_varchar_lengthqc::db_col_varchar_length605,17376
 
-widget.tcl,0
+db_thread_cache.tcl,348
+proc qc::db_thread_cache_1rowqc::db_thread_cache_1row53,2668
+proc qc::db_thread_cache_0or1rowqc::db_thread_cache_0or1row84,3772
+proc qc::db_thread_cache_foreachqc::db_thread_cache_foreach140,5494
+proc qc::db_thread_cache_ldictqc::db_thread_cache_ldict221,7598
+proc qc::db_thread_cache_select_tableqc::db_thread_cache_select_table228,7781
 
-util_list.tcl,0
+dict.tcl,603
+proc qc::dict_createqc::dict_create34,1586
+proc qc::dict_getqc::dict_get45,1836
+proc qc::dict_setqc::dict_set58,2206
+proc qc::dict_unsetqc::dict_unset72,2499
+proc qc::dict_existsqc::dict_exists80,2703
+proc qc::dict_incrqc::dict_incr101,3432
+proc qc::dict_lappendqc::dict_lappend107,3601
+proc qc::dict_keysqc::dict_keys118,3864
+proc qc::dict_subsetqc::dict_subset126,3985
+proc qc::dict_excludeqc::dict_exclude138,4280
+proc qc::dict_sortqc::dict_sort150,4549
+proc qc::dict2xmlqc::dict2xml164,4866
+proc qc::dict_fromqc::dict_from173,5082
+proc qc::dict2varsqc::dict2vars189,5446
+
+email.tcl,676
+proc qc::email_htmlqc::email_html14,418
+proc qc::email_textqc::email_text52,1496
+proc qc::email_attachment_textqc::email_attachment_text65,1937
+proc qc::email_attachment_base64qc::email_attachment_base64116,3384
+proc qc::email_attachmentqc::email_attachment163,4633
+proc qc::smtp_sendqc::smtp_send223,6358
+proc qc::smtp_recvqc::smtp_recv232,6619
+proc qc::sendmailqc::sendmail249,7065
+proc qc::email2multimapqc::email2multimap337,9431
+proc email_header_valuesemail_header_values387,10959
+proc email_header_foldemail_header_fold402,11424
+proc qc::email2multimap_ALTqc::email2multimap_ALT435,12424
+proc qc::email_token2dictqc::email_token2dict446,12778
+
+error.tcl,349
+proc qc::error_handlerqc::error_handler1,0
+proc qc::error_reportqc::error_report49,1343
+proc qc::error_report_no_connqc::error_report_no_conn89,2424
+proc qc::error_report_form_varsqc::error_report_form_vars106,2885
+proc qc::error_report_localsqc::error_report_locals131,3459
+proc qc::error_report_cookiesqc::error_report_cookies147,3850
+
+file.tcl,37
+proc qc::file_tempqc::file_temp1,0
+
+format_date.tcl,323
+proc qc::format_dateqc::format_date28,1474
+proc qc::format_date_isoqc::format_date_iso45,1859
+proc qc::format_date_ukqc::format_date_uk61,2168
+proc qc::format_date_uk_longqc::format_date_uk_long77,2456
+proc qc::format_date_relqc::format_date_rel93,2780
+proc qc::format_date_letterqc::format_date_letter137,4028
+
+format.tcl,727
+proc qc::format_commifyqc::format_commify28,1466
+proc qc::format_moneyqc::format_money44,1778
+proc qc::format_decqc::format_dec58,1984
+proc qc::format_intqc::format_int74,2274
+proc qc::format_linebreakqc::format_linebreak90,2523
+proc qc::format_ccqc::format_cc127,4642
+proc qc::format_ordinalqc::format_ordinal143,4993
+proc qc::format_right0qc::format_right0166,5419
+proc qc::format_leftqc::format_left178,5635
+proc qc::format_rightqc::format_right192,5900
+proc qc::format_centerqc::format_center206,6167
+proc qc::format_boolqc::format_bool214,6447
+proc qc::format_yesnoqc::format_yesno233,6875
+proc qc::format_numberqc::format_number238,6995
+proc qc::format_if_numberqc::format_if_number253,7340
+
+format_timestamp.tcl,246
+proc qc::format_timestamp_isoqc::format_timestamp_iso28,1474
+proc qc::format_timestamp_relqc::format_timestamp_rel46,1909
+proc qc::format_timestamp2hourqc::format_timestamp2hour78,2852
+proc qc::format_timestampqc::format_timestamp82,3003
+
+form_db.tcl,81
+proc qc::form_dbqc::form_db1,0
+proc qc::form_db_plainqc::form_db_plain26,752
+
+form_layout.tcl,222
+proc qc::form_layout_tableqc::form_layout_table1,0
+proc qc::form_layout_tablesqc::form_layout_tables16,382
+proc qc::form_layout_tbodyqc::form_layout_tbody36,906
+proc qc::form_layout_listqc::form_layout_list88,2226
+
+form.tcl,310
+proc qc::form2varsqc::form2vars1,0
+proc qc::form_var_getqc::form_var_get44,1152
+proc qc::form_var_existsqc::form_var_exists72,1867
+proc qc::form2dictqc::form2dict91,2260
+proc qc::form2urlqc::form2url107,2597
+proc qc::form_procqc::form_proc123,2963
+proc qc::formvars2dictqc::formvars2dict169,4306
+
+ftp.tcl,551
+proc qc::ftp_openqc::ftp_open1,0
+proc qc::ftp_closeqc::ftp_close20,589
+proc qc::ftp_pasvqc::ftp_pasv32,808
+proc qc::ftp_putsqc::ftp_puts54,1532
+proc qc::ftp_puts_fileqc::ftp_puts_file76,2139
+proc qc::ftp_renameqc::ftp_rename109,3034
+proc qc::ftp_deleteqc::ftp_delete123,3457
+proc qc::ftp_typeqc::ftp_type135,3784
+proc qc::ftp_listqc::ftp_list147,4109
+proc qc::ftp_fetchqc::ftp_fetch169,4700
+proc qc::ftp_ctrl_writeqc::ftp_ctrl_write191,5292
+proc qc::ftp_ctrl_readqc::ftp_ctrl_read199,5532
+proc qc::ftp_getqc::ftp_get224,6206
+
+graph.tcl,76
+proc chart_saleschart_sales1,0
+proc chart_list2csvchart_list2csv44,1814
+
+html_options.tcl,179
+proc qc::html_options_dbqc::html_options_db28,1479
+proc qc::html_options_db_cacheqc::html_options_db_cache39,1783
+proc qc::html_options_simpleqc::html_options_simple51,2135
+
+html_table_db.tcl,116
+proc qc::html_table_dbqc::html_table_db28,1484
+proc qc::html_table_db_flexgridqc::html_table_db_flexgrid84,3322
+
+html_table_doc.tcl,51
+proc qc::html_table_docqc::html_table_doc28,1478
+
+html_table_list.tcl,53
+proc qc::html_table_listqc::html_table_list28,1479
+
+html_table_scroll.tcl,53
+proc qc::html_table_scrollqc::html_table_scroll1,0
+
+html_table_sort.tcl,116
+proc qc::html_table_sortqc::html_table_sort1,0
+proc qc::html_table_sort_headerqc::html_table_sort_header49,1405
+
+html_table.tcl,1222
+proc qc::html_tableqc::html_table162,4479
+proc qc::html_table_rowqc::html_table_row275,8026
+proc qc::html_table_row_headqc::html_table_row_head288,8289
+proc qc::html_table_colgroupqc::html_table_colgroup304,8707
+proc qc::html_table_thead_from_colsqc::html_table_thead_from_cols322,9260
+proc qc::html_table_tfoot_sumsqc::html_table_tfoot_sums336,9553
+proc qc::html_table_wants_sumqc::html_table_wants_sum358,10260
+proc qc::html_table_wants_col_labelsqc::html_table_wants_col_labels368,10471
+proc qc::html_table_wants_formatqc::html_table_wants_format379,10738
+proc qc::html_table_cols_from_tableqc::html_table_cols_from_table390,10996
+proc qc::html_table_tbody_from_ldictqc::html_table_tbody_from_ldict420,11787
+proc qc::html_table_tbody_from_tableqc::html_table_tbody_from_table437,12115
+proc qc::html_table_tbody_sumqc::html_table_tbody_sum459,12608
+proc qc::html_table_tbody_avgqc::html_table_tbody_avg474,12999
+proc qc::html_table_formatqc::html_table_format495,13505
+proc qc::html_table_format_cell_if_numberqc::html_table_format_cell_if_number534,14905
+proc qc::html_table_format_if_numberqc::html_table_format_if_number546,15425
+proc qc::html_tbody_rowqc::html_tbody_row571,16036
+
+html.tcl,825
+proc html2pdfhtml2pdf1,0
+proc qc::htmlqc::html33,1242
+proc qc::html_tagqc::html_tag58,2061
+proc qc::html_hiddenqc::html_hidden91,3104
+proc qc::html_hidden_setqc::html_hidden_set114,3801
+proc qc::html_listqc::html_list132,4378
+proc qc::html_aqc::html_a156,4764
+proc qc::html_a_replaceqc::html_a_replace173,5244
+proc qc::html_idqc::html_id191,5914
+proc qc::html_menuqc::html_menu208,6227
+proc qc::html_col_listqc::html_col_list221,6680
+proc qc::html2textqc::html2text238,7169
+proc qc::html_info_tablesqc::html_info_tables247,7439
+proc qc::html_style2inlineqc::html_style2inline310,8542
+proc qc::html_styles2inlineqc::html_styles2inline350,9816
+proc qc::html_col_styles_apply2tdqc::html_col_styles_apply2td360,10140
+proc html_cleanhtml_clean403,11429
+proc html2textlitehtml2textlite468,13451
+
+http.tcl,376
+proc qc::http_curlqc::http_curl1,0
+proc qc::http_postqc::http_post47,1145
+proc qc::http_getqc::http_get103,3241
+proc qc::http_header_encodingqc::http_header_encoding135,4379
+proc IANAEncoding2TclEncodingIANAEncoding2TclEncoding152,5015
+proc qc::http_headqc::http_head235,7512
+proc qc::http_existsqc::http_exists264,8516
+proc qc::http_saveqc::http_save278,9099
+
+is.tcl,1028
+proc qc::is_booleanqc::is_boolean28,1472
+proc qc::is_integerqc::is_integer32,1566
+proc qc::is_posqc::is_pos40,1682
+proc qc::is_pnzqc::is_pnz48,1799
+proc qc::is_non_zero_integerqc::is_non_zero_integer56,1915
+proc qc::is_non_zeroqc::is_non_zero64,2036
+proc qc::is_pnz_intqc::is_pnz_int72,2158
+proc qc::is_decimalqc::is_decimal81,2305
+proc qc::is_positive_decimalqc::is_positive_decimal89,2427
+proc qc::is_non_zero_decimalqc::is_non_zero_decimal97,2573
+proc qc::is_pnz_decimalqc::is_pnz_decimal105,2719
+proc qc::is_dateqc::is_date114,2887
+proc qc::is_emailqc::is_email119,3015
+proc qc::is_postcodeqc::is_postcode123,3130
+proc qc::is_creditcardqc::is_creditcard127,3293
+proc qc::is_varcharqc::is_varchar153,3814
+proc is_base64is_base64161,3940
+proc is_int_castableis_int_castable170,4133
+proc is_decimal_castableis_decimal_castable180,4242
+proc is_date_castableis_date_castable189,4354
+proc is_timestamp_castableis_timestamp_castable198,4460
+proc is_mobile_numberis_mobile_number207,4576
+
+ldict.tcl,311
+proc qc::ldict_setqc::ldict_set28,1469
+proc qc::ldict_sumqc::ldict_sum35,1642
+proc qc::ldict_maxqc::ldict_max49,1958
+proc qc::ldict_valuesqc::ldict_values65,2241
+proc qc::ldict_searchqc::ldict_search76,2492
+proc qc::ldict_excludeqc::ldict_exclude89,2823
+proc qc::ldict2tbodyqc::ldict2tbody97,2982
+
+ll.tcl,65
+proc qc::ll_sumqc::ll_sum1,0
+proc qc::ll2csvqc::ll2csv15,303
+
+lock.tcl,27
+proc qc::lockqc::lock1,0
+
+math.tcl,596
+proc qc::roundqc::round1,0
+proc qc::round_upqc::round_up48,1196
+proc qc::rshift10qc::rshift1054,1420
+proc qc::intplacesqc::intplaces81,2085
+proc qc::addqc::add102,2660
+proc sumsum113,2903
+proc subtrsubtr120,3001
+proc multmult131,3242
+proc bigaddbigadd144,3546
+proc bigsubtrbigsubtr173,4150
+proc bigmultbigmult205,4774
+proc exp2stringexp2string228,5299
+proc basebase253,5978
+proc frombasefrombase269,6443
+proc minmin286,7016
+proc maxmax301,7276
+proc mantissa_exponentmantissa_exponent316,7536
+proc sigfigssigfigs324,7782
+proc sigfigs_ceilsigfigs_ceil335,8069
+
+multimap.tcl,338
+proc qc::multimap_get_firstqc::multimap_get_first28,1468
+proc qc::multimap_set_firstqc::multimap_set_first37,1722
+proc qc::multimap_unset_firstqc::multimap_unset_first47,1980
+proc qc::multimap_existsqc::multimap_exists55,2211
+proc qc::multimap_keysqc::multimap_keys64,2384
+proc qc::multimap_get_allqc::multimap_get_all72,2517
+
+ns_set.tcl,296
+proc qc::ns_set_to_varsqc::ns_set_to_vars1,0
+proc qc::ns_set_to_dictqc::ns_set_to_dict10,240
+proc qc::ns_set_to_multimapqc::ns_set_to_multimap16,386
+proc qc::ns_set_getallqc::ns_set_getall22,560
+proc qc::ns_set_keysqc::ns_set_keys37,948
+proc qc::ns_set_valuesqc::ns_set_values50,1252
+
+param.tcl,80
+proc qc::paramqc::param28,1476
+proc qc::param_existsqc::param_exists38,1755
+
+perm.tcl,522
+proc qc::perm_getqc::perm_get28,1483
+proc qc::permqc::perm35,1698
+proc qc::perm_testqc::perm_test43,1979
+proc qc::perm_test_employeeqc::perm_test_employee52,2301
+proc qc::perm_string_testqc::perm_string_test60,2605
+proc qc::perm_method_abbrevqc::perm_method_abbrev71,2988
+proc qc::perm_method_longqc::perm_method_long81,3229
+proc qc::perm_method_descriptionqc::perm_method_description91,3441
+proc qc::perm_string_addqc::perm_string_add101,3654
+proc qc::perm_string_removeqc::perm_string_remove116,4105
+
+reload.tcl,31
+proc qc::reloadqc::reload1,0
+
+return.tcl,270
+proc qc::return_htmlqc::return_html28,1477
+proc qc::return_xmlqc::return_xml32,1568
+proc qc::return_csvqc::return_csv36,1656
+proc qc::return_headersqc::return_headers40,1745
+proc qc::return_nextqc::return_next46,1854
+proc ns_returnmovedns_returnmoved64,2358
+
+section.tcl,79
+proc qc::sectionqc::section1,0
+proc qc::section_menuqc::section_menu12,320
+
+session.tcl,304
+proc qc::session_newqc::session_new28,1478
+proc qc::session_updateqc::session_update41,1857
+proc qc::session_killqc::session_kill54,2254
+proc qc::session_existsqc::session_exists58,2356
+proc qc::session_employee_idqc::session_employee_id67,2548
+proc qc::session_purgeqc::session_purge72,2694
+
+sort.tcl,312
+proc qc::sortcols_pushqc::sortcols_push1,0
+proc qc::sortcols_toggleqc::sortcols_toggle23,660
+proc qc::sortcols_parseqc::sortcols_parse33,924
+proc qc::sortcols2dictqc::sortcols2dict59,1698
+proc qc::sortcols_from_colsqc::sortcols_from_cols85,2464
+proc qc::sortcols_from_qryqc::sortcols_from_qry95,2657
+
+sourceproc.tcl,39
+proc qc::sourceprocqc::sourceproc1,0
+
+sql.tcl,525
+proc qc::sql_setqc::sql_set27,1383
+proc qc::sql_set_varchars_truncateqc::sql_set_varchars_truncate57,2004
+proc sql_set_withsql_set_with78,2888
+proc qc::sql_set_varchars_truncateqc::sql_set_varchars_truncate85,3035
+proc qc::sql_insertqc::sql_insert92,3244
+proc sql_insert_withsql_insert_with122,3992
+proc qc::sql_sortqc::sql_sort130,4187
+proc sql_select_case_monthsql_select_case_month218,6589
+proc sql_insql_in226,6982
+proc sql_array2listsql_array2list238,7178
+proc sql_list2arraysql_list2array243,7327
+
+sql_where_in.tcl,97
+proc qc::sql_where_inqc::sql_where_in1,0
+proc qc::sql_where_in_notqc::sql_where_in_not36,906
+
+sql_where.tcl,727
+proc qc::sql_whereqc::sql_where1,0
+proc qc::sql_where_likeqc::sql_where_like48,1365
+proc qc::sql_where_cols_startqc::sql_where_cols_start85,2403
+proc qc::sql_where_cols_start_nocaseqc::sql_where_cols_start_nocase123,3515
+proc qc::sql_where_col_startsqc::sql_where_col_starts142,4079
+proc qc::sql_where_col_starts_nocaseqc::sql_where_col_starts_nocase174,4911
+proc qc::sql_where_col_starts_notqc::sql_where_col_starts_not191,5395
+proc qc::sql_where_comboqc::sql_where_combo207,5796
+proc qc::sql_where_compareqc::sql_where_compare215,5968
+proc qc::sql_where_compare_setqc::sql_where_compare_set243,6778
+proc qc::sql_where_orqc::sql_where_or257,7139
+proc qc::sql_where_word_inqc::sql_where_word_in279,7665
+
+sticky.tcl,238
+proc sticky_savesticky_save1,0
+proc sticky_getsticky_get22,503
+proc sticky_existssticky_exists30,762
+proc sticky_setsticky_set41,1045
+proc qc::sticky2varsqc::sticky2vars50,1412
+proc qc::sticky_defaultqc::sticky_default62,1650
+
+style.tcl,126
+proc qc::style_setqc::style_set1,0
+proc qc::css_parseqc::css_parse17,419
+proc qc::css_rule2dictqc::css_rule2dict37,1148
+
+table.tcl,243
+proc qc::table_foreachqc::table_foreach26,820
+proc qc::table2ldictqc::table2ldict60,1784
+proc qc::table2tbody_by_monthqc::table2tbody_by_month74,2084
+proc qc::table2arrayqc::table2array93,2553
+proc qc::table_sumqc::table_sum110,2923
+
+tson.tcl,99
+proc tson_objecttson_object1,0
+proc json_quotejson_quote20,632
+proc tson2jsontson2json24,751
+
+up.tcl,68
+proc qc::upcopyqc::upcopy28,1480
+proc qc::upsetqc::upset41,1803
+
+url.tcl,277
+proc qc::urlqc::url28,1470
+proc qc::url_unsetqc::url_unset63,2478
+proc qc::url_to_html_hiddenqc::url_to_html_hidden88,3134
+proc qc::url_backqc::url_back101,3475
+proc qc::url_hereqc::url_here111,3746
+proc url_encodeurl_encode115,3813
+proc url_pathurl_path119,3974
+
+util_list.tcl,777
+proc qc::lpushqc::lpush28,1479
+proc qc::lpopqc::lpop33,1563
+proc qc::lshiftqc::lshift40,1722
+proc qc::lunshiftqc::lunshift47,1861
+proc qc::lintersectqc::lintersect71,2314
+proc qc::lexcludeqc::lexclude82,2526
+proc qc::lexclude2qc::lexclude292,2688
+proc qc::lunionqc::lunion100,2834
+proc qc::ldeleteqc::ldelete105,2928
+proc qc::lmoveqc::lmove111,3102
+proc luniquelunique116,3270
+proc qc::lsort_usingqc::lsort_using127,3445
+proc qc::inqc::in136,3637
+proc qc::lpageqc::lpage145,3794
+proc qc::ltotitleqc::ltotitle156,4129
+proc qc::list2csvqc::list2csv174,4534
+proc lconcatlconcat188,4870
+proc flattenflatten193,4958
+proc lsumlsum199,5080
+proc laveragelaverage207,5204
+proc lreplace_valueslreplace_values211,5287
+proc lapplylapply220,5516
+
+util.tcl,1208
+proc KK28,1483
+proc qc::tryqc::try30,1505
+proc qc::defaultqc::default110,3529
+proc setifsetif137,4029
+proc qc::ssetqc::sset144,4205
+proc sappendsappend155,4537
+proc qc::coalesceqc::coalesce166,4871
+proc qc::incr0qc::incr0187,5207
+proc qc::eqqc::eq197,5382
+proc qc::neqc::ne201,5457
+proc qc::callqc::call205,5532
+proc qc::marginqc::margin230,6319
+proc qc::breakpointqc::breakpoint238,6492
+proc qc::truncqc::trunc261,6995
+proc qc::truncateqc::truncate265,7086
+proc qc::iifqc::iif276,7359
+proc truetrue284,7499
+proc falsefalse292,7645
+proc qc::upperqc::upper300,7793
+proc qc::lowerqc::lower304,7860
+proc trimtrim308,7927
+proc qc::escapeHTMLqc::escapeHTML312,7986
+proc qc::escapeHTMLqc::escapeHTML320,8201
+proc qc::unescapeHTMLqc::unescapeHTML324,8308
+proc xsplitxsplit328,8427
+proc mcsplitmcsplit342,8858
+proc perctperct347,8981
+proc pluralplural371,9979
+proc singularsingular429,11485
+proc cmplencmplen474,13011
+proc subsetssubsets484,13229
+proc permutationspermutations500,13510
+proc split_pairsplit_pair517,13816
+proc min_nzmin_nz529,14264
+proc max_nzmax_nz540,14467
+proc md5md5551,14671
+proc ....556,14751
+proc debugdebug599,16308
+
+widget.tcl,800
+proc qc::widgetqc::widget28,1473
+proc qc::widget_labelqc::widget_label41,1926
+proc qc::widget_textqc::widget_text70,2826
+proc qc::widget_compareqc::widget_compare111,4273
+proc qc::widget_comboqc::widget_combo143,5344
+proc qc::widget_htmlareaqc::widget_htmlarea224,8208
+proc qc::widget_textareaqc::widget_textarea259,9457
+proc qc::widget_selectqc::widget_select292,10515
+proc qc::widget_spanqc::widget_span348,12409
+proc qc::widget_passwordqc::widget_password386,13407
+proc qc::widget_boolqc::widget_bool419,14388
+proc qc::widget_checkboxqc::widget_checkbox455,15610
+proc qc::widget_buttonqc::widget_button479,16332
+proc qc::widget_submitqc::widget_submit502,16964
+proc qc::widget_radioqc::widget_radio525,17554
+proc qc::widget_radiogroupqc::widget_radiogroup549,18155
+
+xml.tcl,305
+proc qc::xmlqc::xml28,1473
+proc qc::xml_escapeqc::xml_escape40,1819
+proc qc::xml_encode_charqc::xml_encode_char53,2180
+proc qc::xml_decode_char_NNNqc::xml_decode_char_NNN55,2252
+proc qc::xml_fromqc::xml_from63,2535
+proc qc::xml_ldictqc::xml_ldict76,2803
+proc qc::xml2dictqc::xml2dict84,2961
 
 utf8.tcl,0
-
-up.tcl,0
-
-table.tcl,0
-
-sticky.tcl,0
-
-sql_where_in.tcl,0
-
-sql_where.tcl,0
-
-sql.tcl,0
-
-sourceproc.tcl,0
-
-sort.tcl,0
-
-session.tcl,0
-
-section.tcl,0
-
-return.tcl,0
-
-perm.tcl,0
-
-param.tcl,0
-
-ns_set.tcl,0
-
-multimap.tcl,0
-
-math.tcl,0
-
-lock.tcl,0
-
-ll.tcl,0
-
-ldict.tcl,0
-
-http.tcl,0
-
-html_table_sort.tcl,0
-
-html_table_scroll.tcl,0
-
-html_table_list.tcl,0
-
-html_table_doc.tcl,0
-
-html_table_db.tcl,0
-
-html_table.tcl,0
-
-html_options.tcl,0
-
-graph.tcl,0
-
-ftp.tcl,0
-
-format_timestamp.tcl,0
-
-format_date.tcl,0
-
-format.tcl,0
-
-form_layout.tcl,0
-
-form_db.tcl,0
-
-form.tcl,0
-
-file.tcl,0
-
-error.tcl,0
-
-email.tcl,0
-
-dict.tcl,0
-
-db_thread_cache.tcl,0
-
-db_cache.tcl,0
-
-date.tcl,0
-
-cookie.tcl,0
-
-conn.tcl,0
-
-check.tcl,0
-
-chart.tcl,0
-
-auth.tcl,0
