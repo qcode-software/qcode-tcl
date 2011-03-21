@@ -261,24 +261,24 @@ doc ofc_linechart {
 	[html_a "Examples" "/doc/ofc_line_examples.html"]
     }
     Examples {
-	set data1 [list \
-		       [list x Jan y 500] \
-		       [list x Feb y 550] \
-		       [list x Mar y 700] \
-		       [list x Apr y 670] \
-		       [list x May y 730]]
+	set data1 [list \ 
+		   [list x Jan y 500] \ 
+		   [list x Feb y 550] \ 
+		   [list x Mar y 700] \ 
+		   [list x Apr y 670] \ 
+		   [list x May y 730]]
 	set data2 [list \
-		       [list x Jan y 50 tooltip "Adwords (Jan)<br>50 Bananas"] \
-		       [list x Feb y 65 tooltip "Adwords (Feb)<br>65 Bananas"] \
-		       [list x Mar y -3 tooltip "Adwords (Mar)<br>-3 Bananas"] \
-		       [list x Apr y 67 tooltip "Adwords (Apr)<br>67 Bananas"] \
-		       [list x May y 73 tooltip "Adwords (May)<br>73 Bananas"]]
+		       [list x Jan y 50 tooltip "Adwords (Jan)<br>50 Bananas"] \ 
+		   [list x Feb y 65 tooltip "Adwords (Feb)<br>65 Bananas"] \ 
+		   [list x Mar y -3 tooltip "Adwords (Mar)<br>-3 Bananas"] \ 
+		   [list x Apr y 67 tooltip "Adwords (Apr)<br>67 Bananas"] \ 
+		   [list x May y 73 tooltip "Adwords (May)<br>73 Bananas"]]
 	set data3 [list \
-		       [list x Jan y 500 tooltip "Froogle (Jan)<br>500 Apples"] \
-		       [list x Feb y 605 tooltip "Froogle (Feb)<br>605 Apples"] \
-		       [list x Mar y 700 tooltip "Froogle (Mar)<br>700 Apples"] \
-		       [list x Apr y 607 tooltip "Froogle (Apr)<br>607 Apples"] \
-		       [list x May y 703 tooltip "Froogle (May)<br>703 Apples"]]
+		       [list x Jan y 500 tooltip "Froogle (Jan)<br>500 Apples"] \ 
+		   [list x Feb y 605 tooltip "Froogle (Feb)<br>605 Apples"] \ 
+		   [list x Mar y 700 tooltip "Froogle (Mar)<br>700 Apples"] \ 
+		   [list x Apr y 607 tooltip "Froogle (Apr)<br>607 Apples"] \ 
+		   [list x May y 703 tooltip "Froogle (May)<br>703 Apples"]]
 
 	Example 1: Minimum Arguments Usage.
 	set lines [list \ 
@@ -396,10 +396,10 @@ proc ofc_barchart {args} {
     set values {}
     set tson_keys {}
     foreach bar $bars {
- 	dict2vars $bar label data 
-	lassign [ofc_bar2tson $label $colors $data] tson_values tson_keys pos_total neg_total 
+ 	dict2vars $bar x data 
+	lassign [ofc_bar2tson $colors $data] tson_values tson_keys pos_total neg_total 
 
-	lappend x_labels [list string $label]
+	lappend x_labels [list string $x]
 	lappend values $tson_values
 	lappend max_values $pos_total
 	lappend min_values $neg_total
@@ -416,7 +416,7 @@ proc ofc_barchart {args} {
 	}
 	set title [list object text [list string $label] style $title_style]
     }
-
+    
     # x legend 
     dict2vars $x_axis label grid_step label_step 
     default label "" 
@@ -424,7 +424,7 @@ proc ofc_barchart {args} {
     default label_step $grid_step
     set style [style_set "" font-family "Arial,Helvetica,sans-serif" font-size 18px]
     set x_legend [list object style $style text [list string $label]]
-
+    
     # y legend
     # Default y-axis with 10 steps.
     dict2vars $y_axis label min max step 
@@ -436,7 +436,7 @@ proc ofc_barchart {args} {
     default step [ofc_step $min $max] 
     set min [expr {ceil(double($min/$step)) * $step}]
     set max [expr {$min + (ceil(double($max-$min)/$step) * $step)}]
-
+    
     # Construct tson that will be used to generate json loaded by ofc. 
     set tson [list object \
 		  elements [list array \
@@ -481,22 +481,22 @@ doc ofc_barchart {
 	[html_a "Examples" "/doc/ofc_bar_examples.html"]
     }
     Examples {
-	set data1 [list \
-		       [list x Direct y 500] \
-		       [list x Adwords y 750] \
-		       [list x Froogle y 70]]
-	set data2 [list \
-		       [list x Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \
-		       [list x Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \
-		       [list x Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
-	set data3 [list \
-		       [list x Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
-		       [list x Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
-		       [list x Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
-	set bars [list \
-		      [list label Jan data $data1] \
-		      [list label Feb data $data2] \
-		      [list label March data $data3]]
+	set data1 [list \ 
+		   [list label Direct y 500] \ 
+		   [list label Adwords y 750] \ 
+		   [list label Froogle y 70]]
+	set data2 [list \ 
+		   [list label Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \ 
+		   [list label Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \ 
+		   [list label Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
+	set data3 [list \ 
+		   [list label Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \ 
+		   [list label Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \ 
+		   [list label Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
+	set bars [list \ 
+		  [list x Jan data $data1] \ 
+		  [list x Feb data $data2] \ 
+		  [list x March data $data3]]
 
 	Example 1: Minimum Arguments Usage.
 	qc::return_html [ofc_barchart $bars]
@@ -520,21 +520,21 @@ proc /doc/ofc_bar_examples.html {} {
     }
     
     set data1 [list \
-		   [list x Direct y 500] \
-		   [list x Adwords y 750] \
-		   [list x Froogle y 70]]
+		   [list label Direct y 500] \
+		   [list label Adwords y 750] \
+		   [list label Froogle y 70]]
     set data2 [list \
-		   [list x Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \
-		   [list x Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \
-		   [list x Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
+		   [list label Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \
+		   [list label Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \
+		   [list label Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
     set data3 [list \
-		   [list x Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
-		   [list x Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
-		   [list x Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
+		   [list label Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
+		   [list label Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
+		   [list label Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
     set bars [list \
-		  [list label Jan data $data1] \
-		  [list label Feb data $data2] \
-		  [list label March data $data3]]
+		  [list x Jan data $data1] \
+		  [list x Feb data $data2] \
+		  [list x March data $data3]]
 
     append html [html h2 "Barchart Examples"]
 
@@ -553,7 +553,7 @@ proc /doc/ofc_bar_examples.html {} {
     qc::return_html $html
 }
 
-proc ofc_bar2tson {label colors data} {
+proc ofc_bar2tson {colors data} {
     # return tson for the ofc element
     # each ofc values describes one bar
     
@@ -562,9 +562,9 @@ proc ofc_bar2tson {label colors data} {
     set pos_total 0
     set neg_total 0
     foreach datum $data {
-	dict2vars $datum x y tooltip
-	default tooltip "$x<br>#val# of #total#"
-	lappend tson_keys [list object text [list string $x] colour [lshift colors] font-size 13]
+	dict2vars $datum label y tooltip
+	default tooltip "$label<br>#val# of #total#"
+	lappend tson_keys [list object text [list string $label] colour [lshift colors] font-size 13]
 	lappend y_values [list object val $y tip [list string $tooltip]]
 	if { $y > 0 } {
 	    incr pos_total $y
@@ -610,7 +610,7 @@ proc ofc_html {id json width height} {
     # html to construct ofc object.
     sset html {
 	<script type="text/javascript"> 
-	swfobject.embedSWF("/JavaScript/open-flash-chart.swf?"+Math.floor(Math.random()*10000), "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
+	swfobject.embedSWF("/JavaScript/open-flash-chart.swf?"+Math.floor(Math.random()*1000), "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
 	
 	function get_data_${id}() {
 	    return JSON.stringify(data_$id);
