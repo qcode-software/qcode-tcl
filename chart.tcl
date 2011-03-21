@@ -177,6 +177,7 @@ proc ofc_linechart {args} {
     set x_labels {}
     foreach line $lines {
  	dict2vars $line label color data 
+	set number_of_points [llength $data]
 	default color [lshift colors]
 	
 	lassign [ofc_line_element $label $color $data] tson x_labels min max 
@@ -185,10 +186,22 @@ proc ofc_linechart {args} {
 	lappend min_values $min
     }
 
-    set elements [list array {*}$elements] 
     set x_labels [list array {*}$x_labels]
     set max_value [max $max_values]  
     set min_value [min $min_values]  
+    
+    # plot y=0 line if negative values exist.
+    if { $min_value < 0 } { 
+	for { set i 0 } { $i < $number_of_points } { incr i } {
+	    lappend y_values 0
+	} 
+	lappend elements [list object \
+			      type line \
+			      line-style [list object style dash on 5 off 5] \
+			      colour #999999 \
+			      size 20 \
+			      values [list array {*}$y_values]]
+    }
     
     # title
     dict2vars $title label font-size
@@ -218,12 +231,12 @@ proc ofc_linechart {args} {
     default min $min_value
     default max $max_value  
     default step [ofc_step $min $max] 
-    set min [expr {ceil(double($min/$step)) * $step}]
+    set min [expr {floor(double($min)/$step) * $step}]
     set max [expr {$min + (ceil(double($max-$min)/$step) * $step)}]
 
     # Construct tson that will be used to generate json loaded by ofc. 
     set tson [list object \
-		  elements $elements \
+		  elements [list array {*}$elements] \
 		  x_legend $x_legend \
 		  x_axis [list object \
 			      steps $grid_step \
@@ -392,6 +405,7 @@ proc ofc_barchart {args} {
     # find min and max over all bars
     lappend max_values 0
     lappend min_values 0
+    set elements {}
     set x_labels {}
     set values {}
     set tson_keys {}
@@ -406,6 +420,28 @@ proc ofc_barchart {args} {
     }
     set max_value [max $max_values]
     set min_value [min $min_values]
+    
+    # elements
+    lappend elements [list object \
+			  type bar_stack \
+			  alpha 0.80 \
+			  colours [list array {*}$colors] \
+			  values [list array {*}$values] \
+			  keys [list array {*}$tson_keys]] 
+    
+    # plot y=0 line if negative values exist.
+    set y0 {}
+    if { $min_value < 0 } { 
+	for { set i 0 } { $i < [llength $bars] } { incr i } {
+	    lappend y_values 0
+	} 
+	lappend elements [list object \
+			      type line \
+			      line-style [list object style dash on 5 off 5] \
+			      colour #999999 \
+			      size 20 \
+			      values [list array {*}$y_values]]
+    }
     
     # title
     dict2vars $title label font-size
@@ -434,18 +470,12 @@ proc ofc_barchart {args} {
     default min $min_value
     default max $max_value  
     default step [ofc_step $min $max] 
-    set min [expr {ceil(double($min/$step)) * $step}]
+    set min [expr {floor(double($min)/$step) * $step}]
     set max [expr {$min + (ceil(double($max-$min)/$step) * $step)}]
     
     # Construct tson that will be used to generate json loaded by ofc. 
     set tson [list object \
-		  elements [list array \
-				[list object \
-				     type bar_stack \
-				     alpha 0.80 \
-				     colours [list array {*}$colors] \
-				     values [list array {*}$values] \
-				     keys [list array {*}$tson_keys]]] \
+		  elements [list array {*}$elements] \
 		  x_legend $x_legend \
 		  x_axis [list object \
 			      steps $grid_step \
@@ -530,7 +560,7 @@ proc /doc/ofc_bar_examples.html {} {
     set data3 [list \
 		   [list label Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \
 		   [list label Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \
-		   [list label Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
+		   [list label Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]    
     set bars [list \
 		  [list x Jan data $data1] \
 		  [list x Feb data $data2] \
@@ -567,9 +597,9 @@ proc ofc_bar2tson {colors data} {
 	lappend tson_keys [list object text [list string $label] colour [lshift colors] font-size 13]
 	lappend y_values [list object val $y tip [list string $tooltip]]
 	if { $y > 0 } {
-	    incr pos_total $y
+	    set pos_total [add $pos_total $y]
 	} else {
-	    incr neg_total $y
+	    set neg_total [add $neg_total $y]
 	}
     }
     set tson_values [list array {*}$y_values]
