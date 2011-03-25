@@ -100,7 +100,7 @@ proc ofc_piechart {args} {
 				     font-size 14 \
 				     tip "#label#:<br>#val# of #total#<br>#percent#" \
 				     alpha 1 \
-				     starting-angle "35" \
+				     start-angle 35 \
 				     gradient-fill true \
 				     label-colour 0 \
 				     border 2 ]] \
