@@ -79,3 +79,50 @@ doc tson2json {
 	}
     }
 }
+
+proc qc::tson_object_from { args } {
+    # Take a list of var names and return a tson object
+    set dict {}
+    foreach name $args {
+	upvar 1 $name value
+	if { [info exists value] } {
+	    lappend dict $name $value
+	} else {
+	    error "Can't create dict with $name: No such variable"
+	}
+    }
+    return [tson_object {*}$dict]
+}
+
+proc qc::tson2xml { tson } {
+    # not dealt with attributes 
+    # prefered technique
+    # http://www.ibm.com/developerworks/xml/library/x-xml2jsonphp/
+    
+    switch -- [lindex $tson 0] {
+	object {
+	    set list {}
+	    foreach {name value} [lrange $tson 1 end] {
+		lappend list <$name>[tson2xml $value]</$name>
+	    }
+	    return [join $list "\n"]
+	}
+	array {
+	    set list {}
+	    foreach value [lrange $tson 1 end] {
+		lappend list <item>[tson2xml $value]</item>
+	    }
+	    return [join $list ""]
+	}
+	string {
+	    return [qc::xml_escape [lindex $tson 1]]
+	}
+	default {
+	    if { [string is double -strict $tson] || [in {true false null} $tson]} {
+		return $tson
+	    } else {
+		return [qc::xml_escape $tson]
+	    }
+	}
+    }
+}

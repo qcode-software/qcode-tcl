@@ -194,12 +194,16 @@ proc qc::incr0 { varName amount } {
     return $var
 }
 
-proc qc::eq {a b} {
-    if {[string equal $a $b]} {return 1} {return 0}
-}
+namespace import ::tcl::mathop::eq
+namespace import ::tcl::mathop::ne
+if { 0 } {
+    proc qc::eq {a b} {
+	if {[string equal $a $b]} {return 1} {return 0}
+    }
 
-proc qc::ne {a b} {
-    if {[string equal $a $b]} {return 0} {return 1}
+    proc qc::ne {a b} {
+	if {[string equal $a $b]} {return 0} {return 1}
+    }
 }
 
 proc qc::call { proc_name args } {
@@ -579,7 +583,11 @@ proc .. {from to {step 1} {limit ""}} {
 	}
     }
     # Dates
-    if { [is_date $from] && [is_date $to] && [regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit] } {
+    if { [is_date $from] && [is_date $to] } {
+	if {![regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit] } {
+	    # default step 1 day
+	    set sign +;set scaler 1; set unit day
+	}
 	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast_date "$i $sign $scaler $unit"]} {
 	    lappend result $i
 	}
