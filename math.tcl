@@ -285,32 +285,48 @@ proc frombase {base number} {
 
 proc min {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
-    set min {}
-    foreach value $args {
-	if { [string equal $min ""] } {
-	    set min $value
-	} else {
-	    if { $value < $min } {
-		set min $value
+    args $args -integer -real -- args
+    if { [info exists integer] } {
+	set type integer
+    } elseif { [info exists real] } {
+	set type real
+    } else {
+	set type ascii
+	foreach value $args {
+	    if {[is_integer $value] && [ne $type real]} {
+		set type integer
+	    } elseif { [is_decimal $value] } {
+		set type real
+	    } else {
+		set type ascii 
+		break
 	    }
 	}
     }
-    return $min
+    return [lindex [lsort -$type $args] 0]
 }
 
 proc max {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
-    set max {}
-    foreach value $args {
-	if { [string equal $max ""] } {
-	    set max $value
-	} else {
-	    if { $value > $max } {
-		set max $value
+    args $args -integer -real -- args
+    if { [info exists integer] } {
+	set type integer
+    } elseif { [info exists real] } {
+	set type real
+    } else {
+	set type ascii
+	foreach value $args {
+	    if {[is_integer $value] && [ne $type real]} {
+		set type integer
+	    } elseif { [is_decimal $value] } {
+		set type real
+	    } else {
+		set type ascii 
+		break
 	    }
 	}
     }
-    return $max
+    return [lindex [lsort -$type -decreasing $args] 0]
 }
 
 proc mantissa_exponent {x} {
