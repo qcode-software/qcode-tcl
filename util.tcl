@@ -538,7 +538,7 @@ proc min_nz {args} {
 	    lappend list $value
 	}
     }
-    return [min $list]
+    return [min {*}$list]
 }
 
 proc max_nz {args} {
@@ -549,7 +549,7 @@ proc max_nz {args} {
 	    lappend list $value
 	}
     }
-    return [max $list]
+    return [max {*}$list]
 }
 
 proc md5 {string} {

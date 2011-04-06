@@ -285,11 +285,22 @@ proc frombase {base number} {
 
 proc min {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
-    args $args -integer -real -- args
-    if { [info exists integer] } {
+    return [lindex [lsort -real $args] 0]
+}
+
+proc max {args} {
+    if { [llength $args]==1 } {set args [lindex $args 0]}
+    return [lindex [lsort -real -decreasing $args] 0]
+}
+
+proc min2 {args} {
+    if { [llength $args]==1 } {set args [lindex $args 0]}
+    if { [eq [lindex $args 0] -integer] } { 
 	set type integer
-    } elseif { [info exists real] } {
+	ldelete args 0
+    } elseif { [eq [lindex $args 0] -real] } {
 	set type real
+	ldelete args 0
     } else {
 	set type ascii
 	foreach value $args {
@@ -306,13 +317,14 @@ proc min {args} {
     return [lindex [lsort -$type $args] 0]
 }
 
-proc max {args} {
+proc max2 {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
-    args $args -integer -real -- args
-    if { [info exists integer] } {
+ if { [eq [lindex $args 0] -integer] } { 
 	set type integer
-    } elseif { [info exists real] } {
+	ldelete args 0
+    } elseif { [eq [lindex $args 0] -real] } {
 	set type real
+	ldelete args 0
     } else {
 	set type ascii
 	foreach value $args {

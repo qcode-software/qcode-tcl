@@ -65,8 +65,12 @@ proc qc::session_exists {session_id} {
 }
 
 proc qc::session_employee_id {session_id} {
-    db_1row {select employee_id from session where session_id=:session_id}
+    db_1row {select coalesce(effective_employee_id,employee_id) from session where session_id=:session_id}
     return $employee_id
+}
+
+proc qc::session_sudo {session_id effective_employee_id} {
+    db_dml {update session set effective_employee_id=:effective_employee_id where session_id=:session_id}
 }
 
 proc qc::session_purge { {timeout_secs 0 } } {

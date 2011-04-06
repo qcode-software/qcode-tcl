@@ -1,5 +1,5 @@
 proc chart_sales {x_labels values tips key_text} {
-    set y_max [sigfigs_ceil [max $values] 2]
+    set y_max [sigfigs_ceil [max {*}$values] 2]
     set x_labels [chart_list2csv $x_labels]
     set values [chart_list2csv $values]
     set tips [chart_list2csv $tips]
