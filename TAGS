@@ -1,197 +1,0 @@
-
-0.doc.tcl,117
-    foreach line [regexp -all -inline -line {^[ \t]*\#\|.*} $body]$body61,1646
-proc /doc/index.html html102,2588
-
-action.tcl,30
-proc qc::action_menu 55,2480
-
-args.tcl,20
-	set next 182,5314
-
-cast.tcl,828
-proc qc::cast_epoch 148,3979
-    if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day)s?( ago)?} $string]$string182,5391
-    if { [regexp {(^|[^0-9])(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})([^0-9]|$)} $string -> start year month day end]end191,5927
-    if { [regexp {(^|[^0-9])(\d{1,2})[/\.](\d{1,2})[/\.](\d{4}|\d{2}|\d)([^0-9]|$)} $string -> start day month year end]end194,6098
-    if { [regexp {(^|\W)(\d{1,2})[/\.](\d{1,2})(\W|$)} $string -> start day month end]end199,6338
-    if { [regexp {(^|[^0-9])(\d{4})([^0-9]|$)} $string -> start year end]end203,6536
-	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end]end207,6696
-
-chart.tcl,43
-	function get_data_${get_data_$645,21805
-
-csv.tcl,191
-	set field_value 41,1174
-	set csv [string replace $csv [lindex $field 0] [lindex $field 1] [string map [list , \0 \n \1 \"\" \2] $field_value]$field_value42,1247
-    foreach line 55,1693
-
-db_cache.tcl,63
-    } elseif 90,3741
-proc qc::db_cache_select_table 209,6883
-
-db.tcl,471
-    regsub -all all55,2667
-    set qry 58,2775
-    if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]$qry61,2846
-	regsub -all all63,2926
-    return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]$qry65,2973
-    if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value]$value85,3542
-    if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail]tail90,3670
-    if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value]$value94,3792
-    } elseif 352,10289
-
-db_thread_cache.tcl,71
-    } elseif 101,4252
-proc qc::db_thread_cache_select_table 228,7781
-
-email.tcl,72
-proc qc::email_text 52,1496
-proc qc::email_attachment_base64 116,3384
-
-error.tcl,28
-proc qc::error_handler 1,0
-
-form.tcl,28
-proc qc::form2url 107,2597
-
-graph.tcl,22
-proc chart_sales 1,0
-
-html_table_scroll.tcl,32
-proc qc::html_table_scroll 1,0
-
-html_table.tcl,38
-proc qc::html_table_format 495,13505
-
-html.tcl,937
-proc qc::html2text 238,7169
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9]*)$} $part -> id]id326,9156
-	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9]*)$} $part -> tag id]id329,9286
-    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html351,9853
-    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]$html362,10199
-	set element 416,11864
-	set attributes 417,11940
-	regsub -all {(^| )(checked|selected|disabled)( |$)} $attributes 423,12107
-	while { [regsub -all {(^| )([^= ]+) *= *([^\"' ]+)( |$)} $attributes 428,12243
-	while { [regsub -all {(^| )([^= ]+) *= *([^\"' ]+)( |$)} $attributes {\1\2="\3"\4} attributes]attributes428,12243
-		[regexp -indices -start $start -- {</?[A-Z]+>} $html match]match458,13113
-	set replace 459,13179
-	set html [string replace $html [lindex $match 0] [lindex $match 1] $replace]$replace461,13283
-proc html2textlite 468,13451
-
-is.tcl,343
-    return [regexp {^[a-zA-Z0-9_\-.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]$email120,3045
-    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode]$postcode124,3166
-    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]$postcode124,3166
-
-reload.tcl,42
-    set files 8,155
-    set files 9,211
-
-sql.tcl,30
-proc sql_array2list 238,7178
-
-sticky.tcl,33
-proc qc::sticky_default 62,1650
-
-style.tcl,75
-    foreach rule [regexp -all -inline {[^\{]+\{[^\}]+\}} $css]$css24,687
-
-table.tcl,29
-proc qc::table_sum 110,2923
-
-url.tcl,25
-    append html 97,3404
-
-util_list.tcl,27
-proc qc::ldelete 105,2928
-
-util.tcl,380
-namespace import 197,5382
-proc xsplit 332,8520
-	    lappend list 337,8750
-	set str [string range $str [expr [lindex $match 1]+1] end]end340,8842
-proc subsets 488,13322
-proc permutations 504,13603
-	if {![regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit]unit587,15831
-	    set sign +;set scaler 589,15936
-	for {set i $from} {($step>0 && $i<$i600,16335
-
-xml.tcl,0
-
-widget.tcl,0
-
-utf8.tcl,0
-
-up.tcl,0
-
-tson.tcl,0
-
-sql_where.tcl,0
-
-sql_where_in.tcl,0
-
-sourceproc.tcl,0
-
-sort.tcl,0
-
-session.tcl,0
-
-section.tcl,0
-
-return.tcl,0
-
-perm.tcl,0
-
-param.tcl,0
-
-ns_set.tcl,0
-
-multimap.tcl,0
-
-math.tcl,0
-
-lock.tcl,0
-
-ll.tcl,0
-
-ldict.tcl,0
-
-http.tcl,0
-
-html_table_sort.tcl,0
-
-html_table_list.tcl,0
-
-html_table_doc.tcl,0
-
-html_table_db.tcl,0
-
-html_options.tcl,0
-
-ftp.tcl,0
-
-form_layout.tcl,0
-
-form_db.tcl,0
-
-format_timestamp.tcl,0
-
-format.tcl,0
-
-format_date.tcl,0
-
-file.tcl,0
-
-dict.tcl,0
-
-date.tcl,0
-
-cookie.tcl,0
-
-conn.tcl,0
-
-check.tcl,0
-
-auth.tcl,0
