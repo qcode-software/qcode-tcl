@@ -154,7 +154,7 @@ proc IANAEncoding2TclEncoding {IANAName} {
     switch [string tolower $IANAName] {
         "us-ascii"    {return ascii}
         "utf-8"       {return utf-8}
-        "utf-16"      {return unicode; # not sure about this}
+        "utf-16"      {return unicode}; # not sure about this
         "iso-8859-1"  {return iso8859-1}
         "iso-8859-2"  {return iso8859-2}
         "iso-8859-3"  {return iso8859-3}

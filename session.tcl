@@ -51,6 +51,10 @@ proc qc::session_update { session_id } {
     }
 }
 
+proc qc::session_sudo_logout {session_id} {
+    db_dml {update session set effective_employee_id=NULL where session_id=:session_id}
+}
+
 proc qc::session_kill {session_id} {
     db_dml "delete from session where session_id=:session_id"
 }
@@ -65,7 +69,7 @@ proc qc::session_exists {session_id} {
 }
 
 proc qc::session_employee_id {session_id} {
-    db_1row {select coalesce(effective_employee_id,employee_id) from session where session_id=:session_id}
+    db_1row {select coalesce(effective_employee_id,employee_id) as employee_id from session where session_id=:session_id}
     return $employee_id
 }
 

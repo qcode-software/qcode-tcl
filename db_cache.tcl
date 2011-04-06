@@ -242,7 +242,7 @@ proc qc::db_cache_clear { {qry ""} } {
 	    ns_cache flush db $key
 	}
     } else {
-	ns_cache flush db [md5 [db_qry_parse $qry 1]
+	ns_cache flush db [md5 [db_qry_parse $qry 1]]
     }
 }
 
