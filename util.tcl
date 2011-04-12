@@ -277,8 +277,16 @@ proc qc::truncate {string length} {
     return [string range $string 0 [expr {$position-1}]]
 }
 
-proc qc::iif { condition true false } {
-    if { [string is true -strict $condition] } {
+proc qc::iif { expr true false } {
+    if { [uplevel 1 eval expr $expr] } {
+	return $true
+    } else {
+	return $false
+    }
+}
+
+proc ? { expr true false } {
+    if { [uplevel 1 eval expr $expr] } {
 	return $true
     } else {
 	return $false

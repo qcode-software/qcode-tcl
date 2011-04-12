@@ -49,6 +49,14 @@ proc qc::perm_test { perm_name method } {
     return [perm_string_test $employee_id $m $perm_string]
 }
 
+proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
+    if { [perm_test $perm_name $method] } {
+	uplevel 1 $if_code
+    } elseif {[ne $else_code ""]} {
+	uplevel 1 $else_code
+    }
+}
+
 proc qc::perm_test_employee { employee_id perm_name method } {
     #| Test whether the user can perform $method on $perm_name
     #| Returns boolean
