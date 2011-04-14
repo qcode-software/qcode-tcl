@@ -426,7 +426,7 @@ proc qc::widget_bool { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set this(checked) [iif $this(value) true false]
+    set this(checked) [true $this(value)]
     # A boolean checkbox ALWAYS has a value of true
     set this(type) checkbox
     set this(value) true
