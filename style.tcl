@@ -5,6 +5,10 @@ proc qc::style_set {rule args} {
     set rule [string trim $rule ";"]
     set dict [split $rule ";:"]
     foreach {property value} $args {
+	if {[in {width height top left right bottom} $property] && [is_integer $value]} {
+	    # add units px for bare integers
+	    append value px
+	}
 	dict set dict $property $value
     }
     set list {}

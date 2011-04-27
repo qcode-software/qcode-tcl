@@ -79,15 +79,11 @@ proc qc::widget_text { args } {
 	default this(id) $this(name)
     }
     default this(width) 160
-    if { [info exists this(style)] } {
-	set this(style) [qc::style_set $this(style) width $this(width)]
-    } else {
-	set this(style) "width:$this(width)"
-    }
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
     if { [info exists this(disabled)] && [string is true $this(disabled)] } {
 	return [html span $this(value)][html_tag input type hidden name $this(name) value $this(value) id $this(id)]
     } else {
-	return [html_tag input [qc::dict_exclude [array get this] label width units required]]
+	return [html_tag input [qc::dict_exclude [array get this] label width units]]
     }
 }
 
@@ -100,7 +96,7 @@ doc widget_text {
     }
     Examples {
 	% widget_text name firstname value "" id firstname width 400
-	<input style="width:400" id="firstname" value="" name="firstname" type="text">
+	<input style="width:400px" id="firstname" value="" name="firstname" type="text">
 
 	# Disabled text controls are shown as non-editable text plus hidden form variable to pass the form variable.
 	% widget_text name firstname value "Jimmy" id firstname disabled yes
@@ -136,7 +132,7 @@ doc widget_compare {
 	<option value="=" selected>equals</option>
 	<option value="&lt;">less than</option>
 	</select>
-	<input style="width:160" id="price" value="10" name="price" type="text">
+	<input style="width:160px" id="price" value="10" name="price" type="text">
     }
 }
 
@@ -171,7 +167,7 @@ doc widget_combo {
     Examples {
 	% widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
 	widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
-	<input searchURL="customer_combo.xml" style="width:160" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="clsDbFormCombo"><input type="hidden" name="customer_id" value="2343">
+	<input searchURL="customer_combo.xml" style="width:160px" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="clsDbFormCombo"><input type="hidden" name="customer_id" value="2343">
 	
 	% https://a-domain.co.uk/customer_combo.xml?name=customer_code&value=A&boundName=customer_id&searchLimit=10
 	
@@ -230,11 +226,8 @@ proc qc::widget_htmlarea { args } {
     args_check_required $args name value 
     default this(width) 160
     default this(height) 100
-    if { [info exists this(style)] } {
-	set this(style) [qc::style_set $this(style) width $this(width) height $this(height)]
-    } else {
-	set this(style) "width:$this(width);height:$this(height)"
-    }
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width) height $this(height)]
+
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
@@ -252,7 +245,7 @@ doc widget_htmlarea {
     }
     Examples {
 	% widget_htmlarea name notes value "A <i>little</i> note."
-	<div contentEditable="true" id="notes" style="width:160;height:100" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="clsDbFormHTMLArea">A <i>little</i> note.</div>
+	<div contentEditable="true" id="notes" style="width:160px;height:100px" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="clsDbFormHTMLArea">A <i>little</i> note.</div>
     }
 }
 
@@ -265,11 +258,7 @@ proc qc::widget_textarea { args } {
     args_check_required $args name value 
     default this(width) 160
     default this(height) 100
-    if { [info exists this(style)] } {
-	set this(style) [qc::style_set $this(style) width $this(width) height $this(height)]
-    } else {
-	set this(style) "width:$this(width);height:$this(height)"
-    }
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width) height $this(height)]
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
@@ -285,7 +274,7 @@ doc widget_textarea {
     }
     Examples {
 	% widget_textarea name notes value "Hi There"
-	<textarea id="notes" style="width:160;height:100" name="notes">Hi There</textarea>
+	<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>
     }
 }
 
@@ -301,7 +290,7 @@ proc qc::widget_select { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html_tag select [qc::dict_exclude [array get this] label type options null_option value required units]]
+    set html [html_tag select [qc::dict_exclude [array get this] label type options null_option value units]]
     append html \n
     if { [string is true $this(null_option)] } {
 	append html "<option value=\"\">- Select -</option>\n"
@@ -354,18 +343,10 @@ proc qc::widget_span { args } {
     }
     # height and width
     if { [info exists this(width)] } {
-	if { [info exists this(style)] } {
-	    set this(style) [qc::style_set $this(style) width $this(width)]
-	} else {
-	    set this(style) "width:$this(width)"
-	}
+	set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
     }
     if { [info exists this(height)] } {
-	if { [info exists this(style)] } {
-	    set this(style) [qc::style_set $this(style) height $this(height)]
-	} else {
-	    set this(style) "height:$this(height)"
-	}
+	set this(style) [qc::style_set [coalesce this(style) ""] height $this(height)]
     }
     return [html span $this(value) [qc::dict_exclude [array get this] label type value name width height]] 
 }
@@ -395,12 +376,8 @@ proc qc::widget_password { args } {
 	default this(id) $this(name)
     }
     default this(width) 160
-    if { [info exists this(style)] } {
-	set this(style) [qc::style_set $this(style) width $this(width)]
-    } else {
-	set this(style) "width:$this(width)"
-    }
-    return [html_tag input [qc::dict_exclude [array get this] label width height units required]]
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
+    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_password {
@@ -412,7 +389,7 @@ doc widget_password {
     }
     Examples {
 	% widget_password name password value "" 
-	<input style="width:160" id="password" value="" name="password" type="password">
+	<input style="width:160px" id="password" value="" name="password" type="password">
     }
 }
 
@@ -431,7 +408,7 @@ proc qc::widget_bool { args } {
     set this(type) checkbox
     set this(value) true
     set this(boolean) true
-    return [html_tag input [qc::dict_exclude [array get this] label width height units required]]
+    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_bool {
@@ -458,7 +435,7 @@ proc qc::widget_checkbox { args } {
 	default this(id) $this(name)
     }
     set this(type) checkbox
-    return [html_tag input [qc::dict_exclude [array get this] label width height units required]]
+    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_checkbox {
@@ -483,7 +460,7 @@ proc qc::widget_button { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    return [html_tag input [qc::dict_exclude [array get this] label width height units required]]
+    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_button {
@@ -506,7 +483,7 @@ proc qc::widget_submit { args } {
 	default this(id) $this(name)
     }
     set this(type) submit
-    return [html_tag input [qc::dict_exclude [array get this] label width height units required]] 
+    return [html_tag input [qc::dict_exclude [array get this] label width height units]] 
 }
 
 doc widget_submit {
