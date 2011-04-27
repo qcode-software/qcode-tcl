@@ -106,7 +106,7 @@ proc qc::check {args} {
 
     # HTML Markup OFF by default
     if { !$html && [regexp {<[^>]+>} $varValue] } {
-	error "\"$varValue\" contains HTML which is not allowed for $varName" {} USER
+	error "\"[string map {< &lt; > &gt;} $varValue]\" contains HTML which is not allowed for $varName" {} USER
     }
 
     return true
