@@ -38,10 +38,14 @@ proc qc::http_curl {args} {
 	# default timeout 60seconds
 	set timeout 60000
     }
-    set dict [ns_proxy eval $handle $script $timeout]
-    ns_proxy release $handle
-    
-    return $dict
+    try {
+	set dict [ns_proxy eval $handle $script $timeout]
+	ns_proxy release $handle
+	return $dict
+    } {
+	ns_proxy release $handle
+	error $::errorMessage $::errorInfo $::errorCode
+    }
 }
 
 proc qc::http_post {args} {

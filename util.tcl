@@ -615,3 +615,16 @@ proc .. {from to {step 1} {limit ""}} {
 proc debug {message} {
     ns_log Debug $message
 }
+
+proc exec_proxy {args} {
+    args $args -timeout 1000 -- args
+    set handle [ns_proxy get exec]
+    try {
+	set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
+	ns_proxy release $handle
+	return $result
+    } {
+	ns_proxy release $handle
+	error $::errorMessage $::errorInfo $::errorCode
+    }
+}
