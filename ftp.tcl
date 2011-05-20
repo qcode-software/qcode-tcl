@@ -144,6 +144,18 @@ proc qc::ftp_type {ctrl_read ctrl_write type} {
     }
 }
 
+proc qc::ftp_cwd {ctrl_read ctrl_write dir} {
+    set timeout 30
+    try {
+	qc::ftp_ctrl_write $ctrl_write "CWD $dir" $timeout
+	qc::ftp_ctrl_read $ctrl_read 2 $timeout
+    } {
+	qc::ftp_close $ctrl_read $ctrl_write
+        global errorMessage errorInfo errorCode
+        error $errorMessage $errorInfo $errorCode
+    }
+}
+
 proc qc::ftp_list {ctrl_read ctrl_write path} {
     set timeout 60
     try {

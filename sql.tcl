@@ -82,13 +82,6 @@ proc sql_set_with {args} {
     return [join $set_list ,]
 }
 
-proc qc::sql_set_varchars_truncate {table args} {
-    foreach name $args {
-        lappend set_list "${name}=:${name}::varchar([qc::db_col_varchar_length $table $name])"
-    }
-    return [join $set_list ,]
-}
-
 proc qc::sql_insert { args } {
     foreach name $args {
 	lappend cols $name

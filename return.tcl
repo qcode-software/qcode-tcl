@@ -43,6 +43,23 @@ MIME-Version: 1.0
 Content-Type: text/html\n\n"
 }
 
+proc qc::return_headers_chunked {} {
+    ns_write "HTTP/1.1 200 OK
+MIME-Version: 1.0
+Content-Type: text/html
+Transfer-Encoding: chunked\n\n"
+}
+
+proc qc::return_chunks {string} {
+    foreach line [mcsplit $string \n] {
+	qc::return_chunk $line
+    }
+}
+
+proc qc::return_chunk {string} {
+    ns_write [format %X [string bytelength $string]]\r\n$string
+}
+
 proc qc::return_next { next_url } {   
     if { ![regexp {^https?://} $next_url] } {
 	set port [ns_set iget [ns_conn headers] Port]

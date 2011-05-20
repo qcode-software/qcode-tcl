@@ -32,6 +32,10 @@ proc qc::check {args} {
 	    set nulls no
 	    incr index 
 	    continue
+	} elseif { $TYPE eq "NOT" && $NEXT_TYPE eq "HTML" } {
+	    set html no
+	    incr index 
+	    continue
 	} elseif {$TYPE eq "HTML"} {
 	    set html yes
 	    continue
