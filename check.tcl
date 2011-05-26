@@ -17,7 +17,8 @@ proc qc::check {args} {
     # Parse
     array set alias [list INT INTEGER BOOL BOOLEAN STRING VARCHAR NZ NON_ZERO]
     set nulls yes
-    set html no
+    set allow_html no
+    set allow_creditcard no
     set TYPES {}
     for {set index 0} {$index<[llength $args]} {incr index} {
 	set TYPE [upper [lindex $args $index]]
@@ -33,11 +34,21 @@ proc qc::check {args} {
 	    incr index 
 	    continue
 	} elseif { $TYPE eq "NOT" && $NEXT_TYPE eq "HTML" } {
-	    set html no
+	    set allow_html no
 	    incr index 
 	    continue
 	} elseif {$TYPE eq "HTML"} {
-	    set html yes
+	    set allow_html yes
+	    continue
+	} elseif { $TYPE eq "NOT" && $NEXT_TYPE eq "ALLOW_CREDITCARD" } {
+	    set allow_creditcard no
+	    incr index 
+	    continue
+	} elseif {$TYPE eq "ALLOW_CREDITCARD"} {
+	    set allow_creditcard yes
+	    continue
+	} elseif {$TYPE eq "CREDITCARD"} {
+	    set allow_creditcard yes
 	    continue
 	} elseif {[info commands is_$type] ne ""} {
 	    lappend TYPES $TYPE
@@ -109,8 +120,13 @@ proc qc::check {args} {
     }
 
     # HTML Markup OFF by default
-    if { !$html && [regexp {<[^>]+>} $varValue] } {
+    if { !$allow_html && [regexp {<[^>]+>} $varValue] } {
 	error "\"[string map {< &lt; > &gt;} $varValue]\" contains HTML which is not allowed for $varName" {} USER
+    }
+
+    # Check contains creditcard by default
+    if { !$allow_creditcard && [contains_creditcard $varValue] } {
+	error [expr {[info exists errorMessage] ? $errorMessage : "\"$varValue\" contains creditcard number which is not allowed for $varName"}] {} USER
     }
 
     return true
