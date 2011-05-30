@@ -215,28 +215,20 @@ proc is_mobile_number {string} {
 }
 
 proc contains_creditcard {string} {
-    set cc_no_pattern {(?:^|[^\.\+0-9])([3456](?:\d[ \-\.]*){11,17}\d)(?:[^0-9]|$)}
-    
-    append context_filter \
-	{(^[^\.\+0-9a-z]*([3456](\d[ \-\.]*){11,17}\d)[^0-9a-z]*$)}\
-	| {(^|[^\.\+0-9])([3456](\d[ \-\.]*){11,17}\d)[^0-9a-z]+([a-z]*[^0-9a-z]*\d{1,2}[^0-9a-z]*(20\d\d|\d\d)[^0-9a-z]+){1,2}[a-z]*[^0-9a-z]*\d{3,4}($|[^0-9])}\
-	| {((^|[^a-z])(visa|mastercard|card|expiry|american express)($|[^a-z]))}\
-	| {(^|[^/0-9])(\d\d/\d\d|\d\d/20\d\d)([^/0-9]|$)}
-    
-    set exclude_filter {((^|[^a-z])(tlc credit account)($|[^a-z]))}
-
-    if { [regexp -nocase $context_filter $string] \
-	     && [regexp -nocase $exclude_filter $string]==0 } {
-
-	set indices [regexp -inline -indices -all $cc_no_pattern $string]
-	
-	foreach {. item} $indices {     
-	    set suspect_str [string range $string [lindex $item 0] [lindex $item 1]]
-	    set suspect_no [string map {" " "" - "" . ""} $suspect_str]
-    
-	    if { [regexp {^[0-9]+(\.|\-)[0-9]+$} $suspect_str]==0 && [is_creditcard $suspect_no] } {
-		return true
-	    }
+    set re {
+	(?:^|[^0-9])
+	(
+	 # amex 15 digits long
+	 (?:3\d{3}[ \-\.]*\d{6}[ \-\.]*\d{5})
+	 |
+	 # other cards 16 digits long
+	 (?:[4|5|6]\d{3}[ \-\.]*\d{4}[ \-\.]*\d{4}[ \-\.]*\d{4})
+	 )
+	(?:[^0-9]|$)
+    }
+    foreach {match cc_no} [regexp -inline -all -expanded $re $string] {
+	if { [is_creditcard [string map {" " "" - "" . ""} $cc_no]] } {
+	    return true
 	}
     }
     return false
