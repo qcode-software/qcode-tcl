@@ -140,6 +140,46 @@ doc format_cc {
     }
 }
 
+proc qc::format_cc_mask {string {prefix 6} {suffix 4}} {
+
+    if { $prefix > 6 } { error "prefix must be less than 6" }
+    if { $suffix > 4 } { error "suffix must be less than 4" }
+    
+    set cc_no_pattern {(?:^|[^\.\+0-9])([3456](?:\d[ \-\.]*){11,17}\d)(?:[^0-9]|$)}
+    set indices [regexp -inline -indices -all -nocase $cc_no_pattern $string]
+    set start 0
+    set masked_string ""
+   
+    foreach {. item} $indices {
+	set cc_no_str [string range $string [lindex $item 0] [lindex $item 1]]
+	set cc_no [string map {" " "" - "" . ""} $cc_no_str]
+
+	if { [is_creditcard $cc_no] } {
+	    append masked_string [string range $string $start [lindex $item 0]-1]
+	    
+	    set masked_cc_no [string range $cc_no 0 [expr {$prefix - 1}]]
+	    append masked_cc_no [string repeat * [expr {[string length $cc_no] - $prefix - $suffix}]]
+	    append masked_cc_no [string range $cc_no end-[expr {$suffix - 1}] end] 
+
+	    append masked_string [join [format_linebreak $masked_cc_no 4] " "]
+	    set start [lindex $item 1]+1
+	}
+    }
+    
+    append masked_string [string range $string $start end]
+    
+    return $masked_string
+}
+
+doc format_cc_mask {
+    Examples {
+	% format_cc_mask 4111111111111111 6 4
+	4111 11** **** 1111
+	% format_cc "Any old 4111 1111 1111 1111 or other 5555555555554444" 4 4
+	Any old 4111 **** **** 1111 or other 5555 **** **** 4444
+    }
+}
+
 proc qc::format_ordinal {number} {
     #| Format number with suffix 23 -> 23rd or 4 -> 4th
     # Taken from TCL Wiki RS
