@@ -48,6 +48,7 @@ proc qc::check {args} {
 	    set allow_creditcards yes
 	    continue
 	} elseif {$TYPE eq "CREDITCARD"} {
+	    lappend TYPES CREDITCARD
 	    set allow_creditcards yes
 	    continue
 	} elseif {[info commands is_$type] ne ""} {
