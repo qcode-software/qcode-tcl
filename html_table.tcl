@@ -607,7 +607,7 @@ proc qc::page_html_table { args } {
 
     set html "
 <h3>$heading</h3>
-<div class=\"clsMenu\">$menu</div>
+<div>$menu</div>
 $table
 "
     return $html
