@@ -118,35 +118,3 @@ proc qc::table_sum { table col_name } {
     }
     return $sum
 }
-
-proc qc::page_table { args } {
-    #sql_sort -paging will have set the correct vars in caller's namespace
-    args $args -limit ? -offset ? -count ? -- heading menu table
-    default limit  [upset 1 limit]
-    default offset [upset 1 offset]
-    if { [uplevel 1 {info exists db_nrows}] } {
-	default count [upset 1 db_nrows]
-    }
-
-    append heading " [expr {$offset +1}]...[expr {$offset+$count}]"
-
-    if { $offset - $limit >=0 } {
-	if { $menu ne "" } {
-	    append menu " &nbsp;|&nbsp; "
-	}
-	append menu [qc::html_a_replace "Previous Page [expr {$offset-$limit+1}]...[expr {$offset}]" [url [url_here] offset [expr {$offset-$limit}]]]
-    }
-    if { $count == $limit } {
-	if { $menu ne "" } {
-	    append menu " &nbsp;|&nbsp; "
-	}
-	append menu [qc::html_a_replace "Next Page [expr {$offset+$limit+1}]...[expr {$offset+2*$limit}]" [url [url_here] offset [expr {$offset+$limit}]]]
-    }
-
-    set html "
-<h3>$heading</h3>
-<div class=\"clsMenu\">$menu</div>
-$table
-"
-    return $html
-}
