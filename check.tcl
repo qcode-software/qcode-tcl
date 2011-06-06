@@ -18,7 +18,7 @@ proc qc::check {args} {
     array set alias [list INT INTEGER BOOL BOOLEAN STRING VARCHAR NZ NON_ZERO]
     set nulls yes
     set allow_html no
-    set allow_creditcards no
+    set allow_creditcards yes
     set TYPES {}
     for {set index 0} {$index<[llength $args]} {incr index} {
 	set TYPE [upper [lindex $args $index]]
@@ -29,6 +29,11 @@ proc qc::check {args} {
 	    set TYPE $alias($TYPE)
 	    set type [lower $TYPE]
 	}
+	# Creditcards not allowed in text fields by default
+	if { [in {STRING VARCHAR} $TYPE] } {
+	    set allow_creditcards no
+	}
+	# 
 	if { $TYPE eq "NOT" && $NEXT_TYPE eq "NULL" } {
 	    set nulls no
 	    incr index 
