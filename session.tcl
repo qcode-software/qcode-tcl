@@ -53,6 +53,10 @@ proc qc::session_update { session_id } {
 
 proc qc::session_sudo_logout {session_id} {
     db_dml {update session set effective_employee_id=NULL where session_id=:session_id}
+    global current_employee_id
+    if { [info exists current_employee_id] } {
+	unset current_employee_id
+    }
 }
 
 proc qc::session_kill {session_id} {
@@ -75,6 +79,8 @@ proc qc::session_employee_id {session_id} {
 
 proc qc::session_sudo {session_id effective_employee_id} {
     db_dml {update session set effective_employee_id=:effective_employee_id where session_id=:session_id}
+    global current_employee_id
+    set current_employee_id $effective_employee_id
 }
 
 proc qc::session_purge { {timeout_secs 0 } } {
