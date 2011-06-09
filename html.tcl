@@ -218,20 +218,24 @@ doc html_menu {
     }
 }
 
-proc qc::html_col_list {args} {
-    #| Construct a column of paragraph elements with a bold title and detail below the title.
+proc qc::html_paragraph_layout {args} {
+    #| Construct paragraph elements as a bold title with the detail below it by default.
+    args $args -deliminator <br> -- args
     if { [llength $args]==1 } {set args [lindex $args 0]}
     set html {}
     foreach {label detail} $args {
-	append html "<p><b>$label</b><br>$detail</p>"
+	append html "<p><b>$label</b>$deliminator$detail</p>"
     }
     return $html
 }
 
-doc html_col_list {
+doc html_paragraph_layout {
     Examples {
-	% html_col_list Name "Jimmy Tarbuck" Venue "Palace Ballroom"
+	% html_paragraph_layout Name "Jimmy Tarbuck" Venue "Palace Ballroom"
 	<p><b>Name</b><br>Jimmy Tarbuck</p><p><b>Venue</b><br>Palace Ballroom</p>
+
+	% html_paragraph_layout -deliminator ": " Name "Jimmy Tarbuck" Venue "Palace Ballroom"
+	<p><b>Name</b>: Jimmy Tarbuck</p><p><b>Venue</b>: Palace Ballroom</p>
     }
 }
 
