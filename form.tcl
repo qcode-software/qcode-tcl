@@ -1,6 +1,5 @@
 proc qc::form2vars {args}  {
     #| Create variables in the caller's namespace corresponding to the form data.
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     if { [llength $args] == 0 } {
 	# set all vars
 	set args [ns_set_keys [ns_getform]]
@@ -129,14 +128,14 @@ proc qc::form_proc { proc_name } {
 	set args [info args $proc_name]
     }
     foreach arg $args {
-	if { [info default $proc_name $arg default_value] } {
-	    if { [qc::form_var_exists $arg] } {
-		lappend largs [qc::form_var_get $arg]
-	    } else {
-		lappend largs $default_value
-	    }
-	} else {
+	if { [qc::form_var_exists $arg] } {
 	    lappend largs [qc::form_var_get $arg]
+	} else {
+	    if { [info default $proc_name $arg default_value] } {
+		lappend largs $default_value
+	    } else {
+		error "The form variable \"$arg\" was missing from the request" {} USER
+	    }
 	}
     }
     if { [eq [lindex [info args $proc_name] end] args] } {
