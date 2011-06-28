@@ -38,26 +38,35 @@ proc qc::return_csv { string } {
 }
 
 proc qc::return_headers {} {
-    ns_write "HTTP/1.0 200 OK
-MIME-Version: 1.0
-Content-Type: text/html\n\n"
+    set list {}
+    lappend list "HTTP/1.0 200 OK"
+    lappend list "Date: [ns_httptime [clock seconds]]"
+    lappend list "MIME-Version: 1.0"
+    lappend list "Content-Type: text/html"
+    ns_write [join $list \r\n]
+    ns_write \r\n\r\n
 }
 
 proc qc::return_headers_chunked {} {
-    ns_write "HTTP/1.1 200 OK
-MIME-Version: 1.0
-Content-Type: text/html
-Transfer-Encoding: chunked\n\n"
+    set list {}
+    lappend list "HTTP/1.1 200 OK"
+    lappend list "Date: [ns_httptime [clock seconds]]"
+    lappend list "MIME-Version: 1.0"
+    lappend list "Content-Type: text/html"
+    lappend list "Transfer-Encoding: chunked"
+    ns_write [join $list \r\n]
+    ns_write \r\n\r\n
 }
 
 proc qc::return_chunks {string} {
-    foreach line [mcsplit $string \n] {
+    regsub -all {\r\n} $string \n string
+    foreach line [split $string \n] {
 	qc::return_chunk $line
     }
 }
 
 proc qc::return_chunk {string} {
-    ns_write [format %X [string bytelength $string]]\r\n$string
+    ns_write [format %X [string bytelength $string]]\r\n$string\r\n
 }
 
 proc qc::return_next { next_url } {   
