@@ -115,101 +115,26 @@ doc email_attachment_text {
 
 proc qc::email_attachment_base64 { from to subject html base64 mimetype filename} {
     #| Send HTML email with alternative text copy
+    #| Attach base64 content
 
-    # headers
-    set args {}
-    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
-    set boundary1 "----=_NextPart1_[clock clicks]"
-    set boundary2 "----=_NextPart2_[clock clicks]"
-    lappend args MIME-Version 1.0 Content-Type "multipart/mixed; boundary=\"$boundary1\""
+    set attachment [dict_from base64 filename]
 
-    set text_message [html2text $html]
-
-    set filename [file tail $filename]
-    set mimetype [ns_guesstype $filename]
-    
-    set body {This is a multi-part message in MIME format.
-
---${boundary1}
-Content-Type: multipart/alternative; boundary="$boundary2"
-
-This is a multi-part message in MIME format.
-
---${boundary2}
-Content-Type: text/plain;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $text_message]
-
---${boundary2}
-Content-Type: text/html;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $html]
-
---${boundary2}--
-
---${boundary1}
-Content-Type: $mimetype;name="$filename"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;filename="$filename"
-
-$base64
---${boundary1}--
-}
-    qc::sendmail $from $to [subst $body] $args
+    qc::email_attachments_base64 $from $to $subject $html $attachment
 }
 
-proc qc::email_attachment { from to subject html filename args} {
+proc qc::email_attachment { from to subject html filenames args} {
     #| Send HTML email with alternative text copy
-    #| Attach a file with given filename
+    #| Attach files with given filenames listed in filenames argument
 
-    # headers
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
-    set boundary1 "----=_NextPart1_[clock clicks]"
-    set boundary2 "----=_NextPart2_[clock clicks]"
-    lappend args MIME-Version 1.0 Content-Type "multipart/mixed; boundary=\"$boundary1\""
+    foreach filename $filenames {
+	set fhandle [open $filename r]
+	fconfigure $fhandle -buffering line -translation binary -blocking 1
+	set base64 [::base64::encode [read $fhandle]]
+	set filename [file tail $filename]
+	lappend attachments [dict_from base64 filename]
+    }
 
-    set text_message [html2text $html]
-
-    set fhandle [open $filename r]
-    fconfigure $fhandle -buffering line -translation binary -blocking 1
-    set attachment [base64::encode [read $fhandle]]
-
-    set filename [file tail $filename]
-    set mimetype [ns_guesstype $filename]
-    
-    set body {This is a multi-part message in MIME format.
-
---${boundary1}
-Content-Type: multipart/alternative; boundary="$boundary2"
-
-This is a multi-part message in MIME format.
-
---${boundary2}
-Content-Type: text/plain;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $text_message]
-
---${boundary2}
-Content-Type: text/html;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $html]
-
---${boundary2}--
-
---${boundary1}
-Content-Type: $mimetype;name="$filename"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;filename="$filename"
-
-$attachment
---${boundary1}--
-}
-    qc::sendmail $from $to [subst $body] $args
+    qc::email_attachments_base64 $from $to $subject $html $attachments $args
 }
 
 doc email_attachment {
@@ -218,6 +143,76 @@ doc email_attachment {
 	# Send a tar gzipped attachment by email using foo.tar.gz as the filename
 	% email_attachment joe@from.com jill@to.com "Please find file <b>foo.tar.gz</b> attached." /tmp/foo.tar.gz
     }
+}
+
+proc qc::email_attachments_base64 { from to subject html attachments args} {
+    #| Send HTML email with alternative text copy and attachments
+    #| attachments argument can be a dict or a list of dicts, each dict describes a single attachment.
+    #| Example dict - {base64 aGVsbG8= cid 1312967973006309 filename attach1.pdf}
+    #| Including cid in this dict is optional, if provided it must be world-unique
+    #| cid can be used to reference an attachment within the email's html.
+    #| eg. embed an image (<img src="cid:1312967973006309"/>).
+  
+    set to daniel@debian.localdomain
+
+    # headers
+    if { [llength $args]==1 } {set args [lindex $args 0]}
+    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
+    set boundary1 "----=_NextPart1_[clock clicks]"
+    set boundary2 "----=_NextPart2_[clock clicks]"
+    lappend args MIME-Version 1.0 Content-Type "multipart/related; boundary=\"$boundary1\""
+
+    set text_message [html2text $html]
+    
+    sset body {This is a multi-part message in MIME format.
+
+	--${boundary1}
+	Content-Type: multipart/alternative; boundary="$boundary2"
+
+	This is a multi-part message in MIME format.
+
+	--${boundary2}
+	Content-Type: text/plain;charset="utf-8"
+	Content-Transfer-Encoding: quoted-printable
+
+	[::mime::qp_encode $text_message]
+
+	--${boundary2}
+	Content-Type: text/html;charset="utf-8"
+	Content-Transfer-Encoding: quoted-printable
+
+	[::mime::qp_encode $html]
+
+	--${boundary2}--
+    }
+
+    # Add each attachment to the body.
+    # if attachments is a single dict convert this to a list of dicts structure.
+    if { [llength [lindex $attachments 0]]==1 } {set attachments [list $attachments]}
+    foreach attachment_dict $attachments {
+	dict2vars $attachment_dict base64 cid filename
+
+	set file_extension [file tail $filename]
+	set mimetype [ns_guesstype $file_extension]
+
+	sappend body {--${boundary1}
+	}
+	if { [info exists cid] } {
+	    sappend body {Content-ID: <$cid>
+	    }
+	}
+	sappend body {Content-Type: $mimetype;name="$filename"
+	    Content-Transfer-Encoding: base64
+	    Content-Disposition: attachment;filename="$filename"
+
+	    $base64
+	}
+    }
+
+    sappend body {--${boundary1}--
+    }
+
+    qc::sendmail $from $to $body $args
 }
 
 proc qc::smtp_send {wfp string timeout} {
