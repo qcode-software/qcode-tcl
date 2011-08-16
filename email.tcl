@@ -152,8 +152,6 @@ proc qc::email_attachments_base64 { from to subject html attachments args} {
     #| Including cid in this dict is optional, if provided it must be world-unique
     #| cid can be used to reference an attachment within the email's html.
     #| eg. embed an image (<img src="cid:1312967973006309"/>).
-  
-    set to daniel@debian.localdomain
 
     # headers
     if { [llength $args]==1 } {set args [lindex $args 0]}
