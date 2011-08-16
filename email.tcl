@@ -10,7 +10,6 @@ doc email {
     }
 }
 	
-
 proc qc::email_html { from to subject html args} {
     #| Send HTML email with alternative text copy
     #| Additional headers can be given through args.
@@ -117,9 +116,9 @@ proc qc::email_attachment_base64 { from to subject html base64 mimetype filename
     #| Send HTML email with alternative text copy
     #| Attach base64 content
 
-    set attachment [dict_from base64 filename]
+    lappend attachments [dict_from base64 filename]
 
-    qc::email_attachments_base64 $from $to $subject $html $attachment
+    qc::email_attachments_base64 $from $to $subject $html $attachments
 }
 
 proc qc::email_attachment { from to subject html filenames args} {
@@ -185,8 +184,6 @@ proc qc::email_attachments_base64 { from to subject html attachments args} {
     }
 
     # Add each attachment to the body.
-    # if attachments is a single dict convert this to a list of dicts structure.
-    if { [llength [lindex $attachments 0]]==1 } {set attachments [list $attachments]}
     foreach attachment_dict $attachments {
 	dict2vars $attachment_dict base64 cid filename
 
