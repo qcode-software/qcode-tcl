@@ -73,6 +73,18 @@ proc qc::ldict_values { ldictVar key } {
     return $list
 }
 
+proc qc::ldict_exists {ldict key} {
+    # Return the first index of the dict that contains the the key $key
+    set index 0
+    foreach dict $ldict {
+	if { [dict exists $dict $key]} {
+	    return $index
+	}
+	incr index
+    }
+    return -1
+}
+
 proc qc::ldict_search {ldictVar key value} {
     # Return the first index of the dict that contains the value $value for the key $key
     upvar 1 $ldictVar ldict

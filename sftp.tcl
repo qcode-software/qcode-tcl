@@ -6,7 +6,7 @@ proc qc::sftp_put {args} {
 	set url sftp://${host}:${port}/~/${filename}
     }
     if { ![nsv_exists which curl] } {
-	nsv_set which curl [exec which curl]
+	nsv_set which curl [exec_proxy which curl]
     }
     
     set file [open "|[nsv_get which curl] -k -T - -u $username:$password $url" w]

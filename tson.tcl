@@ -1,8 +1,9 @@
 proc tson_object { args } {
-    # return object tson from list of name value pairs in args by inserting object keyword at index 0 of list.
-    # use appropriate keywords depending on value type. Cannot be used to create nested objects
-    # EXAMPLE:  % tson_object firstname "Daniel" surname "Clark" age 23
-    #           object firstname {string Daniel} surname {string Clark} age 23
+    # return a tson object from list of name value pairs in args
+    # Cannot be used to create nested objects
+    # EXAMPLE:  
+    # % tson_object firstname "Daniel" surname "Clark" age 23
+    # object firstname {string Daniel} surname {string Clark} age 23
 
     set tson [list object]
     

@@ -243,9 +243,9 @@ proc qc::html2text { html } {
     #| Wrapper for html2text 
     set html [string map [list "&#8209;" -] $html]
     if { ![nsv_exists which html2text] } {
-	nsv_set which html2text [exec which html2text]
+	nsv_set which html2text [exec_proxy which html2text]
     }
-    return [exec [nsv_get which html2text] -nobs << $html]
+    return [exec_proxy [nsv_get which html2text] -utf8 << $html]
 }
 
 proc qc::html_info_tables {args} {

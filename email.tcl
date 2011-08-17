@@ -1,213 +1,189 @@
 package require mime
 package require base64 
+package require uuid
 
 doc email {
     Title "Sending Email"
     Description {
 	All of these procs call [doc_link sendmail] (which is based on ns_sendmail) and connects directly to an SMTP socket normally 127.0.0.1 port 25, so a MTA is required to send any email.<br>
 	Requires tcllib packages mime and base64.
-	[doc_list email_text email_html email_attachment email_attachment_text]
-    }
-}
-	
-proc qc::email_html { from to subject html args} {
-    #| Send HTML email with alternative text copy
-    #| Additional headers can be given through args.
-    #| args is a name value pair list of mail headers  
-    
-    # headers
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
-    set boundary [truncate [base64::encode [clock seconds][info hostname]] 70]
-    lappend args MIME-Version 1.0 Content-Type "multipart/alternative; boundary=\"$boundary\""
-
-    set text [html2text $html]
-    set body {This is a multi-part message in MIME format.
-
---${boundary}
-Content-Type: text/plain;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-
-[::mime::qp_encode $text]
---${boundary}
-Content-Type: text/html;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-
-[::mime::qp_encode $html]
---${boundary}--
-}
-    qc::sendmail $from $to [subst $body] $args
-}
-
-doc email_html {
-    Parent email
-    Examples {
-	email_html joe@from.com jill@to.com Hello "<b>Hello There</b>"
+	[doc_list email_send]
     }
 }
 
-proc qc::email_text { from to subject text } {
-    #| Send a plain text email
-    set text [::mime::qp_encode $text]
-    qc::sendmail $from $to $text [list Subject $subject Date [ns_httptime [ns_time]] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to]
-}
+proc qc::email_send {args} {
+    set argnames [args2vars $args]
+    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?attachment? ?attachments? ?filename? ?filenames?
 
-doc email_html {
-    Parent email
-    Examples {
-	email_text joe@from.com jill@to.com Hello "Howdy There."
-    }
-}
-
-proc qc::email_attachment_text { from to subject html text filename args} {
-    #| Send HTML email with alternative text copy
-    #| Attach a text file with given filename
-  
-    # headers
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
-    set boundary1 "----=_NextPart1_[clock clicks]"
-    set boundary2 "----=_NextPart2_[clock clicks]"
-    lappend args MIME-Version 1.0 Content-Type "multipart/mixed; boundary=\"$boundary1\""
-
-    set text_message [html2text $html]
-    set body {This is a multi-part message in MIME format.
-
---${boundary1}
-Content-Type: multipart/alternative; boundary="$boundary2"
-
-This is a multi-part message in MIME format.
-
---${boundary2}
-Content-Type: text/plain;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $text_message]
-
---${boundary2}
-Content-Type: text/html;charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-
-[::mime::qp_encode $html]
-
---${boundary2}--
-
---${boundary1}
-Content-Type: text/plain;name="$filename"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: attachment;filename="$filename"
-
-[::mime::qp_encode $text]
---${boundary1}--
-}
-    qc::sendmail $from $to [subst $body] $args
-}
-
-doc email_attachment_text {
-    Parent email
-    Examples {
-	email_attachment_text joe@from.com jill@to.com "Please find my <i>message</i> attached." "Hello There!"
-    }
-}
-
-proc qc::email_attachment_base64 { from to subject html base64 mimetype filename} {
-    #| Send HTML email with alternative text copy
-    #| Attach base64 content
-
-    lappend attachments [dict_from base64 filename]
-
-    qc::email_attachments_base64 $from $to $subject $html $attachments
-}
-
-proc qc::email_attachment { from to subject html filenames args} {
-    #| Send HTML email with alternative text copy
-    #| Attach files with given filenames listed in filenames argument
-
-    foreach filename $filenames {
-	set fhandle [open $filename r]
-	fconfigure $fhandle -buffering line -translation binary -blocking 1
-	set base64 [::base64::encode [read $fhandle]]
-	set filename [file tail $filename]
-	lappend attachments [dict_from base64 filename]
-    }
-
-    qc::email_attachments_base64 $from $to $subject $html $attachments $args
-}
-
-doc email_attachment {
-    Parent email
-    Examples {
-	# Send a tar gzipped attachment by email using foo.tar.gz as the filename
-	% email_attachment joe@from.com jill@to.com "Please find file <b>foo.tar.gz</b> attached." /tmp/foo.tar.gz
-    }
-}
-
-proc qc::email_attachments_base64 { from to subject html attachments args} {
-    #| Send HTML email with alternative text copy and attachments
-    #| attachments argument can be a dict or a list of dicts, each dict describes a single attachment.
-    #| Example dict - {base64 aGVsbG8= cid 1312967973006309 filename attach1.pdf}
+    #| attachments is a list of dicts
+    #| dict keys are encoding data filename ?cid?
+    #| Example dict - {encoding base64 data aGVsbG8= cid 1312967973006309 filename attach1.pdf}
     #| Including cid in this dict is optional, if provided it must be world-unique
     #| cid can be used to reference an attachment within the email's html.
     #| eg. embed an image (<img src="cid:1312967973006309"/>).
 
-    # headers
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    lappend args From $from To $to Subject $subject Date [ns_httptime [ns_time]] 
-    set boundary1 "----=_NextPart1_[clock clicks]"
-    set boundary2 "----=_NextPart2_[clock clicks]"
-    lappend args MIME-Version 1.0 Content-Type "multipart/related; boundary=\"$boundary1\""
-
-    set text_message [html2text $html]
-    
-    sset body {This is a multi-part message in MIME format.
-
-	--${boundary1}
-	Content-Type: multipart/alternative; boundary="$boundary2"
-
-	This is a multi-part message in MIME format.
-
-	--${boundary2}
-	Content-Type: text/plain;charset="utf-8"
-	Content-Transfer-Encoding: quoted-printable
-
-	[::mime::qp_encode $text_message]
-
-	--${boundary2}
-	Content-Type: text/html;charset="utf-8"
-	Content-Transfer-Encoding: quoted-printable
-
-	[::mime::qp_encode $html]
-
-	--${boundary2}--
+    # From
+    set mail_from [qc::email_address $from]
+    lappend headers From $from
+    # To
+    set rcpt [list]
+    foreach address [qc::email_addresses $to] {
+	lappend rcpts $address
     }
-
-    # Add each attachment to the body.
-    foreach attachment_dict $attachments {
-	dict2vars $attachment_dict base64 cid filename
-
-	set file_extension [file tail $filename]
-	set mimetype [ns_guesstype $file_extension]
-
-	sappend body {--${boundary1}
+    lappend headers To $to
+    # CC
+    if { [info exists cc] } {
+	foreach address [qc::email_addresses $cc] {
+	    lappend rcpts $address
 	}
-	if { [info exists cid] } {
-	    sappend body {Content-ID: <$cid>
-	    }
-	}
-	sappend body {Content-Type: $mimetype;name="$filename"
-	    Content-Transfer-Encoding: base64
-	    Content-Disposition: attachment;filename="$filename"
-
-	    $base64
+	lappend headers CC $cc
+    }
+    # BCC
+    if { [info exists bcc] } {
+	foreach address [qc::email_addresses $bcc] {
+	    lappend rcpts $address
 	}
     }
+    # Subject
+    lappend headers Subject $subject
+    # Reply-To
+    if { [info exists reply-to] } {
+	lappend headers Reply-To ${reply-to}
+    }
+    # Date
+    lappend headers Date [ns_httptime [ns_time]] 
+    # MIME
+    lappend headers MIME-Version 1.0
+    # Message-ID
+    #lappend headers Message-ID "<[::uuid::uuid generate]>"
 
-    sappend body {--${boundary1}--
+    default attachments [list]
+    # Single attachment
+    if { [info exists attachment] } {
+	lappend attachments $attachment
+    }
+    # Single file 
+    if { [info exists filename] } {
+	set filenames [list $filename]
+    }
+    # Attachments from filenames
+    if { [info exists filenames] } {
+	foreach filename $filenames {
+	    lappend attachments [qc::email_file2attachment $filename]
+	}
+    }
+    if { [info exists attachments] } {
+	if { [ldict_exists $attachments cid] } {
+	    # if any attachment specifies a Content-ID via key cid then type is related
+	    set {content-type} multipart/related
+	} else {
+	    set {content-type} multipart/mixed
+	}
+	
+	set boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+	lappend headers Content-Type "${content-type}; boundary=\"$boundary\""
+	if { [info exists html] } {
+	    # HTML and text subpart
+	    set boundary2 [format "%x" [clock seconds]][format "%x" [clock clicks]]
+	    set body2 [qc::email_mime_html_alternative $html $boundary2]
+	    lappend parts [list headers [list Content-Type "multipart/alternative; boundary=\"$boundary2\""] body $body2]
+	} else {
+	    # Text Only
+	    lappend parts [qc::email_mime_text $text]
+	}
+	# add attachments
+	foreach dict $attachments {
+	    lappend parts [qc::email_mime_attachment $dict]
+	}
+	set body [qc::email_mime_join $parts $boundary]
+    } else {
+	if { [info exists html] } {
+	    # HTML with text alternative
+	    set boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+	    lappend headers Content-Type "multipart/alternative; boundary=\"$boundary\""
+	    set body [qc::email_mime_html_alternative $html $boundary]
+	} else {
+	    # Text Only
+	    lappend headers Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"
+	    set body $text
+	}
+    }  
+    qc::sendmail $mail_from $rcpts $body {*}$headers
+}
+
+proc qc::email_file2attachment {filename} {
+    set fhandle [open $filename r]
+    fconfigure $fhandle -buffering line -translation binary -blocking 1
+    set base64 [::base64::encode [read $fhandle]]
+    set filename [file tail $filename]
+    return [list encoding base64 data $base64 filename $filename]
+}
+
+proc qc::email_address {text} {
+    return [lindex [qc::email_addresses $text] 0]
+}
+
+proc qc::email_addresses {text} {
+    set list [list]
+    foreach dict [mime::parseaddress $text] {
+	lappend list [dict get $dict address]
+    }
+    return $list
+}
+
+proc qc::email_mime_text {text} {
+    set headers [list]
+    lappend headers Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"
+    return [list headers $headers body [::mime::qp_encode $text]]
+}
+
+proc qc::email_mime_html_alternative {html boundary} {
+    # Text
+    set text [html2text $html]
+    lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $text]]
+    lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $html]]
+    return [qc::email_mime_join $parts $boundary]
+}
+
+proc qc::email_mime_attachment {dict} {
+    # dict keys: data filename ?encoding? ?cid?
+    dict2vars $dict encoding data cid filename
+    set headers [list]
+    set mimetype [ns_guesstype [file tail $filename]]
+ 
+    if { ![info exists encoding] } {
+	# No encoding provided so assume binary data even if text
+	set encoding base64
+	set data [::base64::encode $data]
+    }
+    lappend headers Content-Type "$mimetype;name=\"$filename\""
+    lappend headers Content-Transfer-Encoding $encoding
+    if { [info exists cid] } {
+	lappend headers Content-ID <$cid>
+    } else {
+	lappend headers Content-Disposition "attachment;filename=\"$filename\""
     }
 
-    qc::sendmail $from $to $body $args
+    return [list headers $headers body $data]
+}
+
+proc qc::email_mime_join {parts boundary} {
+    lappend list "--${boundary}"
+    foreach part $parts {
+	lappend list [qc::email_mime_part $part]
+	lappend list "--${boundary}"
+    }
+    lset list end "--${boundary}--"
+    return [join $list \r\n]
+}
+
+proc qc::email_mime_part {part} {
+    dict2vars $part headers body
+    set list [list]
+    foreach {name value} $headers {
+	lappend list "$name: $value"
+    }
+    return [join $list \r\n]\r\n\r\n$body
 }
 
 proc qc::smtp_send {wfp string timeout} {
@@ -236,14 +212,12 @@ proc qc::smtp_recv {rfp check timeout} {
     }
 }
 
-proc qc::sendmail {mail_from rcpt_to body args} {
+proc qc::sendmail {mail_from rcpts body args} {
     #| Connect to the smtp host and send email message
+    #| mail_from is a bare email address eg. root@localhost
+    #| rcpts is a list of bare rcpt email addresses
+    #| body is the plain text message usually in mime format.
     #| args is a name value pair list of mail headers  
-    
-    # Extract bare email address if needed
-    # eg joe@blogs.com from "Joe Bloggs" <joe@bloggs.com>
-    regexp {<([^>]*)>} $mail_from -> mail_from
-    regexp {<([^>]*)>} $rcpt_to -> rcpt_to
 
     # Which SMTP server
     if { [ns_config ns/parameters smtphost] ne "" } {
@@ -254,16 +228,14 @@ proc qc::sendmail {mail_from rcpt_to body args} {
     
     set smtpport 25
     set timeout 60
-    set lheaders {}
+    set headers {}
 
     ## CONSTRUCT THE MESSAGE ##
     # Start with headers
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     foreach {name value} $args {
-	lappend lheaders [email_header_fold "$name: $value"]
-	#lappend lheaders "$name: $value"
+	lappend headers [email_header_fold "$name: $value"]
     }
-    set msg [join $lheaders \r\n]
+    set msg [join $headers \r\n]
 
     # Blank line between headers and body
     append msg \r\n\r\n
@@ -294,10 +266,14 @@ proc qc::sendmail {mail_from rcpt_to body args} {
 	qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
 	qc::smtp_recv $rfp 250 $timeout
 	
+	foreach rcpt_to $rcpts {
+	    qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
+	    qc::smtp_recv $rfp 250 $timeout	
+	}
 
-	qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
-	qc::smtp_recv $rfp 250 $timeout	
-	
+	#qc::smtp_send $wfp "SIZE=[string bytelength $msg]" $timeout
+	#qc::smtp_recv $rfp 250 $timeout
+
 	qc::smtp_send $wfp DATA $timeout
 	qc::smtp_recv $rfp 354 $timeout
 	qc::smtp_send $wfp $msg $timeout

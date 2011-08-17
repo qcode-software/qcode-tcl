@@ -40,7 +40,7 @@ proc qc::error_handler { } {
 	    }
 	    if { [qc::param_exists email_support] } {
 		set subject "Bug [string range $errorMessage 0 75]"
-		qc::email_html "nsd@[ns_info hostname]" [qc::param email_support] $subject [qc::error_report]
+		qc::email_send from "nsd@[ns_info hostname]" to [qc::param email_support] subject $subject html [qc::error_report]
 	    }
 	}
     }
@@ -157,3 +157,4 @@ proc qc::error_report_cookies {} {
     }
     return $report
 }
+
