@@ -245,7 +245,7 @@ proc qc::html2text { html } {
     if { ![nsv_exists which html2text] } {
 	nsv_set which html2text [exec_proxy which html2text]
     }
-    return [exec_proxy [nsv_get which html2text] -utf8 << $html]
+    return [exec_proxy [nsv_get which html2text] -nobs << $html]
 }
 
 proc qc::html_info_tables {args} {
