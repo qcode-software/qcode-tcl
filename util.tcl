@@ -623,13 +623,17 @@ proc exec_proxy {args} {
     } else {
 	set timeout 1000
     }
-    set handle [ns_proxy get exec]
-    try {
-	set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
-	ns_proxy release $handle
-	return $result
-    } {
-	ns_proxy release $handle
-	error $::errorMessage $::errorInfo $::errorCode
+    if { ![catch {set handle [ns_proxy get exec]}] } {
+	try {
+	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
+	    ns_proxy release $handle
+	    return $result
+	} {
+	    ns_proxy release $handle
+	    error $::errorMessage $::errorInfo $::errorCode
+	}
+    } else {
+	# No ns_proxy
+	exec {*}$args
     }
 }
