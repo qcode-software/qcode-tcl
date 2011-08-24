@@ -73,7 +73,7 @@ proc qc::email_send {args} {
 	}
     }
     if { [info exists attachments] } {
-	if { [ldict_exists $attachments cid] } {
+	if { [ldict_exists $attachments cid] != -1 } {
 	    # if any attachment specifies a Content-ID via key cid then type is related
 	    set {content-type} multipart/related
 	} else {
