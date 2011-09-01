@@ -37,6 +37,10 @@ proc qc::return_csv { string } {
     ns_return 200 "text/csv; charset=utf-8" $string
 }
 
+proc qc::return_soap+xml { string } { 
+    ns_return 200 "application/soap+xml; charset=utf-8" $string
+}
+
 proc qc::return_headers {} {
     set list {}
     lappend list "HTTP/1.0 200 OK"
