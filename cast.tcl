@@ -179,7 +179,7 @@ proc qc::cast_epoch { string } {
 	return [clock scan "$year-$month-$day"]
     }
     #### RELATIVE ####
-    if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day)s?( ago)?} $string] \
+    if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day|hour|minute)s?( ago)?} $string] \
 	     || [regexp -nocase -- {(this|last|next) (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thurs|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)} $string] \
 	     || [regexp -nocase -- {today|yesterday|tomorrow} $string] } {
 	return [clock scan $string]

@@ -83,7 +83,7 @@ proc qc::widget_text { args } {
     if { [info exists this(disabled)] && [string is true $this(disabled)] } {
 	return [html span $this(value)][html_tag input type hidden name $this(name) value $this(value) id $this(id)]
     } else {
-	return [html_tag input [qc::dict_exclude [array get this] label width units]]
+	return [html_tag input [qc::dict_exclude [array get this] required label width units]]
     }
 }
 
@@ -112,7 +112,7 @@ proc qc::widget_compare { args } {
     default this(sticky) no
     set html [qc::widget_select name $this(name)_op type select options $this(options) value $this(operator) sticky $this(sticky)]
     append html " "
-    append html [qc::widget_text {*}[qc::dict_exclude $args operator options sticky]]
+    append html [qc::widget_text {*}[qc::dict_exclude $args required operator options sticky]]
 
     return $html
 }
@@ -290,7 +290,7 @@ proc qc::widget_select { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html_tag select [qc::dict_exclude [array get this] label type options null_option value units]]
+    set html [html_tag select [qc::dict_exclude [array get this] required label type options null_option value units]]
     append html \n
     if { [string is true $this(null_option)] } {
 	append html "<option value=\"\">- Select -</option>\n"

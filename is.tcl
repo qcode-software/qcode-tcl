@@ -150,6 +150,13 @@ proc qc::is_creditcard { no } {
     }
 }
 
+proc qc::is_creditcard_masked { no } {
+    regsub -all {[^0-9\*]} $no "" no
+
+    # 13-19 chars masked with < 6 prefix and < 4 suffix digits
+    return [expr [regexp {[0-9\*]{13,19}} $no] && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $no]]
+}
+
 proc qc::is_varchar {string length} {
     if { [string length $string]<=$length } {
 	return 1
@@ -175,7 +182,6 @@ proc is_int_castable {string} {
 	return false
     }
 }
-
 
 proc is_decimal_castable {string} {
     try {
