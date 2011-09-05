@@ -369,13 +369,16 @@ proc email_header_fold {string} {
     # Fold header into lines starting with a space as per rfc2822
     set width 78
 
+    # Convert to unix newlines for processing
+    regsub -all {\r\n} $string \n string
+
     set start 0
     set list {}
     while { $start<[string length $string] && [regexp -indices -start $start -- {(\"[^\"]+\")|(\([^\)]+\))|([^ ]+)} $string match] } {
 	set atom [string range $string [lindex $match 0] [lindex $match 1]]
 	# If characters above 127 then encode
 	if { [regexp {([\u007F-\u00FF])} $atom] } {
-	    set list [concat $list [split [mime::word_encode utf-8 quoted-printable $atom] \r\n]]
+	    set list [concat $list [split [mime::word_encode utf-8 quoted-printable $atom] \n]]
 	} else {
 	    lappend list $atom
 	}
@@ -392,8 +395,7 @@ proc email_header_fold {string} {
 	}
     }
     lappend result $line
-
-    return [string map {\r\n "\r\n "} [join $result \r\n]]
+    return [string map {\n "\r\n "} [join $result \r\n]]
 }
 
 # Alternative approach to parsing email into mutimap adta structure
