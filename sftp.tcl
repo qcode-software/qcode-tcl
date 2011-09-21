@@ -9,7 +9,7 @@ proc qc::sftp_put {args} {
 	nsv_set which curl [exec_proxy which curl]
     }
     
-    set file [open "|[nsv_get which curl] -k -T - -u $username:$password $url" w]
+    set file [open "|[nsv_get which curl] -k -T - -u $username:$password $url 2>/dev/null" w]
     puts -nonewline $file $data
     close $file
 }
