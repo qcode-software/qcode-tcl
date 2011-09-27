@@ -565,6 +565,42 @@ proc md5 {string} {
     return $md5
 }
 
+proc qc::key_gen { args } {
+    args $args -lower -upper -int -- length
+    if { $length < 3} {error "min length 3"}
+
+    if { [info exists lower] } {
+	lappend char_types lower
+    }
+    if { [info exists upper] } {
+	lappend char_types upper
+    }
+    if { [info exists int] } {
+	lappend char_types int
+    }
+    default char_types [list lower upper int]
+
+    # Hard-code as mixed up alphabets to make key_gen even more random.
+    set alphabet_lower [list r y c t b p x o k j w h z d s f i a m q v n g u e l]
+    set alphabet_upper [list F U D E S G T X L N Q O A J H P M Y R Z I C B V W K]
+    set alphabet_int [list 0 8 4 5 3 1 2 6 9 7]
+
+    # Add random char from randomly selected char_type.
+    set chars {}
+    while { [llength $chars] < ($length - [llength $char_types])} {
+	set char_type [lindex $char_types [expr round(rand()*([llength $char_types] - 1))]]
+	set alphabet [set alphabet_$char_type]
+	lappend chars [lindex $alphabet [expr round(rand()*([llength $alphabet]-1))]]
+    } 
+
+    # Ensure key contains at least one char from each char_type, insert using random index.
+    foreach char_type $char_types {
+	set alphabet [set alphabet_$char_type]
+	set chars [linsert $chars [expr round(rand()*([llength $chars]-1))] [lindex $alphabet [expr round(rand()*([llength $alphabet]-1))]]]
+    }
+    return [join $chars ""]
+}
+
 proc .. {from to {step 1} {limit ""}} {
     set result {}
     # Check month lists
