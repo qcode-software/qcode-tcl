@@ -116,6 +116,11 @@ proc qc::is_date { date } {
     return [regexp {^\d{4}-\d{2}-\d{2}$} $date]   
 }
 
+proc qc::is_timestamp { date } {
+    # timestamps are expected to be in iso format 
+    return [regexp {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$} $date]   
+}
+
 proc qc::is_email { email } {
     return [regexp {^[a-zA-Z0-9_\-.]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
 }
