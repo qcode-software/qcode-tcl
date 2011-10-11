@@ -353,7 +353,7 @@ proc qc::email2multimap {text} {
     return $email
 }
 
-proc email_header_values {key value} {
+proc qc::email_header_values {key value} {
     # Convert
     # Content-Type: multipart/report; report-type=delivery-status; boundary="=_ventus"
     # to dict
@@ -368,7 +368,7 @@ proc email_header_values {key value} {
     return $dict
 }
 
-proc email_header_fold {string} {
+proc qc::email_header_fold {string} {
     # Fold header into lines starting with a space as per rfc2822
     set width 78
 

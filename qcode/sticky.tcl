@@ -1,7 +1,7 @@
 package provide qcode 1.0
 package require doc
 namespace eval qc {}
-proc sticky_save {args} {
+proc qc::sticky_save {args} {
     #args $args -url ? args
     if { [form_var_exists sticky_url] } {
 	set url [url_path [form_var_get sticky_url]]
@@ -22,7 +22,7 @@ proc sticky_save {args} {
     }
 }
 
-proc sticky_get {args} {
+proc qc::sticky_get {args} {
     args $args -url ? -employee_id ? name
     default employee_id [auth]
     default url [url_path [qc::conn_url]]
@@ -30,7 +30,7 @@ proc sticky_get {args} {
     return $value
 }
 
-proc sticky_exists {args} {
+proc qc::sticky_exists {args} {
     args $args -url ? -employee_id ? name
     default employee_id [auth]
     default url [url_path [qc::conn_url]]
@@ -41,7 +41,7 @@ proc sticky_exists {args} {
     }
 }
 
-proc sticky_set {employee_id url name value} {
+proc qc::sticky_set {employee_id url name value} {
     db_0or1row {select value as old_value from sticky where employee_id=:employee_id and url=:url and name=:name} {
 	db_dml "insert into sticky [sql_insert employee_id url name value]"
     } {

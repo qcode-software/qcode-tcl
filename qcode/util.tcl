@@ -4,7 +4,7 @@ namespace eval qc {
     namespace export qc *
 }
 
-proc K {a b} {set a}
+proc qc::K {a b} {set a}
 
 proc qc::try { try_code { catch_code ""} } {
     global errorMessage errorCode errorInfo
@@ -113,7 +113,7 @@ doc default {
     }
 }
 
-proc setif { varName ifValue defaultValue } {
+proc qc::setif { varName ifValue defaultValue } {
     upvar 1 $varName value
     if { ![info exists value] || [string equal $value $ifValue] } {
 	set value $defaultValue
@@ -131,7 +131,7 @@ proc qc::sset { varName value } {
     uplevel "set $varName \[[list subst $value]\]"
 }
 
-proc sappend { varName value } {
+proc qc::sappend { varName value } {
     # strip leading newline
     regsub -all {^\n +} $value {} value
     # strip trailing newline
@@ -175,15 +175,6 @@ proc qc::incr0 { varName amount } {
 
 namespace import ::tcl::mathop::eq
 namespace import ::tcl::mathop::ne
-if { 0 } {
-    proc qc::eq {a b} {
-	if {[string equal $a $b]} {return 1} {return 0}
-    }
-
-    proc qc::ne {a b} {
-	if {[string equal $a $b]} {return 0} {return 1}
-    }
-}
 
 proc qc::call { proc_name args } {
     if { [info args $proc_name] eq "args" } {
@@ -264,7 +255,7 @@ proc qc::iif { expr true false } {
     }
 }
 
-proc ? { expr true false } {
+proc qc::? { expr true false } {
     if { [uplevel 1 eval expr $expr] } {
 	return $true
     } else {
@@ -272,7 +263,7 @@ proc ? { expr true false } {
     }
 }
 
-proc true { string {true true} {false false} } {
+proc qc::true { string {true true} {false false} } {
     if { [string is true -strict $string] } {
 	return $true
     } else {
@@ -280,7 +271,7 @@ proc true { string {true true} {false false} } {
     }
 }
 
-proc false { string {true true} {false false} } {
+proc qc::false { string {true true} {false false} } {
     if { [string is false -strict $string] } {
 	return $true
     } else {
@@ -296,7 +287,7 @@ proc qc::lower { string } {
     return [string tolower $string]
 }
 
-proc trim { string } {
+proc qc::trim { string } {
     return [string trim $string]
 }
 
@@ -316,7 +307,7 @@ proc qc::unescapeHTML { text } {
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
 
-proc xsplit [list str [list regexp "\[\t \r\n\]+"]] {
+proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
     set list  {}
     while {[regexp -indices -- $regexp $str match submatch]} {
 	lappend list [string range $str 0 [expr [lindex $match 0] -1]]
@@ -330,12 +321,12 @@ proc xsplit [list str [list regexp "\[\t \r\n\]+"]] {
     return $list
 }
 
-proc mcsplit {string splitString} {
+proc qc::mcsplit {string splitString} {
     set mc \x00
     return [split [string map [list $splitString $mc] $string] $mc]
 }
 
-proc perct {x n {p 1}} {
+proc qc::perct {x n {p 1}} {
     return [round [expr {double($x)/$n*100}] $p]
 }
 
@@ -359,7 +350,7 @@ proc perct {x n {p 1}} {
 # Then the masculine pronouns are he, his and him,
 # but imagine the feminine, she, shis and shim.
 
-proc plural word {
+proc qc::plural word {
     set exceptions {
 	man men
 	person people
@@ -417,7 +408,7 @@ proc plural word {
     return ${word}s
 }
 
-proc singular word {
+proc qc::singular word {
     switch -- $word {
 	men   {return man}
 	feet  {return foot}
@@ -462,7 +453,7 @@ proc singular word {
     error "Don't know singular for \"$word\""
 }
 
-proc cmplen {string1 string2} {
+proc qc::cmplen {string1 string2} {
     if { [string length $string1]<[string length $string2] } {
 	return -1 
     } elseif {[string length $string1]==[string length $string2] } {
@@ -472,7 +463,7 @@ proc cmplen {string1 string2} {
     }
 }
 
-proc subsets {l n} {
+proc qc::subsets {l n} {
     set subsets [list [list]]
     set result [list]
     foreach e $l {
@@ -488,7 +479,7 @@ proc subsets {l n} {
     return $result
 }
 
-proc permutations {list} {
+proc qc::permutations {list} {
     set res [list [lrange $list 0 0]]
     set posL {0 1}
     foreach item [lreplace $list 0 0] {
@@ -505,7 +496,7 @@ proc permutations {list} {
 }
 
 
-proc split_pair {string delimiter} {
+proc qc::split_pair {string delimiter} {
     # split a string into 2 parts at the delimiter
     set list {}
     if {[set index [string first $delimiter $string]]!=-1} {
@@ -517,7 +508,7 @@ proc split_pair {string delimiter} {
     return $list
 }
 
-proc min_nz {args} {
+proc qc::min_nz {args} {
     # minimum non zero 
     set list {}
     foreach value $args {
@@ -528,7 +519,7 @@ proc min_nz {args} {
     return [min {*}$list]
 }
 
-proc max_nz {args} {
+proc qc::max_nz {args} {
     # max non zero price
     set list {}
     foreach value $args {
@@ -539,7 +530,7 @@ proc max_nz {args} {
     return [max {*}$list]
 }
 
-proc md5 {string} {
+proc qc::md5 {string} {
     db_1row {select md5(:string) as md5}
     return $md5
 }
@@ -627,11 +618,11 @@ proc qc::.. {from to {step 1} {limit ""}} {
     }
 }
 
-proc debug {message} {
+proc qc::debug {message} {
     ns_log Debug $message
 }
 
-proc exec_proxy {args} {
+proc qc::exec_proxy {args} {
     if {[lindex $args 0] eq "-timeout"} {
 	set timeout [lindex $args 1]
 	set args [lrange $args 2 end]

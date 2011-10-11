@@ -1,7 +1,7 @@
 package provide qcode 1.0
 package require doc
 namespace eval qc {}
-proc chart_sales {x_labels values tips key_text} {
+proc qc::chart_sales {x_labels values tips key_text} {
     set y_max [sigfigs_ceil [max {*}$values] 2]
     set x_labels [chart_list2csv $x_labels]
     set values [chart_list2csv $values]
@@ -44,7 +44,7 @@ proc chart_sales {x_labels values tips key_text} {
     return [subst -nocommands -nobackslashes $html]
 }
 
-proc chart_list2csv {list} {
+proc qc::chart_list2csv {list} {
     set csv {}
     foreach item $list {
 	lappend csv [url_encode [regsub -all {,} $item "#comma#"]]

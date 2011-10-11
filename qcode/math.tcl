@@ -113,14 +113,14 @@ proc qc::add { n1 n2 } {
     return $result
 }
 
-proc sum { sum args } {
+proc qc::sum { sum args } {
     foreach arg $args {
 	set sum [add $sum $arg]
     }
     return $sum
 }
 
-proc subtr { n1 n2 } {
+proc qc::subtr { n1 n2 } {
     set result [expr {$n1 - $n2}]
     
     # Check for buffer overflow
@@ -131,7 +131,7 @@ proc subtr { n1 n2 } {
     return $result
 }
 
-proc mult { n1 n2 } {
+proc qc::mult { n1 n2 } {
     set result [expr {$n1*$n2}]
 
     # Check for buffer overflow
@@ -144,7 +144,7 @@ proc mult { n1 n2 } {
     return $result
 }
 
-proc bigadd { n1 n2 } {
+proc qc::bigadd { n1 n2 } {
     # Convert to integers
     lassign [intplaces $n1] n1 p1
     lassign [intplaces $n2] n2 p2
@@ -173,7 +173,7 @@ proc bigadd { n1 n2 } {
     }
 }
 
-proc bigsubtr { n1 n2 } {
+proc qc::bigsubtr { n1 n2 } {
     # $n1 - $n2
 
     # Convert to integers
@@ -205,7 +205,7 @@ proc bigsubtr { n1 n2 } {
 }
 
 
-proc bigmult { n1 n2 } {
+proc qc::bigmult { n1 n2 } {
     # Convert to integers
     lassign [intplaces $n1] n1 p1
     lassign [intplaces $n2] n2 p2
@@ -228,7 +228,7 @@ proc bigmult { n1 n2 } {
     }
 }
 
-proc exp2string { number } {
+proc qc::exp2string { number } {
     # Convert floats including exponentials to strings
     # eg -1.234e-3
     set number [string tolower $number]
@@ -253,7 +253,7 @@ proc exp2string { number } {
     }
 }
 
-proc base {base number} {
+proc qc::base {base number} {
     set negative [regexp ^-(.+) $number -> number] ;# (1)
     set digits {0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N
         O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p
@@ -269,7 +269,7 @@ proc base {base number} {
     set res
  }
 
-proc frombase {base number} {
+proc qc::frombase {base number} {
     set digits {0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N
         O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p
         q r s t u v w x y z}
@@ -286,17 +286,17 @@ proc frombase {base number} {
     set res
 }
 
-proc min {args} {
+proc qc::min {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
     return [lindex [lsort -real $args] 0]
 }
 
-proc max {args} {
+proc qc::max {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
     return [lindex [lsort -real -decreasing $args] 0]
 }
 
-proc min2 {args} {
+proc qc::min2 {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
     if { [eq [lindex $args 0] -integer] } { 
 	set type integer
@@ -320,7 +320,7 @@ proc min2 {args} {
     return [lindex [lsort -$type $args] 0]
 }
 
-proc max2 {args} {
+proc qc::max2 {args} {
     if { [llength $args]==1 } {set args [lindex $args 0]}
  if { [eq [lindex $args 0] -integer] } { 
 	set type integer
@@ -344,7 +344,7 @@ proc max2 {args} {
     return [lindex [lsort -$type -decreasing $args] 0]
 }
 
-proc mantissa_exponent {x} {
+proc qc::mantissa_exponent {x} {
     if { $x==0 } { return [list 0 0] }
     set m $x;set e 0
     while { abs($m) >=10 } { incr e; set m [expr {double($m)/10}] }
@@ -352,7 +352,7 @@ proc mantissa_exponent {x} {
     return [list $m $e]
 }
 
-proc sigfigs {x n} {
+proc qc::sigfigs {x n} {
     if { $x==0 } { return 0 }
     lassign [mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]
@@ -363,7 +363,7 @@ proc sigfigs {x n} {
     }
 }
 
-proc sigfigs_ceil {x n} {
+proc qc::sigfigs_ceil {x n} {
     if { $x==0 } { return 0 }
     lassign [mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]

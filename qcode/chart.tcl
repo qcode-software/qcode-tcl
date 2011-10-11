@@ -4,7 +4,7 @@ namespace eval qc {}
 ### chart.tcl ###
 
 # New Charts by Daniel Clark 
-proc ofc_piechart {args} {
+proc qc::ofc_piechart {args} {
 
     args $args -id "" -title {} -animate false -width 100% -height 50% -- data
     
@@ -111,7 +111,7 @@ proc /doc/ofc_pie_examples.html {} {
     qc::return_html $html
 }
 
-proc ofc_linechart {args} {
+proc qc::ofc_linechart {args} {
 
     args $args -id "" -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- lines
     
@@ -319,7 +319,7 @@ proc /doc/ofc_line_examples.html {} {
     qc::return_html $html
 }
 
-proc ofc_line_element {label color data} {
+proc qc::ofc_line_element {label color data} {
     # return tson for the ofc element
     # each ofc element describes one line
 
@@ -343,7 +343,7 @@ proc ofc_line_element {label color data} {
     return [list $tson $x_labels [min {*}$values] [max {*}$values]]
 }
 
-proc ofc_barchart {args} {
+proc qc::ofc_barchart {args} {
 
     args $args -id "" -title {} -x_axis {} -y_axis {} -width 100% -height 50% -- bars
     
@@ -536,7 +536,7 @@ proc /doc/ofc_bar_examples.html {} {
     qc::return_html $html
 }
 
-proc ofc_bar2tson {colors data} {
+proc qc::ofc_bar2tson {colors data} {
     # return tson for the ofc element
     # each ofc values describes one bar
     
@@ -560,7 +560,7 @@ proc ofc_bar2tson {colors data} {
     return [list $tson_values $tson_keys $pos_total $neg_total]
 }
 
-proc ofc_step {min max} {
+proc qc::ofc_step {min max} {
     # Determine a step value to be used to display a chart with 10 divisions. 
     # Step size should be rounded up to only one sig fig 
     # in order to have nicer increments 
@@ -573,7 +573,7 @@ proc ofc_step {min max} {
     }
 }
 
-proc ofc_colors {{no_of_elements 1}} {
+proc qc::ofc_colors {{no_of_elements 1}} {
     # 10 preset web safe colours to colour chart elements, if number of elements is odd use 11 instead.
     # #336699/*dark blue*/ #666600/*dark green*/ #CC9933/*dark orange*/ #993366/*dark red*/ 
     # #CCCCCC/*light gray*/ #6699CC/*light blue*/ #999900/*light green*/ #FFCC66/*light orange*/ 
@@ -588,7 +588,7 @@ proc ofc_colors {{no_of_elements 1}} {
     return $colors
 }
 
-proc ofc_html {id json width height} {   
+proc qc::ofc_html {id json width height} {   
 
     # html to construct ofc object.
     sset html {

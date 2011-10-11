@@ -1,7 +1,7 @@
 package provide qcode 1.0
 package require doc
 namespace eval qc {}
-proc csv2list {csv} {
+proc qc::csv2list {csv} {
     return [lindex [qc::csv2ll $csv] 0]
 }
 

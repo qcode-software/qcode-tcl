@@ -158,7 +158,7 @@ doc Args {
     }
 }
 
-proc args2dict {callers_args} {
+proc qc::args2dict {callers_args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Return dict of resulting name value pairs.
@@ -206,7 +206,7 @@ doc args2dict {
 }
 
     
-proc args2vars {callers_args args} {
+proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Dict - set all variables or just those specified that exists in the dict
@@ -235,7 +235,7 @@ proc args2vars {callers_args args} {
     return $varNames
 }
 
-doc args2vars {
+doc qc::args2vars {
     Parent Args
     Description {
 	Parse callers args. Interpret as regular dict unless first item is ~ in which case interpret as a list of variable names to pass-by-name.
@@ -278,7 +278,7 @@ doc args2vars {
 }
 
 
-proc arg_options_split {callers_args} {
+proc qc::arg_options_split {callers_args} {
     # Return two lists for options pairs and other args
     set options {}
     set others {}
@@ -300,7 +300,7 @@ proc arg_options_split {callers_args} {
     return [list $options $others]
 }				    
 
-proc args_by_name2dict {args} {
+proc qc::args_by_name2dict {args} {
     # Convert args list of mixed varNames and "option pairs" to a dict.
     if { [llength $args]==1 } {set args [lindex $args 0]}
     set index 0
@@ -309,7 +309,7 @@ proc args_by_name2dict {args} {
     return $dict
 }				    
 
-proc args_by_name2vars {args} {
+proc qc::args_by_name2vars {args} {
     # Set variables in caller's namespace using a mixed varNames and "option pairs" list of args
     if { [llength $args]==1 } {set args [lindex $args 0]}
     set index 0
@@ -320,7 +320,7 @@ proc args_by_name2vars {args} {
     return [concat [dict keys $options] $varNames]
 }				    
 
-proc args_check_required {callers_args args} {
+proc qc::args_check_required {callers_args args} {
     # Assume callers_args is a dict of name value pairs
     # check that all the keys given exist.
 
@@ -331,7 +331,7 @@ proc args_check_required {callers_args args} {
     }
 }
 
-proc args_split {callers_args {switch_names ""}} {
+proc qc::args_split {callers_args {switch_names ""}} {
     # Return two lists for options pairs and other args
     set switches {}
     set options {}
@@ -365,7 +365,7 @@ proc args_split {callers_args {switch_names ""}} {
     return [list $switches $options $others]
 }	
 
-proc args {callers_args args} {
+proc qc::args {callers_args args} {
     lassign [args_split $args] switches options others
     lassign [args_split $callers_args $switches] callers_switches callers_options callers_others
 

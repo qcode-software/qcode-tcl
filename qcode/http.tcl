@@ -156,7 +156,7 @@ proc qc::http_header_encoding { dict } {
 #   From v0.82 tDom lib/tdom.tcl
 #----------------------------------------------------------------------------
 
-proc IANAEncoding2TclEncoding {IANAName} {
+proc qc::IANAEncoding2TclEncoding {IANAName} {
     
     switch [string tolower $IANAName] {
         "us-ascii"    {return ascii}

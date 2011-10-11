@@ -147,7 +147,7 @@ proc qc::is_varchar {string length} {
     }
 }
 
-proc is_base64 {string} {
+proc qc::is_base64 {string} {
     if { [regexp {^[A-Za-z0-9/+\r\n]+=*$} $string] \
 	&& ([string length $string]-[regexp -all -- \r?\n $string])*6%8==0 } {
 	return 1
@@ -156,7 +156,7 @@ proc is_base64 {string} {
     }
 }
 
-proc is_int_castable {string} {
+proc qc::is_int_castable {string} {
     try {
 	cast_integer $string
 	return true
@@ -165,7 +165,7 @@ proc is_int_castable {string} {
     }
 }
 
-proc is_decimal_castable {string} {
+proc qc::is_decimal_castable {string} {
     try {
 	cast_decimal $string
 	return true
@@ -174,7 +174,7 @@ proc is_decimal_castable {string} {
     }
 }
 
-proc is_date_castable {string} {
+proc qc::is_date_castable {string} {
     try {
 	cast_date $string
 	return true
@@ -183,7 +183,7 @@ proc is_date_castable {string} {
     }
 }
 
-proc is_timestamp_castable {string} {
+proc qc::is_timestamp_castable {string} {
     try {
 	cast_timestamp $string
 	return true
@@ -192,7 +192,7 @@ proc is_timestamp_castable {string} {
     }
 }
 
-proc is_mobile_number {string} {
+proc qc::is_mobile_number {string} {
     # mobile telephone number
     regsub -all {[^0-9]} $string {} tel_no
     if {  [regexp {^07(5|7|8|9)[0-9]{8}$} $tel_no] } {
@@ -202,7 +202,7 @@ proc is_mobile_number {string} {
     }
 }
 
-proc contains_creditcard {string} {
+proc qc::contains_creditcard {string} {
     set re {
 	(?:^|[^0-9])
 	(

@@ -1,7 +1,7 @@
 package provide qcode 1.0
 package require doc
 namespace eval qc {}
-proc tson_object { args } {
+proc qc::tson_object { args } {
     # return a tson object from list of name value pairs in args
     # Cannot be used to create nested objects
     # EXAMPLE:  
@@ -21,11 +21,11 @@ proc tson_object { args } {
     return $tson
 }
 
-proc json_quote {value} {
+proc qc::json_quote {value} {
     return "\"[string map {\" \\\" \\ \\\\ \n \\n \r \\r \f \\f \b \\b \t \\t} $value]\""
 }
 
-proc tson2json { tson } {
+proc qc::tson2json { tson } {
     switch -- [lindex $tson 0] {
 	object {
 	    set list {}

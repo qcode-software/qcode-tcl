@@ -53,7 +53,7 @@ doc sql_set_varchars_truncate {
 }
 
 
-proc sql_set_with {args} {
+proc qc::sql_set_with {args} {
     foreach {name value} $args {
 	lappend set_list "\"$name\"=[db_quote $value]"
     }
@@ -90,7 +90,7 @@ doc sql_insert {
     }
 }
 
-proc sql_insert_with { args } {
+proc qc::sql_insert_with { args } {
     foreach {name value} $args {
 	lappend cols "\"$name\""
 	lappend values [db_quote $value]
@@ -186,7 +186,7 @@ doc sql_sort {
     }
 }
 
-proc sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan feb mar apr may jun jul aug sep oct nov dec}}} {
+proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan feb mar apr may jun jul aug sep oct nov dec}}} {
     set alt_value [db_quote $alt_value]
     foreach month {1 2 3 4 5 6 7 8 9 10 11 12} {
 	lappend list "CASE WHEN extract(month from $date_col)=$month THEN $value_col ELSE $alt_value END as [lindex $col_names [expr {$month-1}]]"
@@ -194,7 +194,7 @@ proc sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan fe
     return [join $list ,\n]
 }
 
-proc sql_in {list} {
+proc qc::sql_in {list} {
      set sql {}
     foreach value $list {
 	lappend sql [db_quote $value]
@@ -206,12 +206,12 @@ proc sql_in {list} {
     }
 }
 
-proc sql_array2list {array} {
+proc qc::sql_array2list {array} {
     set list [csv2list [string map [list \{ "" \} "" \\\" \"\"] $array]]
     return [lreplace_values $list NULL ""]
 }
 
-proc sql_list2array {list} {
+proc qc::sql_list2array {list} {
     foreach item $list {
 	lappend lquoted [db_quote $item]
     }

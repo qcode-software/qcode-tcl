@@ -89,11 +89,11 @@ proc qc::url_here {} {
     return [qc::form2url [qc::conn_url]]
 }
 
-proc url_encode {string {charset utf-8}} {
+proc qc::url_encode {string {charset utf-8}} {
     return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
 }
 
-proc url_path {url} {
+proc qc::url_path {url} {
     set path $url
     regexp {^([^\?]+)} $url -> path
     return $path

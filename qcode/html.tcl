@@ -1,7 +1,7 @@
 package provide qcode 1.0
 package require doc
 namespace eval qc {}
-proc html2pdf { args } {
+proc qc::html2pdf { args } {
     # usage html2pdf ?-encoding encoding? ?-timeout timeout? html
     args $args -encoding base64 -timeout 20 html
     if { ![in {base64 binary} $encoding] } {
@@ -407,7 +407,7 @@ proc qc::html_col_styles_apply2td {html} {
     return $html
 }
 
-proc html_clean {html} {
+proc qc::html_clean {html} {
 
     # Get rid of unnecessary tags
     regsub -all -- {<(/?o:|/?st[0-9]|!\[|\?xml)[^>]*>} $html {} html
@@ -472,7 +472,7 @@ proc html_clean {html} {
     return $html
 }
 
-proc html2textlite {html} {
+proc qc::html2textlite {html} {
     # Will try to expand this to deal with block and inline elements but initially just preserve whitespace and newlines.
     set html [string map [list <br> \r\n] $html]
     return [ns_striphtml $html]

@@ -90,7 +90,7 @@ proc qc::lmove {list from to} {
     return [linsert [lreplace $list $from $from] $to [lindex $list $from]]
 }
 
-proc lunique {list} {
+proc qc::lunique {list} {
     set result {}
     foreach item $list {
 	if {![info exists u($item)]} {
@@ -110,6 +110,10 @@ proc qc::lsort_using { list order } {
     return $list
 }
 
+# ::tcl::mathop::in has different argument sequence
+#namespace import ::tcl::mathop::in
+#namespace import ::tcl::mathop::ni
+
 proc qc::in { list item } {
     set list [lsort $list]
     if {[lsearch -sorted -increasing $list $item] == -1 } {
@@ -118,6 +122,7 @@ proc qc::in { list item } {
 	return 1
     }
 }
+
 
 proc qc::lpage { list page_length } {
     set lpage {}
@@ -162,18 +167,18 @@ proc qc::list2csv {list {comma ,}} {
     return $out
 }
 
-proc lconcat {listVar list} {
+proc qc::lconcat {listVar list} {
     upvar $listVar var
     set var [concat $var $list]
 }
 
-proc flatten {list} {
+proc qc::flatten {list} {
     set newList {}
     foreach e $list {foreach ee $e {lappend newList $ee}}
     return $newList
 }
 
-proc lsum {list} {
+proc qc::lsum {list} {
     set total 0
     foreach number $list {
 	set total [expr {$total+$number}]
@@ -181,11 +186,11 @@ proc lsum {list} {
     return $total
 }
 
-proc laverage {list} {
+proc qc::laverage {list} {
     return [expr {double([lsum $list])/[llength $list]}]
 }
 
-proc lreplace_values {list find replace} {
+proc qc::lreplace_values {list find replace} {
     set index [lsearch -exact $list $find]
     while { $index!=-1 } {
 	set list [lreplace $list $index $index $replace]
@@ -194,7 +199,7 @@ proc lreplace_values {list find replace} {
     return $list
 }
 
-proc lapply { func list } {
+proc qc::lapply { func list } {
     set result {}
     foreach item $list {
         lappend result [$func $item]
