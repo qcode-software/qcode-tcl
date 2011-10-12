@@ -537,38 +537,28 @@ proc qc::md5 {string} {
 
 proc qc::key_gen { args } {
     args $args -lower -upper -int -- length
-    if { $length < 3} {error "min length 3"}
+
+    set alphabet_lower [list a b c d e f g h i j k l m n o p q r s t u v w x y z]
+    set alphabet_upper [list A B C D E F G H I J K L M N O P Q R S T U V W X Y Z]
+    set alphabet_int [list 0 1 2 3 4 5 6 7 8 9]
 
     if { [info exists lower] } {
-	lappend char_types lower
+	lappend alphabet {*}$alphabet_lower
     }
     if { [info exists upper] } {
-	lappend char_types upper
+	lappend alphabet {*}$alphabet_upper
     }
     if { [info exists int] } {
-	lappend char_types int
+	lappend alphabet {*}$alphabet_int
     }
-    default char_types [list lower upper int]
+    default alphabet [concat $alphabet_lower $alphabet_upper $alphabet_int]
 
-    # Hard-code as mixed up alphabets to make key_gen even more random.
-    set alphabet_lower [list r y c t b p x o k j w h z d s f i a m q v n g u e l]
-    set alphabet_upper [list F U D E S G T X L N Q O A J H P M Y R Z I C B V W K]
-    set alphabet_int [list 0 8 4 5 3 1 2 6 9 7]
-
-    # Add random char from randomly selected char_type.
-    set chars {}
-    while { [llength $chars] < ($length - [llength $char_types])} {
-	set char_type [lindex $char_types [expr round(rand()*([llength $char_types] - 1))]]
-	set alphabet [set alphabet_$char_type]
-	lappend chars [lindex $alphabet [expr round(rand()*([llength $alphabet]-1))]]
+    set key ""
+    while { [string length $key] < $length } {
+	append key [lindex $alphabet [expr int(rand()*[llength $alphabet]) ]]
     } 
 
-    # Ensure key contains at least one char from each char_type, insert using random index.
-    foreach char_type $char_types {
-	set alphabet [set alphabet_$char_type]
-	set chars [linsert $chars [expr round(rand()*([llength $chars]-1))] [lindex $alphabet [expr round(rand()*([llength $alphabet]-1))]]]
-    }
-    return [join $chars ""]
+    return $key
 }
 
 proc qc::.. {from to {step 1} {limit ""}} {
