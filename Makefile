@@ -11,18 +11,19 @@ REMOTEDIR=debian.qcode.co.uk
 
 all: package upload clean incr-release
 package:
-	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc" make install
+	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc" make install
 
 install:
 	./pkg_mkIndex $(PACKAGEDIR)
-	rsync $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
+	rsync --delete -av --include "*.tcl" --include LICENSE --exclude "*" $(PACKAGEDIR)/ /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
 
 upload:
-	scp  $(NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
+	scp $(NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) remove squeeze $(NAME)
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb squeeze $(REMOTEDIR)/debs/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 clean:
+	sleep 1
 	ssh  $(REMOTEUSER)@$(REMOTEHOST) rm $(REMOTEDIR)/debs/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 	rm $(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
