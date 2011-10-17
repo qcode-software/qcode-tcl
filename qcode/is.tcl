@@ -221,3 +221,7 @@ proc qc::contains_creditcard {string} {
     }
     return false
 }
+
+proc qc::is_hex {string} {
+    return [regexp -nocase {^[0-9a-f]*$} $string]
+}
