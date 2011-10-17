@@ -1,10 +1,11 @@
-package provide qcode 1.0
+package provide qcode 1.1
 package require doc
 namespace eval qc {}
 proc qc::file_temp {text {mode 0600}} {
     #| Write the text $text out into a temporary file
     #| and return the name of the file.
-    set filename [ns_mktemp /tmp/ns.XXXXXX]
+    package require fileutil
+    set filename [fileutil::tempfile]
     set out [open $filename w $mode]
     puts -nonewline $out $text
     close $out

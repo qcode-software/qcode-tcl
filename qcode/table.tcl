@@ -1,4 +1,4 @@
-package provide qcode 1.0
+package provide qcode 1.1
 package require doc
 namespace eval qc {}
 doc table {
