@@ -23,8 +23,6 @@ upload:
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb squeeze $(REMOTEDIR)/debs/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 clean:
-	sleep 1
-	ssh  $(REMOTEUSER)@$(REMOTEHOST) rm $(REMOTEDIR)/debs/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 	rm $(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 incr-release:
