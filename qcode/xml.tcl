@@ -18,7 +18,7 @@ proc qc::xml { tagName nodeValue {dict_att ""} } {
 proc qc::xml_escape { string } {
     # 
     # Escape < > &
-    set string [ns_quotehtml $string]
+    set string [html_escape $string]
     # Escape characters with value at or above 127
     # Escape characters used by subst i.e. []$\ 
     regsub -all {[][$\\]} $string {\\&} string

@@ -91,6 +91,10 @@ doc html_tag {
     }
 }
 
+proc qc::html_escape {html} {
+    return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
+}
+
 proc qc::html_hidden { args } {
     #| Create hidden fields from vars
     if { [llength $args]==1 } {set args [lindex $args 0]}

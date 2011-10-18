@@ -63,7 +63,7 @@ proc qc::error_report {} {
 	    <b>remoteip:</b>[qc::conn_remote_ip]<br>
 	    <b>time:</b>[clock format [ns_time]]<br>
 	    <b>errorMessage:</b> $errorMessage <br>
-	    <b>errorInfo:</b> <pre>[ns_quotehtml $errorInfo]</pre><br>
+	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
 	    <b>errorCode:</b> $errorCode
 	    <p>
 	    <h3>Form Variables:</h3>
@@ -80,7 +80,7 @@ proc qc::error_report {} {
 	    <b>hostname:</b>[ns_info hostname]<br>
 	    <b>time:</b>[clock format [ns_time]]<br>
 	    <b>errorMessage:</b> $errorMessage <br>
-	    <b>errorInfo:</b> <pre>[ns_quotehtml $errorInfo]</pre><br>
+	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
 	    <b>errorCode:</b> $errorCode
 	    <p>
 	    </html>
@@ -98,7 +98,7 @@ proc qc::error_report_no_conn {} {
         <b>hostname:</b>[ns_info hostname]<br>
         <b>time:</b>[clock format [ns_time]]<br>
         <b>errorMessage:</b> $errorMessage <br>
-        <b>errorInfo:</b> <pre>[ns_quotehtml $errorInfo]</pre><br>
+        <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
         <b>errorCode:</b> $errorCode
         <p>
         </html>

@@ -27,7 +27,7 @@ proc qc::html_table_db {args} {
 	    for {set rowIndex 0} {$rowIndex < [llength $tbody]} {incr rowIndex} {
 		# Try to test if the cell exists but lindex only returns empty string
 		if { [ne [set cell [lindex $tbody $rowIndex $colIndex]] ""] } {
-		    lset tbody $rowIndex $colIndex [ns_quotehtml $cell]
+		    lset tbody $rowIndex $colIndex [html_escape $cell]
 		}
 	    }
 	}

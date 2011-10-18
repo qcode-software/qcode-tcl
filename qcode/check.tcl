@@ -231,7 +231,7 @@ proc qc::check {args} {
 		    default errorMessage [not_$type $varName $varValue] 
 		}
 	    } else {
-		default errorMessage "\"$varValue\" is not a valid $type for $varName"
+		default errorMessage "\"[html_escape $varValue]\" is not a valid $type for $varName"
 	    }
 	    error $errorMessage {} USER
 	}
@@ -239,12 +239,12 @@ proc qc::check {args} {
 
     # HTML Markup OFF by default
     if { !$allow_html && [regexp {<[^>]+>} $varValue] } {
-	error "\"[string map {< &lt; > &gt;} $varValue]\" contains HTML which is not allowed for $varName" {} USER
+	error "\"[html_escape $varValue]\" contains HTML which is not allowed for $varName" {} USER
     }
 
     # Check contains creditcard by default
     if { !$allow_creditcards && [contains_creditcard $varValue] } {
-	error [expr {[info exists errorMessage] ? $errorMessage : "\"$varValue\" contains a creditcard number which is not allowed for $varName"}] {} USER
+	error [expr {[info exists errorMessage] ? $errorMessage : "\"[html_escape $varValue]\" contains a creditcard number which is not allowed for $varName"}] {} USER
     }
 
     return true
