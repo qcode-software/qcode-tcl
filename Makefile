@@ -15,7 +15,9 @@ package:
 
 install:
 	./pkg_mkIndex $(PACKAGEDIR)
-	rsync --delete -av --include "*.tcl" --include LICENSE --exclude "*" $(PACKAGEDIR)/ /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
+	mkdir -p /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
+	cp $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)/
+	cp LICENSE /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)/
 
 upload:
 	scp $(NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
@@ -24,9 +26,10 @@ upload:
 
 clean:
 	rm $(NAME)_$(VERSION)-$(RELEASE)_all.deb
+	ssh  $(REMOTEUSER)@$(REMOTEHOST) rm $(REMOTEDIR)/debs/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 incr-release:
 	./incr-release-number.tcl
 
 uninstall:
-	rm -r /usr/lib/tcltk/$(PACKAGEDIR)
+	rm -r /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
