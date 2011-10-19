@@ -51,9 +51,9 @@ proc qc::return_chunk {string} {
 }
 
 proc qc::return_next { next_url } {   
+    set port [ns_set iget [ns_conn headers] Port]
+    set host [ns_set iget [ns_conn headers] Host]
     if { ![regexp {^https?://} $next_url] } {
-	set port [ns_set iget [ns_conn headers] Port]
-	set host [ns_set iget [ns_conn headers] Host]
 	set next_url [string trimleft $next_url /]
 	if { [ne $host ""] } {
 	    if { [eq $port 443] } {
@@ -64,6 +64,14 @@ proc qc::return_next { next_url } {
 		set next_url "http://$host/$next_url"
 	    }
 	}
+    }
+    # check that redirection is to the same domain
+    if { ![regexp "^https?://$host" $next_url] } {
+	error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
+    }
+    # check for malicious mal-formed url
+    if { ![is_url $next_url] } {
+	error "\"[html_escape $next_url]\" is not a valid url."
     }
     ns_returnredirect $next_url
 }

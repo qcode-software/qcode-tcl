@@ -225,3 +225,23 @@ proc qc::contains_creditcard {string} {
 proc qc::is_hex {string} {
     return [regexp -nocase {^[0-9a-f]*$} $string]
 }
+
+proc qc::is_url {url} {
+    #| This is a more restrictive subset of all legal uri's defined by RFC 3986
+    #| Relax as needed
+    return [regexp -expanded {
+	# protocol
+	^https?://
+	# domain
+	[a-z0-9\-\.]
+	# port
+	(:[0-9]+)?
+	# path
+	([a-zA-Z0-9_\-\.~+/%]+)?
+	# query
+	(\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+	# anchor
+	(\#[a-zA-Z0-9_\-\.~+/%]+)?
+	$
+    } $url]
+}
