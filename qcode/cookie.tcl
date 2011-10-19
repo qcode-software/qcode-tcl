@@ -76,6 +76,7 @@ proc qc::cookie_set {name value args} {
     # which is supposed to supersede Expires RFC 2109
     array set option $args
     default option(secure) false
+    default option(http_only) true
     default option(path) /
     set headers [ns_conn outputheaders]
     set cookie "[url_encode $name]=[url_encode $value]"
@@ -98,6 +99,10 @@ proc qc::cookie_set {name value args} {
 
     if { [string is true $option(secure)] } {
         append cookie "; secure"
+    }
+
+    if { [string is true $option(http_only)] } {
+        append cookie "; HttpOnly"
     }
 
     ns_set put $headers "Set-Cookie" $cookie
