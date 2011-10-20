@@ -66,7 +66,7 @@ proc qc::return_next { next_url } {
 	}
     }
     # check that redirection is to the same domain
-    if { ![regexp "^https?://$host" $next_url] } {
+    if { ![regexp "^https?://${host}(/|\$)" $next_url] } {
 	error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
     }
     # check for malicious mal-formed url
