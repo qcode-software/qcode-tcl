@@ -76,7 +76,8 @@ proc qc::cookie_set {name value args} {
     # which is supposed to supersede Expires RFC 2109
     array set option $args
     default option(secure) false
-    default option(http_only) false
+    # http_only means cookie is not available to JavaScript.
+    default option(http_only) true
     default option(path) /
     set headers [ns_conn outputheaders]
     set cookie "[url_encode $name]=[url_encode $value]"
