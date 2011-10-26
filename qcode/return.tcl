@@ -51,6 +51,7 @@ proc qc::return_chunk {string} {
 }
 
 proc qc::return_next { next_url } {   
+    #| Redirect to an internal url
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
     if { ![regexp {^https?://} $next_url] } {
