@@ -233,7 +233,7 @@ proc qc::is_url {url} {
 	# protocol
 	^https?://
 	# domain
-	[a-z0-9\-\.]
+	[a-z0-9\-\.]+
 	# port
 	(:[0-9]+)?
 	# path
