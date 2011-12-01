@@ -440,9 +440,9 @@ proc qc::email_support { args } {
     lappend email_args to [param email_support]
     lappend email_args subject [qc::format_cc_masked_string $subject]
     if { [info exists html] } {
-	lappend email_args html $html
+	lappend email_args html [qc::format_cc_masked_string $html]
     } else {
-	lappend email_args text $text
+	lappend email_args text [qc::format_cc_masked_string $text]
     }
     qc::email_send {*}$email_args
 }
