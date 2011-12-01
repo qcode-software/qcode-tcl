@@ -608,6 +608,12 @@ proc qc::.. {from to {step 1} {limit ""}} {
     }
 }
 
+proc qc::debug {message} {
+    #| Write message to nsd log if Debugging is switched on.
+    # Filter message by masking anything that looks like a card number.
+    ns_log Debug [qc::format_cc_masked_string $message]
+}
+
 proc qc::log {args} {
     #| Write message to nsd log. If severity argument is not provided this defaults to "Notice". 
     # Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
