@@ -609,7 +609,9 @@ proc qc::.. {from to {step 1} {limit ""}} {
 }
 
 proc qc::debug {message} {
-    ns_log Debug $message
+    #| Write message to nsd log if Debugging is switched on.
+    # Filter message by masking anything that looks like a card number.
+    ns_log Debug [qc::format_cc_masked_string $message]
 }
 
 proc qc::exec_proxy {args} {
