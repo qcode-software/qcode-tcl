@@ -429,3 +429,16 @@ proc qc::email_token2dict {token} {
     }
     return $dict
 }
+
+proc qc::email_support { html {subject UNDEF} } {
+    #| Send html email to support. 
+    # Subject defaults to "Bug ..." if not provided.
+    # Filter html and errorMessage by masking any card numbers.
+
+    set html [qc::format_cc_masked_string $html]
+    if { $subject eq "UNDEF" } {
+	global errorMessage
+	set subject "Bug [string range [qc::format_cc_masked_string $errorMessage] 0 75]"
+    }
+    qc::email_send from "nsd@[ns_info hostname]" to [qc::param email_support] subject $subject html $html
+}

@@ -3,14 +3,9 @@ package require doc
 namespace eval qc {}
 proc qc::error_handler { } {
     #| Return custom error responses depending value of errorCode.
-    # Filter errorMessage & errorInfo to mask anything that looks like a card number.
-
+    
     set suffix [file extension [ns_conn url]]
     global errorMessage errorList errorInfo errorCode
-    # Mask anything that looks like a card number.
-    set errorMessage [qc::format_cc_masked_string $errorMessage]
-    set errorInfo [qc::format_cc_masked_string $errorInfo]    
-
     switch -glob -- $errorCode {
 	USER* {
 	    if { [eq $suffix .xml] } {
@@ -50,7 +45,7 @@ proc qc::error_handler { } {
 	    }
 	    if { [qc::param_exists email_support] } {
 		set subject "Bug [string range $errorMessage 0 75]"
-		qc::email_send from "nsd@[ns_info hostname]" to [qc::param email_support] subject $subject html [qc::error_report]
+		email_support [qc::error_report] 
 	    }
 	}
     }
@@ -59,13 +54,9 @@ proc qc::error_handler { } {
 proc qc::error_report {} {
     #| Return html error report. If there was a http connection when error occurred report any 
     #| relevant information about http request.
-    # Filter errorMessage & errorInfo to mask anything that looks like a card number.
- 
+    
     global errorMessage errorInfo errorCode
-    # mask anything that looks like a card number.
-    set errorMessage [qc::format_cc_masked_string $errorMessage]
-    set errorInfo [qc::format_cc_masked_string $errorInfo]    
-   
+       
     if { [ns_conn isconnected] } {
 	sset html {
 	    <html>
@@ -106,13 +97,9 @@ proc qc::error_report {} {
 
 proc qc::error_report_no_conn {} {
     #| Return html error report, used when there was no http connection when error occurred.
-    # Filter errorMessage & errorInfo to mask anything that looks like a card number.
-
+   
     global errorMessage errorInfo errorCode
-    # Filter errors by masking anything that looks like a card number.
-    set errorMessage [qc::format_cc_masked_string $errorMessage]
-    set errorInfo [qc::format_cc_masked_string $errorInfo]    
-  
+     
     set html {
         <html>
         <h2>Software Bug</h2>
@@ -130,8 +117,7 @@ proc qc::error_report_no_conn {} {
 
 proc qc::error_report_form_vars {} {
     #| Return preformated html indicating values of all form variables when error occurred.
-    # Filter form values by masking anything that looks like a card number.
-
+  
     set set_id [ns_getform]
     if { [string equal $set_id ""] } {
 	set size 0
@@ -143,7 +129,7 @@ proc qc::error_report_form_vars {} {
     while {$i<$size} {
 	set name [ns_set key $set_id $i]
 	# mask anything that looks like a card number.
-	set value [qc::format_cc_masked_string [ns_set value $set_id $i]]
+	set value [ns_set value $set_id $i]
 	append report "<b>$name</b>\n"
 	# Truncate value if too long
 	if { [string bytelength $value] > 1024 } {
@@ -159,12 +145,11 @@ proc qc::error_report_form_vars {} {
 
 proc qc::error_report_locals {} {
     #| Return preformated html indicating values of all local variables when error occurred.
-    # Filter local values by masking anything that looks like a card number.
-
+   
     set report {}
     foreach name [uplevel 1 {info locals}] {
 	# mask anything that looks like a card number.
-	set value [qc::format_cc_masked_string [upset 1 $name]]
+	set value [upset 1 $name]
 	append report "<b>$name</b>\n"
 	# Truncate value if too long
 	if { [string bytelength $value] > 1024 } {
