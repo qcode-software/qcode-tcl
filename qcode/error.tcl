@@ -44,8 +44,8 @@ proc qc::error_handler { } {
 		ns_return 500 text/html [qc::error_report]	
 	    }
 	    if { [qc::param_exists email_support] } {
-		set subject "Bug [string range $errorMessage 0 75]"
-		email_support [qc::error_report] 
+		set subject "Bug - [string range $errorMessage 0 75]"
+		email_support subject $subject html [qc::error_report] 
 	    }
 	}
     }
