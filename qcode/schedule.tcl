@@ -48,7 +48,7 @@ proc qc::schedule {args} {
 		error "Invalid syntax for schedule variable, \"$schedule\""
 	    }
 	}
-	ns_log Notice "Scheduled $proc_name" 
+	log Notice "Scheduled $proc_name" 
     }
     if { ![schedule_running $proc_name] } {
 	schedule_start $proc_name
@@ -96,7 +96,7 @@ proc qc::schedule_stop {proc_name} {
     #| Stop schedule 
     if { [schedule_running $proc_name] } {	
 	ns_pause [schedule_id $proc_name]
-	ns_log Notice "Schedule $proc_name has been stopped" 
+	log Notice "Schedule $proc_name has been stopped" 
     }
 }
 
@@ -104,6 +104,6 @@ proc qc::schedule_start {proc_name} {
     #| Start schedule 
     if { ! [schedule_running $proc_name] } {	
 	ns_resume [schedule_id $proc_name]
-	ns_log Notice "Schedule $proc_name has been started" 
+	log Notice "Schedule $proc_name has been started" 
     }
 }

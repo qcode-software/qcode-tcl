@@ -42,7 +42,7 @@ proc qc::error_handler { } {
 	    }
         }
 	default {
-	    ns_log Error $errorInfo
+	    log Error $errorInfo
 	    if { [eq $suffix .xml] } {
 		ns_return 200 text/xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"]
 	    } else {

@@ -218,7 +218,7 @@ proc qc::ftp_ctrl_read {ctrl_read check timeout} {
             error "Timeout reading from FTP host"
         }
         set line [gets $ctrl_read]
-	#ns_log Notice "FTP Read: $line"
+	#log Notice "FTP Read: $line"
 	if { [regexp {^[0-9]{3} } $line code] } {
 	    set short_code [string range $code 0 0]
 	    if { $short_code == 1 } {

@@ -17,10 +17,10 @@ proc qc::reload {{dir ""}} {
 		namespace eval :: [list ns_eval -sync source $file]
 		
 		nsv_set mtimes $file [file mtime $file]
-		ns_log Notice "Reloading $file"
+		log Notice "Reloading $file"
 	    }
 	} else {
-	    #ns_log Notice "Loading $file"
+	    #log Notice "Loading $file"
 	    namespace eval :: [list source $file]
 	    nsv_set mtimes $file [file mtime $file]
 	}
