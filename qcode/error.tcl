@@ -1,6 +1,7 @@
 package provide qcode 1.1
 package require doc
 namespace eval qc {}
+
 proc qc::error_handler { } {
     #| Return custom error responses depending value of errorCode.
     
@@ -9,7 +10,7 @@ proc qc::error_handler { } {
     switch -glob -- $errorCode {
 	USER* {
 	    if { [eq $suffix .xml] } {
-		ns_return 200 text/xml [qc::xml error $errorMessage]
+		return2client xml [qc::xml error $errorMessage] filter_cc yes
 	    } else {
 		set html {
 		    <h2>Missing or Invalid Data</h2>
@@ -19,29 +20,29 @@ proc qc::error_handler { } {
 		    Please back up and try again.
 		    <hr>
 		}
-		ns_return 200 text/html [subst $html]
+		return2client html [subst $html] filter_cc yes
 	    }
 	}
         PERM* {
 	    if { [eq $suffix .xml] } {
-		ns_return 200 text/xml [qc::xml error "Not authorized:$errorMessage"]
+		return2client text [qc::xml error "Not authorized:$errorMessage"]
 	    } else {
-		ns_return 401 text/html "Not Authorized:$errorMessage"
+		return2client code 401 html "Not Authorized:$errorMessage"
 	    }
         }
         AUTH* {
 	    if { [eq $suffix .xml] } {
-		ns_return 200 text/xml [qc::xml error "Authentication Failed:$errorMessage"]
+		return2client xml  [qc::xml error "Authentication Failed:$errorMessage"]
 	    } else {
-		ns_return 401 text/html "Authentication Failed:$errorMessage"
+		return2client code 401 html "Authentication Failed:$errorMessage"
 	    }
         }
 	default {
 	    log Error $errorInfo
 	    if { [eq $suffix .xml] } {
-		ns_return 200 text/xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"]
+		return2client xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"] filter_cc yes
 	    } else {
-		ns_return 500 text/html [qc::error_report]	
+		return2client code 500 html [qc::error_report] filter_cc yes
 	    }
 	    if { [qc::param_exists email_support] } {
 		set subject "[string toupper [ns_info server]] Bug - [string range $errorMessage 0 75]"

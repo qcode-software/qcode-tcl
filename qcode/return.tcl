@@ -2,16 +2,48 @@ package provide qcode 1.1
 package require doc
 namespace eval qc {}
 
-proc qc::return_html { string } { 
-    ns_return 200 "text/html; charset=utf-8" $string
+proc qc::return2client { args } {
+    #| Return data to http client
+    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?filter_cc boolean? ?header header? .. 
+    set arg_names [args2vars $args]
+    if { [info exists html] } {
+	default content-type "text/html; charset=utf-8"
+	set var html
+    } elseif { [info exists xml] } {
+	default content-type "text/xml; charset=utf-8"
+	set var xml
+    } elseif { [info exists text] } {
+	default content-type "text/plain; charset=utf-8"
+	set var text
+    } else {
+	error "No payload given in html or xml or text" 
+    }
+    default code 200
+    default filter_cc no
+    if { $filter_cc } {
+	# mask credit card numbers
+	set $var [qc::format_cc_masked_string [set $var]] 
+    }
+    # Other headers
+    foreach name [lexclude $arg_names html xml text code content-type] {
+    	set headers [ns_conn outputheaders]
+	ns_set update $headers $name [set $name]
+    }
+    ns_return $code ${content-type} [set $var]
 }
 
-proc qc::return_xml { string } {
-    ns_return 200 "text/xml; charset=utf-8" $string
+proc qc::return_html { html } { 
+    # Deprecated
+    return2client html $html
 }
 
-proc qc::return_csv { string } { 
-    ns_return 200 "text/csv; charset=utf-8" $string
+proc qc::return_xml { xml } {
+    # Deprecated
+    return2client xml $xml
+}
+
+proc qc::return_csv { text } { 
+    return2client content-type "text/csv; charset=utf-8" text $text
 }
 
 proc qc::return_soap { string } { 

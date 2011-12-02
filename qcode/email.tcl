@@ -432,8 +432,8 @@ proc qc::email_token2dict {token} {
 
 proc qc::email_support { args } {
     #| Send email to support.
-    # Filter html|text and errorMessage by masking any card numbers.
-    # Usage: email_support subject $subject (html $html)|(text $text)
+    # Masking any card numbers before sending.
+    # Usage: email_support subject $subject ?html $html? ?text $text?
 
     args2vars $args
     set email_args [list from "nsd@[ns_info hostname]"]
