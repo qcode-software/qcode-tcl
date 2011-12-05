@@ -1,4 +1,4 @@
-package provide qcode 1.1
+package provide qcode 1.2
 package require doc
 namespace eval qc {}
 proc qc::style_set {rule args} {
