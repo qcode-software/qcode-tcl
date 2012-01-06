@@ -179,6 +179,11 @@ doc date_year_iso_end {
     }
 }
 
+proc qc::date_iso_year { date } {
+    #| Return the ISO year.
+    return [cast_integer [clock format [cast_epoch $date] -format "%G"]]
+}
+
 proc qc::date_iso_week_start {date} {
     if { [eq [date_day_name $date] Monday] } {
 	return [cast_date $date]
