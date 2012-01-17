@@ -32,22 +32,29 @@ proc qc::http_curl {args} {
     }
     append script [list main {*}$args]
 
-    set handle [ns_proxy get myproxy]
+    if { [info commands ns_proxy] eq "ns_proxy" } {
+        # We are running under AOLserver so wrap with ns_proxy
 
-    if { [dict exists $args -timeout] } {
-	# The proxy may timeout first due to a dns lookup so double timeout
-	set timeout [expr {[dict get $args -timeout]*1000*2}]
+        set handle [ns_proxy get myproxy]
+
+        if { [dict exists $args -timeout] } {
+	    # The proxy may timeout first due to a dns lookup so double timeout
+	    set timeout [expr {[dict get $args -timeout]*1000*2}]
+        } else {
+	    # default timeout 60seconds
+	    set timeout 60000
+        }
+        try {
+	    set dict [ns_proxy eval $handle $script $timeout]
+	    ns_proxy release $handle
+	    return $dict
+        } {
+	    ns_proxy release $handle
+	    error $::errorMessage $::errorInfo $::errorCode
+        }
     } else {
-	# default timeout 60seconds
-	set timeout 60000
-    }
-    try {
-	set dict [ns_proxy eval $handle $script $timeout]
-	ns_proxy release $handle
-	return $dict
-    } {
-	ns_proxy release $handle
-	error $::errorMessage $::errorInfo $::errorCode
+        # no ns_proxy so evaluate directly
+        return [eval $script]
     }
 }
 
