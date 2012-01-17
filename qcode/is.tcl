@@ -103,7 +103,8 @@ proc qc::is_email { email } {
 }
 
 proc qc::is_postcode { postcode } {
-    return [expr [regexp {^[A-Z]{1,2}[0-9]{1,2}[A-Z]? ?[0-9][A-Z][A-Z]$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]]
+    # uk postcode
+    return [expr [regexp {^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]]
 }
 
 proc qc::is_creditcard { no } {
@@ -193,7 +194,7 @@ proc qc::is_timestamp_castable {string} {
 }
 
 proc qc::is_mobile_number {string} {
-    # mobile telephone number
+    # uk mobile telephone number
     regsub -all {[^0-9]} $string {} tel_no
     if {  [regexp {^07(5|7|8|9)[0-9]{8}$} $tel_no] } {
 	return true
