@@ -298,7 +298,6 @@ proc qc::barcode_ean13 {number_to_encode} {
     
 }
 
-
 proc qc::barcode_ean13_check_digit { number } {
      set odd 1
      set sum 0
@@ -313,11 +312,3 @@ proc qc::barcode_ean13_check_digit { number } {
      }
   return $check
 }
-
-
-
-set number 726412175425
-#set number 12345678901234567890123
-#set number  87104001633834532
-#set number 12345678901287653
-puts [ean13_encode $number]
