@@ -246,3 +246,19 @@ proc qc::is_url {url} {
 	$
     } $url]
 }
+
+proc qc::is_ipv4 {string} {
+    if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$} $string] } {
+        return true
+    } else {
+        return false
+    }
+}
+
+proc qc::is_cidrnetv4 {string} {
+    if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+$} $string] } {
+        return true
+    } else {
+        return false
+    }
+}
