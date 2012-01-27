@@ -1,9 +1,9 @@
-package provide qcode 1.2
+package provide qcode 1.3
 package require doc
 namespace eval qc {}
 
 proc qc::html_table_db {args} {
-    # cols tbody tfoot height id initialFocus enabled addURL updateURL deleteURL dataURL
+    # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL
     set varNames [args2vars $args]
  
     if { [info exists data] && ![info exists tbody] } {
@@ -33,7 +33,11 @@ proc qc::html_table_db {args} {
 	}
 	incr colIndex
     }
-    set class clsDbGrid
+    if { ![info exists class] } {
+	set class [list clsDbGrid]
+    } elseif { "clsDbGrid" ni $class } {
+	lappend class clsDbGrid
+    } 
     # rowHeight
     if { [info exists rowHeight] } {
 	append html "<style type=\"text/css\">table.$class tr { height:${rowHeight}px;vertical-align:top}</style>"
@@ -59,7 +63,7 @@ proc qc::html_table_db {args} {
 }
 
 proc qc::html_table_db_flexgrid {args} {
-    # cols tbody tfoot height id initialFocus enabled addURL updateURL deleteURL dataURL sortable
+    # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL sortable
     set varNames [args2vars $args]
     if { [info exists rowHeight] } {
         append html "<style type=\"text/css\">table.clsDbFlexGrid tr { height:${rowHeight}px;vertical-align:top}</style>"
@@ -74,7 +78,12 @@ proc qc::html_table_db_flexgrid {args} {
     }
     append html  "<div class=\"clsDbFlexGridDiv\">\n"
 
-    set class clsDbFlexGrid
+    if { ![info exists class] } {
+	set class [list clsDbFlexGrid]
+    } elseif { "clsDbFlexGrid" ni $class } {
+	lappend class clsDbFlexGrid
+    } 
+
     lappend varNames class id
     set dict [dict_from [lsort -unique $varNames]]
 

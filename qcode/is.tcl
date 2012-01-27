@@ -1,4 +1,4 @@
-package provide qcode 1.2
+package provide qcode 1.3
 package require doc
 namespace eval qc {}
 
@@ -120,9 +120,9 @@ proc qc::is_creditcard { no } {
 	}
 	set t [expr {$digit*$mult}]
 	if { $t >= 10 } {
-	    set sum [expr $sum + $t%10 +1]
+	    set sum [expr {$sum + $t%10 +1}]
 	} else {
-	    set sum [expr $sum + $t]
+	    set sum [expr {$sum + $t}]
 	}
 	if { $mult == 1 } { set mult 2 } else { set mult 1 }
     }
