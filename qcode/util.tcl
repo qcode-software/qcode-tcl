@@ -656,3 +656,22 @@ proc qc::exec_proxy {args} {
 	exec {*}$args
     }
 }
+
+proc qc::info_proc { proc_name } {
+    #| Return the Tcl source code definition of a Tcl proc.
+    if { [eq [info procs $proc_name] ""] && [eq [info procs ::$proc_name] ""] } {
+	error "The proc $proc_name does not exist"
+    }
+    set proc_name [namespace which $proc_name]
+    set largs {}
+    foreach arg [info args $proc_name] {
+	if { [info default $proc_name $arg value] } {
+	    lappend largs [list $arg $value]
+	} else {
+	    lappend largs $arg
+	}
+    }
+    set body [info body $proc_name]
+    
+    return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
+}
