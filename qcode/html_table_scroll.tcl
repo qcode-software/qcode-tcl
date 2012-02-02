@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 proc qc::html_table_scroll {args} {
@@ -9,7 +9,7 @@ proc qc::html_table_scroll {args} {
     default height 600
 
     append html [html_tag div class clsScroll style "height:${height}px"]
-    append html [qc::html_table [dict_from $varNames]]
+    append html [qc::html_table [dict_from {*}$varNames]]
     append html "</div>\n"
 
     return $html

@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 
@@ -14,7 +14,7 @@ proc qc::html_table_doc {args} {
     }
     lappend tbody $row
     lappend varNames cols tbody
-    return [qc::html_table [dict_from $varNames]]
+    return [qc::html_table [dict_from {*}$varNames]]
 }
 
 

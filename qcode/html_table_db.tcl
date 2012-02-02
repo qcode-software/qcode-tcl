@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 
@@ -56,7 +56,7 @@ proc qc::html_table_db {args} {
 
 
     lappend varNames class id
-    append html [qc::html_table [dict_from [lsort -unique $varNames]]]
+    append html [qc::html_table [dict_from {*}[lsort -unique $varNames]]]
     append html "</div>\n"
     append html "<div class=\"clsDbGridDivStatus\" forTable=\"$id\"> <table width=\"100%\"><tr><td></td><td align=\"right\"></td></tr></table> </div>\n"
     return $html
@@ -85,7 +85,7 @@ proc qc::html_table_db_flexgrid {args} {
     } 
 
     lappend varNames class id
-    set dict [dict_from [lsort -unique $varNames]]
+    set dict [dict_from {*}[lsort -unique $varNames]]
 
     append html [qc::html_table $dict]
     append html "</div>\n"

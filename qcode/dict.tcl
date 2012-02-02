@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 
@@ -9,7 +9,6 @@ if {![llength [info commands dict]]} {
 }
 
 proc qc::dict_create { args } {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set dict {}
     foreach {name value} $args {
 	dict_set dict $name $value
@@ -102,7 +101,6 @@ proc qc::dict_keys {dict} {
 
 proc qc::dict_subset {dict args} {
     # Return an dict made up of the keys given
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set result {}
     foreach key $args {
 	if { [dict exists $dict $key] } {
@@ -114,7 +112,6 @@ proc qc::dict_subset {dict args} {
 
 proc qc::dict_exclude {dict args} {
     #return an dict excluding keys given
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set temp {}
     foreach {key value} $dict {
 	if { ![in $args $key] } {
@@ -149,8 +146,6 @@ proc qc::dict2xml { args } {
 
 proc qc::dict_from { args } {
     # Take a list of var names and return a dict
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    
     set dict {}
     foreach name $args {
 	upvar 1 $name value
@@ -164,8 +159,6 @@ proc qc::dict_from { args } {
 }
 
 proc qc::dict2vars { dict args } {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    
     if { [llength $args]==0 } {
 	# set all variables
 	foreach {name value} $dict {upset 1 $name $value}

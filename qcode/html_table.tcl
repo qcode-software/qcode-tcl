@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 
@@ -198,7 +198,7 @@ proc qc::html_table { args } {
 	set tfoot [qc::html_table_format $tfoot $cols]
     }
     # Write table tag
-    set html [qc::html_tag table [dict_from [lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
+    set html [qc::html_tag table [dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
 
     append html \n
     # Create colgroup and col children

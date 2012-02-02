@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {
     namespace export qc *
@@ -180,7 +180,7 @@ proc qc::call { proc_name args } {
     if { [info args $proc_name] eq "args" } {
 	# Call the proc using a dict of corresponding local vars
 	if { $args ne "" } {
-	    return [uplevel 1 "$proc_name {*}\[dict_from $args\]"]
+	    return [uplevel 1 "$proc_name {*}\[dict_from {*}$args\]"]
 	} else {
 	    return [uplevel 1 $proc_name]
 	} 
