@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=1.3
+VERSION=1.4
 PACKAGEDIR=qcode
 MAINTAINER=hackers@qcode.co.uk
 RELEASE=$(shell cat RELEASE)
