@@ -297,7 +297,6 @@ proc qc::arg_options_split {callers_args} {
 
 proc qc::args_by_name2dict {args} {
     # Convert args list of mixed varNames and "option pairs" to a dict.
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set index 0
     lassign [arg_options_split $args] dict varNames
     foreach varName $varNames { lappend dict $varName [upset 2 $varName] }
@@ -306,7 +305,6 @@ proc qc::args_by_name2dict {args} {
 
 proc qc::args_by_name2vars {args} {
     # Set variables in caller's namespace using a mixed varNames and "option pairs" list of args
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set index 0
     lassign [arg_options_split $args] options varNames
     foreach {name value} $options {upset 1 $name $value}
