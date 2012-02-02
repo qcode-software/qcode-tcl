@@ -28,7 +28,6 @@ proc qc::html_options_db_cache { qry {ttl 86400}} {
 proc qc::html_options_simple { args } {
     #| Use list items as both name and value
     #| Eg Converts one two three -> one one two two three three
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set options {}
     foreach item $args {
         lappend options $item $item
