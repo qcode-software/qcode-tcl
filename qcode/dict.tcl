@@ -135,10 +135,9 @@ proc qc::dict_sort {dictVariable} {
     return $dict
 }
     
-proc qc::dict2xml { args } {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
+proc qc::dict2xml { dict } {
     set list {}
-    foreach {name value} $args {
+    foreach {name value} $dict {
         lappend list [qc::xml $name $value]
     }
     return [join $list \n]
