@@ -34,7 +34,6 @@ proc qc::sortcols_toggle { sortCols colname } {
 }
 
 proc qc::sortcols_parse { args } {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     # Accept args in format col1,col2,col3 DESC,col4 ASC
     # or col1 col2 col3 DESC col4 
     # Returned list col1 col2 col3 DESC ...

@@ -287,17 +287,14 @@ proc qc::frombase {base number} {
 }
 
 proc qc::min {args} {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     return [lindex [lsort -real $args] 0]
 }
 
 proc qc::max {args} {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     return [lindex [lsort -real -decreasing $args] 0]
 }
 
 proc qc::min2 {args} {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     if { [eq [lindex $args 0] -integer] } { 
 	set type integer
 	ldelete args 0
@@ -321,8 +318,7 @@ proc qc::min2 {args} {
 }
 
 proc qc::max2 {args} {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
- if { [eq [lindex $args 0] -integer] } { 
+    if { [eq [lindex $args 0] -integer] } { 
 	set type integer
 	ldelete args 0
     } elseif { [eq [lindex $args 0] -real] } {

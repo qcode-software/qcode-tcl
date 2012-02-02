@@ -59,12 +59,10 @@ proc qc::http_curl {args} {
 }
 
 proc qc::http_post {args} {
+    # args is name value name value ... list
     # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? url ?name value? ?name value?
     args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -data ? -valid_response_codes {100 200} url args
 
-    # args is name value name value ... list
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    
     if { ![info exists data]} {
 	set pairs {}
 	foreach {name value} $args {
