@@ -207,15 +207,14 @@ doc html_id {
     }
 }
 
-proc qc::html_menu { args } {
+proc qc::html_menu { lmenu } {
     #| Join items to form a horizontal menu
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    return [join $args " &nbsp;<b>|</b>&nbsp; "]
+    return [join $lmenu " &nbsp;<b>|</b>&nbsp; "]
 }
 
 doc html_menu {
     Examples {
-	% html_menu [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]
+	% html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
 	<a href="sales.html">Sales</a> &nbsp;|&nbsp; <a href="sales.html">Purchasing</a> &nbsp;|&nbsp; <a href="sales.html">Accounts</a>
     }
 }
