@@ -59,7 +59,6 @@ proc qc::sortcols_parse { args } {
 }
 
 proc qc::sortcols2dict { args } {
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     # Accept args in format col1,col2,col3 DESC,col4 ASC
     # or col1 col2 col3 DESC col4 
     # Returned list col1 ASC col2 ASC col3 DESC ...

@@ -110,7 +110,6 @@ proc qc::sql_sort { args } {
     if { [form_var_exists sortCols] } {
         set string [form_var_get sortCols]
     } else {
-	if { [llength $args]==1 } {set args [lindex $args 0]}
         set string $args
     } 
 

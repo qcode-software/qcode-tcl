@@ -16,7 +16,7 @@ proc qc::html_table_sort {args} {
 	    }
 	}
 	# 
-	regsub -nocase {order by (.+?)(offset|limit|$)} $qry "order by [sql_sort $sortCols] \\2" qry
+	regsub -nocase {order by (.+?)(offset|limit|$)} $qry "order by [sql_sort {*}$sortCols] \\2" qry
 	set table [qc::db_select_table [qc::db_qry_parse $qry 1]]	    
     }
     # table 
@@ -50,7 +50,7 @@ proc qc::html_table_sort {args} {
 }
 
 proc qc::html_table_sort_header { cols sortCols } {
-    set sortCols [qc::sortcols2dict $sortCols]
+    set sortCols [qc::sortcols2dict {*}$sortCols]
     set row {}
     foreach col $cols {
 	if { [dict exists $col label] } {
