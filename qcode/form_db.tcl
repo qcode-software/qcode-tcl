@@ -14,7 +14,7 @@ proc qc::form_db { content args } {
 	    set this(formType) update
 	}
     }
-    append html [html_tag form [array get this]] \n
+    append html [html_tag form {*}[array get this]] \n
     append html "<div class=\"clsDbFormDiv\">\n"
     append html $content \n
     append html "</div>\n"
@@ -30,5 +30,5 @@ proc qc::form_db_plain { content args } {
     array set this $args
     set this(class) clsDbForm
     default this(id) oDbForm
-    return [html form $content [array get this]]
+    return [html form $content {*}[array get this]]
 }

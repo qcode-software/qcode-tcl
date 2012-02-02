@@ -71,7 +71,7 @@ proc qc::url_to_html_hidden { url } {
     } else {
 	array set this {}
     }
-    append html [html_hidden_set [array get this]]
+    append html [html_hidden_set {*}[array get this]]
     return $html
 }
 

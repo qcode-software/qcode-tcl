@@ -198,7 +198,7 @@ proc qc::html_table { args } {
 	set tfoot [qc::html_table_format $tfoot $cols]
     }
     # Write table tag
-    set html [qc::html_tag table [dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
+    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
 
     append html \n
     # Create colgroup and col children
@@ -290,7 +290,7 @@ proc qc::html_table_colgroup { cols } {
 		dict set col style "width:[dict get $col width]"
 	    }
 	}
-	append html [html_tag col [dict_exclude $col width label sum format tfoot thClass]]\n
+	append html [html_tag col {*}[dict_exclude $col width label sum format tfoot thClass]]\n
     }
     append html "</colgroup>\n"
     return $html

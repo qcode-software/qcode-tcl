@@ -35,8 +35,7 @@ doc html2pdf {
 
 proc qc::html {tagName nodeValue args} {
     #| Generate an html node
-    if { [llength $args]==1 } {set args [lindex $args 0]}
-    return "[html_tag $tagName $args]$nodeValue</$tagName>"
+    return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"
 }
 
 doc html {
@@ -60,7 +59,6 @@ doc html {
 
 proc qc::html_tag { tagName args } {
     #| Generate just the opening html tag
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize]
     set attributes {}
     foreach {name value} [qc::dict_exclude $args {*}$minimized] {
@@ -97,7 +95,6 @@ proc qc::html_escape {html} {
 
 proc qc::html_hidden { args } {
     #| Create hidden fields from vars
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set html {}
     foreach name $args {
 	append html [qc::html_tag input type hidden name $name value [upset 1 $name] id $name]\n
@@ -120,7 +117,6 @@ doc html_hidden {
 
 proc qc::html_hidden_set { args } {
     #| Create hidden fields from list of name value pairs.
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set html {}
     foreach {name value} $args {
 	append html [qc::html_tag input type hidden name $name value $value id $name]\n
@@ -162,9 +158,8 @@ doc html_list {
 
 proc qc::html_a { link url args } {
     # Create a HTML hyperlink 
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     lappend args href $url
-    return [html a $link $args]
+    return [html a $link {*}$args]
 }
 
 doc html_a {
@@ -180,7 +175,7 @@ doc html_a {
 proc qc::html_a_replace { link url args } {
     # Used to replace browser history state so browser back button will not record these urls.
     lappend args onclick "location.replace(this.href);return false;"
-    return [html_a $link $url $args]
+    return [html_a $link $url {*}$args]
 }
 
 doc html_a {
@@ -228,7 +223,6 @@ doc html_menu {
 proc qc::html_paragraph_layout {args} {
     #| Construct paragraph elements as a bold title with the detail below it by default.
     args $args -deliminator <br> -- args
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     set html {}
     foreach {label detail} $args {
 	append html "<p><b>$label</b>$deliminator$detail</p>"

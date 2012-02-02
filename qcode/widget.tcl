@@ -60,7 +60,7 @@ proc qc::widget_text { args } {
     if { [info exists this(disabled)] && [string is true $this(disabled)] } {
 	return [html span $this(value)][html_tag input type hidden name $this(name) value $this(value) id $this(id)]
     } else {
-	return [html_tag input [qc::dict_exclude [array get this] required label width units]]
+	return [html_tag input {*}[qc::dict_exclude [array get this] required label width units]]
     }
 }
 
@@ -210,7 +210,7 @@ proc qc::widget_htmlarea { args } {
     }
     set this(contentEditable) true
     set this(class) clsDbFormHTMLArea
-    return [html div $this(value) [qc::dict_exclude [array get this] label required units width height]]
+    return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height]]
 }
 
 doc widget_htmlarea {
@@ -239,7 +239,7 @@ proc qc::widget_textarea { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html textarea $this(value) [qc::dict_exclude [array get this] type value label required units width height]]
+    set html [html textarea $this(value) {*}[qc::dict_exclude [array get this] type value label required units width height]]
 }
 
 doc widget_textarea {
@@ -267,7 +267,7 @@ proc qc::widget_select { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html_tag select [qc::dict_exclude [array get this] required label type options null_option value units]]
+    set html [html_tag select {*}[qc::dict_exclude [array get this] required label type options null_option value units]]
     append html \n
     if { [string is true $this(null_option)] } {
 	append html "<option value=\"\">- Select -</option>\n"
@@ -325,7 +325,7 @@ proc qc::widget_span { args } {
     if { [info exists this(height)] } {
 	set this(style) [qc::style_set [coalesce this(style) ""] height $this(height)]
     }
-    return [html span $this(value) [qc::dict_exclude [array get this] label type value name width height]] 
+    return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value name width height]] 
 }
 
 doc widget_span {
@@ -354,7 +354,7 @@ proc qc::widget_password { args } {
     }
     default this(width) 160
     set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_password {
@@ -385,7 +385,7 @@ proc qc::widget_bool { args } {
     set this(type) checkbox
     set this(value) true
     set this(boolean) true
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_bool {
@@ -412,7 +412,7 @@ proc qc::widget_checkbox { args } {
 	default this(id) $this(name)
     }
     set this(type) checkbox
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_checkbox {
@@ -437,7 +437,7 @@ proc qc::widget_button { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_button {
@@ -460,7 +460,7 @@ proc qc::widget_submit { args } {
 	default this(id) $this(name)
     }
     set this(type) submit
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]] 
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]] 
 }
 
 doc widget_submit {
@@ -484,7 +484,7 @@ proc qc::widget_radio { args } {
 	default this(id) $this(name)
     }
     default this(checked) false
-    return [html_tag input [qc::dict_exclude [array get this] label width height units]]
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
 doc widget_radio {
