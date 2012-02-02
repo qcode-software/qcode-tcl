@@ -1,4 +1,4 @@
-package provide qcode 1.3
+package provide qcode 1.4
 package require doc
 namespace eval qc {}
 
@@ -114,21 +114,17 @@ doc Args {
 	or
 	volume radius $radius length $length
 	</example>
-	To allow both methods to call the proc correctly I use 
-	<example>
-	if { [llength $args]==1 } {set args [lindex $args 0]}
-	</example>
+	To allow both methods to call the proc correctly I use the expansion operator {*}
 	which gives
 	<example>
 	proc volume {args} {
-	    if { [llength $args]==1 } {set args [lindex $args 0]}
 	    set radius [dict get $args radius]
 	    set length [dict get $args length]
 	    return [expr 3.14*$radius*$radius*$length]
 	}
 	% set radius 2
 	% set length 4
-	% volume [list radius $radius length $length]
+	% volume {*}[list radius $radius length $length]
 	50.24
 	% volume radius $radius length $length
 	50.24
@@ -150,7 +146,7 @@ doc Args {
 	% set length 4
 	% volume radius $radius length $length
 	50.24
-	% volume [dict_from radius length]
+	% volume {*}[dict_from radius length]
 	50.24 
 	% volume ~ radius length
 	50.24
@@ -212,7 +208,6 @@ proc qc::args2vars {callers_args args} {
     #| Dict - set all variables or just those specified that exists in the dict
     #| Pass-by-Value - set all variables or just those specified that exists in caller's namespce.
 
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     if { [llength $callers_args]==1 } {set callers_args [lindex $callers_args 0]}
     set varNames {}
 
@@ -256,7 +251,7 @@ doc qc::args2vars {
 	% test foo James bar Robert baz Desmond
 	foo James bar Robert baz Desmond
 	
-	% test [list foo James bar Robert baz Desmond]
+	% test {*}[list foo James bar Robert baz Desmond]
 	foo James bar Robert baz Desmond
 
 	% test ~ foo bar baz
