@@ -3,7 +3,6 @@ package require doc
 namespace eval qc {}
 proc qc::form_db { content args } {
     #| Produce HTML to be used with JavaScript behavior dbForm
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     array set this $args
     set this(class) clsDbForm
     default this(id) oDbForm
@@ -28,7 +27,6 @@ proc qc::form_db { content args } {
 
 proc qc::form_db_plain { content args } {
     #| Produce HTML to be used with JavaScript behavior dbForm
-    if { [llength $args]==1 } {set args [lindex $args 0]}
     array set this $args
     set this(class) clsDbForm
     default this(id) oDbForm
