@@ -587,7 +587,7 @@ proc qc::db_foreach {args} {
     #| indicate the number of rows returned and the current row.
     #| Nested foreach statements clean up special variables so they apply to the current scope.
     args $args -db DEFAULT -- qry foreach_code { no_rows_code ""}
-    global errorCode
+    global errorCode errorInfo
 
      # save special db variables
     upcopy 1 db_nrows      saved_db_nrows
@@ -606,7 +606,7 @@ proc qc::db_foreach {args} {
 		# normal
 	    }
 	    1 { 
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $returnCode $result
@@ -626,7 +626,7 @@ proc qc::db_foreach {args} {
 		    # Normal
 		}
 		1 { 
-		    return -code error -errorcode $errorCode $result 
+		    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 		}
 		2 {
 		    return -code return $result
