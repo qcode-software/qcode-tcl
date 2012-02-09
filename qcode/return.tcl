@@ -89,12 +89,14 @@ proc qc::return_next { next_url } {
     if { ![regexp {^https?://} $next_url] } {
 	set next_url [string trimleft $next_url /]
 	if { [ne $host ""] } {
-	    if { [eq $port 443] } {
+	    if { [eq $port 80] } {
+		set next_url "http://$host/$next_url"
+	    } elseif { [eq $port 443] } {
 		set next_url "https://$host/$next_url"
 	    } elseif { [eq $port 8443] } {
 		set next_url "https://$host:8443/$next_url"
-	    } else {
-		set next_url "http://$host/$next_url"
+	    } else  {
+		set next_url "http://$host:$port/$next_url"
 	    }
 	}
     }

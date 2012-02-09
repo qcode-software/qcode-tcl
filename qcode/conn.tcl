@@ -70,12 +70,14 @@ proc qc::conn_url {} {
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
     if { [ne $host ""] } {
-	if { [eq $port 443] } {
+	if { [eq $port 80] } {
+	    return "http://$host[ns_conn url]"
+	} elseif { [eq $port 443] } {
 	    return "https://$host[ns_conn url]"
 	} elseif { [eq $port 8443] } {
 	    return "https://$host:8443[ns_conn url]"
-	} else {
-	    return "http://$host[ns_conn url]"
+	} else  {
+	    return "http://$host:$port[ns_conn url]"
 	}
     } else {
 	return [ns_conn url]
