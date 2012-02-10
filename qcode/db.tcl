@@ -217,7 +217,71 @@ proc qc::db_qry_parse {qry {level 0} } {
     # TODO: Dollar quoted string like $foo$ or $tag$foo$tag$
 
     # Colon variable substitution
-    regsub -all {([^:]):([a-zA-Z_][a-zA-Z0-9_]*)} $qry {\1[db_quote [set \2]]} qry
+    set re {
+	([^:]):
+	([a-z_][a-z0-9_]*)  
+	(::(
+	    bigint
+	    |int8
+	    |bigserial
+	    |serial8
+	    |double\s+precision
+	    |float8
+	    |integer
+	    |int
+	    |int4
+	    |numeric(\([^,]+,[^\)]+\))?
+	    |decimal(\([^,]+,[^\)]+\))?
+	    |real
+	    |float4
+	    |smallint
+	    |int2
+	    |serial
+	    |serial4
+	    |money
+
+	    |bit(\([^\)]+\))?
+	    |bit\s+varying(\([^\)]+\))?
+	    |varbit
+	    |character\s+varying(\([^\)]+\))?
+	    |varchar(\([^\)]+\))?
+	    |character(\([^\)]+\))?
+	    |char(\([^\)]+\))?
+	    |text
+
+	    |date
+	    |time(\([^\)]+\))?(\s+with(out)?\s+time\s+zone)?
+	    |timetz
+	    |timestamp(\([^\)]+\))?(\s+with(out)?\s+time\s+zone)?
+	    |timestamptz
+	    |interval(\s+[a-z0-9]+)*(\([^\)]+\))?
+
+	    |boolean
+	    |bool
+
+	    |bytes
+	    |bytea	    
+	    |inet
+	    |cidr
+	    |macaddr
+	    |point
+	    |line
+	    |path
+	    |lseg
+	    |box	 
+	    |circle
+	    |polygon	    
+	    |tsquery
+	    |tsvector
+	    |txid_snapshot
+	    |uuid
+	    |xml	  
+
+	    |[a-z0-9_]+
+	    )(?=[^a-z0-9]|$)
+	    )?
+    }
+    regsub -all -nocase -expanded $re $qry {\1[db_quote [set \2] \4]} qry
 
     # Eval with uplevel
     set qry [uplevel $level [list subst $qry]]
@@ -251,41 +315,75 @@ doc db_qry_parse {
     }
 }
 
-proc qc::db_quote { value } {
+proc qc::db_quote { value {type ""}} {
     #| quotes SQL values by escaping single quotes with \'
     #| leaves integers and doubles alone
     #| Empty strings are converted to NULL
+     if { $type eq ""} {
+	set sql_cast ""
+    } else {
+	set sql_cast "::$type"
+    }
+
     if { [string equal $value ""] } {
-	return "NULL"
+	return "NULL${sql_cast}"
     }
     # Reserved keywords
     if { [in [list current_time current_timestamp] $value ] } {
-	return $value
+	return "${value}${sql_cast}"
     }
-    # integer no leading zeros
-    # -123456
-    if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {
-	return $value
-    }
-    # double greater than 1
-    if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value] } {
-	return $value
-    }
-    # decimal less than 1
-    # in form .23 or 0.23
-    if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
-	return "${sign}0.${tail}"
-    }
-    # scientific notation
-    if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
-	return $value
-    }
+     
+     set re_numeric_types {
+	 ^(
+	   bigint
+	   |int8
+	   |bigserial
+	   |serial8
+	   |double\s+precision
+	   |float8
+	   |integer
+	   |int
+	   |int4
+	   |numberic(\([^,]+,[^\)]+\))?
+	   |decimal(\([^,]+,[^\)]+\))?
+	   |real
+	   |float4
+	   |smallint
+	   |int2
+	   |serial
+	   |serial4
+	   |money
+	   )$
+     }
+
+    if { $type eq "" || [regexp -nocase -expanded $re_numeric_types $type] } {
+	# integer no leading zeros
+	# -123456
+	if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {
+	    return "${value}${sql_cast}"
+	}
+	# double greater than 1
+	if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value] } {
+	    return "${value}${sql_cast}"
+	}
+	# decimal less than 1
+	# in form .23 or 0.23
+	if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
+	    return "${sign}0.${tail}${sql_cast}"
+	}
+	# scientific notation	
+	if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
+	    return "${value}${sql_cast}"
+	}
+    } 
+
+    # quote everything else as a string
     # replace ' with '' and \ with \\ 
     # (tcl also uses slash to escape hence \\ in string map)
     if { [string first \\ $value]==-1 } {
-	return "'[string map {' ''} $value]'"
+	return "'[string map {' ''} $value]'${sql_cast}"
     } else {
-	return "E'[string map {' '' \\ \\\\} $value]'"
+	return "E'[string map {' '' \\ \\\\} $value]'${sql_cast}"
     }
 }
 
