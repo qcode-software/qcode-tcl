@@ -281,7 +281,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 	    )(?=[^a-z0-9]|$)
 	    )?
     }
-    regsub -all -nocase -expanded $re $qry {\1[db_quote [set \2] \4]} qry
+    regsub -all -nocase -expanded $re $qry {\1[db_quote [set {\2}] {\4}]} qry
 
     # Eval with uplevel
     set qry [uplevel $level [list subst $qry]]
