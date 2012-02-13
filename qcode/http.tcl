@@ -60,8 +60,8 @@ proc qc::http_curl {args} {
 
 proc qc::http_post {args} {
     # args is name value name value ... list
-    # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? url ?name value? ?name value?
-    args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -data ? -valid_response_codes {100 200} url args
+    # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
+    args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
 
     if { ![info exists data]} {
 	set pairs {}
@@ -86,6 +86,9 @@ proc qc::http_post {args} {
 
     if { [info exists soapaction] } {
 	lappend httpheaders "SOAPAction: $soapaction"
+    }
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
     }
 
     dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
