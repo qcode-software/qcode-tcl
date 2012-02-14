@@ -344,7 +344,7 @@ proc qc::db_quote { value {type ""}} {
 	   |integer
 	   |int
 	   |int4
-	   |numberic(\([^,]+,[^\)]+\))?
+	   |numeric(\([^,]+,[^\)]+\))?
 	   |decimal(\([^,]+,[^\)]+\))?
 	   |real
 	   |float4
