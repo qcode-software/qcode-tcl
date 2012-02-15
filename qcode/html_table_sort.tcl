@@ -43,7 +43,7 @@ proc qc::html_table_sort {args} {
     set thead [qc::html_table_sort_header $cols $sortCols]
 
     append html [html_tag div class clsScroll style "height:${height}px"]
-    append html [qc::html_table ~ class cols thead tbody tfoot data rowClasses]    
+    append html [qc::html_table ~ class cols thead tbody tfoot data rowClasses id]    
     append html "</div>\n"
 
     return $html
