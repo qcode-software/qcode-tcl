@@ -153,14 +153,15 @@ proc qc::http_encoding {headers body} {
     #   * HTTP-Header (charset attribute)
     #   * XML declaration (encoding attribute)
     # Otherwise return iso8859-1 as the default http encoding.
-    if { [set encoding [qc::http_header_encoding $headers]] ne "" } {
-	# Try to determine encoding from HTTP headers (charset attribute).
-    } elseif { [regexp {^\s*<\?xml} $body] && [set encoding [qc::xml_encoding $body]] ne "" } {
-	# HTTP body is XML - Try to determine encoding from xml declaration (encoding attribute).
+    set encoding [qc::http_header_encoding $headers]
+    if { $encoding eq "" } {
+	if { [regexp {^\s*<\?xml} $body] } {
+	    # Its an XML document
+	    set encoding [qc::xml_encoding $body]
+	} else {
+	    set encoding "iso8859-1"
+	}
     }
-    # Defaults to iso-8859-1 as per RFC2616
-    # Misspelt in TCL
-    default encoding "iso8859-1"
     return $encoding
 }
 

@@ -142,10 +142,10 @@ proc qc::xml_encoding {xml} {
     # Otherwise return default encoding "utf-8".
     set regexp1 {^[^>]+encoding=\"([^\"]*)\"}
     set regexp2 {^[^>]+encoding='([^']*)'}
-    regexp -nocase -expanded $regexp1 $xml -> encoding
-    if { ![info exists encoding] } {
-	regexp -nocase -expanded $regexp2 $xml -> encoding
+
+    if { [regexp -nocase -expanded $regexp1 $xml -> encoding] || [regexp -nocase -expanded $regexp2 $xml -> encoding] } {
+	return [IANAEncoding2TclEncoding [string trim $encoding]]
+    } else {
+	return utf-8
     }
-    default encoding utf-8
-    return [IANAEncoding2TclEncoding [string trim $encoding]]
 }
