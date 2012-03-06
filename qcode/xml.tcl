@@ -136,4 +136,16 @@ doc xml2dict {
     }
 }
 
-
+proc qc::xml_encoding {xml} {
+    #| Return the TCL encoding scheme used for an xml document.
+    # Try to determine encoding from the encoding attribute in the xml declaration.
+    # Otherwise return default encoding "utf-8".
+    set regexp1 {^[^>]+encoding=\"([^\"]*)\"}
+    set regexp2 {^[^>]+encoding='([^']*)'}
+    regexp -nocase -expanded $regexp1 $xml -> encoding
+    if { ![info exists encoding] } {
+	regexp -nocase -expanded $regexp2 $xml -> encoding
+    }
+    default encoding utf-8
+    return [IANAEncoding2TclEncoding [string trim $encoding]]
+}

@@ -96,7 +96,7 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
-		return [encoding convertfrom [qc::http_header_encoding [array get return_headers]] $html]
+		return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html]
 	    } else {
 		# raise an error
 		switch $responsecode {
@@ -131,7 +131,7 @@ proc qc::http_get {args} {
 	    switch $responsecode {
 		200 { 
 		    # OK
-		    return [encoding convertfrom [qc::http_header_encoding [array get return_headers]] $html] 
+		    return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html] 
 		}
 		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
 		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
@@ -147,16 +147,35 @@ proc qc::http_get {args} {
     }
 }
 
-proc qc::http_header_encoding { dict } {
-    array set return_headers $dict
-    foreach key {Content-Type content-type} {
-        if { [info exists return_headers($key)] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($key) -> charset] } {
-	    return [IANAEncoding2TclEncoding [string trim $charset]]
-        }
+proc qc::http_encoding {headers body} {
+    #| Return the TCL encoding scheme used for http.
+    # Try to determine the http encoding from the following sources (in this order):
+    #   * HTTP-Header (charset attribute)
+    #   * XML declaration (encoding attribute)
+    # Otherwise return iso8859-1 as the default http encoding.
+    if { [set encoding [qc::http_header_encoding $headers]] ne "" } {
+	# Try to determine encoding from HTTP headers (charset attribute).
+    } elseif { [regexp {^\s*<\?xml} $body] && [set encoding [qc::xml_encoding $body]] ne "" } {
+	# HTTP body is XML - Try to determine encoding from xml declaration (encoding attribute).
     }
     # Defaults to iso-8859-1 as per RFC2616
     # Misspelt in TCL
-    return "iso8859-1"
+    default encoding "iso8859-1"
+    return $encoding
+}
+
+proc qc::http_header_encoding {dict} {
+    #| Return the TCL encoding scheme for a http header dict.
+    # Try to determine encoding from the charset attribute specified in the http header dict.
+    # Otherwise return "".
+    array set return_headers $dict
+    set encoding ""
+    foreach key {Content-Type content-type} {
+        if { [info exists return_headers($key)] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($key) -> charset] } {
+	    set encoding [IANAEncoding2TclEncoding [string trim $charset]]
+        }
+    }
+    return $encoding
 }
 
 #----------------------------------------------------------------------------
@@ -169,7 +188,7 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
     switch [string tolower $IANAName] {
         "us-ascii"    {return ascii}
         "utf-8"       {return utf-8}
-        "utf-16"      {return unicode}; # not sure about this
+        "utf-16"      {return unicode; # not sure about this}
         "iso-8859-1"  {return iso8859-1}
         "iso-8859-2"  {return iso8859-2}
         "iso-8859-3"  {return iso8859-3}
