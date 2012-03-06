@@ -165,25 +165,6 @@ proc qc::http_encoding {headers body} {
     return $encoding
 }
 
-
-proc qc::bom_encoding { document } {
-    set firstBytes ""
-    binary scan $document "H8" firstBytes
-    switch [string range $firstBytes 0 3] {
-        "efbbbf" {
-	    # efbbbf: UTF-8 BOM
-	    return "utf-8"
-	}
-	"feff" -
-        "fffe" {
-            # feff: UTF-16, big-endian BOM
-            # ffef: UTF-16, little-endian BOM
-	    return "unicode"
-        }
-    }
-    return ""
-}
-
 proc qc::http_header_encoding {dict} {
     #| Return the TCL encoding scheme for a http header dict.
     # Try to determine encoding from the charset attribute specified in the http header dict.
