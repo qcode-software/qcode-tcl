@@ -457,6 +457,22 @@ proc qc::years {from_date to_date} {
     return $years
 }
 
+proc qc::iso_year_iso_weeks {from_date to_date} {
+    # Return list of iso years/iso week pairs between from_date & to_date
+    set year_weeks {}
+    set week [date_iso_week $from_date]
+    set year [date_iso_year $from_date]
+    set to_week [date_iso_week $to_date]
+    set to_year [date_iso_year $to_date]
+
+    while {$year<$to_year || ($year==$to_year && $week<=$to_week) } {
+	lappend year_weeks $year $week
+	set last_week [date_iso_week [date_year_iso_end ${year}-01-01]]
+	if { $week==$last_week } { set week 1; incr year } else { incr week }
+    }
+    return $year_weeks
+}
+
 proc qc::year_months {from_date to_date} {
     set year_months {}
     set month [date_month $from_date]
