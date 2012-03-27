@@ -627,7 +627,7 @@ proc qc::db_0or1row {args} {
 	switch $code {
 	    1 { 
 		global errorCode errorInfo
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $code $result
@@ -640,7 +640,7 @@ proc qc::db_0or1row {args} {
 	switch $code {
 	    1 { 
 		global errorCode errorInfo
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $code $result

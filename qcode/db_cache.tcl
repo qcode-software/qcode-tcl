@@ -61,7 +61,7 @@ proc qc::db_cache_0or1row { ttl qry {no_rows_code ""} {one_row_code ""} } {
 	switch $code {
 	    1 { 
 		global errorCode errorInfo
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $code $result
@@ -74,7 +74,7 @@ proc qc::db_cache_0or1row { ttl qry {no_rows_code ""} {one_row_code ""} } {
 	switch $code {
 	    1 { 
 		global errorCode errorInfo
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $code $result
@@ -108,7 +108,7 @@ doc db_cache_0or1row {
 
 proc qc::db_cache_foreach { ttl qry foreach_code { no_rows_code ""} } {
     # Cached equivalent of db_foreach
-    global errorCode
+    global errorCode errorInfo
 
      # save special db variables
     upcopy 1 db_nrows      saved_db_nrows
@@ -127,7 +127,7 @@ proc qc::db_cache_foreach { ttl qry foreach_code { no_rows_code ""} } {
 		# normal
 	    }
 	    1 { 
-		return -code error -errorcode $errorCode $result 
+		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 	    }
 	    default {
 		return -code $returnCode $result
@@ -147,7 +147,7 @@ proc qc::db_cache_foreach { ttl qry foreach_code { no_rows_code ""} } {
 		    # Normal
 		}
 		1 { 
-		    return -code error -errorcode $errorCode $result 
+		    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
 		}
 		2 {
 		    return -code return $result
