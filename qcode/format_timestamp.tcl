@@ -74,3 +74,28 @@ doc format_timestamp {
 	2008-06-23 10:11:00
     }
 }
+
+proc format_timestamp_rel_age {timestamp} {
+    #| Return the approxate relative age of a timestamp
+    set days [date_days $timestamp now]
+    if { $days == 0 } {
+	return "today"
+    }
+   
+    set years [expr {$days / 365}]
+    if { $years > 0 } { 
+	return "$years [iif {$years==1} year years]" 
+    } 
+    
+    set months [expr {$days / 30}] 
+    if {$months > 0} {
+	return "$months [iif {$months==1} month months]" 
+    }
+
+    set weeks [expr {$days / 7}]
+    if {$weeks > 0} {
+	return "$weeks [iif {$weeks==1} week weeks]" 
+    }
+
+    return "$days [iif {$days==1} day days]" 
+}
