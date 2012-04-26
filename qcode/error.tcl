@@ -25,7 +25,7 @@ proc qc::error_handler { } {
 	}
         PERM* {
 	    if { [eq $suffix .xml] } {
-		return2client text [qc::xml error "Not authorized:$errorMessage"]
+		return2client xml [qc::xml error "Not authorized:$errorMessage"]
 	    } else {
 		return2client code 401 html "Not Authorized:$errorMessage"
 	    }
