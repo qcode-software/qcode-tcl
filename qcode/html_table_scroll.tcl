@@ -8,7 +8,14 @@ proc qc::html_table_scroll {args} {
 
     default height 600
 
-    append html [html_tag div class clsScroll style "height:${height}px"]
+    set div_style ""
+    set div_class [list clsScroll]
+    if { [lower $height] eq "max" } {
+	lappend div_class dynamicResize
+    } else {
+	set div_style [style_set $div_style height ${height}px]
+    }
+    append html [html_tag div class $div_class style $div_style]
     append html [qc::html_table [dict_from {*}$varNames]]
     append html "</div>\n"
 

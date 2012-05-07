@@ -244,8 +244,17 @@ proc qc::html_table { args } {
 
     # Scrollable - vertical
     if { [info exists scrollHeight] } {
-	set html [html div $html class clsScroll style "height:${scrollHeight}px"]
+	set div_style ""
+	set div_class [list clsScroll]
+	if { [lower $scrollHeight] eq "max" } {
+	    lappend div_class dynamicResize
+	} else {
+	    set div_style [style_set $div_style height ${scrollHeight}px]
+	}	
+
+	set html [html div $html class $div_class style $div_style]
     }
+
     return $html
 }
 
