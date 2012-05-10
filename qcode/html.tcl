@@ -236,12 +236,22 @@ doc html_paragraph_layout {
 }
 
 proc qc::html2text { html } {
-    #| Wrapper for html2text 
-    set html [string map [list "&#8209;" -] $html]
+    #| Wrapper for html2text.
+    set html [string map [list "&#8209;" -] $html]  
     if { ![nsv_exists which html2text] } {
 	nsv_set which html2text [exec_proxy which html2text]
     }
-    return [exec_proxy [nsv_get which html2text] -nobs << $html]
+    try {
+	return [exec_proxy [nsv_get which html2text] -nobs << $html]
+    } {
+	# html2text unable to convert (possibly invalid html).
+	# Return text by removing all html tags and any style and script elements.
+	if { [regexp -nocase {<body>.*</body>} $html body] } {
+	    # try to extract the body element.
+	    set html $body
+	} 
+	return [regsub -all -nocase {<[^>]*>|<script[^>]*>.*?</script>|<style[^>]*>.*?</style>} $html ""]
+    }
 }
 
 proc qc::html_info_tables {args} {
