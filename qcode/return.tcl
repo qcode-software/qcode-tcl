@@ -43,7 +43,7 @@ proc qc::return_xml { xml } {
 }
 
 proc qc::return_csv { text } { 
-    return2client content-type "text/csv; charset=utf-8" text $text
+    return2client content-type "text/csv; charset=utf-8" text $text Content-disposition "attachment;"
 }
 
 proc qc::return_soap { string } { 
