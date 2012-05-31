@@ -394,7 +394,8 @@ proc qc::html_col_styles_apply2td {html} {
 
 	    }
 	    if { [ne $style ""] } {
-		foreach td [$table selectNodes "tbody/tr/td\[$col_number\]"] {
+		foreach td [$table selectNodes "tbody/tr/td\[$col_number\] | tfoot/tr/td\[$col_number\]"] {
+                    puts "td = [$td asText]"
 		    if { [$td hasAttribute style] } {
 			$td setAttribute style [style_set [$td getAttribute style] {*}[qc::css_rule2dict $style]]
 		    } else {
