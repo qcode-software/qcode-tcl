@@ -99,7 +99,7 @@ proc qc::is_timestamp { date } {
 }
 
 proc qc::is_email { email } {
-    return [regexp {^[a-zA-Z0-9_\-.]*[^\.]@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
+    return [regexp {^[a-zA-Z0-9_\-]+(\.[a-zA-Z0-9_\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
 }
 
 proc qc::is_postcode { postcode } {
