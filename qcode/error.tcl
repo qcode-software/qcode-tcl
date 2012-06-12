@@ -68,7 +68,7 @@ proc qc::error_report {} {
 	    <b>url:</b>[ns_conn url]<br>
 	    <b>request:</b>[ns_conn request]<br>
 	    <b>remoteip:</b>[qc::conn_remote_ip]<br>
-	    <b>time:</b>[clock format [ns_time]]<br>
+	    <b>time:</b>[qc::format_timestamp now]<br>
 	    <b>errorMessage:</b> $errorMessage <br>
 	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
 	    <b>errorCode:</b> $errorCode
@@ -85,7 +85,7 @@ proc qc::error_report {} {
 	    <h2>Software Bug</h2>
 	    <p>
 	    <b>hostname:</b>[ns_info hostname]<br>
-	    <b>time:</b>[clock format [ns_time]]<br>
+	    <b>time:</b>[qc::format_timestamp now]<br>
 	    <b>errorMessage:</b> $errorMessage <br>
 	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
 	    <b>errorCode:</b> $errorCode
@@ -106,7 +106,7 @@ proc qc::error_report_no_conn {} {
         <h2>Software Bug</h2>
         <p>
         <b>hostname:</b>[ns_info hostname]<br>
-        <b>time:</b>[clock format [ns_time]]<br>
+        <b>time:</b>[qc::format_timestamp now]<br>
         <b>errorMessage:</b> $errorMessage <br>
         <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
         <b>errorCode:</b> $errorCode

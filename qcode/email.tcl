@@ -4,7 +4,6 @@ namespace eval qc {}
 package require mime
 package require base64 
 package require uuid
-package require muppet
 
 doc email {
     Title "Sending Email"
@@ -55,11 +54,7 @@ proc qc::email_send {args} {
 	lappend headers Reply-To ${reply-to}
     }
     # Date
-    if { [info commands ns_time] eq "ns_time" } {
-        lappend headers Date [ns_httptime [ns_time]] 
-    } else {
-        lappend headers Date [format_timestamp_http now] 
-    }
+    lappend headers Date [format_timestamp_http now] 
     # MIME
     lappend headers MIME-Version 1.0
     # Message-ID
@@ -220,6 +215,32 @@ proc qc::smtp_recv {rfp check timeout} {
     }
 }
 
+proc qc::socket_open { smtphost smtpport } {
+    #| Layer of abstraction for socket manupulation.
+    # We check for Aolserver's ns_opensock, if not present, use Tcl's socket command.
+    # Returns a list [list read_socket write_socket]. Using Tcl's socket command this is the same descriptor.
+   if { [info commands ns_sockopen] eq "ns_sockopen" } {
+        return [ns_sockopen $smtphost $smtpport]
+    } else {
+        # Not running under aolserver
+        set sock [socket $smtphost $smtpport]
+        return [list $sock $sock]
+    }
+}
+
+proc qc::socket_close { sock_list } {
+    #| Layer of abstraction for socket manupulation.
+    set rfp [lindex $sock_list 0]
+    set wfp [lindex $sock_list 1]
+    if { $rfp eq $wfp } {
+        # These is the same descriptor (opened by Tcl's socket command)
+        close $rfp
+    } else {
+        close $rfp
+        close $wfp
+    }
+}
+
 proc qc::sendmail {mail_from rcpts body args} {
     #| Connect to the smtp host and send email message
     #| mail_from is a bare email address eg. root@localhost
@@ -263,23 +284,14 @@ proc qc::sendmail {mail_from rcpts body args} {
 
     ## Open the connection ##
 
-    if { [info commands ns_sockopen] eq "ns_sockopen" } {
-        set sock [ns_sockopen $smtphost $smtpport]
-        set rfp [lindex $sock 0]
-        set wfp [lindex $sock 1]
-        set hostname [ns_info hostname]
-    } else {
-        # Not running under aolserver
-        set sock [socket $smtphost $smtpport]
-        set rfp $sock
-        set wfp $sock
-        set hostname [muppet::my hostname]
-    }
+    set sock_list [qc::socket_open $smtphost $smtpport]
+    set rfp [lindex $sock_list 0]
+    set wfp [lindex $sock_list 1]
 
     ## Perform the SMTP conversation
     if { [catch {
         qc::smtp_recv $rfp 220 $timeout
-        qc::smtp_send $wfp "HELO $hostname" $timeout
+        qc::smtp_send $wfp "HELO [qc::my hostname]" $timeout
         qc::smtp_recv $rfp 250 $timeout
         qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
         qc::smtp_recv $rfp 250 $timeout
@@ -300,29 +312,19 @@ proc qc::sendmail {mail_from rcpts body args} {
         qc::smtp_recv $rfp 221 $timeout
     } errMsg ] } {
         ## Error, close and report
-        if { [info commands ns_sockopen] eq "ns_sockopen" } {
-            close $rfp
-            close $wfp
-        } else {
-            close $sock
-        }
+        qc::socket_close $sock_list
         return -code error $errMsg
     }
 
     ## Close the connection
-    if { [info commands ns_sockopen] eq "ns_sockopen" } {
-        close $rfp
-        close $wfp
-    } else {
-        close $sock
-    }
+    qc::socket_close $sock_list
 }
 
 doc sendmail {
     Parent email
     Examples {
 	% 
-	% sendmail $mail_from $rcpt_to $text Subject $subject Date [ns_httptime [ns_time]] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to
+	% sendmail $mail_from $rcpt_to $text Subject $subject Date [format_timestamp_http now] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to
     }
 }
 

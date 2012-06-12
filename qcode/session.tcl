@@ -4,7 +4,7 @@ namespace eval qc {}
 
 proc qc::session_new { employee_id } {
     #| Create a new session
-    set now [ns_time]
+    set now [qc::cast_epoch now]
 
     # set session_id [ns_sha1 "$now[ns_rand]$employee_id"]
     # cannot get nssha to compile under FreeBSD
