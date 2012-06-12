@@ -4,6 +4,7 @@ namespace eval qc {}
 package require mime
 package require base64 
 package require uuid
+package require muppet
 
 doc email {
     Title "Sending Email"
@@ -54,7 +55,11 @@ proc qc::email_send {args} {
 	lappend headers Reply-To ${reply-to}
     }
     # Date
-    lappend headers Date [ns_httptime [ns_time]] 
+    if { [info commands ns_time] eq "ns_time" } {
+        lappend headers Date [ns_httptime [ns_time]] 
+    } else {
+        lappend headers Date [format_timestamp_http now] 
+    }
     # MIME
     lappend headers MIME-Version 1.0
     # Message-ID
@@ -191,7 +196,7 @@ proc qc::email_mime_part {part} {
 
 proc qc::smtp_send {wfp string timeout} {
     #| Write data to the smtp server via wfp
-    if {[lindex [ns_sockselect -timeout $timeout {} $wfp {}] 1] == ""} {
+    if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout {} $wfp {}] 1] == ""} {
 	error "Timeout writing to SMTP host"
     }
     puts -nonewline $wfp "$string\r\n"
@@ -201,7 +206,7 @@ proc qc::smtp_send {wfp string timeout} {
 proc qc::smtp_recv {rfp check timeout} {
     #| Read data from the smtp server via rfp
     while (1) {
-	if {[lindex [ns_sockselect -timeout $timeout $rfp {} {}] 0] == ""} {
+	if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout $rfp {} {}] 0] == ""} {
 	    error "Timeout reading from SMTP host"
 	}
 	set line [gets $rfp]
@@ -223,7 +228,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     #| args is a name value pair list of mail headers  
 
     # Which SMTP server
-    if { [ns_config ns/parameters smtphost] ne "" } {
+    if { [info commands ns_config] eq "ns_config" && [ns_config ns/parameters smtphost] ne "" } {
 	set smtphost [ns_config ns/parameters smtphost]
     } else {
 	set smtphost localhost 
@@ -257,42 +262,60 @@ proc qc::sendmail {mail_from rcpts body args} {
     append msg "\r\n."
 
     ## Open the connection ##
-    set sock [ns_sockopen $smtphost $smtpport]
-    set rfp [lindex $sock 0]
-    set wfp [lindex $sock 1]
+
+    if { [info commands ns_sockopen] eq "ns_sockopen" } {
+        set sock [ns_sockopen $smtphost $smtpport]
+        set rfp [lindex $sock 0]
+        set wfp [lindex $sock 1]
+        set hostname [ns_info hostname]
+    } else {
+        # Not running under aolserver
+        set sock [socket $smtphost $smtpport]
+        set rfp $sock
+        set wfp $sock
+        set hostname [muppet::my hostname]
+    }
 
     ## Perform the SMTP conversation
     if { [catch {
-	qc::smtp_recv $rfp 220 $timeout
-	qc::smtp_send $wfp "HELO [ns_info hostname]" $timeout
-	qc::smtp_recv $rfp 250 $timeout
-	qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
-	qc::smtp_recv $rfp 250 $timeout
+        qc::smtp_recv $rfp 220 $timeout
+        qc::smtp_send $wfp "HELO $hostname" $timeout
+        qc::smtp_recv $rfp 250 $timeout
+        qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
+        qc::smtp_recv $rfp 250 $timeout
 	
-	foreach rcpt_to $rcpts {
-	    qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
-	    qc::smtp_recv $rfp 250 $timeout	
-	}
+        foreach rcpt_to $rcpts {
+            qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
+            qc::smtp_recv $rfp 250 $timeout	
+        }
 
-	#qc::smtp_send $wfp "SIZE=[string bytelength $msg]" $timeout
-	#qc::smtp_recv $rfp 250 $timeout
-
-	qc::smtp_send $wfp DATA $timeout
-	qc::smtp_recv $rfp 354 $timeout
-	qc::smtp_send $wfp $msg $timeout
-	qc::smtp_recv $rfp 250 $timeout
-	qc::smtp_send $wfp QUIT $timeout
-	qc::smtp_recv $rfp 221 $timeout
+        #qc::smtp_send $wfp "SIZE=[string bytelength $msg]" $timeout
+        #qc::smtp_recv $rfp 250 $timeout
+    
+        qc::smtp_send $wfp DATA $timeout
+        qc::smtp_recv $rfp 354 $timeout
+        qc::smtp_send $wfp $msg $timeout
+        qc::smtp_recv $rfp 250 $timeout
+        qc::smtp_send $wfp QUIT $timeout
+        qc::smtp_recv $rfp 221 $timeout
     } errMsg ] } {
-	## Error, close and report
-	close $rfp
-	close $wfp
-	return -code error $errMsg
+        ## Error, close and report
+        if { [info commands ns_sockopen] eq "ns_sockopen" } {
+            close $rfp
+            close $wfp
+        } else {
+            close $sock
+        }
+        return -code error $errMsg
     }
 
     ## Close the connection
-    close $rfp
-    close $wfp
+    if { [info commands ns_sockopen] eq "ns_sockopen" } {
+        close $rfp
+        close $wfp
+    } else {
+        close $sock
+    }
 }
 
 doc sendmail {
