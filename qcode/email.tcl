@@ -283,7 +283,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     }
     
     set smtpport 25
-    set timeout 20
+    set timeout 60
     set headers {}
 
     ## CONSTRUCT THE MESSAGE ##
