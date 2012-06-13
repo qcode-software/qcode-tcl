@@ -189,25 +189,53 @@ proc qc::email_mime_part {part} {
     return [join $list \r\n]\r\n\r\n$body
 }
 
-proc qc::smtp_send {wfp string timeout} {
-    #| Write data to the smtp server via wfp
-    if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout {} $wfp {}] 1] == ""} {
-	error "Timeout writing to SMTP host"
+proc qc::socket_puts {socket string timeout} {
+    #| Write data to the smtp server via socket
+    if { [llength $socket] > 1 } {
+        set socket [lindex $socket 1]
     }
-    puts -nonewline $wfp "$string\r\n"
-    flush $wfp
+
+    if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout {} $socket {}] 1] == ""} {
+	error "Timeout writing to SMTP host"
+    } else {
+        #TODO cater for the case where ns_sockselect exists but the's no timeout
+            global state$socket
+            fileevent $socket writable [list set state$socket "writable"]
+            set aid [after [expr {$timeout*1000}] [list set state$socket "timeout"]]
+            vwait state$socket
+            after cancel $aid
+            if { [set state$socket] eq "timeout" } {
+                error "Timeout waiting for socket"
+            }
+    }
+    puts -nonewline $socket "$string\r\n"
+    flush $socket
 }
 
-proc qc::smtp_recv {rfp check timeout} {
-    #| Read data from the smtp server via rfp
+proc qc::socket_gets {socket check timeout} {
+    #| Read data from the smtp server via socket
+    if { [llength $socket] > 1 } {
+        set socket [lindex $socket 0]
+    }
     while (1) {
-	if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout $rfp {} {}] 0] == ""} {
-	    error "Timeout reading from SMTP host"
-	}
-	set line [gets $rfp]
-	set code [string range $line 0 2]
+	if { [info commands ns_sockselect] eq "ns_sockselect" && [lindex [ns_sockselect -timeout $timeout $socket {} {}] 0] == ""} {
+	    error "Timeout reading from socket"
+	} else {
+        #TODO cater for the case where ns_sockselect exists but the's no timeout
+            global state$socket
+            fileevent $socket readable [list set state$socket "readable"]
+            set aid [after [expr {$timeout*1000}] [list set state$socket "timeout"]]
+            vwait state$socket
+            after cancel $aid
+            if { [set state$socket] eq "timeout" } {
+                error "Timeout waiting for socket"
+            }
+        }
+	set line [gets $socket]
+        # select first x characters of response where x = string length $check
+	set code [string range $line 0 [expr {[string length $check]-1}]]
 	if ![string match $check $code] {
-	    error "Expected a $check status line; got:\n$line"
+	    error "Expected a $check response; got:\n$line"
 	}
 	if ![string match "-" [string range $line 3 3]] {
 	    break;
@@ -215,29 +243,27 @@ proc qc::smtp_recv {rfp check timeout} {
     }
 }
 
-proc qc::socket_open { smtphost smtpport } {
+proc qc::socket_open { host port } {
     #| Layer of abstraction for socket manupulation.
     # We check for Aolserver's ns_opensock, if not present, use Tcl's socket command.
-    # Returns a list [list read_socket write_socket]. Using Tcl's socket command this is the same descriptor.
+    # Returns a list [list read_socket write_socket]. Using Tcl's socket command, this returns the same descriptor.
    if { [info commands ns_sockopen] eq "ns_sockopen" } {
-        return [ns_sockopen $smtphost $smtpport]
+        return [ns_sockopen $host $port]
     } else {
         # Not running under aolserver
-        set sock [socket $smtphost $smtpport]
-        return [list $sock $sock]
+        return [socket -async $host $port]
     }
 }
 
-proc qc::socket_close { sock_list } {
+proc qc::socket_close { socket } {
     #| Layer of abstraction for socket manupulation.
-    set rfp [lindex $sock_list 0]
-    set wfp [lindex $sock_list 1]
-    if { $rfp eq $wfp } {
-        # These is the same descriptor (opened by Tcl's socket command)
-        close $rfp
+    if { [llength $socket] > 1 } {
+        # This is a read/write socket list opened by ns_opensock, close both
+        close [lindex $socket 0]
+        close [lindex $socket 1]
     } else {
-        close $rfp
-        close $wfp
+        # Single socket
+        close $socket
     }
 }
 
@@ -252,7 +278,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     if { [info commands ns_config] eq "ns_config" && [ns_config ns/parameters smtphost] ne "" } {
 	set smtphost [ns_config ns/parameters smtphost]
     } else {
-	set smtphost localhost 
+	set smtphost localhost
     }
     
     set smtpport 25
@@ -284,40 +310,38 @@ proc qc::sendmail {mail_from rcpts body args} {
 
     ## Open the connection ##
 
-    set sock_list [qc::socket_open $smtphost $smtpport]
-    set rfp [lindex $sock_list 0]
-    set wfp [lindex $sock_list 1]
+    set socket [qc::socket_open $smtphost $smtpport]
 
     ## Perform the SMTP conversation
     if { [catch {
-        qc::smtp_recv $rfp 220 $timeout
-        qc::smtp_send $wfp "HELO [qc::my hostname]" $timeout
-        qc::smtp_recv $rfp 250 $timeout
-        qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
-        qc::smtp_recv $rfp 250 $timeout
+        qc::socket_gets $socket 220 $timeout
+        qc::socket_puts $socket "HELO [qc::my hostname]" $timeout
+        qc::socket_gets $socket "250" $timeout
+        qc::socket_puts $socket "MAIL FROM:<$mail_from>" $timeout
+        qc::socket_gets $socket 250 $timeout
 	
         foreach rcpt_to $rcpts {
-            qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
-            qc::smtp_recv $rfp 250 $timeout	
+            qc::socket_puts $socket "RCPT TO:<$rcpt_to>" $timeout
+            qc::socket_gets $socket 250 $timeout	
         }
 
-        #qc::smtp_send $wfp "SIZE=[string bytelength $msg]" $timeout
-        #qc::smtp_recv $rfp 250 $timeout
+        #qc::socket_puts $socket "SIZE=[string bytelength $msg]" $timeout
+        #qc::socket_gets $socket 250 $timeout
     
-        qc::smtp_send $wfp DATA $timeout
-        qc::smtp_recv $rfp 354 $timeout
-        qc::smtp_send $wfp $msg $timeout
-        qc::smtp_recv $rfp 250 $timeout
-        qc::smtp_send $wfp QUIT $timeout
-        qc::smtp_recv $rfp 221 $timeout
+        qc::socket_puts $socket DATA $timeout
+        qc::socket_gets $socket 354 $timeout
+        qc::socket_puts $socket $msg $timeout
+        qc::socket_gets $socket 250 $timeout
+        qc::socket_puts $socket QUIT $timeout
+        qc::socket_gets $socket 221 $timeout
     } errMsg ] } {
         ## Error, close and report
-        qc::socket_close $sock_list
+        qc::socket_close $socket
         return -code error $errMsg
     }
 
     ## Close the connection
-    qc::socket_close $sock_list
+    qc::socket_close $socket
 }
 
 doc sendmail {
