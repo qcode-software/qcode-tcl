@@ -152,7 +152,7 @@ proc qc::email_mime_attachment {dict} {
     # dict keys: data filename ?encoding? ?cid?
     dict2vars $dict encoding data cid filename
     set headers [list]
-    set mimetype [ns_guesstype [file tail $filename]]
+    set mimetype [qc::mime_type_guess [file tail $filename]]
  
     if { ![info exists encoding] } {
 	# No encoding provided so assume binary data even if text
@@ -495,4 +495,567 @@ proc qc::email_support { args } {
 	lappend email_args text [qc::format_cc_masked_string $text]
     }
     qc::email_send {*}$email_args
+}
+
+proc qc::mime_type_guess { filename } {
+    #| Lookup a mimetype based on a file extension. Case insensitive.
+    # Based on ns_guesstype.
+    # Defaults to "*/*".
+    
+    set default_type "*/*"
+
+    if { ![regexp {^\S+(\.[a-z]+)$} [qc::lower $filename] -> ext] } {
+        return $default_type
+    }
+   
+    switch $ext {
+        ".adp"   -
+        ".dci"   -
+        ".htm"   -
+        ".html"  -
+        ".sht"   -
+        ".shtml" {
+            return "text/html"
+        }
+        ".ai" {
+            return "application/postscript"
+        }
+        ".aif" {
+            return "audio/aiff"
+        }
+        ".aifc" {
+            return "audio/aiff"
+        }
+        ".aiff" {
+            return "audio/aiff"
+        }
+        ".ani" {
+            return "application/x-navi-animation"
+        }
+        ".art" {
+            return "image/x-art"
+        }
+        ".asc" {
+            return "text/plain"
+        }
+        ".au" {
+            return "audio/basic"
+        }
+        ".avi" {
+            return "video/x-msvideo"
+        }
+        ".bcpio" {
+            return "application/x-bcpio"
+        }
+        ".bin" {
+            return "application/octet-stream"
+        }
+        ".bmp" {
+            return "image/bmp"
+        }
+        ".cdf" {
+            return "application/x-netcdf"
+        }
+        ".cgm" {
+            return "image/cgm"
+        }
+        ".class" {
+            return "application/octet-stream"
+        }
+        ".cpio" {
+            return "application/x-cpio"
+        }
+        ".cpt" {
+            return "application/mac-compactpro"
+        }
+        ".css" {
+            return "text/css"
+        }
+        ".csv" {
+            return "application/csv"
+        }
+        ".dcr" {
+            return "application/x-director"
+        }
+        ".der" {
+            return "application/x-x509-ca-cert"
+        }
+        ".dir" {
+            return "application/x-director"
+        }
+        ".dll" {
+            return "application/octet-stream"
+        }
+        ".dms" {
+            return "application/octet-stream"
+        }
+        ".doc" {
+            return "application/msword"
+        }
+        ".dp" {
+            return "application/commonground"
+        }
+        ".dvi" {
+            return "applications/x-dvi"
+        }
+        ".dwg" {
+            return "image/vnd.dwg"
+        }
+        ".dxf" {
+            return "image/vnd.dxf"
+        }
+        ".dxr" {
+            return "application/x-director"
+        }
+        ".elm" {
+            return "text/plain"
+        }
+        ".eml" {
+            return "text/plain"
+        }
+        ".etx" {
+            return "text/x-setext"
+        }
+        ".exe" {
+            return "application/octet-stream"
+        }
+        ".ez" {
+            return "application/andrew-inset"
+        }
+        ".fm" {
+            return "application/vnd.framemaker"
+        }
+        ".gbt" {
+            return "text/plain"
+        }    
+        ".gif" {
+            return "image/gif"
+        }
+        ".gtar" {
+            return "application/x-gtar"
+        }
+        ".gz" {
+            return "application/x-gzip"
+        }
+        ".hdf" {
+            return "application/x-hdf"
+        }
+        ".hpgl" {
+            return "application/vnd.hp-hpgl"
+        }
+        ".hqx" {
+            return "application/mac-binhex40"
+        }
+        ".ice" {
+            return "x-conference/x-cooltalk"
+        }
+        ".ief" {
+            return "image/ief"
+        }
+        ".igs" {
+            return "image/iges"
+        }
+        ".iges" {
+            return "image/iges"
+        }
+        ".jfif" {
+            return "image/jpeg"
+        }
+        ".jpe" {
+            return "image/jpeg"
+        }
+        ".jpg" {
+            return "image/jpeg"
+        }
+        ".jpeg" {
+            return "image/jpeg"
+        }
+        ".js" {
+            return "application/x-javascript"
+        }
+        ".kar" {
+            return "audio/midi"
+        }
+        ".latex" {
+            return "application/x-latex"
+        }
+        ".lha" {
+            return "application/octet-stream"
+        }
+        ".ls" {
+            return "application/x-javascript"
+        }
+        ".lxc" {
+            return "application/vnd.ms-excel"
+        }
+        ".lzh" {
+            return "application/octet-stream"
+        }
+        ".man" {
+            return "application/x-troff-man"
+        }
+        ".map" {
+            return "application/x-navimap"
+        }
+        ".me" {
+            return "application/x-troff-me"
+        }
+        ".mesh" {
+            return "model/mesh"
+        }
+        ".mid" {
+            return "audio/x-midi"
+        }
+        ".midi" {
+            return "audio/x-midi"
+        }
+        ".mif" {
+            return "application/vnd.mif"
+        }
+        ".mocha" {
+            return "application/x-javascript"
+        }
+        ".mov" {
+            return "video/quicktime"
+        }
+        ".movie" {
+            return "video/x-sgi-movie"
+        }
+        ".mp2" {
+            return "audio/mpeg"
+        }
+        ".mp3" {
+            return "audio/mpeg"
+        }
+        ".mpe" {
+            return "video/mpeg"
+        }
+        ".mpeg" {
+            return "video/mpeg"
+        }
+        ".mpg" {
+            return "video/mpeg"
+        }
+        ".mpga" {
+            return "audio/mpeg"
+        }
+        ".ms" {
+            return "application/x-troff-ms"
+        }
+        ".msh" {
+            return "model/mesh"
+        }
+        ".nc" {
+            return "application/x-netcdf"
+        }
+        ".nvd" {
+            return "application/x-navidoc"
+        }
+        ".nvm" {
+            return "application/x-navimap"
+        }
+        ".oda" {
+            return "application/oda"
+        }
+        ".pbm" {
+            return "image/x-portable-bitmap"
+        }
+        ".pcl" {
+            return "application/vnd.hp-pcl"
+        }
+        ".pclx" {
+            return "application/vnd.hp-pclx"
+        }
+        ".pdb" {
+            return "chemical/x-pdb"
+        }
+        ".pdf" {
+            return "application/pdf"
+        }
+        ".pgm" {
+            return "image/x-portable-graymap"
+        }
+        ".pgn" {
+            return "application/x-chess-pgn"
+        }
+        ".pic" {
+            return "image/pict"
+        }
+        ".pict" {
+            return "image/pict"
+        }
+        ".pnm" {
+            return "image/x-portable-anymap"
+        }
+        ".png" {
+            return "image/png"
+        }
+        ".pot" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ppm" {
+            return "image/x-portable-pixmap"
+        }
+        ".pps" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ppt" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ps" {
+            return "application/postscript"
+        }
+        ".qt" {
+            return "video/quicktime"
+        }
+        ".ra" {
+            return "audio/x-realaudio"
+        }
+        ".ram" {
+            return "audio/x-pn-realaudio"
+        }
+        ".ras" {
+            return "image/x-cmu-raster"
+        }
+        ".rgb" {
+            return "image/x-rgb"
+        }
+        ".rm" {
+            return "audio/x-pn-realaudio"
+        }
+        ".roff" {
+            return "application/x-troff"
+        }
+        ".rpm" {
+            return "audio/x-pn-realaudio-plugin"
+        }
+        ".rtf" {
+            return "application/rtf"
+        }
+        ".rtx" {
+            return "text/richtext"
+        }
+        ".sda" {
+            return "application/vnd.stardivision.draw"
+        }
+        ".sdc" {
+            return "application/vnd.stardivision.calc"
+        }
+        ".sdd" {
+            return "application/vnd.stardivision.impress"
+        }
+        ".sdp" {
+            return "application/vnd.stardivision.impress"
+        }
+        ".sdw" {
+            return "application/vnd.stardivision.writer"
+        }
+        ".sgl" {
+            return "application/vnd.stardivision.writer-global"
+        }
+        ".sgm" {
+            return "text/sgml"
+        }
+        ".sgml" {
+            return "text/sgml"
+        }
+        ".sh" {
+            return "application/x-sh"
+        }
+        ".shar" {
+            return "application/x-shar"
+        }
+        ".silo" {
+            return "model/mesh"
+        }
+        ".sit" {
+            return "application/x-stuffit"
+        }
+        ".skd" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skm" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skp" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skt" {
+            return "application/vnd.stardivision.math"
+        }
+        ".smf" {
+            return "application/vnd.stardivision.math"
+        }
+        ".smi" {
+            return "application/smil"
+        }
+        ".smil" {
+            return "application/smil"
+        }
+        ".snd" {
+            return "audio/basic"
+        }
+        ".spl" {
+            return "application/x-futuresplash"
+        }
+        ".sql" {
+            return "application/x-sql"
+        }
+        ".src" {
+            return "application/x-wais-source"
+        }
+        ".stc" {
+            return "application/vnd.sun.xml.calc.template"
+        }
+        ".std" {
+            return "application/vnd.sun.xml.draw.template"
+        }
+        ".sti" {
+            return "application/vnd.sun.xml.impress.template"
+        }
+        ".stl" {
+            return "application/x-navistyle"
+        }
+        ".stw" {
+            return "application/vnd.sun.xml.writer.template"
+        }
+        ".swf" {
+            return "application/x-shockwave-flash"
+        }
+        ".sxc" {
+            return "application/vnd.sun.xml.calc"
+        }
+        ".sxd" {
+            return "application/vnd.sun.xml.draw"
+        }
+        ".sxg" {
+            return "application/vnd.sun.xml.writer.global"
+        }
+        ".sxl" {
+            return "application/vnd.sun.xml.impress"
+        }
+        ".sxm" {
+            return "application/vnd.sun.xml.math"
+        }
+        ".sxw" {
+            return "application/vnd.sun.xml.writer"
+        }
+        ".t" {
+            return "application/x-troff"
+        }
+        ".tar" {
+            return "application/x-tar"
+        }
+        ".tcl" {
+            return "x-tcl"
+        }
+        ".tex" {
+            return "application/x-tex"
+        }
+        ".texi" {
+            return "application/x-texinfo"
+        }
+        ".texinfo" {
+            return "application/x-texinfo"
+        }
+        ".text" {
+            return "text/plain"
+        }
+        ".tgz" {
+            return "application/x-gtar"
+        }
+        ".tif" {
+            return "image/tiff"
+        }
+        ".tiff" {
+            return "image/tiff"
+        }
+        ".tr" {
+            return "application/x-troff"
+        }
+        ".tsv" {
+            return "text/tab-separated-values"
+        }
+        ".txt" {
+            return "text/plain"
+        }
+        ".ustar" {
+            return "application/x-ustar"
+        }
+        ".vcd" {
+            return "application/x-cdlink"
+        }
+        ".vor" {
+            return "application/vnd.stardivision.writer"
+        }
+        ".vrml" {
+            return "model/vrml"
+        }
+        ".wav" {
+            return "audio/x-wav"
+        }
+        ".wbmp" {
+            return "image/vnd.wap.wbmp"
+        }
+        ".wkb" {
+            return "application/vnd.ms-excel"
+        }
+        ".wks" {
+            return "application/vnd.ms-excel"
+        }
+        ".wml" {
+            return "text/vnd.wap.wml"
+        }
+        ".wmlc" {
+            return "application/vnd.wap.wmlc"
+        }
+        ".wmls" {
+            return "text/vnd.wap.wmlscript"
+        }
+        ".wmlsc" {
+            return "application/vnd.wap.wmlscript"
+        }
+        ".wrl" {
+            return "model/vrml"
+        }
+        ".xbm" {
+            return "image/x-xbitmap"
+        }
+        ".xls" {
+            return "application/vnd.ms-excel"
+        }
+        ".xlw" {
+            return "application/vnd.ms-excel"
+        }
+        ".xpm" {
+            return "image/x-xpixmap"
+        }
+        ".xht" {
+            return "application/xhtml+xml"
+        }
+        ".xhtml" {
+            return "application/xhtml+xml"
+        }
+        ".xml" {
+            return "text/xml"
+        }
+        ".xsl" {
+            return "text/xml"
+        }
+        ".xyz" {
+            return "chemical/x-pdb"
+        }
+        ".xwd" {
+            return "image/x-xwindowdump"
+        }
+        ".z" {
+            return "application/x-compress"
+        }
+        ".zip" {
+            return "application/zip"
+        }
+        default {
+            return $default_type
+        }
+    }
 }
