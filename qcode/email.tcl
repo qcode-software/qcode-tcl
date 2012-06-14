@@ -275,12 +275,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     #| body is the plain text message usually in mime format.
     #| args is a name value pair list of mail headers  
 
-    # Which SMTP server
-    if { [info commands ns_config] eq "ns_config" && [ns_config ns/parameters smtphost] ne "" } {
-	set smtphost [ns_config ns/parameters smtphost]
-    } else {
-	set smtphost localhost
-    }
+    set smtphost localhost
     
     set smtpport 25
     set timeout 60
