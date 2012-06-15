@@ -22,12 +22,17 @@ proc qc::socket_puts {args} {
     after cancel $id
 
     # Check if the socket timed-out
-    if { $sock_state($sock,write) eq "timeout" } {
+    set state $sock_state($sock,write)
+    # tidy up
+    unset sock_state($sock,write)
+    if { $state eq "timeout" } {
         error "Timeout waiting to write to socket"
     }
     # Check for socket error
-    if { [fconfigure $sock -error] ne "" } {
-        error "Socket error: [fconfigure $sock -error]"
+    # fconfigure $sock -error gets and clears any error states so call once only.
+    set sock_error [fconfigure $sock -error]
+    if { $sock_error ne "" } {
+        error "Socket error: $sock_error"
     }
 
     # At this point $sock should be writable - go ahead with puts
@@ -63,12 +68,17 @@ proc qc::socket_gets {sock timeout} {
     after cancel $id
 
     # Check if the socket timed-out
-    if { $sock_state($sock,write) eq "timeout" } {
-	error "Timeout waiting to write to socket"
+    set state $sock_state($sock,read)
+    # tidy up
+    unset sock_state($sock,read)
+    if { $state eq "timeout" } {
+	error "Timeout waiting to read from socket"
     }
     # Check for socket error
-    if { [fconfigure $sock -error] ne "" } {
-	error "Socket error: [fconfigure $sock -error]"
+    # fconfigure $sock -error gets and clears any error states so call once only.
+    set sock_error [fconfigure $sock -error]
+    if { $sock_error ne "" } {
+	error "Socket error: $sock_error"
     }
 
     # At this point $sock should be readable - go ahead with gets
