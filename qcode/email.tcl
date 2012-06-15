@@ -54,7 +54,7 @@ proc qc::email_send {args} {
 	lappend headers Reply-To ${reply-to}
     }
     # Date
-    lappend headers Date [ns_httptime [ns_time]] 
+    lappend headers Date [format_timestamp_http now] 
     # MIME
     lappend headers MIME-Version 1.0
     # Message-ID
@@ -152,7 +152,7 @@ proc qc::email_mime_attachment {dict} {
     # dict keys: data filename ?encoding? ?cid?
     dict2vars $dict encoding data cid filename
     set headers [list]
-    set mimetype [ns_guesstype [file tail $filename]]
+    set mimetype [qc::mime_type_guess [file tail $filename]]
  
     if { ![info exists encoding] } {
 	# No encoding provided so assume binary data even if text
@@ -189,22 +189,75 @@ proc qc::email_mime_part {part} {
     return [join $list \r\n]\r\n\r\n$body
 }
 
-proc qc::smtp_send {wfp string timeout} {
-    #| Write data to the smtp server via wfp
-    if {[lindex [ns_sockselect -timeout $timeout {} $wfp {}] 1] == ""} {
-	error "Timeout writing to SMTP host"
+proc qc::smtp_send {sock string timeout} {
+    #| Write data to the smtp server via sock
+    
+    # Unique global variable as timeout flag since fileevent & after operate at global level...
+    # Should allow concurrent invocations
+    global state_${sock}_write
+
+    # Asynchronous. When $sock becomes writable, set state_${sock}_write.
+    fileevent $sock writable [list set state_${sock}_write "writable"]
+
+    # Asynchronous. Once $timeout*1000 elapses, set state_${sock}_write to timeout.
+    set aid [after [expr {$timeout*1000}] [list set state_${sock}_write "timeout"]]
+
+    # Wait for something to set state$stock
+    vwait state_${sock}_write
+
+    # state_${sock}_write is now set, cancel the timeout timer (it may already have expired)
+    after cancel $aid
+
+    # Find out what set state_${sock}_write
+    set socket_error [fconfigure $sock -error]
+    if { [set state_${sock}_write] eq "timeout" } {
+        error "Timeout waiting to write to socket"
+    } elseif { $socket_error ne "" } {
+        # Something else went wrong
+        error "Socket error: $socket_error"
     }
-    puts -nonewline $wfp "$string\r\n"
-    flush $wfp
+
+    # At this point $sock should be writable - go ahead with puts
+    puts -nonewline $sock "$string\r\n"
+    flush $sock
 }
 
-proc qc::smtp_recv {rfp check timeout} {
-    #| Read data from the smtp server via rfp
+proc qc::smtp_recv {sock check timeout} {
+    #| Read data from the smtp server via sock
     while (1) {
-	if {[lindex [ns_sockselect -timeout $timeout $rfp {} {}] 0] == ""} {
-	    error "Timeout reading from SMTP host"
-	}
-	set line [gets $rfp]
+        # Unique global variable as timeout flag since fileevent & after operate at global level...
+        # Should allow concurrent invocations
+        global state_${sock}_read
+
+        # Asynchronous. When $sock becomes readable, set state_${sock}_read.
+        fileevent $sock readable [list set state_${sock}_read "readable"]
+
+        # Asynchronous. Once $timeout*1000 elapses, set state_${sock}_read to timeout.
+        set aid [after [expr {$timeout*1000}] [list set state_${sock}_read "timeout"]]
+
+        # Wait for something to set state$stock
+        vwait state_${sock}_read
+
+        # TODO This works well if $timeout is less than 20 seconds. 
+        # Above this and there seems to be a system default timeout (perhaps in the TCP stack) which
+        # trips and makes the socket go into an error state and, for some reason, become "readable". 
+        # So we must check fconfigue $sock -error also to be sure of the state.
+        # The bottom line is that the $timeout value is ignored above 20
+
+        # state_${sock}_read is now set, cancel the timeout timer (it may already have expired)
+        after cancel $aid
+
+        # Find out what set state_${sock}_read
+        set socket_error [fconfigure $sock -error]
+        if { [set state_${sock}_read] eq "timeout" } {
+            error "Timeout waiting to read from socket"
+        } elseif { $socket_error ne "" } {
+            # Something else went wrong
+            error "Socket error: $socket_error"
+        }
+
+        # At this point $sock should be readable - go ahead with gets
+	set line [gets $sock]
 	set code [string range $line 0 2]
 	if ![string match $check $code] {
 	    error "Expected a $check status line; got:\n$line"
@@ -222,12 +275,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     #| body is the plain text message usually in mime format.
     #| args is a name value pair list of mail headers  
 
-    # Which SMTP server
-    if { [ns_config ns/parameters smtphost] ne "" } {
-	set smtphost [ns_config ns/parameters smtphost]
-    } else {
-	set smtphost localhost 
-    }
+    set smtphost localhost
     
     set smtpport 25
     set timeout 60
@@ -257,49 +305,46 @@ proc qc::sendmail {mail_from rcpts body args} {
     append msg "\r\n."
 
     ## Open the connection ##
-    set sock [ns_sockopen $smtphost $smtpport]
-    set rfp [lindex $sock 0]
-    set wfp [lindex $sock 1]
+
+    set sock [socket -async $smtphost $smtpport]
 
     ## Perform the SMTP conversation
     if { [catch {
-	qc::smtp_recv $rfp 220 $timeout
-	qc::smtp_send $wfp "HELO [ns_info hostname]" $timeout
-	qc::smtp_recv $rfp 250 $timeout
-	qc::smtp_send $wfp "MAIL FROM:<$mail_from>" $timeout
-	qc::smtp_recv $rfp 250 $timeout
+        qc::smtp_recv $sock 220 $timeout
+        qc::smtp_send $sock "HELO [qc::my hostname]" $timeout
+        qc::smtp_recv $sock 250 $timeout
+        qc::smtp_send $sock "MAIL FROM:<$mail_from>" $timeout
+        qc::smtp_recv $sock 250 $timeout
 	
-	foreach rcpt_to $rcpts {
-	    qc::smtp_send $wfp "RCPT TO:<$rcpt_to>" $timeout
-	    qc::smtp_recv $rfp 250 $timeout	
-	}
+        foreach rcpt_to $rcpts {
+            qc::smtp_send $sock "RCPT TO:<$rcpt_to>" $timeout
+            qc::smtp_recv $sock 250 $timeout	
+        }
 
-	#qc::smtp_send $wfp "SIZE=[string bytelength $msg]" $timeout
-	#qc::smtp_recv $rfp 250 $timeout
-
-	qc::smtp_send $wfp DATA $timeout
-	qc::smtp_recv $rfp 354 $timeout
-	qc::smtp_send $wfp $msg $timeout
-	qc::smtp_recv $rfp 250 $timeout
-	qc::smtp_send $wfp QUIT $timeout
-	qc::smtp_recv $rfp 221 $timeout
+        #qc::smtp_send $sock "SIZE=[string bytelength $msg]" $timeout
+        #qc::smtp_recv $sock 250 $timeout
+    
+        qc::smtp_send $sock DATA $timeout
+        qc::smtp_recv $sock 354 $timeout
+        qc::smtp_send $sock $msg $timeout
+        qc::smtp_recv $sock 250 $timeout
+        qc::smtp_send $sock QUIT $timeout
+        qc::smtp_recv $sock 221 $timeout
     } errMsg ] } {
-	## Error, close and report
-	close $rfp
-	close $wfp
-	return -code error $errMsg
+        ## Error, close and report
+        close $sock
+        return -code error $errMsg
     }
 
     ## Close the connection
-    close $rfp
-    close $wfp
+    close $sock
 }
 
 doc sendmail {
     Parent email
     Examples {
 	% 
-	% sendmail $mail_from $rcpt_to $text Subject $subject Date [ns_httptime [ns_time]] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to
+	% sendmail $mail_from $rcpt_to $text Subject $subject Date [qc::format_timestamp_http now] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to
     }
 }
 
@@ -445,4 +490,567 @@ proc qc::email_support { args } {
 	lappend email_args text [qc::format_cc_masked_string $text]
     }
     qc::email_send {*}$email_args
+}
+
+proc qc::mime_type_guess { filename } {
+    #| Lookup a mimetype based on a file extension. Case insensitive.
+    # Based on ns_guesstype.
+    # Defaults to "*/*".
+    
+    set default_type "*/*"
+
+    if { ![regexp {^\S+(\.[a-z]+)$} [qc::lower $filename] -> ext] } {
+        return $default_type
+    }
+   
+    switch $ext {
+        ".adp"   -
+        ".dci"   -
+        ".htm"   -
+        ".html"  -
+        ".sht"   -
+        ".shtml" {
+            return "text/html"
+        }
+        ".ai" {
+            return "application/postscript"
+        }
+        ".aif" {
+            return "audio/aiff"
+        }
+        ".aifc" {
+            return "audio/aiff"
+        }
+        ".aiff" {
+            return "audio/aiff"
+        }
+        ".ani" {
+            return "application/x-navi-animation"
+        }
+        ".art" {
+            return "image/x-art"
+        }
+        ".asc" {
+            return "text/plain"
+        }
+        ".au" {
+            return "audio/basic"
+        }
+        ".avi" {
+            return "video/x-msvideo"
+        }
+        ".bcpio" {
+            return "application/x-bcpio"
+        }
+        ".bin" {
+            return "application/octet-stream"
+        }
+        ".bmp" {
+            return "image/bmp"
+        }
+        ".cdf" {
+            return "application/x-netcdf"
+        }
+        ".cgm" {
+            return "image/cgm"
+        }
+        ".class" {
+            return "application/octet-stream"
+        }
+        ".cpio" {
+            return "application/x-cpio"
+        }
+        ".cpt" {
+            return "application/mac-compactpro"
+        }
+        ".css" {
+            return "text/css"
+        }
+        ".csv" {
+            return "application/csv"
+        }
+        ".dcr" {
+            return "application/x-director"
+        }
+        ".der" {
+            return "application/x-x509-ca-cert"
+        }
+        ".dir" {
+            return "application/x-director"
+        }
+        ".dll" {
+            return "application/octet-stream"
+        }
+        ".dms" {
+            return "application/octet-stream"
+        }
+        ".doc" {
+            return "application/msword"
+        }
+        ".dp" {
+            return "application/commonground"
+        }
+        ".dvi" {
+            return "applications/x-dvi"
+        }
+        ".dwg" {
+            return "image/vnd.dwg"
+        }
+        ".dxf" {
+            return "image/vnd.dxf"
+        }
+        ".dxr" {
+            return "application/x-director"
+        }
+        ".elm" {
+            return "text/plain"
+        }
+        ".eml" {
+            return "text/plain"
+        }
+        ".etx" {
+            return "text/x-setext"
+        }
+        ".exe" {
+            return "application/octet-stream"
+        }
+        ".ez" {
+            return "application/andrew-inset"
+        }
+        ".fm" {
+            return "application/vnd.framemaker"
+        }
+        ".gbt" {
+            return "text/plain"
+        }    
+        ".gif" {
+            return "image/gif"
+        }
+        ".gtar" {
+            return "application/x-gtar"
+        }
+        ".gz" {
+            return "application/x-gzip"
+        }
+        ".hdf" {
+            return "application/x-hdf"
+        }
+        ".hpgl" {
+            return "application/vnd.hp-hpgl"
+        }
+        ".hqx" {
+            return "application/mac-binhex40"
+        }
+        ".ice" {
+            return "x-conference/x-cooltalk"
+        }
+        ".ief" {
+            return "image/ief"
+        }
+        ".igs" {
+            return "image/iges"
+        }
+        ".iges" {
+            return "image/iges"
+        }
+        ".jfif" {
+            return "image/jpeg"
+        }
+        ".jpe" {
+            return "image/jpeg"
+        }
+        ".jpg" {
+            return "image/jpeg"
+        }
+        ".jpeg" {
+            return "image/jpeg"
+        }
+        ".js" {
+            return "application/x-javascript"
+        }
+        ".kar" {
+            return "audio/midi"
+        }
+        ".latex" {
+            return "application/x-latex"
+        }
+        ".lha" {
+            return "application/octet-stream"
+        }
+        ".ls" {
+            return "application/x-javascript"
+        }
+        ".lxc" {
+            return "application/vnd.ms-excel"
+        }
+        ".lzh" {
+            return "application/octet-stream"
+        }
+        ".man" {
+            return "application/x-troff-man"
+        }
+        ".map" {
+            return "application/x-navimap"
+        }
+        ".me" {
+            return "application/x-troff-me"
+        }
+        ".mesh" {
+            return "model/mesh"
+        }
+        ".mid" {
+            return "audio/x-midi"
+        }
+        ".midi" {
+            return "audio/x-midi"
+        }
+        ".mif" {
+            return "application/vnd.mif"
+        }
+        ".mocha" {
+            return "application/x-javascript"
+        }
+        ".mov" {
+            return "video/quicktime"
+        }
+        ".movie" {
+            return "video/x-sgi-movie"
+        }
+        ".mp2" {
+            return "audio/mpeg"
+        }
+        ".mp3" {
+            return "audio/mpeg"
+        }
+        ".mpe" {
+            return "video/mpeg"
+        }
+        ".mpeg" {
+            return "video/mpeg"
+        }
+        ".mpg" {
+            return "video/mpeg"
+        }
+        ".mpga" {
+            return "audio/mpeg"
+        }
+        ".ms" {
+            return "application/x-troff-ms"
+        }
+        ".msh" {
+            return "model/mesh"
+        }
+        ".nc" {
+            return "application/x-netcdf"
+        }
+        ".nvd" {
+            return "application/x-navidoc"
+        }
+        ".nvm" {
+            return "application/x-navimap"
+        }
+        ".oda" {
+            return "application/oda"
+        }
+        ".pbm" {
+            return "image/x-portable-bitmap"
+        }
+        ".pcl" {
+            return "application/vnd.hp-pcl"
+        }
+        ".pclx" {
+            return "application/vnd.hp-pclx"
+        }
+        ".pdb" {
+            return "chemical/x-pdb"
+        }
+        ".pdf" {
+            return "application/pdf"
+        }
+        ".pgm" {
+            return "image/x-portable-graymap"
+        }
+        ".pgn" {
+            return "application/x-chess-pgn"
+        }
+        ".pic" {
+            return "image/pict"
+        }
+        ".pict" {
+            return "image/pict"
+        }
+        ".pnm" {
+            return "image/x-portable-anymap"
+        }
+        ".png" {
+            return "image/png"
+        }
+        ".pot" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ppm" {
+            return "image/x-portable-pixmap"
+        }
+        ".pps" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ppt" {
+            return "application/vnd.ms-powerpoint"
+        }
+        ".ps" {
+            return "application/postscript"
+        }
+        ".qt" {
+            return "video/quicktime"
+        }
+        ".ra" {
+            return "audio/x-realaudio"
+        }
+        ".ram" {
+            return "audio/x-pn-realaudio"
+        }
+        ".ras" {
+            return "image/x-cmu-raster"
+        }
+        ".rgb" {
+            return "image/x-rgb"
+        }
+        ".rm" {
+            return "audio/x-pn-realaudio"
+        }
+        ".roff" {
+            return "application/x-troff"
+        }
+        ".rpm" {
+            return "audio/x-pn-realaudio-plugin"
+        }
+        ".rtf" {
+            return "application/rtf"
+        }
+        ".rtx" {
+            return "text/richtext"
+        }
+        ".sda" {
+            return "application/vnd.stardivision.draw"
+        }
+        ".sdc" {
+            return "application/vnd.stardivision.calc"
+        }
+        ".sdd" {
+            return "application/vnd.stardivision.impress"
+        }
+        ".sdp" {
+            return "application/vnd.stardivision.impress"
+        }
+        ".sdw" {
+            return "application/vnd.stardivision.writer"
+        }
+        ".sgl" {
+            return "application/vnd.stardivision.writer-global"
+        }
+        ".sgm" {
+            return "text/sgml"
+        }
+        ".sgml" {
+            return "text/sgml"
+        }
+        ".sh" {
+            return "application/x-sh"
+        }
+        ".shar" {
+            return "application/x-shar"
+        }
+        ".silo" {
+            return "model/mesh"
+        }
+        ".sit" {
+            return "application/x-stuffit"
+        }
+        ".skd" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skm" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skp" {
+            return "application/vnd.stardivision.math"
+        }
+        ".skt" {
+            return "application/vnd.stardivision.math"
+        }
+        ".smf" {
+            return "application/vnd.stardivision.math"
+        }
+        ".smi" {
+            return "application/smil"
+        }
+        ".smil" {
+            return "application/smil"
+        }
+        ".snd" {
+            return "audio/basic"
+        }
+        ".spl" {
+            return "application/x-futuresplash"
+        }
+        ".sql" {
+            return "application/x-sql"
+        }
+        ".src" {
+            return "application/x-wais-source"
+        }
+        ".stc" {
+            return "application/vnd.sun.xml.calc.template"
+        }
+        ".std" {
+            return "application/vnd.sun.xml.draw.template"
+        }
+        ".sti" {
+            return "application/vnd.sun.xml.impress.template"
+        }
+        ".stl" {
+            return "application/x-navistyle"
+        }
+        ".stw" {
+            return "application/vnd.sun.xml.writer.template"
+        }
+        ".swf" {
+            return "application/x-shockwave-flash"
+        }
+        ".sxc" {
+            return "application/vnd.sun.xml.calc"
+        }
+        ".sxd" {
+            return "application/vnd.sun.xml.draw"
+        }
+        ".sxg" {
+            return "application/vnd.sun.xml.writer.global"
+        }
+        ".sxl" {
+            return "application/vnd.sun.xml.impress"
+        }
+        ".sxm" {
+            return "application/vnd.sun.xml.math"
+        }
+        ".sxw" {
+            return "application/vnd.sun.xml.writer"
+        }
+        ".t" {
+            return "application/x-troff"
+        }
+        ".tar" {
+            return "application/x-tar"
+        }
+        ".tcl" {
+            return "x-tcl"
+        }
+        ".tex" {
+            return "application/x-tex"
+        }
+        ".texi" {
+            return "application/x-texinfo"
+        }
+        ".texinfo" {
+            return "application/x-texinfo"
+        }
+        ".text" {
+            return "text/plain"
+        }
+        ".tgz" {
+            return "application/x-gtar"
+        }
+        ".tif" {
+            return "image/tiff"
+        }
+        ".tiff" {
+            return "image/tiff"
+        }
+        ".tr" {
+            return "application/x-troff"
+        }
+        ".tsv" {
+            return "text/tab-separated-values"
+        }
+        ".txt" {
+            return "text/plain"
+        }
+        ".ustar" {
+            return "application/x-ustar"
+        }
+        ".vcd" {
+            return "application/x-cdlink"
+        }
+        ".vor" {
+            return "application/vnd.stardivision.writer"
+        }
+        ".vrml" {
+            return "model/vrml"
+        }
+        ".wav" {
+            return "audio/x-wav"
+        }
+        ".wbmp" {
+            return "image/vnd.wap.wbmp"
+        }
+        ".wkb" {
+            return "application/vnd.ms-excel"
+        }
+        ".wks" {
+            return "application/vnd.ms-excel"
+        }
+        ".wml" {
+            return "text/vnd.wap.wml"
+        }
+        ".wmlc" {
+            return "application/vnd.wap.wmlc"
+        }
+        ".wmls" {
+            return "text/vnd.wap.wmlscript"
+        }
+        ".wmlsc" {
+            return "application/vnd.wap.wmlscript"
+        }
+        ".wrl" {
+            return "model/vrml"
+        }
+        ".xbm" {
+            return "image/x-xbitmap"
+        }
+        ".xls" {
+            return "application/vnd.ms-excel"
+        }
+        ".xlw" {
+            return "application/vnd.ms-excel"
+        }
+        ".xpm" {
+            return "image/x-xpixmap"
+        }
+        ".xht" {
+            return "application/xhtml+xml"
+        }
+        ".xhtml" {
+            return "application/xhtml+xml"
+        }
+        ".xml" {
+            return "text/xml"
+        }
+        ".xsl" {
+            return "text/xml"
+        }
+        ".xyz" {
+            return "chemical/x-pdb"
+        }
+        ".xwd" {
+            return "image/x-xwindowdump"
+        }
+        ".z" {
+            return "application/x-compress"
+        }
+        ".zip" {
+            return "application/zip"
+        }
+        default {
+            return $default_type
+        }
+    }
 }
