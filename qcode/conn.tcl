@@ -1,6 +1,7 @@
 package provide qcode 1.4
 package require doc
 namespace eval qc {}
+
 proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection
     #| Trust that a reverse proxy like nginx is setup to pass an X-Forwarded-For header.
@@ -21,6 +22,7 @@ doc conn_remote_ip {
 	12.34.56.78
     }
 }
+
 
 proc qc::conn_marshal { {error_handler qc::error_handler} } {
     #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
@@ -84,6 +86,10 @@ proc qc::conn_url {} {
     }
 }
  
+proc qc::conn_host {} {
+    return [ns_set iget [ns_conn headers] Host]
+}
+
 # Alexey Pechnikov
 proc _ns_conn {args} {
     set host [string tolower [ns_set get [ns_conn headers] Host]]

@@ -191,75 +191,18 @@ proc qc::email_mime_part {part} {
 
 proc qc::smtp_send {sock string timeout} {
     #| Write data to the smtp server via sock
-    
-    # Unique global variable as timeout flag since fileevent & after operate at global level...
-    # Should allow concurrent invocations
-    global state_${sock}_write
 
-    # Asynchronous. When $sock becomes writable, set state_${sock}_write.
-    fileevent $sock writable [list set state_${sock}_write "writable"]
-
-    # Asynchronous. Once $timeout*1000 elapses, set state_${sock}_write to timeout.
-    set aid [after [expr {$timeout*1000}] [list set state_${sock}_write "timeout"]]
-
-    # Wait for something to set state$stock
-    vwait state_${sock}_write
-
-    # state_${sock}_write is now set, cancel the timeout timer (it may already have expired)
-    after cancel $aid
-
-    # Find out what set state_${sock}_write
-    set socket_error [fconfigure $sock -error]
-    if { [set state_${sock}_write] eq "timeout" } {
-        error "Timeout waiting to write to socket"
-    } elseif { $socket_error ne "" } {
-        # Something else went wrong
-        error "Socket error: $socket_error"
-    }
-
-    # At this point $sock should be writable - go ahead with puts
-    puts -nonewline $sock "$string\r\n"
+    # All SMTP commands should be terminated by CRLF
+    socket_puts -nonewline $sock "$string\r\n" $timeout
     flush $sock
 }
 
 proc qc::smtp_recv {sock check timeout} {
-    #| Read data from the smtp server via sock
+    #| Read data from the smtp server
     while (1) {
-        # Unique global variable as timeout flag since fileevent & after operate at global level...
-        # Should allow concurrent invocations
-        global state_${sock}_read
-
-        # Asynchronous. When $sock becomes readable, set state_${sock}_read.
-        fileevent $sock readable [list set state_${sock}_read "readable"]
-
-        # Asynchronous. Once $timeout*1000 elapses, set state_${sock}_read to timeout.
-        set aid [after [expr {$timeout*1000}] [list set state_${sock}_read "timeout"]]
-
-        # Wait for something to set state$stock
-        vwait state_${sock}_read
-
-        # TODO This works well if $timeout is less than 20 seconds. 
-        # Above this and there seems to be a system default timeout (perhaps in the TCP stack) which
-        # trips and makes the socket go into an error state and, for some reason, become "readable". 
-        # So we must check fconfigue $sock -error also to be sure of the state.
-        # The bottom line is that the $timeout value is ignored above 20
-
-        # state_${sock}_read is now set, cancel the timeout timer (it may already have expired)
-        after cancel $aid
-
-        # Find out what set state_${sock}_read
-        set socket_error [fconfigure $sock -error]
-        if { [set state_${sock}_read] eq "timeout" } {
-            error "Timeout waiting to read from socket"
-        } elseif { $socket_error ne "" } {
-            # Something else went wrong
-            error "Socket error: $socket_error"
-        }
-
-        # At this point $sock should be readable - go ahead with gets
-	set line [gets $sock]
+	set line [socket_gets $sock $timeout]
 	set code [string range $line 0 2]
-	if ![string match $check $code] {
+	if {$check ne $code} {
 	    error "Expected a $check status line; got:\n$line"
 	}
 	if ![string match "-" [string range $line 3 3]] {
