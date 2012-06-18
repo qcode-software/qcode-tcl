@@ -1,4 +1,4 @@
-package provide qcode 1.4
+package provide qcode 1.5
 package require doc
 namespace eval qc {
     namespace export qc *
@@ -642,7 +642,8 @@ proc qc::exec_proxy {args} {
     } else {
 	set timeout 1000
     }
-    if { ![catch {set handle [ns_proxy get exec]}] } {
+    if { [info commands ns_proxy] eq "ns_proxy" } {
+	set handle [ns_proxy get exec]
 	try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
@@ -674,4 +675,17 @@ proc qc::info_proc { proc_name } {
     set body [info body $proc_name]
     
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
+}
+
+proc qc::which {command} {
+    #| Return path of unix command - cache result in nsv on AOLserver
+    if { [info commands nsv_exists] eq "nsv_exists" } {
+	if { ![nsv_exists which $command] } {
+	    nsv_set which $command [exec_proxy which $command]
+	}
+	set which [nsv_get which $command]
+    } else {
+	set which [exec which $command]
+    }
+    return $which
 }

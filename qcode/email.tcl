@@ -1,4 +1,4 @@
-package provide qcode 1.4
+package provide qcode 1.5
 package require doc
 namespace eval qc {}
 package require mime
@@ -248,8 +248,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     append msg "\r\n."
 
     ## Open the connection ##
-
-    set sock [socket -async $smtphost $smtpport]
+    set sock [socket_open $smtphost $smtpport $timeout]
 
     ## Perform the SMTP conversation
     if { [catch {

@@ -1,4 +1,4 @@
-package provide qcode 1.4
+package provide qcode 1.5
 package require doc
 namespace eval qc {}
 proc qc::html2pdf { args } {
@@ -238,11 +238,8 @@ doc html_paragraph_layout {
 proc qc::html2text { html } {
     #| Wrapper for html2text.
     set html [string map [list "&#8209;" -] $html]  
-    if { ![nsv_exists which html2text] } {
-	nsv_set which html2text [exec_proxy which html2text]
-    }
     try {
-	return [exec_proxy [nsv_get which html2text] -nobs << $html]
+	return [exec_proxy [qc::which html2text] -nobs << $html]
     } {
 	# html2text unable to convert (possibly invalid html).
 	# Return text by removing all html tags and any style and script elements.

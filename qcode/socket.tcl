@@ -1,6 +1,41 @@
-package provide qcode 1.4
+package provide qcode 1.5
 package require doc
 namespace eval qc {}
+
+proc qc::socket_open {host port timeout} {
+    #| Open a TCP socket with timeout
+
+    set sock [socket -async $host $port]
+    # Store socket state in global array
+    global sock_state
+
+    # Asynchronous. When $sock becomes writable, set sock_state($sock,write).
+    fileevent $sock writable [list set sock_state($sock,write) "writable"]
+
+    # Asynchronous. After $timeout seconds flag socket state as timeout.
+    set id [after [expr {$timeout*1000}] [list set sock_state($sock,write) "timeout"]]
+
+    # Wait for socket state to change
+    vwait sock_state($sock,write)
+
+    # Cleanup. Cancel the timeout timer (it may already have expired)
+    after cancel $id
+
+    # Check if the socket timed-out
+    set state $sock_state($sock,write)
+    # tidy up
+    unset sock_state($sock,write)
+    if { $state eq "timeout" } {
+        error "Timeout waiting to connect to $host on port $port"
+    }
+    # Check for socket error
+    # fconfigure $sock -error gets and clears any error states so call once only.
+    set sock_error [fconfigure $sock -error]
+    if { $sock_error ne "" } {
+        error "Socket connection error: $sock_error"
+    }
+    return $sock
+}
 
 proc qc::socket_puts {args} {
     #| Write data to a tcp socket with timeout
@@ -9,7 +44,7 @@ proc qc::socket_puts {args} {
     # Store socket state in global array
     global sock_state
 
-    # Asynchronous. When $sock becomes writable, set state_${sock}_write.
+    # Asynchronous. When $sock becomes writable, set sock_state($sock,write).
     fileevent $sock writable [list set sock_state($sock,write) "writable"]
 
     # Asynchronous. After $timeout seconds flag socket state as timeout.
@@ -57,12 +92,6 @@ proc qc::socket_gets {sock timeout} {
 
     # Wait for socket state to change
     vwait sock_state($sock,read)
-
-    # TODO This works well if $timeout is less than 20 seconds. 
-    # Above this and there seems to be a system default timeout (perhaps in the TCP stack) which
-    # trips and makes the socket go into an error state and, for some reason, become "readable". 
-    # So we must check fconfigue $sock -error also to be sure of the state.
-    # The bottom line is that the $timeout value is ignored above 20
 
     # Cleanup. Cancel the timeout timer (it may already have expired)
     after cancel $id
