@@ -9,31 +9,34 @@ proc qc::socket_open {host port timeout} {
     # Store socket state in global array
     global sock_state
 
-    # Asynchronous. When $sock becomes writable, set sock_state($sock,write).
-    fileevent $sock writable [list set sock_state($sock,write) "writable"]
-
-    # Asynchronous. After $timeout seconds flag socket state as timeout.
+    # After $timeout seconds flag socket state as timeout.
     set id [after [expr {$timeout*1000}] [list set sock_state($sock,write) "timeout"]]
 
+    # Asynchronous. When $sock becomes writable, set sock_state($sock,write).
+    fileevent $sock writable [list set sock_state($sock,write) "writable"]
+   
     # Wait for socket state to change
     vwait sock_state($sock,write)
 
-    # Cleanup. Cancel the timeout timer (it may already have expired)
+    # Cleanup.
     after cancel $id
+    set state $sock_state($sock,write)
+    unset sock_state($sock,write)
 
     # Check if the socket timed-out
-    set state $sock_state($sock,write)
-    # tidy up
-    unset sock_state($sock,write)
     if { $state eq "timeout" } {
         error "Timeout waiting to connect to $host on port $port"
     }
+
     # Check for socket error
     # fconfigure $sock -error gets and clears any error states so call once only.
     set sock_error [fconfigure $sock -error]
     if { $sock_error ne "" } {
         error "Socket connection error: $sock_error"
     }
+
+    # Config
+    fconfigure $sock -blocking 0 -buffering line
     return $sock
 }
 
@@ -44,25 +47,25 @@ proc qc::socket_puts {args} {
     # Store socket state in global array
     global sock_state
 
+    # After $timeout seconds flag socket state as timeout.
+    set id [after [expr {$timeout*1000}] [list set sock_state($sock,write) "timeout"]]
+
     # Asynchronous. When $sock becomes writable, set sock_state($sock,write).
     fileevent $sock writable [list set sock_state($sock,write) "writable"]
-
-    # Asynchronous. After $timeout seconds flag socket state as timeout.
-    set id [after [expr {$timeout*1000}] [list set sock_state($sock,write) "timeout"]]
 
     # Wait for socket state to change
     vwait sock_state($sock,write)
 
-    # Cleanup. Cancel the timeout timer (it may already have expired)
+    # Cleanup. 
     after cancel $id
+    set state $sock_state($sock,write)
+    unset sock_state($sock,write)
 
     # Check if the socket timed-out
-    set state $sock_state($sock,write)
-    # tidy up
-    unset sock_state($sock,write)
     if { $state eq "timeout" } {
         error "Timeout waiting to write to socket"
     }
+    
     # Check for socket error
     # fconfigure $sock -error gets and clears any error states so call once only.
     set sock_error [fconfigure $sock -error]
@@ -84,25 +87,25 @@ proc qc::socket_gets {sock timeout} {
     # Store socket state in global array
     global sock_state
 
-    # Asynchronous. When $sock becomes readable, set sock_state($sock,read).
-    fileevent $sock readable [list set sock_state($sock,read) "readable"]
-
-    # Asynchronous. After $timeout seconds flag socket state as timeout.
+    # After $timeout seconds flag socket state as timeout.
     set id [after [expr {$timeout*1000}] [list set sock_state($sock,read) "timeout"]]
+
+    # When $sock becomes readable, set sock_state($sock,read).
+    fileevent $sock readable [list set sock_state($sock,read) "readable"]
 
     # Wait for socket state to change
     vwait sock_state($sock,read)
 
-    # Cleanup. Cancel the timeout timer (it may already have expired)
+    # Cleanup.
     after cancel $id
+    set state $sock_state($sock,read)
+    unset sock_state($sock,read)
 
     # Check if the socket timed-out
-    set state $sock_state($sock,read)
-    # tidy up
-    unset sock_state($sock,read)
     if { $state eq "timeout" } {
 	error "Timeout waiting to read from socket"
     }
+    
     # Check for socket error
     # fconfigure $sock -error gets and clears any error states so call once only.
     set sock_error [fconfigure $sock -error]
@@ -110,6 +113,23 @@ proc qc::socket_gets {sock timeout} {
 	error "Socket error: $sock_error"
     }
 
-    # At this point $sock should be readable - go ahead with gets
-    return [gets $sock]
+    # Check Config
+    fconfigure $sock -blocking 0 -buffering line
+
+    # Socket is now readable but could stutter one byte at a time
+    # Loop until sufficent data to read or timeout
+    # gets returns -1 if insufficient data to read.
+    set step 100
+    set timer 0
+    while {$timer <= $timeout*1000 && [gets $sock line]==-1 } {
+	after $step
+	incr timer $step
+    }
+
+    if {$timer>$timeout*1000} {
+	# raise error
+	error "Timeout waiting to read from socket"
+    }
+
+    return $line
 }
