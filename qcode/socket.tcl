@@ -85,13 +85,16 @@ proc qc::socket_gets {sock timeout} {
     #| Read data from a tcp socket with timeout
 
     # Store socket state in global array
-    global sock_state
+    global sock_state sock_data
+
+    # Check Config
+    fconfigure $sock -blocking 0 -buffering line
 
     # After $timeout seconds flag socket state as timeout.
-    set id [after [expr {$timeout*1000}] [list set sock_state($sock,read) "timeout"]]
+    set id [after [expr {$timeout*1000}] [list set sock_state($sock,read) timeout]]
 
-    # When $sock becomes readable, set sock_state($sock,read).
-    fileevent $sock readable [list set sock_state($sock,read) "readable"]
+    # When $sock becomes readable
+    fileevent $sock readable [list qc::socket_gets_if_ready $sock]
 
     # Wait for socket state to change
     vwait sock_state($sock,read)
@@ -100,12 +103,12 @@ proc qc::socket_gets {sock timeout} {
     after cancel $id
     set state $sock_state($sock,read)
     unset sock_state($sock,read)
-
+    
     # Check if the socket timed-out
     if { $state eq "timeout" } {
 	error "Timeout waiting to read from socket"
     }
-    
+
     # Check for socket error
     # fconfigure $sock -error gets and clears any error states so call once only.
     set sock_error [fconfigure $sock -error]
@@ -113,23 +116,23 @@ proc qc::socket_gets {sock timeout} {
 	error "Socket error: $sock_error"
     }
 
-    # Check Config
-    fconfigure $sock -blocking 0 -buffering line
+    # Cleanup
+    set data $sock_data($sock)
+    unset sock_data($sock)
 
-    # Socket is now readable but could stutter one byte at a time
-    # Loop until sufficent data to read or timeout
-    # gets returns -1 if insufficient data to read.
-    set step 100
-    set timer 0
-    while {$timer <= $timeout*1000 && [gets $sock line]==-1 } {
-	after $step
-	incr timer $step
-    }
+    return $data
+}
 
-    if {$timer>$timeout*1000} {
-	# raise error
-	error "Timeout waiting to read from socket"
-    }
-
-    return $line
+proc qc::socket_gets_if_ready { sock } {
+    #| Called when a socket is readable
+    # Event and data passed back through global variables
+    global sock_state sock_data
+    gets $sock line
+    if { [eof $sock] } {
+        set sock_data($sock) ""
+        set sock_state($sock,read) "eof"
+    } elseif { ![fblocked $sock] } {
+        set sock_data($sock) $line
+        set sock_state($sock,read) "done"
+    } 
 }
