@@ -39,7 +39,7 @@ proc qc::table_foreach { table code } {
     }
 }
 
-doc table_foreach {
+doc qc::table_foreach {
     Usage {table_foreach table code}
     Description {
 	Loop through the <proc>table</proc> row-by-row. Use local variables with names corresponding to the column names in the table to hold the data for each row. Execute the code given for every data row.

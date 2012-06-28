@@ -2,193 +2,10 @@ package provide qcode 1.5
 package require doc
 namespace eval qc {}
 
-doc db_sql_injection_attack {
-    Title "SQL Injection Attacks"
-    Parent db
-    Description {
-	SQL injection attacks take advantage of code that does not validate user input or properly escape (or quote) strings used in SQL queries.
-	<h3>Attack on column_id=$column_id</h3>
-	Lets say we have a page <code>mypage.html?user_id=1</code> which displays the greeting <i>"Jimmy's Page"</i><br>
-	The variable user_id is set to 1 and the page uses the insecure query 
-	<pre>select name from users where user_id=$user_id</pre>
-	If no validation takes place on the input for $user_id a SQL injection attach can be crafted to extract arbitary information from the database.
-	<p>
-	For example :-
-	<example>
-	% set user_id "1 UNION ALL select password as name from users where user_id=2 order by name DESC LIMIT 1"
-	% set qry "select name from users where user_id=$user_id"
-	% select name from users where user_id=1 UNION ALL select password as name from users where user_id=2 order by name LIMIT 1
-	</example>
-	
-	When this query runs it returns
-	<pre>
-	name   
-	----------
-	conner23
-	(1 row)
-	</pre>
-	You might need to change the <code>order by</code> clause depending on the values in the database.
-	<p>
-	To pass this value of user_id to the page it needs to be url encoded
-	<example>
-	% set user_id "1 UNION ALL select password as name from users where user_id=2 order by name DESC LIMIT 1"
-	% url mypage.html user_id
-	mypage.html?user%5fid=1+UNION+ALL+select+password+as+name+from+users+where+user%5fid%3d2+order+by+name+DESC+LIMIT+1
-	</example>
-	<p>
-	So the welcome message on the page will read <i>"conner23's Page"</i> and the password for user 2 is compromised.
-	<p>
-	Similar attacks can be used on UPDATE and INSERT queries to manipulate or destroy the database.
-	
-	<h3>Attack on column='$column'</h3>
-	A page uses the insecure qry <code>select name from users where email='$email'</code>
-	<example>
-	% set email "foo@bar.com' UNION ALL select password as name from users where user_id=2 order by name;--"
-	% set qry "select name from users where email='$email'"
-	select name from users where email='foo@bar.com' UNION ALL select password as name from users where user_id=2 order by name;--'
-	</example>	
-    }
-}
 
 doc db {
     Title "Database API"
-    Description {
-	<table>
-	<tr>
-	<td valign=top>
-
-	<h3>SELECT statements</h3>
-	<ul>
-	<li><proc>db_1row</proc></li>
-	<li><proc>db_0or1row</proc> and</li>
-	<li><proc>db_foreach</proc>.</li>
-	<li><proc>db_select_table</proc>.</li>
-	</ul>
-	<h3>INSERT, UPDATE and other DML statements</h3>
-	<ul>
-	<li><proc>db_dml</proc></li>
-	</ul>
-	<h3>Database Transactions</h3>
-	<ul>
-	<li><proc>db_trans</proc></li>
-	</ul>
-	<h3>Sequences</h3>
-	<ul>
-	<li><proc>db_seq</proc></li>
-	</ul>
-	<h3>Bind Variables and Quoting</h3>
-	<ul>
-	<li><proc>db_qry_parse</proc></li>
-	<li><proc>db_quote</proc></li>
-	</ul>
-	
-	</td>
-	<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-	<td valign=top>
-
-	<h3>SQL Shortcuts</h3>
-	<ul>
-	<li><proc>sql_set</proc></li>
-	<li><proc>sql_insert</proc></li>
-	<li><proc>sql_order_by</proc></li>
-	</ul>
-	<h3>SQL WHERE helpers</h3>
-	<ul>
-	<li><proc>sql_where</proc></li>
-	<li><proc>sql_where_set</proc></li>
-	<li><proc>sql_where_cols_start</proc></li>
-	<li><proc>sql_where_col_starts</proc></li>
-	<li><proc>sql_where_like</proc></li>
-	<li><proc>sql_where_in</proc></li>
-	<li><proc>sql_where_in_not</proc></li>
-	</ul>
-	<h3>Caching</h3>
-	<ul>
-	<li><proc>db_cache</proc></li>
-	<li><proc>db_thread_cache</proc></li>
-	</td>
-	</table>
-	<hr>
-	<h2>Examples</h2>
-	Lets say we have a table users
-	<pre class="psql">
-	% CREATE table users (
-	    user_id integer primary key,
-	    name varchar(50),
-	    email varchar(100),
-	    password varchar(50)
-	);
-        NOTICE:  CREATE TABLE / PRIMARY KEY will create implicit index "users_pkey" for table "users"
-        CREATE TABLE
-	% 
-	% insert into users (user_id,name,email,password) values (1,'Jimmy','jimmy@tarbuck.com','buz99');
-	% insert into users (user_id,name,email,password) values (2,'Des','des@oconner.com','conner23');
-	</pre>
-	<h3>Getting Data Out</h3>
-	The Database API sets local variables with names corresponding to the column names in the query.
-	<example>
-	% db_1row {select name,email from users where user_id=1}
-	% set name
-	Jimmy
-	% set email
-	jimmy@foo.com
-	</example>
-	<h3>Bind Variables</h3>
-	Bind Variables are designed to prevent [html_a "SQL Injection Attacks" db_sql_injection_attack.html] and escape strings ready for the database.
-	<p>
-	Bind Variables are denoted by a colon followed by the name of the variable to be substituted e.g. <code>:foo or :bar</code>.The syntax is similar to ACS and [html_a OpenACS http://www.openacs.org]. Postgresql's psql program also uses this notation for substitution but without escaping values.
-	<p>
-	The work is done by <proc>db_qry_parse</proc> but it should not be neccessary to call this proc directly.
-	<example>
-	% set user_id 1
-	% set qry {select name from users where user_id=:user_id}
-	% db_qry_parse $qry
-	select name from users where user_id=1
-	</example>
-	<p>
-	The procs <proc>db_1row</proc>, <proc>db_0or1row</proc>, <proc>db_foreach</proc>,  <proc>db_select_table</proc> and <proc>db_dml</proc> all parse queries for bind variables before executing the query.<br>For example:-
-	<example>
-	% set user_id 1
-	% db_1row {select name from users where user_id=:user_id}
-	% set name
-	Jimmy
-	</example>
-	<h3>Getting Data In</h3>
-	Lets say we have a sequence called user_id_seq to generate user_id numbers and we have a new user to add to the users table.<br>
-	The shortcut <proc>sql_insert</proc> provides a concise way of constructing an INSERT <proc>db_dml</proc> statement.
-	<example>
-	% set user_id [db_seq user_id_seq]
-	% set name Bob
-	% set email bob@monkhouse.com
-	% set password joker
-	%
-	% set qry "insert into users [sql_insert user_id name email password]"
-	insert into users (user_id,name,email,password) values (:user_id,:name,:email,:password)
-	%
-	% # So we can write
-	% db_dml "insert into users [sql_insert user_id name email password]"
-	</example>
-	<proc>sql_insert</proc> also accepts a list of field names.
-	<example>
-	% set cols [list user_id name email password]
-	% set qry "insert into users [sql_insert $cols]"
-	insert into users (user_id,name,email,password) values (:user_id,:name,:email,:password)
-	</example>
-	<h3>Updates</h3>
-	Another useful shortcut for update statements is <proc>sql_set</proc>
-	Lets say we want to update user#3  
-	<pre class="example">
-	% set user_id 3
-	% set name "Bob Monkhouse"
-	% set email "\"Bob Monkhouse\" <bob@monkhouse.com>"
-	%
-	% set qry "update users set [sql_set name email] where user_id=:user_id"
-	update users set name=:name,email=:email where user_id=3
-	% 
-	% # Shortcut form can be handed to db_dml
-	% db_dml "update users set [sql_set name email] where user_id=:user_id"
-	</pre>
-    }
+    Url {//wiki/DatabaseApi}
 }
 
 proc qc::db_qry_parse {qry {level 0} } {
@@ -294,7 +111,7 @@ proc qc::db_qry_parse {qry {level 0} } {
     return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
 }
 
-doc db_qry_parse {
+doc qc::db_qry_parse {
     Parent db
     Usage {db_qry_parse qry ?level?}
     Description {
@@ -387,7 +204,7 @@ proc qc::db_quote { value {type ""}} {
     }
 }
 
-doc db_quote {
+doc qc::db_quote {
     Parent db
     Description {
 	Escape strings that contain single quotes e.g. O'Neil becomes 'O''Neil' Empty strings are replaced with NULL. Numbers are left unchanged. 
@@ -436,7 +253,7 @@ proc qc::db_escape_regexp { string } {
     return [string map $list $string]
 }
 
-doc db_escape_regexp {
+doc qc::db_escape_regexp {
     Parent db
     Usage {db_escape_regexp string}
     Description {
@@ -472,7 +289,7 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
     return $_db($poolname)
 }
 
-doc db_get_handle {
+doc qc::db_get_handle {
     Parent db
     Description {
 	Return a database handle.
@@ -494,7 +311,7 @@ proc qc::db_dml { args } {
     }
 }
 
-doc db_dml {
+doc qc::db_dml {
     Parent db
     Usage {db_dml qry}
     Description {Execute a SQL dml statement}
@@ -548,7 +365,7 @@ proc qc::db_trans {args} {
     }
 }
 
-doc db_trans {
+doc qc::db_trans {
     Parent db
     Usage {db_trans code ?on_error_code?}
     Description {
@@ -595,7 +412,7 @@ proc qc::db_1row { args } {
     return
 }
 
-doc db_1row {
+doc qc::db_1row {
     Parent db
     Usage {db_1row qry}
     Description {
@@ -652,7 +469,7 @@ proc qc::db_0or1row {args} {
     }
 }
 
-doc db_0or1row {
+doc qc::db_0or1row {
     Parent db
     Usage {db_0or1row qry ?no_rows_code? ?one_row_code?}
     Description {
@@ -745,7 +562,7 @@ proc qc::db_foreach {args} {
     }
 }
 
-doc db_foreach {
+doc qc::db_foreach {
     Parent db
     Description {
 	Place variables corresponding to column names in the caller's namespace for each row returned.
@@ -780,7 +597,7 @@ proc qc::db_seq {args} {
     return $next_id
 }
 
-doc db_seq {
+doc qc::db_seq {
     Parent db
     Description {Fetch the next value from the sequence named seq_name}
     Examples {
@@ -810,7 +627,7 @@ proc qc::db_select_table {args} {
     }
 }
 
-doc db_select_table {
+doc qc::db_select_table {
     Parent db
     Description {Select the results of the query into a <proc>table</proc>. Substitute and quote bind variables starting with a colon.}
     Examples {
@@ -842,7 +659,7 @@ proc qc::db_select_csv { qry {level 0} } {
     }
 }
 
-doc db_select_csv {
+doc qc::db_select_csv {
     Parent db
     Description {Select the results of the SQL qry into a csv report. First row contains column names.Lines separated with windows \\r\\n}
     Examples {
@@ -860,7 +677,7 @@ proc qc::db_select_ldict { qry } {
     return [qc::table2ldict $table]
 }
 
-doc db_select_ldict {
+doc qc::db_select_ldict {
     Parent db
     Description {Select the results of the SQL qry into a ldict. An ldict is a list of dicts}
     Examples {
@@ -914,7 +731,7 @@ proc qc::db_col_varchar_length { table_name col_name } {
     }
 }
 
-doc db_col_varchar_length {
+doc qc::db_col_varchar_length {
     Parent db
     Examples {
 	# A table sales_orders has column delivery_address1 type varchar(100)

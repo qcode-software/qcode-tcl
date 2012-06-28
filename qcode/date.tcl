@@ -81,7 +81,7 @@ proc qc::date_month_start {date} {
     return [clock format [cast_epoch $date] -format "%Y-%m-01"]
 }
 
-doc date_month_start {
+doc qc::date_month_start {
     Parent date
     Examples {
 	% date_month_start 2007-05-06
@@ -97,7 +97,7 @@ proc qc::date_month_end {date} {
     return [cast_date "[date_month_start $date] +1 month -1 day"]
 }
 
-doc date_month_end {
+doc qc::date_month_end {
     Parent date
     Examples {
 	% date_month_end 2007-05-06
@@ -113,7 +113,7 @@ proc qc::date_year_start {date} {
     return [clock format [cast_epoch $date] -format "%Y-01-01"]
 }
 
-doc date_year_start {
+doc qc::date_year_start {
     Parent date
     Examples {
 	% date_year_start 2007-05-06
@@ -129,7 +129,7 @@ proc qc::date_year_end {date} {
     return [clock format [cast_epoch $date] -format "%Y-12-31"]
 }
 
-doc date_year_end {
+doc qc::date_year_end {
     Parent date
     Examples {
 	% date_year_end 2007-05-06
@@ -149,7 +149,7 @@ proc qc::date_year_iso_start {date} {
     return [cast_date [clock scan "3 days ago" -base [clock scan "Thursday" -base [clock scan "$year-01-01"] ]]]
 }
 
-doc date_year_iso_start {
+doc qc::date_year_iso_start {
     Parent date
     Examples {
 	% date_year_start 2006-05-06
@@ -168,7 +168,7 @@ proc qc::date_year_iso_end {date} {
     return [cast_date [clock scan "4 days ago" -base [clock scan "Thursday" -base [clock scan "$next_year-01-01"]]]]
 }
 
-doc date_year_iso_end {
+doc qc::date_year_iso_end {
     Parent date
     Examples {
 	% date_year_iso_end 2007-05-06
@@ -216,7 +216,7 @@ proc qc::date_month { date } {
     return [cast_integer [clock format [cast_epoch $date] -format "%m"]]
 }
 
-doc date_month {
+doc qc::date_month {
     Parent date
     Examples {
 	% date_month 2007-05-06
@@ -232,7 +232,7 @@ proc qc::date_doy { date } {
     return [cast_integer [clock format [cast_epoch $date] -format "%j"]]
 }
 
-doc date_doy {
+doc qc::date_doy {
     Parent date
     Examples {
 	% date_doy 2009-01-01
@@ -249,7 +249,7 @@ proc qc::date_year { date } {
     return [clock format [cast_epoch $date] -format "%Y"]
 }
 
-doc date_year {
+doc qc::date_year {
     Parent date
     Examples {
 	% date_year 2007-05-06
@@ -265,7 +265,7 @@ proc qc::date_dom { date } {
     return [cast_integer [clock format [cast_epoch $date] -format "%d"]]
 }
 
-doc date_dom {
+doc qc::date_dom {
     Parent date
     Examples {
 	% date_dom 2007-05-06
@@ -286,7 +286,7 @@ proc qc::date_day_name { date } {
     return [clock format [cast_epoch $date] -format "%A"]
 }
 
-doc date_day_name {
+doc qc::date_day_name {
     Parent date
     Examples {
 	% date_day_name 2007-05-06
@@ -302,7 +302,7 @@ proc qc::date_day_shortname { date } {
     return [clock format [cast_epoch $date] -format "%a"]
 }
 
-doc date_day_shortname {
+doc qc::date_day_shortname {
     Parent date
     Examples {
 	% date_day_shortname 2007-05-06
@@ -318,7 +318,7 @@ proc qc::date_month_shortname { date } {
     return [clock format [cast_epoch $date] -format "%b"]
 }
 
-doc date_month_shortname {
+doc qc::date_month_shortname {
     Parent date
     Examples {
 	% date_month_shortname 2007-08-06
@@ -334,7 +334,7 @@ proc qc::date_month_name { date } {
     return [clock format [cast_epoch $date] -format "%B"]
 }
 
-doc date_month_name {
+doc qc::date_month_name {
     Parent date
     Examples {
 	% date_month_name 2007-08-06
@@ -358,7 +358,7 @@ proc qc::date_compare { date1 date2 } {
     }
 }
 
-doc date_compare {
+doc qc::date_compare {
     Parent date
     Examples {
 	% date_compare 2007-08-06 2007-08-07
@@ -377,7 +377,7 @@ proc qc::date_quarter {date} {
     return [cast_int [expr {ceil(double([date_month $date])/3)}]]
 }
 
-doc date_quarter {
+doc qc::date_quarter {
     Parent date
     Examples {
 	% date_quarter 2007-08-06
@@ -392,7 +392,7 @@ proc qc::date_quarter_start {date} {
     return [cast_date "$year-$month-01"]
 }
 
-doc date_quarter_start {
+doc qc::date_quarter_start {
     Parent date
     Examples {
 	% date_quarter_start 2007-08-06
@@ -407,7 +407,7 @@ proc qc::date_quarter_end {date} {
     return [cast_date [clock scan "+1 month -1 day" -base [clock scan "$year-$month-01"]]]
 }
 
-doc date_quarter_end {
+doc qc::date_quarter_end {
     Parent date
     Examples {
 	% date_quarter_end 2007-08-06
@@ -426,7 +426,7 @@ proc qc::dates {from_date to_date} {
     return $dates
 }
 
-doc dates {
+doc qc::dates {
     Parent date
     Examples {
 	% date_dates 2007-02-25 2007-03-05
@@ -439,7 +439,7 @@ proc qc::date_days {from_date to_date} {
     return [expr {([cast_epoch $to_date]-[cast_epoch $from_date])/(60*60*24)}]
 }
 
-doc dates {
+doc qc::dates {
     Parent date
     Examples {
 	% date_days 2007-02-25 2007-03-05

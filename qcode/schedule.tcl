@@ -1,6 +1,7 @@
 package provide qcode 1.5
 package require doc
 namespace eval qc {}
+
 proc qc::schedule {args} {
     #| Schedule proc for execution unless already scheduled. Start schedule if it is not already running.
     # Usage:

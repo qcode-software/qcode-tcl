@@ -8,7 +8,7 @@ proc qc::format_commify {number} {
     return $number
 }
 
-doc format_commify {
+doc qc::format_commify {
     Examples {
 	% format_commify 2314
 	2,314
@@ -22,7 +22,7 @@ proc qc::format_money { value } {
     return [format_commify [round $value 2]]
 }
 
-doc format_money {
+doc qc::format_money {
     Examples {
 	% format_money 2314
 	2,314.00
@@ -38,7 +38,7 @@ proc qc::format_dec { value dec_places } {
     return [format_commify [qc::round $value $dec_places]]
 }
 
-doc format_dec {
+doc qc::format_dec {
     Examples {
 	% format_dec 2314 3
 	2,314.000
@@ -54,7 +54,7 @@ proc qc::format_int {value} {
     return [format_commify [qc::round $value 0]]
 }
 
-doc format_int {
+doc qc::format_int {
     Examples {
 	% format_int 2.69
 	3
@@ -83,7 +83,7 @@ proc qc::format_linebreak {string width} {
     lappend result $string
 }
 
-doc format_linebreak {
+doc qc::format_linebreak {
     Examples {
 	% set string {Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.}
 	% 
@@ -108,7 +108,7 @@ proc qc::format_cc {cc_no} {
     return [join [format_linebreak $cc_no 4] " "]
 }
 
-doc format_cc {
+doc qc::format_cc {
     Examples {
 	% format_cc 4111111111111111
 	4111 1111 1111 1111
@@ -125,7 +125,7 @@ proc qc::format_cc_bin {cc_no {prefix 6}} {
     return [string range $cc_no 0 "$prefix-1"]
 }
 
-doc format_cc_bin {
+doc qc::format_cc_bin {
     Examples {
 	% format_cc_bin 4111111111111111
 	411111
@@ -142,7 +142,7 @@ proc qc::format_cc_tail {cc_no {suffix 4}} {
     return [string range $cc_no "end-[expr {$suffix - 1}]" end]
 }
 
-doc format_cc_tail {
+doc qc::format_cc_tail {
     Examples {
 	% format_cc_tail 4111111111111111
 	1111
@@ -166,7 +166,7 @@ proc qc::format_cc_masked {cc_no {prefix 6} {suffix 4}} {
     return [join [format_linebreak $masked_cc_no 4] " "]
 }
 
-doc format_cc_masked {
+doc qc::format_cc_masked {
     Examples {
 	% format_cc_masked 4111111111111111
 	4111 11** **** 1111
@@ -204,7 +204,7 @@ proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
     return $masked_string
 }
 
-doc format_cc_masked_string {
+doc qc::format_cc_masked_string {
     Examples {
 	% format_cc_masked_string 4111111111111111 6 4
 	4111 11** **** 1111
@@ -227,7 +227,7 @@ proc qc::format_ordinal {number} {
     append number $suffix
 }
 
-doc format_ordinal {
+doc qc::format_ordinal {
     Examples {
 	% format_ordinal 23
 	23rd
@@ -241,7 +241,7 @@ proc qc::format_right0 {string width} {
     return [format "%0${width}.${width}s" $string]
 }
 
-doc format_right0 {
+doc qc::format_right0 {
     Examples {
 	% format_right0 675 6
 	000675
@@ -253,7 +253,7 @@ proc qc::format_left {string width} {
     return [format "%-${width}.${width}s" $string]
 }
 
-doc format_left {
+doc qc::format_left {
     Examples {
 	% puts ">>[format_left Dunstable 10]<<"
 	>>Dunstable <<
@@ -267,7 +267,7 @@ proc qc::format_right {string width} {
     return [format "%${width}.${width}s" $string]
 }
 
-doc format_right {
+doc qc::format_right {
     Examples {
 	% puts ">>[format_right Dunstable 10]<<"
 	>> Dunstable<<
@@ -293,7 +293,7 @@ proc qc::format_bool { value {true Yes} {false No}} {
     }
 }
 
-doc format_bool {
+doc qc::format_bool {
     Examples {
 	% format_bool Y 
 	<span class="clsTrue">Yes</span>
@@ -343,7 +343,7 @@ proc qc::format_if_number {args} {
     return $value
 }
 
-doc format_if_number {
+doc qc::format_if_number {
     Examples {
 	% format_if_number 65242
 	65,242

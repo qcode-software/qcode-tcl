@@ -54,7 +54,7 @@ proc qc::tson2json { tson } {
     }
 }
 
-doc tson2json {
+doc qc::tson2json {
     Examples {
 	% set tson [list object Image \ 
 		    [list object \ 

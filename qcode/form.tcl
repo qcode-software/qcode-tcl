@@ -15,7 +15,7 @@ proc qc::form2vars {args}  {
     }
 }
 
-doc form2vars {
+doc qc::form2vars {
     Description {
 	Create variables in the caller's namespace corresponding to the form data. If a list of variable names is specified then only create variables in that list if corresponding form data exists;otherwise create variables for all the names in the form data.
 	<p>
@@ -58,7 +58,7 @@ proc qc::form_var_get { var_name } {
     }
 }
 
-doc form_var_get {
+doc qc::form_var_get {
     Examples {
 	# some-page.html?foo=2&foo=45&bar=Hello%20World
 	% form_var_get foo
@@ -80,7 +80,7 @@ proc qc::form_var_exists { var_name } {
     }
 }
 
-doc form_var_exists {
+doc qc::form_var_exists {
     Examples {
 	# some-page.html?foo=2&foo=45&bar=Hello%20World
 	% form_var_exists foo
@@ -114,7 +114,7 @@ proc qc::form2url { url } {
     return $url
 }
 
-doc form2url {
+doc qc::form2url {
     Examples {
 	# some-page.html?foo=2&foo=45&bar=Hello%20World
 	form2url other-url.html
@@ -147,7 +147,7 @@ proc qc::form_proc { proc_name } {
     return [uplevel 0 $proc_name $largs]
 }
 
-doc form_proc {
+doc qc::form_proc {
     Description {
 	Call proc_name using corresponding form variables
 	if the last variable name is called args then it is filled with a dict containing name value

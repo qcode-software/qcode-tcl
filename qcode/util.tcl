@@ -51,7 +51,7 @@ proc qc::try { try_code { catch_code ""} } {
     }
 }
 
-doc try {
+doc qc::try {
     Usage {try try_code ?catch_code?}
     Description {
 	Try to execute the code <code>try_code</code> and catch any error. If an error occurs then run <code>catch_code</code>.
@@ -95,7 +95,7 @@ proc qc::default { args } {
     }
 }
 
-doc default {
+doc qc::default {
     Usage {default varName defaultValue ?varName defaultValue? ...}
     Description {
 	If a variable does not exists then set its value to <i>defaultValue</i>
@@ -153,7 +153,7 @@ proc qc::coalesce { varName altValue } {
     }
 }
 
-doc coalesce {
+doc qc::coalesce {
     Examples {
 	% set foo 23
 	% coalesce foo 13

@@ -26,7 +26,7 @@ proc qc::widget_label { args } {
     }
 }
 
-doc widget_label {
+doc qc::widget_label {
     Description {
 	Return an HTML form label element.
     }
@@ -64,7 +64,7 @@ proc qc::widget_text { args } {
     }
 }
 
-doc widget_text {
+doc qc::widget_text {
     Description {
 	Return an HTML form text input widget.
     }
@@ -94,7 +94,7 @@ proc qc::widget_compare { args } {
     return $html
 }
 
-doc widget_compare {
+doc qc::widget_compare {
     Description {
 	Return an HTML form widget with an operator drop down and input box.
     }
@@ -124,7 +124,7 @@ proc qc::widget_combo { args } {
     return $html
 }
 
-doc widget_combo {
+doc qc::widget_combo {
     Usage {
 	widget_combo name widgetName value Value boundName widgetName boundValue Value searchURL url ?searchLimit 10? ?...?
     }
@@ -213,7 +213,7 @@ proc qc::widget_htmlarea { args } {
     return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height]]
 }
 
-doc widget_htmlarea {
+doc qc::widget_htmlarea {
     Usage {
 	widget_htmlarea name widgetName value html ?width size? ?height size? ?..?
     }
@@ -242,7 +242,7 @@ proc qc::widget_textarea { args } {
     set html [html textarea $this(value) {*}[qc::dict_exclude [array get this] type value label required units width height]]
 }
 
-doc widget_textarea {
+doc qc::widget_textarea {
     Usage {
 	widget_textarea name widgetName value text ?width size? ?height size? ?..?
     }
@@ -288,7 +288,7 @@ proc qc::widget_select { args } {
     }
 }
 
-doc widget_select {
+doc qc::widget_select {
     Usage {
 	widget_select name widgetName value text options {name value name value ...} ?null_option yes/no?
     }
@@ -328,7 +328,7 @@ proc qc::widget_span { args } {
     return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value name width height]] 
 }
 
-doc widget_span {
+doc qc::widget_span {
     Usage {
 	widget_span name widgetName value text ?width size? ?height size?
     }
@@ -357,7 +357,7 @@ proc qc::widget_password { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
-doc widget_password {
+doc qc::widget_password {
     Usage {
 	widget_text name widgetName value Value ?id ID? ?width pixels? ...
     }
@@ -388,7 +388,7 @@ proc qc::widget_bool { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
-doc widget_bool {
+doc qc::widget_bool {
     Usage {
 	widget_bool name widgetName value Value ?id ID? 
     }
@@ -415,7 +415,7 @@ proc qc::widget_checkbox { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
-doc widget_checkbox {
+doc qc::widget_checkbox {
     Usage {
 	widget_checkbox name widgetName value Value ?id ID? 
     }
@@ -440,7 +440,7 @@ proc qc::widget_button { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
-doc widget_button {
+doc qc::widget_button {
     Usage {
 	widget_button name widgetName value buttonText ?option value? ?..?
     }
@@ -463,7 +463,7 @@ proc qc::widget_submit { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]] 
 }
 
-doc widget_submit {
+doc qc::widget_submit {
     Usage {
 	widget_submit name widgetName value buttonText ?option value? ?..?
     }
@@ -487,7 +487,7 @@ proc qc::widget_radio { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
 }
 
-doc widget_radio {
+doc qc::widget_radio {
     Usage {
 	widget_radio name widgetName value checkedValue ?option value? ?..?
     }
@@ -521,7 +521,7 @@ proc qc::widget_radiogroup { args } {
     return [html div [join $buttons "&nbsp; &nbsp;"] class clsRadioGroup name $group_name id $group_name]
 }
 
-doc widget_radiogroup {
+doc qc::widget_radiogroup {
     Usage {
 	widget_radiogroup name widgetName value checkedValue options {name value name value ...} ?..?
     }

@@ -9,7 +9,7 @@ proc qc::sql_set {args} {
     return [join $set_list ,]
 }
 
-doc sql_set {
+doc qc::sql_set {
     Parent db
     Usage {sql_set ?varName1 varName2 varName3 ...?}
     Description {
@@ -39,7 +39,7 @@ proc qc::sql_set_varchars_truncate {table args} {
     return [join $set_list ,]
 }
 
-doc sql_set_varchars_truncate {
+doc qc::sql_set_varchars_truncate {
     Parent db
     Usage {sql_set_varchars_truncate table_name ?varName1 varName2 varName3 ...?}
     Description {
@@ -68,7 +68,7 @@ proc qc::sql_insert { args } {
     return "( [join $cols ,] ) values ( [join $values ,] )" 
 }
 
-doc sql_insert {
+doc qc::sql_insert {
     Parent db
     Usage {sql_insert varName1 ?varName2 varName3 ...?}
     Description {
@@ -171,7 +171,7 @@ proc qc::sql_sort { args } {
     }
 }
 
-doc sql_sort {
+doc qc::sql_sort {
     Parent db
     Usage {sql_sort colName1 ?colName2 colName3 ...?}
     Examples {

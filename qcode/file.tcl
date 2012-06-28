@@ -12,7 +12,7 @@ proc qc::file_temp {text {mode 0600}} {
     return $filename
 }
 
-doc file_temp {
+doc qc::file_temp {
     Examples {
 	% set csv {
 	    Jimmy,1

@@ -49,7 +49,7 @@ proc qc::auth {} {
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
-doc auth {
+doc qc::auth {
     Parent authentication
     Examples {
 	% set employee_id [auth]
@@ -76,7 +76,7 @@ proc qc::auth_check {} {
     return false
 }
 
-doc auth_check {
+doc qc::auth_check {
     Parent authentication
 }
 
@@ -93,7 +93,7 @@ proc qc::auth_hba {} {
     } 
 }
 
-doc auth_hba {
+doc qc::auth_hba {
     Parent authentication
 }
 
@@ -110,7 +110,7 @@ proc qc::auth_hba_check {} {
     } 
 }
 
-doc auth_hba_check {
+doc qc::auth_hba_check {
     Parent authentication
 }
 
@@ -125,7 +125,7 @@ proc qc::auth_password { employee_code password } {
     }
 }
 
-doc auth_password {
+doc qc::auth_password {
     Parent authentication
 }
 
@@ -139,7 +139,7 @@ proc qc::auth_password_check { employee_code password } {
     }
 }
 
-doc auth_password_check {
+doc qc::auth_password_check {
     Parent authentication
 }
 
@@ -154,7 +154,7 @@ proc qc::auth_session { session_id } {
     }
 }
 
-doc auth_session {
+doc qc::auth_session {
     Parent authentication
 }
 

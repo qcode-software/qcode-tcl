@@ -250,7 +250,7 @@ proc qc::check {args} {
     return true
 }
 
-doc check {
+doc qc::check {
     Parent validate
     Usage {
 	check varName type ?type? ?type? ?errorMessage?
@@ -307,7 +307,7 @@ proc qc::checks { body } {
     }
 }
 
-doc checks {
+doc qc::checks {
     Description {
 	Foreach line of checks in the format <code>varName type ?type? ?type? ?errorMessage?</code>, check that the value of the local variable is of the given type or can be cast into that type. The empty string is treated as a NULL value and always treated as valid unless NOT NULL is specified in types. If the variable cannot be cast into the given type then append a message to a list of errors. Use the error message given or a default message for the given type.
 	<p>

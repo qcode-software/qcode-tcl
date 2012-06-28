@@ -25,7 +25,7 @@ proc qc::sql_where { args } {
     }
 }
 
-doc sql_where {
+doc qc::sql_where {
     Parent db
     Usage {sql_where varName1 ?varName2 varName3 ...?}
     Description {
@@ -68,7 +68,7 @@ proc qc::sql_where_like { args } {
     }
 }
 
-doc sql_where_like {
+doc qc::sql_where_like {
     Parent db
     Usage {sql_where_like ?varName1 varName2 varName3 ...?}
     Description {
@@ -104,7 +104,7 @@ proc qc::sql_where_cols_start { args } {
     }
 }
 
-doc sql_where_cols_start {
+doc qc::sql_where_cols_start {
     Parent db
     Usage {sql_where_cols_start ?varName1 varName2 varName3 ...?}
     Description {
@@ -159,7 +159,7 @@ proc qc::sql_where_col_starts { col_name args } {
     }
 }
 
-doc sql_where_col_starts {
+doc qc::sql_where_col_starts {
     Parent db
     Usage {sql_where_col_starts colName value1 ?value2 value3...?}
     Description {
@@ -299,7 +299,7 @@ proc qc::sql_where_word_in { args } {
     }
 }
 
-doc sql_where_word_in {
+doc qc::sql_where_word_in {
     Parent db
     Usage {sql_where_word_in ?varName1 varName2 varName3 ...?}
     Description {

@@ -84,7 +84,7 @@ proc qc::xml2dict { xml root_element } {
     return $dict
 }
 
-doc xml2dict {
+doc qc::xml2dict {
     Description {
         Converts an XML structure in the form of a text string into a dict.
         Will start parsing from the element that matches the rootElement. 

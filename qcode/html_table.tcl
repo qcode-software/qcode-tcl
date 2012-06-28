@@ -2,7 +2,7 @@ package provide qcode 1.5
 package require doc
 namespace eval qc {}
 
-doc html_table {
+doc qc::html_table {
     Usage {
 	html_table ?dict?<br>
 	html_table ~ varName varName varName ...

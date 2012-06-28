@@ -174,7 +174,7 @@ proc qc::args2dict {callers_args} {
     }
 }
 
-doc args2dict {
+doc qc::args2dict {
     Parent Args
     Description {
 	Parse callers args. Interpret as regular dict unless first item is ~ in which case interpret as a list of variable names to pass-by-name.

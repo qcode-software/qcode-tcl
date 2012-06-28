@@ -8,7 +8,7 @@ proc qc::format_date { date } {
     return [string map [list - "&#8209;"] [clock format [cast_epoch $date] -format "%Y-%m-%d"]]
 }
 
-doc format_date {
+doc qc::format_date {
     Parent date
     Examples {
 	% format_date "23rd June 2008"
@@ -24,7 +24,7 @@ proc qc::format_date_iso { date } {
     return [clock format [cast_epoch $date] -format "%Y-%m-%d"]
 }
 
-doc format_date_iso {
+doc qc::format_date_iso {
     Parent date
     Examples {
 	% format_date "23rd June 2008"
@@ -40,7 +40,7 @@ proc qc::format_date_uk { date } {
     return [clock format [cast_epoch $date] -format "%d/%m/%y"]
 }
 
-doc format_date_uk {
+doc qc::format_date_uk {
     Parent date
     Examples {
 	% format_date_uk 2008-06-23
@@ -56,7 +56,7 @@ proc qc::format_date_uk_long { date } {
     return [clock format [cast_epoch $date] -format "%d/%m/%Y"]
 }
 
-doc format_date_uk_long {
+doc qc::format_date_uk_long {
     Parent date
     Examples {
 	% format_date_uk 2008-06-23
@@ -94,7 +94,7 @@ proc qc::format_date_rel { date } {
     }
 }
 
-doc format_date_rel {
+doc qc::format_date_rel {
     Parent date
     Examples {
 	% format_date_rel now
@@ -119,7 +119,7 @@ proc qc::format_date_letter { date } {
     return "[format_ordinal $dom] [clock format $epoch -format "%B %Y"]"
 }
 
-doc format_date_letter {
+doc qc::format_date_letter {
     Parent date
     Examples {
 	% format_date_letter now

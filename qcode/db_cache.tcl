@@ -34,7 +34,7 @@ proc qc::db_cache_1row { ttl qry } {
     return
 }
 
-doc db_cache_1row {
+doc qc::db_cache_1row {
     Parent db_cache
     Description {
 	Cached equivalent of <proc>db_1row</proc>. Select one row from the cached results or the database if the cache has expired. Place variables corresponding to column names in the caller's namespace Throw an error if the number of rows returned is not exactly one.
@@ -86,7 +86,7 @@ proc qc::db_cache_0or1row { ttl qry {no_rows_code ""} {one_row_code ""} } {
     }
 }
 
-doc db_cache_0or1row {
+doc qc::db_cache_0or1row {
     Parent db_cache
     Description {
 	Cached equivalent of <proc>db_0or1row</proc>.<br>
@@ -168,7 +168,7 @@ proc qc::db_cache_foreach { ttl qry foreach_code { no_rows_code ""} } {
     }
 }
 
-doc db_cache_foreach {
+doc qc::db_cache_foreach {
     Parent db_cache
     Description {
 	Cached equivalent of <proc>db_foreach</proc>.<br> 
@@ -203,7 +203,7 @@ proc qc::db_cache_select_table {ttl qry {level 0}} {
     }
 }
 
-doc db_cache_select_table {
+doc qc::db_cache_select_table {
     Parent db_cache
      Examples {
 	% db_cache_select_table 20 {select user_id,firstname,surname from users}
@@ -226,7 +226,7 @@ proc qc::db_cache_clear { {qry ""} } {
     }
 }
 
-doc db_cache_clear {
+doc qc::db_cache_clear {
     Parent db_cache
     Description {
 	Delete the results from the database cache for the query given. If no query is specified then remove all cached results.

@@ -63,7 +63,7 @@ proc qc::ofc_piechart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc ofc_piechart {
+doc qc::ofc_piechart {
     Usage {
 	ofc_piechart ?-id id? ?-title title? ?-animate animate? ?-width width? ?-height height? data
     }
@@ -218,7 +218,7 @@ proc qc::ofc_linechart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc ofc_linechart {
+doc qc::ofc_linechart {
     Usage {
 	ofc_linechart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? lines
     }
@@ -455,7 +455,7 @@ proc qc::ofc_barchart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc ofc_barchart {
+doc qc::ofc_barchart {
     Usage {
 	ofc_barchart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? bars
     }

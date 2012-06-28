@@ -16,7 +16,7 @@ proc qc::conn_remote_ip {} {
     return $ip
 }
 
-doc conn_remote_ip {
+doc qc::conn_remote_ip {
     Examples {
 	% conn_remote_ip
 	12.34.56.78
@@ -51,7 +51,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     }
 }
 
-doc conn_marshal {
+doc qc::conn_marshal {
     Examples {
 	# We can use ns_register_proc to get conn_marshal to handle .html requests with
 	% ns_register_proc GET  /*.html conn_marshal

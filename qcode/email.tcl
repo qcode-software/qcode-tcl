@@ -282,7 +282,7 @@ proc qc::sendmail {mail_from rcpts body args} {
     close $sock
 }
 
-doc sendmail {
+doc qc::sendmail {
     Parent email
     Examples {
 	% 

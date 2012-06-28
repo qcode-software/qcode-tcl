@@ -7,7 +7,7 @@ proc qc::format_timestamp_iso { string } {
     return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
 }
 
-doc format_timestamp_iso {
+doc qc::format_timestamp_iso {
     Examples {
 	% format_timestamp_iso now
 	2007-11-05 17:30:14
@@ -24,7 +24,7 @@ proc qc::format_timestamp_http { string } {
     #| Format string as http timestamp according to RFC 1123
     return [clock format [cast_epoch $string] -format "%a, %d %b %Y %H:%M:%S %Z"]
 }
-doc format_timestamp_http {
+doc qc::format_timestamp_http {
     Examples {
 	% format_timestamp_http now
         Tue, 12 Jun 2012 10:39:47 BST
@@ -50,7 +50,7 @@ proc qc::format_timestamp_rel { string } {
     return [clock format $epoch -format "%Y-%m-%d"]
 }
 
-doc format_timestamp_rel {
+doc qc::format_timestamp_rel {
     Examples {
 	% format_timestamp_rel now
 	17:33
@@ -73,7 +73,7 @@ proc qc::format_timestamp { string } {
     return [format_timestamp_iso $string]
 }
 
-doc format_timestamp {
+doc qc::format_timestamp {
     Examples {
 	% format_timestamp now
 	2007-11-05 17:30:14

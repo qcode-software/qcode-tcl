@@ -44,7 +44,7 @@ proc qc::cast_integer {string} {
     }
 }
 
-doc cast_integer {
+doc qc::cast_integer {
     Parent cast
     Examples {
 	% cast_integer 2,305
@@ -77,7 +77,7 @@ proc qc::cast_decimal {string {precision ""}} {
     }
 }
 
-doc cast_decimal {
+doc qc::cast_decimal {
     Parent cast
     Examples {
 	% cast_decimal 2,305.25
@@ -96,7 +96,7 @@ proc qc::cast_date {string} {
     return [clock format [cast_epoch $string] -format "%Y-%m-%d"]
 }
 
-doc cast_date {
+doc qc::cast_date {
     Parent cast
     Examples {
 	% cast_date 12/5/07
@@ -209,7 +209,7 @@ proc qc::cast_epoch { string } {
     return [clock scan $string]
 }
 
-doc cast_epoch {
+doc qc::cast_epoch {
     Parent cast    
     Examples {
 	% cast_epoch 12/5/07
@@ -241,7 +241,7 @@ proc qc::cast_boolean { string {true t} {false f} } {
     }
 }
 
-doc cast_boolean {
+doc qc::cast_boolean {
     Parent cast    
     Examples {
 	% cast_boolean YES
@@ -285,7 +285,7 @@ proc qc::cast_postcode { postcode } {
     }
 }
 
-doc cast_postcode {
+doc qc::cast_postcode {
     Parent cast    
     Examples {
 	% cast_postcode AB12CD
@@ -310,7 +310,7 @@ proc qc::cast_creditcard { no } {
     }
 }
 
-doc cast_creditcard {
+doc qc::cast_creditcard {
     Examples {
 	% cast_creditcard "4111 1111 1111 1111"
 	4111111111111111

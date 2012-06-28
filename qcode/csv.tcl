@@ -61,7 +61,7 @@ proc qc::csv2ll {csv } {
     return $result
 }
 
-doc csv2ll {
+doc qc::csv2ll {
     Examples {
 	% set csv {"one","two","three"
 4,5,6}

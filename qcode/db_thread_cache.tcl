@@ -39,7 +39,7 @@ proc qc::db_thread_cache_1row { qry } {
     return
 }
 
-doc db_thread_cache_1row {
+doc qc::db_thread_cache_1row {
     Parent db_thread_cache
     Description {
 	Thread-Cached equivalent of <proc>db_1row</proc>. Select one row from the cached results or the database if the cache is empty. Place variables corresponding to column names in the caller's namespace Throw an error if the number of rows returned is not exactly one.
@@ -94,7 +94,7 @@ proc qc::db_thread_cache_0or1row { qry {no_rows_code ""} {one_row_code ""} } {
     }
 }
 
-doc db_thread_cache_0or1row {
+doc qc::db_thread_cache_0or1row {
     Parent db_thread_cache
     Description {
 	Thread-Cached equivalent of <proc>db_0or1row</proc>.<br>
@@ -176,7 +176,7 @@ proc qc::db_thread_cache_foreach { qry foreach_code { no_rows_code ""} } {
     }
 }
 
-doc db_thread_cache_foreach {
+doc qc::db_thread_cache_foreach {
     Parent db_thread_cache
     Description {
 	Thread-Cached equivalent of <proc>db_foreach</proc>.<br> 
@@ -218,7 +218,7 @@ proc qc::db_thread_cache_select_table {qry {level 0} } {
     }
 }
 
-doc db_thread_cache_select_table {
+doc qc::db_thread_cache_select_table {
     Parent db_thread_cache
     Description {
 	Check if the results of the qry have already been cached. If not run the qry and place the results as a table in the global array db_thread_cache using a hash of the the qry as an index.

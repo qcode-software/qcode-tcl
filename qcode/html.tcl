@@ -15,7 +15,7 @@ proc qc::html2pdf { args } {
     return $pdfDoc
 }
 
-doc html2pdf {
+doc qc::html2pdf {
     Examples {
         % html2pdf -encoding base64 -timeout 10 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
         JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovUHJvZHVjZXIgKHdraHRtbHRvcGRmKQov
@@ -38,7 +38,7 @@ proc qc::html {tagName nodeValue args} {
     return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"
 }
 
-doc html {
+doc qc::html {
     Examples {
 	% html span "Hello There"
 	<span>Hello There</span>
@@ -76,7 +76,7 @@ proc qc::html_tag { tagName args } {
     }
 }
 
-doc html_tag {
+doc qc::html_tag {
     Examples {
 	% html_tag input name firstname
 	<input name="firstname">
@@ -102,7 +102,7 @@ proc qc::html_hidden { args } {
     return $html
 }
 
-doc html_hidden {
+doc qc::html_hidden {
     Examples {
 	% set customer_key As234454g.4/2
 	% html_hidden customer_key
@@ -124,7 +124,7 @@ proc qc::html_hidden_set { args } {
     return $html
 }
 
-doc html_hidden_set {
+doc qc::html_hidden_set {
     Examples {
 	% html_hidden_set customer_key As234454g.4/2 order_key 66524F.kL
 	<input type="hidden" name="customer_key" value="As234454g.4/2" id="customer_key">
@@ -142,7 +142,7 @@ proc qc::html_list { list } {
     return $html
 }
 
-doc html_list {
+doc qc::html_list {
     Examples {
 	% set list [list one two three four]
 	one two three four
@@ -162,7 +162,7 @@ proc qc::html_a { link url args } {
     return [html a $link {*}$args]
 }
 
-doc html_a {
+doc qc::html_a {
     Examples {
 	% html_a Google http://www.google.co.uk 
 	<a href="http://www.google.co.uk">Google</a>
@@ -178,7 +178,7 @@ proc qc::html_a_replace { link url args } {
     return [html_a $link $url {*}$args]
 }
 
-doc html_a {
+doc qc::html_a {
     Examples {
 	% html_a_replace Google http://www.google.co.uk 
 	<a href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
@@ -199,7 +199,7 @@ proc qc::html_id { name {value UNDEF}} {
     return [html span $value id $name]
 }
 
-doc html_id {
+doc qc::html_id {
     Examples {
 	% html_id total 23.50
 	<span id="total">23.50</span>
@@ -212,7 +212,7 @@ proc qc::html_menu { lmenu } {
     return [join $lmenu " &nbsp;<b>|</b>&nbsp; "]
 }
 
-doc html_menu {
+doc qc::html_menu {
     Examples {
 	% html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
 	<a href="sales.html">Sales</a> &nbsp;|&nbsp; <a href="sales.html">Purchasing</a> &nbsp;|&nbsp; <a href="sales.html">Accounts</a>
@@ -228,7 +228,7 @@ proc qc::html_paragraph_layout {args} {
     return $html
 }
 
-doc html_paragraph_layout {
+doc qc::html_paragraph_layout {
     Examples {
 	% html_paragraph_layout Name "Jimmy Tarbuck" Venue "Palace Ballroom"
 	<p><b>Name</b><br>Jimmy Tarbuck</p><p><b>Venue</b><br>Palace Ballroom</p>
@@ -268,7 +268,7 @@ proc qc::html_info_tables {args} {
     return [qc::html_table class clsColumar tbody [list $row]]
 }
 
-doc html_info_tables {
+doc qc::html_info_tables {
     Examples {
 	% html_info_tables {Name "Jimmy Tarbuck" Venue "Palace Ballroom"} {Name "Des O'Conner" Venue "Royal Palladium"}
 	<table class="clsColumar">

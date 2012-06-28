@@ -28,7 +28,7 @@ proc qc::cookie_get { name } {
     }
 }
 
-doc cookie_get {
+doc qc::cookie_get {
     Parent cookie
     Examples {
 	% cookie_get session_id
@@ -56,7 +56,7 @@ proc qc::cookie_exists { name } {
     }
 }
 
-doc cookie_exists {
+doc qc::cookie_exists {
     Parent cookie
     Examples {
 	% cookie_exists session_id
@@ -109,7 +109,7 @@ proc qc::cookie_set {name value args} {
     ns_set put $headers "Set-Cookie" $cookie
 }
 
-doc cookie_set {
+doc qc::cookie_set {
     Parent cookie
     Examples {
 	% cookie_set tracking Google expires "+30 days"

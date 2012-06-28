@@ -16,7 +16,7 @@ proc qc::sql_where_in {column list {default false} } {
     }
 }
 
-doc sql_where_in {
+doc qc::sql_where_in {
     Parent db
     Usage {sql_where_in colName list ?defaultValue?}
     Description {
@@ -49,7 +49,7 @@ proc qc::sql_where_in_not {column list {default true}} {
     }
 }
 
-doc sql_where_in_not {
+doc qc::sql_where_in_not {
     Parent db
     Usage {sql_where_in_not colName list ?defaultValue?}
     Description {
