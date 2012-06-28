@@ -38,9 +38,9 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     set url [ns_conn url]
     set file [ns_url2file [ns_conn url]]
 
-    if { [string equal [info procs $url] $url] || [string equal [info procs "::$url"] "::$url"] } {
+    if { [llength [info procs "::$url"]] } {
 	try {
-	    form_proc $url
+	    form_proc ::$url
 	} {
 	    $error_handler 
 	}
