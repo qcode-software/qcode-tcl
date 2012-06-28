@@ -3,7 +3,7 @@ package require doc
 namespace eval qc {}
 
 
-doc db {
+doc qc::db {
     Title "Database API"
     Url {/wiki/DatabaseApi}
 }
