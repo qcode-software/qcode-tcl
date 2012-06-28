@@ -1,4 +1,4 @@
-package provide qcode 1.5
+package provide qcode 1.6
 namespace eval qc {}
 proc qc::action { description url {actionKey ""} } {
     if { [eq "" $actionKey] } {

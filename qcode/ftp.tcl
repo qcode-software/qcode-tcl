@@ -1,4 +1,4 @@
-package provide qcode 1.5
+package provide qcode 1.6
 package require doc
 namespace eval qc {}
 proc qc::ftp_open {host user password} {
