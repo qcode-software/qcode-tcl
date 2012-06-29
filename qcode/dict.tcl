@@ -3,9 +3,11 @@ package require doc
 namespace eval qc {}
 
 proc qc::dict_exists { args } {
-    #| Return true if the given key (or path to key) exists. Otherwise return false.
-    # Unlike dict exists command, do not fail if path to key does not exist.
-    # Eg: dict_exists [dict create a 1 b 2 c 3] a a1
+    #| Return true if the given key (or path to key) exists. 
+    #| Otherwise return false.
+
+    #| Unlike dict exists command, do not fail if path to key does not exist.
+    #| Eg: dict_exists [dict create a 1 b 2 c 3] a a1
     args $args dict args
 
     set key [lindex $args 0]
@@ -26,6 +28,28 @@ proc qc::dict_exists { args } {
     }
 }
 
+doc qc::dict_exists {
+    Usage {
+	qc::dict_exists dict ?key? ?key? ...
+    }
+    Examples {
+	% set dict {a 1 b {b1 1 b2 2} c 3}
+	a 1 b {b1 1 b2 2} c 3
+	
+	% qc::dict_exists $dict a
+	1
+	
+	% qc::dict_exists $dict b b1
+	1
+	
+	% qc::dict_exists $dict d
+	0
+	
+	% qc::dict_exists $dict c d
+	0
+    }
+}
+
 proc qc::dict_subset {dict args} {
     #| Return a dict made up of the keys given.
     set result {}
@@ -37,6 +61,28 @@ proc qc::dict_subset {dict args} {
     return $result
 }
 
+doc qc::dict_subset {
+    Usage {
+	qc::dict_subset dict ?key? ?key? ...
+    }
+    Examples {
+	% set dict {a 1 b {b1 1 b2 2} c 3}
+	a 1 b {b1 1 b2 2} c 3
+	
+	% qc::dict_subset $dict a
+	a 1
+	
+	% qc::dict_subset $dict b c
+	b {b1 1 b2 2} c 3
+	
+	% qc::dict_subset $dict c d
+	c 3
+	
+	% qc::dict_subset $dict d
+	 
+    }
+}
+
 proc qc::dict_exclude {dict args} {
     #| Return an dict excluding the keys given.
     set temp {}
@@ -46,6 +92,28 @@ proc qc::dict_exclude {dict args} {
 	}
     }
     return $temp
+}
+
+doc qc::dict_exclude {
+    Usage {
+	qc::dict_exclude dict ?key? ?key? ...
+    }
+    Examples {
+	% set dict {a 1 b {b1 1 b2 2} c 3}
+	a 1 b {b1 1 b2 2} c 3
+	
+	% qc::dict_exclude $dict a
+	b {b1 1 b2 2} c 3
+	
+	% qc::dict_exclude $dict b c
+	a 1
+	
+	% qc::dict_exclude $dict c d
+	a 1 b {b1 1 b2 2}
+	
+	% qc::dict_exclude $dict d
+	a 1 b {b1 1 b2 2} c 3
+    }
 }
 
 proc qc::dict_sort {dictVariable} {
@@ -64,6 +132,19 @@ proc qc::dict_sort {dictVariable} {
     return $dict
 }
     
+doc qc::dict_sort {
+    Examples {
+	% set dict {a 1 b 3 c 2}
+	a 1 b 3 c 2
+	
+	% qc::dict_sort dict
+	a 1 c 2 b 3
+	
+	% set dict
+	a 1 c 2 b 3
+    }
+}
+
 proc qc::dict2xml { dict } {
     #| Convert top level {key value} pairs in dict value to xml elements.
     #| Return xml.
@@ -72,6 +153,18 @@ proc qc::dict2xml { dict } {
         lappend list [qc::xml $name $value]
     }
     return [join $list \n]
+}
+
+doc qc::dict2xml {
+    Examples {
+	% set dict {a 1 b 2 c 3}
+	a 1 b 2 c 3
+	
+	% qc::dict2xml $dict
+	<a>1</a>
+	<b>2</b>
+	<c>3</c>
+    }
 }
 
 proc qc::dict_from { args } {
@@ -88,10 +181,26 @@ proc qc::dict_from { args } {
     return $dict
 }
 
+doc qc::dict_from {
+    Usage {
+	qc::dict_from ?varName? ?varName? ...
+    }
+    Examples {
+	% set a 1; set b 2; set c 3
+	
+	% qc::dict_from a b
+	a 1 b 2 
+
+	% qc::dict_from c d
+	Can't create dict with d: No such variable
+    }
+}
+
 proc qc::dict2vars { dict args } {
     #| Set all or a subset of the {key value} pairs in dict as variables in the caller.
-    # If a list of keys is provided only set corresponding variables.
-    # If any of the keys do not exist in the dict unset the variable in the caller if it exists.
+    #|
+    #| If a list of keys is provided only set corresponding variables.
+    #| If any of the keys do not exist in the dict unset the variable in the caller if it exists.
     if { [llength $args]==0 } {
 	# set all variables
 	foreach {name value} $dict {upset 1 $name $value}
@@ -106,5 +215,29 @@ proc qc::dict2vars { dict args } {
 		}
 	    }
 	}
+    }
+}
+
+doc qc::dict2vars {
+    Usage {
+	qc::dict2vars dict ?varName? ?varName? ...
+    }
+    Examples {
+	% set dict { a 1 b 2 c 3}
+	a 1 b 2 c 3
+	% set d 4
+	4
+	
+	% qc::dict2vars $dict
+	% puts "a:$a, b:$b, c:$c, d:$d"
+	a:1, b:2, c:3, d:4
+
+	% qc::dict2vars $dict a b
+	% puts "a:$a, b:$b"
+	a:1, b:2
+
+	% qc::dict2vars $dict a b d
+	% puts "a:$a, b:$b, d:$d"
+	can't read "d": no such variable
     }
 }
