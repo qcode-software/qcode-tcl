@@ -2,8 +2,32 @@ package provide qcode 1.6
 package require doc
 namespace eval qc {}
 
+proc qc::dict_exists { args } {
+    #| Return true if the given key (or path to key) exists. Otherwise return false.
+    # Unlike dict exists command, do not fail if path to key does not exist.
+    # Eg: dict_exists [dict create a 1 b 2 c 3] a a1
+    args $args dict args
+
+    set key [lindex $args 0]
+    set index [lsearch -exact $dict $key]
+    while { $index%2!=0 && $index!=-1 && $index<[llength $dict]} {
+	incr index
+	set index [lsearch -exact -start $index $dict $key]
+    }
+    if { $index%2 == 0 && [llength $args] > 1 } {
+        # key has a value but there are more keys, so recurse with value and rest of keys
+        return [dict_exists [lindex $dict [expr {$index+1}]] {*}[lrange $args 1 end]]
+    } elseif { $index%2 == 0 && [llength $dict]%2 == 0} {
+        # key has value, this is a valid dict and there are no more keys. the end.
+        return 1
+    } else {
+        # key doesn't have value
+        return 0
+    }
+}
+
 proc qc::dict_subset {dict args} {
-    # Return an dict made up of the keys given
+    #| Return a dict made up of the keys given.
     set result {}
     foreach key $args {
 	if { [dict exists $dict $key] } {
@@ -14,7 +38,7 @@ proc qc::dict_subset {dict args} {
 }
 
 proc qc::dict_exclude {dict args} {
-    #return an dict excluding keys given
+    #| Return an dict excluding the keys given.
     set temp {}
     foreach {key value} $dict {
 	if { ![in $args $key] } {
@@ -25,6 +49,8 @@ proc qc::dict_exclude {dict args} {
 }
 
 proc qc::dict_sort {dictVariable} {
+    #| Sort the top level dict contained in dictVariable by ascending key values.
+    #| Write the resulting dict back to dictVariable and return the sorted dict.
     upvar 1 $dictVariable dict
     set llist {}
     foreach {name value} $dict {
@@ -39,6 +65,8 @@ proc qc::dict_sort {dictVariable} {
 }
     
 proc qc::dict2xml { dict } {
+    #| Convert top level {key value} pairs in dict value to xml elements.
+    #| Return xml.
     set list {}
     foreach {name value} $dict {
         lappend list [qc::xml $name $value]
@@ -47,7 +75,7 @@ proc qc::dict2xml { dict } {
 }
 
 proc qc::dict_from { args } {
-    # Take a list of var names and return a dict
+    #| Take a list of var names and return a dict.
     set dict {}
     foreach name $args {
 	upvar 1 $name value
@@ -61,6 +89,9 @@ proc qc::dict_from { args } {
 }
 
 proc qc::dict2vars { dict args } {
+    #| Set all or a subset of the {key value} pairs in dict as variables in the caller.
+    # If a list of keys is provided only set corresponding variables.
+    # If any of the keys do not exist in the dict unset the variable in the caller if it exists.
     if { [llength $args]==0 } {
 	# set all variables
 	foreach {name value} $dict {upset 1 $name $value}
