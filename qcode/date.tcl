@@ -4,75 +4,7 @@ namespace eval qc {}
 
 doc date {
     Title "Date Handling"
-    Description {
-	<h3>Date Representation</h3>
-	Dates in qcode are represented using a limited ISO 8601 format of YYYY-MM-DD.<br>
-	This format matches the default postgresql <i>date</i> data type and should be unambiguous.<br>
-	Testing if a string is a valid date is done using <proc>is_date</proc>.
-	<h3>Parsing Date Strings</h3>
-	The proc <proc>cast_date</proc> will try to convert a wide variety of date strings into an ISO date.<br>
-
-	<example>
-	% cast_date 12/5/07
-	2007-05-12
-	# At present dates in this format are assumed to be European DD/MM/YY
-	%
-	% cast_date yesterday
-	2007-05-11
-	%
-	% cast_date "June 23rd"
-	2007-06-23
-	</example>
-	The proc <proc>cast_epoch</proc> does the real work of parsing date strings into a [html_a "unix epoch" http://en.wikipedia.org/wiki/Unix_time].
-	<h3>Date Calculations</h3>
-	TCL does a great job of parsing strings to carry out simple date calculations.
-	<example>
-	% cast_date "2007-06-05 + 3days"
-	2007-06-08
-	%
-	% cast_date "2007-06-05 - 2 months"
-	2007-04-05
-	</example>
-	<h3>Date Helpers</h3>
-	<ul>
-	<li><proc>date_compare</proc></li>
-
-	<li><proc>date_day_name</proc></li>
-	<li><proc>date_day_shortname</proc></li>
-	<li><proc>date_dom</proc></li>
-
-	<li><proc>date_month</proc></li>
-	<li><proc>date_month_name</proc></li>
-	<li><proc>date_month_shortname</proc></li>
-	<li><proc>date_month_start</proc></li>
-	<li><proc>date_month_end</proc></li>
-
-	<li><proc>date_quarter</proc></li>
-	<li><proc>date_quarter_start</proc></li>
-	<li><proc>date_quarter_end</proc></li>
-
-	<li><proc>date_year</proc></li>
-
-	<li><proc>date_year_start</proc></li>
-	<li><proc>date_year_end</proc></li>
-
-	<li><proc>date_year_iso_start</proc></li>
-	<li><proc>date_year_iso_end</proc></li>
-
-
-	<li><proc>dates</proc></li>
-	</ul>
-	<h3>Formatting Dates</h3>
-	TCL provides a rich set of features to format dates but here are a few useful shortcuts.
-	<ul>
-	<li><proc>format_date</proc></li>
-	<li><proc>format_date_iso</proc></li>
-	<li><proc>format_date_letter</proc></li>
-	<li><proc>format_date_rel</proc></li>
-	<li><proc>format_date_uk</proc></li>
-	<li><proc>format_date_uk_long</proc></li>
-	</ul>
-    }
+    Url {/qc/wiki/DateHandling}
 }
 
 proc qc::date_month_start {date} {

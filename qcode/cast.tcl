@@ -4,22 +4,7 @@ namespace eval qc {}
 
 doc cast {
     Title "Casting Procs"
-    Description {
-	The Casting Procs try to parse strings and return a literal representation that can be passed to the database or used in qcode.
-	
-	<h3>Numbers</h3>
-	[doc_list cast_integer cast_decimal]
-
-	<h3>Dates</h3>
-	[doc_list cast_date cast_epoch]
-
-	<h3>Boolean</h3>
-	[doc_list cast_boolean]
-	
-	<h3>Postcodes</h3>
-	[doc_list cast_postcode]
-	
-    }
+    Url {/qc/wiki/CastPage}
 }
 
 proc qc::cast_integer {string} {

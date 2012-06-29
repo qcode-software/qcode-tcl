@@ -1,12 +1,10 @@
 package provide qcode 1.6
 package require doc
 namespace eval qc {}
+
 doc cookie {
     Title "Cookie Handling"
-    Description {
-	Qcode provides 3 procs for cookie handling to get,set and test for existence.<br> 
-	[doc_list cookie_get cookie_set cookie_exists]
-    }
+    Url {/qc/wiki/CookiePage}
 }
 
 proc qc::cookie_get { name } {

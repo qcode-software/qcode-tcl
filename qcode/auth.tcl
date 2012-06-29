@@ -1,28 +1,10 @@
 package provide qcode 1.6
 package require doc
 namespace eval qc {}
+
 doc authentication {
     Title Authentication
-    Description {
-	These procs try to authenticate who the current employee/user is.<br>
-	<h3>Session</h3>
-	Each session has a unique reference called the session_id that is very hard to guess. The user holds onto the session_id by way of a cookie which is passed to the server with each request.
-	The proc <proc>session_exists</proc> can be used to test if the session is valid and <proc>auth_session</proc> can be used to return the employee_id of the session owner.
-	<h3>Host Based Authentication</h3>
-	Host based Authentication or HBA for short associates an employee with an IP address. If the remote user is using a particular IP address then we return the employee_id associated with that unique address. 
-	<p>
-	HBA is not suitable for hosts behind NAT unless you want to grant the same priviledges to all hosts behind the NAT router.Normally the server only sees the IP address of the NAT router.
-	<p>
-	The mapping of IP address to employee_id is stored in the employee table.<br>
-	The proc <proc>auth_hba_check</proc> can be used to test if the user can be established based on IP address. The proc <proc>auth_hba</proc> can be used to return the employee_id associated with the IP address of the <link ref="conn_remote_ip">current connection</link> based on the employee table.
-	<h3>Password Based Authentication</h3>
-	Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, employee code or email address. In this implementation it is an employee code.
-	The proc <proc>auth_password_check</proc> can be used to test if the pair of values is valid and <proc>auth_password</proc> can be used to return the employee_id associated with this pair of values from the employee table.
-	<h3>General</h3>
-	The proc <proc>auth_check</proc> tries to establish if we can authenticate who the current user/employee is by checking session based authentication first and then host based authentication.
-	<p> 
-	The proc <proc>auth</proc> returns the employee_id of the current user by checking session based authentication first and then host based authentication. 
-    }
+    Url {/qc/wiki/AuthPage}
 }
 
 proc qc::auth {} {
