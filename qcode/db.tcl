@@ -380,7 +380,7 @@ doc qc::db_trans {
 
 	db_trans {
 	    # Select for update
-	    db_dml {select order_state from sales_order where order_number=123 for update}
+	    db_1row {select order_state from sales_order where order_number=123 for update}
 	    if { ![string equal $order_state OPEN ] } {
 		# Throw error and ROLLBACK
 		error "Can't invoice sales order $order_number because it is not OPEN"
