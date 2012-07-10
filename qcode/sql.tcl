@@ -99,7 +99,7 @@ proc qc::sql_insert_with { args } {
 }
 
 proc qc::sql_sort { args } {
-    args $args -paging -limit ? -- args
+    args $args -paging -limit ? -nulls last -- args
     #| Create the sql for sorting and paging from form_vars
     #| Default sort order can be specified in args
 
@@ -122,14 +122,36 @@ proc qc::sql_sort { args } {
     for {set i 0} {$i<[llength $list]} {incr i} {
 	set this_item [lindex $list $i]
 	set next_item [lindex $list [expr {$i+1}]]
-	if { [eq [string toupper $next_item] ASC] } {
-	    lappend order_by_list $this_item
-	    incr i
-	} elseif { [eq [string toupper $next_item] DESC] } {
-	    lappend order_by_list "$this_item DESC"
-	    incr i
-	} else {
-	    lappend order_by_list "$this_item"
+	switch -nocase $next_item {
+	    ASC {
+		if { [string toupper $nulls] eq "FIRST" } {
+		    # override default null sorting order
+		    lappend order_by_list "$this_item NULLS FIRST"
+		} else {
+		    # default null sorting order for ASC (NULLS LAST)
+		    lappend order_by_list $this_item
+		}
+		incr i
+	    }
+	    DESC {
+		if { [string toupper $nulls] eq "LAST" } {
+		    # override default null sorting order
+		    lappend order_by_list "$this_item DESC NULLS LAST"
+		} else {
+		    # default null sorting order for DESC (NULLS FIRST)
+		    lappend order_by_list "$this_item DESC"
+		}
+		incr i
+	    }
+	    default {
+		if { [string toupper $nulls] eq "FIRST" } {
+		    # override default null sorting order
+		    lappend order_by_list "$this_item NULLS FIRST"
+		} else {
+		    # default null sorting order (NULLS LAST)
+		    lappend order_by_list $this_item
+		}
+	    }
 	}
     }
     if { [llength $order_by_list]==0 } {
