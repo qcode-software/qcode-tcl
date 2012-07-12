@@ -601,7 +601,7 @@ proc qc::ofc_html {id json width height} {
 	</script>
     }
     # add div element for ofc to be written into. 
-    append html [html div "" id $id style="width:$width;height:$height;"]
+    append html [html div "" id $id style "width:$width;height:$height;"]
 
     return $html
 }
