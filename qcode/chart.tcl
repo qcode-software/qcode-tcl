@@ -589,7 +589,6 @@ proc qc::ofc_colors {{no_of_elements 1}} {
 }
 
 proc qc::ofc_html {id json width height} {   
-
     # html to construct ofc object.
     sset html {
 	<script type="text/javascript"> 
@@ -602,7 +601,7 @@ proc qc::ofc_html {id json width height} {
 	</script>
     }
     # add div element for ofc to be written into. 
-    append html [html div "" id $id]
+    append html [html div "" id $id style="width:$width;height:$height;"]
 
     return $html
 }
