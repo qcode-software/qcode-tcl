@@ -21,6 +21,15 @@ proc qc::db_qry_parse {qry {level 0} } {
 	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $field 0] [lindex $field 1]]]]
 	set start [lindex $right 0]
     }
+
+    # Dollar Quoted fields
+    set start 0
+    while { $start<[string length $qry] \
+		&& [regexp -indices -start $start -- {(\$[^$]*\$)(.*?)(\1)} $qry -> left field right] } {
+	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $left 0] [lindex $right 1]]]]
+	set start [expr {[lindex $right 1]+1}]
+    }
+
     # SQL Arrays
     # array[2:3]
     regsub -all {\[([0-9]+:[0-9]+)\]} $qry {\\[\1\\]} qry
@@ -30,8 +39,6 @@ proc qc::db_qry_parse {qry {level 0} } {
     regsub -all {\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\\[\1\\]} qry
     # array[sql_function(args)]
     regsub -all {([a-zA-Z_]+)\[([a-zA-Z_]+\([^\)]+\))\]} $qry {\1\\[\2\\]} qry
-
-    # TODO: Dollar quoted string like $foo$ or $tag$foo$tag$
 
     # Colon variable substitution
     set re {
