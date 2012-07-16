@@ -30,9 +30,12 @@ proc qc::db_qry_parse {qry {level 0} } {
 	set start [expr {[lindex $right 1]+1}]
     }
 
+    # Escaped \:colon
+    set qry [string map {\\: \0} $qry]
+    
     # SQL Arrays
-    # array[2:3]
-    regsub -all {\[([0-9]+:[0-9]+)\]} $qry {\\[\1\\]} qry
+    # array[2:3] or array[$from:$to]
+    regsub -all {\[([^:]+:[^:]+)\]} $qry {\\[\1\\]} qry
     # array[2]
     regsub -all {\[([0-9]+)\]} $qry {\\[\1\\]} qry
     # array[:index] or array[$index]
@@ -40,9 +43,10 @@ proc qc::db_qry_parse {qry {level 0} } {
     # array[sql_function(args)]
     regsub -all {([a-zA-Z_]+)\[([a-zA-Z_]+\([^\)]+\))\]} $qry {\1\\[\2\\]} qry
 
+  
     # Colon variable substitution
     set re {
-	([^:]):
+	([^:\\]):
 	([a-z_][a-z0-9_]*)  
 	(::(
 	    bigint
@@ -105,7 +109,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 	    )(?=[^a-z0-9]|$)
 	    )?
     }
-    regsub -all -nocase -expanded $re $qry {\1[db_quote [set {\2}] {\4}]} qry
+    regsub -all -nocase -expanded $re $qry {\1[::qc::db_quote [set {\2}] {\4}]} qry
 
     # Eval with uplevel
     set qry [uplevel $level [list subst $qry]]
