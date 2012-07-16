@@ -25,24 +25,22 @@ proc qc::db_qry_parse {qry {level 0} } {
     # Dollar Quoted fields
     set start 0
     while { $start<[string length $qry] \
-		&& [regexp -indices -start $start -- {(?:(\$[^$]*\$)(.*)(\1)){1,1}?} $qry -> left field right] } {
+		&& [regexp -indices -start $start -- {(?:(\$[a-zA-Z0-9_]*\$)(.*)(\1)){1,1}?} $qry -> left field right] } {
 	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $left 0] [lindex $right 1]]]]
 	set start [expr {[lindex $right 1]+1}]
     }
 
     # Escaped \:colon
     set qry [string map {\\: \0} $qry]
-    
     # SQL Arrays
     # array[2:3] or array[$from:$to]
-    regsub -all {\[([^:]+:[^:]+)\]} $qry {\\[\1\\]} qry
+    regsub -all {\[([a-zA-Z0-9_$]+:[a-zA-Z0-9_$]+)\]} $qry {\\[\1\\]} qry
     # array[2]
     regsub -all {\[([0-9]+)\]} $qry {\\[\1\\]} qry
     # array[:index] or array[$index]
     regsub -all {\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\\[\1\\]} qry
     # array[sql_function(args)]
     regsub -all {([a-zA-Z_]+)\[([a-zA-Z_]+\([^\)]+\))\]} $qry {\1\\[\2\\]} qry
-
   
     # Colon variable substitution
     set re {
