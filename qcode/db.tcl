@@ -32,11 +32,14 @@ proc qc::db_qry_parse {qry {level 0} } {
 
     # Escaped \:colon
     set qry [string map {\\: \0} $qry]
+
     # SQL Arrays
     # array[2:3] or array[$from:$to]
     regsub -all {\[([a-zA-Z0-9_$]+:[a-zA-Z0-9_$]+)\]} $qry {\\[\1\\]} qry
     # array[2]
     regsub -all {\[([0-9]+)\]} $qry {\\[\1\\]} qry
+    # array[]
+    regsub -all {\[\]} $qry {\\[\\]} qry
     # array[:index] or array[$index]
     regsub -all {\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\\[\1\\]} qry
     # array[sql_function(args)]
