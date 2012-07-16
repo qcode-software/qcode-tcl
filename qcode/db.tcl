@@ -41,7 +41,69 @@ proc qc::db_qry_parse {qry {level 0} } {
     # array[2]
     regsub -all {([a-z0-9_]+)\[([0-9]+)\]} $qry {\1\\[\2\\]} qry
     # array[]
-    regsub -all {([a-z0-9_]+)\[\]} $qry {\1\\[\\]} qry
+    set re {
+	(
+	 bigint
+	 |int8
+	 |bigserial
+	 |serial8
+	 |double\s+precision
+	 |float8
+	 |integer
+	 |int
+	 |int4
+	 |numeric(\([^,]+,[^\)]+\))?
+	 |decimal(\([^,]+,[^\)]+\))?
+	 |real
+	 |float4
+	 |smallint
+	 |int2
+	 |serial
+	 |serial4
+	 |money
+
+	 |bit(\([^\)]+\))?
+	 |bit\s+varying(\([^\)]+\))?
+	 |varbit
+	 |character\s+varying(\([^\)]+\))?
+	 |varchar(\([^\)]+\))?
+	 |character(\([^\)]+\))?
+	 |char(\([^\)]+\))?
+	 |text
+
+	 |date
+	 |time(\([^\)]+\))?(\s+with(out)?\s+time\s+zone)?
+	 |timetz
+	 |timestamp(\([^\)]+\))?(\s+with(out)?\s+time\s+zone)?
+	 |timestamptz
+	 |interval(\s+[a-z0-9]+)*(\([^\)]+\))?
+
+	 |boolean
+	 |bool
+
+	 |bytes
+	 |bytea	    
+	 |inet
+	 |cidr
+	 |macaddr
+	 |point
+	 |line
+	 |path
+	 |lseg
+	 |box	 
+	 |circle
+	 |polygon	    
+	 |tsquery
+	 |tsvector
+	 |txid_snapshot
+	 |uuid
+	 |xml	  
+
+	 |[a-z0-9_]+
+	 )\[\]
+    }
+    regsub -all -nocase -expanded $re $qry {\1\\[\\]} qry
+
     # array[:index] or array[$index]
     regsub -all {([a-z0-9_]+)\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\1\\[\2\\]} qry
     # array[sql_function(args)]
