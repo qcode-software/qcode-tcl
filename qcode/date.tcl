@@ -368,7 +368,8 @@ doc qc::dates {
 
 proc qc::date_days {from_date to_date} {
     #| Return the number of days between from_date and to_date
-    return [expr {([cast_epoch $to_date]-[cast_epoch $from_date])/(60*60*24)}]
+    # Rounding to cope with daylight saving time, leap-seconds, etc.
+    return [qc::round [expr {([cast_epoch $to_date]-[cast_epoch $from_date])/(60.0*60*24)}] 0]
 }
 
 doc qc::dates {
