@@ -547,7 +547,7 @@ proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage}
 	if { [true $commify] } {
 	    set value [format_commify $value]
 	} 
-	if { [true $percentage] } {
+	if { [true $percentage] && [is_decimal $value] } {
 	    set value $value%
 	}
     }
