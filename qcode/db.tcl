@@ -25,7 +25,7 @@ proc qc::db_qry_parse {qry {level 0} } {
     # Dollar Quoted fields
     set start 0
     while { $start<[string length $qry] \
-		&& [regexp -indices -start $start -- {(?:(\$[a-zA-Z0-9_]*\$)(.*)(\1)){1,1}?} $qry -> left field right] } {
+		&& [regexp -indices -start $start -- {(\$[a-zA-Z0-9_]*?\$)(.*?)(\1)} $qry -> left field right] } {
 	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $left 0] [lindex $right 1]]]]
 	set start [expr {[lindex $right 1]+1}]
     }
