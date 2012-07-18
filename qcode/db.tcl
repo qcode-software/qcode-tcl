@@ -32,14 +32,32 @@ proc qc::db_qry_parse {qry {level 0} } {
 
   
     ## SQL Arrays ##
-    # array[2:3] 
-    regsub -all {([a-z_][a-z0-9_]*)\[([0-9]+:[0-9]+)\]} $qry {\1\\[\2\\]} qry
-    # array[$from:$to] 
-    regsub -all {([a-z][a-z0-9_]*)\[(\$[a-zA-Z_][a-zA-Z0-9_]*:\$[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\1\\[\2\\]} qry
-    # array[:from\::to] 
-    regsub -all {([a-z_][a-z0-9_]*)\[(:[a-z_][a-z0-9_]*\\::[a-z_][a-z0-9_]*)\]} $qry {\1\\[\2\\]} qry
-    # array[2]
-    regsub -all {([a-z_][a-z0-9_]*)\[([0-9]+)\]} $qry {\1\\[\2\\]} qry
+    # May be multi-dimensional, indexed or slices, with numbers, $variables, :variables, or sql_functions()
+    # If sliced with the upper bound being a :variable, \: must be used - eg my_array[2\::index] or my_array[:from_index\::to_index]
+    # cannot handle nested sql functions, cannot handle more advanced sql expressions as indices
+    set start 0
+    while { $start<[string length $qry] \
+		&& [regexp -indices -nocase -expanded -start $start -- {[a-z_][a-z0-9_]*(
+									       (?:\[
+										(?: [0-9]+
+										 | [:$][a-z_][a-z0-9_]*
+										 | [a-z_]+\([^\)]*\)
+										 )
+										(?:
+										 :[0-9]+
+										 | :\$[a-z_][a-z0-9_]*
+										 | \\::[a-z_][a-z0-9_]*
+										 | :[a-z_]+\([^\)]*\)
+										 )?
+										\])+
+									       )} $qry -> match] } {
+	set qry [string replace $qry [lindex $match 0] [lindex $match 1] [string map {\[ \\[ \] \\]} [string range $qry [lindex $match 0] [lindex $match 1]]]]
+	set start [expr {[lindex $match 1]+1}]
+    }
+
+    # ARRAY constructor - eg. array[1, 2, 3]
+    regsub -all -nocase {(array)\[([^\]]+)\]} $qry {\1\\[\2\\]} qry
+
     # array[]
     set re {
 	(
@@ -101,11 +119,6 @@ proc qc::db_qry_parse {qry {level 0} } {
 	 )\[\]
     }
     regsub -all -nocase -expanded $re $qry {\1\\[\\]} qry
-
-    # array[:index] or array[$index]
-    regsub -all {([a-z_][a-z0-9_]*)\[((:|\$)[a-zA-Z_][a-zA-Z0-9_]*)\]} $qry {\1\\[\2\\]} qry
-    # array[sql_function(args)]
-    regsub -all {([a-zA-Z_]+)\[([a-zA-Z_]+\([^\)]+\))\]} $qry {\1\\[\2\\]} qry
 
     # Escaped \:colon
     set qry [string map {\\: \0} $qry]
