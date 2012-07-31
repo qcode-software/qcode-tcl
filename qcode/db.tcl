@@ -433,11 +433,9 @@ proc qc::db_trans {args} {
     switch $code {
 	1 {
 	    # Error
-	    if { $db_trans_level($db) == 1 } {
+	    if { $db_trans_level($db) >= 1 } {
 		db_dml "ROLLBACK WORK"
 		set db_trans_level($db) 0
-	    } else {
-		incr db_trans_level($db) -1
 	    }
 	    uplevel 1 $error_code
 	    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
