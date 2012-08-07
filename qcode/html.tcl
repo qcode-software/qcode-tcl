@@ -132,11 +132,11 @@ doc qc::html_hidden_set {
     }
 }
 
-proc qc::html_list { list } {
+proc qc::html_list { list args } {
     #| Convert list into HTML list.
-    set html "<ul>\n"
+    set html [html_tag ul {*}$args]
     foreach item $list {
-	append html "<li>$item</li>\n"
+	append html [html li $item] \n
     }
     append html "</ul>\n"
     return $html
