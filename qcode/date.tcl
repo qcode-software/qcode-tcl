@@ -117,6 +117,7 @@ proc qc::date_iso_year { date } {
 }
 
 proc qc::date_iso_week_start {date} {
+    #| Returns the date of the start of the week in which $date falls
     if { [eq [date_day_name $date] Monday] } {
 	return [cast_date $date]
     } else {
@@ -124,13 +125,48 @@ proc qc::date_iso_week_start {date} {
     }
 }
 
+doc qc:::date_iso_week_start {
+    Parent date
+    Examples {
+	% date_iso_week_start 2007-05-06
+	% 2007-04-30
+	%
+	% date_iso_week_start "today"
+	% 2012-08-06
+    }
+}
+
 proc qc::date_iso_week_end {date} {   
+    #| Returns the date of the end of the week in which $date falls
     return [cast_date [clock scan "sunday" -base [cast_epoch $date]]]
 }
+
+doc qc:::date_iso_week_end {
+    Parent date
+    Examples {
+	% date_iso_week_end 2007-05-06
+	% 2007-05-06
+	%
+	% date_iso_week_end "today"
+	% 2012-08-12
+    }
+}
+
 
 proc qc::date_iso_week { date } {
     #| Return the ISO week number.
     return [cast_integer [clock format [cast_epoch $date] -format "%V"]]
+}
+
+doc qc:::date_iso_week {
+    Parent date
+    Examples {
+	% date_iso_week 2007-05-06
+	% 18
+	%
+	% date_iso_week "today"
+	% 32
+    }
 }
 
 proc qc::date_yesterday { date } {
@@ -138,9 +174,31 @@ proc qc::date_yesterday { date } {
     return [cast_date "$date -1day"]
 }
 
+doc qc:::date_yesterday {
+    Parent date
+    Examples {
+	% date_yesterday 2007-05-06
+	% 2007-05-05
+	%
+	% date_yesterday "today"
+	% 2012-08-09
+    }
+}
+
 proc qc::date_tomorrow { date } {
     #| Return tomorrow's date
     return [cast_date "$date +1day"]
+}
+
+doc qc:::date_tomorrow {
+    Parent date
+    Examples {
+	% date_tomorrow 2007-05-06
+	% 2007-05-07
+	%
+	% date_tomorrow "today"
+	% 2012-08-11
+    }
 }
 
 proc qc::date_month { date } {
@@ -211,6 +269,17 @@ doc qc::date_dom {
 proc qc::date_dow { date } {
     #| Return the day of the week.
     return [cast_integer [clock format [cast_epoch $date] -format "%u"]]
+}
+
+doc qc::date_dow {
+    Parent date
+    Examples {
+	% date_dow 2007-05-06
+	% 7
+	%
+	% date_dow "2 days ago"
+	% 3
+    }
 }
 
 proc qc::date_day_name { date } {
@@ -383,11 +452,22 @@ doc qc::dates {
 }
 
 proc qc::years {from_date to_date} {
+    #| Returns list of years between from_date & to_date
     set years {}
     for {set year [date_year $from_date]} {$year <= [date_year $to_date]} {incr year} {
 	lappend years $year
     }
     return $years
+}
+
+doc qc::years {
+    Parent date
+    Examples {
+	% years 2007-02-25 2009-03-05
+	% 2007 2008 2009
+	% years 2007-02-25 2007-02-26
+	% 2007
+    }
 }
 
 proc qc::iso_year_iso_weeks {from_date to_date} {
@@ -406,7 +486,18 @@ proc qc::iso_year_iso_weeks {from_date to_date} {
     return $year_weeks
 }
 
+doc qc::iso_year_iso_weeks {
+    Parent date
+    Examples {
+	% iso_year_iso_weeks 2007-02-25 2007-03-05
+	% 2007 8 2007 9 2007 10
+	% iso_year_iso_weeks 2007-02-25 2007-02-26
+	% 2007 8 2007 9
+    }
+}
+
 proc qc::year_months {from_date to_date} {
+    #| Returns list of iso year/iso month pairs between from_date & to_date
     set year_months {}
     set month [date_month $from_date]
     set year [date_year $from_date]
@@ -420,7 +511,18 @@ proc qc::year_months {from_date to_date} {
     return $year_months
 }
 
+doc qc::year_months {
+    Parent date
+    Examples {
+	% year_months 2007-02-25 2008-03-05
+	% 2007 2 2007 3 2007 4 2007 5 2007 6 2007 7 2007 8 2007 9 2007 10 2007 11 2007 12 2008 1 2008 2 2008 3
+	% year_months 2007-02-25 2007-02-26
+	% 2007 2
+    }
+}
+
 proc qc::year_quarters {from_date to_date} {
+    #| Returns list of iso year/quarter pairs between from_date & to_date
     set year_quarters {}
     set quarter [date_quarter $from_date]
     set year [date_year $from_date]
@@ -434,7 +536,25 @@ proc qc::year_quarters {from_date to_date} {
     return $year_quarters
 }
 
+doc qc::year_quarters {
+    Parent date
+    Examples {
+	% year_quarters 2007-02-25 2008-03-05
+	% 2007 1 2007 2 2007 3 2007 4 2008 1
+	% year_quarters 2007-02-25 2007-02-26
+	% 2007 1
+    }
+}
+
 proc qc::time_hour { datetime } {
     #| Return the hour
     return [cast_integer [clock format [cast_epoch $datetime] -format "%H"]]
+}
+
+doc qc::time_hour {
+    Parent date
+    Example {
+	% time_hour "2012-08-10 16:42:43"
+	% 16
+    }
 }
