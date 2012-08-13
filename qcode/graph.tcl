@@ -1,4 +1,4 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 proc qc::chart_sales {x_labels values tips key_text} {

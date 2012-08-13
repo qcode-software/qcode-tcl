@@ -1,4 +1,4 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
@@ -12,19 +12,17 @@ doc db_cache {
 	<li><proc>db_cache_foreach</proc> and
 	<li><proc>db_cache_select_table</proc>
 	</ul>
-	provide a database cache by storing results of executed queries in an nsv array with a hash of each qry used as the index.<br>
-	Each time a cached proc is called, it checks to see if cached results exist and if so checks that the results are no older than the time-to-live given.If the cached results have not expired then it returns the cached results rather than going to fetch a fresh copy from the database.
+	provide a database cache by storing results of executed queries in either a time limited ns_cache cache (if a ttl is specified), or a global array which will persist for the life of the thread (if no ttl is specified). A hash of each qry used as the index.<br>
+	Each time a cached proc is called, it checks to see if cached results exist. If the cached results exist then it returns the cached results rather than going to fetch a fresh copy from the database.
 	<p>
 	The cached version of db procs can give speed improvements where the same query is executed repeatedly but at the expense of more memory usage. The operating system may already cache parts of the filesystem and the database may cache some query results.      
     }
-    "See Also" {
-	<proc>db</proc> and <proc>db_thread_cache</proc>
-    }
 }
 
-proc qc::db_cache_1row { ttl qry } {
+proc qc::db_cache_1row { args } {
      # Cached equivalent of db_1row
-    set table [db_cache_select_table $ttl $qry 1]
+    args $args -ttl 0 -- qry 
+    set table [db_cache_select_table -ttl $ttl $qry 1]
     set db_nrows [expr {[llength $table]-1}]
     
     if { $db_nrows!=1 } {
@@ -39,20 +37,21 @@ doc qc::db_cache_1row {
     Description {
 	Cached equivalent of <proc>db_1row</proc>. Select one row from the cached results or the database if the cache has expired. Place variables corresponding to column names in the caller's namespace Throw an error if the number of rows returned is not exactly one.
 	<p>
-	Time-to-live is given in seconds.
+	Time-to-live, if specified, is given in seconds.
     }
     Examples {
 	# Cache the results of a query for 20 seconds
-	% db_cache_1row 20 {select order_date from sales_order where order order_number=123}
+	% db_cache_1row -ttl 20 {select order_date from sales_order where order order_number=123}
 	% set order_date
 	2007-01-23
 	% 
     }
 }
 
-proc qc::db_cache_0or1row { ttl qry {no_rows_code ""} {one_row_code ""} } {
+proc qc::db_cache_0or1row { args } {
     # Cached equivalent of db_0or1row
-    set table [db_cache_select_table $ttl $qry 1]
+    args $args -ttl 0 -- qry {no_rows_code ""} {one_row_code ""}
+    set table [db_cache_select_table -ttl $ttl $qry 1]
     set db_nrows [expr {[llength $table]-1}]
 
     if {$db_nrows==0} {
@@ -93,11 +92,11 @@ doc qc::db_cache_0or1row {
 	Select zero or one row from the cached results or the database if the cache has expired. Place variables corresponding to column names in the caller's namespace.<br>
 	If zero rows are returned then run no_rows_code else place variables corresponding to column names in the caller's namespace and execute one_row_body.
 	<p>
-	Time-to-live is given in seconds.
+	Time-to-live, if specified, is given in seconds.
     }
     Examples {
 	# Cache results for 20 seconds.
-	% db_cache_0or1row 20 {select order_date from sales_orders where order order_number=123} {
+	% db_cache_0or1row -ttl 20 {select order_date from sales_orders where order order_number=123} {
 	    puts "No Rows Found"
 	} {
 	    puts "Order Date $order_date"
@@ -106,15 +105,16 @@ doc qc::db_cache_0or1row {
     }
 }
 
-proc qc::db_cache_foreach { ttl qry foreach_code { no_rows_code ""} } {
+proc qc::db_cache_foreach { args } {
     # Cached equivalent of db_foreach
+    args $args -ttl 0 -- qry foreach_code { no_rows_code ""}
     global errorCode errorInfo
 
      # save special db variables
     upcopy 1 db_nrows      saved_db_nrows
     upcopy 1 db_row_number saved_db_row_number
 
-    set table [db_cache_select_table $ttl $qry 1] 
+    set table [db_cache_select_table -ttl $ttl $qry 1] 
     set db_nrows [expr {[llength $table]-1}]
     set db_row_number 0
 
@@ -176,60 +176,95 @@ doc qc::db_cache_foreach {
 	Place variables corresponding to column names in the caller's namespace for each row returned.
 	Set special variables db_nrows and db_row_number in caller's namespace to
 	indicate the number of rows returned and the current row.<br>
-	Time-to-live is given in seconds.
+	Time-to-live, if specified, is given in seconds.
     }
     Examples {
 	% set qry {select firstname,surname from users order by surname} 
-	% db_cache_foreach 20 $qry {
+	% db_cache_foreach -ttl 20 $qry {
 	    lappend list "$surname, $firstname"
 	}
     }
 }
 
-proc qc::db_cache_select_table {ttl qry {level 0}} {
+proc qc::db_cache_select_table { args } {
     #| Check if the results of the qry have already been saved.
-    #| If so check the age of the saved data using db_cache_timestamp
-    #| If never saved or too old then run the qry and place the results
-    #| as a table in the nsv db_cache 
-    #| using the qry hash as index.
+    #| If never saved (or has expired due to ttl) then run the qry and place the results
+    #| as a table in either db_thread_cache global array, or if ttl was specified,
+    #| a time limited ns_cache cache.
+    args $args -ttl 0 -- qry {level 0}
     incr level
     set hash [md5 [db_qry_parse $qry $level]]
-    if { [ne [ns_cache names db $hash] ""] } { 
-	return [ns_cache get db $hash]
+
+    # Use global array or ns_cache with ttl?
+    if { $ttl > 0 } {
+        # Use ns_cache with ttl
+
+        # Try to create cache in case it doesn't exist yet
+        try { ns_cache create db_${ttl} -timeout $ttl -size [expr 1024*1024] }
+
+        if { [ne [ns_cache names db_${ttl} $hash] ""] } { 
+	    return [ns_cache get db_${ttl} $hash]
+        } else {
+	    set table [db_select_table $qry $level]
+	    ns_cache set db_${ttl} $hash $table
+	    return $table
+        }
+
     } else {
-	set table [db_select_table $qry $level]
-	ns_cache set db $hash $table
-	return $table
+        # No ttl specified - use global array.
+
+        global db_thread_cache    
+        if { [info exists db_thread_cache($hash)] } {
+	    return $db_thread_cache($hash)
+        } else {
+	    set db_thread_cache($hash) [db_select_table $qry $level]
+        }
     }
+
 }
 
 doc qc::db_cache_select_table {
     Parent db_cache
      Examples {
-	% db_cache_select_table 20 {select user_id,firstname,surname from users}
+	% db_cache_select_table -ttl 20 {select user_id,firstname,surname from users}
 	% {user_id firstname surname} {73214205 Jimmy Tarbuck} {73214206 Des O'Conner} {73214208 Bob Monkhouse}
 
 	% set surname MacDonald
-	 % db_cache_select_table [expr 60*60*60*24] {select id,firstname,surname from users where surname=:surname}
+	 % db_cache_select_table -ttl [expr 60*60*60*24] {select id,firstname,surname from users where surname=:surname}
 	% {user_id firstname surname} {83214205 Angus MacDonald} {83214206 Iain MacDonald} {83214208 Donald MacDonald}
     }
 }
 
 proc qc::db_cache_clear { {qry ""} } {
-    # clear the cache for the qry or all
-    if { [eq $qry ""] } {
-	foreach key [ns_cache names db] {
-	    ns_cache flush db $key
-	}
-    } else {
-	ns_cache flush db [md5 [db_qry_parse $qry 1]]
+    #| Clear the cache for the qry or all
+    set hash [md5 [db_qry_parse $qry 1]]
+
+    # ns_cache cache
+    foreach db_cache [regexp -all -inline -- {db_[0-9]+} [ns_cache_names]] {
+        foreach key [ns_cache names $db_cache] {
+            if { $qry eq "" || $key eq $hash } {
+	        ns_cache flush $db_cache $key
+	    }
+        }
+    }
+
+    # Thread cache
+    global db_thread_cache
+    if { [info exists db_thread_cache] } {
+        if { $qry eq ""} {
+            unset db_thread_cache
+        } else {
+            if { [info exists db_thread_cache($hash)] } {
+                unset db_thread_cache($hash)
+            }
+        }
     }
 }
 
 doc qc::db_cache_clear {
     Parent db_cache
     Description {
-	Delete the results from the database cache for the query given. If no query is specified then remove all cached results.
+	Delete the results from the database cache for the query given. If no query is specified then remove all time limited cached results.
     }
     Examples {
 	# Delete the cache results for this query
@@ -238,4 +273,11 @@ doc qc::db_cache_clear {
 	# Clear the entire cache
 	% db_cache_clear
     }
+}
+
+proc qc::db_cache_ldict { qry } {
+    # Cached equivalent of db_select_ldict
+    # Select the results of qry into a ldict
+    set table [db_cache_select_table $qry 1]
+    return [qc::table2ldict $table]
 }
