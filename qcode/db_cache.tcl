@@ -264,7 +264,7 @@ proc qc::db_cache_clear { {qry ""} } {
 doc qc::db_cache_clear {
     Parent db_cache
     Description {
-	Delete the results from the database cache for the query given. If no query is specified then remove all time limited cached results.
+	Delete the results from the database cache for the query given. If no query is specified then remove all cached results.
     }
     Examples {
 	# Delete the cache results for this query
@@ -276,8 +276,24 @@ doc qc::db_cache_clear {
 }
 
 proc qc::db_cache_ldict { qry } {
-    # Cached equivalent of db_select_ldict
-    # Select the results of qry into a ldict
+    #| Cached equivalent of db_select_ldict
+    #| Select the results of qry into a ldict
     set table [db_cache_select_table $qry 1]
     return [qc::table2ldict $table]
 }
+
+doc qc::db_cache_ldict {
+    Parent db_cache
+    Description {
+        Cached version of db_select_ldict.
+    }
+    Examples {
+	% set qry {select firstname,surname from users}
+	% db_cache_ldict $qry
+	{firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus surname McNeil}
+    }
+}
+
+
+
+
