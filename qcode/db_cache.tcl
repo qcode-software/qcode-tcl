@@ -20,9 +20,13 @@ doc db_cache {
 }
 
 proc qc::db_cache_1row { args } {
-     # Cached equivalent of db_1row
-    args $args -ttl 0 -- qry 
-    set table [db_cache_select_table -ttl $ttl $qry 1]
+    # Cached equivalent of db_1row
+    args $args -ttl -- qry 
+    if { [info exists ttl] } {
+	set table [db_cache_select_table -ttl $ttl $qry 1]
+    } else {
+	set table [db_cache_select_table $qry 1]
+    }
     set db_nrows [expr {[llength $table]-1}]
     
     if { $db_nrows!=1 } {
@@ -50,8 +54,12 @@ doc qc::db_cache_1row {
 
 proc qc::db_cache_0or1row { args } {
     # Cached equivalent of db_0or1row
-    args $args -ttl 0 -- qry {no_rows_code ""} {one_row_code ""}
-    set table [db_cache_select_table -ttl $ttl $qry 1]
+    args $args -ttl -- qry {no_rows_code ""} {one_row_code ""}
+    if { [info exists ttl] } {
+	set table [db_cache_select_table -ttl $ttl $qry 1]
+    } else {
+	set table [db_cache_select_table $qry 1]
+    }
     set db_nrows [expr {[llength $table]-1}]
 
     if {$db_nrows==0} {
@@ -107,14 +115,18 @@ doc qc::db_cache_0or1row {
 
 proc qc::db_cache_foreach { args } {
     # Cached equivalent of db_foreach
-    args $args -ttl 0 -- qry foreach_code { no_rows_code ""}
+    args $args -ttl -- qry foreach_code { no_rows_code ""}
     global errorCode errorInfo
 
      # save special db variables
     upcopy 1 db_nrows      saved_db_nrows
     upcopy 1 db_row_number saved_db_row_number
 
-    set table [db_cache_select_table -ttl $ttl $qry 1] 
+    if { [info exists ttl] } {
+	set table [db_cache_select_table -ttl $ttl $qry 1]
+    } else {
+	set table [db_cache_select_table $qry 1]
+    }
     set db_nrows [expr {[llength $table]-1}]
     set db_row_number 0
 
@@ -191,12 +203,12 @@ proc qc::db_cache_select_table { args } {
     #| If never saved (or has expired due to ttl) then run the qry and place the results
     #| as a table in either db_thread_cache global array, or if ttl was specified,
     #| a time limited ns_cache cache.
-    args $args -ttl 0 -- qry {level 0}
+    args $args -ttl -- qry {level 0}
     incr level
     set hash [md5 [db_qry_parse $qry $level]]
 
     # Use global array or ns_cache with ttl?
-    if { $ttl > 0 } {
+    if { [info exists $ttl] } {
         # Use ns_cache with ttl
 
         # Try to create cache in case it doesn't exist yet
@@ -220,7 +232,6 @@ proc qc::db_cache_select_table { args } {
 	    set db_thread_cache($hash) [db_select_table $qry $level]
         }
     }
-
 }
 
 doc qc::db_cache_select_table {
