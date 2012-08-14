@@ -131,6 +131,16 @@ proc qc::cast_epoch { string } {
     if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})( |T)(\d{1,2}:\d{1,2}(:\d{1,2})?)$} $string -> year month day . time] } {
 	return [clock scan "$year-$month-$day $time"]
     }
+    # Exact ISO datetime with offset timezone e.g. "2012-08-13 10:21:23.7777 -06:00"
+    if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})(?: |T)(\d{1,2}:\d{1,2})(?::(\d{1,2}(?:\.\d+)?))?\s?(Z|[-+]\d\d(:?\d\d)?)$} $string -> year month day time sec timezone] } {
+        if { $timezone eq "Z" } {
+            set timezone "+00"
+        }
+        if { $sec ne "" } {
+            set time "$time:[qc::round $sec 0]"
+        }
+	return [clock scan "$year-$month-$day $time" -timezone "$timezone"]
+    }
     # ISO datetime Don't match the end of line for e.g. "2009-04-06 12:25:18.343"
     if { [regexp {^(19\d\d|20\d\d)(\d\d)(\d\d)( |T)(\d{1,2}:\d{1,2}(:\d{1,2})?)} $string -> year month day . time] } {
 	return [clock scan "$year-$month-$day $time"]
