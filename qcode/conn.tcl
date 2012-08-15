@@ -23,7 +23,6 @@ doc qc::conn_remote_ip {
     }
 }
 
-
 proc qc::conn_marshal { {error_handler qc::error_handler} } {
     #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
     #| If found call the proc with values from form variables that match the proc's argument names.
@@ -40,7 +39,12 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
 
     if { [llength [info procs "::$url"]] } {
 	try {
-	    form_proc ::$url
+	    set result [form_proc ::$url]
+	    if { ![expr 0x1 & [ns_conn flags]] } {
+		# If conn is still open
+		set content-type "[mime_type_guess [file tail $url]]; charset=utf-8"
+		ns_return 200 ${content-type} $result
+	    }
 	} {
 	    $error_handler 
 	}

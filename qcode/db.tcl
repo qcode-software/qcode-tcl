@@ -5,7 +5,7 @@ namespace eval qc {}
 
 doc qc::db {
     Title "Database API"
-    Url {/qc//wiki/DatabaseApi}
+    Url {/qc/wiki/DatabaseApi}
 }
 
 proc qc::db_qry_parse {qry {level 0} } {
