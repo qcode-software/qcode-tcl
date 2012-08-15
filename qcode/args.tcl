@@ -127,7 +127,7 @@ doc qc::args2vars {
 
 
 proc qc::arg_options_split {callers_args} {
-    # Return two lists for options pairs and other args
+    #| Return two lists for options pairs and other args
     set options {}
     set others {}
     set index 0
@@ -149,7 +149,7 @@ proc qc::arg_options_split {callers_args} {
 }				    
 
 proc qc::args_by_name2dict {args} {
-    # Convert args list of mixed varNames and "option pairs" to a dict.
+    #| Convert args list of mixed varNames and "option pairs" to a dict.
     set index 0
     lassign [arg_options_split $args] dict varNames
     foreach varName $varNames { lappend dict $varName [upset 2 $varName] }
@@ -157,7 +157,7 @@ proc qc::args_by_name2dict {args} {
 }				    
 
 proc qc::args_by_name2vars {args} {
-    # Set variables in caller's namespace using a mixed varNames and "option pairs" list of args
+    #| Set variables in caller's namespace using a mixed varNames and "option pairs" list of args
     set index 0
     lassign [arg_options_split $args] options varNames
     foreach {name value} $options {upset 1 $name $value}
@@ -167,8 +167,8 @@ proc qc::args_by_name2vars {args} {
 }				    
 
 proc qc::args_check_required {callers_args args} {
-    # Assume callers_args is a dict of name value pairs
-    # check that all the keys given exist.
+    #| Assume callers_args is a dict of name value pairs
+    #| check that all the keys given exist.
 
     foreach arg $args {
 	if { ![dict exists $callers_args $arg] } {
@@ -178,7 +178,7 @@ proc qc::args_check_required {callers_args args} {
 }
 
 proc qc::args_split {callers_args {switch_names ""}} {
-    # Return two lists for options pairs and other args
+    #| Return two lists for options pairs and other args
     set switches {}
     set options {}
     set others {}
@@ -212,6 +212,7 @@ proc qc::args_split {callers_args {switch_names ""}} {
 }	
 
 proc qc::args {callers_args args} {
+    #| Assign caller arguments to variables as specified
     lassign [args_split $args] switches options others
     lassign [args_split $callers_args $switches] callers_switches callers_options callers_others
 
@@ -277,5 +278,88 @@ proc qc::args {callers_args args} {
 	    incr index
 	}
 	upset 1 args [lrange $callers_others $index end]
+    }
+}
+
+    #args $args -id "" -title {} -animate false -width 100% -height 50% -- data
+
+doc qc::args {
+    Parent Args
+    Description {
+        Specify the caller args to expect, then parse and assign them to variables appropriately.
+        Arguments can be specified as switches, options or standard Tcl procedure arguments.
+
+        For switches, a switch is specifed in the args_spec using "-switch_name".
+        If a switch is passed by the caller, args will set the variable of that name to true if the switch is present.
+        By default, if not passed, the switch variable will be undefined. (The Qcode qc::default command can be used
+        to set a default value).
+
+        For options, an option is specified in the args_spec using "-option_name default"
+        If option is passed by the caller, a default value can be specified. To indicate not default is required, 
+        use "-option_name ?". If a default is not specified, the option variable will be undefined. Otherwise the
+        variable "option_name" is assigned to the option value.
+
+        Switches and options can be called in any order regardless of the order in which they were defined. 
+        To indicate the list of options and switches is finished use --
+        e.g. "-foo -bar bar_default -baz baz_default --"
+
+        The values appearing after -- (or if no options or switches were specified) are treated as standard Tcl 
+        procedure arguments.
+    }
+    Usage {args caller_args specified_arguments}
+    Examples {
+
+	% proc options_test {args} {
+	    qc::args $args -foo ? -bar 0 --
+            # If called without any options, foo will be undefined, and bar will be 0.
+            if { [info exists foo] } {
+                return "foo $foo bar $bar"
+            } else {
+                return "foo UNDEF bar $bar"
+            }
+	  }
+	
+        % options_test
+        foo UNDEF bar 0
+
+	% options_test -foo 999 -bar 999
+        foo 999 bar 999
+
+	% proc switch_test {args} {
+	    qc::args $args -foo --
+            # If called without any options, both will be undefined unless a default is manually set as in this case.
+            qc::default foo false
+            return "foo is $foo"
+	}
+
+        % switch_test
+        foo is false
+
+        % switch_test -foo
+        foo is true
+
+        % proc test {args} {
+            qc::args $args -foo -bar bar_default -- thud grunt
+            qc::default foo false
+            return "foo $foo bar $bar thud $thud grunt $grunt"
+        }
+
+        % test -bar 999 -foo quux quuux
+        foo true bar 999 thud quux grunt quuux
+
+        % test quux quuux -bar 999 -foo
+        foo true bar 999 thud quux grunt quuux
+
+        % test quux quuux
+        foo false bar bar_default thud quux grunt quuux
+
+        % test quux 
+        Too few values
+
+        % test quux quuux quuuux
+        Too many values; expected 2 but got 3 in "quux quuux quuuux"
+        
+        % test quux quuux -baz 999
+        Illegal option "baz"
     }
 }
