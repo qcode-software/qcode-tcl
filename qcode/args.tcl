@@ -281,8 +281,6 @@ proc qc::args {callers_args args} {
     }
 }
 
-    #args $args -id "" -title {} -animate false -width 100% -height 50% -- data
-
 doc qc::args {
     Parent Args
     Description {
