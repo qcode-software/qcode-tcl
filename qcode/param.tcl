@@ -1,4 +1,4 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
@@ -7,7 +7,7 @@ proc qc::param { param_name } {
 	return $param_value
     }
     set qry {select param_value from param where param_name=:param_name}
-    db_cache_1row 86400 $qry
+    db_cache_1row -ttl 86400 $qry
     return $param_value
 }
 
@@ -17,7 +17,7 @@ proc qc::param_exists { param_name } {
 	return true
     }
     set qry {select param_value from param where param_name=:param_name}
-    db_cache_0or1row 86400 $qry {
+    db_cache_0or1row -ttl 86400 $qry {
 	return false
     } {
 	return true

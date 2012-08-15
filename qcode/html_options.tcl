@@ -1,4 +1,4 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
@@ -7,7 +7,7 @@ proc qc::html_options_db { qry } {
     #| Use aliases where required.
     #| E.g select foo_id as value,description as name from foo
     set options {}
-    db_thread_cache_foreach $qry {
+    db_cache_foreach $qry {
 	lappend options $name $value
     }
     return $options
@@ -19,7 +19,7 @@ proc qc::html_options_db_cache { qry {ttl 86400}} {
     #| E.g select foo_id as value,description as name from foo
     #| Query results are cached 
     set options {}
-    db_cache_foreach $ttl $qry {
+    db_cache_foreach -ttl $ttl $qry {
 	lappend options $name $value
     }
     return $options

@@ -1,4 +1,4 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
@@ -68,7 +68,7 @@ proc qc::auth_hba {} {
     #| On failure throw AUTH error
     set ip [qc::conn_remote_ip]
     set qry "select employee_id from employee where ip=:ip"
-    db_thread_cache_0or1row $qry { 
+    db_cache_0or1row $qry { 
 	error "Cannot authenticate user on ip $ip" {} AUTH
     } { 
 	return $employee_id
@@ -85,7 +85,7 @@ proc qc::auth_hba_check {} {
     set ip [qc::conn_remote_ip]
 
     set qry "select employee_id from employee where ip=:ip"
-    db_thread_cache_0or1row $qry { 
+    db_cache_0or1row $qry { 
 	return false
     } { 
 	return true
@@ -100,7 +100,7 @@ proc qc::auth_password { employee_code password } {
     #| Try to authenticate an employee based on employee_code and password
     #| On failure throw AUTH error
     set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
-    db_thread_cache_0or1row $qry {
+    db_cache_0or1row $qry {
 	error "Password authentication failed" {} AUTH
     } { 
 	return $employee_id
@@ -114,7 +114,7 @@ doc qc::auth_password {
 proc qc::auth_password_check { employee_code password } {
     #| Check if we can authenticate an employee based on employee_code and password
     set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
-    db_thread_cache_0or1row $qry {
+    db_cache_0or1row $qry {
 	return false
     } { 
 	return true

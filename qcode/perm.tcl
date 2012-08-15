@@ -1,11 +1,11 @@
-package provide qcode 1.6
+package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
 proc qc::perm_get { perm_name property } {
     #| Abstraction layer for accessing properties
     set qry { select * from perm where perm_name=:perm_name }
-    db_thread_cache_1row $qry
+    db_cache_1row $qry
     return [set $property]
 }
 
