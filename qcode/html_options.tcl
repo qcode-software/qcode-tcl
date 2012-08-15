@@ -19,7 +19,7 @@ proc qc::html_options_db_cache { qry {ttl 86400}} {
     #| E.g select foo_id as value,description as name from foo
     #| Query results are cached 
     set options {}
-    db_cache_foreach $ttl $qry {
+    db_cache_foreach -ttl $ttl $qry {
 	lappend options $name $value
     }
     return $options
