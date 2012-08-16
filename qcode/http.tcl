@@ -96,6 +96,8 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
+            puts "qc::http_encoding [array get return_headers] $html"
+            puts "[qc::http_encoding [array get return_headers] $html]" 
 		return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html]
 	    } else {
 		# raise an error
@@ -112,6 +114,28 @@ proc qc::http_post {args} {
 	default {
 	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
 	}
+    }
+}
+
+doc qc::http_post {
+    Usage { http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value? }
+    Examples {
+        > qc::http_post http://httpbin.org/post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" data "Here's the POST data"
+        {
+            "files": {},
+            "form": {},
+            "url": "http://httpbin.org/post",
+            "args": {},
+            "headers": {
+                "Content-Length": "27",
+                "Host": "httpbin.org",
+                "Content-Type": "text/plain; charset=utf-8",
+                "Connection": "keep-alive",
+                "Accept": "text/plain; charset=utf-8"
+            },
+        "json": null,
+        "data": "data=Here%27s+the+POST+data"
+        }
     }
 }
 
@@ -146,6 +170,28 @@ proc qc::http_get {args} {
 	}
     }
 }
+
+doc qc::http_get {
+    Usage { http_get  ?-timeout timeout? ?-headers {name value name value ...}? url }
+    Examples {
+        > qc::http_get http://httpbin.org/get?ourformvar=999&anotherformvar=123
+        {
+        "url": "http://httpbin.org/get?ourformvar=999&anotherformvar=123",
+        "headers": {
+            "Content-Length": "",
+            "Host": "httpbin.org",
+            "Content-Type": "",
+            "Connection": "keep-alive",
+            "Accept": "*/*"
+        },
+        "args": {
+            "anotherformvar": "123",
+            "ourformvar": "999"
+        },
+        }
+    }
+}
+
 
 proc qc::http_encoding {headers body} {
     #| Return the TCL encoding scheme used for http.

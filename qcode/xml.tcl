@@ -61,6 +61,7 @@ proc qc::xml_ldict { li_tag ldict } {
 proc qc::xml2dict { xml root_element } {
 
     set dict ""
+    package require tdom
     dom parse $xml doc
     set subtree [$doc getElementsByTagName $root_element]
     if { $subtree eq "" } {
