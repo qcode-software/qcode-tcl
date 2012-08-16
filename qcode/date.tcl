@@ -116,14 +116,6 @@ proc qc::date_iso_year { date } {
     return [cast_integer [clock format [cast_epoch $date] -format "%G"]]
 }
 
-doc qc::date_iso_year {
-    Parent date
-    Examples {
-	% date_iso_year 2007-05-06
-	% 2007
-    }
-}
-
 proc qc::date_iso_week_start {date} {
     #| Returns the date of the start of the week in which $date falls
     if { [eq [date_day_name $date] Monday] } {
