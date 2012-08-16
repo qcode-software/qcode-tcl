@@ -211,8 +211,10 @@ proc qc::db_cache_select_table { args } {
     if { [info exists ttl] } {
         # Use ns_cache with ttl
 
-        # Try to create cache in case it doesn't exist yet
-        try { ns_cache create db_${ttl} -timeout $ttl -size [expr 1024*1024] }
+        # Create the cache if it doesn't exist yet
+        if { ! [in [ns_cache_names] db_${ttl}] } {
+	    ns_cache create db_${ttl} -timeout $ttl -size [expr 1024*1024] 
+	}
 
         if { [ne [ns_cache names db_${ttl} $hash] ""] } { 
 	    return [ns_cache get db_${ttl} $hash]
