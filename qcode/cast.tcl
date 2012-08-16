@@ -132,6 +132,7 @@ proc qc::cast_epoch { string } {
 	return [clock scan "$year-$month-$day $time"]
     }
     # Exact ISO datetime with offset timezone e.g. "2012-08-13 10:21:23.7777 -06:00"
+    # Accepts offsets in formats -hh, -hhmm, or -hh:mm
     if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})(?: |T)(\d{1,2}:\d{1,2})(?::(\d{1,2}(?:\.\d+)?))?\s?(Z|[-+]\d\d(:?\d\d)?)$} $string -> year month day time sec timezone] } {
         if { $timezone eq "Z" } {
             set timezone "+00"
@@ -220,6 +221,9 @@ doc qc::cast_epoch {
 	# times can be hh:mm or hh:mm:ss
 	% cast_epoch "2007-10-16 10:12:36"
 	1192525956
+        # With ISO offset timezone in formats -hh, -hhmm or -hh:mm
+        % cast_epoch "2007-10-16 12:14:34.15445 +05"
+        1192518874
     }
 }
 
