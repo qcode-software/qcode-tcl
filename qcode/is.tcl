@@ -556,6 +556,17 @@ proc qc::is_url {url} {
     } $url]
 }
 
+doc qc::is_url {
+    Examples {
+        % qc::is_url www.google.com
+        0
+        % qc::is_url http://www.google.co.uk
+        1
+        % qc::is_url https://www.google.co.uk:443/subdir?formvar1=foo&formvar2=bar#anchor 
+        1
+    }
+}
+
 proc qc::is_ipv4 {string} {
     if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$} $string] } {
         return true
@@ -564,10 +575,30 @@ proc qc::is_ipv4 {string} {
     }
 }
 
+doc qc::is_ipv4 {
+    Examples {
+        % qc::is_ipv4  2001:0db8:85a3:0042:0000:8a2e:0370:7334
+        false
+        % qc::is_ipv4 192.0.1
+        false
+        % qc::is_ipv4 192.168.1.1
+        true
+    }
+}
+
 proc qc::is_cidrnetv4 {string} {
     if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+$} $string] } {
         return true
     } else {
         return false
+    }
+}
+
+doc qc::is_cidrnetv4 {
+    Examples {
+        % qc::is_cidrnetv4 192.168.1.1
+        false
+        % qc::is_cidrnetv4 192.168.1.0/24
+        true
     }
 }
