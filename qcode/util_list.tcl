@@ -2,23 +2,29 @@ package provide qcode 1.7
 package require doc
 namespace eval qc {}
 
-proc qc::lpush { stack value } {
-    upvar 1 $stack list
-    lappend list $value
-}
-
-proc qc::lpop { stack } {
-    upvar 1 $stack list
-    set value [lindex $list end]
-    set list [lrange $list 0 [expr [llength $list]-2]]
-    return $value
-}
-
 proc qc::lshift { stack } {
+    #| Return leftmost value from list and remove it
     upvar 1 $stack list
     set value [lindex $list 0]
     set list [lrange $list 1 end]
     return $value 
+}
+
+doc qc::round {
+    Description {
+        Return leftmost value from list and remove it
+    }
+    Usage {
+        qc::lshift listVar
+    }
+    Examples {
+        % proc call { args } {
+        set proc_name [qc::lshift args]
+        return [$proc_name {*}$args]
+        }
+        % call qc::base 16 15
+        F
+    }
 }
 
 proc qc::lunshift { stack value } {
