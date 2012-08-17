@@ -8,6 +8,8 @@ proc qc::dict_exists { args } {
 
     #| Unlike dict exists command, do not fail if path to key does not exist.
     #| Eg: dict_exists [dict create a 1 b 2 c 3] a a1
+    #
+    # This is fixed apparently in Tcl8.5.12
     args $args dict args
 
     set key [lindex $args 0]

@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::form2vars {args}  {
     #| Create variables in the caller's namespace corresponding to the form data.
     if { [llength $args] == 0 } {
@@ -123,7 +124,7 @@ doc qc::form2url {
 }
 
 proc qc::form_proc { proc_name } {
-    # Call proc_name using corresponding form variables
+    #| Call proc_name using corresponding form variables
     set largs {}
     if { [eq [lindex [info args $proc_name] end] args] } {
 	set args [lrange [info args $proc_name] 0 end-1]
@@ -166,14 +167,5 @@ doc qc::form_proc {
 	% hello John "Hello World"
 	John said Hello World
     }
-}
-
-proc qc::formvars2dict {formvars} {
-    set formvars [string trimleft $formvars ?]
-    set dict {}
-    foreach {name value} [split $formvars &=] {
-	lappend dict [ns_urldecode $name] [ns_urldecode $value]
-    }
-    return $dict
 }
 
