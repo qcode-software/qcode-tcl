@@ -2,8 +2,11 @@ package provide qcode 1.7
 package require doc
 namespace eval qc {}
 proc qc::round { value dec_places } {
-    # round up on 5
-    # e.g. 2.345 -> 2.35
+    #| Perform rounding of $value to $dec_places places.
+    #| Handles exponentials.
+    #| Rounds up on 5
+    #| e.g. 2.345 -> 2.35
+    # TODO Susceptible to buffer overflow for large values
     
     if { [string first e $value]!=-1 || [string first E $value]!=-1 } {
 	set value [exp2string $value]
@@ -48,17 +51,53 @@ proc qc::round { value dec_places } {
     }
 }
 
+doc qc::round {
+    Description {
+        Perform rounding of $value to $dec_places places.
+        Handles exponentials.
+        Rounds up on 5
+        e.g. 2.345 -> 2.35
+    }
+    Usage {
+        qc::round value dec_places
+    }
+    Examples {
+        % qc::round 1.23456789e5 2
+        123456.79
+        % qc::round 6 10
+        6.0000000000
+        % qc::round 6.66 8
+        6.66000000
+        % qc::round 0008.2345 3
+        8.235
+    }
+}
+
 proc qc::round_up { value trunc_places } {
-    # e.g 2.30->2.3  2.31->2.4  2.39->2.4
+    #| Round up to the nearest $trunc_places decimal places
     set value [expr {double(ceil($value*pow(10,$trunc_places)))/pow(10,$trunc_places)}]
     return [format "%.${trunc_places}f" $value]
 }
 
+doc qc::round_up {
+    Description {
+        Round up to the nearest $trunc_places decimal places
+    }
+    Usage {
+        qc::round_up value trunc_places
+    }
+    Examples {
+        % qc::round_up 2.30 1
+        2.3
+        % qc::round_up 2.31 1
+        2.4
+        % qc::round_up 2.33333 2
+        2.34
+    }
+}
+
 proc qc::rshift10 {int dec_places} {
-    # format right aligned padding left
-    # eg 6 -> 0.006 for 3 dec_places 
-    # or 
-    # 23 ->2.3 for 1 dec_places 
+    #| Format right aligned padding left
     set s [string length $int]
     if { $int == 0 } {
 	if { $dec_places > 0 } {
@@ -81,10 +120,23 @@ proc qc::rshift10 {int dec_places} {
     }
 }
 
+doc qc::rshift10 {
+    Description {
+        Move decimal point $dec_places to the left 
+    }
+    Usage {
+        qc::rshift10 int dec_places
+    }
+    Examples {
+        % qc::rshift10 6 3
+        0.006
+        % qc::rshift10 23 1
+        2.3
+    }
+}
+
 proc qc::intplaces { number } {
-    # return the number as an integer with the number of places shifted
-    # eg 23.4 -> 234 and 1
-    # eg 0.235 -> 235 and 3
+    #| Shift the decimal point n places to the right until $number is an int. Return int and n.
     set k  [string first . $number]
     if { $k ==-1 } {
 	set dec_places 0
@@ -102,7 +154,23 @@ proc qc::intplaces { number } {
     return [list $number $dec_places]
 }
 
+doc qc::intplaces {
+    Description {
+        Shift the decimal point n places to the right until $number is an int. Return int and n.
+    }
+    Usage {
+        qc::intplaces number
+    }
+    Examples {
+        % qc::intplaces 23.4
+        234 1
+        % qc::intplaces 0.235
+        235 3
+    }
+}
+
 proc qc::add { n1 n2 } {
+    #| Adds 2 numbers with check for overflow
     set result [expr {$n1 + $n2}]
     
     # Check for buffer overflow
@@ -113,14 +181,44 @@ proc qc::add { n1 n2 } {
     return $result
 }
 
+doc qc::add {
+    Description {
+        Adds two numbers with check for overflow
+    }
+    Usage {
+        qc::add n1 n2
+    }
+    Examples {
+        % qc::add 2 2
+        4
+    }
+}
+
 proc qc::sum { sum args } {
+    #| Returns the sum of list of number.
     foreach arg $args {
 	set sum [add $sum $arg]
     }
     return $sum
 }
 
+doc qc::sum {
+    Description {
+        Returns the sum of list of number.
+    }
+    Usage {
+        qc::sum n1 ?n2? ?n3? ....
+    }
+    Examples {
+        % qc::sum 1
+        1
+        % qc::sum 1 1 1 1 1 1 1 1 
+        8
+    }
+}
+
 proc qc::subtr { n1 n2 } {
+    #| Subtracts with check for overflow
     set result [expr {$n1 - $n2}]
     
     # Check for buffer overflow
@@ -131,7 +229,23 @@ proc qc::subtr { n1 n2 } {
     return $result
 }
 
+doc qc::subtr {
+    Description {
+        Subtracts with check for overflow
+    }
+    Usage {
+        qc::subtr n1 n2
+    }
+    Examples {
+        % qc::subtr 5 1
+        4
+        %  qc::subtr 1.11111 999999999
+        -999999997.88889
+    }
+}
+
 proc qc::mult { n1 n2 } {
+    #| Multiplies 2 numbers with check for overflow
     set result [expr {$n1*$n2}]
 
     # Check for buffer overflow
@@ -142,6 +256,19 @@ proc qc::mult { n1 n2 } {
     }
 
     return $result
+}
+
+doc qc::mult {
+    Description {
+        Multiplies 2 numbers with check for overflow
+    }
+    Usage {
+        qc::mult n1 n2
+    }
+    Examples {
+        % qc::mult 2 6
+        12
+    }
 }
 
 proc qc::bigadd { n1 n2 } {
@@ -229,8 +356,7 @@ proc qc::bigmult { n1 n2 } {
 }
 
 proc qc::exp2string { number } {
-    # Convert floats including exponentials to strings
-    # eg -1.234e-3
+    #| Convert floats including exponentials to strings
     set number [string tolower $number]
     set k  [string first e $number]
     if { $k == -1 } {
@@ -253,7 +379,23 @@ proc qc::exp2string { number } {
     }
 }
 
+doc qc::exp2string {
+    Description {
+        Convert floats including exponentials to strings
+    }
+    Usage {
+        qc::exp2string number 
+    }
+    Examples {
+        % qc::exp2string -1.23e6
+        -1230000
+        % qc::exp2string 10000
+        10000
+    }
+}
+
 proc qc::base {base number} {
+    #| Convert supplied number to specified base 
     set negative [regexp ^-(.+) $number -> number] ;# (1)
     set digits {0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N
         O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p
@@ -269,7 +411,25 @@ proc qc::base {base number} {
     set res
  }
 
+doc qc::base {
+    Description {
+        Convert supplied number to specified base 
+    }
+    Usage {
+        qc::base base number
+    }
+    Examples {
+        % qc::base 2 1024
+        10000000000
+        % qc::base 8 1024 
+        2000
+        % qc::base 16 15
+        F
+    }
+}
+
 proc qc::frombase {base number} {
+    #| Converts a number from the specified base to base 10
     set digits {0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N
         O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p
         q r s t u v w x y z}
@@ -286,15 +446,65 @@ proc qc::frombase {base number} {
     set res
 }
 
+doc qc::frombase {
+    Description {
+        Converts a number from the specified base to base 10
+    }
+    Usage {
+        qc::frombase base number
+    }
+    Examples {
+        % qc::frombase 16 F
+        15
+        % qc::frombase 2 1001101
+        77
+        % qc::frombase 8 77
+        63
+    }
+}
+
 proc qc::min {args} {
+    #| Returns min of its numeric arguments
     return [lindex [lsort -real $args] 0]
 }
 
+doc qc::min {
+    Description {
+        Returns min of its numeric arguments
+    }
+    Usage {
+        qc::min n1 ?n2? ?n3? ....
+    }
+    Examples {
+        % qc::min 1 7 2 3 5 9 2
+        1
+        % qc::min 1.1 1.9 1.5 1.3
+        1.1
+    }
+}
+
 proc qc::max {args} {
+    #| Returns max of its numeric arguments
     return [lindex [lsort -real -decreasing $args] 0]
 }
 
+doc qc::max {
+    Description {
+        Returns max of its numeric arguments
+    }
+    Usage {
+        qc::max n1 ?n2? ?n3? ....
+    }
+    Examples {
+        % qc::max 1 7 2 3 5 9 2
+        9
+        % qc::max 1.1 1.9 1.5 1.3
+        1.9
+    }
+}
+
 proc qc::min2 {args} {
+    
     if { [eq [lindex $args 0] -integer] } { 
 	set type integer
 	ldelete args 0
@@ -341,6 +551,7 @@ proc qc::max2 {args} {
 }
 
 proc qc::mantissa_exponent {x} {
+    #| Returns the mantissa and exponent which would be used to represent x
     if { $x==0 } { return [list 0 0] }
     set m $x;set e 0
     while { abs($m) >=10 } { incr e; set m [expr {double($m)/10}] }
@@ -348,7 +559,23 @@ proc qc::mantissa_exponent {x} {
     return [list $m $e]
 }
 
+doc qc::mantissa exponent {
+    Description {
+        Returns the mantissa and exponent which represent x
+    }
+    Usage {
+        qc::mantissa_exponent x
+    }
+    Examples {
+        % qc::mantissa_exponent -0.000015463
+        -1.5463000000000002 -5
+        % qc::mantissa_exponent 912000000
+        9.120000000000001 8
+    }
+}
+
 proc qc::sigfigs {x n} {
+    #| Returns x to n significant figures
     if { $x==0 } { return 0 }
     lassign [mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]
@@ -359,7 +586,27 @@ proc qc::sigfigs {x n} {
     }
 }
 
+doc qc::sigfigs {
+    Description {
+        Returns x to n significant figures
+    }
+    Usage {
+        qc::sigfigs x n
+    }
+    Examples {
+        % qc::sigfigs 9192837465 2
+        9200000000
+        % qc::sigfigs 12 1
+        10
+        % qc::sigfigs 12 5
+        12.000
+        % qc::sigfigs 12.2222 3
+        12.2
+    }
+}
+
 proc qc::sigfigs_ceil {x n} {
+    #| Returns x to n significant figures rounding up
     if { $x==0 } { return 0 }
     lassign [mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]
@@ -367,5 +614,24 @@ proc qc::sigfigs_ceil {x n} {
 	return [round [expr {ceil(double($x)/$p)*$p}] [expr {$n-$e-1}]]
     } else {
 	return [round [expr {ceil(double($x)/$p)*$p}] 0]
+    }
+}
+
+doc qc::sigfigs_ceil {
+    Description {
+        Returns x to n significant figures rounding up
+    }
+    Usage {
+        qc::sigfigs_ceil x n
+    }
+    Examples {
+        % qc::sigfigs_ceil 9192837465 2
+        9200000000
+        % qc::sigfigs_ceil 12 1
+        20
+        % qc::sigfigs_ceil 12 5
+        12.000
+        % qc::sigfigs_ceil 12.2222 3
+        12.3
     }
 }
