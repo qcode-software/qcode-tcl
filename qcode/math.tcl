@@ -171,14 +171,7 @@ doc qc::intplaces {
 
 proc qc::add { n1 n2 } {
     #| Adds 2 numbers with check for overflow
-    set result [expr {$n1 + $n2}]
-    
-    # Check for buffer overflow
-    if { ($n1>0 && $n2>0 && $result<0) || ($n1<0 && $n2<0 && $result>0) } {
-	error "Result is too large to represent"
-    }
-
-    return $result
+    return [expr {$n1 + $n2}]
 }
 
 doc qc::add {
@@ -219,14 +212,7 @@ doc qc::sum {
 
 proc qc::subtr { n1 n2 } {
     #| Subtracts with check for overflow
-    set result [expr {$n1 - $n2}]
-    
-    # Check for buffer overflow
-    if { ($n1<0 && $n2>0 && $result>0) || ($n1>0 && $n2<0 && $result<0) } {
-	error "Result is too large to represent"
-    }
-
-    return $result
+    return [expr {$n1 - $n2}]
 }
 
 doc qc::subtr {
@@ -246,16 +232,7 @@ doc qc::subtr {
 
 proc qc::mult { n1 n2 } {
     #| Multiplies 2 numbers with check for overflow
-    set result [expr {$n1*$n2}]
-
-    # Check for buffer overflow
-    if { !($n1<=32767 && $n1>=-32768 && $n2<=32767 && $n2>=-32768) 
-	 && $n2!=0 
-	 && ($result/$n2!=$n1 || ($n2==-1 && $n1<0 && $result < 0)) } {
-	error "Result is too large to represent"
-    }
-
-    return $result
+    return [expr {$n1*$n2}]
 }
 
 doc qc::mult {
@@ -268,90 +245,6 @@ doc qc::mult {
     Examples {
         % qc::mult 2 6
         12
-    }
-}
-
-proc qc::bigadd { n1 n2 } {
-    # Convert to integers
-    lassign [intplaces $n1] n1 p1
-    lassign [intplaces $n2] n2 p2
-
-    # Line up
-    if { $p1>$p2 } { 
-	set p $p1
-	append n2 [string repeat 0 [expr {$p1-$p2}]]
-    } else { 
-	set p $p2
-	append n1 [string repeat 0 [expr {$p2-$p1}]]
-    }
-
-    set result [expr {wide($n1) + wide($n2)}]
-    
-    # Check for buffer overflow
-    if { ($n1>0 && $n2>0 && $result<0) || ($n1<0 && $n2<0 && $result>0) } {
-	error "Result is too large to represent"
-    }
-
-    # Format answer
-    if { $p>0 } {
-	return [rshift10 $result $p]
-    } else {
-	return $result
-    }
-}
-
-proc qc::bigsubtr { n1 n2 } {
-    # $n1 - $n2
-
-    # Convert to integers
-    lassign [intplaces $n1] n1 p1
-    lassign [intplaces $n2] n2 p2
-
-    # Line up
-    if { $p1>$p2 } { 
-	set p $p1
-	append n2 [string repeat 0 [expr {$p1-$p2}]]
-    } else { 
-	set p $p2
-	append n1 [string repeat 0 [expr {$p2-$p1}]]
-    }
-
-    set result [expr {wide($n1) - wide($n2)}]
-    
-    # Check for buffer overflow
-    if { ($n1<0 && $n2>0 && $result>0) || ($n1>0 && $n2<0 && $result<0) } {
-	error "Result is too large to represent"
-    }
-
-    # Format answer
-    if { $p>0 } {
-	return [rshift10 $result $p]
-    } else {
-	return $result
-    }
-}
-
-
-proc qc::bigmult { n1 n2 } {
-    # Convert to integers
-    lassign [intplaces $n1] n1 p1
-    lassign [intplaces $n2] n2 p2
-
-    set result [expr {wide($n1)*wide($n2)}]
-
-    # Check for buffer overflow
-    if { !($n1<=32767 && $n1>=-32768 && $n2<=32767 && $n2>=-32768) 
-	 && $n2!=0 
-	 && ($result/$n2!=$n1 || ($n2==-1 && $n1<0 && $result < 0)) } {
-	error "Result is too large to represent"
-    }
-
-    # format result
-    set p [expr {$p1+$p2}]
-    if { $p>0 } {
-	return [rshift10 $result $p]
-    } else {
-	return $result
     }
 }
 
@@ -501,53 +394,6 @@ doc qc::max {
         % qc::max 1.1 1.9 1.5 1.3
         1.9
     }
-}
-
-proc qc::min2 {args} {
-    
-    if { [eq [lindex $args 0] -integer] } { 
-	set type integer
-	ldelete args 0
-    } elseif { [eq [lindex $args 0] -real] } {
-	set type real
-	ldelete args 0
-    } else {
-	set type ascii
-	foreach value $args {
-	    if {[is_integer $value] && [ne $type real]} {
-		set type integer
-	    } elseif { [is_decimal $value] } {
-		set type real
-	    } else {
-		set type ascii 
-		break
-	    }
-	}
-    }
-    return [lindex [lsort -$type $args] 0]
-}
-
-proc qc::max2 {args} {
-    if { [eq [lindex $args 0] -integer] } { 
-	set type integer
-	ldelete args 0
-    } elseif { [eq [lindex $args 0] -real] } {
-	set type real
-	ldelete args 0
-    } else {
-	set type ascii
-	foreach value $args {
-	    if {[is_integer $value] && [ne $type real]} {
-		set type integer
-	    } elseif { [is_decimal $value] } {
-		set type real
-	    } else {
-		set type ascii 
-		break
-	    }
-	}
-    }
-    return [lindex [lsort -$type -decreasing $args] 0]
 }
 
 proc qc::mantissa_exponent {x} {
