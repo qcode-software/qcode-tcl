@@ -74,7 +74,7 @@ doc qc::form_var_get {
 
 proc qc::form_var_exists { var_name } {
     #| Test whether a form variable exists or not.
-    if { [ns_conn isconnected] && [ne [set set_id [ns_getform]] ""] && [ns_set find $set_id $var_name] != -1 } {
+    if { [info commands ns_conn] eq "ns_conn" && [ns_conn isconnected] && [ne [set set_id [ns_getform]] ""] && [ns_set find $set_id $var_name] != -1 } {
 	return 1
     } else {
 	return 0

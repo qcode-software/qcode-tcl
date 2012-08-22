@@ -90,7 +90,13 @@ doc qc::html_tag {
 }
 
 proc qc::html_escape {html} {
+    #| Convert html markup characters to HTML entities
     return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
+}
+
+proc qc::html_unescape { text } {
+    #| Convert html entities back to text
+    return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
 
 proc qc::html_hidden { args } {

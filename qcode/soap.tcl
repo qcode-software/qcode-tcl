@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::soap_template {xml method {namespace ""} } {
     sset soap {<?xml version="1.0"?>
 	<soap:Envelope

@@ -91,11 +91,19 @@ doc qc::sql_insert {
 }
 
 proc qc::sql_insert_with { args } {
+    #| Construct a SQL INSERT statement using the name value pairs given
     foreach {name value} $args {
 	lappend cols "\"$name\""
 	lappend values [db_quote $value]
     }
     return "( [join $cols ,] ) values ( [join $values ,] )" 
+}
+
+doc qc::sql_insert_with {
+    Examples {
+	% qc::sql_insert_with user_id 1 name "Joe D'Amato" email joe@example.com password munroe
+	( "user_id","name","email","password" ) values ( 1,'Joe D''Amato','joe@example.com','munroe' )
+    }
 }
 
 proc qc::sql_sort { args } {
@@ -216,7 +224,8 @@ proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {ja
 }
 
 proc qc::sql_in {list} {
-     set sql {}
+    #| Return a SQL comma separated list
+    set sql {}
     foreach value $list {
 	lappend sql [db_quote $value]
     }
@@ -225,6 +234,15 @@ proc qc::sql_in {list} {
     } else {
 	return "([join $sql ,])"
     }
+}
+
+doc qc::sql_in {
+    Examples {
+	% qc::sql_in [list blue yellow orange]
+	('blue','yellow','orange')
+	
+	% set qry "select * from users where surname in [qc::sql_in [list Campbell Graham Fraser]]"
+	select * from users where surname in ('Campbell','Graham','Fraser')
 }
 
 proc qc::sql_array2list {array} {

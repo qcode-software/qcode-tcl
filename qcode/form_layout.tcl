@@ -74,7 +74,7 @@ doc qc::form_layout_table {
 <td><input style="width:250px" id="surname" name="surname" value="" type="text" sticky="no"></td>
 </tr>
 <tr>
-<td><label for="email">Email</label></td>
+<td><label for="email_address">Email</label></td>
 <td><input style="width:160px" name="email" value="" id="email_address" type="text" sticky="no"></td>
 </tr>
 <tr>
@@ -216,7 +216,7 @@ doc qc::form_layout_list {
 	    {name agree value no type checkbox label Agree}
 	}
 	% qc::form_layout_list $conf
-<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color">
+<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color">
 <option value="Red">1</option>
 <option value="Blue">2</option>
 <option value="Green">3</option>
