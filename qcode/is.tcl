@@ -100,6 +100,7 @@ doc qc::is__non_zero_integer {
         1
     }
 }
+
 proc qc::is_non_zero {number} {
     if { [is_decimal $number] && $number!=0 } {
 	return 1
@@ -163,6 +164,7 @@ proc qc::is_positive_decimal { number } {
 	return 0
     }
 }
+
 doc qc::is_positive_decimal {
     Examples {
         % qc::is_positive_decimal -9.99999
@@ -484,7 +486,6 @@ doc qc::is_mobile_number {
         true
     }
 }
-
 
 proc qc::contains_creditcard {string} {
     #| Checks string for occurrences of credit card numbers

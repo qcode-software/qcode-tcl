@@ -999,11 +999,13 @@ doc qc::md5 {
         qc::md5 string
     }
     Examples {
-        
+        1> qc::md5 {This string requires hashing}
+        fed9e24fe3df8ca8c093fca78e546ddc
     }
 }
 
 proc qc::key_gen { args } {
+    # TODO Unused
     args $args -lower -upper -int -- length
 
     set alphabet_lower [list a b c d e f g h i j k l m n o p q r s t u v w x y z]
@@ -1030,6 +1032,7 @@ proc qc::key_gen { args } {
 }
 
 proc qc::.. {from to {step 1} {limit ""}} {
+    #| List all values from $from to $to. Will attempt to guess the input type.
     set result {}
     # Check month lists
     set lists {}
@@ -1076,10 +1079,48 @@ proc qc::.. {from to {step 1} {limit ""}} {
     }
 }
 
+doc qc::.. {
+    Description {
+        List all values from $from to $to. Will attempt to guess the input type.
+        The limit argument only affects alphabetic lists eg. Mon-Fri Jan-Feb
+    }
+    Usage {
+        qc::.. from to ?step? ?limit?
+    }
+    Examples {
+        % qc::.. 1 10
+        1 2 3 4 5 6 7 8 9 10
+        % qc::.. 1 10 2
+        1 3 5 7 9
+        % qc::.. Mon Fri
+        Mon Tue Wed Thu Fri
+        % qc::.. MON FRI
+        MON TUE WED THU FRI
+        % qc::.. jan dec 1 6
+        jan feb mar apr may jun
+        % qc::.. 2012-06-04 2012-07-01
+        2012-06-04 2012-06-05 2012-06-06 2012-06-07 2012-06-08 2012-06-09 2012-06-10 2012-06-11 2012-06-12 2012-06-13 2012-06-14 2012-06-15 2012-06-16 2012-06-17 2012-06-18 2012-06-19 2012-06-20 2012-06-21 2012-06-22 2012-06-23 2012-06-24 2012-06-25 2012-06-26 2012-06-27 2012-06-28 2012-06-29 2012-06-30 2012-07-01
+    }
+}
+
 proc qc::debug {message} {
     #| Write message to nsd log if Debugging is switched on.
-    # Filter message by masking anything that looks like a card number.
+    #| Filter message by masking anything that looks like a card number.
+    # TODO Aolserver only
     ns_log Debug [qc::format_cc_masked_string $message]
+}
+
+doc qc::debug {
+    Description {
+        Write message to nsd log if Debugging is switched on.
+        Filter message by masking anything that looks like a card number.
+    }
+    Usage {
+        qc::debug message
+    }
+    Examples {
+        qc::debug "Something bad happened."
+    }
 }
 
 proc qc::log {args} {
@@ -1087,9 +1128,7 @@ proc qc::log {args} {
     # Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
     # Filter Message by masking anything that looks like a card number before writing to log file.
     # Usage:
-    # log Debug "Debug this"
-    # log Notice "Notice this"
-    # log "Notice this"
+    # TODO Aolserver only
 
     if { [llength $args]==1 } {
 	set severity Notice
@@ -1103,7 +1142,25 @@ proc qc::log {args} {
     ns_log $severity [qc::format_cc_masked_string $message]
 }
 
+doc qc::debug {
+    Description {
+        Write message to nsd log. If severity argument is not provided this defaults to "Notice". 
+        Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
+        Filter Message by masking anything that looks like a card number before writing to log file.
+    }
+    Usage {
+        qc::log ?severity? message
+    }
+    Examples {
+        % qc::log Debug "Debug this"
+        % qc::log Notice "Notice this"
+        % qc::log "Notice this"
+    }
+}
+
 proc qc::exec_proxy {args} {
+    #| Execute the given command.
+    #| If running on aolserver will use ns_proxy, otherwise the command is executed directly.
     if {[lindex $args 0] eq "-timeout"} {
 	set timeout [lindex $args 1]
 	set args [lrange $args 2 end]
@@ -1126,6 +1183,24 @@ proc qc::exec_proxy {args} {
     }
 }
 
+doc qc::exec_proxy {
+    Description {
+        Execute the supplied command.
+        If running on aolserver will use ns_proxy, otherwise the command is executed directly.
+        A timeout can be optionally supplied in milliseconds. 
+        Note, timeout is ignored if not running via ns_proxy.
+    }
+    Usage {
+        qc::exec_proxy ?-timeout ms? command ?arg? ?arg? ...
+    }
+    Examples {
+        % qc::exec_proxy hostname
+        myhostname
+        1> qc::exec_proxy -timeout 1000 wget http://cdimage.debian.org/debian-cd/6.0.5/amd64/iso-cd/debian-6.0.5-amd64-CD-1.iso
+        wait for proxy "exec-proxy-0" failed: timeout waiting for evaluation
+    }
+}
+
 proc qc::info_proc { proc_name } {
     #| Return the Tcl source code definition of a Tcl proc.
     if { [eq [info procs $proc_name] ""] && [eq [info procs ::$proc_name] ""] } {
@@ -1145,8 +1220,24 @@ proc qc::info_proc { proc_name } {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }
 
+doc qc::info_proc {
+    Description {
+        Return the Tcl source code definition of a Tcl proc.
+    }
+    Usage {
+        qc::info_proc proc_name
+    }
+    Examples {
+        % qc::info_proc trim
+        proc qc::trim {string} {
+            #| Removes and leading or trailing white space.
+            return [string trim $string]
+        }
+    }
+}   
+
 proc qc::which {command} {
-    #| Return path of unix command - cache result in nsv on AOLserver
+    #| Return path of unix command - cache result in nsv on AOLserver if present
     if { [info commands nsv_exists] eq "nsv_exists" } {
 	if { ![nsv_exists which $command] } {
 	    nsv_set which $command [exec_proxy which $command]
@@ -1156,4 +1247,17 @@ proc qc::which {command} {
 	set which [exec which $command]
     }
     return $which
+}
+
+doc qc::which {
+    Description {
+        Return path of unix command - cache result in nsv on AOLserver if present
+    }
+    Usage {
+        qc::which command
+    }
+    Examples {
+        % qc::which sftp
+        /usr/bin/sftp
+    }
 }
