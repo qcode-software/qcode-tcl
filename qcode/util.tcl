@@ -589,22 +589,47 @@ doc qc::trim {
 }
 
 proc qc::escapeHTML { html } {
-    regsub -all {<} $html "\\&lt;" html
-    regsub -all {>} $html "\\&gt;" html
-    regsub -all {&} $html "\\&amp;" html
-    regsub -all {\"} $html "\\&quot;" html
-    return $html
-}
-
-proc qc::escapeHTML { html } {
+    #| TODO Deprecate for html_escape: Convert reserved HTML characters in a string into entities
     return [string map {< &lt; > &gt; & &amp; \" &quot; ' &\#39;} $html]
 }
 
+doc qc::escapeHTML {
+    Description {
+        Convert reserved HTML characters in a string into entities.
+    }
+    Usage {
+        qc::escapeHTML html
+    }
+    Examples {
+        % set text "This stuff is all true '1<2 & 3>2'." 
+        This stuff is all true '1<2 & 3>2'.
+        % set html "<html><p>[qc::escapeHTML $text]</p></html>"
+        <html><p>This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;.</p></html>
+    }
+}
+
 proc qc::unescapeHTML { text } {
+    #| Convert HTML entities back to their ascii characters
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
 
+doc qc::unescapeHTML {
+    Description {
+        Convert HTML entities back to their ascii characters.
+    }
+    Usage {
+        qc::unescapeHTML html
+    }
+    Examples {
+        % set escaped_html "This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;."
+        This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;.
+        % qc::unescapeHTML $escaped_html
+        This stuff is all true '1<2 & 3>2'.
+    }
+}
+
 proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
+    # TODO unused
     set list  {}
     while {[regexp -indices -- $regexp $str match submatch]} {
 	lappend list [string range $str 0 [expr [lindex $match 0] -1]]
@@ -619,11 +644,30 @@ proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
 }
 
 proc qc::mcsplit {string splitString} {
+    #| Split the string on the supplied string which can be of arbitrary length (unlike split).
     set mc \x00
     return [split [string map [list $splitString $mc] $string] $mc]
 }
 
+doc qc::mcsplit {
+    Description {
+        Split the string on the supplied string which can be of arbitrary length (unlike split).
+    }
+    Usage {
+        qc::mcsplit sting splitString
+    }
+    Examples {
+        % set test "this||is||a||delimited||string"
+        this||is||a||delimited||string
+        % split $test {||}
+        this {} is {} a {} delimited {} string
+        % qc::mcsplit $test {||}
+        this is a delimited string
+    }
+}
+
 proc qc::perct {x n {p 1}} {
+    # TODO unused
     return [round [expr {double($x)/$n*100}] $p]
 }
 
@@ -648,6 +692,8 @@ proc qc::perct {x n {p 1}} {
 # but imagine the feminine, she, shis and shim.
 
 proc qc::plural word {
+    #| Attempts to return the plural form of a word.
+    #| Assumes the supplied word is not already plural.
     set exceptions {
 	man men
 	person people
@@ -705,7 +751,26 @@ proc qc::plural word {
     return ${word}s
 }
 
+doc qc::plural {
+    Description {
+        Attempts to return the plural form of a word.
+        Assumes the supplied word is not already plural.
+    }
+    Usage {
+        qc::plural word
+    }
+    Examples {
+        % qc::plural dog
+        dogs
+        % qc::plural dogs
+        dogses
+        % qc::plural formula
+        formulae
+    }
+}
+
 proc qc::singular word {
+    # TODO unused
     switch -- $word {
 	men   {return man}
 	feet  {return foot}
@@ -751,6 +816,7 @@ proc qc::singular word {
 }
 
 proc qc::cmplen {string1 string2} {
+    #| Compare length of 2 strings
     if { [string length $string1]<[string length $string2] } {
 	return -1 
     } elseif {[string length $string1]==[string length $string2] } {
@@ -760,7 +826,25 @@ proc qc::cmplen {string1 string2} {
     }
 }
 
+doc qc::cmplen {
+    Description {
+        Compare length of 2 strings
+    }
+    Usage {
+        qc::cmplen string1 string2
+    }
+    Examples {
+        % qc::cmplen "ox" "hippopotamus"
+        -1
+        % qc::cmplen "hippopotamus" "ox"
+        1
+        % qc::cmplen "ox" "ox"
+        0
+    }
+}
+
 proc qc::subsets {l n} {
+    #| Returns all possible subsets of length n from list l
     set subsets [list [list]]
     set result [list]
     foreach e $l {
@@ -776,7 +860,23 @@ proc qc::subsets {l n} {
     return $result
 }
 
+doc qc::subsets {
+    Description {
+        Returns all possible subsets of length n from list l.
+    }
+    Usage {
+        qc::subsets list length
+    }
+    Examples {
+        % qc::subsets [list a b c d e f g h i] 9
+        {a b c d e f g h i}
+        % qc::subsets [list a b c d e f g h i] 8
+        {a b c d e f g h} {a b c d e f g i} {a b c d e f h i} {a b c d e g h i} {a b c d f g h i} {a b c e f g h i} {a b d e f g h i} {a c d e f g h i} {b c d e f g h i}
+    }
+}
+
 proc qc::permutations {list} {
+    #| Returns all permuations of the supplied list
     set res [list [lrange $list 0 0]]
     set posL {0 1}
     foreach item [lreplace $list 0 0] {
@@ -792,9 +892,23 @@ proc qc::permutations {list} {
     return $res
 }
 
+doc qc::permutations {
+    Description {
+        Returns all permuations of the supplied list
+    }
+    Usage {
+        qc::permutations list 
+    }
+    Examples {
+        % qc::permutations [list a b c]
+        {c b a} {c a b} {b c a} {a c b} {b a c} {a b c}
+        % qc::permutations [list a]
+        a
+    }
+}
 
 proc qc::split_pair {string delimiter} {
-    # split a string into 2 parts at the delimiter
+    #| split a string into 2 parts at the first occurence of the delimiter
     set list {}
     if {[set index [string first $delimiter $string]]!=-1} {
 	lappend list [string trim [string range $string 0 [expr {$index-1}]]] 
@@ -805,8 +919,22 @@ proc qc::split_pair {string delimiter} {
     return $list
 }
 
+doc qc::split_pair {
+    Description {
+        Split a string into 2 parts at the first occurence of the delimiter
+    }
+    Usage {
+        qc::split_pair string delimiter 
+    }
+    Examples {
+        % qc::split_pair "key=key_value" =
+        key key_value
+    }
+}
+
 proc qc::min_nz {args} {
-    # minimum non zero 
+    # TODO Unused
+    #| Return the minimum supplied value which is non zero 
     set list {}
     foreach value $args {
 	if { [string is double -strict $value] && $value>0 } {
@@ -816,8 +944,21 @@ proc qc::min_nz {args} {
     return [min {*}$list]
 }
 
+doc qc::min_nz {
+    Description {
+        Return the minimum supplied value which is non zero 
+    }
+    Usage {
+        qc::min_nz val1 ?val2? ?val3? ...
+    }
+    Examples {
+        % qc::min_nz 0 1 5 7 3
+        1
+    }
+}
+
 proc qc::max_nz {args} {
-    # max non zero price
+    #| Return the maximum supplied value which is non zero 
     set list {}
     foreach value $args {
 	if { [string is double -strict $value] && $value>0 } {
@@ -827,9 +968,39 @@ proc qc::max_nz {args} {
     return [max {*}$list]
 }
 
+doc qc::max_nz {
+    Description {
+        Return the maximum supplied value which is non zero 
+    }
+    Usage {
+        qc::max_nz val1 ?val2? ?val3? ...
+    }
+    Examples {
+        % qc::max_nz 0 1 5 7 3
+        7
+        % qc::max_nz 0 0 0 0 0
+        % 
+    }
+}
+
 proc qc::md5 {string} {
+    #| Returns the md5 hash of supplied string.
+    #| Requires aolserver with DB backend.
     db_1row {select md5(:string) as md5}
     return $md5
+}
+
+doc qc::md5 {
+    Description {
+        Returns the md5 hash of supplied string.
+        Requires aolserver with DB backend.
+    }
+    Usage {
+        qc::md5 string
+    }
+    Examples {
+        
+    }
 }
 
 proc qc::key_gen { args } {
