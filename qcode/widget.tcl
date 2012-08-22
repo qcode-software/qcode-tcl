@@ -3,8 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::widget {args} {
-    # Look for a proc "widget_$type" to make the widget
-    # e.g. type text would look for qc::widget_text or widget_text
+    #| Look for a proc "widget_$type" to make the widget
     set type [dict get $args type]
     if { [eq [info procs "::qc::widget_$type"] "::qc::widget_$type"] } {
 	return ["::qc::widget_$type" {*}$args]
@@ -13,6 +12,25 @@ proc qc::widget {args} {
 	return ["widget_$type" {*}$args]
     } 
     error "No widget proc defined for $type"
+}
+
+doc qc::widget_label {
+    Description {
+        Look for a proc "widget_$type" to make the widget
+    }
+    Usage {
+	widget name widgetName label labelText ?required yes?
+    }
+    Examples {
+        % qc::widget type text name textWidget value "Horses"
+        <input style="width:160px" id="textWidget" value="Horses" name="textWidget" type="text">
+
+        % qc::widget type label name labelWidget label "This is a label"
+        <label for="labelWidget">This is a label</label>
+
+        % qc::widget type quantum name quantumWidget value "Everything" 
+        No widget proc defined for quantum
+    }
 }
 
 proc qc::widget_label { args } {
@@ -108,6 +126,7 @@ doc qc::widget_compare {
 }
 
 proc qc::widget_combo { args } {
+    #| Return an DHTML form widget with text input and dropdown for completion.
     array set this $args
     args_check_required $args name value boundName boundValue searchURL
     default this(searchLimit) 10
