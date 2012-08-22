@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::sql_where { args } {
     #| Construct part of SQL WHERE clause using varNames
     #| in a pass-by-name list or a dict.
@@ -90,11 +91,17 @@ proc qc::sql_where_cols_start { args } {
     #| corresponding to column names with a regexp matching the
     #| start of the col value.
     #| Any empty values or non-existent variables are ignored
+    qc::args $args -nocase -- args
     set dict [args2dict $args]
+    if { [info exists nocase] } {
+	set operator ~*
+    } else {
+	set operator ~
+    }
     set list {}
     foreach {name value} $dict {
 	if { [info exists value] && [ne $value ""] } {
-	    lappend list "$name ~ [db_quote "^[db_escape_regexp $value]"]"
+	    lappend list "$name $operator [db_quote "^[db_escape_regexp $value]"]"
 	}
     }
     if { [llength $list]==0 } {
@@ -124,38 +131,36 @@ doc qc::sql_where_cols_start {
 }
 
 proc qc::sql_where_cols_start_nocase { args } {
-    #| Construct part of SQL WHERE clause using varNames
-    #| corresponding to column names with a regexp matching the
-    #| start of the col value.
-    #| Any empty values or non-existent variables are ignored
-    set dict [args2dict $args]
-    set list {}
-    foreach {name value} $dict {
-	if { [info exists value] && [ne $value ""] } {
-	    lappend list "$name ~* [db_quote "^[db_escape_regexp $value]"]"
-	}
-    }
-    if { [llength $list]==0 } {
-	return true
-    } else {
-	return [join $list " and "]
-    }
+    #| DEPRECTED - use -nocase switch to sql_where_cols_start
+    return [sql_where_cols_start -nocase {*}$args]
 }
 
-proc qc::sql_where_col_starts { col_name args } {
+proc qc::sql_where_col_starts { args } {
     #| Construct part of SQL WHERE clause with a regexp matching 
     #| any given values to the start of the col value.
     #| Any empty values or non-existent variables are ignored
+    qc::args $args -nocase -not -- col_name args
+    if { [info exists nocase] } {
+	set operator ~*
+    } else {
+	set operator ~
+    }
+    if { [info exists not] } {
+	set operator "!$operator"
+	set logic and
+    } else {
+	set logic or
+    }
     set list {}
     foreach value $args {
 	if { [ne $value ""] } {
-	    lappend list "$col_name ~ [db_quote "^[db_escape_regexp $value]"]"
+	    lappend list "$col_name $operator [db_quote "^[db_escape_regexp $value]"]"
 	}
     }
     if { [llength $list]==0 } {
 	return true
     } else {
-	return [join $list " or "]
+	return [join $list " $logic "]
     }
 }
 
@@ -175,36 +180,13 @@ doc qc::sql_where_col_starts {
 }
 
 proc qc::sql_where_col_starts_nocase { col_name args } {
-    #| Construct part of SQL WHERE clause with a regexp matching 
-    #| any given values to the start of the col value.
-    #| Any empty values or non-existent variables are ignored
-    set list {}
-    foreach value $args {
-	if { [ne $value ""] } {
-	    lappend list "$col_name ~* [db_quote "^[db_escape_regexp $value]"]"
-	}
-    }
-    if { [llength $list]==0 } {
-	return true
-    } else {
-	return [join $list " or "]
-    }
+    #| DEPRECATED - use -nocase switch on sql_where_col_starts
+    return [sql_where_col_starts -nocase $col_name {*}$args]
 }
 
 proc qc::sql_where_col_starts_not { col_name args } {
-    #| Negation of sql_where_col_starts
-    #| Any empty values or non-existent variables are ignored
-    set list {}
-    foreach value $args {
-	if { [ne $value ""] } {
-	    lappend list "$col_name !~ [db_quote "^[db_escape_regexp $value]"]"
-	}
-    }
-    if { [llength $list]==0 } {
-	return true
-    } else {
-	return [join $list " and "]
-    }
+    #| DEPRECATED - use -nocase switch on sql_where_col_starts
+    return [sql_where_col_starts -not $col_name {*}$args]
 }
 
 proc qc::sql_where_combo { col_name value } {
@@ -216,6 +198,7 @@ proc qc::sql_where_combo { col_name value } {
 }
 
 proc qc::sql_where_compare { args } {
+    # WACKY
     # list of varNames
     # assume operator is stored in names variable named varName_op
     set list {}
@@ -258,7 +241,7 @@ proc qc::sql_where_compare_set { name operator value } {
 }
 
 proc qc::sql_where_or { args } {
-    #| Any empty values or non-existent variables are ignored
+    #| Return a SQL where clause. Any empty values or non-existent variables are ignored
     set dict [args2dict $args]
     set list {}
     foreach {name value} $dict {
