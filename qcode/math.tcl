@@ -405,7 +405,7 @@ proc qc::mantissa_exponent {x} {
     return [list $m $e]
 }
 
-doc qc::mantissa exponent {
+doc qc::mantissa_exponent {
     Description {
         Returns the mantissa and exponent which represent x
     }
