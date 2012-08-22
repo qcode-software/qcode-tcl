@@ -3,17 +3,10 @@ package require doc
 namespace eval qc {}
 
 proc qc::url { url args } {
-    #| Take an url with or without url encoded vars
-    #| and insert or replace the names in vars with the 
-    #| values in callers namespace level $level
-    #| Example:
-    #| > set foo Hello
-    #| There
-    #| > set bar There
-    #| There
-    #| > url afile.html foo bar
-    #| afile.html?foo=Hello&bar=There
-    #
+    #| Take an url with or without url encoded vars and insert or replace vars based on 
+    #| the supplied pairs of var & value.
+    # TODO Aolserver only
+
     # Are there existing encoded vars path?var1=name1...
     set dict [args2dict $args]
     if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
@@ -34,6 +27,20 @@ proc qc::url { url args } {
 	return "$path?[join $pairs &]"
     } else {
 	return $path
+    }
+}
+
+doc qc::url {
+    Description {
+        Take an url with or without url encoded vars and insert or replace vars based on<br> 
+        the supplied pairs of var & value.
+    }
+    Usage {
+        qc::url url ?var value? ...
+    }
+    Examples {
+        > qc::url afile.html?foo=Goodbye foo "Hello" bar "There"
+        afile.html?foo=Hello&bar=There
     }
 }
 
@@ -62,7 +69,21 @@ proc qc::url_unset { url var_name } {
     }
 }
 
+doc qc::url_unset {
+    Description {
+        Unset a url encoded variable in url
+    }
+    Usage {
+        qc::url_unset url var_name
+    }
+    Examples {
+        > qc::url_unset afile.html?foo=Hello&bar=There bar
+        afile.html?foo=Hello
+    }
+}
+
 proc qc::url_to_html_hidden { url } {
+    #| Convert a url with form vars into html hidden input tags
     set html ""
     if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
 	foreach {name value} [split $query_string &=] {
@@ -75,6 +96,20 @@ proc qc::url_to_html_hidden { url } {
     return $html
 }
 
+doc qc::url_to_html_hidden {
+    Description {
+        Convert a url with form vars into html hidden input tags.<br>
+    }
+    Usage {
+        qc::url_to_html_hidden url
+    }
+    Examples {
+        > qc::url_to_html_hidden afile.html?foo=Hello&bar=There
+        <input type="hidden" name="foo" value="Hello" id="foo">
+        <input type="hidden" name="bar" value="There" id="bar">
+    }
+}
+
 proc qc::url_back { url args } {
     #| Link to url using next_url to come back 
     #| Preserve vars passed in via GET or POST
@@ -83,6 +118,20 @@ proc qc::url_back { url args } {
     }
     set value(next_url) [url_here]
     return [url $url [array get value]]
+}
+
+doc qc::url_back {
+    Description {
+        Link to url using next_url to come back.<br>
+        Preserve vars passed in via GET or POST
+    }
+    Usage {
+        qc::url_back url args
+    }
+    Examples {
+        # TODO **************** placeholder
+        
+    }
 }
 
 proc qc::url_here {} {
