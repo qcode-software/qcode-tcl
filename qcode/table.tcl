@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 doc table {
     Title {Table Data Structure}
     Description {
@@ -74,26 +75,8 @@ proc qc::table2ldict { table } {
     return $ldict
 }
 
-proc qc::table2tbody_by_month { table from_year to_year } {
-    set tbody {}
-    set keys [lindex $table 0]
-    array set data [table2array $table year month]
-    
-    foreach month [.. 1 12] {
-	set row {}
-	lappend row [date_month_shortname $from_year-$month-01]
-	foreach year [.. $from_year $to_year] {
-	    foreach varname [lexclude $keys year month] {
-		lappend row [coalesce data($year,$month,$varname) ""]
-	    }
-	}
-	lappend tbody $row
-    }
-
-    return $tbody
-}
-
 proc qc::table2array { table args } {
+    # Attempt at cross tab stuff 
     array set data {}
     set keys [lindex $table 0]
     table_foreach $table {
@@ -111,6 +94,7 @@ proc qc::table2array { table args } {
 }
 
 proc qc::table_sum { table col_name } {
+    #| Return the sum of values in a column
     set sum 0
     set col_index [lsearch [lindex $table 0] $col_name]
     foreach row_index [.. 1 [expr {[llength $table]-1}]] {

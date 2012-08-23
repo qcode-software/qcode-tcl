@@ -39,7 +39,7 @@ doc qc::url {
         qc::url url ?var value? ...
     }
     Examples {
-        > qc::url afile.html?foo=Goodbye foo "Hello" bar "There"
+        % qc::url afile.html?foo=Goodbye foo "Hello" bar "There"
         afile.html?foo=Hello&bar=There
     }
 }
@@ -117,7 +117,7 @@ proc qc::url_back { url args } {
 	set value($name) [upset 1 $name]
     }
     set value(next_url) [url_here]
-    return [url $url [array get value]]
+    return [url $url {*}[array get value]]
 }
 
 doc qc::url_back {
@@ -135,15 +135,26 @@ doc qc::url_back {
 }
 
 proc qc::url_here {} {
+    #| Encode form_vars from GET and POST in this url.
     return [qc::form2url [qc::conn_url]]
 }
 
 proc qc::url_encode {string {charset utf-8}} {
+    #| Return url-encoded string
     return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
 }
 
 proc qc::url_path {url} {
-    set path $url
-    regexp {^([^\?]+)} $url -> path
-    return $path
+    # Return just the url path
+    if { [regexp {^(?:https?://[a-z0-9_]+(?:\.[a-z0-9_]+)+)?(/[^\?]+)} $url -> path] } {
+	return $path
+    } else {
+	return ""
+    }
+}
+
+doc qc::url_path {
+    Examples {
+	
+    }
 }

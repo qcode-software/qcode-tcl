@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::html2pdf { args } {
     # usage html2pdf ?-encoding encoding? ?-timeout timeout? html
     args $args -encoding base64 -timeout 20 html
@@ -94,9 +95,23 @@ proc qc::html_escape {html} {
     return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
 }
 
+doc qc::html_escape {
+    Examples {
+	% qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}
+	Hello &lt;strong&gt;Brave&lt;/strong&gt; &amp; &quot;Wise&quot; Ones
+    }
+}
+
 proc qc::html_unescape { text } {
     #| Convert html entities back to text
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
+}
+
+doc qc::html_unescape {
+    Examples {
+	% qc::html_unescape [qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}]
+	Hello <strong>Brave</strong> & "Wise" Ones
+    }
 }
 
 proc qc::html_hidden { args } {
@@ -184,7 +199,7 @@ proc qc::html_a_replace { link url args } {
     return [html_a $link $url {*}$args]
 }
 
-doc qc::html_a {
+doc qc::html_a_replace {
     Examples {
 	% html_a_replace Google http://www.google.co.uk 
 	<a href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
@@ -193,8 +208,6 @@ doc qc::html_a {
         <a title="Google Search" class="highlight" href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
     }
 }
-
-
 
 proc qc::html_id { name {value UNDEF}} {
     #| Wrap value in span tag and give it an ID
@@ -258,6 +271,7 @@ proc qc::html2text { html } {
 }
 
 proc qc::html_info_tables {args} {
+    # WACKY
     #| Foreach dict in args return a table with 2 columns with name value in each row
     set cols {
 	{class clsBold}

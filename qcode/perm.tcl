@@ -27,6 +27,7 @@ proc qc::perm_test { perm_name method } {
 }
 
 proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
+    #| Evaluate if_code if current user has permission else else_code
     if { [perm_test $perm_name $method] } {
 	uplevel 1 $if_code
     } elseif {[ne $else_code ""]} {

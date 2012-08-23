@@ -244,6 +244,7 @@ doc qc::sql_in {
 	
 	% set qry "select * from users where surname in [qc::sql_in [list Campbell Graham Fraser]]"
 	select * from users where surname in ('Campbell','Graham','Fraser')
+    }
 }
 
 proc qc::sql_array2list {array} {
@@ -259,6 +260,7 @@ doc qc::sql_array2list {
 	{"John West","George East",Harry}
 	%  qc::sql_array2list {"John West","George East",Harry}
 	{John West} {George East} Harry
+    }
 }
 
 proc qc::sql_list2array {list} {

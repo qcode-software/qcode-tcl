@@ -272,7 +272,7 @@ proc qc::cast_bool { string {true t} {false f} } {
 }
 
 proc qc::cast_postcode { postcode } {
-    #| Try to cast a string into stand UK Postcode form
+    #| Try to cast a string into UK Postcode form
     set saved $postcode
     set postcode [string toupper $postcode]
     # BFPO 

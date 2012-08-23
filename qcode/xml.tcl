@@ -3,7 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::xml { tagName nodeValue {dict_att ""} } {
-    #| Constructs xml from supplies parameters
+    #| Constructs xml node from supplied parameters
     set latt {}
     foreach {name value} $dict_att {
 	lappend latt "$name=\"[qc::xml_escape $value]\""

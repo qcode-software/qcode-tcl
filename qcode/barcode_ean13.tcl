@@ -5,6 +5,7 @@ namespace eval qc {
 }
 
 proc qc::barcode_ean13 {number_to_encode} {
+    #| *Untested* Create an EAN barcode
     if { $number_to_encode == "" || $number_to_encode == 0  } {
 	return 1;
     }
@@ -299,6 +300,7 @@ proc qc::barcode_ean13 {number_to_encode} {
 }
 
 proc qc::barcode_ean13_check_digit { number } {
+    # helper proc
      set odd 1
      set sum 0
      foreach digit [split $number ""] {

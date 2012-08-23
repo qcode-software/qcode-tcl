@@ -3,6 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::html_table_list {args} {
+    # DEPRECATED - only used in mla. This file to be deleted. 
     set varNames [args2vars $args]
     default height 120
     default id dbGridList

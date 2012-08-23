@@ -1,9 +1,10 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::http_curl {args} {
-    #| This is a wrapper for TclCurl which is not thread-safe when using some SSL libraries
-    #| Uses ns_proxy to isolate.
+    #| This is a wrapper for TclCurl
+    # If run within AOLserver uses ns_proxy to make thread safe.
     set script {
 	proc main {args} {
 	    package require TclCurl
@@ -59,6 +60,7 @@ proc qc::http_curl {args} {
 }
 
 proc qc::http_post {args} {
+    #| Perform an HTTP POST
     # args is name value name value ... list
     # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
     args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
@@ -120,7 +122,7 @@ proc qc::http_post {args} {
 doc qc::http_post {
     Usage { http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value? }
     Examples {
-        > qc::http_post http://httpbin.org/post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" data "Here's the POST data"
+        % qc::http_post http://httpbin.org/post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" data "Here's the POST data"
         {
             "files": {},
             "form": {},
@@ -314,6 +316,7 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
 #----------------------------------------------------------------------------
 
 proc qc::http_head {args} {
+    #| Return a dict of name value pairs returned by the server in the HTTP header
     # usage http_head ?-timeout timeout? ?-useragent useragent? url
     args $args -timeout 60 -useragent ? url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
@@ -342,7 +345,15 @@ proc qc::http_head {args} {
     }
 }
 
+doc qc::http_head {
+    Examples {
+	% qc::http_head www.google.co.uk
+	% Expires -1 http {HTTP/1.1 200 OK} Transfer-Encoding chunked X-Frame-Options SAMEORIGIN Content-Type {text/html; charset=ISO-8859-1} Cache-Control {private, max-age=0} Date {Thu, 23 Aug 2012 14:42:23 GMT} X-XSS-Protection {1; mode=block} Server gws P3P {CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657 for more info."} Set-Cookie {{PREF=ID=a756df18ac806a1b:FF=0:TM=1345732943:LM=1345732943:S=pks7ngzKuTVPwX92; expires=Sat, 23-Aug-2014 14:42:23 GMT; path=/; domain=.google.co.uk} {NID=63=RM68tXvZZYQ6EMUebcB7iyXIbKwXH1PoXgkNyomu_tF5-DBQ1vhBw_o8A_n0N-zhdNbTp7_eOZ8A90i3VsxT19TvuW9ld-kiidOfY-Tn8jaDVXs3C7i6em6ITp3MFLbn; expires=Fri, 22-Feb-2013 14:42:23 GMT; path=/; domain=.google.co.uk; HttpOnly}}
+    }
+}
+
 proc qc::http_exists {args} {
+    #| Test if an URL returns a valid response
     # usage http_head ?-timeout timeout? ?-useragent useragent? url
     args $args -timeout 60 -useragent ? -valid_response_codes {100 200} url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
@@ -356,7 +367,18 @@ proc qc::http_exists {args} {
     }
 }
 
+doc qc::http_exists {
+    Examples  {
+	% qc::http_exists www.qcode.co.uk
+	true
+	
+	% qc::http_exists www.qcode.co.uk/foo
+	false
+    }
+}
+
 proc qc::http_save {url file} {
+    #| Save the HTTP response to a file.
     dict2vars [qc::http_curl -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file

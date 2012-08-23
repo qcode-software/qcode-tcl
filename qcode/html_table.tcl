@@ -259,6 +259,7 @@ proc qc::html_table { args } {
 }
 
 proc qc::html_table_row { row {rowClass ""} } {
+    #| Return HTML for a table row
     if { $rowClass == "" } {
 	set html "<tr>\n"
     } else {
@@ -272,6 +273,7 @@ proc qc::html_table_row { row {rowClass ""} } {
 }
 
 proc qc::html_table_row_head { row {cols ""} } {
+    #| Return HTML for th row
     # look for thClass in col config
     set html "<tr>\n"
     for {set i 0} {$i<[llength $row]} {incr i} {
@@ -288,8 +290,8 @@ proc qc::html_table_row_head { row {cols ""} } {
 }
 
 proc qc::html_table_colgroup { cols } {
-    # create the html for the colgroup
-    # col elements wrapped in a colgroup
+    #| Create the html for the colgroup
+    #| col elements wrapped in a colgroup
     set html "<colgroup>\n"
     foreach col $cols {
 	if { [dict exists $col width] } {
@@ -306,6 +308,7 @@ proc qc::html_table_colgroup { cols } {
 }
 
 proc qc::html_table_thead_from_cols {cols} {
+    #| Helper. Write thead using cols object.
     set thead {}
     set row {}
     foreach col $cols {
@@ -320,6 +323,9 @@ proc qc::html_table_thead_from_cols {cols} {
 }
 
 proc qc::html_table_tfoot_sums {cols tbodyVar} {
+    #| Check if "sum yes" or "avg yes" is specified in the cols object and
+    #| add column sum or average.
+    # If "tfoot value" is given in col definition then use the value in the tfoot.
     upvar 1 $tbodyVar tbody
     set tfoot {}
     set row {}
@@ -352,8 +358,8 @@ proc qc::html_table_wants_sum {cols} {
 }
 
 proc qc::html_table_wants_col_labels {cols} {
-    # look through the list of cols to see if any of them
-    # have used a "label text" pair to indicate a column heading
+    #| Look through the list of cols to see if any of them
+    #| have used a "label text" pair to indicate a column heading
     foreach col $cols {
 	if { [dict exists $col label] } {
 	    return 1
@@ -363,8 +369,8 @@ proc qc::html_table_wants_col_labels {cols} {
 }
 
 proc qc::html_table_wants_format {cols} {
-    # look through the list of cols to see if any of them
-    # have format or class set
+    #| Look through the list of cols to see if any of them
+    #| have format or class set
     foreach col $cols {
 	if { [dict exists $col format] || [dict exists $col class] } {
 	    return 1
@@ -374,8 +380,8 @@ proc qc::html_table_wants_format {cols} {
 }
 
 proc qc::html_table_cols_from_table { tableVar cols } {
-    # Create or update cols from table data structure
-    # use table to set label and name if not already set in col
+    #| Create or update cols from table data structure
+    #| use table to set label and name if not already set in col
     upvar 1 $tableVar table
     set index 0
     foreach colname [lindex $table 0] col $cols {
@@ -404,6 +410,7 @@ proc qc::html_table_cols_from_table { tableVar cols } {
 }
 
 proc qc::html_table_tbody_from_ldict {ldict cols} {
+    #| Convert ldict into a tbody
     set tbody {}
     foreach dict $ldict {
 	set row {}
@@ -421,6 +428,7 @@ proc qc::html_table_tbody_from_ldict {ldict cols} {
 }
 
 proc qc::html_table_tbody_from_table {table cols} {
+    #| Convert table data structure into tbody
     set tbody {}
     set indices {}
     set keys [lindex $table 0]
@@ -443,7 +451,7 @@ proc qc::html_table_tbody_from_table {table cols} {
 }
 
 proc qc::html_table_tbody_sum { tbodyVar index } {
-    # Calculate the sum of cells in the column given by index
+    #| Calculate the sum of cells in the column given by index
     set sum 0
     upvar 1 $tbodyVar tbody
     foreach list $tbody {
@@ -458,7 +466,7 @@ proc qc::html_table_tbody_sum { tbodyVar index } {
 }
 
 proc qc::html_table_tbody_avg { tbodyVar index } {
-    # Calculate the average value of cells in the column given by index
+    #| Calculate the average value of cells in the column given by index
     set sum 0
     set count 0
     upvar 1 $tbodyVar tbody
@@ -479,7 +487,7 @@ proc qc::html_table_tbody_avg { tbodyVar index } {
 }
 
 proc qc::html_table_format {table cols} {
-    # format columns based on the column class or column format
+    #| Format columns based on the column class or column format
     foreach col $cols colIndex [.. 0 [llength $cols]] {
 	dict2vars $col class format dp zeros sigfigs commify percentage
 	if { [info exists class] } {
@@ -555,6 +563,7 @@ proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage}
 }
 
 proc qc::html_tbody_row {cols} {
+    #| Return a list to append to a tbody using variables corresponding to col names in the correct sequence.
     set list {}
     foreach col $cols {
 	if { [dict exists $col name] } {
@@ -568,6 +577,7 @@ proc qc::html_tbody_row {cols} {
 }
 
 proc qc::page_html_table { args } {
+    #| Return the HTML for a Heading and Menu of a paged report.
     #sql_sort -paging will have set the correct vars in caller's namespace
     args $args -limit ? -offset ? -count ? -- heading menu table
     default limit  [upset 1 limit]
