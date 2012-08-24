@@ -111,8 +111,9 @@ doc qc::url_to_html_hidden {
 }
 
 proc qc::url_back { url args } {
-    #| Link to url using next_url to come back 
+    #| Creates a link to url with a formvar next_url which links back to the current page.
     #| Preserve vars passed in via GET or POST
+    # TODO Aolserver only
     foreach name $args {
 	set value($name) [upset 1 $name]
     }
@@ -122,26 +123,58 @@ proc qc::url_back { url args } {
 
 doc qc::url_back {
     Description {
-        Link to url using next_url to come back.<br>
+        Creates a link to url with a formvar next_url which links back to the current page.<br>
         Preserve vars passed in via GET or POST
     }
     Usage {
         qc::url_back url args
     }
     Examples {
-        # TODO **************** placeholder
-        
+        set order_number 911
+        set html [html_a "Do something to order $order_number and return" [url_back destination.html order_number]] 
+        <a href="destination.html?order_number=911&amp;next_url=https%3a%2f%2fwww.domain.co.uk%2fsource.html%3forder_number%3d911">Do something to order 911 and return</a>
     }
 }
 
 proc qc::url_here {} {
     #| Encode form_vars from GET and POST in this url.
+    # TODO Aolserver only
     return [qc::form2url [qc::conn_url]]
 }
 
+doc qc::url_here {
+    Description {
+        Encode form_vars from GET and POST in this url.
+    }
+    Usage {
+        qc::url_here
+    }
+    Examples {
+        # On page somePage.html?order_number=911
+        set return_url [url_here]
+    }
+}
+
+
 proc qc::url_encode {string {charset utf-8}} {
-    #| Return url-encoded string
+    #| Return url-encoded string with option to specify charset
+    # TODO Aolserver only
     return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
+}
+
+doc qc::url_encode {
+    Description {
+        Return url-encoded string with option to specify charset
+    }
+    Usage {
+        qc::url_encode string ?charset? 
+    }
+    Examples {
+        > qc::url_encode "someplace.html?order_number=911&title=casáu"
+        someplace.html%3forder_number%3d911%26title%3dcas%c3%a1u
+        > qc::url_encode "someplace.html?order_number=911&title=casáu" iso8859-1
+        someplace.html%3forder_number%3d911%26title%3dcas%e1u
+    }
 }
 
 proc qc::url_path {url} {
@@ -154,7 +187,14 @@ proc qc::url_path {url} {
 }
 
 doc qc::url_path {
+    Description {
+        Return just the url path 
+    }
+    Usage {
+        qc::url_path url
+    }
     Examples {
-	
+        % qc::url_path "someplace.html?order_number=911&title=casáu"
+        someplace.html
     }
 }
