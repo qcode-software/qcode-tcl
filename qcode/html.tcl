@@ -1,6 +1,7 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::html2pdf { args } {
     # usage html2pdf ?-encoding encoding? ?-timeout timeout? html
     args $args -encoding base64 -timeout 20 html
@@ -90,7 +91,27 @@ doc qc::html_tag {
 }
 
 proc qc::html_escape {html} {
+    #| Convert html markup characters to HTML entities
     return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
+}
+
+doc qc::html_escape {
+    Examples {
+	% qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}
+	Hello &lt;strong&gt;Brave&lt;/strong&gt; &amp; &quot;Wise&quot; Ones
+    }
+}
+
+proc qc::html_unescape { text } {
+    #| Convert html entities back to text
+    return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
+}
+
+doc qc::html_unescape {
+    Examples {
+	% qc::html_unescape [qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}]
+	Hello <strong>Brave</strong> & "Wise" Ones
+    }
 }
 
 proc qc::html_hidden { args } {
@@ -178,7 +199,7 @@ proc qc::html_a_replace { link url args } {
     return [html_a $link $url {*}$args]
 }
 
-doc qc::html_a {
+doc qc::html_a_replace {
     Examples {
 	% html_a_replace Google http://www.google.co.uk 
 	<a href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
@@ -187,8 +208,6 @@ doc qc::html_a {
         <a title="Google Search" class="highlight" href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
     }
 }
-
-
 
 proc qc::html_id { name {value UNDEF}} {
     #| Wrap value in span tag and give it an ID
@@ -252,6 +271,7 @@ proc qc::html2text { html } {
 }
 
 proc qc::html_info_tables {args} {
+    # WACKY
     #| Foreach dict in args return a table with 2 columns with name value in each row
     set cols {
 	{class clsBold}
@@ -314,8 +334,63 @@ doc qc::html_info_tables {
     }
 }
 
+proc qc::html_styles2inline {html} {
+    #| Applies defined styles in html head as inline styles for relevant elements in body
+    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
+    #regsub -all {<style[^>]*>([^<]*)</style>} $html {} html
+    foreach style $styles {
+	regexp {<style[^>]*>([^<]*)</style>} $style -> style
+	set html [qc::html_style2inline $html $style]
+    }
+    return $html
+}
+
+doc qc::html_styles2inline {
+    Examples {
+        % set html {
+        <html>
+        <head>
+        <style type="text/css">
+        body {
+	    font-family: Arial, Helvetica, sans-serif;
+	    font-size:84%;
+        }
+        table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+        </style>
+        </head>
+        <body>
+            <p>Hello</p>
+            <table>
+                <tr><td>Table entry</td></tr>
+            </table>
+        </body>
+        </html>
+        }
+
+	% qc::html_styles2inline $html
+        <html>
+        <head><style type="text/css">
+        body {
+	    font-family: Arial, Helvetica, sans-serif;
+	    font-size:84%;
+        }
+        table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+        </style>
+        </head>
+        <body style="font-family:Arial, Helvetica, sans-serif;font-size:84%">
+            <p>Hello</p>
+            <table style="font-family:Arial, Helvetica, sans-serif;font-size:100%">
+                <tr><td>Table entry</td></tr>
+            </table>
+        </body>
+        </html>
+    }
+}
+
 proc qc::html_style2inline {html style} {
+    #| Helper proc for qc::html_styles2inline
     set data [qc::css_parse $style]
+    package require tdom
     dom parse -html $html doc
     foreach {selector styles} $data {
 	set nodes {}
@@ -354,17 +429,9 @@ proc qc::html_style2inline {html style} {
     return $html
 }
 
-proc qc::html_styles2inline {html} {
-    set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
-    #regsub -all {<style[^>]*>([^<]*)</style>} $html {} html
-    foreach style $styles {
-	regexp {<style[^>]*>([^<]*)</style>} $style -> style
-	set html [qc::html_style2inline $html $style]
-    }
-    return $html
-}
-
 proc qc::html_col_styles_apply2td {html} {
+    #| Applies any relevent col styles as inline styles on td, tr, or tfoot elements
+    #| Useful for correct html rendering in email clients
     set data {}
     set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
     foreach style $styles {
@@ -372,6 +439,7 @@ proc qc::html_col_styles_apply2td {html} {
 	set data [dict merge $data [qc::css_parse $style]]
     }
     # Apply col styles to td elements in all tables
+    package require tdom
     dom parse -html $html doc
     foreach table [$doc selectNodes //table] {
 	set col_number 1
@@ -388,7 +456,6 @@ proc qc::html_col_styles_apply2td {html} {
 			set style [style_set $style {*}[dict get $data $selector]]
 		    }
 		}
-
 	    }
 	    if { [ne $style ""] } {
 		foreach td [$table selectNodes "tbody/tr/td\[$col_number\] | tfoot/tr/td\[$col_number\]"] {
@@ -407,6 +474,53 @@ proc qc::html_col_styles_apply2td {html} {
     return $html
 }
 
+doc qc::html_styles_apply2td {
+    Examples {
+        % set html {
+        <html>
+        <head>
+
+        <style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td>100</td><td>586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+        }
+
+        % qc:::html_styles_apply2td $html
+        <html>
+        <head><style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td style="font-weight:bold">100</td><td style="text-align:right">586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+    }
+}
+
 proc qc::html_clean {html} {
 
     # Get rid of unnecessary tags
@@ -423,29 +537,21 @@ proc qc::html_clean {html} {
 	set element [string range $html [lindex $ielement 0] [lindex $ielement 1]]
 	set attributes [string range $html [lindex $iattributes 0] [lindex $iattributes 1]]
 
-#puts "element $element"
-#puts "attributes $attributes"
-
 	# minimized attributes
 	regsub -all {(^| )(checked|selected|disabled)( |$)} $attributes {\1\2="\2"\3} attributes
 	
-#puts "minimized $attributes"
-
 	set count 0
 	while { [regsub -all {(^| )([^= ]+) *= *([^\"' ]+)( |$)} $attributes {\1\2="\3"\4} attributes] && $count<10000} {
-#puts "quotes $attributes"
 	    incr count 
 	}
 	
 	set count 0
 	while { [regsub -all {(^| )([^= ]+) *= *'([^']+)'( |$)} $attributes {\1\2="\3"\4} attributes] && $count<10000} {
-#puts "single2quotes $attributes"	    
 	    incr count
 	}
 	
 	set attributes [join [regexp -all -inline {[^= ]+=\"[^\"]+\"} $attributes]]
 
-#puts "final $attributes"
 	set element [lower $element]
 	if { [eq $attributes ""] } {
 	    set replace "<$element>"
@@ -456,7 +562,6 @@ proc qc::html_clean {html} {
 	set html [string replace $html [lindex $match 0] [lindex $match 1] $replace]
 
 	set start [expr {[lindex $match 0]+[string length $replace]}]
-	#puts "start $start is [string range $html $start end]"
     }
 
 
@@ -464,7 +569,6 @@ proc qc::html_clean {html} {
     while { $start<[string length $html] && \
 		[regexp -indices -start $start -- {</?[A-Z]+>} $html match] } {
 	set replace [lower [string range $html [lindex $match 0] [lindex $match 1]]]
-	#puts "replace $replace"
 	set html [string replace $html [lindex $match 0] [lindex $match 1] $replace]
 	set start [expr {[lindex $match 0]+[string length $replace]}]
     }

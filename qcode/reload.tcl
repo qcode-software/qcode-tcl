@@ -1,24 +1,18 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::reload {{dir ""}} {
-    if { ![namespace exists qc] } {
-	namespace eval qc {}
-    }
-    if { [eq $dir ""] } {
+    if { $dir eq "" } {
 	set dir [ns_library private]
     }
     set files [glob -nocomplain [file join $dir *.tcl]]
-    set files [concat $files [glob -nocomplain [file join $dir *.doc]]]
   
     foreach file $files {
-	if { [nsv_exists mtimes $file] } {
-	    if { [file mtime $file]!=[nsv_get mtimes $file] } {
-		namespace eval :: [list ns_eval -sync source $file]
-		
-		nsv_set mtimes $file [file mtime $file]
-		log Notice "Reloading $file"
-	    }
+	if { [nsv_exists mtimes $file] && [file mtime $file]!=[nsv_get mtimes $file] } {
+	    namespace eval :: [list ns_eval -sync source $file]
+	    nsv_set mtimes $file [file mtime $file]
+	    log Notice "Reloading $file"
 	} else {
 	    #log Notice "Loading $file"
 	    namespace eval :: [list source $file]

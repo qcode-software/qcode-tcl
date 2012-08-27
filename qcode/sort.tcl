@@ -1,9 +1,10 @@
 package provide qcode 1.7
 package require doc
 namespace eval qc {}
+
 proc qc::sortcols_push { sortCols colname {sortorder ASC} } {
-    # take a list of [colname1 order colname2 order ...]
-    # and reorder putting $colname first with order $sortorder
+    #| take a list of [colname1 order colname2 order ...]
+    #| and reorder putting $colname first with order $sortorder
     set newSortCols [list $colname $sortorder]
 
     for {set i 0} {$i<[llength $sortCols]} {incr i} {
@@ -24,7 +25,7 @@ proc qc::sortcols_push { sortCols colname {sortorder ASC} } {
 }
 
 proc qc::sortcols_toggle { sortCols colname } {
-    # toggle the sort order on colname
+    #| Toggle the sort order on colname
     if { [eq [string toupper [dict get $sortCols $colname]] ASC] } {
 	dict set sortCols $colname DESC
     } else {
@@ -34,9 +35,9 @@ proc qc::sortcols_toggle { sortCols colname } {
 }
 
 proc qc::sortcols_parse { args } {
-    # Accept args in format col1,col2,col3 DESC,col4 ASC
-    # or col1 col2 col3 DESC col4 
-    # Returned list col1 col2 col3 DESC ...
+    #| Accept args in format col1,col2,col3 DESC,col4 ASC
+    #| or col1 col2 col3 DESC col4 
+    #| Returned list col1 col2 col3 DESC ...
     if { [regexp , $args] } {
 	set args [string trim $args]
 	set args [split $args " ,"]
@@ -59,9 +60,9 @@ proc qc::sortcols_parse { args } {
 }
 
 proc qc::sortcols2dict { args } {
-    # Accept args in format col1,col2,col3 DESC,col4 ASC
-    # or col1 col2 col3 DESC col4 
-    # Returned list col1 ASC col2 ASC col3 DESC ...
+    #| Accept args in format col1,col2,col3 DESC,col4 ASC
+    #| or col1 col2 col3 DESC col4 
+    #| Returned list col1 ASC col2 ASC col3 DESC ...
     if { [regexp , $args] } {
 	set args [string trim $args]
 	set args [split $args " ,"]
@@ -84,6 +85,7 @@ proc qc::sortcols2dict { args } {
 }
 
 proc qc::sortcols_from_cols { cols } {
+    #| Extract column names from a cols list-of-lists 
     set sortCols {}
     foreach col $cols {
 	if { [dict exists $col name] } {
@@ -94,7 +96,7 @@ proc qc::sortcols_from_cols { cols } {
 }
 
 proc qc::sortcols_from_qry { qry } {
-    # look for an order by clause in the qry and return a list version
+    #| Look for an order by clause in the qry and return a list version
     if { [regexp -nocase {order by (.+?)(offset|limit|$)} $qry -> orderby ignore] } {
 	regsub -all {\n} $qry {} qry
 	return [qc::sortcols_parse $orderby]

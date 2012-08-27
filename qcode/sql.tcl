@@ -91,11 +91,19 @@ doc qc::sql_insert {
 }
 
 proc qc::sql_insert_with { args } {
+    #| Construct a SQL INSERT statement using the name value pairs given
     foreach {name value} $args {
 	lappend cols "\"$name\""
 	lappend values [db_quote $value]
     }
     return "( [join $cols ,] ) values ( [join $values ,] )" 
+}
+
+doc qc::sql_insert_with {
+    Examples {
+	% qc::sql_insert_with user_id 1 name "Joe D'Amato" email joe@example.com password munroe
+	( "user_id","name","email","password" ) values ( 1,'Joe D''Amato','joe@example.com','munroe' )
+    }
 }
 
 proc qc::sql_sort { args } {
@@ -208,6 +216,7 @@ doc qc::sql_sort {
 }
 
 proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan feb mar apr may jun jul aug sep oct nov dec}}} {
+    #| SQL case for crosstab style queries
     set alt_value [db_quote $alt_value]
     foreach month {1 2 3 4 5 6 7 8 9 10 11 12} {
 	lappend list "CASE WHEN extract(month from $date_col)=$month THEN $value_col ELSE $alt_value END as [lindex $col_names [expr {$month-1}]]"
@@ -216,7 +225,8 @@ proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {ja
 }
 
 proc qc::sql_in {list} {
-     set sql {}
+    #| Return a SQL comma separated list
+    set sql {}
     foreach value $list {
 	lappend sql [db_quote $value]
     }
@@ -227,12 +237,34 @@ proc qc::sql_in {list} {
     }
 }
 
+doc qc::sql_in {
+    Examples {
+	% qc::sql_in [list blue yellow orange]
+	('blue','yellow','orange')
+	
+	% set qry "select * from users where surname in [qc::sql_in [list Campbell Graham Fraser]]"
+	select * from users where surname in ('Campbell','Graham','Fraser')
+    }
+}
+
 proc qc::sql_array2list {array} {
+    # Convert Postgresql 1-dimensional Array to a Tcl list
     set list [csv2list [string map [list \{ "" \} "" \\\" \"\"] $array]]
     return [lreplace_values $list NULL ""]
 }
 
+doc qc::sql_array2list {
+    Examples {
+	% db_1row {select array['John West','George East','Harry'] as list}
+	% set list
+	{"John West","George East",Harry}
+	%  qc::sql_array2list {"John West","George East",Harry}
+	{John West} {George East} Harry
+    }
+}
+
 proc qc::sql_list2array {list} {
+    #| Convert a list into a PostgrSQL array literal.
     foreach item $list {
 	lappend lquoted [db_quote $item]
     }
@@ -240,5 +272,12 @@ proc qc::sql_list2array {list} {
 	return \{\}
     } else {
 	return \{[join $lquoted ,]\}
+    }
+}
+
+doc qc::sql_list2array {
+    Examples {
+	% qc::sql_list2array [list "John West" "George East" Harry]
+	{'John West','George East','Harry'}
     }
 }

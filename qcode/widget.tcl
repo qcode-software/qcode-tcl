@@ -3,8 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::widget {args} {
-    # Look for a proc "widget_$type" to make the widget
-    # e.g. type text would look for qc::widget_text or widget_text
+    #| Look for a proc "widget_$type" to make the widget
     set type [dict get $args type]
     if { [eq [info procs "::qc::widget_$type"] "::qc::widget_$type"] } {
 	return ["::qc::widget_$type" {*}$args]
@@ -15,21 +14,38 @@ proc qc::widget {args} {
     error "No widget proc defined for $type"
 }
 
+doc qc::widget_label {
+    Description {
+        Look for a proc "widget_$type" to make the widget
+    }
+    Usage {
+	widget name widgetName label labelText ?required yes?
+    }
+    Examples {
+        % qc::widget type text name textWidget value "Horses"
+        <input style="width:160px" id="textWidget" value="Horses" name="textWidget" type="text">
+
+        % qc::widget type label name labelWidget label "This is a label"
+        <label for="labelWidget">This is a label</label>
+
+        % qc::widget type quantum name quantumWidget value "Everything" 
+        No widget proc defined for quantum
+    }
+}
+
 proc qc::widget_label { args } {
+    #| Return an HTML form label element.
     args_check_required $args name label 
     array set this $args
-    
+    default this(id) $this(name)
     if {[info exists this(required)] && [string is true $this(required)] } {
-	return [html label "$this(label)<span style=\"color:#CC0000\">*</span>" for $this(name) class clsRequired]
+	return [html label "$this(label)<span style=\"color:#CC0000\">*</span>" for $this(id) class clsRequired]
     } else {
-	return [html label $this(label) for $this(name)]
+	return [html label $this(label) for $this(id)]
     }
 }
 
 doc qc::widget_label {
-    Description {
-	Return an HTML form label element.
-    }
     Usage {
 	widget_label name widgetName label labelText ?required yes?
     }
@@ -45,6 +61,7 @@ doc qc::widget_label {
 }
 
 proc qc::widget_text { args } {
+    #| Return an HTML form text input widget.
     args_check_required $args name value 
     array set this $args
     if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
@@ -65,9 +82,6 @@ proc qc::widget_text { args } {
 }
 
 doc qc::widget_text {
-    Description {
-	Return an HTML form text input widget.
-    }
     Usage {
 	widget_text name widgetName value Value ?id ID? ?width pixels? ...
     }
@@ -82,6 +96,7 @@ doc qc::widget_text {
 }
 
 proc qc::widget_compare { args } {
+    #| Return an HTML form widget with an operator drop down and input box.
     args_check_required $args name value 
     array set this $args
     default this(operator) =
@@ -95,9 +110,6 @@ proc qc::widget_compare { args } {
 }
 
 doc qc::widget_compare {
-    Description {
-	Return an HTML form widget with an operator drop down and input box.
-    }
     Usage {
 	widget_compare name widgetName value Value ?operator Operator? ?...?
     }
@@ -114,6 +126,7 @@ doc qc::widget_compare {
 }
 
 proc qc::widget_combo { args } {
+    #| Return an DHTML form widget with text input and dropdown for completion.
     array set this $args
     args_check_required $args name value boundName boundValue searchURL
     default this(searchLimit) 10
@@ -195,6 +208,7 @@ doc qc::widget_combo {
 }
 
 proc qc::widget_htmlarea { args } {
+    #| 	Return an HTML form htmlarea widget made from an editable div tag.
     array set this $args
     if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
 	# sticky values
@@ -217,9 +231,6 @@ doc qc::widget_htmlarea {
     Usage {
 	widget_htmlarea name widgetName value html ?width size? ?height size? ?..?
     }
-    Description {
-	Return an HTML form htmlarea widget made from an editable div tag.
-    }
     Examples {
 	% widget_htmlarea name notes value "A <i>little</i> note."
 	<div contentEditable="true" id="notes" style="width:160px;height:100px" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="clsDbFormHTMLArea">A <i>little</i> note.</div>
@@ -227,6 +238,7 @@ doc qc::widget_htmlarea {
 }
 
 proc qc::widget_textarea { args } {
+    #| Return an HTML form textarea element.
     array set this $args
     if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
 	# sticky values
@@ -246,9 +258,6 @@ doc qc::widget_textarea {
     Usage {
 	widget_textarea name widgetName value text ?width size? ?height size? ?..?
     }
-    Description {
-	Return an HTML form textarea element.
-    }
     Examples {
 	% widget_textarea name notes value "Hi There"
 	<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>
@@ -256,6 +265,7 @@ doc qc::widget_textarea {
 }
 
 proc qc::widget_select { args } {
+    #| 	Return an HTML form dropdown list.
     args_check_required $args name value options
     set name_selected "-"
     array set this $args
@@ -312,6 +322,7 @@ doc qc::widget_select {
 }
 
 proc qc::widget_span { args } {
+    #| Return a span element showing the value of the widget.
     args_check_required $args name value 
     array set this $args
     
@@ -332,9 +343,6 @@ doc qc::widget_span {
     Usage {
 	widget_span name widgetName value text ?width size? ?height size?
     }
-    Description {
-	Return a span element diplaying the value of the widget.
-    }
     Examples {
 	% widget_span name foo value bar
 	<span id="foo">bar</span>
@@ -342,6 +350,7 @@ doc qc::widget_span {
 }
 
 proc qc::widget_password { args } {
+    #| Return an HTML form, password input widget.
     args_check_required $args name value
     array set this $args
     if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
@@ -360,9 +369,6 @@ proc qc::widget_password { args } {
 doc qc::widget_password {
     Usage {
 	widget_text name widgetName value Value ?id ID? ?width pixels? ...
-    }
-    Description {
-	Return an HTML form, password input widget.
     }
     Examples {
 	% widget_password name password value "" 
@@ -431,6 +437,7 @@ doc qc::widget_checkbox {
 }
 
 proc qc::widget_button { args } {
+    #| Return an HTML form, button
     args_check_required $args name value
     array set this $args
     set this(type) button
@@ -444,9 +451,6 @@ doc qc::widget_button {
     Usage {
 	widget_button name widgetName value buttonText ?option value? ?..?
     }
-    Description {
-	Return an HTML form, button
-    }
     Examples {
 	widget_button name foo value "Click Me" onclick "alert('Hi');"
 	<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">
@@ -454,6 +458,7 @@ doc qc::widget_button {
 }
 
 proc qc::widget_submit { args } {
+    #| Return an HTML form, submit button
     args_check_required $args name value
     array set this $args
     if { [info exists this(name)] } { 
@@ -467,9 +472,6 @@ doc qc::widget_submit {
     Usage {
 	widget_submit name widgetName value buttonText ?option value? ?..?
     }
-    Description {
-	Return an HTML form, submit button
-    }
     Examples {
 	widget_submit name foo value "Submit"
 	<input id="foo" value="Submit" name="foo" type="submit">
@@ -477,6 +479,7 @@ doc qc::widget_submit {
 }
 
 proc qc::widget_radio { args } {
+    #| Return an HTML form, radio button
     args_check_required $args name value
     array set this $args
     set this(type) radio
@@ -490,9 +493,6 @@ proc qc::widget_radio { args } {
 doc qc::widget_radio {
     Usage {
 	widget_radio name widgetName value checkedValue ?option value? ?..?
-    }
-    Description {
-	Return an HTML form, radio button
     }
     Examples {
 	widget_radio name sex value male

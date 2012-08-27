@@ -3,11 +3,13 @@ package require doc
 namespace eval qc {}
 
 proc qc::ssh {args} {
+    #| Execute an ssh command with some default options 
     set args [linsert $args 0 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -q]
     return [exec -ignorestderr ssh {*}$args]
 }
 
 proc qc::scp {args} {
+    #| Execute an scp command with some default options 
     set args [linsert $args 0 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -q]
     return [exec -ignorestderr scp {*}$args]
 }

@@ -64,7 +64,7 @@ doc qc::conn_marshal {
 	
 	# If we then create a proc
 	proc /foo.html {greeting name} {
-	    return_html "You said $greeting $name"
+	    return "You said $greeting $name"
 	}
 	# a request for /foo.html?greeting=Hello&name=John would result in a call to 
 	/foo.html Hello John
@@ -73,6 +73,7 @@ doc qc::conn_marshal {
 }
 
 proc qc::conn_url {} {
+    #| Try to construct the full url of this request.
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
     if { [ne $host ""] } {
@@ -91,31 +92,7 @@ proc qc::conn_url {} {
 }
  
 proc qc::conn_host {} {
+    #| Return the host indicated in the HTTP/1.1 headers
     return [ns_set iget [ns_conn headers] Host]
 }
 
-# Alexey Pechnikov
-proc _ns_conn {args} {
-    set host [string tolower [ns_set get [ns_conn headers] Host]]
-    if {[string match [lindex $args 0] "host"]} {
-	regexp {[^:]+} $host host
-	return $host
-    } elseif {[string match [lindex $args 0] "server"]} {
-	regexp {[^:\.]+} $host host
-	return $host
-    } elseif {[string match [lindex $args 0] "port"]} {
-	if { [regexp {:(\d+)} $host str port] == 1 } {
-	    return $port
-	}
-	return
-    } elseif {[string match [lindex $args 0] "protocol"]} {
-	if {[string equal [ns_set get [ns_conn headers] "X-Forwarded-Proto"] "https"]} {
-	    return https
-	}
-	return http
-    } elseif {[string match [lindex $args 0] "location"]} {
-	return [ns_conn protocol]://$host
-    } else {
-	return [_ns_conn {*}$args]
-    }
-}

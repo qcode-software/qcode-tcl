@@ -12,7 +12,9 @@ proc qc::args2dict {callers_args} {
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Return dict of resulting name value pairs.
 
+    ### This line below has got to go but will break things. ####
     if { [llength $callers_args]==1 } {set callers_args [lindex $callers_args 0]}
+    ##################
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
 	set dict {}

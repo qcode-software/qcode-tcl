@@ -107,6 +107,19 @@ proc qc::cast_timestamp {string} {
     return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
 }
 
+doc qc::cast_timestamp {
+    Parent cast
+    Examples {
+        % qc::cast_timestamp today
+        2012-08-16 17:04:47
+        % qc::cast_timestamp 12/5/12
+        2012-05-12 00:00:00
+        % qc::cast_timestamp 12:33:33 
+        2012-08-12 12:33:33
+    }
+}
+
+
 proc qc::cast_epoch { string } {
     #| Try to convert the given string into an epoch
     #
@@ -132,6 +145,7 @@ proc qc::cast_epoch { string } {
 	return [clock scan "$year-$month-$day $time"]
     }
     # Exact ISO datetime with offset timezone e.g. "2012-08-13 10:21:23.7777 -06:00"
+    # Accepts offsets in formats -hh, -hhmm, or -hh:mm
     if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})(?: |T)(\d{1,2}:\d{1,2})(?::(\d{1,2}(?:\.\d+)?))?\s?(Z|[-+]\d\d(:?\d\d)?)$} $string -> year month day time sec timezone] } {
         if { $timezone eq "Z" } {
             set timezone "+00"
@@ -220,6 +234,9 @@ doc qc::cast_epoch {
 	# times can be hh:mm or hh:mm:ss
 	% cast_epoch "2007-10-16 10:12:36"
 	1192525956
+        # With ISO offset timezone in formats -hh, -hhmm or -hh:mm
+        % cast_epoch "2007-10-16 12:14:34.15445 +05"
+        1192518874
     }
 }
 
@@ -255,7 +272,7 @@ proc qc::cast_bool { string {true t} {false f} } {
 }
 
 proc qc::cast_postcode { postcode } {
-    #| Try to cast a string into stand UK Postcode form
+    #| Try to cast a string into UK Postcode form
     set saved $postcode
     set postcode [string toupper $postcode]
     # BFPO 

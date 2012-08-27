@@ -5,7 +5,7 @@ namespace eval qc {
 }
 
 proc qc::barcode128 {string} {
-    # make code128 barcode
+    #| Make a code128 barcode
     # encode 4 or more consecutive numbers in code C
     # data is char value char value ..... pairs
     set data {}
@@ -60,6 +60,7 @@ proc qc::barcode128 {string} {
 }
 
 proc qc::barcode128partB { string } {
+    # Encode ASCII as 128B
     set lstring [split $string ""]
     set data {}
     foreach char $lstring {
@@ -72,7 +73,7 @@ proc qc::barcode128partB { string } {
 }
 
 proc qc::barcode128partC {string} {
-    # Encode as 128C
+    #| Encode as 128C
     # If the number does not have an even number of digits
     # then prepend a zero
     if { [string length $string]%2 != 0 } {
@@ -88,6 +89,7 @@ proc qc::barcode128partC {string} {
 }
 
 proc qc::barcode_charcode { value } {
+    #| Return the corresponding charcode. This is specific to the font set used.
     if { $value == 0 } {
 	# space
 	return 194
@@ -101,6 +103,7 @@ proc qc::barcode_charcode { value } {
 }
 
 proc qc::barcode_charcode_html { value } {
+    #| Translate to HTML entities 
     if { $value == 0 } {
 	# space
 	return "&#194;"

@@ -3,6 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::sftp_put {args} {
+    #| Write data to the filename on the remote host using sftp
     args $args -port 22 username password host filename data
     if { [regexp {^/} $filename] } {
 	set url sftp://${host}:${port}${filename}

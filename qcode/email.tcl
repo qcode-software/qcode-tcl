@@ -5,13 +5,9 @@ package require mime
 package require base64 
 package require uuid
 
-doc email {
+doc qc::email {
     Title "Sending Email"
-    Description {
-	All of these procs call <proc>sendmail</proc> (which is based on ns_sendmail) and connects directly to an SMTP socket normally 127.0.0.1 port 25, so a MTA is required to send any email.<br>
-	Requires tcllib packages mime and base64.
-	[doc_list email_send]
-    }
+    Url {/qc/wiki/SendingEmail}
 }
 
 proc qc::email_send {args} {
@@ -114,7 +110,40 @@ proc qc::email_send {args} {
     qc::sendmail $mail_from $rcpts $body {*}$headers
 }
 
+doc qc::email_send {
+    Parent email
+    Usage {email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?attachment? ?attachments? ?filename? ?filenames?
+	<br><em>arguments passed in as dict</em>}
+    Description {Send email with plain text or html and add optional attachments}
+    Examples {
+	% qc::email_send from joe@bloggs.com to cool@fonzy.net subject Hi text "What's up"
+
+	% qc::email_send from {"Tom Jones" <tommy@wales.com>} to "\"The Fonz\" <cool@fonzy.net>" \
+	    cc "\"The King\" <elvis@graceland.org>" subject "Woah Woah" html "What's <i>new</i> pussy cat" 
+	# If html2text is installed will provide a text alternative
+
+	# Image attachment with base64 encoded data
+	% qc::email_send from {"Tom Jones" <tommy@wales.com>} to {"The King" <elvis@graceland.org>} \
+	    subject Hi text "The misses" \
+	    attachment [list encoding base64 data "AsgHy...Jk==" filename Priscilla.png]
+
+	#| attachments is a list of dicts
+	#| dict keys are encoding data filename ?cid?
+	#| Example dict - {encoding base64 data aGVsbG8= cid 1312967973006309 filename attach1.pdf}
+	#| Including cid in this dict is optional, if provided it must be world-unique
+	#| cid can be used to reference an attachment within the email's html.
+	#| eg. embed an image (<img src="cid:1312967973006309"/>).
+	
+	# Image attachment used in html
+	% qc::email_send from {"Tom Jones" <tommy@wales.com>} to {"The King" <elvis@graceland.org>} subject Hi \
+	    html {<h2>Priscilla</h2><img src="cid:1312967973006309"/>} \
+	    attachment [list encoding base64 data "AsgHy...Jk==" filename Priscilla.png cid 1312967973006309]
+    }
+
+}
+
 proc qc::email_file2attachment {filename} {
+    #| Return an attachment dict for this file
     set fhandle [open $filename r]
     fconfigure $fhandle -buffering line -translation binary -blocking 1
     set base64 [::base64::encode [read $fhandle]]
@@ -123,10 +152,20 @@ proc qc::email_file2attachment {filename} {
 }
 
 proc qc::email_address {text} {
+    #| Extract the email address from text
     return [lindex [qc::email_addresses $text] 0]
 }
 
+doc qc::email_address {
+    Parent email
+    Examples {
+	% qc::email_address {"Joe Biden" <joe@biden.com>}
+joe@biden.com
+    }
+}
+
 proc qc::email_addresses {text} {
+    #| Return a list of email addresses in the text
     set list [list]
     foreach dict [mime::parseaddress $text] {
 	lappend list [dict get $dict address]
@@ -134,14 +173,23 @@ proc qc::email_addresses {text} {
     return $list
 }
 
+doc qc::email_addresses {
+    Parent email
+    Examples {
+	% qc::email_addresses {"Joe Biden" <joe@biden.com> "Paul Ryan" <paul@ryan.com>}
+	joe@biden.com paul@ryan.com
+    }
+}
+
 proc qc::email_mime_text {text} {
+    #| Helper to return mime part for plain text
     set headers [list]
     lappend headers Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"
     return [list headers $headers body [::mime::qp_encode $text]]
 }
 
 proc qc::email_mime_html_alternative {html boundary} {
-    # Text
+    #| Helper to return mime part for html part with plain text alternative
     set text [html2text $html]
     lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $text]]
     lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $html]]
@@ -149,6 +197,7 @@ proc qc::email_mime_html_alternative {html boundary} {
 }
 
 proc qc::email_mime_attachment {dict} {
+    #| Helper to return mime part for attachment
     # dict keys: data filename ?encoding? ?cid?
     dict2vars $dict encoding data cid filename
     set headers [list]
@@ -171,6 +220,7 @@ proc qc::email_mime_attachment {dict} {
 }
 
 proc qc::email_mime_join {parts boundary} {
+    #| Helper to join mime parts
     lappend list "--${boundary}"
     foreach part $parts {
 	lappend list [qc::email_mime_part $part]
@@ -181,6 +231,7 @@ proc qc::email_mime_join {parts boundary} {
 }
 
 proc qc::email_mime_part {part} {
+    # Helper to construct mime part
     dict2vars $part headers body
     set list [list]
     foreach {name value} $headers {
@@ -330,7 +381,7 @@ proc qc::email2multimap {text} {
 			set body [::mime::qp_decode $body]
 		    }
 		    base64 {
-			set body [::base64::decode_string $body]
+			set body [::base64::decode $body]
 		    }
 		}
 	    }
@@ -340,7 +391,54 @@ proc qc::email2multimap {text} {
     return $email
 }
 
+doc qc::email2multimap {
+    Examples {
+	% set email {
+MIME-Version: 1.0
+Received: by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)
+Date: Fri, 17 Aug 2012 12:51:36 +0100
+Delivered-To: bernhard@qcode.co.uk
+Message-ID: <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com>
+Subject: Memo
+From: Bernhard van Woerden <bernhard@qcode.co.uk>
+To: Bernhard van Woerden <bernhard@qcode.co.uk>
+Content-Type: multipart/mixed; boundary=0016e6d9a38e403c6904c774c888
+
+--0016e6d9a38e403c6904c774c888
+Content-Type: multipart/alternative; boundary=0016e6d9a38e403c6004c774c886
+
+--0016e6d9a38e403c6004c774c886
+Content-Type: text/plain; charset=ISO-8859-1
+
+Please see the attached.
+
+- Bernhard
+
+--0016e6d9a38e403c6004c774c886
+Content-Type: text/html; charset=ISO-8859-1
+
+Please see the attached.<div><br></div><div>- Bernhard</div>
+
+--0016e6d9a38e403c6004c774c886--
+--0016e6d9a38e403c6904c774c888
+Content-Type: text/plain; charset=US-ASCII; name="Memo.txt"
+Content-Disposition: attachment; filename="Memo.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h5z7vyc30
+
+V291bGQgdGhlIGxhc3QgcGVyc29uIHRvIGxlYXZlIHBsZWFzZSB0dXJuIHRoZSBsaWdodHMgb2Zm
+Lg==
+--0016e6d9a38e403c6904c774c888--
+}
+    % qc::email2multimap $email
+MIME-Version 1.0 Received {by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)} Date {Fri, 17 Aug 2012 12:51:36 +0100} Delivered-To bernhard@qcode.co.uk Message-ID <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com> Subject Memo From {Bernhard van Woerden <bernhard@qcode.co.uk>} To {Bernhard van Woerden <bernhard@qcode.co.uk>} Content-Type {multipart/mixed; boundary=0016e6d9a38e403c6904c774c888} bodies {{Content-Type {multipart/alternative; boundary=0016e6d9a38e403c6004c774c886} bodies {{Content-Type {text/plain; charset=ISO-8859-1} body {Please see the attached.
+
+- Bernhard}} {Content-Type {text/html; charset=ISO-8859-1} body {Please see the attached.<div><br></div><div>- Bernhard</div>}}}} {Content-Type {text/plain; charset=US-ASCII; name="Memo.txt"} Content-Disposition {attachment; filename="Memo.txt"} Content-Transfer-Encoding base64 X-Attachment-Id f_h5z7vyc30 body {Would the last person to leave please turn the lights off.}}}    
+    }
+}
+
 proc qc::email_header_values {key value} {
+    #| Convert header values to dict
     # Convert
     # Content-Type: multipart/report; report-type=delivery-status; boundary="=_ventus"
     # to dict
@@ -356,7 +454,7 @@ proc qc::email_header_values {key value} {
 }
 
 proc qc::email_header_fold {string} {
-    # Fold header into lines starting with a space as per rfc2822
+    #| Fold header into lines starting with a space as per rfc2822
     set width 78
 
     # Convert to unix newlines for processing
@@ -388,20 +486,18 @@ proc qc::email_header_fold {string} {
     return [string map {\n "\r\n "} [join $result \r\n]]
 }
 
-# Alternative approach to parsing email into mutimap adta structure
-
-proc qc::email2multimap_ALT {source} {
-    set dict {}
-    set token [mime::initialize -string $source]
-    set dict [qc::email_token2dict $token]
-    foreach header [lintersect [mime::getheader $token -names] {From To Subject Date}] {
-	lappend dict $header [lindex [mime::getheader $token $header] 0]
+doc qc::email_header_fold {
+    Examples {
+	% qc::email_header_fold "This is a long line over the 78 characters allowed before folding at a word boundary where possible"
+This is a long line over the 78 characters allowed before folding at a word
+ boundary where possible
+	% qc::email_header_fold "Non ASCII is treated like this pound sign £"
+Non ASCII is treated like this pound sign =?UTF-8?Q?=C2=A3?=
     }
-    mime::finalize $token
-    return $dict
 }
 
 proc qc::email_token2dict {token} {
+    # Helper to convert a mime token to dict
     set dict {}
     set mime_type [mime::getproperty $token content]
     switch -glob -- $mime_type {
@@ -994,5 +1090,14 @@ proc qc::mime_type_guess { filename } {
         default {
             return $default_type
         }
+    }
+}
+
+doc qc::mime_type_guess {
+    Examples {
+	% qc::mime_type_guess foo.pdf
+	application/pdf
+	% qc::mime_type_guess crack.exe
+	application/octet-stream
     }
 }
