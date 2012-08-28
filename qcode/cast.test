@@ -1,0 +1,16 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode 1.7
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    # Cast
+    test cast_integer-1.0 {cast integer} {qc::cast_integer 2,305} 2305
+    test cast_integer-1.1 {cast integer} {qc::cast_integer "01%"} 1
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test

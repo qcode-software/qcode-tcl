@@ -1,0 +1,14 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode 1.7
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test date_month_start-1.0 {date_month_start} {qc::date_month_start 2007-05-06} 2007-05-01
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test

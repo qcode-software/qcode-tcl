@@ -1,0 +1,30 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode 1.7
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test file_temp-1.0 {file_temp exists} -setup {
+        set file [qc::file_temp "Test"]
+    } -body {
+        file exists $file
+    } -cleanup {
+        file delete $file
+    } -result 1
+
+    test file_temp-1.1 {file_temp contains string} -setup {
+        set file [qc::file_temp "Test contents"]
+        set fh [open $file r]
+    } -body {
+        gets $fh
+    } -cleanup {
+        close $fh
+        file delete $file
+    } -result "Test contents"
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test
