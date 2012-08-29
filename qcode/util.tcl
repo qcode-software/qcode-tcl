@@ -1142,7 +1142,7 @@ proc qc::log {args} {
     ns_log $severity [qc::format_cc_masked_string $message]
 }
 
-doc qc::debug {
+doc qc::log {
     Description {
         Write message to nsd log. If severity argument is not provided this defaults to "Notice". 
         Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
