@@ -1,12 +1,82 @@
 package require tcltest
 eval ::tcltest::configure $argv
 package require qcode 1.7
+namespace import qc::*
 
 namespace eval ::qcode::test {
 
     namespace import ::tcltest::*
 
-    test date_month_start-1.0 {date_month_start} {qc::date_month_start 2007-05-06} 2007-05-01
+    test date_month_start-1.0 {date_month_start success} {qc::date_month_start 2007-05-06} 2007-05-01
+    test date_month_start-1.1 {date_month_start relative success} -body {
+        qc::date_month_start today
+    } -result [clock format [clock scan today] -format "%Y-%m-01"]
+
+    test date_month_end-1.0 {date_month_end relative success} -body {
+        qc::date_month_end today
+    } -result [clock format [clock scan "1 month -1 day" -base [clock scan [clock format [clock scan today] -format "%Y-%m-01"]]] -format "%Y-%m-%d"] 
+    test date_month_end-1.1 {date_month_end success} {qc::date_month_end 2007-05-06} 2007-05-31
+
+    test date_year_start-1.0 {date_year_start success} {qc::date_year_start 2007-05-06} 2007-01-01
+
+    test date_year_end-1.0 {date_year_end success} {qc::date_year_end 2007-05-06} 2007-12-31
+
+    test date_year_iso_start-1.0 {date_year_iso_start success} {qc::date_year_iso_start 2006-05-05} 2006-01-02
+
+    test date_year_iso_end-1.0 {date_year_iso_end success} {qc::date_year_iso_end 2007-05-05} 2007-12-30
+
+    test date_iso_year-1.0 {date_iso_year success} {qc::date_iso_year 2007-05-05} 2007
+
+    test date_iso_week_start-1.0 {date_iso_week_start success} {qc::date_iso_week_start 2007-05-05} 2007-04-30
+
+    test date_iso_week_end-1.0 {date_iso_week_end success} {qc::date_iso_week_end 2007-05-05} 2007-05-06
+
+    test date_iso_week-1.0 {date_iso_week success} {qc::date_iso_week 2007-05-05} 18
+
+    test date_yesterday-1.0 {date_yesterday success} {qc::date_yesterday 2007-05-01} 2007-04-30
+
+    test date_tomorrow-1.0 {date_tomorrow success} {qc::date_tomorrow 2007-04-30} 2007-05-01 
+
+    test date_doy-1.0 {date_doy success} {qc::date_doy 2007-04-30} 120
+
+    test date_year-1.0 {date_year success} {qc::date_year 2007-04-30} 2007
+
+    test date_dom-1.0 {date_dom success} {qc::date_dom 2007-04-30} 30
+
+    test date_dow-1.0 {date_dow success} {qc::date_dow 2007-05-01} 2
+
+    test date_day_name-1.0 {date_day_name success} {qc::date_day_name 2007-05-01} Tuesday
+
+    test date_day_shortname-1.0 {date_day_shortname success} {qc::date_day_shortname 2007-05-01} Tue
+
+    test date_month_shortname-1.0 {date_month_shortname success} {qc::date_month_shortname 2007-06-01} Jun
+
+    test date_month_name-1.0 {date_month_name success} {qc::date_month_name 2007-06-01} June
+
+    test date_compare-1.0 {date_compare earlier} {qc::date_compare 2007-06-01 2007-05-28} 1
+    test date_compare-1.1 {date_compare later} {qc::date_compare 2007-06-01 2008-06-28} -1
+    test date_compare-1.2 {date_compare equal} {qc::date_compare 2007-06-01 2007-06-01} 0
+
+    test date_quarter-1.0 {date_quarter success} {qc::date_quarter 2007-06-01} 2
+
+    test date_quarter_start-1.0 {date_quarter_start success} {qc::date_quarter_start 2007-06-01} 2007-04-01
+
+    test date_quarter_end-1.0 {date_quarter_end success} {qc::date_quarter_end 2007-06-01} 2007-06-30
+
+    test dates-1.0 {dates success} {qc::dates 2012-02-25 2012-03-05} {2012-02-25 2012-02-26 2012-02-27 2012-02-28 2012-02-29 2012-03-01 2012-03-02 2012-03-03 2012-03-04 2012-03-05}
+    test dates-1.1 {dates success2} {qc::dates 2012-02-25 2012-02-25} 2012-02-25
+
+    test date_days-1.0 {date_days success} {qc::date_days 2012-02-25 2012-03-05} 9
+
+    test years-1.0 {years success} {qc::years 2007-02-25 2012-03-05} {2007 2008 2009 2010 2011 2012}
+
+    test iso_year_iso_weeks-1.0 {iso_year_iso_weeks success} {qc::iso_year_iso_weeks 2007-09-25 2008-03-05} {2007 39 2007 40 2007 41 2007 42 2007 43 2007 44 2007 45 2007 46 2007 47 2007 48 2007 49 2007 50 2007 51 2007 52 2008 1 2008 2 2008 3 2008 4 2008 5 2008 6 2008 7 2008 8 2008 9 2008 10}
+
+    test year_months-1.0 {year_months success} {qc::year_months 2011-02-25 2012-03-05} {2011 2 2011 3 2011 4 2011 5 2011 6 2011 7 2011 8 2011 9 2011 10 2011 11 2011 12 2012 1 2012 2 2012 3} 
+
+    test year_quarters-1.0 {year_quarters success} {qc::year_quarters 2011-02-25 2012-03-05} {2011 1 2011 2 2011 3 2011 4 2012 1}
+
+    test time_hour-1.0 {time_hour success} {qc::time_hour "2011-02-25 16:42:12"} 16
 
     cleanupTests
 
