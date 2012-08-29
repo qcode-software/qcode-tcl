@@ -1,0 +1,59 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode 1.7
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test cast_integer-1.0 {cast_integer commas} {qc::cast_integer 2,305} 2305
+    test cast_integer-1.1 {cast_integer leading zeros} {qc::cast_integer "001"} 1
+    test cast_integer-1.2 {cast_integer percentages} {qc::cast_integer "10%"} 10
+    test cast_integer-1.3 {cast_integer e notation} {qc::cast_integer "43e2"} 4300
+
+    test cast_decimal-1.0 {cast_decimal commas} {qc::cast_decimal "2,305.25"} 2305.25
+    test cast_decimal-1.1 {cast_decimal percentages} {qc::cast_decimal "100%"} 100
+    test cast_decimal-1.2 {cast_decimal precision} {qc::cast_decimal 3.689 2} 3.69
+    test cast_decimal-1.3 {cast_decimal precision} {qc::cast_decimal 3 4} 3.0000
+
+    test cast_date-1.0 {cast_date forward slashes} {qc::cast_date 12/5/07} 2007-05-12
+    test cast_date-1.1 {cast_date relative time} -body {
+        qc::cast_date yesterday
+    } -result [clock format [clock scan yesterday] -format "%Y-%m-%d"]
+    test cast_date-1.2 {cast_date long format} {qc::cast_date "June 23rd 2010"} 2010-06-23
+
+    test cast_timestamp-1.0 {cast_timestamp relative time} -body {
+        qc::cast_timestamp tomorrow
+    } -result [clock format [clock scan tomorrow] -format "%Y-%m-%d %H:%M:%S"]
+
+    test cast_epoch-1.0 {cast_epoch empty string} -body {
+        qc::cast_epoch ""
+    } -result "Can't cast an empty string to epoch" -returnCodes error 
+    test cast_epoch-1.1 {cast_epoch iso date no delimiter} {qc::cast_epoch 20100810} 1281394800
+    test cast_epoch-1.2 {cast_epoch epoch} {qc::cast_epoch 1281394800} 1281394800
+    test cast_epoch-1.3 {cast_epoch exact iso date} {qc::cast_epoch "2012-06-12"} 1339455600
+    test cast_epoch-1.4 {cast_epoch iso datetime} {qc::cast_epoch "2012-06-12 12:12:12"} 1339499532
+    test cast_epoch-1.5 {cast_epoch iso datetime with offset} {qc::cast_epoch "2012-06-12 12:12:12.777 -06:00"} 1339524733
+    test cast_epoch-1.6 {cast_epoch iso date time no end anchor} {qc::cast_epoch "2012-06-12 12:12:12.777"} 1339499532
+    test cast_epoch-1.7 {cast_epoch forward slash date format} {qc::cast_epoch "12/06/12"} 1339455600
+    test cast_epoch-1.8 {cast_epoch forward slash date format long year} {qc::cast_epoch "12/06/2012"} 1339455600
+    test cast_epoch-1.9 {cast_epoch relative} {qc::cast_epoch "today"} [clock scan today]
+    test cast_epoch-1.10 {cast_epoch relative2} {qc::cast_epoch "1 year ago"} [clock scan "1 year ago"]
+
+#   Aolserver dependent
+#   test cast_boolean-1.0 {cast_boolean default true} {qc::cast_boolean yes} t
+#   test cast_boolean-1.1 {cast_boolean default false} {qc::cast_boolean no} f
+#   test cast_boolean-1.2 {cast_boolean custom true} {qc::cast_boolean 1 Si No} Si
+
+    test cast_postcode-1.0 {cast_postcode no space} {qc::cast_postcode EH123DE} "EH12 3DE"
+    test cast_postcode-1.1 {cast_postcode no space2} {qc::cast_postcode EH12DE} "EH1 2DE"
+    test cast_postcode-1.2 {cast_postcode extra zero} {qc::cast_postcode "Y043 3AH"} "YO43 3AH"
+
+    test cast_creditcard-1.0 {cast_creditcard invalid} -body {
+        qc::cast_creditcard "4213 3222 1121 1112"
+    } -returnCodes error -result "4213322211211112 is not a valid credit card number"
+    test cast_creditcard-1.1 {cast_creditcard spaces} {qc::cast_creditcard "4111 1111 1111 1111"} 4111111111111111
+
+    cleanupTests
+}
+namespace delete ::qcode::test
