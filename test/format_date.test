@@ -1,0 +1,32 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test format_date-1.0 {format_date long form} {format_date "23rd June 2008"} "2008&#8209;06&#8209;23"
+    test format_date-1.1 {format_date slashes} {format_date "23/06/08"} "2008&#8209;06&#8209;23"
+
+    test format_date_iso-1.0 {format_date_iso long form} {format_date_iso "23rd June 2008"} "2008-06-23"
+    test format_date_iso-1.1 {format_date_iso slashes} {format_date_iso "23/06/08"} "2008-06-23"
+   
+    test format_date_uk-1.0 {format_date_uk iso} {format_date_uk "2008-06-23"} 23/06/08
+    test format_date_uk-1.1 {format_date_uk relative} {format_date_uk today} [clock format [clock scan today] -format "%d/%m/%y"]
+
+    test format_date_uk_long-1.0 {format_date_uk_long iso} {format_date_uk_long "2008-06-23"} 23/06/2008
+    test format_date_uk_long-1.1 {format_date_uk_long relative} {format_date_uk_long today} [clock format [clock scan today] -format "%d/%m/%Y"]
+
+    test format_date_rel-1.0 {format_date_rel now} {format_date_rel now} Today
+    test format_date_rel-1.1 {format_date_rel next year} -body {
+        format_date_rel "next year"
+    } -result "[clock format [clock scan "next year"] -format "%Y-%m-%d"]"
+
+    test format_date_letter-1.0 {format_date_letter now} {format_date_letter 2008-12-22} "22nd December 2008"
+
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

@@ -30,7 +30,7 @@ namespace eval ::qcode::test {
         qc::check qty INT
     } -cleanup {
         unset qty
-    } -returnCodes 1 -result "\"Im a string\" is not a valid integer for qty"
+    } -returnCodes error -result "\"Im a string\" is not a valid integer for qty"
 
     test check-1.02 {check INT simple} -setup {
         set qty 99
@@ -86,7 +86,7 @@ namespace eval ::qcode::test {
         qc::check bool BOOLEAN "This is a custom msg"
     } -cleanup {
         unset bool
-    } -returnCodes 1 -result "This is a custom msg"
+    } -returnCodes error -result "This is a custom msg"
 
     test check-1.09 {check STRING postive} -setup {
         set str "A string" 
@@ -110,7 +110,7 @@ namespace eval ::qcode::test {
         qc::check str STRING 20
     } -cleanup {
         unset str
-    } -returnCodes 1 -result "\"A slightly too long string\" is not a valid varchar for str"
+    } -returnCodes error -result "\"A slightly too long string\" is not a valid varchar for str"
 
     test check-1.11 {check STRING null} -setup {
         set str ""
@@ -126,7 +126,7 @@ namespace eval ::qcode::test {
         qc::check str STRING 20 NOT NULL
     } -cleanup {
         unset str
-    } -returnCodes 1 -result "str is empty"
+    } -returnCodes error -result "str is empty"
 
     test check-1.13 {check DECIMAL} -setup {
         set dec -1.2
@@ -142,7 +142,7 @@ namespace eval ::qcode::test {
         qc::check dec DECIMAL POS
     } -cleanup {
         unset dec
-    } -returnCodes 1 -result "\"-1.2\" is not a valid pos for dec"
+    } -returnCodes error -result "\"-1.2\" is not a valid pos for dec"
 
     test check-1.15 {check DECIMAL POS success} -setup {
         set dec 1.2
@@ -191,7 +191,7 @@ namespace eval ::qcode::test {
         qc::check text NOT HTML
     } -cleanup {
         unset text
-    } -returnCodes 1 -result "\"Nothing to &lt;a href=http://hack.me&gt;see&lt;/a&gt; here.\" contains HTML which is not allowed for text"
+    } -returnCodes error -result "\"Nothing to &lt;a href=http://hack.me&gt;see&lt;/a&gt; here.\" contains HTML which is not allowed for text"
 
     test check-1.21 {check NOT CREDITCARDS success} -setup {
         set text "Just a number ( 4123123112311231 ) that looks like a CC number but isnt." 
@@ -207,7 +207,7 @@ namespace eval ::qcode::test {
         qc::check text NOT CREDITCARDS
     } -cleanup {
         unset text
-    } -returnCodes 1 -result "\"This is a valid CC number 4111111111111111 \" contains a creditcard number which is not allowed for text"
+    } -returnCodes error -result "\"This is a valid CC number 4111111111111111 \" contains a creditcard number which is not allowed for text"
 
 
     test check-1.23 {check PRICE success} -setup {
@@ -260,7 +260,7 @@ namespace eval ::qcode::test {
         unset dec
         unset cc
         unset html
-    } -returnCodes 1 -match glob -result "*\"999\" is not a valid creditcard for cc*" 
+    } -returnCodes error -match glob -result "*\"999\" is not a valid creditcard for cc*" 
 
     cleanupTests
 }
