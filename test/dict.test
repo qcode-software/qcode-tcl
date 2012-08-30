@@ -1,0 +1,19 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+#    variable test_dict { [dict create a 1 [dict create b1 1 b2 2] c 3] }
+#
+#    test dict_exists-1.0 {dict_exists success} -setup $test_dict -body {
+#        dict_exists $test
+#    } -cleanup {
+#        file delete $file
+#    } -result 1
+
+}
+namespace delete ::qcode::test

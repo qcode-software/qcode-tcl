@@ -1,6 +1,6 @@
 package require tcltest
 eval ::tcltest::configure $argv
-package require qcode 1.7
+package require qcode
 namespace import qc::*
 
 namespace eval ::qcode::test {
