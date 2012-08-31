@@ -1,0 +1,26 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test form_db-1.0 {form_db} -body {
+        form_db "<p>No Quarter Live</p>" type prog
+    } -result {<form method="POST" id="oDbForm" class="clsDbForm" type="prog">
+<div class="clsDbFormDiv">
+<p>No Quarter Live</p>
+</div>
+<div class="clsDbFormDivStatus">
+</div>
+</form>}
+
+    test form_db_plain-1.0 {form_db_plain} -body {
+        form_db_plain "<p>The Reflex</p>" type eighties option eyeliner 
+    } -result {<form id="oDbForm" option="eyeliner" class="clsDbForm" type="eighties"><p>The Reflex</p></form>}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

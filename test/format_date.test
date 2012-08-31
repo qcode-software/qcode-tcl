@@ -23,8 +23,8 @@ namespace eval ::qcode::test {
         format_date_rel "next year"
     } -result "[clock format [clock scan "next year"] -format "%Y-%m-%d"]"
 
-    test format_date_letter-1.0 {format_date_letter now} {format_date_letter 2008-12-22} "22nd December 2008"
-
+    test format_date_letter-1.0 {format_date_letter iso} {format_date_letter 2008-12-22} "22nd December 2008"
+    test format_date_letter-1.1 {format_date_letter slashes} {format_date_letter 22/12/08} "22nd December 2008"
 
 
     cleanupTests
