@@ -234,7 +234,7 @@ proc qc::html_menu { lmenu } {
 doc qc::html_menu {
     Examples {
 	% html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
-	<a href="sales.html">Sales</a> &nbsp;|&nbsp; <a href="sales.html">Purchasing</a> &nbsp;|&nbsp; <a href="sales.html">Accounts</a>
+        <a href="sales.html">Sales</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Purchasing</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Accounts</a>
     }
 }
 
