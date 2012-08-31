@@ -59,7 +59,7 @@ doc qc::format_timestamp_rel {
 	Sun 17:34
 	%
 	% format_timestamp_rel "next week"
-	2007-11-12 17:34
+	Sep 7th
     }
 }
 
@@ -86,8 +86,8 @@ doc qc::format_timestamp {
     }
 }
 
-proc format_timestamp_rel_age {timestamp} {
-    #| Return the approxate relative age of a timestamp
+proc qc::format_timestamp_rel_age {timestamp} {
+    #| Return the approximate relative age of a timestamp
     set days [date_days $timestamp now]
     if { $days == 0 } {
 	return "today"
@@ -109,4 +109,11 @@ proc format_timestamp_rel_age {timestamp} {
     }
 
     return "$days [iif {$days==1} day days]" 
+}
+
+doc qc::format_timestamp_rel_age {
+    Examples {
+        % format_timestamp_rel_age "2009-10-12 12:12:12"
+        3 years
+    }
 }
