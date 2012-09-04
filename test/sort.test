@@ -1,0 +1,37 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test sortcols_toggle-1.0 {sortcols_toggle} -setup {
+    } -body {
+        sortcols_toggle {product DESC qty DESC sales DESC profit DESC price DESC} qty
+    } -cleanup {} -result {product DESC qty ASC sales DESC profit DESC price DESC}
+
+    test sortcols_from_cols-1.0 {sortcols_from_cols positive } -setup {
+        set cols {}
+        lappend cols [list width 120 name product]
+        lappend cols [list label "Qty" name qty width 60 class clsNumber]
+        lappend cols [list label "Sales" name sales width 60 class clsMoney]
+        lappend cols [list label "Profit" name profit width 60 class clsMoney]
+        lappend cols [list label "Price" name price width 60 class clsMoney]
+    } -body {
+        sortcols_from_cols $cols
+    } -cleanup {unset cols} -result {product qty sales profit price} 
+
+    test sortcols_parse-1.0 {sortcols_parse list } -setup {
+    } -body {
+        sortcols_parse product qty DESC sales profit price
+    } -cleanup {} -result {product qty DESC sales profit price}
+
+    test sortcols_parse-1.1 {sortcols_parse commas } -setup {
+    } -body {
+        sortcols_parse product,qty DESC,sales,profit,price
+    } -cleanup {} -result {product qty DESC sales profit price}
+
+    cleanupTests
+}
+namespace delete ::qcode::test

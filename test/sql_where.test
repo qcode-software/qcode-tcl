@@ -1,0 +1,34 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test sql_where-1.0 {sql_where} -setup {
+    } -body {
+        sql_where name "Townes Van Zandt" email "townes@tecumseh.com"
+    } -cleanup {} -result {name='Townes Van Zandt' and email='townes@tecumseh.com'}
+
+    test sql_where-1.1 {sql_where null} -setup {
+    } -body {
+        sql_where name NULL email "townes@tecumseh.com"
+    } -cleanup {} -result {name IS NULL and email='townes@tecumseh.com'}
+
+    test sql_where-1.1 {sql_where empty string} -setup {
+    } -body {
+        sql_where name "" email "townes@tecumseh.com"
+    } -cleanup {} -result {email='townes@tecumseh.com'}
+
+    test sql_where-1.1 {sql_where nothing to do} -setup {
+    } -body {
+        sql_where name "" email ""
+    } -cleanup {} -result {true}
+
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

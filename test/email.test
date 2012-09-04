@@ -50,17 +50,7 @@ file
     
     test email_mime_html_alternative-1.0 {email_mime_html_alternative success} -body {
         email_mime_html_alternative {<html><p>This is some <b>HTML</b></p></html>} 503f5d914c87ae17acde9
-    } -match glob -result {--503f5d914c87ae17acde9*
-Content-Type: text/plain;charset="utf-8"*
-Content-Transfer-Encoding: quoted-printable*
-*
-This is some HTML*
---503f5d914c87ae17acde9*
-Content-Type: text/html;charset="utf-8"*
-Content-Transfer-Encoding: quoted-printable*
-*
-<html><p>This is some <b>HTML</b></p></html>*
---503f5d914c87ae17acde9--}
+    } -match regexp -result {--503f5d914c87ae17acde9\r\nContent-Type: text/plain;charset="utf-8"\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nThis is some HTML\r\n--503f5d914c87ae17acde9\r\nContent-Type: text/html;charset="utf-8"\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n<html><p>This is some <b>HTML</b></p></html>\r\n--503f5d914c87ae17acde9--}
 
     test email_mime_attachment-1.0 {email_mime_attachment success} -body {
         email_mime_attachment {data "Some text of some sort" filename attachment.txt}

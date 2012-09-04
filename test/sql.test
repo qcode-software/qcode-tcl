@@ -1,0 +1,87 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test sql_set-1.0 {sql_set} -setup {
+    } -body {
+        sql_set name email user_code
+    } -cleanup {} -result {name=:name,email=:email,user_code=:user_code} 
+
+    test sql_set_with-1.0 {sql_set_with} -setup {
+    } -body {
+        sql_set_with name "Amadou" email "amadou@mali.com" user_code 911
+    } -cleanup {} -result {"name"='Amadou',"email"='amadou@mali.com',"user_code"=911}
+
+    test sql_set_with-1.1 {sql_set_with needs quoting} -setup {
+    } -body {
+        sql_set_with name "" email "Amado'u <amadou@mali.com>" user_code 911
+    } -cleanup {} -result {"name"=NULL,"email"='Amado''u <amadou@mali.com>',"user_code"=911}
+
+    test sql_insert-1.0 {sql_insert} -setup {
+    } -body {
+        sql_insert name email user_code 
+    } -cleanup {} -result {( name,email,user_code ) values ( :name,:email,:user_code )}
+
+    test sql_insert_with-1.0 {sql_insert_with} -setup {
+    } -body {
+        sql_insert_with name "Amadou" email "amadou@mali.com" user_code 911
+    } -cleanup {} -result {( "name","email","user_code" ) values ( 'Amadou','amadou@mali.com',911 )}
+
+    test sql_insert_with-1.1 {sql_insert_with needs quoting} -setup {
+    } -body {
+        sql_insert_with name "" email "Amado'u <amadou@mali.com>" user_code 911
+    } -cleanup {} -result {( "name","email","user_code" ) values ( NULL,'Amado''u <amadou@mali.com>',911 )}
+
+    test sql_sort-1.0 {sql_sort} -setup {
+    } -body {
+        sql_sort name email user_code 
+    } -cleanup {} -result {name,email,user_code}
+
+    test sql_sort-1.1 {sql_sort with order} -setup {
+    } -body {
+        sql_sort name DESC email user_code 
+    } -cleanup {} -result {name DESC NULLS LAST,email,user_code}
+
+    test sql_sort-1.2 {sql_sort with paging} -setup {
+    } -body {
+        sql_sort -paging name email user_code 
+    } -cleanup {} -result {name,email,user_code limit 100 offset 0}
+
+    test sql_in-1.0 {sql_in} -setup {
+    } -body {
+        sql_in [list Antics Horses Rounds]
+    } -cleanup {} -result {('Antics','Horses','Rounds')}
+
+    test sql_in-1.1 {sql_in empty} -setup {
+    } -body {
+        sql_in [list]
+    } -cleanup {} -result {(NULL)}
+
+    test sql_array2list-1.0 {sql_array2list} -setup {
+    } -body {
+        sql_array2list {"Four Tet","Sleigh Bells",Bauhaus}
+    } -cleanup {} -result {{Four Tet} {Sleigh Bells} Bauhaus}
+
+    test sql_array2list-1.1 {sql_array2list empty} -setup {
+    } -body {
+        sql_array2list {}
+    } -cleanup {} -result {}
+
+    test sql_list2array-1.0 {sql_list2array} -setup {
+    } -body {
+        sql_list2array [list "Four 'Tet" "Sleigh Bells" Bauhaus]
+    } -cleanup {} -result {{'Four ''Tet','Sleigh Bells','Bauhaus'}}
+
+    test sql_list2array-1.1 {sql_list2array empty} -setup {
+    } -body {
+        sql_list2array [list]
+    } -cleanup {} -result {{}}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

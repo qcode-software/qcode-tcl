@@ -30,6 +30,145 @@ namespace eval ::qcode::test {
         unset dict_list
     } -returnCodes 1 -result {list index out of range}
 
+# Aolserver only
+#    test ldict_sum-1.0 {ldict_sum } -setup {
+#        set dict_list [list {product CR331 price 9.99} {product CN123 price 3.99}]
+#    } -body {
+#        ldict_sum dict_list price
+#    } -cleanup {
+#        unset dict_list
+#    } -result 12.98
+
+
+    test ldict_max-1.0 {ldict_max numeric} -setup {
+        set dict_list [list {prod CR111 price 0.99} {prod CT111 price 6.49} {prod CZ111 price 9.99}]
+    } -body {
+        ldict_max dict_list price
+    } -cleanup {
+        unset dict_list
+    } -result 9.99
+
+    test ldict_max-1.1 {ldict_max alphabetic} -setup {
+        set dict_list [list {prod CR111 price 0.99} {prod CT111 price 6.49} {prod CZ111 price 9.99}]
+    } -body {
+        ldict_max dict_list prod
+    } -cleanup {
+        unset dict_list
+    } -result CZ111
+
+    test ldict_max-1.2 {ldict_max invalid index} -setup {
+        set dict_list [list {prod CR111 price 0.99} {prod CT111 price 6.49} {prod CZ111 price 9.99}]
+    } -body {
+        ldict_max dict_list qty
+    } -returnCodes 1 -cleanup {
+        unset dict_list
+    } -result {key "qty" not known in dictionary}
+
+    test ldict_values-1.0 {ldict_values } -setup {
+        set dict_list [list {prod CR111 price 0.99} {prod CT111 price 6.49} {prod CZ111 price 9.99}]
+    } -body {
+        ldict_values dict_list prod
+    } -cleanup {
+        unset dict_list
+    } -result {CR111 CT111 CZ111}
+
+    test ldict_values-1.1 {ldict_values invalid key} -setup {
+        set dict_list [list {prod CR111 price 0.99} {prod CT111 price 6.49} {prod CZ111 price 9.99}]
+    } -body {
+        ldict_values dict_list qty
+    } -returnCodes 1 -cleanup {
+        unset dict_list
+    } -result {key "qty" not known in dictionary}
+
+    test ldict_exists-1.0 {ldict_exists exists once} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exists $dict_list middlename
+    } -cleanup { unset dict_list }  -result 2
+
+    test ldict_exists-1.1 {ldict_exists exists all} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exists $dict_list surname
+    } -cleanup { unset dict_list }  -result 0
+
+    test ldict_exists-1.2 {ldict_exists does not exist} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exists $dict_list salutation
+    } -cleanup { unset dict_list } -result -1
+
+    test ldict_search-1.0 {ldict_search} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_search dict_list firstname "Angus"
+    } -cleanup {
+        unset dict_list
+    } -result 2
+
+    test ldict_search-1.1 {ldict_search value not found} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_search dict_list firstname "Donald"
+    } -cleanup {
+        unset dict_list
+    } -result -1
+
+    test ldict_search-1.2 {ldict_search key not found} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald}  {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_search dict_list salutation "Wing Commander"
+    } -cleanup {
+        unset dict_list
+    } -result -1
+
+    test ldict_exclude-1.0 {ldict_exclude single} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exclude $dict_list middlename
+    } -cleanup {
+        unset dict_list
+    } -result {{firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus surname McNeil}}
+
+    test ldict_exclude-1.1 {ldict_exclude multiple} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exclude $dict_list surname
+    } -cleanup {
+        unset dict_list
+    } -result {{firstname John} {firstname Andrew} {firstname Angus middlename Walter}}
+
+    test ldict_exclude-1.2 {ldict_exclude everything} -setup {
+        set dict_list [list {firstname John} {firstname Andrew} {firstname Angus}] 
+    } -body {
+        ldict_exclude $dict_list firstname
+    } -cleanup {
+        unset dict_list
+    } -result {{} {} {}}
+
+    test ldict_exclude-1.3 {ldict_exclude nothing} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus middlename Walter surname McNeil}] 
+    } -body {
+        ldict_exclude $dict_list salutation
+    } -cleanup {
+        unset dict_list
+    } -result {{firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus middlename Walter surname McNeil}}
+
+    test ldict2tbody-1.0 {ldict2tbody } -setup {
+        set dict_list [list {code AAA product widget_a desc "Widget Type A" price 9.99 qty 10} {code BBB product widget_b desc "Widget Type B" price 8.99 qty 19} {code CCC product widget_c desc "Widget Type C" price 7.99 qty 1}] 
+    } -body {
+        ldict2tbody $dict_list [list product desc price]
+    } -cleanup {
+        unset dict_list
+    } -result {{widget_a {Widget Type A} 9.99} {widget_b {Widget Type B} 8.99} {widget_c {Widget Type C} 7.99}}
+
+    test ldict2tbody-1.0 {ldict2tbody } -setup {
+        set dict_list [list {code AAA product widget_a desc "Widget Type A" price 9.99 qty 10} {code BBB product widget_b desc "Widget Type B" price 8.99 qty 19} {code CCC product widget_c desc "Widget Type C" price 7.99 qty 1}] 
+    } -body {
+        ldict2tbody $dict_list [list product desc price]
+    } -cleanup {
+        unset dict_list
+    } -result {{widget_a {Widget Type A} 9.99} {widget_b {Widget Type B} 8.99} {widget_c {Widget Type C} 7.99}}
 
 
     cleanupTests
