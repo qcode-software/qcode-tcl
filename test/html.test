@@ -111,6 +111,137 @@ namespace eval ::qcode::test {
         html_paragraph_layout Name "Neutral Milk Hotel" Item "Oh Comely"
     }  -result {<p><b>Name</b><br>Neutral Milk Hotel</p><p><b>Item</b><br>Oh Comely</p>}
 
+    testConstraint html2text_installed [expr {[catch {exec which html2text}] == 0}]
+    test html2text-1.0 {html2text simple} -constraints html2text_installed -body {
+        html2text {<html><p>This is some <b>simple</b> <i>html</i> to convert to text.<p></html>}
+    }  -result {This is some simple html to convert to text.}
+
+    test html_styles2inline-1.0 {html_styles2inline } -body {
+        html_styles2inline {
+        <html>
+            <head>
+            <style type="text/css">
+            body {
+	        font-family: Arial, Helvetica, sans-serif;
+	        font-size:84%;
+            }
+            table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+            </style>
+            </head>
+            <body>
+                <p>Hello</p>
+                <table>
+                    <tr><td>Table entry</td></tr>
+                </table>
+            </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+            body {
+	        font-family: Arial, Helvetica, sans-serif;
+	        font-size:84%;
+            }
+            table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+            </style></head><body style="font-family:Arial, Helvetica, sans-serif;font-size:84%">
+<p>Hello</p><table style="font-family:Arial, Helvetica, sans-serif;font-size:100%"><tr><td>Table entry</td></tr></table>
+</body>
+</html>}
+   
+    test html_styles2inline-1.1 {html_styles2inline no styles} -body {
+        html_styles2inline {
+        <html>
+            <head>
+            <style type="text/css">
+            </style>
+            </head>
+            <body>
+                <p>Hello</p>
+                <table>
+                    <tr><td>Table entry</td></tr>
+                </table>
+            </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+            </style></head><body>
+<p>Hello</p><table><tr><td>Table entry</td></tr></table>
+</body>
+</html>}
+
+
+    test html_col_styles_apply2td-1.0 {html_col_styles_apply2td } -body {
+        html_col_styles_apply2td {
+        <html>
+        <head>
+
+        <style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td>100</td><td>586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+<colgroup>
+<col class="clsBold"><col class="clsNumber">
+</colgroup><thead><tr>
+<th>Qty</th><th>Total</th>
+</tr></thead><tbody><tr>
+<td style="font-weight:bold">100</td><td style="text-align:right">586.98</td>
+</tr></tbody>
+</table></body>
+</html>}
+
+    test html_col_styles_apply2td-1.1 {html_col_styles_apply2td no styles} -body {
+        html_col_styles_apply2td {
+        <html>
+        <head>
+
+        <style type="text/css">
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td>100</td><td>586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+        </style></head><body><table width="100%">
+<colgroup>
+<col class="clsBold"><col class="clsNumber">
+</colgroup><thead><tr>
+<th>Qty</th><th>Total</th>
+</tr></thead><tbody><tr>
+<td>100</td><td>586.98</td>
+</tr></tbody>
+</table></body>
+</html>}
 
     cleanupTests
 }

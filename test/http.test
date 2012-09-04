@@ -1,0 +1,100 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    
+    test http_encoding-1.0 {http_encoding xml } -setup {
+    } -body {
+        http_encoding {} {<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <soap:Body>
+    <Response xmlns="https://www.example.com">
+      <Result>
+        <ClientHeader>
+          <PassKey>999</PassKey>
+        </ClientHeader>
+        <Type>TEST</Type>
+        <Data>Testing</Data
+      </Result>
+    </Response>
+  </soap:Body>
+</soap:Envelope>}
+    } -result {utf-8}
+
+    test http_encoding-1.1 {http_encoding xml default} -setup {
+    } -body {
+        http_encoding {} {<?xml version="1.0"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <soap:Body>
+    <Response xmlns="https://www.example.com">
+      <Result>
+        <ClientHeader>
+          <PassKey>999</PassKey>
+        </ClientHeader>
+        <Type>TEST</Type>
+        <Data>Testing</Data
+      </Result>
+    </Response>
+  </soap:Body>
+</soap:Envelope>}
+    } -result {utf-8}
+
+    test http_encoding-1.2 {http_encoding http charset} -setup {
+    } -body {
+        http_encoding {Content-Type {text/html; charset=utf-8}} {}
+    } -result {utf-8}
+
+    test http_encoding-1.3 {http_encoding http charset not found} -setup {
+    } -body {
+        http_encoding {Accept-Encoding gzip} {}
+    } -result {iso8859-1}
+
+    test http_encoding-1.4 {http_encoding http long headers } -setup {
+    } -body {
+        http_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
+    } -result {unicode}
+
+    test http_encoding-1.5 {http_encoding http long headers no charset } -setup {
+    } -body {
+        http_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
+    } -result {iso8859-1}
+
+    test http_header_encoding-1.0 {http_header_encoding no charset } -setup {
+    } -body {
+        http_header_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
+    } -result {}
+
+    test http_header_encoding-1.1 {http_header_encoding charset } -setup {
+    } -body {
+        http_header_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
+    } -result {unicode}
+
+    test http_header_encoding-1.2 {http_header_encoding empty headers } -setup {
+    } -body {
+        http_header_encoding {}
+    } -result {}
+
+    test IANAEncoding2TclEncoding-1.0 {IANAEncoding2TclEncoding utf-8 upper} -setup {
+    } -body {
+         IANAEncoding2TclEncoding {UTF-8}
+    } -result {utf-8}
+
+    test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding error} -setup {
+    } -body {
+         IANAEncoding2TclEncoding {qwerty}
+    } -returnCodes 1 -result {Unrecognized encoding name 'qwerty'}
+
+    test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding latin} -setup {
+    } -body {
+         IANAEncoding2TclEncoding {latin1}
+    } -result {iso8859-1}
+
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

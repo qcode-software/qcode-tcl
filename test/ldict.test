@@ -1,0 +1,37 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test ldict_set-1.0 {ldict_set valid set} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Angus surname McNeil}]
+    } -body {
+        ldict_set dict_list 1 surname Jamison
+    } -cleanup {
+        unset dict_list
+    } -result {{firstname John surname Mackay} {firstname Angus surname Jamison}}
+
+    test ldict_set-1.1 {ldict_set new key} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Angus surname McNeil}]
+    } -body {
+        ldict_set dict_list 1 middlename Jamison
+    } -cleanup {
+        unset dict_list
+    } -result {{firstname John surname Mackay} {firstname Angus surname McNeil middlename Jamison}}
+
+    test ldict_set-1.2 {ldict_set invalid index} -setup {
+        set dict_list [list {firstname John surname Mackay} {firstname Angus surname McNeil}]
+    } -body {
+        ldict_set dict_list 3 surname Jamison
+    } -cleanup {
+        unset dict_list
+    } -returnCodes 1 -result {list index out of range}
+
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test
