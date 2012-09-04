@@ -197,7 +197,7 @@ proc qc::sum { sum args } {
 
 doc qc::sum {
     Description {
-        Returns the sum of list of number.
+        Returns the sum of list of numbers.
     }
     Usage {
         qc::sum n1 ?n2? ?n3? ....
