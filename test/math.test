@@ -156,7 +156,7 @@ namespace eval ::qcode::test {
         base 8 1024
     } -cleanup {} -result {2000}
 
-    test base-1.3 {base zero } -setup {
+    test base-1.3 {base zero } -constraints knownBug -setup {
     } -body {
         base 8 0
     } -cleanup {} -result 0

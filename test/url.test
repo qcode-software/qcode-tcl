@@ -1,0 +1,23 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test url_path-1.0 {url_path } -setup {
+    } -body {
+        url_path "/someplace.html?order_number=911&title=casáu"
+    } -cleanup {} -result {/someplace.html}
+
+    test url_path-1.1 {url_path full url} -setup {
+    } -body {
+        url_path "http://www.domain.com/someplace.html?order_number=911&title=casáu"
+    } -cleanup {} -result {/someplace.html}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

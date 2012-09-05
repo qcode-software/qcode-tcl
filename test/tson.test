@@ -1,0 +1,87 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test tson_object-1.0 {tson_object } -setup {
+    } -body {
+        tson_object legs 4 eyes 2 coat fur call meow alive true
+    } -cleanup {} -result {object legs 4 eyes 2 coat {string fur} call {string meow} alive true}
+
+    test json_quote-1.0 {json_quote } -setup {
+    } -body {
+        json_quote {This is the "test" string for chars and escapes like "\", "\s" and "\n".}
+    } -cleanup {} -result {"This is the \"test\" string for chars and escapes like \"\\\", \"\\s\" and \"\\n\"."}
+
+    test tson2json-1.0 {tson2json } -setup {
+    } -body {
+        tson2json [list object Image \
+		    [list object \
+		     Width 800 \
+		     Height 600 \
+		     Title {View from the 15th Floor} \
+		     Thumbnail [list object \
+				Url http://www.example.com/image/481989943 \
+				Height 125 \
+				Width [list string 100]] \
+		     IDs [list array 116 943 234 38793]]]
+    } -cleanup {} -result {{
+"Image": {
+"Width": 800,
+"Height": 600,
+"Title": "View from the 15th Floor",
+"Thumbnail": {
+"Url": "http://www.example.com/image/481989943",
+"Height": 125,
+"Width": "100"
+},
+"IDs": [116,943,234,38793]
+}
+}}
+
+    test tson_object_from-1.0 {tson_object_from } -setup {
+        set firstname Aiden
+        set surname Soppit
+        set location "Copper Top"
+        set id 1471
+    } -body {
+        tson_object_from firstname surname location id
+    } -cleanup {
+        unset firstname
+        unset surname
+        unset location
+        unset id
+    } -result {object firstname {string Aiden} surname {string Soppit} location {string {Copper Top}} id 1471}
+
+    test tson2xml-1.0 {tson2xml } -setup {
+        set tson [list object Image \
+		    [list object \
+		     Width 800 \
+		     Height 600 \
+		     Title {View from the 15th Floor} \
+		     Thumbnail [list object \
+				Url http://www.example.com/image/481989943 \
+				Height 125 \
+				Width [list string 100]] \
+		     IDs [list array 116 943 234 38793]]]
+    } -body {
+        tson2xml $tson
+    } -cleanup {
+        unset tson
+    } -result {<Image><Width>800</Width>
+<Height>600</Height>
+<Title>View from the 15th Floor</Title>
+<Thumbnail><Url>http://www.example.com/image/481989943</Url>
+<Height>125</Height>
+<Width>100</Width></Thumbnail>
+<IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>}
+
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test
