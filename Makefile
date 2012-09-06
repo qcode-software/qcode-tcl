@@ -16,7 +16,7 @@ package:
 
 test:
 	make install
-	tclsh ./test_all.tcl -testdir $(TESTDIR)
+	tclsh ./test_all.tcl -testdir $(TESTDIR) 
 
 install:
 	./pkg_mkIndex $(PACKAGEDIR)
