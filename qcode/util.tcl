@@ -279,6 +279,7 @@ doc qc::incr0 {
     }
 }
 
+# TODO Tcl 8.5 only
 namespace import ::tcl::mathop::eq
 namespace import ::tcl::mathop::ne
 
