@@ -155,7 +155,651 @@ namespace eval ::qcode::test {
     } -result {test_var1 = AAA test_var2 = BBB
 }
 
+    test sappend-1.0 {sappend to empty} -setup {
+        set test_var1 "AAA"
+        set test_var2 "BBB"
+        set result {}
+        sappend result {
+            result = $test_var1 test_var2 = $test_var2
+        }
+    } -body {
+        set result
+    } -cleanup {
+        unset test_var1
+        unset test_var2
+        unset result
+    } -result {result = AAA test_var2 = BBB
+}
 
+    test sappend-1.1 {sappend to existing} -setup {
+        set test_var1 "ZZZ"
+        set test_var2 "XXX"
+        set result {result = AAA test_var2 = BBB }
+        sappend result {
+            result = $test_var1 test_var2 = $test_var2
+        }
+    } -body {
+        set result
+    } -cleanup {
+        unset test_var1
+        unset test_var2
+        unset result
+    } -result {result = AAA test_var2 = BBB result = ZZZ test_var2 = XXX
+}
+
+    test coalesce-1.0 {coalesce exists} -setup {
+        set test_var "ZZZ"
+    } -body {
+        coalesce test_var XXX
+    } -cleanup {
+        unset test_var
+    } -result {ZZZ}
+
+    test coalesce-1.1 {coalesce doesnt exist} -setup {
+    } -body {
+        coalesce test_var XXX
+    } -cleanup {
+    } -result {XXX}
+
+    test incr0-1.0 {incr0 1} -setup {
+        set test_var 10
+    } -body {
+        incr0 test_var 1
+    } -cleanup {
+        unset test_var
+    } -result {11}
+
+    test incr0-1.1 {incr0 negative} -setup {
+        set test_var -10
+    } -body {
+        incr0 test_var 1
+    } -cleanup {
+        unset test_var
+    } -result {-9}
+
+    test incr0-1.2 {incr0 does not exist} -setup {
+    } -body {
+        incr0 test_var 10
+    } -cleanup {
+        unset test_var
+    } -result {10}
+
+    test incr0-1.3 {incr0 with negative} -setup {
+        set test_var 10
+    } -body {
+        incr0 test_var -5
+    } -cleanup {
+        unset test_var
+    } -result {5}
+
+    test call-1.0 {call } -setup {
+        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
+            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+                return true
+            } else {
+                return false
+            }
+        }
+        set aaa true
+        set bbb true
+        set ccc true
+        set ddd true
+        set eee true
+        set fff true
+    } -body {
+        call ::qcode::test::check_all_vars
+    } -cleanup {
+        unset aaa 
+        unset bbb 
+        unset ccc 
+        unset ddd 
+        unset eee 
+        unset fff 
+        rename ::qcode::test::check_all_vars ""
+    } -result {true}
+
+    test call-1.1 {call missing var} -setup {
+        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
+            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+                return true
+            } else {
+                return false
+            }
+        }
+        set bbb true
+        set ccc true
+        set ddd true
+        set eee true
+        set fff true
+    } -body {
+        call ::qcode::test::check_all_vars
+    } -cleanup {
+        unset bbb 
+        unset ccc 
+        unset ddd 
+        unset eee 
+        unset fff 
+        rename ::qcode::test::check_all_vars ""
+    } -returnCodes 1 -result {Cannot use variable "aaa" to call proc qc::"::qcode::test::check_all_vars":no such variable "aaa"}
+
+    test call-1.0 {call functionality check} -setup {
+        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
+            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+                return true
+            } else {
+                return false
+            }
+        }
+        set aaa true
+        set bbb true
+        set ccc true
+        set ddd true
+        set eee true
+        set fff false
+    } -body {
+        call ::qcode::test::check_all_vars
+    } -cleanup {
+        unset aaa 
+        unset bbb 
+        unset ccc 
+        unset ddd 
+        unset eee 
+        unset fff 
+        rename ::qcode::test::check_all_vars ""
+    } -result {false}
+
+    test margin-1.0 {margin } -setup {
+    } -body {
+        margin 0.40 2.99
+    } -cleanup {
+    } -result {86.6}
+
+    test margin-1.1 {margin 3 decimal places} -setup {
+    } -body {
+        margin 0.40 2.99 3
+    } -cleanup {
+    } -result {86.622}
+
+    test margin-1.2 {margin zero} -setup {
+    } -body {
+        margin 0.40 0.40
+    } -cleanup {
+    } -result {0.0}
+
+    test margin-1.3 {margin loss} -setup {
+    } -body {
+        margin 40 1
+    } -cleanup {
+    } -result {-3900.0}
+
+    test margin-1.4 {margin zero} -setup {
+    } -body {
+        margin 40 0
+    } -cleanup {
+    } -result {}
+
+    test trunc-1.0 {trunc } -setup {
+    } -body {
+        trunc "01234567890" 5
+    } -cleanup {
+    } -result {01234}
+
+    test trunc-1.1 {trunc to empty} -setup {
+    } -body {
+        trunc "01234567890" 0
+    } -cleanup {
+    } -result {}
+
+    test trunc-1.2 {trunc nothing to do} -setup {
+    } -body {
+        trunc "01234567890" 20
+    } -cleanup {
+    } -result {01234567890}
+
+    test truncate-1.0 {truncate } -setup {
+    } -body {
+        truncate "This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately." 50
+    } -cleanup {
+    } -result {This is a longer string than would be allowed in }
+
+    test truncate-1.1 {truncate nothing to do} -setup {
+    } -body {
+        truncate "This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately." 200
+    } -cleanup {
+    } -result {This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately.}
+
+    test truncate-1.2 {truncate smaller than word} -setup {
+    } -body {
+        truncate "This is a string" 2
+    } -cleanup {
+    } -result {Th}
+
+    test iif-1.0 {iif true} -setup {
+    } -body {
+        iif true AAA ZZZZ
+    } -cleanup {
+    } -result {AAA}
+
+    test iif-1.1 {iif false} -setup {
+    } -body {
+        iif false AAA ZZZ
+    } -cleanup {
+    } -result {ZZZ}
+
+    test iif-1.2 {iif numeric} -setup {
+    } -body {
+        iif 1 AAA ZZZ
+    } -cleanup {
+    } -result {AAA}
+
+    test iif-1.3 {iif numeric2} -setup {
+    } -body {
+        iif 0 AAA ZZZ
+    } -cleanup {
+    } -result {ZZZ}
+
+    test ?-1.0 {? true} -setup {
+    } -body {
+        ? true AAA ZZZZ
+    } -cleanup {
+    } -result {AAA}
+
+    test ?-1.1 {? false} -setup {
+    } -body {
+        ? false AAA ZZZ
+    } -cleanup {
+    } -result {ZZZ}
+
+    test ?-1.2 {? numeric} -setup {
+    } -body {
+        ? 1 AAA ZZZ
+    } -cleanup {
+    } -result {AAA}
+
+    test ?-1.3 {? numeric2} -setup {
+    } -body {
+        ? 0 AAA ZZZ
+    } -cleanup {
+    } -result {ZZZ}
+
+    test true-1.0 {true true} -setup {
+    } -body {
+        true true
+    } -cleanup {
+    } -result {true}
+
+    test true-1.1 {true yes} -setup {
+    } -body {
+        true yes
+    } -cleanup {
+    } -result {true}
+
+    test true-1.2 {true 1} -setup {
+    } -body {
+        true 1
+    } -cleanup {
+    } -result {true}
+
+    test true-1.3 {true false} -setup {
+    } -body {
+        true false
+    } -cleanup {
+    } -result {false}
+
+    test true-1.4 {true no} -setup {
+    } -body {
+        true no
+    } -cleanup {
+    } -result {false}
+
+    test true-1.5 {true 0} -setup {
+    } -body {
+        true 0
+    } -cleanup {
+    } -result {false}
+
+    test true-1.6 {true true custom} -setup {
+    } -body {
+        true true aye nae
+    } -cleanup {
+    } -result {aye}
+
+    test true-1.7 {true false custom} -setup {
+    } -body {
+        true false aye nae
+    } -cleanup {
+    } -result {nae}
+
+    test false-1.0 {false true} -setup {
+    } -body {
+        false true
+    } -cleanup {
+    } -result {false}
+
+    test false-1.1 {false yes} -setup {
+    } -body {
+        false yes
+    } -cleanup {
+    } -result {false}
+
+    test false-1.2 {false 1} -setup {
+    } -body {
+        false 1
+    } -cleanup {
+    } -result {false}
+
+    test false-1.3 {false false} -setup {
+    } -body {
+        false false
+    } -cleanup {
+    } -result {true}
+
+    test false-1.4 {false no} -setup {
+    } -body {
+        false no
+    } -cleanup {
+    } -result {true}
+
+    test false-1.5 {false 0} -setup {
+    } -body {
+        false 0
+    } -cleanup {
+    } -result {true}
+
+    test false-1.6 {false true custom} -setup {
+    } -body {
+        false true aye nae
+    } -cleanup {
+    } -result {nae}
+
+    test false-1.7 {false false custom} -setup {
+    } -body {
+        false false aye nae
+    } -cleanup {
+    } -result {aye}
+
+    test upper-1.0 {upper } -setup {
+    } -body {
+        upper "This will be changed to upper case."
+    } -cleanup {
+    } -result {THIS WILL BE CHANGED TO UPPER CASE.}
+
+    test upper-1.1 {upper empty} -setup {
+    } -body {
+        upper ""
+    } -cleanup {
+    } -result {}
+
+    test lower-1.0 {lower } -setup {
+    } -body {
+        lower "Test String."
+    } -cleanup {
+    } -result {test string.}
+
+    test lower-1.1 {lower empty} -setup {
+    } -body {
+        lower ""
+    } -cleanup {
+    } -result {}
+
+    test trim-1.0 {trim } -setup {
+    } -body {
+        trim "           Test    String.           "
+    } -cleanup {
+    } -result {Test    String.}
+
+    test trim-1.1 {trim empty} -setup {
+    } -body {
+        trim ""
+    } -cleanup {
+    } -result {}
+
+    test mcsplit-1.0 {mcsplit } -setup {
+    } -body {
+        mcsplit "this||is||a||delimited||string" {||}
+    } -cleanup {
+    } -result {this is a delimited string}
+
+    test mcsplit-1.1 {mcsplit single delimiter} -setup {
+    } -body {
+        mcsplit "this||is||a||delimited||string" {|}
+    } -cleanup {
+    } -result {this {} is {} a {} delimited {} string}
+
+    test mcsplit-1.2 {mcsplit nothing to do} -setup {
+    } -body {
+        mcsplit "this||is||a||delimited||string" {|||}
+    } -cleanup {
+    } -result {this||is||a||delimited||string}
+
+    test mcsplit-1.3 {mcsplit empty} -setup {
+    } -body {
+        mcsplit "" {||}
+    } -cleanup {
+    } -result {}
+
+    test plural-1.0 {plural dog} -setup {
+    } -body {
+        plural dog
+    } -cleanup {
+    } -result {dogs}
+
+    test plural-1.1 {plural dogs} -constraints knownBug -setup {
+    } -body {
+        plural dogs
+    } -cleanup {
+    } -result {dogses}
+
+    test plural-1.2 {plural dog} -setup {
+    } -body {
+        plural "the dog"
+    } -cleanup {
+    } -result {the dogs}
+
+    test plural-1.3 {plural knife} -setup {
+    } -body {
+        plural knife
+    } -cleanup {
+    } -result {knives}
+
+    test plural-1.4 {plural cactus} -setup {
+    } -body {
+        plural cactus
+    } -cleanup {
+    } -result {cacti}
+
+    test plural-1.5 {plural self} -setup {
+    } -body {
+        plural self
+    } -cleanup {
+    } -result {selves}
+
+    test plural-1.6 {plural cod} -setup {
+    } -body {
+        plural cod
+    } -cleanup {
+    } -result {cod}
+
+    test plural-1.7 {plural kilo} -setup {
+    } -body {
+        plural kilo
+    } -cleanup {
+    } -result {kilos}
+
+    test plural-1.8 {plural shaving} -constraints knownBug -setup {
+    } -body {
+        plural shaving
+    } -cleanup {
+    } -result {shavings}
+
+    test plural-1.9 {plural index} -setup {
+    } -body {
+        plural index
+    } -cleanup {
+    } -result {indices}
+
+    test plural-2.0 {plural box} -setup {
+    } -body {
+        plural box
+    } -cleanup {
+    } -result {boxes}
+
+    test plural-2.1 {plural friendly} -setup {
+    } -body {
+        plural friendly
+    } -cleanup {
+    } -result {friendlies}
+
+    test plural-2.2 {plural child} -setup {
+    } -body {
+        plural child
+    } -cleanup {
+    } -result {children}
+
+    test plural-2.3 {plural plateau} -setup {
+    } -body {
+        plural plateau
+    } -cleanup {
+    } -result {plateaux}
+
+    test plural-2.4 {plural thesis} -constraints knownBug -setup {
+    } -body {
+        plural thesis
+    } -cleanup {
+    } -result {theses}
+
+    test plural-2.5 {plural woman} -setup {
+    } -body {
+        plural woman
+    } -cleanup {
+    } -result {women}
+
+    test cmplen-1.0 {cmplen bigger} -setup {
+    } -body {
+        cmplen "hippopotamus" "ox"
+    } -cleanup {
+    } -result {1}
+
+    test cmplen-1.1 {cmplen smaller} -setup {
+    } -body {
+        cmplen "ox" "hippopotamus"
+    } -cleanup {
+    } -result {-1}
+
+    test cmplen-1.2 {cmplen same} -setup {
+    } -body {
+        cmplen "ox" "ox"
+    } -cleanup {
+    } -result {0}
+
+    test cmplen-1.3 {cmplen compare to empty} -setup {
+    } -body {
+        cmplen "ox" ""
+    } -cleanup {
+    } -result {1}
+
+    test cmplen-1.3 {cmplen empty to empty} -setup {
+    } -body {
+        cmplen "" ""
+    } -cleanup {
+    } -result {0}
+
+    test subsets-1.0 {subsets 9} -setup {
+    } -body {
+        subsets [list a b c d e f g h i] 9
+    } -cleanup {
+    } -result {{a b c d e f g h i}}
+
+    test subsets-1.1 {subsets 8} -setup {
+    } -body {
+        subsets [list a b c d e f g h i] 8
+    } -cleanup {
+    } -result {{a b c d e f g h} {a b c d e f g i} {a b c d e f h i} {a b c d e g h i} {a b c d f g h i} {a b c e f g h i} {a b d e f g h i} {a c d e f g h i} {b c d e f g h i}}
+
+    test subsets-1.2 {subsets length 1} -setup {
+    } -body {
+        subsets [list a b c d e f g h i] 1
+    } -cleanup {
+    } -result {a b c d e f g h i}
+
+    test subsets-1.3 {subsets length 0} -setup {
+    } -body {
+        subsets [list a b c d e f g h i] 0
+    } -cleanup {
+    } -result {}
+
+    test subsets-1.4 {subsets list of lists } -setup {
+    } -body {
+        subsets [list [list 1 2 3] [list 4 5 6] [list 7 8 9] [list 10 11 12] [list 13 14 15]] 2
+    } -cleanup {
+    } -result {{{1 2 3} {4 5 6}} {{1 2 3} {7 8 9}} {{4 5 6} {7 8 9}} {{1 2 3} {10 11 12}} {{4 5 6} {10 11 12}} {{7 8 9} {10 11 12}} {{1 2 3} {13 14 15}} {{4 5 6} {13 14 15}} {{7 8 9} {13 14 15}} {{10 11 12} {13 14 15}}}
+
+    test permutations-1.0 {permutations } -setup {
+    } -body {
+        permutations [list a b c]
+    } -cleanup {
+    } -result {{c b a} {c a b} {b c a} {a c b} {b a c} {a b c}}
+
+    test permutations-1.1 {permutations single} -setup {
+    } -body {
+        permutations [list a]
+    } -cleanup {
+    } -result {a}
+
+    test permutations-1.2 {permutations empty} -setup {
+    } -body {
+        permutations [list]
+    } -cleanup {
+    } -result {{}}
+
+    test split_pair-1.0 {split_pair } -setup {
+    } -body {
+        split_pair "key=value" =
+    } -cleanup {
+    } -result {key value}
+
+    test split_pair-1.1 {split_pair not found} -setup {
+    } -body {
+        split_pair "key=value" |
+    } -cleanup {
+    } -returnCodes 1 -result {Delimiter "|" was not found in the string "key=value"}
+
+    test split_pair-1.2 {split_pair multiple} -setup {
+    } -body {
+        split_pair "key=value=value=value" =
+    } -cleanup {
+    } -result {key value=value=value}
+
+    test split_pair-1.3 {split_pair longer delimiter} -setup {
+    } -body {
+        split_pair "key/***/value" {/***/}
+    } -cleanup {
+    } -result {key value}
+
+    test max_nz-1.0 {max_nz single argument } -setup {
+    } -body {
+        max_nz 1
+    } -cleanup {} -result {1}
+
+    test max_nz-1.1 {max_nz non-numeric } -setup {
+    } -body {
+        max_nz "hunners"
+    } -cleanup {} -result {}
+
+    test max_nz-1.2 {max_nz negative max } -constraints knownBug -setup {
+    } -body {
+        max_nz -1 -94 -3 0 -2 -6 -100
+    } -cleanup {} -result {-1}
+
+    test max_nz-1.3 {max_nz floats } -setup {
+    } -body {
+        max_nz 99.9 4.4 0.0000001 63.3 0.0001 2 
+    } -cleanup {} -result {99.9}
+
+    test max_nz-1.4 {max_nz zeros } -setup {
+    } -body {
+        max_nz 0 0 0 0 0 0
+    } -cleanup {} -result {}
 
 
 
