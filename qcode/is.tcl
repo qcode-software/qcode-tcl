@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -92,7 +92,7 @@ proc qc::is_non_zero_integer {int} {
     }
 }
 
-doc qc::is__non_zero_integer {
+doc qc::is_non_zero_integer {
     Examples {
         % qc::is_non_zero_integer 0
         0
@@ -518,7 +518,7 @@ proc qc::contains_creditcard {string} {
 
 doc qc::contains_creditcard {
     Examples {
-        % qc::contains_creditcard "This is a sting with a CC number 4111111111111111 in it."
+        % qc::contains_creditcard "This is a string with a CC number 4111111111111111 in it."
         true
         % qc::contains_creditcard "There's just a phone number here 01311111111 so nothing to see"
         false
@@ -577,6 +577,7 @@ doc qc::is_url {
 }
 
 proc qc::is_ipv4 {string} {
+    # TODO checks structure only, will allow 9999.9999.9999.9999
     if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$} $string] } {
         return true
     } else {

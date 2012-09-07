@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -243,6 +243,7 @@ doc qc::cast_epoch {
 proc qc::cast_boolean { string {true t} {false f} } {
     #| Cast a string as a boolean
     # strip html
+    # TODO Aolserver only
     set string [ns_striphtml $string]
     if { [in {Y YES TRUE T 1} [upper $string]] } {
 	return $true

@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -164,7 +164,7 @@ doc qc::check {
 	% check amount POS DECIMAL 
 	"mistake" is not a positive value for amount
 	%
-	% set qty 1.2
+	% set qty eight
 	% check qty INT "Please enter a whole number of days."
 	Please enter a whole number of days.
 	%

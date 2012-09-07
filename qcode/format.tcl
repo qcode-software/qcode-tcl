@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -236,6 +236,8 @@ doc qc::format_ordinal {
     }
 }
 
+# TODO Could this be named differently? Not sure a user would expect this to truncate
+# strings longer than $width
 proc qc::format_right0 {string width} {
     #| Right justified padded with leading 0's
     return [format "%0${width}.${width}s" $string]

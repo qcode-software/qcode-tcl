@@ -1,10 +1,10 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
 proc qc::param { param_name } {
     #| Return param value.
-    #| First checks if param_name is a global variable (as used my muppet)
+    #| First checks if param_name is a global variable (as used by muppet)
     #| then tries nsd params and DB.
     global $param_name
     if { [info exists $param_name] } {

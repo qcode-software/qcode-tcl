@@ -1,9 +1,10 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 proc qc::lock {lock_id timeout code} {
     #| Wait up to $timeout seconds to obtain a lock and then
     #| execute code 
+    # TODO Aolserver only
     while { [nsv_incr lock $lock_id] != 1 } {
 	if { $timeout>0 } {
 	    ns_sleep 1

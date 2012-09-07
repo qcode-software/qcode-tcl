@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 proc qc::round { value dec_places } {
@@ -197,7 +197,7 @@ proc qc::sum { sum args } {
 
 doc qc::sum {
     Description {
-        Returns the sum of list of number.
+        Returns the sum of list of numbers.
     }
     Usage {
         qc::sum n1 ?n2? ?n3? ....

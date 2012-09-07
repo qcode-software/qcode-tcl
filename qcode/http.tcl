@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -199,6 +199,8 @@ proc qc::http_encoding {headers body} {
     #   * HTTP-Header (charset attribute)
     #   * XML declaration (encoding attribute)
     # Otherwise return iso8859-1 as the default http encoding.
+    # TODO this defaults to iso8859-1 for non-xml, but xml_encoding defaults to utf-8
+    # I suspect this should be updated to default to utf-8 also.
     set encoding [qc::http_header_encoding $headers]
     if { $encoding eq "" } {
 	if { [regexp {^\s*<\?xml} $body] } {

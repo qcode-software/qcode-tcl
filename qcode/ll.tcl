@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -43,13 +43,13 @@ proc qc::ll2csv {ll {comma ,}} {
     return [join $lines \r\n]
 }
 
-doc qc::ll_sum {
+doc qc::ll2csv {
     Description {
         Convert a list of lists into a csv.
         Defaults to comma separated but allows the passing of alternative delimiters.
     }
     Usage {
-        qc::ll_sum llist ?separator?
+        qc::ll2csv llist ?separator?
     }
     Examples {
         % set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}]
