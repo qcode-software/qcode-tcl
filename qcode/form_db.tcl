@@ -14,7 +14,9 @@ proc qc::form_db { content args } {
 	    set this(formType) update
 	}
     }
-    append html [html_tag form {*}[array get this]] \n
+    append html [html_tag form class $this(class) id $this(id) method $this(method)]
+    append html "<script>dbFormData = " [tson2json [tson_object {*}[array get this]]]
+    append html ";</script>\n"
     append html "<div class=\"clsDbFormDiv\">\n"
     append html $content \n
     append html "</div>\n"
