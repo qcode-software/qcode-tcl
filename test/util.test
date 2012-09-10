@@ -801,6 +801,115 @@ namespace eval ::qcode::test {
         max_nz 0 0 0 0 0 0
     } -cleanup {} -result {}
 
+    test ..-1.0 {.. months long} -setup {
+    } -body {
+        .. October February
+    } -cleanup {} -result {October November December January February}
+
+    test ..-1.11 {.. months short} -setup {
+    } -body {
+        .. Oct Feb
+    } -cleanup {} -result {Oct Nov Dec Jan Feb}
+
+    test ..-1.12 {.. days short} -setup {
+    } -body {
+        .. Fri Tue
+    } -cleanup {} -result {Fri Sat Sun Mon Tue}
+
+    test ..-1.13 {.. days long} -setup {
+    } -body {
+        .. Friday Tuesday
+    } -cleanup {} -result {Friday Saturday Sunday Monday Tuesday}
+
+    test ..-1.14 {.. months long upper} -setup {
+    } -body {
+        .. OCTOBER FEBRUARY
+    } -cleanup {} -result {OCTOBER NOVEMBER DECEMBER JANUARY FEBRUARY}
+
+    test ..-1.15 {.. months short lower} -setup {
+    } -body {
+        .. oct feb
+    } -cleanup {} -result {oct nov dec jan feb}
+
+    test ..-1.16 {.. days short upper} -setup {
+    } -body {
+        .. FRI TUE
+    } -cleanup {} -result {FRI SAT SUN MON TUE}
+
+    test ..-1.17 {.. days long lower} -setup {
+    } -body {
+        .. friday tuesday
+    } -cleanup {} -result {friday saturday sunday monday tuesday}
+
+    test ..-1.18 {.. days return one} -setup {
+    } -body {
+        .. friday friday
+    } -cleanup {} -result {friday}
+
+    test ..-1.19 {.. days step 2 } -setup {
+    } -body {
+        .. friday thursday 2
+    } -cleanup {} -result {friday sunday tuesday thursday}
+
+    #TODO is this a bug - it returns friday wednesday monday saturday thursday ?
+    test ..-1.20 {.. days step 5 } -constraints knownBug -setup {
+    } -body {
+        .. friday thursday 5
+    } -cleanup {} -result {friday wednesday}
+
+    test ..-1.21 {.. days step 2 limit 2 } -setup {
+    } -body {
+        .. FRIDAY THURSDAY 2 2
+    } -cleanup {} -result {FRIDAY SUNDAY}
+
+    test ..-1.22 {.. days step 2 limit 2 } -setup {
+    } -body {
+        .. FRIDAY THURSDAY 2 10
+    } -cleanup {} -result {FRIDAY SUNDAY TUESDAY THURSDAY SATURDAY MONDAY WEDNESDAY FRIDAY SUNDAY TUESDAY}
+
+    test ..-1.23 {.. dates leap year} -setup {
+    } -body {
+        .. 2012-02-25 2012-03-03
+    } -cleanup {} -result {2012-02-25 2012-02-26 2012-02-27 2012-02-28 2012-02-29 2012-03-01 2012-03-02 2012-03-03}
+
+    test ..-1.24 {.. dates backwards} -setup {
+    } -body {
+        .. 2012-01-03 2011-12-29
+    } -cleanup {} -result {}
+
+    test ..-1.25 {.. dates over year} -setup {
+    } -body {
+        ..  2011-12-29 2012-01-03
+    } -cleanup {} -result {2011-12-29 2011-12-30 2011-12-31 2012-01-01 2012-01-02 2012-01-03}
+
+    test ..-1.26 {.. dates step 2 days} -setup {
+    } -body {
+        ..  2011-12-29 2012-01-03 "2 days"
+    } -cleanup {} -result {2011-12-29 2011-12-31 2012-01-02}
+
+    test ..-1.27 {.. dates step 1 month} -setup {
+    } -body {
+        ..  2011-07-29 2012-01-03 "1 month"
+    } -cleanup {} -result {2011-07-29 2011-08-29 2011-09-29 2011-10-29 2011-11-29 2011-12-29}
+
+    test ..-1.28 {.. dates step 1 year} -setup {
+    } -body {
+        ..  2007-07-29 2012-01-03 "1 year"
+    } -cleanup {} -result {2007-07-29 2008-07-29 2009-07-29 2010-07-29 2011-07-29}
+
+    test ..-1.29 {.. integers} -setup {
+    } -body {
+        ..  1 10
+    } -cleanup {} -result {1 2 3 4 5 6 7 8 9 10}
+
+    test ..-1.29 {.. integers} -setup {
+    } -body {
+        ..  1 10
+    } -cleanup {} -result {1 2 3 4 5 6 7 8 9 10}
+
+
+
+
 
 
     cleanupTests
