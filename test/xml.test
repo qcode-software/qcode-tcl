@@ -1,0 +1,18 @@
+package require tcltest
+eval ::tcltest::configure $argv
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test xml-1.0 {xml  } -setup {
+    } -body {
+        xml  
+    } -cleanup {} -result {}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test
