@@ -14,7 +14,7 @@ proc qc::widget {args} {
     error "No widget proc defined for $type"
 }
 
-doc qc::widget_label {
+doc qc::widget {
     Description {
         Look for a proc "widget_$type" to make the widget
     }
@@ -260,7 +260,7 @@ doc qc::widget_textarea {
     }
     Examples {
 	% widget_textarea name notes value "Hi There"
-	<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>
+        <div contentEditable="true" id="notes" style="width:160px;height:100px" value="Hi There" name="notes" class="clsDbFormHTMLArea">Hi There</div>
     }
 }
 
