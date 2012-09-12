@@ -6,7 +6,8 @@ proc qc::param { param_name } {
     #| Return param value.
     #| First checks if param_name exists as a variable in param:: namespace (as used by muppet)
     #| then tries nsd params and DB.
-    if { [info exists param::${param_name}] } {
+    if { [info exists param::${param_name}] && [set param::${param_name}] ne ""} {
+        # Var in param:: namespace
         return [set param::${param_name}]
     } 
     if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
@@ -32,15 +33,18 @@ proc qc::param_exists { param_name } {
     #| First checks if param_name exists as a variable in param:: namespace (as used by muppet)
     #| then tries nsd params and DB.
     if { [info exists param::${param_name}] && [set param::${param_name}] ne ""} {
+        # Var in param:: namespace
 	return true
     }
     if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
+        # Aolserver param
 	return true
     }
     if { [info commands ns_db] eq "ns_db" } {
+        # DB param
         set qry {select param_value from param where param_name=:param_name}
         db_cache_0or1row -ttl 86400 $qry {
-	    return false
+            # Not found in DB
         } {
 	    return true
         }
