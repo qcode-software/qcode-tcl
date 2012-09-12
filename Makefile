@@ -15,8 +15,8 @@ package:
 	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
 test:
-	make install
-	tclsh ./test_all.tcl -testdir $(TESTDIR) 
+	./pkg_mkIndex $(PACKAGEDIR)
+	tclsh ./test_all.tcl -testdir $(TESTDIR)
 
 install:
 	./pkg_mkIndex $(PACKAGEDIR)
