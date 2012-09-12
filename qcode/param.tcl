@@ -4,12 +4,10 @@ namespace eval qc {}
 
 proc qc::param { param_name } {
     #| Return param value.
-    #| First checks if param_name is a global variable (as used by muppet)
+    #| First checks if param_name exists as a variable in param:: namespace (as used by muppet)
     #| then tries nsd params and DB.
-    global $param_name
-    if { [info exists $param_name] } {
-        # global variable
-        return [set $param_name]
+    if { [info exists param::${param_name}] } {
+        return [set param::${param_name}]
     } elseif { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
         # Aolserver param
 	return $param_value
