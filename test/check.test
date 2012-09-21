@@ -1,0 +1,269 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test check-1.0 {check INT castable success} -setup {
+        set qty 1.2
+    } -body {
+        qc::check qty INT
+    } -cleanup {
+        unset qty
+    } -result true
+
+    test check-1.0a {check INT castable success value} -setup {
+        set qty 1.2
+        qc::check qty INT
+    } -body {
+        set qty
+    } -cleanup {
+        unset qty
+    } -result 1
+
+    test check-1.01 {check INT false} -setup {
+        set qty "Im a string"
+    } -body {
+        qc::check qty INT
+    } -cleanup {
+        unset qty
+    } -returnCodes error -result "\"Im a string\" is not a valid integer for qty"
+
+    test check-1.02 {check INT simple} -setup {
+        set qty 99
+    } -body {
+        qc::check qty INT
+    } -cleanup {
+        unset qty
+    } -result true
+
+    test check-1.03 {check INTEGER simple} -setup {
+        set qty 99
+    } -body {
+        qc::check qty INTEGER
+    } -cleanup {
+        unset qty
+    } -result true
+
+    test check-1.04 {check BOOLEAN yes} -setup {
+        set bool yes
+    } -body {
+        qc::check bool BOOLEAN
+    } -cleanup {
+        unset bool
+    } -result true
+
+    test check-1.05 {check BOOLEAN no} -setup {
+        set bool no
+    } -body {
+        qc::check bool BOOLEAN
+    } -cleanup {
+        unset bool
+    } -result true
+
+    test check-1.06 {check BOOLEAN number} -setup {
+        set bool 1
+    } -body {
+        qc::check bool BOOLEAN
+    } -cleanup {
+        unset bool
+    } -result true
+
+    test check-1.07 {check BOOLEAN true} -setup {
+        set bool true
+    } -body {
+        qc::check bool BOOLEAN
+    } -cleanup {
+        unset bool
+    } -result true
+
+    test check-1.08 {check BOOLEAN negative custom} -setup {
+        set bool -1
+    } -body {
+        qc::check bool BOOLEAN "This is a custom msg"
+    } -cleanup {
+        unset bool
+    } -returnCodes error -result "This is a custom msg"
+
+    test check-1.09 {check STRING postive} -setup {
+        set str "A string" 
+    } -body {
+        qc::check str STRING 30
+    } -cleanup {
+        unset str
+    } -result true
+
+    test check-1.09 {check STRING postive} -setup {
+        set str "A string" 
+    } -body {
+        qc::check str STRING 30
+    } -cleanup {
+        unset str
+    } -result true
+
+    test check-1.10 {check STRING too long} -setup {
+        set str "A slightly too long string"
+    } -body {
+        qc::check str STRING 20
+    } -cleanup {
+        unset str
+    } -returnCodes error -result "\"A slightly too long string\" is not a valid varchar for str"
+
+    test check-1.11 {check STRING null} -setup {
+        set str ""
+    } -body {
+        qc::check str STRING 20
+    } -cleanup {
+        unset str
+    } -result true
+
+    test check-1.12 {check STRING not null} -setup {
+        set str ""
+    } -body {
+        qc::check str STRING 20 NOT NULL
+    } -cleanup {
+        unset str
+    } -returnCodes error -result "str is empty"
+
+    test check-1.13 {check DECIMAL} -setup {
+        set dec -1.2
+    } -body {
+        qc::check dec DECIMAL
+    } -cleanup {
+        unset dec
+    } -result true
+
+    test check-1.14 {check DECIMAL POS fail} -setup {
+        set dec -1.2
+    } -body {
+        qc::check dec DECIMAL POS
+    } -cleanup {
+        unset dec
+    } -returnCodes error -result "\"-1.2\" is not a valid pos for dec"
+
+    test check-1.15 {check DECIMAL POS success} -setup {
+        set dec 1.2
+    } -body {
+        qc::check dec DECIMAL POS
+    } -cleanup {
+        unset dec
+    } -result true
+
+    test check-1.16 {check DATE castable success} -setup {
+        set date "20/7/81"
+    } -body {
+        qc::check date DATE
+    } -cleanup {
+        unset date
+    } -result true
+
+    test check-1.17 {check DATE castable success value} -setup {
+        set date "20/7/81"
+        qc::check date DATE
+    } -body {
+        set date
+    } -cleanup {
+        unset date
+    } -result 1981-07-20
+
+    test check-1.18 {check DATE success} -setup {
+        set date "2012-08-01"
+    } -body {
+        qc::check date DATE
+    } -cleanup {
+        unset date
+    } -result true
+
+    test check-1.19 {check NOT HTML success} -setup {
+        set text "Nothing to see here."
+    } -body {
+        qc::check text NOT HTML
+    } -cleanup {
+        unset text
+    } -result true
+
+    test check-1.20 {check NOT HTML fail} -setup {
+        set text "Nothing to <a href=http://hack.me>see</a> here."
+    } -body {
+        qc::check text NOT HTML
+    } -cleanup {
+        unset text
+    } -returnCodes error -result "\"Nothing to &lt;a href=http://hack.me&gt;see&lt;/a&gt; here.\" contains HTML which is not allowed for text"
+
+    test check-1.21 {check NOT CREDITCARDS success} -setup {
+        set text "Just a number ( 4123123112311231 ) that looks like a CC number but isnt." 
+    } -body {
+        qc::check text NOT CREDITCARDS
+    } -cleanup {
+        unset text
+    } -result true
+
+    test check-1.22 {check NOT CREDITCARDS failure} -setup {
+        set text "This is a valid CC number 4111111111111111 "
+    } -body {
+        qc::check text NOT CREDITCARDS
+    } -cleanup {
+        unset text
+    } -returnCodes error -result "\"This is a valid CC number 4111111111111111 \" contains a creditcard number which is not allowed for text"
+
+
+    test check-1.23 {check PRICE success} -setup {
+        set price "1.21"
+    } -body {
+        qc::check price PRICE
+    } -cleanup {
+        unset price
+    } -result true
+
+    test checks-1.00 {checks success} -setup {
+        set price "1.21"
+        set text "This is a string"
+        set dec 1.2
+        set cc 4111111111111111
+        set html "<p>Hello</p>"
+    } -body {
+        qc::checks {
+            price PRICE
+            text STRING 30 NOT NULL
+            dec DECIMAL
+            cc CREDITCARD
+            html HTML
+        }
+    } -cleanup {
+        unset price 
+        unset text
+        unset dec
+        unset cc
+        unset html
+    } -result ""
+
+    test checks-1.01 {checks failure} -setup {
+        set price "1.21"
+        set text "This is a string"
+        set dec 1.2
+        set cc 999
+        set html "<p>Hello</p>"
+    } -body {
+        qc::checks {
+            price PRICE
+            text STRING 30 NOT NULL
+            dec DECIMAL
+            cc CREDITCARD
+            html HTML
+        }
+    } -cleanup {
+        unset price 
+        unset text
+        unset dec
+        unset cc
+        unset html
+    } -returnCodes error -match glob -result "*\"999\" is not a valid creditcard for cc*" 
+
+    cleanupTests
+}
+namespace delete ::qcode::test

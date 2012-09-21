@@ -1,0 +1,242 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test widget_label-1.0 {widget_label  } -setup {
+    } -body {
+        widget_label  name firstname label Firstname
+    } -cleanup {} -result {<label for="firstname">Firstname</label>}
+
+    test widget-1.0 {widget label } -setup {
+    } -body {
+        widget type label name firstname label Firstname
+    } -cleanup {} -result {<label for="firstname">Firstname</label>}
+
+    test widget_label-1.1 {widget_label required } -setup {
+    } -body {
+        widget_label  name firstname label Firstname required yes
+    } -cleanup {} -result {<label for="firstname" class="clsRequired">Firstname<span style="color:#CC0000">*</span></label>}
+
+    test widget_label-1.2 {widget_label error missing label} -setup {
+    } -body {
+        widget_label name firstname required yes
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "label" when calling "widget_label name firstname required yes"}
+
+    test widget_text-1.0 {widget_text  } -setup {
+    } -body {
+        widget_text name firstname value "" id firstname width 400
+    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
+
+    test widget-1.1 {widget text } -setup {
+    } -body {
+        widget type text name firstname value "" id firstname width 400
+    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
+
+    test widget_text-1.1 {widget_text disabled } -setup {
+    } -body {
+        widget_text name firstname value "Jimmy" id firstname disabled yes
+    } -cleanup {} -result {<span>Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
+
+    test widget_text-1.2 {widget_text error missing value } -setup {
+    } -body {
+        widget_text name firstname id firstname disabled yes
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_text name firstname id firstname disabled yes"}
+
+    test widget_text-1.3 {widget_text error missing name } -setup {
+    } -body {
+        widget_text value "" id firstname width 400
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "name" when calling "widget_text value {} id firstname width 400"}
+
+    test widget_compare-1.0 {widget_compare  } -setup {
+    } -body {
+        widget_compare name price value 10 operator =
+    } -cleanup {} -result {<select id="price_op" name="price_op" sticky="no">
+<option value="&gt;">greater than</option>
+<option value="=" selected="selected">equals</option>
+<option value="&lt;">less than</option>
+</select>
+ <input style="width:160px" id="price" value="10" name="price" type="text">}
+
+    test widget-1.2 {widget compare } -setup {
+    } -body {
+        widget type compare name price value 10 operator =
+    } -cleanup {} -result {<select id="price_op" name="price_op" sticky="no">
+<option value="&gt;">greater than</option>
+<option value="=" selected="selected">equals</option>
+<option value="&lt;">less than</option>
+</select>
+ <input style="width:160px" id="price" value="10" name="price" type="text">}
+
+    test widget_compare-1.1 {widget_compare error missing value } -setup {
+    } -body {
+        widget_compare name price operator =
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_compare name price operator ="}
+
+    test widget_combo-1.0 {widget_combo  } -setup {
+    } -body {
+        widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
+    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="clsDbFormCombo"><input type="hidden" name="customer_id" value="2343">}
+
+    test widget-1.3 {widget combo } -setup {
+    } -body {
+        widget type combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
+    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="clsDbFormCombo"><input type="hidden" name="customer_id" value="2343">}
+
+    test widget_textarea-1.0 {widget_textarea  } -setup {
+    } -body {
+        widget_textarea name notes value "Hi There"
+    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
+
+    test widget-1.4 {widget textarea } -setup {
+    } -body {
+        widget type textarea name notes value "Hi There"
+    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
+
+    test widget_textarea-1.1 {widget_textarea error missing value } -setup {
+    } -body {
+        widget_textarea name notes 
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_textarea name notes"}
+
+    test widget_select-1.0 {widget_select  } -setup {
+    } -body {
+        widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
+    } -cleanup {} -result {<select id="letter" name="letter">
+<option value="">- Select -</option>
+<option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option>
+</select>
+}
+
+    test widget-1.5 {widget select } -setup {
+    } -body {
+        widget type select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
+    } -cleanup {} -result {<select id="letter" name="letter">
+<option value="">- Select -</option>
+<option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option>
+</select>
+}
+
+    test widget_select-1.1 {widget_select error missing options } -setup {
+    } -body {
+        widget_select name letter value "" null_option yes
+    } -returnCodes 1 -cleanup {} -result {Missing value for arg "options" when calling "widget_select name letter value {} null_option yes"}
+
+    test widget_span-1.0 {widget_span  } -setup {
+    } -body {
+        widget_span name foo value bar
+    } -cleanup {} -result {<span id="foo">bar</span>}
+
+    test widget-1.6 {widget span } -setup {
+    } -body {
+        widget type span  name foo value bar
+    } -cleanup {} -result {<span id="foo">bar</span>}
+
+    test widget_span-1.1 {widget_span width height } -setup {
+    } -body {
+        widget_span name foo value bar width 100 height 100
+    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo">bar</span>}
+
+    test widget_password-1.0 {widget_password  } -setup {
+    } -body {
+        widget_password name password value ""
+    } -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
+
+    test widget-1.7 {widget password } -setup {
+    } -body {
+        widget type password name password value ""
+    } -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
+
+    test widget_password-1.1 {widget_password id width } -setup {
+    } -body {
+        widget_password name password value "" id pw width 100
+    } -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" type="password">}
+
+    test widget_bool-1.0 {widget_bool no } -setup {
+    } -body {
+        widget_bool name spam value no
+    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
+
+    test widget-1.8 {widget bool } -setup {
+    } -body {
+        widget type bool  name spam value no
+    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
+
+    test widget_bool-1.1 {widget_bool yes } -setup {
+    } -body {
+        widget_bool name spam value yes
+    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox" checked="checked">}
+
+    test widget_bool-1.2 {widget_bool no id } -setup {
+    } -body {
+        widget_bool name spam value no id ham
+    } -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" type="checkbox">}
+
+    test widget_checkbox-1.0 {widget_checkbox  } -setup {
+    } -body {
+        widget_checkbox name order_no value 3215
+    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
+
+    test widget-1.9 {widget checkbox } -setup {
+    } -body {
+        widget type checkbox name order_no value 3215
+    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
+
+    test widget_button-1.0 {widget_button  } -setup {
+    } -body {
+        widget_button name foo value "Click Me" onclick "alert('Hi');"
+    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
+
+    test widget-2.0 {widget button } -setup {
+    } -body {
+        widget type button name foo value "Click Me" onclick "alert('Hi');"
+    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
+
+    test widget_submit-1.0 {widget_submit  } -setup {
+    } -body {
+        widget_submit name foo value "Submit"
+    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
+
+    test widget-2.1 {widget submit } -setup {
+    } -body {
+        widget type submit name foo value "Submit"
+    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
+
+    test widget_radio-1.0 {widget_radio  } -setup {
+    } -body {
+        widget_radio name sex value male
+    } -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
+
+    test widget-2.2 {widget radio } -setup {
+    } -body {
+        widget type radio name sex value male
+    } -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
+
+    test widget_radiogroup-1.0 {widget_radiogroup  } -setup {
+    } -body {
+        widget_radiogroup  name sex value M options {Male M Female F}
+    } -cleanup {} -result {<div class="clsRadioGroup" name="sex" id="sex"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></div>}
+
+    test widget-2.3 {widget radiogroup } -setup {
+    } -body {
+        widget type radiogroup name sex value M options {Male M Female F}
+    } -cleanup {} -result {<div class="clsRadioGroup" name="sex" id="sex"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></div>}
+
+    test widget-2.4 {widget unknown } -setup {
+    } -body {
+        widget type hadron_collider name sex value M options {Male M Female F}
+    } -returnCodes 1 -cleanup {} -result {No widget proc defined for hadron_collider}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

@@ -1,0 +1,67 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test style_set-1.0 {style_set clobber} -setup {
+    } -body {
+        style_set "color:pink;font-weight:bold;" color green
+    } -cleanup {} -result {color:green;font-weight:bold}
+
+    test style_set-1.1 {style_set integer} -setup {
+    } -body {
+        style_set "color:pink;width:100px;font-weight:bold;" width 200
+    } -cleanup {} -result {color:pink;width:200px;font-weight:bold}
+
+    test style_set-1.2 {style_set new} -setup {
+    } -body {
+        style_set "color:pink;width:100px;font-weight:bold;" height 500px
+    } -cleanup {} -result {color:pink;width:100px;font-weight:bold;height:500px}
+
+    test style_set-1.3 {style_set empty rule} -setup {
+    } -body {
+        style_set "" color green
+    } -cleanup {} -result {color:green}
+
+    test style_set-1.4 {style_set integer not px} -setup {
+    } -body {
+        style_set "color:pink;width:100px;font-weight:bold;" anotherproperty 999
+    } -cleanup {} -result {color:pink;width:100px;font-weight:bold;anotherproperty:999}
+
+    test css_parse-1.0 {css_parse } -setup {
+    } -body {
+        css_parse {
+            @media screen
+            {
+                p.test {font-family:verdana,sans-serif;font-size:14px;}
+            }
+            /* This is a comment */
+            body
+            {
+            background-image:url('gingham.png');
+            background-repeat:no-repeat;
+            background-position:right top;
+            margin-right:200px;
+            }
+            p.date {text-align:right;}
+            p.main {text-align:justify;}
+            p.rep_small
+            {
+            font:10px arial,sans-serif;
+            }
+            p.rep_bold
+            {
+            font:italic bold 12px/30px Georgia,serif;
+            }
+        }
+    } -cleanup {} -result {body {background-image url('gingham.png') background-repeat no-repeat background-position {right top} margin-right 200px} p.date {text-align right} p.main {text-align justify} p.rep_small {font {10px arial,sans-serif}} p.rep_bold {font {italic bold 12px/30px Georgia,serif}}}
+
+    cleanupTests
+}
+namespace delete ::qcode::test

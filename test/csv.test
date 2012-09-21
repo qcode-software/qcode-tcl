@@ -1,0 +1,46 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test csv2ll-1.00 {csv2ll success} -setup {
+        set csv {"one","two","three"
+4,5,6}
+    } -body {
+        qc::csv2ll $csv
+    } -cleanup {
+        unset csv
+    } -result "{one two three} {4 5 6}"
+
+    test csv2ll-1.00 {csv2ll escape chars success} -setup {
+        set csv {,"one
+two","three"",",",""four",","
+2,3,4,",
+",9}
+    } -body {
+        qc::csv2ll $csv
+    } -cleanup {
+        unset csv
+    } -result {{{} {one
+two} three\", {} four ,} {2 3 4 {,
+} 9}}
+
+    test csv2list-1.00 {csv2list success} -setup {
+        set csv {"one","two","three"
+4,5,6}
+    } -body {
+        qc::csv2list $csv
+    } -cleanup {
+        unset csv
+    } -result {one two three}
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test

@@ -1,17 +1,22 @@
 NAME=qcode
 VERSION=1.8
 PACKAGEDIR=qcode
+TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
 RELEASE=$(shell cat RELEASE)
 REMOTEUSER=debian.qcode.co.uk
 REMOTEHOST=debian.qcode.co.uk
 REMOTEDIR=debian.qcode.co.uk
 
-.PHONY: all
+.PHONY: all test
 
 all: package upload clean incr-release
 package:
 	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
+
+test:
+	./pkg_mkIndex $(PACKAGEDIR)
+	tclsh ./test_all.tcl -testdir $(TESTDIR)
 
 install:
 	./pkg_mkIndex $(PACKAGEDIR)

@@ -1,0 +1,108 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    variable SETUP { set test_dict [dict create a 1 b [dict create b1 1 b2 2] c 3] }
+    variable CLEANUP { unset test_dict }
+
+    test dict_exists-1.0 {dict_exists success} -setup $SETUP -body {
+        dict_exists $test_dict b b2
+    } -cleanup $CLEANUP -result 1
+    test dict_exists-1.1 {dict_exists failure} -setup $SETUP -body {
+        dict_exists $test_dict b c1
+    } -cleanup $CLEANUP -result 0
+
+    test dict_subset-1.0 {dict_subset success1} -setup $SETUP -body {
+        dict_subset $test_dict a
+    } -cleanup $CLEANUP -result {a 1}
+    test dict_subset-1.1 {dict_subset success2} -setup $SETUP -body {
+        dict_subset $test_dict b c
+    } -cleanup $CLEANUP -result {b {b1 1 b2 2} c 3}
+    test dict_subset-1.2 {dict_subset empty} -setup $SETUP -body {
+        dict_subset $test_dict d
+    } -cleanup $CLEANUP -result {}
+    test dict_subset-1.3 {dict_subset out of bounds} -setup $SETUP -body {
+        dict_subset $test_dict a b c d
+    } -cleanup $CLEANUP -result {a 1 b {b1 1 b2 2} c 3}
+        
+    test dict_exclude-1.0 {dict_exclude} -setup $SETUP -body {
+        dict_exclude $test_dict a
+    } -cleanup $CLEANUP -result {b {b1 1 b2 2} c 3}
+    test dict_exclude-1.1 {dict_exclude all} -setup $SETUP -body {
+        dict_exclude $test_dict a b c 
+    } -cleanup $CLEANUP -result {}
+    test dict_exclude-1.2 {dict_exclude none} -setup $SETUP -body {
+        dict_exclude $test_dict d
+    } -cleanup $CLEANUP -result {a 1 b {b1 1 b2 2} c 3}
+
+    test dict_sort-1.0 {dict_sort} -setup { 
+        set test_dict [dict create a 3 b 1 c 2] 
+    } -body {
+        dict_sort test_dict
+    } -cleanup {unset test_dict} -result {b 1 c 2 a 3}
+    test dict_sort-1.1 {dict_sort check var} -setup { 
+        set test_dict [dict create a 3 b 1 c 2] 
+        dict_sort test_dict
+    } -body {
+        set test_dict
+    } -cleanup {unset test_dict} -result {b 1 c 2 a 3}
+    test dict_sort-1.2 {dict_sort nested dict check var} -setup { 
+        set test_dict [dict create a 3 b 1 c [dict create a1 3 a2 1 a3 2]] 
+        dict_sort test_dict
+    } -body {
+        set test_dict
+    } -cleanup {unset test_dict} -result {b 1 a 3 c {a1 3 a2 1 a3 2}}
+
+    test dict2xml-1.0 {dict2xml} -body {
+        dict2xml {a 3 b 1 c 2}
+    } -result {<a>3</a>
+<b>1</b>
+<c>2</c>}
+    test dict2xml-1.1 {dict2xml with html} -body {
+        dict2xml {a 3 b 1 c {<p>I'm some html</p>}}
+    } -result {<a>3</a>
+<b>1</b>
+<c>&lt;p&gt;I&#39;m some html&lt;/p&gt;</c>}
+    
+    test dict_from-1.0 {dict_from success} -setup { 
+        set a 1; set b 2; set c 3
+    } -body {
+        dict_from a b c
+    } -cleanup {unset a; unset b; unset c} -result {a 1 b 2 c 3}
+    test dict_from-1.1 {dict_from failure} -setup { 
+        set a 1; set b 2; set c 3
+    } -body {
+        dict_from a b c d
+    } -cleanup {
+        unset a; unset b; unset c
+    } -returnCodes error -result {Can't create dict with d: No such variable}
+
+    test dict2vars-1.0 {dict2vars success} -setup { 
+        set test_dict [dict create a 1 b 2 c 3]
+        dict2vars $test_dict
+    } -body {
+        set c
+    } -cleanup {
+        unset a; unset b; unset c; unset test_dict
+    } -result 3
+    test dict2vars-1.1 {dict2vars subset only} -setup { 
+        set test_dict [dict create a 1 b 2 c 3]
+        dict2vars $test_dict a b 
+    } -body {
+        set c
+    } -cleanup {
+        unset a; unset b; unset test_dict
+    } -returnCodes error -result {can't read "c": no such variable}
+
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test

@@ -1,0 +1,48 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test html_table_scroll-1.0 {html_table_doc} -setup {
+        set cols {
+	    {label "Sales Quote No." name sales_quote_no}
+	    {label "Customer Order No." name customer_order_no}
+	}
+        set tbody [list 999 121212]
+    } -body {
+        html_table_scroll cols $cols tbody $tbody
+    }  -cleanup {
+        unset cols
+        unset tbody
+    } -result {<div class="clsScroll" style="height:600px"><table>
+<colgroup>
+<col name="sales_quote_no">
+<col name="customer_order_no">
+</colgroup>
+<thead>
+<tr>
+<th>Sales Quote No.</th>
+<th>Customer Order No.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>999</td>
+</tr>
+<tr>
+<td>121212</td>
+</tr>
+</tbody>
+</table>
+</div>
+}
+    
+    
+    cleanupTests
+} 
+namespace delete ::qcode::test

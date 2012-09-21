@@ -1,0 +1,114 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    test multimap_get_first-1.0 {multimap_get_first } -setup {
+    } -body {
+        multimap_get_first [list from John from Jill from Gail to Kim subject Hi] from
+    } -cleanup {} -result {John}
+
+    test multimap_get_first-1.1 {multimap_get_first invalid key} -setup {
+    } -body {
+        multimap_get_first [list from John from Jill from Gail to Kim subject Hi] text
+    } -returnCodes 1 -cleanup {} -result {multimap does not contain the key:text it contains "from John from Jill from Gail to Kim subject Hi"}
+
+    test multimap_set_first-1.0 {multimap_set_first } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_set_first multimap from Johnny
+    } -cleanup {unset multimap} -result {from Johnny from Jill from Gail to Kim subject Hi}
+
+    test multimap_set_first-1.1 {multimap_set_first new key} -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_set_first multimap text "Dallas 1pm"
+    } -cleanup {unset multimap} -result {from John from Jill from Gail to Kim subject Hi text {Dallas 1pm}}
+
+    test multimap_set_first-1.2 {multimap_set_first empty} -setup {
+        set multimap [list]
+    } -body {
+        multimap_set_first multimap text "Dallas 1pm"
+    } -cleanup {unset multimap} -result {text {Dallas 1pm}}
+
+    test multimap_unset_first-1.0 {multimap_unset_first } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_unset_first multimap from 
+    } -cleanup {unset multimap} -result {from Jill from Gail to Kim subject Hi}
+
+    test multimap_unset_first-1.1 {multimap_unset_first key not present } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+        multimap_unset_first multimap text 
+    } -body {
+        set multimap
+    } -cleanup {unset multimap} -result {from John from Jill from Gail to Kim subject Hi}
+
+    test multimap_unset_first-1.2 {multimap_unset_first empty} -setup {
+        set multimap [list]
+    } -body {
+        multimap_unset_first multimap from 
+    } -cleanup {unset multimap} -result {}
+
+    test multimap_exists-1.0 {multimap_exists positive } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_exists $multimap from
+    } -cleanup {unset multimap} -result 1
+
+    test multimap_exists-1.1 {multimap_exists negative} -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_exists $multimap text
+    } -cleanup {unset multimap} -result 0
+
+    test multimap_exists-1.2 {multimap_exists empty} -setup {
+        set multimap [list]
+    } -body {
+        multimap_exists $multimap text
+    } -cleanup {unset multimap} -result 0
+
+    test multimap_keys-1.0 {multimap_keys positive } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_keys $multimap 
+    } -cleanup {unset multimap} -result {from from from to subject}
+
+    test multimap_keys-1.1 {multimap_keys empty } -setup {
+        set multimap [list]
+    } -body {
+        multimap_keys $multimap 
+    } -cleanup {unset multimap} -result {}
+
+    test multimap_get_all-1.0 {multimap_get_all multiple values } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_get_all $multimap from
+    } -cleanup {unset multimap} -result {John Jill Gail}
+
+    test multimap_get_all-1.1 {multimap_get_all key not present } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_get_all $multimap text
+    } -cleanup {unset multimap} -result {}
+
+    test multimap_get_all-1.2 {multimap_get_all empty } -setup {
+        set multimap [list]
+    } -body {
+        multimap_get_all $multimap text
+    } -cleanup {unset multimap} -result {}
+
+    test multimap_get_all-1.3 {multimap_get_all single value } -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_get_all $multimap to
+    } -cleanup {unset multimap} -result {Kim}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
