@@ -459,7 +459,7 @@ proc qc::lsum {list} {
 
 doc qc::lsum {
     Description {
-        Returns the sum of a list of numeric items.
+        Results the sum of a list of numeric items.
     }
     Usage {
         qc::lsum list
