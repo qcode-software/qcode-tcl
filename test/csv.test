@@ -28,7 +28,7 @@ two","three"",",",""four",","
     } -cleanup {
         unset csv
     } -result {{{} {one
-two} three\", {} four ,} {2 3 4 {,
+two} three\", ,\"four ,} {2 3 4 {,
 } 9}}
 
     test csv2list-1.00 {csv2list success} -setup {

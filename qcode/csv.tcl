@@ -42,10 +42,10 @@ proc qc::csv2ll {csv } {
 		    \s*(?:,|\n|$)
 		} $csv -> field] } {
 	set field_value [string range $csv [lindex $field 0] [lindex $field 1]]
-	set csv [string replace $csv [lindex $field 0] [lindex $field 1] [string map [list , \0 \n \1 \"\" \2] $field_value]]
-	set start [expr {[lindex $field 0]+[string length $field_value]+1}]
+	set escaped_value [string map [list , \0 \n \1 \"\" \2] $field_value]
+	set csv [string replace $csv [lindex $field 0] [lindex $field 1] $escaped_value]
+	set start [expr {[lindex $field 0]+[string length $escaped_value]+1}]
     }
-
 
     set csv [string map {, \0 \0 ,} $csv] 
     # trim whitespace
