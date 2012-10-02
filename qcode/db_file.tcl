@@ -14,6 +14,7 @@ proc qc::db_file_insert {args} {
     set data [base64::encode [read $id]]
     close $id
    
+    db_dml {update file set archived_date=now() where filename=:filename and archived_date is null}
     set file_id [db_seq file_id_seq]
     set qry {
 	insert into file 

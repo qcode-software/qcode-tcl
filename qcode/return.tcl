@@ -4,7 +4,7 @@ namespace eval qc {}
 
 proc qc::return2client { args } {
     #| Return data to http client
-    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?filter_cc boolean? ?header header? .. 
+    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
     set arg_names [args2vars $args]
     if { [info exists html] } {
 	default content-type "text/html; charset=utf-8"
@@ -15,8 +15,11 @@ proc qc::return2client { args } {
     } elseif { [info exists text] } {
 	default content-type "text/plain; charset=utf-8"
 	set var text
+    } elseif { [info exists json] } {
+	default content-type "application/json; charset=utf-8"
+	set var json
     } else {
-	error "No payload given in html or xml or text" 
+	error "No payload given in html or xml or text or json" 
     }
     default code 200
     default filter_cc no
@@ -25,7 +28,7 @@ proc qc::return2client { args } {
 	set $var [qc::format_cc_masked_string [set $var]] 
     }
     # Other headers
-    foreach name [lexclude $arg_names html xml text code content-type] {
+    foreach name [lexclude $arg_names html xml text json code content-type] {
     	set headers [ns_conn outputheaders]
 	ns_set update $headers $name [set $name]
     }

@@ -11,6 +11,8 @@ proc qc::error_handler { } {
 	USER* {
 	    if { [eq $suffix .xml] } {
 		return2client xml [qc::xml error $errorMessage] filter_cc yes
+	    } elseif { [eq $suffix .json] } {
+		return2client code 409 json $errorMessage
 	    } else {
 		set html {
 		    <h2>Missing or Invalid Data</h2>
