@@ -1,0 +1,139 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test email_file2attachment-1.0 {email_file2attachment return value} -setup {
+        set fh [open test_file.txt w]
+        puts $fh {This is a
+multiline
+file}
+        close $fh
+    } -body {
+        email_file2attachment test_file.txt
+    } -cleanup {
+        file delete test_file.txt
+    } -result {encoding base64 data VGhpcyBpcyBhCm11bHRpbGluZQpmaWxlCg== filename test_file.txt}
+
+    test email_file2attachment-1.1 {email_file2attachment check decoding} -setup {
+        set fh [open test_file.txt w]
+        puts $fh {This is a
+multiline
+file}
+        close $fh
+        set result_dict [email_file2attachment test_file.txt]
+    } -body {
+        ::base64::decode [dict get $result_dict data]
+    } -cleanup {
+        file delete test_file.txt
+        unset result_dict
+    } -result {This is a
+multiline
+file
+}
+    
+    test email_address-1.0 {email_address success} -body {
+        email_address {"Test Testerton" <test@testerton.com>}
+    } -result {test@testerton.com}
+
+    test email_addresses-1.0 {email_addresses success} -body {
+        email_addresses {"Test Testerton" <test@testerton.com> "Testy Testerton" <testy@testerton.com> "Tester Testerton" <tester@testerton.com> }
+    } -result {test@testerton.com testy@testerton.com tester@testerton.com}
+
+    test email_mime_text-1.0 {email_mime_text success} -body {
+        email_mime_text "This is some text"
+    } -result {headers {Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}} body {This is some text}}
+    
+    test email_mime_html_alternative-1.0 {email_mime_html_alternative success} -body {
+        email_mime_html_alternative {<html><p>This is some <b>HTML</b></p></html>} 503f5d914c87ae17acde9
+    } -match regexp -result {--503f5d914c87ae17acde9\r\nContent-Type: text/plain;charset="utf-8"\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nThis is some HTML\r\n--503f5d914c87ae17acde9\r\nContent-Type: text/html;charset="utf-8"\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n<html><p>This is some <b>HTML</b></p></html>\r\n--503f5d914c87ae17acde9--}
+
+    test email_mime_attachment-1.0 {email_mime_attachment success} -body {
+        email_mime_attachment {data "Some text of some sort" filename attachment.txt}
+    } -result {headers {Content-Type {text/plain;name="attachment.txt"} Content-Transfer-Encoding base64 Content-Disposition {attachment;filename="attachment.txt"}} body U29tZSB0ZXh0IG9mIHNvbWUgc29ydA==}
+
+    test email_mime_attachment-1.1 {email_mime_attachment with cid success} -body {
+        email_mime_attachment {data "Some text of some sort" filename attachment.txt cid 5.31.32252.1057009685@server01.example.net}
+    } -result {headers {Content-Type {text/plain;name="attachment.txt"} Content-Transfer-Encoding base64 Content-ID <5.31.32252.1057009685@server01.example.net>} body U29tZSB0ZXh0IG9mIHNvbWUgc29ydA==}
+
+    test email2multimap-1.0 {email2multimap success} -setup {
+    set email {MIME-Version: 1.0
+Received: by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)
+Date: Fri, 17 Aug 2012 12:51:36 +0100
+Delivered-To: bernhard@qcode.co.uk
+Message-ID: <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com>
+Subject: Memo
+From: Bernhard van Woerden <bernhard@qcode.co.uk>
+To: Bernhard van Woerden <bernhard@qcode.co.uk>
+Content-Type: multipart/mixed; boundary=0016e6d9a38e403c6904c774c888
+
+--0016e6d9a38e403c6904c774c888
+Content-Type: multipart/alternative; boundary=0016e6d9a38e403c6004c774c886
+
+--0016e6d9a38e403c6004c774c886
+Content-Type: text/plain; charset=ISO-8859-1
+
+Please see the attached.
+
+- Bernhard
+
+--0016e6d9a38e403c6004c774c886
+Content-Type: text/html; charset=ISO-8859-1
+
+Please see the attached.<div><br></div><div>- Bernhard</div>
+
+--0016e6d9a38e403c6004c774c886--
+--0016e6d9a38e403c6904c774c888
+Content-Type: text/plain; charset=US-ASCII; name="Memo.txt"
+Content-Disposition: attachment; filename="Memo.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h5z7vyc30
+
+V291bGQgdGhlIGxhc3QgcGVyc29uIHRvIGxlYXZlIHBsZWFzZSB0dXJuIHRoZSBsaWdodHMgb2Zm
+Lg==
+--0016e6d9a38e403c6904c774c888--
+}
+    } -body {
+        email2multimap $email
+    } -cleanup {
+        unset email
+    } -result {MIME-Version 1.0 Received {by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)} Date {Fri, 17 Aug 2012 12:51:36 +0100} Delivered-To bernhard@qcode.co.uk Message-ID <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com> Subject Memo From {Bernhard van Woerden <bernhard@qcode.co.uk>} To {Bernhard van Woerden <bernhard@qcode.co.uk>} Content-Type {multipart/mixed; boundary=0016e6d9a38e403c6904c774c888} bodies {{Content-Type {multipart/alternative; boundary=0016e6d9a38e403c6004c774c886} bodies {{Content-Type {text/plain; charset=ISO-8859-1} body {Please see the attached.
+
+- Bernhard}} {Content-Type {text/html; charset=ISO-8859-1} body {Please see the attached.<div><br></div><div>- Bernhard</div>}}}} {Content-Type {text/plain; charset=US-ASCII; name="Memo.txt"} Content-Disposition {attachment; filename="Memo.txt"} Content-Transfer-Encoding base64 X-Attachment-Id f_h5z7vyc30 body {Would the last person to leave please turn the lights off.}}}}
+
+    test email_header_values-1.0 {email_header_values success} -body {
+        email_header_values Content-Type {Content-Type: multipart/report; report-type=delivery-status; boundary="=_pluto"}
+    } -result {Content-Type {Content-Type: multipart/report} report-type delivery-status boundary =_pluto}
+    
+    test email_header_fold-1.0 {email_header_fold non ascii} -body {
+        email_header_fold "Non ASCII treated llike this pound sign £"
+    } -result {Non ASCII treated llike this pound sign =?UTF-8?Q?=C2=A3?=}
+
+    test email_header_fold-1.1 {email_header_fold no fold} -body {
+        email_header_fold "Not long enough to fold"
+    } -result {Not long enough to fold}
+
+    # Using binary scan to check \r\n line break`
+    test email_header_fold-1.2 {email_header_fold fold} -setup {
+        set result [email_header_fold "This is a long line over the 78 characters allowed before folding at a word boundary where possible"]
+        binary scan $result H* hex
+    } -body {
+        set hex
+    } -match regexp -result {546869732069732061206c6f6e67206c696e65206f76657220746865203738206368617261637465727320616c6c6f776564206265666f726520666f6c64696e67206174206120776f72640d0d0a20626f756e6461727920776865726520706f737369626c65}
+
+    test mime_type_guess-1.0 {mime_type_guess default} {mime_type_guess file.xxx} {*/*}
+    test mime_type_guess-1.1 {mime_type_guess zip} {mime_type_guess file.zip} application/zip
+    test mime_type_guess-1.2 {mime_type_guess shtml} {mime_type_guess another_file.shtml} text/html
+    test mime_type_guess-1.3 {mime_type_guess pdf} {mime_type_guess another_file.old.pdf} application/pdf
+
+
+    cleanupTests
+
+}
+namespace delete ::qcode::test

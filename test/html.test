@@ -1,0 +1,250 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+
+    test html-1.0 {html simple } -setup {
+    } -body {
+        html span {Hello There}
+    } -result {<span>Hello There</span>}
+    test html-1.1 {html class } -setup {
+    } -body {
+        html span {Hello There} class greeting
+    } -result {<span class="greeting">Hello There</span>}
+    test html-1.2 {html escaped value } -setup {
+    } -body {
+        html span {Hello There} class greeting value Escape&Me
+    } -result {<span class="greeting" value="Escape&amp;Me">Hello There</span>}
+    test html-1.3 {html quotes } -setup {
+    } -body {
+        html span {Hello There} class greeting value "don't \"quote\" me"
+    } -result {<span class="greeting" value="don't &#34;quote&#34; me">Hello There</span>}
+
+    test html_tag-1.0 {html_tag simple } -setup {
+    } -body {
+        html_tag input name firstname
+    } -result {<input name="firstname">}
+    test html_tag-1.1 {html_tag simple2 } -setup {
+    } -body {
+        html_tag input name firstname value "Aquarian"
+    } -result {<input name="firstname" value="Aquarian">}
+    test html_tag-1.2 {html_tag disabled } -setup {
+    } -body {
+        html_tag input name firstname value "Aquarian" disabled yes
+    } -result {<input name="firstname" value="Aquarian" disabled="disabled">}
+
+
+    test html_escape-1.0 {html_escape  } -setup {
+    } -body {
+        html_escape {<p>Down This "Road" He's Watching & Waiting</p>}
+    } -result {&lt;p&gt;Down This &quot;Road&quot; He&#39;s Watching &amp; Waiting&lt;/p&gt;}
+
+    test html_unescape-1.0 {html_unescape  } -setup {
+    } -body {
+        html_unescape {&lt;p&gt;Down This &quot;Road&quot; He&#39;s Watching &amp; Waiting&lt;/p&gt;}
+    } -result {<p>Down This "Road" He's Watching & Waiting</p>}
+    
+    test html_hidden-1.0 {html_hidden  } -setup {
+        set customer_key 1021020120120
+    } -body {
+        html_hidden customer_key
+    } -cleanup {
+        unset customer_key
+    } -result {<input type="hidden" name="customer_key" value="1021020120120" id="customer_key">
+}
+    test html_hidden-1.1 {html_hidden 2 vats } -setup {
+        set customer_key 1021020120120
+        set order_key 999
+    } -body {
+        html_hidden customer_key order_key
+    } -cleanup {
+        unset customer_key
+        unset order_key
+    } -result {<input type="hidden" name="customer_key" value="1021020120120" id="customer_key">
+<input type="hidden" name="order_key" value="999" id="order_key">
+}
+
+    test html_hidden_set-1.0 {html_hidden_set } -body {
+        html_hidden_set customer_key 1021020120120 order_key 999
+    }  -result {<input type="hidden" name="customer_key" value="1021020120120" id="customer_key">
+<input type="hidden" name="order_key" value="999" id="order_key">
+}
+
+    test html_list-1.0 {html_list } -body {
+        html_list [list "Kathleen" "Like a SUmmer Thursday" "Our Mother the Mountain" "Second Lovers Song" "Snake Mountain BLues"]
+    }  -result {<ul><li>Kathleen</li>
+<li>Like a SUmmer Thursday</li>
+<li>Our Mother the Mountain</li>
+<li>Second Lovers Song</li>
+<li>Snake Mountain BLues</li>
+</ul>
+}
+
+    test html_a-1.0 {html_a simple} -body {
+        html_a Google http://www.google.com
+    }  -result {<a href="http://www.google.com">Google</a>}
+    test html_a-1.1 {html_a class} -body {
+        html_a Google http://www.google.com class highlight
+    }  -result {<a class="highlight" href="http://www.google.com">Google</a>}
+    
+    test html_a_replace-1.0 {html_a_replace simple} -body {
+        html_a_replace Google http://www.google.com
+    }  -result {<a onclick="location.replace(this.href);return false;" href="http://www.google.com">Google</a>}
+    test html_a_replace-1.1 {html_a_replace simple} -body {
+        html_a_replace Google http://www.google.com class highlight
+    }  -result {<a class="highlight" onclick="location.replace(this.href);return false;" href="http://www.google.com">Google</a>}
+
+
+    test html_id-1.0 {html_id } -body {
+        html_id total 23.50
+    }  -result {<span id="total">23.50</span>}
+
+    test html_menu-1.0 {html_menu } -body {
+        html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
+    }  -result {<a href="sales.html">Sales</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Purchasing</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Accounts</a>}
+
+    test html_paragraph_layout-1.0 {html_paragraph_layout } -body {
+        html_paragraph_layout Name "Neutral Milk Hotel" Item "Oh Comely"
+    }  -result {<p><b>Name</b><br>Neutral Milk Hotel</p><p><b>Item</b><br>Oh Comely</p>}
+
+    testConstraint html2text_installed [expr {[catch {exec which html2text}] == 0}]
+    test html2text-1.0 {html2text simple} -constraints html2text_installed -body {
+        html2text {<html><p>This is some <b>simple</b> <i>html</i> to convert to text.<p></html>}
+    }  -result {This is some simple html to convert to text.}
+
+    test html_styles2inline-1.0 {html_styles2inline } -body {
+        html_styles2inline {
+        <html>
+            <head>
+            <style type="text/css">
+            body {
+	        font-family: Arial, Helvetica, sans-serif;
+	        font-size:84%;
+            }
+            table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+            </style>
+            </head>
+            <body>
+                <p>Hello</p>
+                <table>
+                    <tr><td>Table entry</td></tr>
+                </table>
+            </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+            body {
+	        font-family: Arial, Helvetica, sans-serif;
+	        font-size:84%;
+            }
+            table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
+            </style></head><body style="font-family:Arial, Helvetica, sans-serif;font-size:84%">
+<p>Hello</p><table style="font-family:Arial, Helvetica, sans-serif;font-size:100%"><tr><td>Table entry</td></tr></table>
+</body>
+</html>}
+   
+    test html_styles2inline-1.1 {html_styles2inline no styles} -body {
+        html_styles2inline {
+        <html>
+            <head>
+            <style type="text/css">
+            </style>
+            </head>
+            <body>
+                <p>Hello</p>
+                <table>
+                    <tr><td>Table entry</td></tr>
+                </table>
+            </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+            </style></head><body>
+<p>Hello</p><table><tr><td>Table entry</td></tr></table>
+</body>
+</html>}
+
+
+    test html_col_styles_apply2td-1.0 {html_col_styles_apply2td } -body {
+        html_col_styles_apply2td {
+        <html>
+        <head>
+
+        <style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td>100</td><td>586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+        col.clsNumber { 
+	    text-align:right;
+        }
+        col.clsBold {
+	    font-weight:bold
+        }
+        </style></head><body><table width="100%">
+<colgroup>
+<col class="clsBold"><col class="clsNumber">
+</colgroup><thead><tr>
+<th>Qty</th><th>Total</th>
+</tr></thead><tbody><tr>
+<td style="font-weight:bold">100</td><td style="text-align:right">586.98</td>
+</tr></tbody>
+</table></body>
+</html>}
+
+    test html_col_styles_apply2td-1.1 {html_col_styles_apply2td no styles} -body {
+        html_col_styles_apply2td {
+        <html>
+        <head>
+
+        <style type="text/css">
+        </style></head><body><table width="100%">
+        <colgroup>
+        <col class="clsBold"><col class="clsNumber">
+        </colgroup><thead><tr>
+        <th>Qty</th><th>Total</th>
+        </tr></thead><tbody><tr>
+        <td>100</td><td>586.98</td>
+        </tr></tbody>
+        </table></body>
+        </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+        </style></head><body><table width="100%">
+<colgroup>
+<col class="clsBold"><col class="clsNumber">
+</colgroup><thead><tr>
+<th>Qty</th><th>Total</th>
+</tr></thead><tbody><tr>
+<td>100</td><td>586.98</td>
+</tr></tbody>
+</table></body>
+</html>}
+
+    cleanupTests
+}
+namespace delete ::qcode::test

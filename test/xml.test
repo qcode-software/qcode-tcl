@@ -1,0 +1,151 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test xml-1.0 {xml} -setup {
+    } -body {
+        xml message "This is the message" 
+    } -cleanup {} -result {<message>This is the message</message>}
+
+    test xml-1.1 {xml attributes } -setup {
+    } -body {
+        xml message "This is the message" {messageType text maxMessageLength 100 required yes}
+    } -cleanup {} -result {<message messageType="text" maxMessageLength="100" required="yes">This is the message</message>}
+
+    test xml-1.2 {xml encoding required } -setup {
+    } -body {
+        xml message "<p>This is a <b>html</b> message</p>" {attribute1 "<p>more html</p>"}
+    } -cleanup {} -result {<message attribute1="&lt;p&gt;more html&lt;/p&gt;">&lt;p&gt;This is a &lt;b&gt;html&lt;/b&gt; message&lt;/p&gt;</message>}
+
+    test xml-1.3 {xml empty attribute} -setup {
+    } -body {
+        xml message "This is the message" {messageType text maxMessageLength}
+    } -cleanup {} -result {<message messageType="text" maxMessageLength="">This is the message</message>}
+
+    test xml_escape-1.0 {xml_escape} -setup {
+    } -body {
+        xml_escape "Special characters like \u009F and reserved characters like < > and & are escaped"
+    } -cleanup {} -result {Special characters like &#159; and reserved characters like &lt; &gt; and &amp; are escaped}
+
+    test xml_decode_char_NNN-1.0 {xml_decode_char_NNN} -setup {
+    } -body {
+        xml_decode_char_NNN "&#167; and &#166; are special characters."
+    } -cleanup {} -result {§ and ¦ are special characters.}
+
+    test xml_from-1.0 {xml_from} -setup {
+        set name "Angus Jamison"
+        set number "01311111122"
+    } -body {
+        xml_from name number
+    } -cleanup {
+        unset name
+        unset number
+    } -result {<name>Angus Jamison</name>
+<number>01311111122</number>}
+
+    test xml_ldict-1.0 {xml_ldict} -setup {
+    } -body {
+        xml_ldict record [list {product_code "AA" sales "9.99" qty 99} {product_code "BB" sales 0 qty 1000}]
+    } -cleanup {} -result {<record><product_code>AA</product_code>
+<sales>9.99</sales>
+<qty>99</qty></record><record><product_code>BB</product_code>
+<sales>0</sales>
+<qty>1000</qty></record>}
+
+    test xml2dict-1.0 {xml2dict} -setup {
+        set xml {<?xml version="1.0"?>
+            <messages>
+   	    <note>
+                <to>Bill</to>
+                <from>Ben</from>
+                <body>Information</body>
+            </note>
+        </messages>
+        }
+    } -body {
+        xml2dict $xml messages
+    } -cleanup {unset xml} -result {note {to Bill from Ben body Information}}
+
+    test xml2dict-1.1 {xml2dict} -setup {
+        set xml {<?xml version="1.0"?>
+            <messages>
+   	    <note>
+                <to>Bill</to>
+                <from>Ben</from>
+                <body>Information</body>
+            </note>
+        </messages>
+        }
+    } -body {
+        xml2dict $xml note
+    } -cleanup {unset xml} -result {to Bill from Ben body Information}
+
+    test xml2dict-1.2 {xml2dict invalid element} -setup {
+        set xml {<?xml version="1.0"?>
+            <messages>
+   	    <note>
+                <to>Bill</to>
+                <from>Ben</from>
+                <body>Information</body>
+            </note>
+        </messages>
+        }
+    } -body {
+        xml2dict $xml unknown
+    } -returnCodes 1 -cleanup {unset xml} -result {XML parse error}
+
+    test xml2dict-1.3 {xml2dict attributes} -setup {
+        set xml {<?xml version="1.0"?>
+            <messages>
+   	    <note>
+                <to attr1="X">Bill</to>
+                <from attr2="Y">Ben</from>
+                <body attr3="Z">Information</body>
+            </note>
+        </messages>
+        }
+    } -body {
+        xml2dict $xml note
+    } -cleanup {unset xml} -result {to Bill from Ben body Information}
+
+    test xml_encoding-1.0 {xml_encoding iso} -setup {
+    } -body {
+        xml_encoding {        
+            <?xml version="1.0" encoding="ISO-8859-1"?>
+            <record>
+            <name>Angus</name>
+            </record>
+        }
+    } -cleanup {} -result {iso8859-1}
+
+    test xml_encoding-1.1 {xml_encoding cp1252} -setup {
+    } -body {
+        xml_encoding {        
+            <?xml version="1.0" encoding="windows-1252"?>
+            <record>
+            <name>Angus</name>
+            </record>
+        }
+    } -cleanup {} -result {cp1252}
+
+    test xml_encoding-1.2 {xml_encoding default} -setup {
+    } -body {
+        xml_encoding {        
+            <?xml version="1.0"?>
+            <record>
+            <name>Angus</name>
+            </record>
+        }
+    } -cleanup {} -result {utf-8}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

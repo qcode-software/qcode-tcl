@@ -1,0 +1,35 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test sql_where_in-1.0 {sql_where_in } -setup {
+    } -body {
+        sql_where_in name [list Beth Patti Brian]
+    } -cleanup {} -result {name in ('Beth','Patti','Brian')}
+
+    test sql_where_in-1.1 {sql_where_in empty} -setup {
+    } -body {
+        sql_where_in name [list]
+    } -cleanup {} -result {false}
+
+    test sql_where_in_not-1.0 {sql_where_in_not } -setup {
+    } -body {
+        sql_where_in_not name [list Beth Patti Brian]
+    } -cleanup {} -result {name not in ('Beth','Patti','Brian')}
+
+    test sql_where_in_not-1.1 {sql_where_in_not empty} -setup {
+    } -body {
+        sql_where_in_not name [list]
+    } -cleanup {} -result {true}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

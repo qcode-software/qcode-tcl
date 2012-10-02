@@ -1,0 +1,170 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+
+    namespace import ::tcltest::*
+
+    test sql_where-1.0 {sql_where} -setup {
+    } -body {
+        sql_where name "Townes Van Zandt" email "townes@tecumseh.com"
+    } -cleanup {} -result {name='Townes Van Zandt' and email='townes@tecumseh.com'}
+
+    test sql_where-1.1 {sql_where null} -setup {
+    } -body {
+        sql_where name NULL email "townes@tecumseh.com"
+    } -cleanup {} -result {name IS NULL and email='townes@tecumseh.com'}
+
+    test sql_where-1.2 {sql_where empty string} -setup {
+    } -body {
+        sql_where name "" email "townes@tecumseh.com"
+    } -cleanup {} -result {email='townes@tecumseh.com'}
+
+    test sql_where-1.3 {sql_where nothing to do} -setup {
+    } -body {
+        sql_where name "" email ""
+    } -cleanup {} -result {true}
+
+    test sql_where-1.4 {sql_where need quoting} -setup {
+    } -body {
+        sql_where name "Townes O'Reilly" email ""
+    } -cleanup {} -result {name='Townes O''Reilly'}
+
+    test sql_where_like-1.0 {sql_where_like} -setup {
+    } -body {
+        sql_where_like name "Townes Van Zandt" email "townes@tecumseh.com"
+    } -cleanup {} -result {name ~~* '%Townes%' and name ~~* '%Van%' and name ~~* '%Zandt%' and email ~~* '%townes@tecumseh.com%'}
+
+    test sql_where_like-1.1 {sql_where_like null} -setup {
+    } -body {
+        sql_where_like name ""
+    } -cleanup {} -result {true}
+
+    test sql_where_like-1.2 {sql_where_like needs quoting} -setup {
+    } -body {
+        sql_where_like name "Townes O'Reilly"
+    } -cleanup {} -result {name ~~* '%Townes%' and name ~~* '%O''Reilly%'}
+
+    test sql_where_cols_start-1.0 {sql_where_cols_start} -setup {
+    } -body {
+        sql_where_cols_start  name "Townes Van" email "townes.van"
+    } -cleanup {} -result {name ~ '^Townes Van' and email ~ E'^townes\\.van'}
+
+    test sql_where_cols_start-1.1 {sql_where_cols_start nocase} -setup {
+    } -body {
+        sql_where_cols_start -nocase name "Townes Van" email "townes.van"
+    } -cleanup {} -result {name ~* '^Townes Van' and email ~* E'^townes\\.van'}
+
+    test sql_where_cols_start-1.2 {sql_where_cols_start empty} -setup {
+    } -body {
+        sql_where_cols_start name ""
+    } -cleanup {} -result {true}
+
+    test sql_where_col_starts-1.0 {sql_where_col_starts} -setup {
+    } -body {
+        sql_where_col_starts  name "Townes Van" "townes.van"
+    } -cleanup {} -result {name ~ '^Townes Van' or name ~ E'^townes\\.van'}
+
+    test sql_where_col_starts-1.1 {sql_where_col_starts nocase} -setup {
+    } -body {
+        sql_where_col_starts -nocase name "Townes Van" "townes.van"
+    } -cleanup {} -result {name ~* '^Townes Van' or name ~* E'^townes\\.van'}
+
+    test sql_where_col_starts-1.2 {sql_where_col_starts empty} -setup {
+    } -body {
+        sql_where_col_starts name ""
+    } -cleanup {} -result {true}
+
+    test sql_where_col_starts-1.3 {sql_where_col_starts not} -setup {
+    } -body {
+        sql_where_col_starts -not name "Townes Van" "townes.van"
+    } -cleanup {} -result {name !~ '^Townes Van' and name !~ E'^townes\\.van'}
+
+    test sql_where_combo-1.0 {sql_where_combo} -setup {
+    } -body {
+        sql_where_combo name "Townes Van Zandt"
+    } -cleanup {} -result {name ~* '^Townes Van Zandt'}
+
+    test sql_where_combo-1.1 {sql_where_combo empty} -setup {
+    } -body {
+        sql_where_combo name ""
+    } -cleanup {} -result {true}
+
+    test sql_where_combo-1.2 {sql_where_combo escape} -setup {
+    } -body {
+        sql_where_combo email "townes.van@zandt.com"
+    } -cleanup {} -result {email ~* E'^townes\\.van@zandt\\.com'}
+
+    test sql_where_compare_set-1.0 {sql_where_compare_set} -setup {
+    } -body {
+        sql_where_compare_set order_date >= "2012-01-01"
+    } -cleanup {} -result {order_date>='2012-01-01'}
+
+    test sql_where_compare_set-1.1 {sql_where_compare_set unknown operator} -setup {
+    } -body {
+        sql_where_compare_set order_date _ "2012-01-01"
+    } -returnCodes 1 -cleanup {} -result {Unknown operator _}
+
+    test sql_where_compare_set-1.2 {sql_where_compare_set is null} -setup {
+    } -body {
+        sql_where_compare_set order_date = NULL
+    }  -cleanup {} -result {order_date IS NULL}
+
+    test sql_where_compare_set-1.3 {sql_where_compare_set empty} -setup {
+    } -body {
+        sql_where_compare_set order_date <> ""
+    }  -cleanup {} -result {true}
+
+    test sql_where_compare_set-1.4 {sql_where_compare_set needs quoting} -setup {
+    } -body {
+        sql_where_compare_set name <> "Bill O'Reilly"
+    }  -cleanup {} -result {name<>'Bill O''Reilly'}
+
+    test sql_where_or-1.0 {sql_where_or} -setup {
+    } -body {
+        sql_where_or name "Townes Van Zandt" email "townes.van@zandt.com"
+    } -cleanup {} -result {name='Townes Van Zandt' or email='townes.van@zandt.com'}
+
+    test sql_where_or-1.1 {sql_where_or empty clause} -setup {
+    } -body {
+        sql_where_or name "Townes Van Zandt" tel "" email "townes.van@zandt.com"
+    } -cleanup {} -result {name='Townes Van Zandt' or email='townes.van@zandt.com'}
+
+    test sql_where_or-1.2 {sql_where_or all empty } -setup {
+    } -body {
+        sql_where_or name "" tel "" email ""
+    } -cleanup {} -result {true}
+
+    test sql_where_or-1.3 {sql_where_or null } -setup {
+    } -body {
+        sql_where_or name "Townes Van Zandt" tel NULL email "NOT NULL"
+    } -cleanup {} -result {name='Townes Van Zandt' or tel IS NULL or email IS NOT NULL}
+
+    test sql_where_or-1.4 {sql_where_or quote } -setup {
+    } -body {
+        sql_where_or name "Bill O'Reilly" tel NULL email "NOT NULL"
+    } -cleanup {} -result {name='Bill O''Reilly' or tel IS NULL or email IS NOT NULL}
+
+    test sql_where_word_in-1.0 {sql_where_word_in} -setup {
+    } -body {
+        sql_where_word_in name "Van Zandt" email "townes.van"
+    } -cleanup {} -result {name ~ '( |^)Van( |$)' and name ~ '( |^)Zandt( |$)' and email ~ E'( |^)townes\\.van( |$)'}
+
+    test sql_where_word_in-1.1 {sql_where_word_in empty} -setup {
+    } -body {
+        sql_where_word_in name "Van Zandt" tel "" email "townes.van"
+    } -cleanup {} -result {name ~ '( |^)Van( |$)' and name ~ '( |^)Zandt( |$)' and email ~ E'( |^)townes\\.van( |$)'}
+
+    test sql_where_word_in-1.2 {sql_where_word_in all empty} -setup {
+    } -body {
+        sql_where_word_in name "" tel "" email ""
+    } -cleanup {} -result {true}
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test

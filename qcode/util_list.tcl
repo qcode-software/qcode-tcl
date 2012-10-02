@@ -1,4 +1,4 @@
-package provide qcode 1.7
+package provide qcode 1.8
 package require doc
 namespace eval qc {}
 
@@ -163,11 +163,12 @@ doc qc::lexclude {
 
 proc qc::lexclude2 { list args } { 
     #| Alternative implementation of qc::lexclude
-    foreach item $list {
+    foreach item $args {
 	if { [set index [lsearch $list $item]]!=-1 } {
 	    ldelete list $index
 	}
     }
+    return $list
 }
 
 proc qc::lunion { a b } {
@@ -458,6 +459,7 @@ proc qc::lsum {list} {
 
 doc qc::lsum {
     Description {
+        Returns the sum of a list of numeric items.
     }
     Usage {
         qc::lsum list
