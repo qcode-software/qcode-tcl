@@ -40,6 +40,64 @@ proc qc::db_file_export {args} {
     return $tmp_file
 }
 
+proc qc::db_file_thumbnailer {} {
+    #| Return image file resized to the given width and height.
+    # Generated thumnails are cached.
+    #
+    form2vars file_id width height
+    # Create the image cache if it doesn't exist yet
+    if { ! [in [ns_cache_names] images] } {
+	ns_cache create images -size [expr 100*1024*1024] 
+    }
+    db_1row {
+	select filename, mime_type, date_created::timestamp(0) as file_created 
+	from file where file_id=:file_id
+    }
+    set headers [ns_conn headers]
+    if { [ns_set find $headers If-Modified-Since]!=-1 } {
+	set if_modified_since [ns_set iget $headers If-Modified-Since]
+    }   
+    if { [info exists width] && [info exists height] } {
+	set key "$file_id $width $height"
+    } else {
+	set key $file_id
+    }
+    if { [info exists if_modified_since] && [clock scan $if_modified_since]>=[clock scan $file_created] } {
+	# Return 304 - Unchanged
+	ns_return 304 $mime_type ""
+    } elseif { [ne [ns_cache names images $key] ""] } {
+	# Cache exists
+	set tmp_file /tmp/[uuid::uuid generate]
+	set id [open $tmp_file a+]
+	fconfigure $id -translation binary
+	puts $id [ns_cache get images $key]
+	close $id
+	ns_returnfile 200 $mime_type $tmp_file
+	file delete $tmp_file
+    } else {
+	# Pull from db
+	set tmp_file [qc::db_file_export $file_id]
+	if { [info exists width] && [info exists height] } {
+	    # Resize and cache
+	    set thumb /tmp/[uuid::uuid generate]
+	    # Call imagemagick convert 
+	    exec_proxy convert -thumbnail ${width}x${height} $tmp_file $thumb
+	    file delete $tmp_file
+	    set id [open $thumb r]
+	    fconfigure $id -translation binary
+	    set data [read $id]
+	    close $id	
+	    ns_cache set images $key $data
+	    ns_returnfile 200 $mime_type $thumb
+	    file delete $thumb
+	} else {
+	    # Return original file
+	    ns_returnfile 200 $mime_type $tmp_file
+	    file delete $tmp_file
+	}
+    }
+}
+
 proc qc::plupload.html {name chunk chunks file} {
     # Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
     # File inserted into file table.
