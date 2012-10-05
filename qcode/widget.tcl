@@ -336,7 +336,7 @@ proc qc::widget_span { args } {
     if { [info exists this(height)] } {
 	set this(style) [qc::style_set [coalesce this(style) ""] height $this(height)]
     }
-    return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value name width height]] 
+    return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value width height]] 
 }
 
 doc qc::widget_span {
