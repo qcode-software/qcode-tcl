@@ -14,7 +14,6 @@ proc qc::db_file_insert {args} {
     set data [base64::encode [read $id]]
     close $id
    
-    db_dml {update file set archived_date=now() where filename=:filename and archived_date is null}
     set file_id [db_seq file_id_seq]
     set qry {
 	insert into file 
@@ -102,8 +101,8 @@ proc qc::plupload.html {name chunk chunks file} {
     # Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
     # File inserted into file table.
     set user_id [qc::auth]
-    set file_id $name
-    set tmp_file /tmp/$file_id.$chunk
+    set id $name
+    set tmp_file /tmp/$id.$chunk
     # Move the AOLserver generated tmp file to one we will keep
     file rename [ns_getformfile file] $tmp_file
     if { [nsv_exists pluploads $user_id] } {
@@ -111,30 +110,31 @@ proc qc::plupload.html {name chunk chunks file} {
     } else {
 	set dict {}
     }
-    dict set dict $file_id $chunk $tmp_file
-    dict set dict $file_id chunks $chunks
-    dict set dict $file_id filename $file
+    dict set dict $id $chunk $tmp_file
+    dict set dict $id chunks $chunks
+    dict set dict $id filename $file
 
     set complete true
     foreach chunk [.. 0 $chunks-1] {
-	if { ![dict exists $dict $file_id $chunk] } {
+	if { ![dict exists $dict $id $chunk] } {
 	    set complete false
 	    break
 	} else {
-	    lappend files /tmp/$file_id.$chunk
+	    lappend files /tmp/$id.$chunk
 	}
     }
     if { $complete } {
 	# Join parts together
-	exec_proxy cat {*}$files > /tmp/$file_id
-	set file_id [qc::db_file_insert -employee_id $user_id -filename [dict get $dict $file_id filename] /tmp/$file_id]
+	exec_proxy cat {*}$files > /tmp/$id
+	set file_id [qc::db_file_insert -employee_id $user_id -filename [dict get $dict $id filename] /tmp/$id]
 	# Clean up
 	foreach file $files {
 	    file delete $file
 	}
-	dict unset dict $file_id
+	dict unset dict $id
+	return $file_id	
     } else {
 	nsv_set pluploads $user_id $dict
+	return ""
     }
-    return $file_id
 }
