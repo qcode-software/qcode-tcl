@@ -96,3 +96,12 @@ proc qc::conn_host {} {
     return [ns_set iget [ns_conn headers] Host]
 }
 
+proc qc::conn_ie {} {
+    set header_set [ns_conn headers]
+    set ui_string [ns_set get $header_set "User-Agent"]
+    if [regexp {[\s;]MSIE\s([1-9][0-9]*)\.[0-9]+[bB]?;} $ui_string -> version] {
+	return true
+    } else {
+	return false
+    }
+}
