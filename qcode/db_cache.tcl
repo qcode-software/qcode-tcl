@@ -209,24 +209,23 @@ proc qc::db_cache_select_table { args } {
 
     # Use global array or ns_cache with ttl?
     if { [info exists ttl] } {
-        # Use ns_cache with ttl
-
+        # Use ns_cache
         # Create the cache if it doesn't exist yet
-        if { ! [in [ns_cache_names] db_${ttl}] } {
-	    ns_cache create db_${ttl} -timeout $ttl -size [expr 1024*1024] 
+        if { ! [in [ns_cache_names] db] } {
+	    ns_cache create db -size [expr 1024*1024] 
 	}
 
-        if { [ne [ns_cache names db_${ttl} $hash] ""] } { 
-	    return [ns_cache get db_${ttl} $hash]
+        if { [nsv_exists db $hash] && (([clock seconds]-[nsv_get db $hash])<=$ttl) } {
+	    # age of cache value < ttl
+	    return [ns_cache get db $hash]
         } else {
 	    set table [db_select_table $qry $level]
-	    ns_cache set db_${ttl} $hash $table
+	    ns_cache set db $hash $table
+	    nsv_set db $hash [clock seconds]
 	    return $table
         }
-
     } else {
         # No ttl specified - use global array.
-
         global db_thread_cache    
         if { [info exists db_thread_cache($hash)] } {
 	    return $db_thread_cache($hash)
@@ -234,17 +233,16 @@ proc qc::db_cache_select_table { args } {
 	    set db_thread_cache($hash) [db_select_table $qry $level]
         }
     }
-
 }
 
 doc qc::db_cache_select_table {
     Parent db_cache
-     Examples {
+    Examples {
 	% db_cache_select_table -ttl 20 {select user_id,firstname,surname from users}
 	% {user_id firstname surname} {73214205 Jimmy Tarbuck} {73214206 Des O'Conner} {73214208 Bob Monkhouse}
-
+	
 	% set surname MacDonald
-	 % db_cache_select_table -ttl [expr 60*60*60*24] {select id,firstname,surname from users where surname=:surname}
+	% db_cache_select_table -ttl [expr 60*60*60*24] {select id,firstname,surname from users where surname=:surname}
 	% {user_id firstname surname} {83214205 Angus MacDonald} {83214206 Iain MacDonald} {83214208 Donald MacDonald}
     }
 }
@@ -254,12 +252,10 @@ proc qc::db_cache_clear { {qry ""} } {
     set hash [md5 [db_qry_parse $qry 1]]
 
     # ns_cache cache
-    foreach db_cache [regexp -all -inline -- {db_[0-9]+} [ns_cache_names]] {
-        foreach key [ns_cache names $db_cache] {
-            if { $qry eq "" || $key eq $hash } {
-	        ns_cache flush $db_cache $key
-	    }
-        }
+    foreach key [ns_cache names db] {
+	if { $qry eq "" || $key eq $hash } {
+	    ns_cache flush db $key
+	}
     }
 
     # Thread cache

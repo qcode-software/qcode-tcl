@@ -134,17 +134,17 @@ namespace eval ::qcode::test {
     test widget_span-1.0 {widget_span  } -setup {
     } -body {
         widget_span name foo value bar
-    } -cleanup {} -result {<span id="foo">bar</span>}
+    } -cleanup {} -result {<span id="foo" name="foo">bar</span>}
 
     test widget-1.6 {widget span } -setup {
     } -body {
         widget type span  name foo value bar
-    } -cleanup {} -result {<span id="foo">bar</span>}
+    } -cleanup {} -result {<span id="foo" name="foo">bar</span>}
 
     test widget_span-1.1 {widget_span width height } -setup {
     } -body {
         widget_span name foo value bar width 100 height 100
-    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo">bar</span>}
+    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo">bar</span>}
 
     test widget_password-1.0 {widget_password  } -setup {
     } -body {
