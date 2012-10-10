@@ -215,7 +215,10 @@ proc qc::db_cache_select_table { args } {
 	    ns_cache create db -size [expr 1024*1024] 
 	}
 
-        if { [nsv_exists db $hash] && (([clock seconds]-[nsv_get db $hash])<=$ttl) } {
+        if { [ns_cache names db $hash] ne "" \
+		 && [nsv_exists db $hash] \
+		 && (([clock seconds]-[nsv_get db $hash])<=$ttl) 
+	 } {
 	    # age of cache value < ttl
 	    return [ns_cache get db $hash]
         } else {
