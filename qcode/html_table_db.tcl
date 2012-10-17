@@ -1,4 +1,4 @@
-package provide qcode 1.8
+package provide qcode 1.9
 package require doc
 namespace eval qc {}
 
@@ -52,20 +52,11 @@ proc qc::html_table_db {args} {
 	ns_set update $headers Cache-Control no-cache
     }
 
-    set div_style ""
-    set div_class [list clsDbGridDiv]
-    if { [lower $height] eq "max" } {
-	lappend div_class dynamicResize
-    } else {
-	set div_style [style_set $div_style height ${height}px]
-    }
-
-    append html "[html_tag div class $div_class style $div_style]\n"
+    set scrollHeight $height
+    lappend varNames scrollHeight
 
     lappend varNames class id
     append html [qc::html_table [dict_from {*}[lsort -unique $varNames]]]
-    append html "</div>\n"
-    append html "<div class=\"clsDbGridDivStatus\" forTable=\"$id\"> <table width=\"100%\"><tr><td></td><td align=\"right\"></td></tr></table> </div>\n"
     return $html
 }
 

@@ -1,4 +1,4 @@
-package provide qcode 1.8
+package provide qcode 1.9
 package require doc
 namespace eval qc {}
 ### chart.tcl ###

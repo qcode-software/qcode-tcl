@@ -1,4 +1,4 @@
-package provide qcode 1.8
+package provide qcode 1.9
 package require doc
 namespace eval qc {}
 
@@ -197,6 +197,24 @@ proc qc::html_table { args } {
     if { [info exists tfoot] && [info exists cols] && [qc::html_table_wants_format $cols] } { 
 	set tfoot [qc::html_table_format $tfoot $cols]
     }
+
+    # Scrollable - vertical
+    if { [info exists scrollHeight] } {
+	if { [info exists class] } {
+	    if { ! [regexp {clsDbGrid} $class] } {
+		lappend class clsScroll
+	    }
+	} else {
+	    set class clsScroll
+	    lappend argnames class
+	}
+	if { [lower $scrollHeight] eq "max" } {
+	    lappend class dynamicResize
+	} else {
+	    set "data-height" $scrollHeight
+	    lappend argnames "data-height"
+	}
+    }
     # Write table tag
     set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
 
@@ -241,20 +259,6 @@ proc qc::html_table { args } {
         append html "</tfoot>\n"
     }
     append html "</table>\n"
-
-    # Scrollable - vertical
-    if { [info exists scrollHeight] } {
-	set div_style ""
-	set div_class [list clsScroll]
-	if { [lower $scrollHeight] eq "max" } {
-	    lappend div_class dynamicResize
-	} else {
-	    set div_style [style_set $div_style height ${scrollHeight}px]
-	}	
-
-	set html [html div $html class $div_class style $div_style]
-    }
-
     return $html
 }
 
@@ -295,10 +299,14 @@ proc qc::html_table_colgroup { cols } {
     set html "<colgroup>\n"
     foreach col $cols {
 	if { [dict exists $col width] } {
+	    set width [dict get $col width]
+	    if [is_integer $width] {
+		append width "px"
+	    }
 	    if { [dict exists $col style] } {
-		dict set col style [qc::style_set [dict get $col style] width [dict get $col width]]
+		dict set col style [qc::style_set [dict get $col style] width $width]
 	    } else {
-		dict set col style "width:[dict get $col width]"
+		dict set col style "width:${width};"
 	    }
 	}
 	append html [html_tag col {*}[dict_exclude $col width label sum format tfoot thClass]]\n

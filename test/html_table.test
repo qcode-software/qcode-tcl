@@ -53,8 +53,8 @@ namespace eval ::qcode::test {
         unset cols
     } -result  {<table>
 <colgroup>
-<col style="width:200">
-<col class="clsMoney" style="width:100">
+<col style="width:200px;">
+<col class="clsMoney" style="width:100px;">
 </colgroup>
 <thead>
 <tr>
@@ -106,7 +106,7 @@ namespace eval ::qcode::test {
         unset tfoot
         unset rowClasses
         unset scrollHeight
-    } -result  {<div class="clsScroll" style="height:1000px"><table width="400" thClass="someClass">
+    } -result  {<table width="400" thClass="someClass" class="clsScroll" data-height="1000">
 <colgroup>
 <col>
 <col class="clsMoney">
@@ -138,7 +138,7 @@ namespace eval ::qcode::test {
 </tr>
 </tfoot>
 </table>
-</div>}
+}
 
 
     test html_table_row-1.0 {html_table_row} -body {
@@ -185,7 +185,7 @@ namespace eval ::qcode::test {
             {label Balance class clsMoney }
         }
     } -cleanup {} -result {<colgroup>
-<col style="width:50">
+<col style="width:50px;">
 <col class="clsMoney">
 </colgroup>
 }
