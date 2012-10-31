@@ -34,9 +34,14 @@ proc qc::html_table_db {args} {
 	incr colIndex
     }
     if { ![info exists class] } {
-	set class [list clsDbGrid]
-    } elseif { "clsDbGrid" ni $class } {
-	lappend class clsDbGrid
+	set class [list clsDbGrid fixed]
+    } else {
+	if { "clsDbGrid" ni $class } {
+	    lappend class clsDbGrid
+	}
+	if { "fixed" ni $class && "flex" ni $class } {
+	    lappend class fixed
+	}
     } 
     # rowHeight
     if { [info exists rowHeight] } {
