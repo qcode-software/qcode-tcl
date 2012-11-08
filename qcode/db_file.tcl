@@ -31,7 +31,7 @@ proc qc::db_file_export {args} {
     args $args -tmp_file ? -- file_id
 
     default tmp_file /tmp/[uuid::uuid generate]
-    db_1row {select filename, mime_type, encode(data,'base64') as base64 from file where file_id=:file_id}
+    db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
     set id [open $tmp_file a+]
     fconfigure $id -translation binary
     puts $id [base64::decode $base64]
