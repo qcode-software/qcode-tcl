@@ -3,6 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::sql_where { args } {
+    qc::args $args -nocase -- args
     #| Construct part of SQL WHERE clause using varNames
     #| in a pass-by-name list or a dict.
     #| Any empty values or non-existent variables are ignored
@@ -15,7 +16,11 @@ proc qc::sql_where { args } {
 	    } elseif { [string equal $value "NOT NULL"] } {
 		lappend list "$name IS NOT NULL"
 	    } else {
-		lappend list "$name=[db_quote $value]"
+                if { [info exists nocase] } {
+		    lappend list "lower($name)=lower([db_quote $value])"
+                } else {
+		    lappend list "$name=[db_quote $value]"
+                }
 	    }
 	}
     }
