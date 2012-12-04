@@ -45,11 +45,11 @@ doc qc::sql_where {
 	email='jimmy@tarbuck.com'
 	% 
 	% set name Jimmy
-	% set qry "select * from users where [sql_where name email]"
+	% set qry "select * from users where [sql_where name $name email $email]"
 	select * from users where name='Jimmy' and email='jimmy@tarbuck.com'
 	%
 	% set product_code ""
-	set qry "select * from products where [sql_where product_code category] LIMIT 100"
+	set qry "select * from products where [sql_where product_code $product_code category $category] LIMIT 100"
 	select * from products where true LIMIT 100
     }
 }
