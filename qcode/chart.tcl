@@ -591,13 +591,14 @@ proc qc::ofc_colors {{no_of_elements 1}} {
 proc qc::ofc_html {id json width height} {   
     # html to construct ofc object.
     sset html {
-	<script type="text/javascript"> 
-	swfobject.embedSWF("/JavaScript/open-flash-chart.swf?"+Math.floor(Math.random()*1000), "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"} );
-	
+	<script type="text/javascript">
+	var data_$id = ${json};
 	function get_data_${id}() {
 	    return JSON.stringify(data_$id);
 	}
-	var data_$id =$json
+	jQuery(function(){
+	    swfobject.embedSWF("/JavaScript/open-flash-chart.swf?"+Math.floor(Math.random()*1000), "$id", "$width", "$height", "9.0.0", false, {"get-data":"get_data_$id"}, {"wmode":"opaque"} );
+	});
 	</script>
     }
     # add div element for ofc to be written into. 
