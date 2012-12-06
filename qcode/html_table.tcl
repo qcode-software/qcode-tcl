@@ -201,22 +201,18 @@ proc qc::html_table { args } {
     # Scrollable - vertical
     if { [info exists scrollHeight] } {
 	if { [info exists class] } {
-	    if { ! [regexp {clsDbGrid} $class] } {
-		lappend class clsScroll
-	    }
+	    lappend class scrollable
 	} else {
-	    set class clsScroll
+	    set class scrollable
 	    lappend argnames class
 	}
 	if { [lower $scrollHeight] eq "max" } {
-	    lappend class dynamicResize
-	} else {
-	    set "data-height" $scrollHeight
-	    lappend argnames "data-height"
+	    lappend class maximizeHeight
+	    unset scrollHeight
 	}
     }
     # Write table tag
-    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry scrollHeight sortable]]]
+    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable]]]
 
     append html \n
     # Create colgroup and col children
