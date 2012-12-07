@@ -106,7 +106,7 @@ namespace eval ::qcode::test {
         unset tfoot
         unset rowClasses
         unset scrollHeight
-    } -result  {<table width="400" thClass="someClass" class="clsScroll" data-height="1000">
+    } -result  {<table width="400" thClass="someClass" scrollHeight="1000" class="scrollable">
 <colgroup>
 <col>
 <col class="clsMoney">

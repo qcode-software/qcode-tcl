@@ -42,7 +42,7 @@ proc qc::html_table_db {args} {
 	if { "fixed" ni $class && "flex" ni $class } {
 	    lappend class fixed
 	}
-    } 
+    }
     # rowHeight
     if { [info exists rowHeight] } {
 	append html "<style type=\"text/css\">table.$class tr { height:${rowHeight}px;vertical-align:top}</style>"
@@ -85,7 +85,7 @@ proc qc::html_table_db_flexgrid {args} {
 	set class [list clsDbFlexGrid]
     } elseif { "clsDbFlexGrid" ni $class } {
 	lappend class clsDbFlexGrid
-    } 
+    }
 
     lappend varNames class id
     set dict [dict_from {*}[lsort -unique $varNames]]

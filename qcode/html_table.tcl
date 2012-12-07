@@ -209,6 +209,7 @@ proc qc::html_table { args } {
 	if { [lower $scrollHeight] eq "max" } {
 	    lappend class maximizeHeight
 	    unset scrollHeight
+	    set argnames [lexclude $argnames scrollHeight]
 	}
     }
     # Write table tag
