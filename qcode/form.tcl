@@ -48,15 +48,21 @@ proc qc::form_var_get { var_name } {
     #| If the form variable exists return its value otherwise throw an error.
     #| A repeated form variable will return a list of corresponding values.
     set set_id [ns_getform]
-    if { [string equal $set_id ""] || [ns_set find $set_id $var_name] == -1 } {
+    if { [string equal $set_id ""] } {
 	error "No such form variable \"$var_name\""
-    } else {
+    }
+    if { [ns_set find $set_id $var_name] > -1 } {
 	if { [ns_set unique $set_id $var_name] } {
 	    return [ns_set get $set_id $var_name]
 	} else {
 	    return [qc::ns_set_getall $set_id $var_name]
-	}
+	}	
     }
+    set array_name "${var_name}\[\]";
+    if { [ns_set find $set_id $array_name] > -1 } {
+	return [qc::ns_set_getall $set_id $array_name]
+    }
+    error "No such form variable \"$var_name\""
 }
 
 doc qc::form_var_get {
@@ -74,7 +80,11 @@ doc qc::form_var_get {
 
 proc qc::form_var_exists { var_name } {
     #| Test whether a form variable exists or not.
-    if { [info commands ns_conn] eq "ns_conn" && [ns_conn isconnected] && [ne [set set_id [ns_getform]] ""] && [ns_set find $set_id $var_name] != -1 } {
+    if { [info commands ns_conn] eq "ns_conn"
+	 && [ns_conn isconnected]
+	 && [ne [set set_id [ns_getform]] ""]
+	 && ( [ns_set find $set_id $var_name] != -1 || [ns_set find $set_id "${var_name}\[\]"] != -1 )
+     } {
 	return 1
     } else {
 	return 0
