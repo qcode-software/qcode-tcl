@@ -52,14 +52,17 @@ proc qc::form_var_get { var_name } {
     if { [string equal $set_id ""] } {
 	error "No such form variable \"$var_name\""
     }
-    foreach var_name [list $var_name "${var_name}\[\]"] {
-	if { [ns_set find $set_id $var_name] != -1 } {
-	    if { [ns_set unique $set_id $var_name] } {
-		return [ns_set get $set_id $var_name]
-	    } else {
-		return [qc::ns_set_getall $set_id $var_name]
-	    }	
-	}
+    if { [ns_set find $set_id $var_name] != -1 } {
+	if { [ns_set unique $set_id $var_name] } {
+	    return [ns_set get $set_id $var_name]
+	} else {
+	    return [qc::ns_set_getall $set_id $var_name]
+	}	
+    }
+    # Look for PHP style repeated form variables
+    set array_name "${var_name}\[\]";
+    if { [ns_set find $set_id $array_name] != -1 } {
+	return [qc::ns_set_getall $set_id $array_name]
     }
     error "No such form variable \"$var_name\""
 }
@@ -74,6 +77,10 @@ doc qc::form_var_get {
 	%
 	% form_var baz
 	No such form variable "baz"
+	%
+	# some-page.html?foo[]=a&foo[]=b
+	% form_var_get foo
+	a b
     }
 }
 
