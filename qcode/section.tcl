@@ -1,4 +1,4 @@
-package provide qcode 1.10
+package provide qcode 1.11
 package require doc
 namespace eval qc {}
 proc qc::section {conf section default_url {section_var section}} {
@@ -32,7 +32,7 @@ proc qc::section_menu {conf section default_url section_var} {
 
 	# Spacer - TLC
 	if { [dict exists $dict type] && [string equal [dict get $dict type] spacer] } {
-	    lappend lmenu [html i "" style "width:[dict get $dict width]px" class clsSectionBlank]
+	    lappend lmenu [html span "" style "width:[dict get $dict width]px" class clsSectionBlank]
 	    continue
 	}
 
