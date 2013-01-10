@@ -1,4 +1,4 @@
-package provide qcode 1.10
+package provide qcode 1.11
 package require doc
 namespace eval qc {}
 proc qc::file_temp {text {mode 0600}} {
