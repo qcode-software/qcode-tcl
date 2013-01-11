@@ -27,6 +27,7 @@ proc qc::param { param_name } {
     error "I don't know how to find param $param_name"
 }
 
+
 proc qc::param_exists { param_name } {
     #| Check for param existence.
     #| First checks if param_name exists as a variable in param:: namespace (as used by muppet)
