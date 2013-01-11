@@ -265,6 +265,15 @@ doc qc::lunique {
     }
 }
 
+proc qc::lequal {a b} {
+    #| Compare 2 list 
+    # Author RS Tcl wiki
+    if {[llength $a] != [llength $b]} {return 0}
+    if {[lindex $a 0] == $a} {return [string equal $a $b]}
+    foreach i $a j $b {if {![lequal $i $j]} {return 0}}
+    return 1
+} 
+
 proc qc::lsort_using { list order } {
     #| Apply an arbitrary sort order to a list
     foreach item [lreverse $order] {
