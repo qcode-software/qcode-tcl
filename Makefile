@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=1.12
+VERSION=1.13
 PACKAGEDIR=qcode
 TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
