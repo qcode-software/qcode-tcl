@@ -1,3 +1,7 @@
+#| Script to Create Docs |#
+# Convert Markdown docs to HTML 
+# Create page for each proc
+
 package require qcode
 
 proc proc_fqn {proc_name {namespace ::}} {
