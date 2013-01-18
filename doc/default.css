@@ -1,0 +1,127 @@
+body {
+    font-size: 100%; margin-left: 5%; margin-right: 5%; font-family: arial, helvetica, sans-serif
+}
+h1 {
+    margin-top:15px;
+    margin-bottom:5px;
+    font-size:180%;
+}
+h2 {
+    margin-top:15px;
+    margin-bottom:5px;
+    font-size:150%;
+}
+h3 {
+    margin-top:10px;
+    margin-bottom:3px;
+    font-size:110%;
+}
+h4 {
+    margin-top:10px;
+    margin-bottom:1px;
+    font-size:105%;
+}
+pre.example {
+    font-family: courier;
+    background-color: #e8f3ff;
+    padding:10px;
+    margin-top:10px;
+    margin-bottom:15px;
+    border-style: solid;
+    border-width:1px;
+    border-color:#0099ff;
+}
+pre.source {
+    font-family: courier;
+    background-color: #ffffcc;
+    border-style: solid;
+    border-width:1px;
+    border-color:#663300;
+    padding:10px;
+    margin:5px;
+    font-size:95%;
+}
+pre.psql {
+    font-family: courier;
+    color:black;
+    background-color:wheat;
+    padding:10px;
+    margin:5px;
+    border-style: solid;
+    border-width:1px;
+    border-color:brown;
+}
+span.comment { color:maroon;font-weight:bold; }
+div.indent {
+    margin-left:40px;
+    padding-left:10px;
+    border-left:solid 2px brown;
+}
+table.clsFlexGrid th {
+    border-width:1px;
+    border-style:solid;
+    border-color:#aca899;
+    background-color:#ece9d8;
+    color:black;
+    font-weight:bold;
+    text-align:center;
+    padding-left:8px;
+    padding-right:8px;
+}
+
+table.clsFlexGrid { 
+    border-collapse:collapse;
+    border-width:1px;
+    border-style:solid;
+    border-color:#aca899;
+}
+
+table.clsFlexGrid td {
+    border:solid 1px #aca899;
+    padding-left:3px;
+    padding-right:3px;
+}
+
+table.clsFlexGrid tr {
+    vertical-align:top;
+}
+
+table.clsFlexGrid tfoot {
+    font-weight:bold;
+}
+
+table.clsFlexGrid thead th.clsSorted {
+    background:#FFFFE9;
+}
+
+table.clsFlexGrid col {
+    padding-left:2px;
+    padding-right:15px;
+
+}
+
+table.clsFlexGrid col.clsNumber { 
+    text-align:right;
+    padding-left:15px;
+    padding-right:2px;
+}
+table.clsFlexGrid col.clsMoney { 
+    text-align:right;
+    padding-left:15px;
+    padding-right:2px;
+}
+table.clsFlexGrid col.clsCenter {
+    text-align:center;
+    padding-left:2px;
+    padding-right:2px;
+}
+table.clsFlexGrid col.clsRight {
+    text-align:right;
+    padding-left:15px;
+    padding-right:2px;
+}
+table.clsFlexGrid col.clsInteger {
+    text-align:right;
+    padding-left:15px;
+    padding-right:2px;
+}
