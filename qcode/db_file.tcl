@@ -49,9 +49,10 @@ proc qc::db_file_thumbnailer {} {
 	ns_cache create images -size [expr 100*1024*1024] 
     }
     db_1row {
-	select filename, mime_type, date_created::timestamp(0) as file_created 
+	select filename, upload_date::timestamp(0) as file_created 
 	from file where file_id=:file_id
     }
+    set mime_type [ns_guesstype $filename]
     set headers [ns_conn headers]
     if { [ns_set find $headers If-Modified-Since]!=-1 } {
 	set if_modified_since [ns_set iget $headers If-Modified-Since]
