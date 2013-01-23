@@ -539,3 +539,17 @@ doc qc::widget_radiogroup {
 	</div>
     }
 }
+
+proc qc::widget_file_combo { args } {
+    array set this $args
+    args_check_required $args name value searchURL object_id
+    default this(searchLimit) 10
+    default this(class) fileCombo
+    default this(width) 150
+    default this(height) 150
+    default this(imageURL) [qc::url "/thumbnail.html" object_id $this(object_id) width $this(width) height $this(height)]
+    set this(searchURL) [qc::url $this(searchURL) object_id $this(object_id)]
+    set html [html_tag img]
+    append html [qc::widget_text {*}[qc::dict_exclude [array get this] class height object_id type] class clsDbFormCombo]
+    return [html div $html class $this(class)]
+}

@@ -39,11 +39,10 @@ proc qc::db_file_export {args} {
     return $tmp_file
 }
 
-proc qc::db_file_thumbnailer {} {
+proc qc::db_file_thumbnailer {file_id {width ""} {height ""}} {
     #| Return image file resized to the given width and height.
     # Generated thumnails are cached.
-    #
-    form2vars file_id width height
+    
     # Create the image cache if it doesn't exist yet
     if { ! [in [ns_cache_names] images] } {
 	ns_cache create images -size [expr 100*1024*1024] 
@@ -57,7 +56,7 @@ proc qc::db_file_thumbnailer {} {
     if { [ns_set find $headers If-Modified-Since]!=-1 } {
 	set if_modified_since [ns_set iget $headers If-Modified-Since]
     }   
-    if { [info exists width] && [info exists height] } {
+    if { $width ne "" && $height ne "" } {
 	set key "$file_id $width $height"
     } else {
 	set key $file_id
@@ -77,7 +76,7 @@ proc qc::db_file_thumbnailer {} {
     } else {
 	# Pull from db
 	set tmp_file [qc::db_file_export $file_id]
-	if { [info exists width] && [info exists height] } {
+	if { $width ne "" && $height ne "" } {
 	    # Resize and cache
 	    set thumb /tmp/[uuid::uuid generate]
 	    # Call imagemagick convert 
