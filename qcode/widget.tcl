@@ -1,4 +1,4 @@
-package provide qcode 1.12
+package provide qcode 1.13
 package require doc
 namespace eval qc {}
 
@@ -128,18 +128,20 @@ doc qc::widget_compare {
 proc qc::widget_combo { args } {
     #| Return an DHTML form widget with text input and dropdown for completion.
     array set this $args
-    args_check_required $args name value boundName boundValue searchURL
+    args_check_required $args name value searchURL
     default this(searchLimit) 10
     set this(class) clsDbFormCombo
     set this(AUTOCOMPLETE) off
     set html [qc::widget_text {*}[array get this]]
-    append html [html_tag input type hidden name $this(boundName) value $this(boundValue)]
+    if {[info exists this(boundName)]} {
+        append html [html_tag input type hidden name $this(boundName) value $this(boundValue)]
+    }
     return $html
 }
 
 doc qc::widget_combo {
     Usage {
-	widget_combo name widgetName value Value boundName widgetName boundValue Value searchURL url ?searchLimit 10? ?...?
+	widget_combo name widgetName value Value searchURL url ?boundName widgetName boundValue Value? ?searchLimit 10? ?...?
     }
     Description {
 	Return an DHTML form widget with text input and dropdown for completion.<br>
