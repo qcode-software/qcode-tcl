@@ -243,3 +243,14 @@ doc qc::dict2vars {
 	can't read "d": no such variable
     }
 }
+
+proc qc::dict_default {dictVar args} {
+    #| Set default values in the dict if they do not exist
+    foreach {name value} $args {
+        upvar 1 $dictVar dict
+        if { ![dict exists $dict $name] } {
+            dict set dict $name $value
+        }
+    }
+    return $dict
+}

@@ -2,6 +2,11 @@ package provide qcode 1.12
 package require doc
 namespace eval qc {}
 
+proc qc::form_var_names {} {
+    #| Return a list of form variable names
+    return [ns_set_keys [ns_getform]]
+}
+
 proc qc::form2vars {args}  {
     #| Create variables in the caller's namespace corresponding to the form data.
     if { [llength $args] == 0 } {
