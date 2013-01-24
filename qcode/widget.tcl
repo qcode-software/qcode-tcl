@@ -540,16 +540,21 @@ doc qc::widget_radiogroup {
     }
 }
 
-proc qc::widget_file_combo { args } {
+proc qc::widget_image_combo { args } {
+    #| A widget continaing an image and a combo-input for filenames
     array set this $args
-    args_check_required $args name value searchURL object_id
+    args_check_required $args name value searchURL imageURL
     default this(searchLimit) 10
-    default this(class) fileCombo
+    default this(class) imageCombo
     default this(width) 150
     default this(height) 150
-    default this(imageURL) [qc::url "/thumbnail.html" object_id $this(object_id) width $this(width) height $this(height)]
-    set this(searchURL) [qc::url $this(searchURL) object_id $this(object_id)]
-    set html [html_tag img]
-    append html [qc::widget_text {*}[qc::dict_exclude [array get this] class height object_id type] class clsDbFormCombo]
+    default this(defaultImage) "/Graphics/noimage.png"
+    set style [qc::style_set "" max-width $this(width)px max-height $this(height)px]
+    if {$this(value) ne ""} {
+        set html [html_tag img src [qc::url $this(imageURL) filename $this(value)] style $style]
+    } else {
+        set html [html_tag img src $this(defaultImage) style $style]
+    }
+    append html [qc::widget_text {*}[qc::dict_exclude [array get this] class height type]]
     return [html div $html class $this(class)]
 }
