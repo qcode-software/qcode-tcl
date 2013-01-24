@@ -539,3 +539,22 @@ doc qc::widget_radiogroup {
 	</div>
     }
 }
+
+proc qc::widget_image_combo { args } {
+    #| A widget continaing an image and a combo-input for filenames
+    array set this $args
+    args_check_required $args name value searchURL imageURL
+    default this(searchLimit) 10
+    default this(class) imageCombo
+    default this(width) 150
+    default this(height) 150
+    default this(defaultImage) "/Graphics/noimage.png"
+    set style [qc::style_set "" max-width $this(width)px max-height $this(height)px]
+    if {$this(value) ne ""} {
+        set html [html_tag img src [qc::url $this(imageURL) filename $this(value)] style $style]
+    } else {
+        set html [html_tag img src $this(defaultImage) style $style]
+    }
+    append html [qc::widget_text {*}[qc::dict_exclude [array get this] class height type]]
+    return [html div $html class $this(class)]
+}
