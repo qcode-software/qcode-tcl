@@ -1,6 +1,11 @@
 package provide qcode 1.13
 package require doc
 namespace eval qc {}
+
+# Import Math functions
+namespace import ::tcl::mathfunc::max
+namespace import ::tcl::mathfunc::min
+
 proc qc::round { value dec_places } {
     #| Perform rounding of $value to $dec_places places.
     #| Handles exponentials.
@@ -353,46 +358,6 @@ doc qc::frombase {
         77
         % qc::frombase 8 77
         63
-    }
-}
-
-proc qc::min {args} {
-    #| Returns min of its numeric arguments
-    return [lindex [lsort -real $args] 0]
-}
-
-doc qc::min {
-    Description {
-        Returns min of its numeric arguments
-    }
-    Usage {
-        qc::min n1 ?n2? ?n3? ....
-    }
-    Examples {
-        % qc::min 1 7 2 3 5 9 2
-        1
-        % qc::min 1.1 1.9 1.5 1.3
-        1.1
-    }
-}
-
-proc qc::max {args} {
-    #| Returns max of its numeric arguments
-    return [lindex [lsort -real -decreasing $args] 0]
-}
-
-doc qc::max {
-    Description {
-        Returns max of its numeric arguments
-    }
-    Usage {
-        qc::max n1 ?n2? ?n3? ....
-    }
-    Examples {
-        % qc::max 1 7 2 3 5 9 2
-        9
-        % qc::max 1.1 1.9 1.5 1.3
-        1.9
     }
 }
 
