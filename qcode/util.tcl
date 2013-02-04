@@ -942,7 +942,11 @@ proc qc::min_nz {args} {
 	    lappend list $value
 	}
     }
-    return [min {*}$list]
+    if { [llength $list] > 0 } {
+        return [min {*}$list]
+    } else {
+        return ""
+    }
 }
 
 doc qc::min_nz {
@@ -966,7 +970,11 @@ proc qc::max_nz {args} {
 	    lappend list $value
 	}
     }
-    return [max {*}$list]
+    if { [llength $list] > 0 } {
+        return [max {*}$list]
+    } else {
+        return ""
+    }
 }
 
 doc qc::max_nz {

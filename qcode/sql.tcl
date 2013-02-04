@@ -281,3 +281,54 @@ doc qc::sql_list2array {
 	{'John West','George East','Harry'}
     }
 }
+
+proc qc::sql_where_postcode {column postcode} {
+    #| Search for rows matching this full or partial UK postcode.
+    # Eg. [sql_where_postcode "delivery_postcode" "IV"] matches "IV1 5DZ", "IV10 5DZ" etc.
+    #     [sql_where_postcode "delivery_postcode" "I"] matches "I0 5DZ", "I10 5DZ" etc
+    set area_regexp {[A-Z]{1,2}}
+    set district_regexp {[0-9][0-9]?[A-Z]?}
+    set space_regexp {\s}
+    set sector_regexp {[0-9]}
+    set unit_regexp {[A-Z]{2}}
+    set parse_regexp "
+        ^
+        ( \$ | ${area_regexp} )
+        ( \$ | ${district_regexp} )
+        ( \$ | ${space_regexp} )
+        ( \$ | ${sector_regexp} )
+        ( \$ | ${unit_regexp} )
+        $
+    "
+    
+    # Parse postcode extracting area, district, sector and unit.
+    if { ! [regexp -expanded $parse_regexp $postcode match area district space sector unit] } {
+        error "Unable to parse postcode \"$postcode\""
+    }
+    
+    # Build regexp
+    set regexp {^}
+    foreach var [list area district space sector unit] {
+        if { [set $var] ne "" && $var ne "space" } {
+            append regexp [db_escape_regexp [set $var]]
+        } else {
+            append regexp [set ${var}_regexp]
+        }
+    }
+    append regexp {$}
+    
+    return [db_qry_parse "$column ~ :regexp"]
+}
+
+doc qc::sql_where_postcode {
+    Examples {
+        % qc::sql_where_postcode "delivery_postcode" "IV2 5DZ"
+        delivery_postcode ~ E'^IV2\\s5DZ$'
+        % qc::sql_where_postcode "delivery_postcode" "IV"
+        delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
+        % qc::sql_where_postcode "delivery_postcode" "I"
+        delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
+        % qc::sql_where_postcode "delivery_postcode" ""
+        delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
+    }   
+}

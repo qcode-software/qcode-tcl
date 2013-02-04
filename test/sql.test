@@ -83,6 +83,35 @@ namespace eval ::qcode::test {
         sql_list2array [list]
     } -cleanup {} -result {{}}
 
+    test sql_where_postcode-1.0 {sql_where_postcode full} -setup {
+    } -body {
+        sql_where_postcode "delivery_postcode" "IV2 5DZ"
+    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5DZ$'}
+
+    test sql_where_postcode-1.1 {sql_where_postcode partial-1} -setup {            
+    } -body {
+        sql_where_postcode "delivery_postcode" "IV2 5"
+    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5[A-Z]{2}$'}
+    
+    test sql_where_postcode-1.2 {sql_where_postcode partial-2} -setup {            
+    } -body {
+        sql_where_postcode "delivery_postcode" "IV2"
+    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s[0-9][A-Z]{2}$'}
+
+    test sql_where_postcode-1.3 {sql_where_postcode partial-3} -setup {
+    } -body {
+        sql_where_postcode "delivery_postcode" "IV"
+    } -cleanup {} -result {delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
+
+    test sql_where_postcode-1.4 {sql_where_postcode partial-4} -setup {
+    } -body {
+        sql_where_postcode "delivery_postcode" "I"
+    } -cleanup {} -result {delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
+
+    test sql_where_postcode-1.5 {sql_where_postcode empty} -setup {
+    } -body {
+        sql_where_postcode "delivery_postcode" ""
+    } -cleanup {} -result {delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
 
     cleanupTests
 }
