@@ -1,8 +1,12 @@
-package provide qcode 1.13
+package provide qcode 1.14
 package require doc
 namespace eval qc {
     namespace export qc *
 }
+
+# Tcl 8.5 only
+namespace import ::tcl::mathop::eq
+namespace import ::tcl::mathop::ne
 
 proc qc::K {a b} {set a}
 
@@ -278,10 +282,6 @@ doc qc::incr0 {
         150
     }
 }
-
-# TODO Tcl 8.5 only
-namespace import ::tcl::mathop::eq
-namespace import ::tcl::mathop::ne
 
 proc qc::call { proc_name args } {
     #| Calls a procedure using local variables as arguments.
@@ -942,7 +942,11 @@ proc qc::min_nz {args} {
 	    lappend list $value
 	}
     }
-    return [min {*}$list]
+    if { [llength $list] > 0 } {
+        return [min {*}$list]
+    } else {
+        return ""
+    }
 }
 
 doc qc::min_nz {
@@ -966,7 +970,11 @@ proc qc::max_nz {args} {
 	    lappend list $value
 	}
     }
-    return [max {*}$list]
+    if { [llength $list] > 0 } {
+        return [max {*}$list]
+    } else {
+        return ""
+    }
 }
 
 doc qc::max_nz {
@@ -1261,4 +1269,48 @@ doc qc::which {
         % qc::which sftp
         /usr/bin/sftp
     }
+}
+
+proc qc::levenshtein_distance {s t} {
+    # Returns the number of edits required to turn one string into the other.
+    # Tcl wiki 
+    if {![set n [string length $t]]} {
+        return [string length $s]
+    } elseif {![set m [string length $s]]} {
+        return $n
+    }
+    for {set i 0} {$i <= $m} {incr i} {
+        lappend d 0
+        lappend p $i
+    }
+    for {set j 0} {$j < $n} {} {
+        set tj [string index $t $j]
+        lset d 0 [incr j]
+        for {set i 0} {$i < $m} {} {
+            set a [expr {[lindex $d $i]+1}]
+            set b [expr {[lindex $p $i]+([string index $s $i] ne $tj)}]
+            set c [expr {[lindex $p [incr i]]+1}]
+            lset d $i [expr {$a<$b ? $c<$a ? $c : $a : $c<$b ? $c : $b}]
+        }
+        set nd $p; set p $d; set d $nd
+    }
+    return [lindex $p end]
+}
+
+proc qc::string_similarity {s t} {
+    #| Returns a number from 0 to 1 indicating how similar the 2 strings are
+    #| using the levenshtein distance.
+    # Tcl wiki
+
+    set sl [string length $s]
+    set tl [string length $t]
+
+    set ml [max $sl $tl]
+    set dn [qc::levenshtein_distance $s $t]
+
+    # -- get match characters number
+    set mn [expr $ml - $dn]
+
+    # -- match number != 0? (mn-1)/tl + (1/tl)*(mn/sl)
+    return [expr $mn==0?0:($mn-1+double($mn)/$sl)/$tl]
 }
