@@ -43,13 +43,13 @@ proc qc::excel_file_create {args} {
 
         # Workbook formats, eg.
         # my $formats = {
-        #    bold => $workbook->add_format(
+        #    highlight {
         #        bold => 1,
         #        color => 'green'
-        #    ),
-        #    red => $workbook->add_format(
+        #    },
+        #    error => {
         #        color => 'red'
-        #    )
+        #    }
         # };
         my $formats = <formats>;
 
@@ -159,7 +159,7 @@ proc qc::excel_file_create {args} {
     set cell_data [llist2perl_aarray $data]
 
     # Formats - a dict of dicts becomes a hash of format objects added to the current workbook
-    set formats [class_defs2perl_excel_formats $formats]
+    set formats [qc::excel_formats $formats]
 
     # Colum meta-data - a dict of dicts becomes a hash of hashes
     set column_meta [ddict2perl_hhash $column_meta]
@@ -261,136 +261,143 @@ doc excel_file_create {
     }
 }
 
-proc class_defs2perl_excel_formats {class_defs} {
+proc qc::excel_formats {class_defs} {
     #| Converts a nested dict of class definitions to a perl hash of excel formats
     set format_list {}
     dict for {class format} $class_defs {
-        set attribute_dict {}
-        dict for {attribute value} $format {
-            switch $attribute {
-                "font-family" {
-                    dict set attribute_dict font $value
-                }
-                "font-size" {
-                    dict set attribute_dict size $value
-                }
-                "font-weight" {
-                    if {$value eq "bold"} {
-                        dict set attribute_dict bold 1
-                    } else {
-                        error "$css_attribute $css_value is unsupported"
-                    }
-                }
-                "font-style" {
-                    if {$value eq "italic"} {
-                        dict set attribute_dict italic 1
-                    } else {
-                        error "$css_attribute $css_value is unsupported"
-                    }
-                }
-                "text-decoration" {
-                    switch $value {
-                        "underline" {
-                            dict set attribute_dict underline 1
-                        }
-                        "line-through" {
-                            dict set attribute_dict font_strikeout 1
-                        }
-                        default {
-                            error "$css_attribute $css_value is unsupported"
-                        }
-                    }
-                }
-                "text-align" {
-                    dict set attribute_dict align $value
-                }
-                "vertical-align" {
-                    if {$value eq "middle"} {
-                        dict set attribute_dict valign vcenter
-                    } else {
-                        dict set attribute_dict valign $value
-                    }
-                }
-                "background" -
-                "background-color" {
-                    dict set attribute_dict bg_color $value
-                }
-                "border" -
-                "border-top" -
-                "border-right" -
-                "border-bottom" -
-                "border-left" {
-                    set side [string range $attribute 7 end]
-                    if {$side eq ""} {
-                        set side "border"
-                    }
-                    set values [split $value " "]
-                    set color [lindex $values 2]
-                    switch [lindex $values 1] {
-                        "solid" {
-                            switch [lindex $values 0] {
-                                "1px" {
-                                    set index 1
-                                }
-                                "2px" {
-                                    set index 2
-                                }
-                                "3px" {
-                                    set index 5
-                                }
-                                default {
-                                    error "$css_attribute $css_value is unsupported"
-                                }
-                            }
-                        }
-                        "dashed" {
-                            switch [lindex $values 0] {
-                                "1px" {
-                                    set index 3
-                                }
-                                "2px" {
-                                    set index 8
-                                }
-                                default {
-                                    error "$css_attribute $css_value is unsupported"
-                                }
-                            }
-                        }
-                        "dotted" {
-                            switch [lindex $values 0] {
-                                "1px" {
-                                    set index 7
-                                }
-                                default {
-                                    error "$css_attribute $css_value is unsupported"
-                                }
-                            }
-                        }
-                        "double" {
-                            switch [lindex $values 0] {
-                                "1px" {
-                                    set index 6
-                                }
-                                default {
-                                    error "$css_attribute $css_value is unsupported"
-                                }
-                            }
-                        }
-                        default {
-                            error "$css_attribute $css_value is unsupported"
-                        }
-                    }
-                    dict set attribute_dict $side $index
-                    dict set attribute_dict ${side}_color $color
-                }
-                default {
-                    dict set attribute_dict $attribute $value
-                }
-            }
-        }
-        lappend format_list "$class => \$workbook->add_format(%\{[dict2perl_hash $attribute_dict]\})"
+        set attribute_dict [qc::excel_format $format]
+        set hash [dict2perl_hash $attribute_dict]
+        lappend format_list "$class => \$workbook->add_format(%{$hash})"
     }
     return \{[join $format_list ","]\}
+}
+
+proc qc::excel_format {format} {
+    #| Prepare a format defn for the Perl Lib
+    set format_list {}
+    dict for {attribute value} $format {
+        switch $attribute {
+            "font-family" {
+                dict set attribute_dict font $value
+            }
+            "font-size" {
+                dict set attribute_dict size $value
+            }
+            "font-weight" {
+                if {$value eq "bold"} {
+                    dict set attribute_dict bold 1
+                } else {
+                    error "$css_attribute $css_value is unsupported"
+                }
+            }
+            "font-style" {
+                if {$value eq "italic"} {
+                    dict set attribute_dict italic 1
+                } else {
+                    error "$css_attribute $css_value is unsupported"
+                }
+            }
+            "text-decoration" {
+                switch $value {
+                    "underline" {
+                        dict set attribute_dict underline 1
+                    }
+                    "line-through" {
+                        dict set attribute_dict font_strikeout 1
+                    }
+                    default {
+                        error "$css_attribute $css_value is unsupported"
+                    }
+                }
+            }
+            "text-align" {
+                dict set attribute_dict align $value
+            }
+            "vertical-align" {
+                if {$value eq "middle"} {
+                    dict set attribute_dict valign vcenter
+                } else {
+                    dict set attribute_dict valign $value
+                }
+            }
+            "background" -
+            "background-color" {
+                dict set attribute_dict bg_color $value
+            }
+            "border" -
+            "border-top" -
+            "border-right" -
+            "border-bottom" -
+            "border-left" {
+                set side [string range $attribute 7 end]
+                if {$side eq ""} {
+                    set side "border"
+                }
+                set values [split $value " "]
+                set color [lindex $values 2]
+                switch [lindex $values 1] {
+                    "solid" {
+                        switch [lindex $values 0] {
+                            "1px" {
+                                set index 1
+                            }
+                            "2px" {
+                                set index 2
+                            }
+                            "3px" {
+                                set index 5
+                            }
+                            default {
+                                error "$css_attribute $css_value is unsupported"
+                            }
+                        }
+                    }
+                    "dashed" {
+                        switch [lindex $values 0] {
+                            "1px" {
+                                set index 3
+                            }
+                            "2px" {
+                                set index 8
+                            }
+                            default {
+                                error "$css_attribute $css_value is unsupported"
+                            }
+                        }
+                    }
+                    "dotted" {
+                        switch [lindex $values 0] {
+                            "1px" {
+                                set index 7
+                            }
+                            default {
+                                error "$css_attribute $css_value is unsupported"
+                            }
+                        }
+                    }
+                    "double" {
+                        switch [lindex $values 0] {
+                            "1px" {
+                                set index 6
+                            }
+                            default {
+                                error "$css_attribute $css_value is unsupported"
+                            }
+                        }
+                    }
+                    default {
+                        error "$css_attribute $css_value is unsupported"
+                    }
+                }
+                dict set attribute_dict $side $index
+                dict set attribute_dict ${side}_color $color
+            }
+            default {
+                dict set attribute_dict $attribute $value
+            }
+        }
+    }
+    return $attribute_dict
 }
 
 proc cell_meta2perl {cell_meta} {
