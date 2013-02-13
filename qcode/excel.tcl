@@ -89,12 +89,17 @@ proc qc::excel_file_create {args} {
         ####################
         # Logic
         ####################
+        # Formats
+        my $format_objects = {};
+        foreach my $class ( keys %{$formats} ) {
+            $format_objects->{$class} = $workbook->add_format(%{$formats->{$class}});
+        }
 
         # Column meta
         foreach my $i ( keys %{$column_meta} ) {
             my $format;
             if ( exists $column_meta->{$i}{"class"} ) {
-                $format = $formats->{$column_meta->{$i}{"class"}};
+                $format = $format_objects->{$column_meta->{$i}{"class"}};
             }
             my $width = $column_meta->{$i}{"width"};
             $worksheet->set_column($i, $i, $width, $format);
@@ -104,7 +109,7 @@ proc qc::excel_file_create {args} {
         foreach my $i ( keys %{$row_meta} ) {
             my $format;
             if ( exists $row_meta->{$i}{"class"} ) {
-                $format = $formats->{$row_meta->{$i}{"class"}};
+                $format = $format_objects->{$row_meta->{$i}{"class"}};
             }
             my $height = $row_meta->{$i}{"height"};
             $worksheet->set_row($i, $height, $format);
@@ -117,7 +122,7 @@ proc qc::excel_file_create {args} {
                 my $format;
                 my $type;
                 if ( exists $cell_meta->{$i}{$j}{"class"} ) {
-                    $format = $formats->{$cell_meta->{$i}{$j}{"class"}};
+                    $format = $format_objects->{$cell_meta->{$i}{$j}{"class"}};
                 }
                 if ( exists $column_meta->{$j}{"type"} ) {
                     $type = $column_meta->{$j}{"type"};
@@ -187,6 +192,7 @@ proc qc::excel_file_create {args} {
     ########################################
     set script_filename [file_temp $script]
     try {
+        log $script_filename
         exec_proxy perl $script_filename
         file delete $script_filename
     } {
@@ -263,13 +269,11 @@ doc excel_file_create {
 
 proc qc::excel_formats {class_defs} {
     #| Converts a nested dict of class definitions to a perl hash of excel formats
-    set format_list {}
+    set format_dict {}
     dict for {class format} $class_defs {
-        set attribute_dict [qc::excel_format $format]
-        set hash [dict2perl_hash $attribute_dict]
-        lappend format_list "$class => \$workbook->add_format(%{$hash})"
+        dict set format_dict $class [qc::excel_format $format]
     }
-    return \{[join $format_list ","]\}
+    return [ddict2perl_hhash $format_dict]
 }
 
 proc qc::excel_format {format} {
