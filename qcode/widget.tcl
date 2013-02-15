@@ -64,9 +64,13 @@ proc qc::widget_text { args } {
     #| Return an HTML form text input widget.
     args_check_required $args name value 
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     set this(type) text
     if { [info exists this(name)] } { 
@@ -212,9 +216,13 @@ doc qc::widget_combo {
 proc qc::widget_htmlarea { args } {
     #| 	Return an HTML form htmlarea widget made from an editable div tag.
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     args_check_required $args name value 
     default this(width) 160
@@ -242,9 +250,13 @@ doc qc::widget_htmlarea {
 proc qc::widget_textarea { args } {
     #| Return an HTML form textarea element.
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     args_check_required $args name value 
     default this(width) 160
@@ -271,9 +283,13 @@ proc qc::widget_select { args } {
     args_check_required $args name value options
     set name_selected "-"
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     default this(null_option) no
     if { [info exists this(name)] } { 
@@ -355,9 +371,13 @@ proc qc::widget_password { args } {
     #| Return an HTML form, password input widget.
     args_check_required $args name value
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     set this(type) password
     if { [info exists this(name)] } { 
@@ -381,9 +401,13 @@ doc qc::widget_password {
 proc qc::widget_bool { args } {
     args_check_required $args name value
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
@@ -505,9 +529,13 @@ doc qc::widget_radio {
 proc qc::widget_radiogroup { args } {
     args_check_required $args name value options
     array set this $args
-    if { [info exists this(sticky)] && [true $this(sticky)] && [sticky_exists $this(name)] } {
-	# sticky values
-	set this(value) [sticky_get $this(name)]
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
     }
 
     set group_name $this(name)
