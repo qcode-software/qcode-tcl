@@ -1,4 +1,4 @@
-package provide qcode 1.15
+package provide qcode 1.16
 package require doc
 namespace eval qc {}
 proc qc::html_table_scroll {args} {
