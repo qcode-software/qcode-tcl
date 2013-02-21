@@ -74,7 +74,12 @@ doc qc::html_table {
 	<h3>scrollHeight</h3>
 	<div class="indent">
 	Controls the height of the view port used to scroll the table with fixed headers.
-	</div>	
+	</div>
+
+        <h3>headerRowClasses</h3>
+        <div class="indent">
+        A list of css class names that will be repeatedly applied to thead rows.
+        </div>
     }
     Examples {
 	% set tbody {
@@ -223,12 +228,19 @@ proc qc::html_table { args } {
     # Create thead
     if { [info exists thead] } {
         append html "<thead>\n"
+	set rowNumber 0
         foreach row $thead {
-	    if { [info exists cols]} {
-		append html [qc::html_table_row_head $row $cols]
+	    if { [info exists headerRowClasses] } {
+		set rowClass [lindex $headerRowClasses [expr {$rowNumber%[llength $headerRowClasses]}]]
 	    } else {
-		append html [qc::html_table_row_head $row]
+		set rowClass {}
 	    }
+	    if { [info exists cols]} {
+		append html [qc::html_table_row_head $row $rowClass $cols]
+	    } else {
+		append html [qc::html_table_row_head $row $rowClass]
+	    }
+	    incr rowNumber
         }
         append html "</thead>\n"
     }
@@ -273,10 +285,14 @@ proc qc::html_table_row { row {rowClass ""} } {
     return $html 
 }
 
-proc qc::html_table_row_head { row {cols ""} } {
+proc qc::html_table_row_head { row rowClass {cols ""} } {
     #| Return HTML for th row
+    if { $rowClass == "" } {
+	set html "<tr>\n"
+    } else {
+	set html "<tr class=\"$rowClass\">\n"
+    }
     # look for thClass in col config
-    set html "<tr>\n"
     for {set i 0} {$i<[llength $row]} {incr i} {
 	set cell [lindex $row $i]
 	set col [lindex $cols $i]
