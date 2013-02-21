@@ -4,9 +4,15 @@ namespace eval qc {}
 
 proc qc::sticky_save {args} {
     #| Save form_vars for the given sticky_url or referrer
-    #args $args -url ? args
     if { [form_var_exists sticky_url] } {
-	set url [url_path [form_var_get sticky_url]]
+        set sticky_url [form_var_get sticky_url]
+	if { [url_path $sticky_url] ne "" } {
+            # extract path from sticky_url eg: "/sales_form.html"
+            set url [url_path $sticky_url]
+        } else {
+            # Use sticky_url as a namespace eg: "sales_form"
+            set url $sticky_url
+        }
     } else {
 	set url [url_path [ns_set iget [ns_conn headers] Referer]]
     }
