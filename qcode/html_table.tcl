@@ -629,3 +629,52 @@ $table
 "
     return $html
 }
+
+proc qc::columns_show_hide_toolbar {args} {
+    #| Construct a toolbar of column show/hide controls.
+    #
+    # Arguments: -title (optional) and conf (ldict describing show/hide controls).
+    # show/hide control mandatory dict keys: label, name, col_selector
+    # show/hide control optional dict keys: value, width, sticky, sticky_url, table_selector (reduce the scope to certain tables)
+    # dividers: empty dicts create dividers that can be used to spearate groups of show/hide controls.
+    #
+    # Usage: set conf {}
+    #        foreach year [list 2012 2013 2014] {
+    #            lappend conf [list label $year name $year_control col_selector ".$year" value true width 120 table "#sales_by_year" sticky true sticky_url sales_by_year_sticky]
+    #        }
+    #        append html [columns_show_hide_toolbar -title "Show/Hide Years: " $conf]
+
+    args $args -title "Show/Hide Columns: " -- conf
+    set title [string map {" " "&nbsp;"} $title]
+
+    # Column show/hide controls
+    set show_hide_controls {}
+    foreach dict $conf {
+        if { [llength $dict] == 0 } {
+            # Divider
+            lappend show_hide_controls [html div "" class "columnsShowHideControlDivider"]
+        } else {
+            # Show/Hide control
+            dict_default dict table_selector "table" width "auto" sticky true value true
+            dict2vars $dict label name col_selector table_selector width sticky sticky_url value 
+
+            # Label
+            set show_hide_control [widget_label {*}[dict_from label name]]
+            
+            # Checkbox
+            set args [dict_from name col_selector value table_selector sticky]
+            if { [info exists sticky_url] } {
+                lappend args sticky_url $sticky_url
+            }
+            append show_hide_control [widget_bool {*}$args]
+
+            lappend show_hide_controls [html div $show_hide_control class "columnsShowHideControl" style [qc::style_set "" width $width]]
+        }        
+    }
+    
+    # Contruct Column Show/Hide toolbar
+    set row {}
+    lappend row [html div $title class "title"]
+    lappend row [html div [join $show_hide_controls " "]]
+    return [html_table tbody [list $row]  class columnsShowHideToolbar]
+}
