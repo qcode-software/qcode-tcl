@@ -1,4 +1,4 @@
-package provide qcode 1.15
+package provide qcode 1.17
 package require doc
 namespace eval qc {}
 
