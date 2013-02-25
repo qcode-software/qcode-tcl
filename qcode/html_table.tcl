@@ -74,7 +74,12 @@ doc qc::html_table {
 	<h3>scrollHeight</h3>
 	<div class="indent">
 	Controls the height of the view port used to scroll the table with fixed headers.
-	</div>	
+	</div>
+
+        <h3>headerRowClasses</h3>
+        <div class="indent">
+        A list of css class names that will be repeatedly applied to thead rows.
+        </div>
     }
     Examples {
 	% set tbody {
@@ -223,12 +228,19 @@ proc qc::html_table { args } {
     # Create thead
     if { [info exists thead] } {
         append html "<thead>\n"
+	set rowNumber 0
         foreach row $thead {
-	    if { [info exists cols]} {
-		append html [qc::html_table_row_head $row $cols]
+	    if { [info exists headerRowClasses] } {
+		set rowClass [lindex $headerRowClasses [expr {$rowNumber%[llength $headerRowClasses]}]]
 	    } else {
-		append html [qc::html_table_row_head $row]
+		set rowClass {}
 	    }
+	    if { [info exists cols]} {
+		append html [qc::html_table_row_head $row $rowClass $cols]
+	    } else {
+		append html [qc::html_table_row_head $row $rowClass]
+	    }
+	    incr rowNumber
         }
         append html "</thead>\n"
     }
@@ -273,10 +285,14 @@ proc qc::html_table_row { row {rowClass ""} } {
     return $html 
 }
 
-proc qc::html_table_row_head { row {cols ""} } {
+proc qc::html_table_row_head { row rowClass {cols ""} } {
     #| Return HTML for th row
+    if { $rowClass == "" } {
+	set html "<tr>\n"
+    } else {
+	set html "<tr class=\"$rowClass\">\n"
+    }
     # look for thClass in col config
-    set html "<tr>\n"
     for {set i 0} {$i<[llength $row]} {incr i} {
 	set cell [lindex $row $i]
 	set col [lindex $cols $i]
@@ -612,4 +628,52 @@ proc qc::page_html_table { args } {
 $table
 "
     return $html
+}
+
+proc qc::columns_show_hide_toolbar {args} {
+    #| Construct a toolbar of column show/hide controls.
+    #
+    # Arguments: -title (optional) and conf (ldict describing show/hide controls).
+    # show/hide control mandatory dict keys: label, name, col_selector
+    # show/hide control optional dict keys: value, width, sticky, sticky_url, table_selector (reduce the scope to certain tables)
+    # dividers: empty dicts create dividers that can be used to spearate groups of show/hide controls.
+    #
+    # Usage: set conf {}
+    #        foreach year [list 2012 2013 2014] {
+    #            lappend conf [list label $year name $year_control col_selector ".$year" value true width 120 table "#sales_by_year" sticky true sticky_url sales_by_year_sticky]
+    #        }
+    #        append html [columns_show_hide_toolbar -title "Show/Hide Years: " $conf]
+
+    args $args -title "Show/Hide Columns: " -- conf
+
+    # Column show/hide controls
+    set show_hide_controls {}
+    foreach dict $conf {
+        if { [llength $dict] == 0 } {
+            # Divider
+            lappend show_hide_controls [html div "" class "columnsShowHideControlDivider"]
+        } else {
+            # Show/Hide control
+            dict_default dict table_selector "table" width "auto" sticky true value true
+            dict2vars $dict label name col_selector table_selector width sticky sticky_url value 
+
+            # Label
+            set show_hide_control [widget_label {*}[dict_from label name]]
+            
+            # Checkbox
+            set args [dict_from name col_selector value table_selector sticky]
+            if { [info exists sticky_url] } {
+                lappend args sticky_url $sticky_url
+            }
+            append show_hide_control [widget_bool {*}$args]
+
+            lappend show_hide_controls [html div $show_hide_control class "columnsShowHideControl" style [qc::style_set "" width $width]]
+        }        
+    }
+    
+    # Contruct Column Show/Hide toolbar
+    set row {}
+    lappend row [html div $title class "title"]
+    lappend row [html div [join $show_hide_controls " "]]
+    return [html_table tbody [list $row]  class columnsShowHideToolbar]
 }
