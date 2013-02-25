@@ -1,4 +1,4 @@
-package provide qcode 1.17
+package provide qcode 1.16
 package require doc
 namespace eval qc {}
 
@@ -20,7 +20,7 @@ proc qc::sticky_save {args} {
   
     if { [llength $args] == 0 } {
 	# set all vars
-	set args [uplevel 1 [list info locals]]
+	set args [uplevel 1 [lexclude [list info locals] sticky_url]]
     }
     # set vars
     foreach name $args {
@@ -53,10 +53,13 @@ proc qc::sticky_exists {args} {
 
 proc qc::sticky_set {employee_id url name value} {
     #| Insert or Update the sticky record
-    db_0or1row {select value as old_value from sticky where employee_id=:employee_id and url=:url and name=:name} {
-	db_dml "insert into sticky [sql_insert employee_id url name value]"
-    } {
-	db_dml "update sticky set value=:value where employee_id=:employee_id and url=:url and name=:name"
+    db_trans {
+        db_1row {select employee_id from employee where employee_id=:employee_id for update}
+        db_0or1row {select value as old_value from sticky where employee_id=:employee_id and url=:url and name=:name} {
+            db_dml "insert into sticky [sql_insert employee_id url name value]"
+        } {
+            db_dml "update sticky set value=:value where employee_id=:employee_id and url=:url and name=:name"
+        }
     }
     return $value
 }

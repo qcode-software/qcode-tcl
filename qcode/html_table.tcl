@@ -1,4 +1,4 @@
-package provide qcode 1.17
+package provide qcode 1.16
 package require doc
 namespace eval qc {}
 
@@ -645,7 +645,6 @@ proc qc::columns_show_hide_toolbar {args} {
     #        append html [columns_show_hide_toolbar -title "Show/Hide Years: " $conf]
 
     args $args -title "Show/Hide Columns: " -- conf
-    set title [string map {" " "&nbsp;"} $title]
 
     # Column show/hide controls
     set show_hide_controls {}
