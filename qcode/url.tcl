@@ -200,3 +200,23 @@ doc qc::url_path {
         /someplace.html
     }
 }
+
+proc qc::url_full {url} {
+    #| Try to construct a full url from a local url
+    set url [string trimleft $url /]
+    set port [ns_set iget [ns_conn headers] Port]
+    set host [ns_set iget [ns_conn headers] Host]
+    if { [ne $host ""] } {
+	if { [eq $port 80] } {
+	    return "http://$host/$url"
+	} elseif { [eq $port 443] } {
+	    return "https://$host/$url"
+	} elseif { [eq $port 8443] } {
+	    return "https://$host:8443/$url"
+	} else  {
+	    return "http://$host:$port/$url"
+	}
+    } else {
+	return $url
+    }
+}

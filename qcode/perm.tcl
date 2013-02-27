@@ -11,9 +11,29 @@ proc qc::perm_get { perm_name property } {
 
 proc qc::perm { perm_name method } {
     #| Test whether the current user can perform $method on $perm_name
-    #| Throws an error on failure.
+    #| Throws an error and sets a global ldict perm_errors on failure.
     if { [string is false [perm_test $perm_name $method]] } {
+        global perm_errors
+        set perm_errors [list [dict create perm_name $perm_name method $method]]
 	error "You do not have $method permission on $perm_name." {} PERM
+    }
+}
+
+proc qc::perms { perm_ldict } {
+    #| Tests whether the current user has all permissions in the ldict
+    #| Throws an error after all tests if any fail, and sets a global ldict perm_errors
+    global perm_errors
+    set perm_errors {}
+    set error_messages {}
+    foreach dict $perm_ldict {
+        dict2vars $dict perm_name method
+        if { [string is false [perm_test $perm_name $method]] } {
+            lappend perm_errors [dict create perm_name $perm_name method $method]
+            lappend error_messages "You do not have $method permission on $perm_name."
+        }
+    }
+    if { $perm_errors ne {} } {
+        error [html_list $error_messages] {} PERM
     }
 }
 
@@ -116,3 +136,9 @@ proc qc::perm_string_remove { perm_string employee_id m } {
     return $perm_string
 }
 
+proc qc::perm_list_employees { perm_name method } {
+    #| List all employee_ids (excluding charlie root) who have $method permission on $perm_name
+    set perm_string [perm_get $perm_name perm_string]
+    set m [perm_method_abbrev $method]
+    return [lexclude [dict keys [dict filter $perm_string value *${m}*]] 0]
+}
