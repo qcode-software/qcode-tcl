@@ -11,28 +11,33 @@ proc qc::perm_get { perm_name property } {
 
 proc qc::perm { perm_name method } {
     #| Test whether the current user can perform $method on $perm_name
-    #| Throws an error and sets a global ldict perm_errors on failure.
+    #| Throws an error and sets a global ldict errorList on failure.
     if { [string is false [perm_test $perm_name $method]] } {
-        global perm_errors
-        set perm_errors [list [dict create perm_name $perm_name method $method]]
+        global errorList
+        set errorList [list [dict create perm_name $perm_name method $method]]
 	error "You do not have $method permission on $perm_name." {} PERM
     }
 }
 
-proc qc::perms { perm_ldict } {
-    #| Tests whether the current user has all permissions in the ldict
-    #| Throws an error after all tests if any fail, and sets a global ldict perm_errors
-    global perm_errors
-    set perm_errors {}
+proc qc::perms { body } {
+    #| Test each line of permissions
+    #| Throws an error after all tests if any fail, and sets a global ldict errorList
+    global errorList
+    set errorList {}
     set error_messages {}
-    foreach dict $perm_ldict {
-        dict2vars $dict perm_name method
-        if { [string is false [perm_test $perm_name $method]] } {
-            lappend perm_errors [dict create perm_name $perm_name method $method]
-            lappend error_messages "You do not have $method permission on $perm_name."
+    set lines [split $body \n]
+    foreach line $lines {
+        set line [string trim $line]
+        if {$line ne ""} {
+            set perm_name [lindex [split $line " "] 0]
+            set method [lindex [split $line " "] 1]
+            if { [string is false [perm_test $perm_name $method]] } {
+                lappend errorList [dict create perm_name $perm_name method $method]
+                lappend error_messages "You do not have $method permission on $perm_name."
+            }
         }
     }
-    if { $perm_errors ne {} } {
+    if { $errorList ne {} } {
         error [html_list $error_messages] {} PERM
     }
 }
