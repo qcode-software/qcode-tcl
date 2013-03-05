@@ -1,4 +1,4 @@
-package provide qcode 1.16
+package provide qcode 1.17
 package require doc
 namespace eval qc {}
 
@@ -11,9 +11,34 @@ proc qc::perm_get { perm_name property } {
 
 proc qc::perm { perm_name method } {
     #| Test whether the current user can perform $method on $perm_name
-    #| Throws an error on failure.
+    #| Throws an error and sets a global ldict errorList on failure.
     if { [string is false [perm_test $perm_name $method]] } {
+        global errorList
+        set errorList [list [dict create perm_name $perm_name method $method]]
 	error "You do not have $method permission on $perm_name." {} PERM
+    }
+}
+
+proc qc::perms { body } {
+    #| Test each line of permissions
+    #| Throws an error after all tests if any fail, and sets a global ldict errorList
+    global errorList
+    set errorList {}
+    set error_messages {}
+    set lines [split $body \n]
+    foreach line $lines {
+        set line [string trim $line]
+        if {$line ne ""} {
+            set perm_name [lindex [split $line " "] 0]
+            set method [lindex [split $line " "] 1]
+            if { [string is false [perm_test $perm_name $method]] } {
+                lappend errorList [dict create perm_name $perm_name method $method]
+                lappend error_messages "You do not have $method permission on $perm_name."
+            }
+        }
+    }
+    if { $errorList ne {} } {
+        error [html_list $error_messages] {} PERM
     }
 }
 
@@ -116,3 +141,9 @@ proc qc::perm_string_remove { perm_string employee_id m } {
     return $perm_string
 }
 
+proc qc::perm_list_employees { perm_name method } {
+    #| List all employee_ids (excluding charlie root) who have $method permission on $perm_name
+    set perm_string [perm_get $perm_name perm_string]
+    set m [perm_method_abbrev $method]
+    return [lexclude [dict keys [dict filter $perm_string value *${m}*]] 0]
+}

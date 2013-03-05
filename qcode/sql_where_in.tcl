@@ -1,4 +1,4 @@
-package provide qcode 1.16
+package provide qcode 1.17
 package require doc
 namespace eval qc {}
 proc qc::sql_where_in {column list {default false} } {
