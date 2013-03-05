@@ -1,4 +1,4 @@
-package provide qcode 1.16
+package provide qcode 1.17
 package require doc
 namespace eval qc {}
 proc qc::lock {lock_id timeout code} {
