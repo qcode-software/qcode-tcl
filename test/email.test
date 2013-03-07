@@ -60,7 +60,7 @@ file
 
     test email_mime_attachment-1.1 {email_mime_attachment with cid success} -body {
         email_mime_attachment {data "Some text of some sort" filename attachment.txt cid 5.31.32252.1057009685@server01.example.net}
-    } -result {headers {Content-Type {text/plain;name="attachment.txt"} Content-Transfer-Encoding base64 Content-ID <5.31.32252.1057009685@server01.example.net>} body U29tZSB0ZXh0IG9mIHNvbWUgc29ydA==}
+    } -result {headers {Content-Type {text/plain;name="attachment.txt"} Content-Transfer-Encoding base64 Content-Disposition {inline;filename="attachment.txt"} Content-ID <5.31.32252.1057009685@server01.example.net>} body U29tZSB0ZXh0IG9mIHNvbWUgc29ydA==}
 
     test email2multimap-1.0 {email2multimap success} -setup {
     set email {MIME-Version: 1.0
