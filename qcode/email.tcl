@@ -71,42 +71,55 @@ proc qc::email_send {args} {
 	    lappend attachments [qc::email_file2attachment $filename]
 	}
     }
-    if { [info exists attachments] } {
-	if { [ldict_exists $attachments cid] != -1 } {
-	    # if any attachment specifies a Content-ID via key cid then type is related
-	    set {content-type} multipart/related
-	} else {
-	    set {content-type} multipart/mixed
-	}
-	
-	set boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
-	lappend headers Content-Type "${content-type}; boundary=\"$boundary\""
-	if { [info exists html] } {
-	    # HTML and text subpart
-	    set boundary2 [format "%x" [clock seconds]][format "%x" [clock clicks]]
-	    set body2 [qc::email_mime_html_alternative $html $boundary2]
-	    lappend parts [list headers [list Content-Type "multipart/alternative; boundary=\"$boundary2\""] body $body2]
-	} else {
-	    # Text Only
-	    lappend parts [qc::email_mime_text $text]
-	}
-	# add attachments
-	foreach dict $attachments {
-	    lappend parts [qc::email_mime_attachment $dict]
-	}
-	set body [qc::email_mime_join $parts $boundary]
+
+    # Split up mixed and related (cid that can be referenced in html) attachments 
+    set mixed_attachments {}
+    set related_attachments {}
+    foreach attachment $attachments {
+        if { [dict exists $attachment cid] } {
+            lappend related_attachments $attachment
+        } else {
+            lappend mixed_attachments $attachment
+        }
+    }
+
+    if { [info exists html] } {
+        # HTML with text alternative
+        set alternative_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+            
+        set outer_body [qc::email_mime_html_alternative $html $alternative_boundary]
+        set outer_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
-	if { [info exists html] } {
-	    # HTML with text alternative
-	    set boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
-	    lappend headers Content-Type "multipart/alternative; boundary=\"$boundary\""
-	    set body [qc::email_mime_html_alternative $html $boundary]
-	} else {
-	    # Text Only
-	    lappend headers Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"
-	    set body $text
+        # Text Only
+        set outer_body $text
+        set outer_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
+    }
+    
+    if { [llength $related_attachments] } {
+        # Related attachments have a cid that can be referenced in email's html
+        set related_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+        set related_parts [list [list headers $outer_headers body $outer_body]]
+        foreach dict $related_attachments {
+	    lappend related_parts [qc::email_mime_attachment $dict]
 	}
-    }  
+
+	set outer_body [qc::email_mime_join $related_parts $related_boundary]
+        set outer_headers [list Content-Type "multipart/related; boundary=\"$related_boundary\""]
+    }
+    if { [llength $mixed_attachments] } {
+        # Mixed attachments (standard attachments)
+        set mixed_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+        set mixed_parts [list [list headers $outer_headers body $outer_body]]
+        foreach dict $mixed_attachments {
+	    lappend mixed_parts [qc::email_mime_attachment $dict]
+	}
+
+	set outer_body [qc::email_mime_join $mixed_parts $mixed_boundary]
+        set outer_headers [list Content-Type "multipart/mixed; boundary=\"$mixed_boundary\""]
+    }
+
+    set body $outer_body
+    lappend headers {*}$outer_headers
     qc::sendmail $mail_from $rcpts $body {*}$headers
 }
 
@@ -211,6 +224,7 @@ proc qc::email_mime_attachment {dict} {
     lappend headers Content-Type "$mimetype;name=\"$filename\""
     lappend headers Content-Transfer-Encoding $encoding
     if { [info exists cid] } {
+        lappend headers Content-Disposition "inline;filename=\"$filename\""
 	lappend headers Content-ID <$cid>
     } else {
 	lappend headers Content-Disposition "attachment;filename=\"$filename\""
