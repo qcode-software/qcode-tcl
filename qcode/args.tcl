@@ -150,24 +150,6 @@ proc qc::arg_options_split {callers_args} {
     return [list $options $others]
 }				    
 
-proc qc::args_by_name2dict {args} {
-    #| Convert args list of mixed varNames and "option pairs" to a dict.
-    set index 0
-    lassign [arg_options_split $args] dict varNames
-    foreach varName $varNames { lappend dict $varName [upset 2 $varName] }
-    return $dict
-}				    
-
-proc qc::args_by_name2vars {args} {
-    #| Set variables in caller's namespace using a mixed varNames and "option pairs" list of args
-    set index 0
-    lassign [arg_options_split $args] options varNames
-    foreach {name value} $options {upset 1 $name $value}
-    foreach name $varNames {upset 1 $name [upset 2 $name]}
-    #return a list of varNames that were set in caller's namespace
-    return [concat [dict keys $options] $varNames]
-}				    
-
 proc qc::args_check_required {callers_args args} {
     #| Assume callers_args is a dict of name value pairs
     #| check that all the keys given exist.
@@ -180,7 +162,7 @@ proc qc::args_check_required {callers_args args} {
 }
 
 proc qc::args_split {callers_args {switch_names ""}} {
-    #| Return two lists for options pairs and other args
+    #| Return three lists for switches, options pairs and other args
     set switches {}
     set options {}
     set others {}
