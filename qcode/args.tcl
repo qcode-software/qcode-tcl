@@ -161,44 +161,75 @@ proc qc::args_check_required {callers_args args} {
     }
 }
 
-proc qc::args_split {callers_args {switch_names ""}} {
-    #| Return three lists for switches, options pairs and other args
+proc qc::args_definition_split {def_args} {
+    #| Return three lists for switches, option-default pairs and other args
     set switches {}
     set options {}
     set others {}
-    set index 0
-    while {$index<[llength $callers_args]} {
-	set arg [lindex $callers_args $index]
-	set next [lindex $callers_args [expr {$index+1}]]
-	if { [eq $arg "--"] } {
-	    incr index
-	    set others [lrange $callers_args $index end]
-	    break
-	} elseif { [eq [string index $arg 0] "-"] \
-		       && ([eq [string index $next 0] "-"] \
-				|| [in $switch_names [string range $arg 1 end]] \
-				|| [in $switch_names $arg] \
-				)} {
-	    # switch
-	    lappend switches [string range $arg 1 end]
-	    incr index 1
-	} elseif { [eq [string index $arg 0] "-"] && [ne [string index $next 0] "-"] } {
-	    # option
-	    lappend options [string range $arg 1 end] $next 
-	    incr index 2
-	} else {
-	    # other
-	    lappend others $arg
-	    incr index
-	}
+    if { [eq [string index [lindex $def_args 0] 0] "-"] } {
+        set index 0
+        while {$index<[llength $def_args]} {
+            set arg [lindex $def_args $index]
+            set next [lindex $def_args [expr {$index+1}]]
+            if { [eq $arg "--"] } {
+                incr index
+                set others [lrange $callers_args $index end]
+                break
+            } elseif { [eq [string index $arg 0] "-"] && [eq [string index $next 0] "-"] } {
+                # switch
+                lappend switches [string range $arg 1 end]
+                incr index 1
+            } elseif { [eq [string index $arg 0] "-"] } {
+                # option
+                lappend options [string range $arg 1 end] $next 
+                incr index 2
+            } else {
+                lappend others $arg
+            }
+        }
+    } else {
+        set others $def_args
     }
     return [list $switches $options $others]
-}	
+}
+
+proc qc::args_split {callers_args switch_names option_names} {
+    #| Return three lists for switches, options pairs and other args
+    set caller_switches {}
+    set caller_options {}
+    set caller_others {}
+
+    if { [eq [string index [lindex $def_args 0] 0] "-"] && ([llength $switch_names] > 0 || [llength $option_names] > 0) } {
+        set index 0
+        while {$index<[llength $callers_args]} {
+            set arg [lindex $callers_args $index]
+            set next [lindex $callers_args [expr {$index+1}]]
+            if { [eq $arg "--"] } {
+                incr index 1
+                set caller_others [lrange $callers_args $index end]
+                break
+            } elseif { [eq [string index $arg 0] "-"] && [in $switch_names [string range $arg 1 end]] } {
+                # switch
+                lappend caller_switches [string range $arg 1 end]
+                incr index 1
+            } elseif { [eq [string index $arg 0] "-"] && [in $option_names [string range $arg 1 end]] } {
+                # option
+                lappend caller_options [string range $arg 1 end] $next 
+                incr index 2
+            } else {
+                error "Unable to parse args"
+            }
+        }
+    } else {
+        set others $caller_args
+    }
+    return [list $switches $options $others]
+}
 
 proc qc::args {callers_args args} {
     #| Assign caller arguments to variables as specified
-    lassign [args_split $args] switches options others
-    lassign [args_split $callers_args $switches] callers_switches callers_options callers_others
+    lassign [args_definition_split $args] switches options others
+    lassign [args_split $callers_args $switches [dict keys $options]] callers_switches callers_options callers_others
 
     if { [llength $args]==0 } {
 	foreach switch $callers_switches {
@@ -211,19 +242,10 @@ proc qc::args {callers_args args} {
     } else {
 	# prescribed
 	# Usage Switches
-	if { [llength [lexclude $callers_switches {*}$switches]]>0 } {
-	    # Usage Error - unknown switches
-	    error "Unknown switches [lexclude $callers_switches {*}$switches]"
-	}
 	foreach switch $callers_switches {
 	    upset 1 $switch true
 	}
 	# Options
-	foreach {name value} $callers_options {
-	    if { ![dict exists $options $name] } {
-		error "Illegal option \"$name\""
-	    }
-	}
 	foreach {name defaultValue} $options {
 	    if { [dict exists $callers_options $name] } {
 		upset 1 $name [dict get $callers_options $name]
