@@ -132,7 +132,138 @@ Lg==
     test mime_type_guess-1.2 {mime_type_guess shtml} {mime_type_guess another_file.shtml} text/html
     test mime_type_guess-1.3 {mime_type_guess pdf} {mime_type_guess another_file.old.pdf} application/pdf
 
+    set email_send_setup {
+        # Backup ::qc::sendmail before overriding
+        proc sendmail_bak [info args ::qc::sendmail] [info body ::qc::sendmail]
+        
+        # Override sendmail to return dict of args, replacing time dependant strings to allow result matching.
+        proc ::qc::sendmail {mail_from rcpts body args} {
+            set headers [dict replace $args Date "Wed, 6 Mar 2013 09:32:02 +0000"] 
+            set boundary_count 0
 
+            set boundaries {}
+            foreach {. boundary} [regexp -all -inline {boundary=\"([^\"]+)\"} $body] {
+                lappend boundaries $boundary
+            }
+            foreach {. boundary} [regexp -all -inline {boundary=\"([^\"]+)\"} $headers] {
+                lappend boundaries $boundary
+            }
+            foreach boundary [lunique $boundaries] {
+                incr boundary_count
+                regsub -all $boundary $body "boundary$boundary_count" body
+                regsub -all $boundary $headers "boundary$boundary_count" headers
+            }                    
+            return [dict_from mail_from rcpts body headers]
+        }
+
+        # Test base64 attachments
+        set related_attachment [list encoding base64 data aGVsbG8gd29ybGQ= filename attachment1.txt cid attachment1.txt@1312980225194014]
+        set mixed_attachment [list encoding base64 data Z29vZGJ5ZSB3b3JsZA== filename attachment2.txt]
+
+        # Test File
+        set fh [open test_file.txt w]
+        puts $fh {This is a
+            multiline
+            file}
+        close $fh
+    }
+    set email_send_cleanup {
+        proc ::qc::sendmail [info args sendmail_bak] [info body sendmail_bak]
+
+        file delete test_file.txt
+    } 
+
+    # email_send test 1.0 - plaintext
+    set mail_from from@test.com 
+    set rcpts to@test.com 
+    set lines [list "This is a test email containing plaintext."]
+    set body [join $lines \r\n]
+    set headers [list From from@test.com To to@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}]
+    set result [dict_from mail_from rcpts body headers]
+
+    set test_body {
+        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext."
+    }
+    test email_send-1.0 {email_send plaintext} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup
+
+    # email_send test 1.1 - plaintext + 1 mixed attachment
+    set mail_from from@test.com 
+    set rcpts to@test.com 
+    set lines [list "--boundary1" \
+                   "Content-Transfer-Encoding: quoted-printable" \
+                   "Content-Type: text/plain; charset=utf-8" \
+                   "" \
+                   "This is a test email containing plaintext and 1 mixed attachment." \
+                   "--boundary1" \
+                   "Content-Type: text/plain;name=\"attachment2.txt\"" \
+                   "Content-Transfer-Encoding: base64" \
+                   "Content-Disposition: attachment;filename=\"attachment2.txt\"" \
+                   "" \
+                   "Z29vZGJ5ZSB3b3JsZA==" \
+                   "--boundary1--"]
+    set body [join $lines \r\n]
+    set headers [list From from@test.com To to@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Type {multipart/mixed; boundary="boundary1"}]
+    set result [dict_from mail_from rcpts body headers]
+
+    set test_body {
+        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and 1 mixed attachment." attachment $mixed_attachment
+    }
+    test email_send-1.1 {email_send plaintext + 1 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
+
+    # email_send test 1.2 - plaintext + 2 mixed attachment
+    set mail_from from@test.com 
+    set rcpts to@test.com 
+    set lines [list {--boundary1} \
+                   {Content-Transfer-Encoding: quoted-printable} \
+                   {Content-Type: text/plain; charset=utf-8} \
+                   {} \
+                   {This is a test email containing plaintext and 2 mixed attachments.} \
+                   {--boundary1} \
+                   {Content-Type: text/plain;name="attachment2.txt"} \
+                   {Content-Transfer-Encoding: base64} \
+                   {Content-Disposition: attachment;filename="attachment2.txt"} \
+                   {} \
+                   {Z29vZGJ5ZSB3b3JsZA==} \
+                   {--boundary1} \
+                   {Content-Type: text/plain;name="attachment2.txt"} \
+                   {Content-Transfer-Encoding: base64} \
+                   {Content-Disposition: attachment;filename="attachment2.txt"} \
+                   {} \
+                   {Z29vZGJ5ZSB3b3JsZA==} \
+                   {--boundary1--}]
+    set body [join $lines \r\n]
+    set headers [list From from@test.com To to@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Type {multipart/mixed; boundary="boundary1"}]
+    set result [dict_from mail_from rcpts body headers]
+
+    set test_body {
+        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and 2 mixed attachments." attachments [list $mixed_attachment $mixed_attachment]
+    }
+    test email_send-1.2 {email_send plaintext + 2 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
+
+    # email_send test 1.3 - plaintext + file attachment
+    set mail_from from@test.com 
+    set rcpts to@test.com 
+    set lines [list {--boundary1} \
+                   {Content-Transfer-Encoding: quoted-printable} \
+                   {Content-Type: text/plain; charset=utf-8} \
+                   {} \
+                   {This is a test email containing plaintext and a file attachments.} \
+                   {--boundary1} \
+                   {Content-Type: text/plain;name="test_file.txt"} \
+                   {Content-Transfer-Encoding: base64} \
+                   {Content-Disposition: attachment;filename="test_file.txt"} \
+                   {} \
+                   {VGhpcyBpcyBhCiAgICAgICAgICAgIG11bHRpbGluZQogICAgICAgICAgICBmaWxlCg==} \
+                   {--boundary1--}]
+    set body [join $lines \r\n]
+    set headers [list From from@test.com To to@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Type {multipart/mixed; boundary="boundary1"}]
+    set result [dict_from mail_from rcpts body headers]
+
+    set test_body {
+        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and a file attachments." filename test_file.txt 
+    }
+    test email_send-1.3 {email_send plaintext + file attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
+ 
     cleanupTests
 
 }
