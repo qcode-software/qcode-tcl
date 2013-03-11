@@ -2,9 +2,17 @@ package provide qcode 1.17
 package require doc
 namespace eval qc {}
 
-proc qc::multimap_get_first { multimap key } {
+proc qc::multimap_get_first {args} {
     #| Return the value for the first matching key
-    set index [lsearch $multimap $key]
+    args $args -nocase -glob -regexp -- multimap key
+    set switches {}
+    foreach switch {nocase glob regexp} {
+        if { [info exists $switch] } {
+            lappend switches -${switch}
+        }
+    }
+    set index [lsearch {*}$switches $multimap $key]
+
     if { $index%2 == 0 } {
 	return [lindex $multimap [expr {$index+1}]]
     } else {
@@ -18,13 +26,23 @@ doc qc::multimap_get_first {
 	from John from Jill from Gail to Kim subject Hi
 	% qc::multimap_get_first $multimap from
 	John
+	% qc::multimap_get_first -nocase $multimap FROM
+	John
     }
 }
 
-proc qc::multimap_set_first { multimapVariable key value } {
+proc qc::multimap_set_first {args} {
     #| Set the value of the first matching key
+    args $args -nocase -glob -regexp -- multimapVariable key value
     upvar 1 $multimapVariable multimap
-    set index [lsearch $multimap $key]
+    set switches {}
+    foreach switch {nocase glob regexp} {
+        if { [info exists $switch] } {
+            lappend switches -${switch}
+        }
+    }
+    set index [lsearch {*}$switches $multimap $key]
+
     if { $index%2 == 0 } {
 	lset multimap [expr {$index+1}] $value
     } else {
@@ -37,6 +55,8 @@ doc qc::multimap_set_first {
 	% set multimap [list from John from Jill from Gail to Kim subject Hi]
 	from John from Jill from Gail to Kim subject Hi
 	% qc::multimap_set_first multimap from Johnny
+	from Johnny from Jill from Gail to Kim subject Hi
+        % qc::multimap_set_first -nocase multimap FROM Johnny
 	from Johnny from Jill from Gail to Kim subject Hi
     }
 }
