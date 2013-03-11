@@ -1,0 +1,305 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+
+    # args2dict
+    test args2dict-1.0 {args2dict name value ...} -body {
+        proc test_proc {args} {
+            return [args2dict $args]
+        }
+        return [test_proc foo 1 bar 2 baz apple]
+    } -cleanup {
+        rename test_proc ""
+    } -result {foo 1 bar 2 baz apple}
+
+    test args2dict-1.1 {args2dict ~ name ...} -setup {
+        set foo 1
+        set bar 2
+        set baz apple
+        proc test_proc {args} {
+            return [args2dict $args]
+        }
+    } -body {
+        return [test_proc ~ foo bar baz]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -result {foo 1 bar 2 baz apple}
+
+    test args2dict-1.2 {args2dict dict} -setup {
+        proc test_proc {args} {
+            return [args2dict $args]
+        }
+    } -body {
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -result {foo 1 bar 2 baz apple}
+
+
+    #args2vars
+    test args2vars-1.0 {args2vars args} -body {
+        proc test_proc {args} {
+            args2vars $args
+            return "$baz $foo $bar"
+        }
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -result "apple 1 2"
+
+    test args2vars-1.1 {args2vars args variableName variableName (test that named variables are set)} -body {
+        proc test_proc {args} {
+            args2vars $args baz foo
+            return "$baz $foo"
+        }
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -result "apple 1"
+
+    test args2vars-1.2 {args2vars args variableName (test that unnamed variables are not set)} -body {
+        proc test_proc {args} {
+            args2vars $args baz foo
+            return "$bar"
+        }
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -returnCodes error -result {can't read "bar": no such variable}
+
+    test args2vars-1.3 {args2vars args variableName (test that non-existent variables do not cause errors)} -body {
+        proc test_proc {args} {
+            args2vars $args foo thud
+            return "$foo"
+        }
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -result "1"
+
+    test args2vars-1.4 {args2vars args variableName (test that non-existent variables are not set)} -body {
+        proc test_proc {args} {
+            args2vars $args foo thud
+            return "$thud"
+        }
+        return [test_proc [list foo 1 bar 2 baz apple]]
+    } -cleanup {
+        rename test_proc ""
+    } -returnCodes error -result {can't read "thud": no such variable}
+
+    test args2vars-1.5 {args2vars ~args} -setup {
+        set foo 12
+        set bar 21
+        set baz pear
+    } -body {
+        proc test_proc {args} {
+            args2vars $args
+            return "$baz $foo $bar"
+        }
+        return [test_proc [list ~ foo bar baz]]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -result "pear 12 21"
+
+    test args2vars-1.6 {args2vars ~args variableName variableName (test that named variables are set)} -setup {
+        set foo 12
+        set bar 21
+        set baz pear
+    } -body {
+        proc test_proc {args} {
+            args2vars $args baz foo
+            return "$baz $foo"
+        }
+        return [test_proc [list ~ foo bar baz]]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -result "pear 12"
+
+    test args2vars-1.7 {args2vars ~args variableName (test that unnamed variables are not set)} -setup {
+        set foo 12
+        set bar 21
+        set baz pear
+    } -body {
+        proc test_proc {args} {
+            args2vars $args baz foo
+            return "$bar"
+        }
+        return [test_proc [list ~ foo bar baz]]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -returnCodes error -result {can't read "bar": no such variable}
+
+    test args2vars-1.8 {args2vars ~args variableName (test that non-existent variables do not cause errors)} -setup {
+        set foo 12
+        set bar 21
+        set baz pear
+    } -body {
+        proc test_proc {args} {
+            args2vars $args thud baz
+            return "$baz"
+        }
+        return [test_proc [list ~ foo bar baz]]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -result "pear"
+
+    test args2vars-1.9 {args2vars ~args variableName (test that non-existent variables are not set)} -setup {
+        set foo 12
+        set bar 21
+        set baz pear
+    } -body {
+        proc test_proc {args} {
+            args2vars $args thud baz
+            return "$thud"
+        }
+        return [test_proc [list ~ foo bar baz]]
+    } -cleanup {
+        rename test_proc ""
+        unset foo bar baz
+    } -returnCodes error -result {can't read "thud": no such variable}
+
+
+    # arg_options_split
+    set setup {
+        proc test_proc {args} {
+            return [arg_options_split $args]
+        }
+    }
+    set cleanup {
+        rename test_proc ""
+    }
+    test arg_options_split-1.0 {arg_options_split -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -foo 12 -bar 23 testing apple]
+    } -result {{foo 12 bar 23} {testing apple}}
+
+    test arg_options_split-1.1 {arg_options_split -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -foo 12 -bar 23 -- testing apple]
+    } -result {{foo 12 bar 23} {testing apple}}
+    unset setup cleanup
+
+
+    # args_check_required
+    set setup {
+        proc test_proc {args} {
+            args_check_required $args foo bar
+            return 1
+        }
+    }
+    set cleanup {
+        rename test_proc ""
+    }
+    test args_check_required-1.0 {args_check_required (no error)} -setup $setup -cleanup $cleanup -body {
+        return [test_proc foo aa bar bb baz cc]
+    } -result 1
+    test args_check_required-1.1 {args_check_required (error)} -setup $setup -cleanup $cleanup -body {
+        return [test_proc foo aa baz cc]
+    } -returnCodes error -result {Missing value for arg "bar" when calling "test_proc foo aa baz cc"}
+    unset setup cleanup
+
+
+    # args_split
+    set setup {
+        proc test_proc {args} {
+            return [args_split $args "xx yy"]
+        }
+    }
+    set cleanup {
+        rename test_proc ""
+    }
+    test args_split-1.0 {args_split -switch -switch -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -a -b -foo 12 -bar 23 testing apple]
+    } -result {{a b} {foo 12 bar 23} {testing apple}}
+
+    test args_split-1.1 {args_split -switch -switch -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -a -b -foo 12 -bar 23 -- testing apple]
+    } -result {{a b} {foo 12 bar 23} {testing apple}}
+
+    test args_split-1.2 {args_split -option value -switch -switch arg1 arg2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -foo 12 -xx -yy testing apple]
+    } -result {{xx yy} {foo 12} {testing apple}}
+    unset setup cleanup
+
+
+    # args
+    set setup {
+        proc options_test {args} {
+	    qc::args $args -foo ? -bar 0 --
+            if { [info exists foo] } {
+                return "foo $foo bar $bar"
+            } else {
+                return "foo UNDEF bar $bar"
+            }
+        }
+        proc switch_test {args} {
+	    qc::args $args -foo --
+            qc::default foo false
+            return "foo is $foo"
+	}
+        proc test_proc {args} {
+            qc::args $args -foo -bar bar_default -- thud grunt
+            qc::default foo false
+            return "foo $foo bar $bar thud $thud grunt $grunt"
+        }
+    }
+    set cleanup {
+        rename options_test ""
+        rename switch_test ""
+        rename test_proc ""
+    }
+    test args-1.0 {options_tset no arguments} -setup $setup -cleanup $cleanup -body {
+        return [options_test]
+    } -result {foo UNDEF bar 0}
+
+    test args-1.1 {options_test with arguments} -setup $setup -cleanup $cleanup -body {
+        return [options_test -foo 999 -bar 888]
+    } -result {foo 999 bar 888}
+
+    test args-1.2 {switch test false} -setup $setup -cleanup $cleanup -body {
+        return [switch_test]
+    } -result "foo is false"
+
+    test args-1.3 {switch test true} -setup $setup -cleanup $cleanup -body {
+        return [switch_test -foo]
+    } -result "foo is true"
+
+    test args-1.4 {args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -bar 999 -foo quux quuux]
+    } -result {foo true bar 999 thud quux grunt quuux}
+
+    test args-1.5 {args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc quux quuux -bar 999 -foo]
+    } -result {foo true bar 999 thud quux grunt quuux}
+
+    test args-1.6 {args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc quux quuux]
+    } -result {foo false bar bar_default thud quux grunt quuux}
+
+    test args-1.7 {error test args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc quux]
+    } -returnCodes error -result "Too few values"
+
+    test args-1.8 {error test args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc quux quuux quuuux]
+    } -returnCodes error -result {Too many values; expected 2 but got 3 in "quux quuux quuuux"}
+
+    test args-1.8 {error test args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
+        return [test_proc quux quuux -baz 999]
+    } -returnCodes error -result {Illegal option "baz"}
+
+    unset setup cleanup
+
+
+    cleanupTests
+}
+namespace delete ::qcode::test
