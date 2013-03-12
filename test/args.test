@@ -169,26 +169,6 @@ namespace eval ::qcode::test {
         unset foo bar baz
     } -returnCodes error -result {can't read "thud": no such variable}
 
-
-    # arg_options_split
-    set setup {
-        proc test_proc {args} {
-            return [arg_options_split $args]
-        }
-    }
-    set cleanup {
-        rename test_proc ""
-    }
-    test arg_options_split-1.0 {arg_options_split -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc -foo 12 -bar 23 testing apple]
-    } -result {{foo 12 bar 23} {testing apple}}
-
-    test arg_options_split-1.1 {arg_options_split -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc -foo 12 -bar 23 -- testing apple]
-    } -result {{foo 12 bar 23} {testing apple}}
-    unset setup cleanup
-
-
     # args_check_required
     set setup {
         proc test_proc {args} {

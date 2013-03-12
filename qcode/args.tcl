@@ -56,7 +56,6 @@ doc qc::args2dict {
     }
 }
 
-    
 proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
@@ -126,29 +125,6 @@ doc qc::args2vars {
 	foo James bar Robert
     }
 }
-
-
-proc qc::arg_options_split {callers_args} {
-    #| Return two lists for options pairs and other args
-    set options {}
-    set others {}
-    set index 0
-    while {$index<[llength $callers_args]} {
-	set name [lindex $callers_args $index]
-	if { [eq $name "--"] } {
-	    incr index
-	    set others [lrange $callers_args $index end]
-	    break
-	} elseif { [eq [string index $name 0] "-"] } {
-	    lappend options [string range $name 1 end] [lindex $callers_args [expr {$index+1}]]
-	    incr index 2
-	} else {
-	    lappend others $name
-	    incr index
-	}
-    }
-    return [list $options $others]
-}				    
 
 proc qc::args_check_required {callers_args args} {
     #| Assume callers_args is a dict of name value pairs
