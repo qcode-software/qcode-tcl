@@ -553,7 +553,7 @@ proc qc::db_0or1row {args} {
 	}
     } else {
 	# more than 1 row
-	error "The qry <code>$qry</code> returned $db_nrows rows"
+	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
     }
 }
 
