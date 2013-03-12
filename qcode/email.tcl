@@ -87,40 +87,39 @@ proc qc::email_send {args} {
         # HTML with text alternative
         set alternative_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
             
-        set outer_body [qc::email_mime_html_alternative $html $alternative_boundary]
-        set outer_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
+        set mime_body [qc::email_mime_html_alternative $html $alternative_boundary]
+        set mime_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
         # Text Only
-        set outer_body $text
-        set outer_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
+        set mime_body $text
+        set mime_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
     }
     
     if { [llength $related_attachments] } {
         # Related attachments have a cid that can be referenced in email's html
         set related_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
-        set related_parts [list [list headers $outer_headers body $outer_body]]
-        foreach dict $related_attachments {
-	    lappend related_parts [qc::email_mime_attachment $dict]
+        set related_parts [list [list headers $mime_headers body $mime_body]]
+        foreach attachment $related_attachments {
+	    lappend related_parts [qc::email_mime_attachment $attachment]
 	}
 
-	set outer_body [qc::email_mime_join $related_parts $related_boundary]
-        set outer_headers [list Content-Type "multipart/related; boundary=\"$related_boundary\""]
+	set mime_body [qc::email_mime_join $related_parts $related_boundary]
+        set mime_headers [list Content-Type "multipart/related; boundary=\"$related_boundary\""]
     }
     if { [llength $mixed_attachments] } {
         # Mixed attachments (standard attachments)
         set mixed_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
-        set mixed_parts [list [list headers $outer_headers body $outer_body]]
-        foreach dict $mixed_attachments {
-	    lappend mixed_parts [qc::email_mime_attachment $dict]
+        set mixed_parts [list [list headers $mime_headers body $mime_body]]
+        foreach attachment $mixed_attachments {
+	    lappend mixed_parts [qc::email_mime_attachment $attachment]
 	}
 
-	set outer_body [qc::email_mime_join $mixed_parts $mixed_boundary]
-        set outer_headers [list Content-Type "multipart/mixed; boundary=\"$mixed_boundary\""]
+	set mime_body [qc::email_mime_join $mixed_parts $mixed_boundary]
+        set mime_headers [list Content-Type "multipart/mixed; boundary=\"$mixed_boundary\""]
     }
 
-    set body $outer_body
-    lappend headers {*}$outer_headers
-    qc::sendmail $mail_from $rcpts $body {*}$headers
+    lappend headers {*}$mime_headers
+    qc::sendmail $mail_from $rcpts $mime_body {*}$headers
 }
 
 doc qc::email_send {
