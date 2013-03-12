@@ -118,8 +118,8 @@ proc qc::email_send {args} {
         set mime_headers [list Content-Type "multipart/mixed; boundary=\"$mixed_boundary\""]
     }
 
-    lappend headers {*}$mime_headers
-    qc::sendmail $mail_from $rcpts $mime_body {*}$headers
+    set mime_headers [concat $headers $mime_headers]
+    qc::sendmail $mail_from $rcpts $mime_body {*}$mime_headers
 }
 
 doc qc::email_send {
