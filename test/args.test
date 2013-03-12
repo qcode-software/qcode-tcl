@@ -169,26 +169,6 @@ namespace eval ::qcode::test {
         unset foo bar baz
     } -returnCodes error -result {can't read "thud": no such variable}
 
-
-    # arg_options_split
-    set setup {
-        proc test_proc {args} {
-            return [arg_options_split $args]
-        }
-    }
-    set cleanup {
-        rename test_proc ""
-    }
-    test arg_options_split-1.0 {arg_options_split -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc -foo 12 -bar 23 testing apple]
-    } -result {{foo 12 bar 23} {testing apple}}
-
-    test arg_options_split-1.1 {arg_options_split -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc -foo 12 -bar 23 -- testing apple]
-    } -result {{foo 12 bar 23} {testing apple}}
-    unset setup cleanup
-
-
     # args_check_required
     set setup {
         proc test_proc {args} {
@@ -208,26 +188,49 @@ namespace eval ::qcode::test {
     unset setup cleanup
 
 
-    # args_split
+    # args_definition_split
     set setup {
         proc test_proc {args} {
-            return [args_split $args "xx yy"]
+            return [args_definition_split $args]
         }
     }
     set cleanup {
         rename test_proc ""
     }
-    test args_split-1.0 {args_split -switch -switch -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
+
+    test args_definition_split-1.0 {args_definition_split -switch -switch -option value -option value arg1 arg2} -setup $setup -cleanup $cleanup -body {
         return [test_proc -a -b -foo 12 -bar 23 testing apple]
     } -result {{a b} {foo 12 bar 23} {testing apple}}
 
-    test args_split-1.1 {args_split -switch -switch -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
+    test args_definition_split-1.1 {args_definition_split -switch -switch -option value -option value -- arg1 arg2} -setup $setup -cleanup $cleanup -body {
         return [test_proc -a -b -foo 12 -bar 23 -- testing apple]
     } -result {{a b} {foo 12 bar 23} {testing apple}}
 
-    test args_split-1.2 {args_split -option value -switch -switch arg1 arg2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc -foo 12 -xx -yy testing apple]
-    } -result {{xx yy} {foo 12} {testing apple}}
+    unset setup cleanup
+
+
+    # args_split
+    set setup {
+        proc test_proc {args} {
+            return [args_split $args {a b c} {foo bar baz}]
+        }
+    }
+    set cleanup {
+        rename test_proc ""
+    }
+
+    test args_split-1.0 {args_split -switch -switch -option value -option value argument} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -a -c -baz pear -foo peach fruit]
+    } -result {{a c} {baz pear foo peach} fruit}
+
+    test args_split-1.1 {args_split -switch -switch -option value -option value -- argument} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -a -c -baz pear -foo peach -- fruit]
+    } -result {{a c} {baz pear foo peach} fruit}
+
+    test args_split-1.1 {args_split -switch argument argument -notaswitch} -setup $setup -cleanup $cleanup -body {
+        return [test_proc -a 12 23 -b]
+    } -result {a {} {12 23 -b}}
+
     unset setup cleanup
 
 
@@ -279,7 +282,7 @@ namespace eval ::qcode::test {
 
     test args-1.5 {args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
         return [test_proc quux quuux -bar 999 -foo]
-    } -result {foo true bar 999 thud quux grunt quuux}
+    } -returnCodes error -result {Too many values; expected 2 but got 5 in "quux quuux -bar 999 -foo"}
 
     test args-1.6 {args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
         return [test_proc quux quuux]
@@ -292,10 +295,6 @@ namespace eval ::qcode::test {
     test args-1.8 {error test args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
         return [test_proc quux quuux quuuux]
     } -returnCodes error -result {Too many values; expected 2 but got 3 in "quux quuux quuuux"}
-
-    test args-1.8 {error test args -switch -option default -- var1 var2} -setup $setup -cleanup $cleanup -body {
-        return [test_proc quux quuux -baz 999]
-    } -returnCodes error -result {Illegal option "baz"}
 
     unset setup cleanup
 

@@ -56,7 +56,6 @@ doc qc::args2dict {
     }
 }
 
-    
 proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
@@ -127,29 +126,6 @@ doc qc::args2vars {
     }
 }
 
-
-proc qc::arg_options_split {callers_args} {
-    #| Return two lists for options pairs and other args
-    set options {}
-    set others {}
-    set index 0
-    while {$index<[llength $callers_args]} {
-	set name [lindex $callers_args $index]
-	if { [eq $name "--"] } {
-	    incr index
-	    set others [lrange $callers_args $index end]
-	    break
-	} elseif { [eq [string index $name 0] "-"] } {
-	    lappend options [string range $name 1 end] [lindex $callers_args [expr {$index+1}]]
-	    incr index 2
-	} else {
-	    lappend others $name
-	    incr index
-	}
-    }
-    return [list $options $others]
-}				    
-
 proc qc::args_check_required {callers_args args} {
     #| Assume callers_args is a dict of name value pairs
     #| check that all the keys given exist.
@@ -161,44 +137,79 @@ proc qc::args_check_required {callers_args args} {
     }
 }
 
-proc qc::args_split {callers_args {switch_names ""}} {
-    #| Return three lists for switches, options pairs and other args
+proc qc::args_definition_split {def_args} {
+    #| Return three lists for switches, option-default pairs and other args
     set switches {}
     set options {}
     set others {}
     set index 0
-    while {$index<[llength $callers_args]} {
-	set arg [lindex $callers_args $index]
-	set next [lindex $callers_args [expr {$index+1}]]
-	if { [eq $arg "--"] } {
-	    incr index
-	    set others [lrange $callers_args $index end]
-	    break
-	} elseif { [eq [string index $arg 0] "-"] \
-		       && ([eq [string index $next 0] "-"] \
-				|| [in $switch_names [string range $arg 1 end]] \
-				|| [in $switch_names $arg] \
-				)} {
-	    # switch
-	    lappend switches [string range $arg 1 end]
-	    incr index 1
-	} elseif { [eq [string index $arg 0] "-"] && [ne [string index $next 0] "-"] } {
-	    # option
-	    lappend options [string range $arg 1 end] $next 
-	    incr index 2
-	} else {
-	    # other
-	    lappend others $arg
-	    incr index
-	}
+    while {$index<[llength $def_args]} {
+        set arg [lindex $def_args $index]
+        set next [lindex $def_args [expr {$index+1}]]
+        if { [eq $arg "--"] } {
+            # -- indicates the end of switches and options, all remaining args are value arguments
+            incr index 1
+            set others [lrange $def_args $index end]
+            break
+        } elseif { [eq [string index $arg 0] "-"] && [eq [string index $next 0] "-"] } {
+            # switch
+            lappend switches [string range $arg 1 end]
+            incr index 1
+        } elseif { [eq [string index $arg 0] "-"] } {
+            # option
+            lappend options [string range $arg 1 end] $next 
+            incr index 2
+        } else {
+            # value argument
+            lappend others $arg
+            incr index 1
+        }
     }
     return [list $switches $options $others]
-}	
+}
+
+proc qc::args_split {caller_args switch_names option_names} {
+    #| Return three lists for switches, options pairs and other args
+    set caller_switches {}
+    set caller_options {}
+    set caller_others {}
+
+    # If this proc takes switches/options and the first arg might be a switch or option
+    if { [eq [string index [lindex $caller_args 0] 0] "-"] && ([llength $switch_names] > 0 || [llength $option_names] > 0) } {
+        set index 0
+        while {$index<[llength $caller_args]} {
+            set arg [lindex $caller_args $index]
+            set next [lindex $caller_args [expr {$index+1}]]
+            if { [eq $arg "--"] } {
+                # -- indicates the end of switches and options - all that remain are regular args
+                incr index 1
+                set caller_others [lrange $caller_args $index end]
+                break
+            } elseif { [eq [string index $arg 0] "-"] && [in $switch_names [string range $arg 1 end]] } {
+                # switch
+                lappend caller_switches [string range $arg 1 end]
+                incr index 1
+            } elseif { [eq [string index $arg 0] "-"] && [in $option_names [string range $arg 1 end]] } {
+                # option
+                lappend caller_options [string range $arg 1 end] $next 
+                incr index 2
+            } else {
+                # Once a value argument has been found, all that remain must be value args
+                set caller_others [lrange $caller_args $index end]
+                incr index 1
+                break
+            }
+        }
+    } else {
+        set caller_others $caller_args
+    }
+    return [list $caller_switches $caller_options $caller_others]
+}
 
 proc qc::args {callers_args args} {
     #| Assign caller arguments to variables as specified
-    lassign [args_split $args] switches options others
-    lassign [args_split $callers_args $switches] callers_switches callers_options callers_others
+    lassign [args_definition_split $args] switches options others
+    lassign [args_split $callers_args $switches [dict keys $options]] callers_switches callers_options callers_others
 
     if { [llength $args]==0 } {
 	foreach switch $callers_switches {
@@ -211,19 +222,10 @@ proc qc::args {callers_args args} {
     } else {
 	# prescribed
 	# Usage Switches
-	if { [llength [lexclude $callers_switches {*}$switches]]>0 } {
-	    # Usage Error - unknown switches
-	    error "Unknown switches [lexclude $callers_switches {*}$switches]"
-	}
 	foreach switch $callers_switches {
 	    upset 1 $switch true
 	}
 	# Options
-	foreach {name value} $callers_options {
-	    if { ![dict exists $options $name] } {
-		error "Illegal option \"$name\""
-	    }
-	}
 	foreach {name defaultValue} $options {
 	    if { [dict exists $callers_options $name] } {
 		upset 1 $name [dict get $callers_options $name]
@@ -281,7 +283,8 @@ doc qc::args {
         use "-option_name ?". If a default is not specified, the option variable will be undefined. Otherwise the
         variable "option_name" is assigned to the option value.
 
-        Switches and options can be called in any order regardless of the order in which they were defined. 
+        If switches and/or options are to be called, they must be provided before any standard arguments, but can
+        otherwise be called in any order regardless of the order in which they were defined. 
         To indicate the list of options and switches is finished use --
         e.g. "-foo -bar bar_default -baz baz_default --"
 
@@ -327,9 +330,6 @@ doc qc::args {
         }
 
         % test -bar 999 -foo quux quuux
-        foo true bar 999 thud quux grunt quuux
-
-        % test quux quuux -bar 999 -foo
         foo true bar 999 thud quux grunt quuux
 
         % test quux quuux
