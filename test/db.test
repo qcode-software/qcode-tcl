@@ -1,0 +1,178 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./qcode]
+package require qcode
+package require Pgtcl
+namespace import qc::*
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    # The test user configuration.
+    set test_conf {
+        host localhost
+        port 5432
+        dbname test_database
+        user test_user
+        password test_password
+    }
+
+    # Request a username/password in order to set up test environment
+    # User must have sufficient privileges (create user, create db)
+    puts "Enter username for database:"
+    set user [gets stdin]
+    puts "Enter password for database:"
+    exec stty -echo
+    set password [gets stdin]
+    exec stty echo
+
+    # Attempt to setup a database and user for testing
+    set conn [pg_connect -connlist "
+        host localhost
+        port 5432
+        dbname template1
+        user $user
+        password $password
+    "]
+    set failed [catch {
+        pg_execute $conn {CREATE DATABASE test_database}
+        pg_execute $conn {
+            CREATE USER test_user WITH PASSWORD 'test_password';
+            GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
+        }
+    } results options]
+    pg_disconnect $conn
+    if { $failed } {
+        return -options $options $results
+    }
+
+    # Create setup and cleanup scripts for tests
+    set setup {
+        # Attempt to setup some tables for testing
+        set conn [pg_connect -connlist $test_conf]
+        set failed [catch {
+            pg_execute $conn {
+                SET client_min_messages = WARNING;
+                CREATE TABLE courses (
+                                      course_id    int PRIMARY KEY,
+                                      title        varchar(40)
+                                      );
+                INSERT INTO courses VALUES
+                (0, 'Computer Science'),
+                (1, 'Art & Design'),
+                (2, 'International Copyright Law');
+                CREATE TABLE students (
+                                       student_id   int PRIMARY KEY,
+                                       firstname    varchar(30) NOT NULL,
+                                       surname      varchar(30) NOT NULL,
+                                       dob          date,
+                                       course_id    int REFERENCES courses
+                                       );
+                INSERT INTO students VALUES
+                (012345, 'John', 'Smith', '1980-01-01', 0),
+                (192837, 'Jane', 'Doe', '1990-03-31', 2),
+                (246810, 'Sam', 'Brown', '1985-05-15', 1),
+                (007123, 'Max', 'Power', '1989-08-09', 1);
+            }
+        } results options]
+        pg_disconnect $conn
+        if { $failed } {
+            return -options $options $results
+        }
+
+        db_connect {*}$test_conf
+    }
+    set cleanup {
+        pg_disconnect $_db
+        unset _db
+
+        set conn [pg_connect -connlist $test_conf]
+        set failed [catch {
+            pg_execute $conn {
+                DROP TABLE courses;
+                DROP TABLE students;
+            }
+        } results options]
+        pg_disconnect $conn
+        if { $failed } {
+            results -options $options $results
+        }
+    }
+    # ========================================
+    # Begin the actual testing
+    # ========================================
+    # db_qry_parse
+
+    # db_quote
+
+    # db_escape_regexp
+
+    # db_connect
+    test db_connect-1.0 {db_connect} -body {
+        db_connect {*}$test_conf
+    } -cleanup {
+        pg_disconnect $_db
+        unset _db
+    }
+
+    # db_get_handle
+    test db_get_handle-1.0 {db_get_handle} -setup $setup -cleanup $cleanup -body {
+        set handle [db_get_handle]
+        if { [lsearch [pg_dbinfo connections] $handle] == -1 } {
+            return "handle: $handle connections: [pg_dbinfo connections]"
+        } else {
+            return 1
+        }
+    } -result 1
+
+    # db_select_table
+    test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -body {
+        db_select_table {select * from students}
+    } -result {{student_id firstname surname dob course_id} {12345 John Smith 1980-01-01 0} {192837 Jane Doe 1990-03-31 2} {246810 Sam Brown 1985-05-15 1} {7123 Max Power 1989-08-09 1}}
+
+    # db_dml
+
+    # db_select_csv
+
+    # db_select_ldict
+
+    # db_select_dict
+
+    # db_1row
+
+    # db_0or1row
+
+    # db_foreach
+
+    # db_seq
+
+    # db_col_varchar_length
+
+    # db_trans
+
+    # ========================================
+    # End of testing - now do cleanup
+    # ========================================
+
+    # Attempt to drop the database and user that were created for testing
+    set conn [pg_connect -connlist "
+        host localhost
+        port 5432
+        dbname template1
+        user $user
+        password $password
+    "]
+    set database_cleanup_failed [catch {
+        pg_execute $conn {DROP DATABASE IF EXISTS test_database}
+        pg_execute $conn {
+            DROP ROLE IF EXISTS test_user;
+        }
+    } database_cleanup_results database_cleanup_options]
+    pg_disconnect $conn
+    if { $database_cleanup_failed } {
+        return -options $database_cleanup_options $database_cleanup_results
+    }
+
+    cleanupTests
+}
+namespace delete ::qcode::test
