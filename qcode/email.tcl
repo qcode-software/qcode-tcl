@@ -91,7 +91,7 @@ proc qc::email_send {args} {
         set mime_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
         # Text Only
-        set mime_body $text
+        set mime_body [::mime::qp_encode $text]
         set mime_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
     }
     
