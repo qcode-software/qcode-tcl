@@ -111,7 +111,7 @@ namespace eval ::qcode::test {
         # ========================================
         # Begin the actual testing
         # ========================================
-        # db_qry_parse (incomplete)
+        # db_qry_parse
         test db_qry_parse-1.0 {db_qry_parse} -body {
             set foo hello
             set bar {it's "fun" to use quotes}
@@ -122,13 +122,15 @@ namespace eval ::qcode::test {
         test db_quote-1.0 {db_quote} -body {
             set foo 1
             set bar one
-            return "[db_quote $foo] [db_quote $bar]"
-        } -result {1 'one'}
+            set baz {backslash\\}
+            set thud {don't "forget" quotes}
+            return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud]"
+        } -result {1 'one' E'backslash\\\\' 'don''t "forget" quotes'}
 
         # db_escape_regexp
         test db_escape_regexp-1.0 {db_escape_regexp} -body {
-            db_escape_regexp "*fish"
-        } -result {\*fish}
+            db_escape_regexp "*fi+sh(es)?"
+        } -result {\*fi\+sh\(es\)\?}
 
         # db_connect
         test db_connect-1.0 {db_connect} -constraints {requires_database} -body {
