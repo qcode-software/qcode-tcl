@@ -367,14 +367,23 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
     # Return db handle 
     # Keep one handle per pool for current thread.
     global _db
-    if { ![info exists _db($poolname)] } {
-	if { [string equal $poolname DEFAULT] } {
-	    set _db($poolname) [ns_db gethandle]
-	} else {
-	    set _db($poolname) [ns_db gethandle $poolname]
-	}
+    if { [info commands ns_db] eq "ns_db" } {
+        # AOL Server
+        if { ![info exists _db($poolname)] } {
+            if { [string equal $poolname DEFAULT] } {
+                set _db($poolname) [ns_db gethandle]
+            } else {
+                set _db($poolname) [ns_db gethandle $poolname]
+            }
+        }
+        return $_db($poolname)
+    } else {
+        # Should be connected with db_connect
+        if { ![info exists _db] } {
+            error "No database connection"
+        }
+        return $_db
     }
-    return $_db($poolname)
 }
 
 doc qc::db_get_handle {
@@ -391,11 +400,22 @@ proc qc::db_dml { args } {
     #| Execute a SQL dml statement
     set db [db_get_handle $db]
     set qry [db_qry_parse $qry 1]
-    try {
-	ns_db dml $db $qry
-    } {
-	global errorInfo
-	error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" $errorInfo
+    if { [info commands ns_db] eq "ns_db" } {
+        # AOL Server
+        try {
+            ns_db dml $db $qry
+        } {
+            global errorInfo
+            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" $errorInfo
+        }
+    } else {
+        # Connected with db_connect
+        try {
+            pg_execute $db $qry
+        } {
+            global errorInfo
+            error "Failed to execute dml <code>$qry</code>.<br>" $errorInfo
+        }
     }
 }
 
@@ -703,15 +723,30 @@ proc qc::db_select_table {args} {
     set qry [db_qry_parse $qry $level]
     set table {}
     set db [db_get_handle $db]
-    try {
-	set row [ns_db select $db $qry]
-	lappend table [ns_set_keys $row]
-	while { [ns_db getrow $db $row] } {
-	    lappend table [ns_set_values $row]
-	}
-	return $table
-    } {
-	error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
+    if { [info commands ns_db] eq "ns_db" } {
+        # AOL Server
+        try {
+            set row [ns_db select $db $qry]
+            lappend table [ns_set_keys $row]
+            while { [ns_db getrow $db $row] } {
+                lappend table [ns_set_values $row]
+            }
+            return $table
+        } {
+            error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
+        }
+    } else {
+        # Connected with db_connect
+        try {
+            set results [pg_exec $db $qry]
+            lappend table [pg_result $results -attributes]
+            set table [concat $table [pg_result $results -llist]]
+            pg_result $results -clear
+            return $table
+        } {
+            global errorInfo
+            error "Failed to execute qry <code>$qry</code><br>" $errorInfo
+        }
     }
 }
 
@@ -732,19 +767,11 @@ proc qc::db_select_csv { qry {level 0} } {
     #| Select qry into csv report
     #| First row contains column names
     incr level
-    set qry [db_qry_parse $qry $level]
-    set lines {}
-    set db [db_get_handle]
-    try {
-	set row [ns_db select $db $qry]
-	lappend lines [list2csv [ns_set_keys $row]]
-	while { [ns_db getrow $db $row] } {
-	    lappend lines [list2csv [ns_set_values $row]]
-	}
-	return [join $lines \r\n]
-    } {
-	error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
+    set table [db_select_table $qry $level]
+    foreach row $table {
+        lappend lines [list2csv $row]
     }
+    return [join $lines \r\n]
 }
 
 doc qc::db_select_csv {
@@ -825,5 +852,17 @@ doc qc::db_col_varchar_length {
 	# A table sales_orders has column delivery_address1 type varchar(100)
 	% db_col_varchar_length sales_orders delivery_address1
 	100
+    }
+}
+
+proc qc::db_connect {args} {
+    #| Connect to a postgresql database
+    global _db
+    try {
+        package require Pgtcl 1.5
+        set _db [pg_connect -connlist $args]
+    } {
+        global errorInfo errorMessage
+        error "Could not connect to database. $errorMessage" $errorInfo
     }
 }

@@ -45,10 +45,6 @@ file
     test email_addresses-1.0 {email_addresses success} -body {
         email_addresses {"Test Testerton" <test@testerton.com> "Testy Testerton" <testy@testerton.com> "Tester Testerton" <tester@testerton.com> }
     } -result {test@testerton.com testy@testerton.com tester@testerton.com}
-
-    test email_mime_text-1.0 {email_mime_text success} -body {
-        email_mime_text "This is some text"
-    } -result {headers {Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}} body {This is some text}}
     
     test email_mime_html_alternative-1.0 {email_mime_html_alternative success} -body {
         email_mime_html_alternative {<html><p>This is some <b>HTML</b></p></html>} 503f5d914c87ae17acde9
@@ -272,7 +268,8 @@ Lg==
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and a file attachments and 1 mixed attachment." \
+                   "This is a test email containing plaintext and a file attachments and 1 mi=" \
+                   "xed attachment." \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -302,7 +299,8 @@ Lg==
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and a file attachments and 2 mixed attachments." \
+                   "This is a test email containing plaintext and a file attachments and 2 mi=" \
+                   "xed attachments." \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
