@@ -91,7 +91,7 @@ proc qc::email_send {args} {
         set mime_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
         # Text Only
-        set mime_body $text
+        set mime_body [::mime::qp_encode $text]]
         set mime_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
     }
     
@@ -191,13 +191,6 @@ doc qc::email_addresses {
 	% qc::email_addresses {"Joe Biden" <joe@biden.com> "Paul Ryan" <paul@ryan.com>}
 	joe@biden.com paul@ryan.com
     }
-}
-
-proc qc::email_mime_text {text} {
-    #| Helper to return mime part for plain text
-    set headers [list]
-    lappend headers Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"
-    return [list headers $headers body [::mime::qp_encode $text]]
 }
 
 proc qc::email_mime_html_alternative {html boundary} {
