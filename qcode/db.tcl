@@ -738,16 +738,10 @@ proc qc::db_select_table {args} {
     } else {
         # Connected with db_connect
         try {
-            pg_select $db $qry results {
-                if { $results(.tupno) == 0 } {
-                    lappend table $results(.headers)
-                }
-                set row {}
-                foreach header $results(.headers) {
-                    lappend row $results($header)
-                }
-                lappend table $row
-            }
+            set results [pg_exec $db $qry]
+            lappend table [pg_result $results -attributes]
+            set table [concat $table [pg_result $results -llist]]
+            pg_result $results -clear
             return $table
         } {
             global errorInfo
