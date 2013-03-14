@@ -91,7 +91,7 @@ proc qc::email_send {args} {
         set mime_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
         # Text Only
-        set mime_body [::mime::qp_encode $text]
+        set mime_body [qc::qp_encode $text]
         set mime_headers [list Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8"]
     }
     
@@ -1106,4 +1106,69 @@ doc qc::mime_type_guess {
 	% qc::mime_type_guess crack.exe
 	application/octet-stream
     }
+}
+
+proc qc::qp_encode {string {encoded_word 0} {no_softbreak 0}} {
+    # Based on ::mime::qp_encode
+
+    regsub -all -- \
+	    {[\x00-\x08\x0B-\x1E\x21-\x24\x3D\x40\x5B-\x5E\x60\x7B-\xFF]} \
+	    $string {[format =%02X [scan "\\&" %c]]} string
+
+    # Replace the format commands with their result
+
+    set string [subst -novariable $string]
+
+    # soft/hard newlines and other
+    # Funky cases for SMTP compatibility
+    set mapChars [list " \n" "=20\n" "\t\n" "=09\n" \
+	    "\n\.\n" "\n=2E\n" "\nFrom " "\n=46rom "]
+    if {$encoded_word} {
+	# Special processing for encoded words (RFC 2047)
+	lappend mapChars " " "_"
+    }
+    set string [string map $mapChars $string]
+
+    # Break long lines - ugh
+
+    # Implementation of FR #503336
+    if {$no_softbreak} {
+	set result $string
+    } else {
+	set result ""
+	foreach line [split $string \n] {
+	    while {[string length $line] > 72} {
+		set chunk [string range $line 0 72]
+		if {[regexp -- (=|=.)$ $chunk dummy end]} {
+
+		    # Don't break in the middle of a code
+
+		    set len [expr {72 - [string length $end]}]
+		    set chunk [string range $line 0 $len]
+		    incr len
+		    set line [string range $line $len end]
+		} else {
+		    set line [string range $line 73 end]
+		}
+		append result $chunk=\r\n
+	    }
+	    append result $line\r\n
+	}
+    
+	# Trim off last \r\n, since the above code has the side-effect
+	# of adding an extra \r\n to the encoded string and return the
+	# result.
+	set result [string range $result 0 end-2]
+    }
+
+    # If the string ends in space or tab, replace with =xx
+
+    set lastChar [string index $result end]
+    if {$lastChar==" "} {
+	set result [string replace $result end end "=20"]
+    } elseif {$lastChar=="\t"} {
+	set result [string replace $result end end "=09"]
+    }
+
+    return $result
 }
