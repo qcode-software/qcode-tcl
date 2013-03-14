@@ -33,9 +33,11 @@ proc qc::password_complexity_check { args } {
             incr classes
         }
     }
-    # [[:punct:]] doesn't match the POSIX definition for the character class
-    # Using the inverse of the above instead
-    set classes [expr {$classes + [regexp {[^[:upper:][:lower:][:digit:]]} $password]}]
+    # [[:punct:]] matches !"%&*()_-{}][@:#';?/.,\
+    # Using inverse instead to catch £$^+=~><|`¬ in addition
+    if {[regexp {[^[:upper:][:lower:][:digit:]]} $password]} {
+        incr classes
+    }
     if { $classes < $minclasses } {
         error "Your password must contain at least $minclasses of uppercase, lowercase, numeric or punctuation" {} USER
     }
