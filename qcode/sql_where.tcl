@@ -135,11 +135,6 @@ doc qc::sql_where_cols_start {
     }
 }
 
-proc qc::sql_where_cols_start_nocase { args } {
-    #| DEPRECTED - use -nocase switch to sql_where_cols_start
-    return [sql_where_cols_start -nocase {*}$args]
-}
-
 proc qc::sql_where_col_starts { args } {
     #| Construct part of SQL WHERE clause with a regexp matching 
     #| any given values to the start of the col value.
@@ -182,16 +177,6 @@ doc qc::sql_where_col_starts {
 	% sql_where_col_starts name Jim Mac
 	name ~ '^Jim' or name ~ '^Mac'
     }
-}
-
-proc qc::sql_where_col_starts_nocase { col_name args } {
-    #| DEPRECATED - use -nocase switch on sql_where_col_starts
-    return [sql_where_col_starts -nocase $col_name {*}$args]
-}
-
-proc qc::sql_where_col_starts_not { col_name args } {
-    #| DEPRECATED - use -nocase switch on sql_where_col_starts
-    return [sql_where_col_starts -not $col_name {*}$args]
 }
 
 proc qc::sql_where_combo { col_name value } {
