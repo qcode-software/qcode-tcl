@@ -184,13 +184,14 @@ Lg==
     test email_send-1.0 {email_send plaintext} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup
 
     # email_send test 1.1 - plaintext + 1 mixed attachment
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_text "This is a test email containing plaintext and 1 mixed attachment."
     set lines [list "--boundary1" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and 1 mixed attachment." \
+                   [qc::qp_encode $email_text] \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -203,18 +204,19 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and 1 mixed attachment." attachment $mixed_attachment
+        email_send to to@test.com from from@test.com subject "Test Email" text $email_text attachment $mixed_attachment
     }
     test email_send-1.1 {email_send plaintext + 1 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.2 - plaintext + 2 mixed attachment
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_text "This is a test email containing plaintext and 2 mixed attachments."
     set lines [list "--boundary1" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and 2 mixed attachments." \
+                   [qc::qp_encode $email_text] \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -233,18 +235,19 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and 2 mixed attachments." attachments [list $mixed_attachment $mixed_attachment]
+        email_send to to@test.com from from@test.com subject "Test Email" text $email_text attachments [list $mixed_attachment $mixed_attachment]
     }
     test email_send-1.2 {email_send plaintext + 2 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.3 - plaintext + file attachment
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_text "This is a test email containing plaintext and a file attachments."
     set lines [list "--boundary1" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and a file attachments." \
+                   [qc::qp_encode $email_text] \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"test_file.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -257,19 +260,19 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and a file attachments." filename test_file.txt 
+        email_send to to@test.com from from@test.com subject "Test Email" text $email_text filename test_file.txt 
     }
     test email_send-1.3 {email_send plaintext + file attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
     
     # email_send test 1.4 - plaintext + file attachment + 1 mixed attachment
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_text "This is a test email containing plaintext and a file attachments and 1 mixed attachment."
     set lines [list "--boundary1" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and a file attachments and 1 mi=" \
-                   "xed attachment." \
+                   [qc::qp_encode $email_text] \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -288,19 +291,19 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and a file attachments and 1 mixed attachment." filename test_file.txt attachment $mixed_attachment       
+        email_send to to@test.com from from@test.com subject "Test Email" text $email_text filename test_file.txt attachment $mixed_attachment       
     }
     test email_send-1.4 {email_send plaintext + file attachment + 1 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.5 - plaintext + file attachment + 2 mixed attachment
     set mail_from from@test.com 
-    set rcpts to@test.com 
+    set rcpts to@test.com
+    set email_text "This is a test email containing plaintext and a file attachments and 2 mixed attachments."
     set lines [list "--boundary1" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "Content-Type: text/plain; charset=utf-8" \
                    "" \
-                   "This is a test email containing plaintext and a file attachments and 2 mi=" \
-                   "xed attachments." \
+                   [qc::qp_encode $email_text] \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
                    "Content-Transfer-Encoding: base64" \
@@ -325,36 +328,38 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" text "This is a test email containing plaintext and a file attachments and 2 mixed attachments." filename test_file.txt attachments [list $mixed_attachment $mixed_attachment]       
+        email_send to to@test.com from from@test.com subject "Test Email" text $email_text filename test_file.txt attachments [list $mixed_attachment $mixed_attachment]       
     }
     test email_send-1.5 {email_send plaintext + file attachment + 2 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.6 - html
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html.<b>"
     set lines [list "--boundary1" \
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html." \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary1" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html.<b>" \
+                   [qc::qp_encode $email_html] \
                    "--boundary1--"]
     set body [join $lines \r\n]
     set headers [list From from@test.com To to@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Type {multipart/alternative; boundary="boundary1"}]
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html.<b>"       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html
     }
     test email_send-1.6 {email_send html} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.7 - html + 1 mixed attachment
     set mail_from from@test.com 
-    set rcpts to@test.com 
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html and 1 mixed attachment.<b>"
     set lines [list "--boundary2" \
                    "Content-Type: multipart/alternative; boundary=\"boundary1\"" \
                    "" \
@@ -362,12 +367,12 @@ Lg==
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html and 1 mixed attachment." \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary1" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html and 1 mixed attachment.<b>" \
+                   [qc::qp_encode $email_html] \
                    "--boundary1--" \
                    "--boundary2" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
@@ -381,13 +386,14 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html and 1 mixed attachment.<b>" attachment $mixed_attachment       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachment $mixed_attachment       
     }
     test email_send-1.7 {email_send html + 1 mixed attachment} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.8 - html + 2 mixed attachments
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html and 2 mixed attachments.<b>"
     set lines [list "--boundary2" \
                    "Content-Type: multipart/alternative; boundary=\"boundary1\"" \
                    "" \
@@ -395,12 +401,12 @@ Lg==
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html and 2 mixed attachments." \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary1" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html and 2 mixed attachments.<b>" \
+                   [qc::qp_encode $email_html] \
                    "--boundary1--" \
                    "--boundary2" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
@@ -420,13 +426,14 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html and 2 mixed attachments.<b>" attachments [list $mixed_attachment $mixed_attachment]       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachments [list $mixed_attachment $mixed_attachment]       
     }
     test email_send-1.8 {email_send html + 2 mixed attachments} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.9 - html + file attachment + 1 mixed attachments
     set mail_from from@test.com 
-    set rcpts to@test.com 
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html and a file attachment and 1 mixed attachment.<b>"
     set lines [list "--boundary2" \
                    "Content-Type: multipart/alternative; boundary=\"boundary1\"" \
                    "" \
@@ -434,12 +441,12 @@ Lg==
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html and a file attachment and 1 mixed\nattachment." \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary1" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html and a file attachment and 1 mixed=\n attachment.<b>" \
+                   [qc::qp_encode $email_html] \
                    "--boundary1--" \
                    "--boundary2" \
                    "Content-Type: text/plain;name=\"attachment2.txt\"" \
@@ -459,13 +466,14 @@ Lg==
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html and a file attachment and 1 mixed attachment.<b>" attachment $mixed_attachment filename test_file.txt       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachment $mixed_attachment filename test_file.txt       
     }
     test email_send-1.9 {email_send html + file attachment + 1 mixed attachments} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.10 - html + 1 related attachments
     set mail_from from@test.com 
-    set rcpts to@test.com 
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html and 1 related attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />"
     set lines [list "--boundary2" \
                    "Content-Type: multipart/alternative; boundary=\"boundary1\"" \
                    "" \
@@ -473,14 +481,12 @@ Lg==
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html and 1 related attachment.=5Bcid:
-attachment1.txt=401312980225194014=5D" \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary1" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html and 1 related attachment.<b><img =
-src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
+                   [qc::qp_encode $email_html] \
                    "--boundary1--" \
                    "--boundary2" \
                    "Content-Type: text/plain;name=\"attachment1.txt\"" \
@@ -495,13 +501,14 @@ src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html and 1 related attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />" attachment $related_attachment       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachment $related_attachment       
     }
     test email_send-1.10 {email_send html + 1 related attachments} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.11 - html + 1 related attachments + 1 mixed attachments
-    set mail_from from@test.com 
-    set rcpts to@test.com 
+    set mail_from from@test.com
+    set rcpts to@test.com
+    set email_html "<b>This is a test email containing html and 1 related attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />"
     set lines [list "--boundary3" \
                    "Content-Type: multipart/related; boundary=\"boundary1\"" \
                    "" \
@@ -512,14 +519,12 @@ src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html and 1 related attachment.=5Bcid:
-attachment1.txt=401312980225194014=5D" \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary2" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html and 1 related attachment.<b><img =
-src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
+                   [qc::qp_encode $email_html] \
                    "--boundary2--" \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment1.txt\"" \
@@ -541,13 +546,14 @@ src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html and 1 related attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />" attachments [list $mixed_attachment $related_attachment]
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachments [list $mixed_attachment $related_attachment]
     }
     test email_send-1.11 {email_send html + 1 related attachments + 1 mixed attachments} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
     # email_send test 1.12 - html + file attachment + 1 related attachments + 1 mixed attachments
     set mail_from from@test.com 
     set rcpts to@test.com 
+    set email_html "<b>This is a test email containing html a file attachment and 1 related attachment and 1 mixed attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />"
     set lines [list "--boundary3" \
                    "Content-Type: multipart/related; boundary=\"boundary1\"" \
                    "" \
@@ -558,12 +564,12 @@ src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
                    "Content-Type: text/plain;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "This is a test email containing html a file attachment and 1 related atta=\nchment\nand 1 mixed attachment.=5Bcid:attachment1.txt=401312980225194014=5D" \
+                   [qc::qp_encode [html2text $email_html]] \
                    "--boundary2" \
                    "Content-Type: text/html;charset=\"utf-8\"" \
                    "Content-Transfer-Encoding: quoted-printable" \
                    "" \
-                   "<b>This is a test email containing html a file attachment and 1 related a=\nttachment and 1 mixed attachment.<b><img src=3D=22cid:attachment1.txt=401=\n312980225194014=22 />" \
+                   [qc::qp_encode $email_html] \
                    "--boundary2--" \
                    "--boundary1" \
                    "Content-Type: text/plain;name=\"attachment1.txt\"" \
@@ -591,7 +597,7 @@ src=3D=22cid:attachment1.txt=401312980225194014=22 />" \
     set result [dict_from mail_from rcpts body headers]
 
     set test_body {
-        email_send to to@test.com from from@test.com subject "Test Email" html "<b>This is a test email containing html a file attachment and 1 related attachment and 1 mixed attachment.<b><img src=\"cid:attachment1.txt@1312980225194014\" />" attachments [list $mixed_attachment $related_attachment] filename test_file.txt       
+        email_send to to@test.com from from@test.com subject "Test Email" html $email_html attachments [list $mixed_attachment $related_attachment] filename test_file.txt       
     }
     test email_send-1.12 {email_send html + file attachment + 1 related attachments + 1 mixed attachments} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 

@@ -1109,7 +1109,7 @@ doc qc::mime_type_guess {
 }
 
 proc qc::qp_encode {string {encoded_word 0} {no_softbreak 0}} {
-    # Based on ::mime::qp_encode
+    # Based on ::mime::qp_encode, but uses \r\n instead of only \n
 
     regsub -all -- \
 	    {[\x00-\x08\x0B-\x1E\x21-\x24\x3D\x40\x5B-\x5E\x60\x7B-\xFF]} \
