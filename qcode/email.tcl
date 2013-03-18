@@ -118,8 +118,8 @@ proc qc::email_send {args} {
         set mime_headers [list Content-Type "multipart/mixed; boundary=\"$mixed_boundary\""]
     }
 
-    set mime_headers [concat $headers $mime_headers]
-    qc::sendmail $mail_from $rcpts $mime_body {*}$mime_headers
+    lappend headers {*}$mime_headers
+    qc::sendmail $mail_from $rcpts $mime_body {*}$headers
 }
 
 doc qc::email_send {
@@ -196,8 +196,8 @@ doc qc::email_addresses {
 proc qc::email_mime_html_alternative {html boundary} {
     #| Helper to return mime part for html part with plain text alternative
     set text [html2text $html]
-    lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $text]]
-    lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [::mime::qp_encode $html]]
+    lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode $text]]
+    lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode $html]]
     return [qc::email_mime_join $parts $boundary]
 }
 
@@ -1109,7 +1109,7 @@ doc qc::mime_type_guess {
 }
 
 proc qc::qp_encode {string {encoded_word 0} {no_softbreak 0}} {
-    # Based on ::mime::qp_encode
+    # Based on ::mime::qp_encode, but uses \r\n instead of only \n
 
     regsub -all -- \
 	    {[\x00-\x08\x0B-\x1E\x21-\x24\x3D\x40\x5B-\x5E\x60\x7B-\xFF]} \
