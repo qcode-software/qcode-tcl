@@ -120,7 +120,7 @@ proc qc::http_post {args} {
 doc qc::http_post {
     Usage { http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value? }
     Examples {
-        % qc::http_post http://httpbin.org/post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" data "Here's the POST data"
+        % qc::http_post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"
         {
             "files": {},
             "form": {},
