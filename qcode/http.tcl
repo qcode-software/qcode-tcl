@@ -377,9 +377,10 @@ doc qc::http_exists {
     }
 }
 
-proc qc::http_save {url file} {
+proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    dict2vars [qc::http_curl -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    args $args -timeout 60 -- url file
+    dict2vars [qc::http_curl -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }
