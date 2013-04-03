@@ -9,7 +9,7 @@ proc qc::ll_sum { llVar index } {
     upvar 1 $llVar ll
     foreach list $ll {
 	set value [lindex $list $index]
-	set value [ns_striphtml $value]
+	set value [qc::strip_html $value]
 	regsub -all {[, ]} $value {} value
 	if { [string is double -strict $value] } {
 	    set sum [expr {$sum + $value}]

@@ -5,11 +5,7 @@ namespace eval qc {}
 proc qc::session_new { employee_id } {
     #| Create a new session
     set now [qc::cast_epoch now]
-
-    # set session_id [ns_sha1 "$now[ns_rand]$employee_id"]
-    # cannot get nssha to compile under FreeBSD
-
-    set session_id "${employee_id}${now}[ns_rand]"
+    set session_id "${employee_id}${now}[md5 [key_gen -upper -lower -int 30]]"
     set ip [qc::conn_remote_ip]
     db_dml "insert into session [sql_insert session_id ip employee_id]"
     return $session_id

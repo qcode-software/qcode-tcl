@@ -244,7 +244,7 @@ proc qc::cast_boolean { string {true t} {false f} } {
     #| Cast a string as a boolean
     # strip html
     # TODO Aolserver only
-    set string [ns_striphtml $string]
+    set string [qc::strip_html $string]
     if { [in {Y YES TRUE T 1} [upper $string]] } {
 	return $true
     } elseif { [in {N NO FALSE F 0} [upper $string]] } {

@@ -11,7 +11,7 @@ proc qc::url { url args } {
     set dict [args2dict $args]
     if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
 	foreach {name value} [split $query_string &=] {
-	    set this([ns_urldecode $name]) [ns_urldecode $value]
+	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
 	error "\"$url\" is not a valid URL."
@@ -48,7 +48,7 @@ proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
     if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
 	foreach {name value} [split $query_string &=] {
-	    set this([ns_urldecode $name]) [ns_urldecode $value]
+	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
 	array set this {}
@@ -87,7 +87,7 @@ proc qc::url_to_html_hidden { url } {
     set html ""
     if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
 	foreach {name value} [split $query_string &=] {
-	    set this([ns_urldecode $name]) [ns_urldecode $value]
+	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
 	array set this {}
@@ -155,11 +155,32 @@ doc qc::url_here {
     }
 }
 
+proc url_encoding_init {} {
+    #| Initialise url encode/decode maps in the global namespace
+    for {set i 0} {$i < 256} {incr i} {
+        set char [format %c $i]
+        set hex %[format %02x $i]
+        if { ! [string match {[-a-zA-Z0-9.~_]} $char] } {
+            if { $char eq " " } {
+                lappend encode_pairs $char +
+                lappend decode_pairs + $char
+                lappend decode_pairs $hex $char
+            } else {
+                lappend encode_pairs $char $hex
+                lappend decode_pairs $hex $char
+            }
+        }
+    }
+    set ::qc::url_encode_map $encode_pairs
+    set ::qc::url_decode_map $decode_pairs
+}
 
-proc qc::url_encode {string {charset utf-8}} {
+proc qc::url_encode {string {charset utf-8}} { 
     #| Return url-encoded string with option to specify charset
-    # TODO Aolserver only
-    return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
+    if { ! [info exists ::url_encode_map] } { 
+        url_encoding_init 
+    }
+    return [string map $::qc::url_encode_map [encoding convertto $charset $string]]
 }
 
 doc qc::url_encode {
@@ -170,10 +191,33 @@ doc qc::url_encode {
         qc::url_encode string ?charset? 
     }
     Examples {
-        > qc::url_encode "someplace.html?order_number=911&title=casáu"
-        someplace.html%3forder_number%3d911%26title%3dcas%c3%a1u
-        > qc::url_encode "someplace.html?order_number=911&title=casáu" iso8859-1
-        someplace.html%3forder_number%3d911%26title%3dcas%e1u
+        > qc::url_encode "someplace.html?order_number=911&title=ca sáu"
+        someplace.html%3forder_number%3d911%26title%3dca+s%c3%a1u
+        > qc::url_encode "someplace.html?order_number=911&title=ca sáu" iso8859-1
+        someplace.html%3forder_number%3d911%26title%3dca+s%e1u
+    }
+}
+
+proc qc::url_decode {string {charset utf-8}} { 
+    #| Return url-decoded string with option to specify charset
+    if { ! [info exists ::url_decode_map] } { 
+        url_encoding_init 
+    }
+    return [encoding convertfrom $charset [string map -nocase $::qc::url_decode_map $string]]
+}
+
+doc qc::url_decode {
+    Description {
+        Return url-decoded string with option to specify charset
+    }
+    Usage {
+        qc::url_decode string ?charset? 
+    }
+    Examples {
+        > qc::url_decode "someplace.html%3forder_number%3d911%26title%3dca+s%c3%a1u"
+        someplace.html?order_number=911&title=ca sáu
+        > qc::url_decode "someplace.html%3forder_number%3d911%26title%3dca+s%e1u" iso8859-1
+        someplace.html?order_number=911&title=ca sáu
     }
 }
 
@@ -200,3 +244,4 @@ doc qc::url_path {
         /someplace.html
     }
 }
+

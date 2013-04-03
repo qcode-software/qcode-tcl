@@ -171,9 +171,9 @@ proc qc::error_report_cookies {} {
     set report {}
     foreach pair [split $cookies ;] {
 	lassign [split $pair =] name value
-	set name [ns_urldecode $name]
+	set name [qc::url_decode $name]
 	set value [string trimright $value "; "]
-	set value [ns_urldecode $value]
+	set value [qc::url_decode $value]
 	append report "<b>$name</b> $value <br>"
     }
     return $report

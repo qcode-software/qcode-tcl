@@ -13,16 +13,16 @@ proc qc::cookie_get { name } {
     set cookie [ns_set iget $headers Cookie]
     # Be relaxed about encoding names
     if { [set start [string first "[url_encode $name]=" $cookie]] != -1 \
-	     || [set start [string first "[ns_urlencode $name]=" $cookie]] != -1 \
+	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
 	     || [set start [string first "$name=" $cookie]] != -1  } {
 	set start [string first "=" $cookie $start]
 	if { [set end [string first ";" $cookie $start]]!=-1 } {
-	    return [ns_urldecode [string range $cookie [expr {$start+1}] [expr {$end-1}]]]
+	    return [qc::url_decode [string range $cookie [expr {$start+1}] [expr {$end-1}]]]
 	} else {
-	    return [ns_urldecode [string range $cookie [expr {$start+1}] end]]
+	    return [qc::url_decode [string range $cookie [expr {$start+1}] end]]
 	}
     } else {
-	error "Cookie [ns_urldecode $name] does not exist"
+	error "Cookie [qc::url_decode $name] does not exist"
     }
 }
 
@@ -46,7 +46,7 @@ proc qc::cookie_exists { name } {
     set headers [ns_conn headers]
     set cookie [ns_set iget $headers Cookie]
     if { [string first "[url_encode $name]=" $cookie] != -1 \
-	     || [set start [string first "[ns_urlencode $name]=" $cookie]] != -1 \
+	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
 	     || [string first "$name=" $cookie] != -1 } {
 	return true
     } else {

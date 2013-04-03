@@ -245,6 +245,47 @@ namespace eval ::qcode::test {
 </table></body>
 </html>}
 
+        # strip_html
+        test strip_html-1.0 {strip_html empty} -body {
+            strip_html ""
+        } -result {}
+
+        test strip_html-1.1 {strip_html text} -body {
+            strip_html "Hello World"
+        } -result {Hello World}
+    
+        test strip_html-1.2 {strip_html simple html} -body {
+            strip_html "<h3><b>Hello</b> World</h3>"
+        } -result {Hello World}
+    
+        sset result {
+            
+
+            h3 {
+                font-size:150%
+            }
+            
+            
+            Hello World
+            
+
+        }
+        test strip_html-1.3 {strip_html html} -body {
+            sset html {
+                <html>
+                <style>
+                h3 {
+                    font-size:150%
+                }
+                </style>
+                <body>
+                <h3><b>Hello</b> World</h3>
+                </body>
+                </html>
+            } 
+            strip_html $html
+        } -result $result
+          
     cleanupTests
 }
 namespace delete ::qcode::test

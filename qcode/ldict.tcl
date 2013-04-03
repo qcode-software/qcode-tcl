@@ -33,7 +33,7 @@ proc qc::ldict_sum { ldictVar key } {
     upvar 1 $ldictVar ldict
     foreach dict $ldict {
 	set value [dict get $dict $key]
-	set value [ns_striphtml $value]
+	set value [qc::strip_html $value]
 	regsub -all {[, ]} $value {} value
 	if { [string is double -strict $value] } {
 	    set sum [expr {$sum + $value}]

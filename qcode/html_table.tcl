@@ -477,7 +477,7 @@ proc qc::html_table_tbody_sum { tbodyVar index } {
     upvar 1 $tbodyVar tbody
     foreach list $tbody {
 	set value [lindex $list $index]
-	set value [ns_striphtml $value]
+	set value [qc::strip_html $value]
 	regsub -all {[, ]} $value {} value
 	if { [string is double -strict $value] } {
 	    set sum [expr {$sum + $value}]
@@ -493,7 +493,7 @@ proc qc::html_table_tbody_avg { tbodyVar index } {
     upvar 1 $tbodyVar tbody
     foreach list $tbody {
 	set value [lindex $list $index]
-	set value [ns_striphtml $value]
+	set value [qc::strip_html $value]
 	regsub -all {[, ]} $value {} value
 	if { [string is double -strict $value] } {
 	    set sum [expr {$sum + $value}]

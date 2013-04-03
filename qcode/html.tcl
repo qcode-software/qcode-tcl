@@ -579,5 +579,10 @@ proc qc::html_clean {html} {
 proc qc::html2textlite {html} {
     # Will try to expand this to deal with block and inline elements but initially just preserve whitespace and newlines.
     set html [string map [list <br> \r\n] $html]
-    return [ns_striphtml $html]
+    return [qc::strip_html $html]
+}
+
+proc qc::strip_html {html} {
+    #| Returns a string that is the HTML with all the HTML tags removed
+    return [regsub -all -- {<[^>]+>} $html ""]
 }
