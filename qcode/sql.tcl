@@ -286,6 +286,7 @@ proc qc::sql_where_postcode {column postcode} {
     #| Search for rows matching this full or partial UK postcode.
     # Eg. [sql_where_postcode "delivery_postcode" "IV"] matches "IV1 5DZ", "IV10 5DZ" etc.
     #     [sql_where_postcode "delivery_postcode" "I"] matches "I0 5DZ", "I10 5DZ" etc
+    set postcode [string toupper $postcode]
     set area_regexp {[A-Z]{1,2}}
     set district_regexp {[0-9][0-9]?[A-Z]?}
     set space_regexp {\s}

@@ -340,42 +340,6 @@ namespace eval ::qcode::test {
     } -cleanup {
     } -result {}
 
-    test trunc-1.0 {trunc } -setup {
-    } -body {
-        trunc "01234567890" 5
-    } -cleanup {
-    } -result {01234}
-
-    test trunc-1.1 {trunc to empty} -setup {
-    } -body {
-        trunc "01234567890" 0
-    } -cleanup {
-    } -result {}
-
-    test trunc-1.2 {trunc nothing to do} -setup {
-    } -body {
-        trunc "01234567890" 20
-    } -cleanup {
-    } -result {01234567890}
-
-    test truncate-1.0 {truncate } -setup {
-    } -body {
-        truncate "This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately." 50
-    } -cleanup {
-    } -result {This is a longer string than would be allowed in }
-
-    test truncate-1.1 {truncate nothing to do} -setup {
-    } -body {
-        truncate "This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately." 200
-    } -cleanup {
-    } -result {This is a longer string than would be allowed in varchar(50) DB columns so truncate appropriately.}
-
-    test truncate-1.2 {truncate smaller than word} -setup {
-    } -body {
-        truncate "This is a string" 2
-    } -cleanup {
-    } -result {Th}
-
     test iif-1.0 {iif true} -setup {
     } -body {
         iif true AAA ZZZZ
@@ -520,42 +484,6 @@ namespace eval ::qcode::test {
     } -cleanup {
     } -result {aye}
 
-    test upper-1.0 {upper } -setup {
-    } -body {
-        upper "This will be changed to upper case."
-    } -cleanup {
-    } -result {THIS WILL BE CHANGED TO UPPER CASE.}
-
-    test upper-1.1 {upper empty} -setup {
-    } -body {
-        upper ""
-    } -cleanup {
-    } -result {}
-
-    test lower-1.0 {lower } -setup {
-    } -body {
-        lower "Test String."
-    } -cleanup {
-    } -result {test string.}
-
-    test lower-1.1 {lower empty} -setup {
-    } -body {
-        lower ""
-    } -cleanup {
-    } -result {}
-
-    test trim-1.0 {trim } -setup {
-    } -body {
-        trim "           Test    String.           "
-    } -cleanup {
-    } -result {Test    String.}
-
-    test trim-1.1 {trim empty} -setup {
-    } -body {
-        trim ""
-    } -cleanup {
-    } -result {}
-
     test mcsplit-1.0 {mcsplit } -setup {
     } -body {
         mcsplit "this||is||a||delimited||string" {||}
@@ -579,102 +507,6 @@ namespace eval ::qcode::test {
         mcsplit "" {||}
     } -cleanup {
     } -result {}
-
-    test plural-1.0 {plural dog} -setup {
-    } -body {
-        plural dog
-    } -cleanup {
-    } -result {dogs}
-
-    test plural-1.1 {plural dogs} -constraints knownBug -setup {
-    } -body {
-        plural dogs
-    } -cleanup {
-    } -result {dogses}
-
-    test plural-1.2 {plural dog} -setup {
-    } -body {
-        plural "the dog"
-    } -cleanup {
-    } -result {the dogs}
-
-    test plural-1.3 {plural knife} -setup {
-    } -body {
-        plural knife
-    } -cleanup {
-    } -result {knives}
-
-    test plural-1.4 {plural cactus} -setup {
-    } -body {
-        plural cactus
-    } -cleanup {
-    } -result {cacti}
-
-    test plural-1.5 {plural self} -setup {
-    } -body {
-        plural self
-    } -cleanup {
-    } -result {selves}
-
-    test plural-1.6 {plural cod} -setup {
-    } -body {
-        plural cod
-    } -cleanup {
-    } -result {cod}
-
-    test plural-1.7 {plural kilo} -setup {
-    } -body {
-        plural kilo
-    } -cleanup {
-    } -result {kilos}
-
-    test plural-1.8 {plural shaving} -constraints knownBug -setup {
-    } -body {
-        plural shaving
-    } -cleanup {
-    } -result {shavings}
-
-    test plural-1.9 {plural index} -setup {
-    } -body {
-        plural index
-    } -cleanup {
-    } -result {indices}
-
-    test plural-2.0 {plural box} -setup {
-    } -body {
-        plural box
-    } -cleanup {
-    } -result {boxes}
-
-    test plural-2.1 {plural friendly} -setup {
-    } -body {
-        plural friendly
-    } -cleanup {
-    } -result {friendlies}
-
-    test plural-2.2 {plural child} -setup {
-    } -body {
-        plural child
-    } -cleanup {
-    } -result {children}
-
-    test plural-2.3 {plural plateau} -setup {
-    } -body {
-        plural plateau
-    } -cleanup {
-    } -result {plateaux}
-
-    test plural-2.4 {plural thesis} -constraints knownBug -setup {
-    } -body {
-        plural thesis
-    } -cleanup {
-    } -result {theses}
-
-    test plural-2.5 {plural woman} -setup {
-    } -body {
-        plural woman
-    } -cleanup {
-    } -result {women}
 
     test cmplen-1.0 {cmplen bigger} -setup {
     } -body {
