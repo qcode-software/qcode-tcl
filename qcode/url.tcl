@@ -155,32 +155,37 @@ doc qc::url_here {
     }
 }
 
-proc url_encoding_init {} {
-    #| Initialise url encode/decode maps in the global namespace
+proc qc::url_encoding_init {} {
+    #| Initialise url encode/decode maps in the qc namespace
+    variable url_encode_map {}
+    variable url_decode_map {}
     for {set i 0} {$i < 256} {incr i} {
         set char [format %c $i]
         set hex %[format %02x $i]
         if { ! [string match {[-a-zA-Z0-9.~_]} $char] } {
             if { $char eq " " } {
-                lappend encode_pairs $char +
-                lappend decode_pairs + $char
-                lappend decode_pairs $hex $char
+                lappend url_encode_map $char +
+                lappend url_decode_map + $char
+                lappend url_decode_map $hex $char
             } else {
-                lappend encode_pairs $char $hex
-                lappend decode_pairs $hex $char
+                lappend url_encode_map $char $hex
+                lappend url_decode_map $hex $char
             }
         }
-    }
-    set ::qc::url_encode_map $encode_pairs
-    set ::qc::url_decode_map $decode_pairs
+    }    
 }
 
 proc qc::url_encode {string {charset utf-8}} { 
-    #| Return url-encoded string with option to specify charset
-    if { ! [info exists ::url_encode_map] } { 
+    #| Return url-encoded string with option to specify charset    
+    if { [info commands ns_urlencode] ne "" } { 
+        # Use ns_urlencode if available
+        return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
+    }
+    variable url_encode_map
+    if { ! [info exists url_encode_map] } { 
         url_encoding_init 
     }
-    return [string map $::qc::url_encode_map [encoding convertto $charset $string]]
+    return [string map $url_encode_map [encoding convertto $charset $string]]
 }
 
 doc qc::url_encode {
@@ -200,10 +205,15 @@ doc qc::url_encode {
 
 proc qc::url_decode {string {charset utf-8}} { 
     #| Return url-decoded string with option to specify charset
-    if { ! [info exists ::url_decode_map] } { 
+    if { [info commands ns_urlencode] ne "" } { 
+        # Use ns_urlencode if available
+        return [ns_urldecode -charset $charset $string]
+    }
+    variable url_decode_map
+    if { ! [info exists url_decode_map] } { 
         url_encoding_init 
     }
-    return [encoding convertfrom $charset [string map -nocase $::qc::url_decode_map $string]]
+    return [encoding convertfrom $charset [string map -nocase $url_decode_map $string]]
 }
 
 doc qc::url_decode {
