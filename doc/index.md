@@ -6,7 +6,7 @@ CSS: default.css
 * * *
 
 ### [Database API][1]
-* Select data out of the db. [db_1row], [db0or1row], [db_foreach]
+* Select data out of the db. [`db_1row`], [`db0or1row`], [`db_foreach`]
 * DML statements - `INSERT`, `UPDATE`, `DELETE`
 * Database Transactions
 * Sequences
