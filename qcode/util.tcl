@@ -738,17 +738,15 @@ doc qc::max_nz {
     }
 }
 
+package require md5
 proc qc::md5 {string} {
     #| Returns the md5 hash of supplied string.
-    #| Requires aolserver with DB backend.
-    db_1row {select md5(:string) as md5}
-    return $md5
+    return [string tolower [md5::md5 -hex $string]]
 }
 
 doc qc::md5 {
     Description {
         Returns the md5 hash of supplied string.
-        Requires aolserver with DB backend.
     }
     Usage {
         qc::md5 string
@@ -757,6 +755,12 @@ doc qc::md5 {
         1> qc::md5 {This string requires hashing}
         fed9e24fe3df8ca8c093fca78e546ddc
     }
+}
+
+package require sha1
+proc qc::sha1 {string} {
+    # Return the sha1 hash
+    return [sha1::sha1 $string]
 }
 
 proc qc::key_gen { args } {
