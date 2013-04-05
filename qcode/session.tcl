@@ -4,8 +4,12 @@ namespace eval qc {}
 
 proc qc::session_new { employee_id } {
     #| Create a new session
-    set now [qc::cast_epoch now]
-    set session_id "${employee_id}${now}[md5 [key_gen -upper -lower -int 30]]"
+    # Grap some random entropy
+    set file [open /dev/urandom]
+    fconfigure $file -translation binary
+    set entropy [read $file 50]
+    close $file
+    set session_id [qc::sha1 "[clock seconds]$entropy"]
     set ip [qc::conn_remote_ip]
     db_dml "insert into session [sql_insert session_id ip employee_id]"
     return $session_id
