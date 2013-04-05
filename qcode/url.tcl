@@ -205,8 +205,8 @@ doc qc::url_encode {
 
 proc qc::url_decode {string {charset utf-8}} { 
     #| Return url-decoded string with option to specify charset
-    if { [info commands ns_urlencode] ne "" } { 
-        # Use ns_urlencode if available
+    if { [info commands ns_urldecode] ne "" } { 
+        # Use ns_urldecode if available
         return [ns_urldecode -charset $charset $string]
     }
     variable url_decode_map
