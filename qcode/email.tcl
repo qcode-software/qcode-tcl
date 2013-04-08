@@ -524,7 +524,7 @@ proc qc::email_support { args } {
     # Masking any card numbers before sending.
     # Usage: email_support subject $subject ?html $html? ?text $text?
 
-    args2vars $args
+    args2vars $args subject html text
     if { [param_exists hostname] } {
         set hostname [param hostname]
     } else {
