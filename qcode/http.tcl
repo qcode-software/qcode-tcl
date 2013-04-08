@@ -68,7 +68,7 @@ proc qc::http_post {args} {
     if { ![info exists data]} {
 	set pairs {}
 	foreach {name value} $args {
-	    lappend pairs "[qc::url_encode -charset $encoding $name]=[qc::url_encode -charset $encoding $value]"
+	    lappend pairs "[qc::url_encode $name $encoding]=[qc::url_encode $value $encoding]"
 	}
 	set data [join $pairs &]
 
