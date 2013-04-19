@@ -208,6 +208,38 @@ doc qc::http_header {
     }
 }
 
+proc qc::http_put {args} {
+    # usage http_put ?-timeout timeout? ?-headers {name value name value ...}? url filename
+    args $args -timeout 60 -sslversion sslv3 -headers {} url filename
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+   
+    dict2vars [qc::http_curl -upload 1 -infile $filename -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+
+    switch $curlErrorNumber {
+	0 {
+	    switch $responsecode {
+		200 { 
+		    # OK
+		    return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html] 
+		}
+		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+		default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+	    }
+	}
+	28 {
+	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
 proc qc::http_encoding {headers body} {
     #| Return the TCL encoding scheme used for http.
     # Try to determine the http encoding from the following sources (in this order):
@@ -394,8 +426,14 @@ doc qc::http_exists {
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    args $args -timeout 60 -- url file
-    dict2vars [qc::http_curl -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    args $args -timeout 60 -headers {} -- url file
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+
+    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }
