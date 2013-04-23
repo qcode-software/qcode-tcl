@@ -157,6 +157,7 @@ doc qc::url_here {
 
 proc qc::url_encoding_init {} {
     #| Initialise url encode/decode maps in the qc namespace
+    # Conforms to RFC 3986
     variable url_encode_map {}
     variable url_decode_map {}
     for {set i 0} {$i < 256} {incr i} {
@@ -177,6 +178,7 @@ proc qc::url_encoding_init {} {
 
 proc qc::url_encode {string {charset utf-8}} { 
     #| Return url-encoded string with option to specify charset    
+    # Conforms to RFC 3986
     variable url_encode_map
     if { ! [info exists url_encode_map] } { 
         url_encoding_init 
@@ -201,6 +203,7 @@ doc qc::url_encode {
 
 proc qc::url_decode {string {charset utf-8}} { 
     #| Return url-decoded string with option to specify charset
+    # Conforms to RFC 3986
     variable url_decode_map
     if { ! [info exists url_decode_map] } { 
         url_encoding_init 
