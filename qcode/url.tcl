@@ -177,10 +177,6 @@ proc qc::url_encoding_init {} {
 
 proc qc::url_encode {string {charset utf-8}} { 
     #| Return url-encoded string with option to specify charset    
-    if { [info commands ns_urlencode] ne "" } { 
-        # Use ns_urlencode if available
-        return [string map {%2e . %2E . %7e ~ %7E ~ %2d - %2D - %5f _ %5F _} [ns_urlencode -charset $charset $string]]
-    }
     variable url_encode_map
     if { ! [info exists url_encode_map] } { 
         url_encoding_init 
@@ -205,10 +201,6 @@ doc qc::url_encode {
 
 proc qc::url_decode {string {charset utf-8}} { 
     #| Return url-decoded string with option to specify charset
-    if { [info commands ns_urldecode] ne "" } { 
-        # Use ns_urldecode if available
-        return [ns_urldecode -charset $charset $string]
-    }
     variable url_decode_map
     if { ! [info exists url_decode_map] } { 
         url_encoding_init 
