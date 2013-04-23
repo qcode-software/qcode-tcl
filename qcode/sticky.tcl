@@ -53,6 +53,8 @@ proc qc::sticky_exists {args} {
 
 proc qc::sticky_set {employee_id url name value} {
     #| Insert or Update the sticky record
+    # trim whitespace
+    set value [string trim $value]
     db_trans {
         db_1row {select employee_id from employee where employee_id=:employee_id for update}
         db_0or1row {select value as old_value from sticky where employee_id=:employee_id and url=:url and name=:name} {
