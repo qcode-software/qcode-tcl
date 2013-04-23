@@ -157,22 +157,19 @@ doc qc::url_here {
 
 proc qc::url_encoding_init {} {
     #| Initialise url encode/decode maps in the qc namespace
-    # Conforms to RFC 3986
     variable url_encode_map {}
     variable url_decode_map {}
     for {set i 0} {$i < 256} {incr i} {
         set char [format %c $i]
         set hex %[format %02x $i]
+        # RFC 3986 - Encode all characters except ( a-z A-Z 0-9 . - ~ _ )
         if { ! [string match {[-a-zA-Z0-9.~_]} $char] } {
-            if { $char eq " " } {
-                lappend url_encode_map $char +
-                lappend url_decode_map + $char
-                lappend url_decode_map $hex $char
-            } else {
-                lappend url_encode_map $char $hex
-                lappend url_decode_map $hex $char
-            }
+            lappend url_encode_map $char $hex
         }
+        # Decode any percent hex encoded characters
+        lappend url_decode_map $hex $char
+        # Decode + char as a space
+        lappend url_decode_map + " " 
     }    
 }
 
