@@ -30,7 +30,7 @@ proc qc::db_cache_1row { args } {
     set db_nrows [expr {[llength $table]-1}]
     
     if { $db_nrows!=1 } {
-	error "The qry <code>$qry</code> returned $db_nrows rows"
+	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
     }
     foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
     return
@@ -89,7 +89,7 @@ proc qc::db_cache_0or1row { args } {
 	}
     } else {
 	# more than 1 row
-	error "The qry <code>$qry</code> returned $db_nrows rows"
+	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
     }
 }
 
