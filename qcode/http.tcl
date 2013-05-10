@@ -456,3 +456,34 @@ proc qc::http_save {args} {
 	}
     }
 }
+
+proc qc::http_delete {args} {
+    #| Send http DELETE request
+    args $args -timeout 60 -headers {} -- url
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+
+    dict2vars [qc::http_curl -customrequest DELETE -httpheader $httpheaders -timeout $timeout -url $url -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    switch $responsecode {
+        204 -
+	200 { 
+	    # OK 
+	}
+	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+	500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+	default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+    }
+    switch $curlErrorNumber {
+	0 {
+	    # OK
+	    return 1
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
