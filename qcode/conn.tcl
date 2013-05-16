@@ -49,7 +49,12 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
 	    $error_handler 
 	}
     } elseif { [file exists $file] } {
-	ns_returnfile 200 [ns_guesstype $file] $file
+        set if_mod_by [ns_set iget [ns_conn headers] If-Modified-Since]
+        if { $if_mod_by eq "" || [file mtime $file] > [clock scan $if_mod_by] } {
+	    ns_returnfile 200 [ns_guesstype $file] $file
+        } else {
+            ns_return 304 {} {}
+        }
     } else {
 	ns_returnnotfound
     }
