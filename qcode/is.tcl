@@ -235,6 +235,24 @@ doc qc::is_date {
     }
 }
 
+proc qc::is_timestamp_http { date } {
+    #| Returns true if date is an acceptable HTTP timestamp. Note although all three should be accepted,
+    #| only RFC 1123 format should be generated.
+    # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
+    if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)][,]\s\d{2}\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
+        return true
+    }
+    # RFC 850 - Sunday, 06-Nov-94 08:49:37 GMT
+    if { [regexp {([(Monday)|(Tueday)|(Wednesday)|(Thursday)|(Friday)|(Saturday)|(Sunday)][,]\s\d{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
+        return true
+    }
+    # ANCI C - Sun Nov  6 08:49:37 1994
+    if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)]\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\s\d\d?\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d \d{4})} $date] } {
+        return true
+    }
+    return false
+}
+
 proc qc::is_timestamp { date } {
     # timestamps are expected to be in iso format 
     return [regexp {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$} $date]   

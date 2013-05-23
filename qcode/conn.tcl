@@ -49,11 +49,21 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
 	    $error_handler 
 	}
     } elseif { [file exists $file] } {
-        set if_mod_by [ns_set iget [ns_conn headers] If-Modified-Since]
-        if { $if_mod_by eq "" || [file mtime $file] > [clock scan $if_mod_by] } {
-	    ns_returnfile 200 [ns_guesstype $file] $file
+        set outputheaders [ns_conn outputheaders]
+        set file_mtime [file mtime $file]
+        if { $file_mtime > [qc::cast_epoch now] } {
+            # Last-Modified should never be in the future
+            set last_modified [qc::format_timestamp_http [qc::cast_epoch now]]
         } else {
+            set last_modified [qc::format_timestamp_http $file_mtime]
+        }
+        ns_set put $outputheaders "Last-Modified" $last_modified
+    
+        set if_modified_since [ns_set iget [ns_conn headers] If-Modified-Since]
+        if { [qc::is_timestamp_http $if_modified_since] && $file_mtime <= [clock scan $if_modified_since] } {
             ns_return 304 {} {}
+        } else {
+	    ns_returnfile 200 [ns_guesstype $file] $file
         }
     } else {
 	ns_returnnotfound
