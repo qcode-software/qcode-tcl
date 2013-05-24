@@ -90,25 +90,28 @@ proc qc::format_timestamp_rel_age {timestamp} {
     #| Return the approximate relative age of a timestamp
     set days [date_days $timestamp now]
     if { $days == 0 } {
-	return "today"
+        return "today"
     }
-   
-    set years [expr {$days / 365}]
-    if { $years > 0 } { 
-	return "$years [iif {$years==1} year years]" 
-    } 
-    
-    set months [expr {$days / 30}] 
-    if {$months > 0} {
-	return "$months [iif {$months==1} month months]" 
+  
+    set years [expr {round ($days/365.0)}]
+    # Return to the nearest year if 361 days or more have elapsed
+    if { $years > 0 && $days > 360} {
+        return "$years [iif {$years==1} year years]"
     }
-
-    set weeks [expr {$days / 7}]
-    if {$weeks > 0} {
-	return "$weeks [iif {$weeks==1} week weeks]" 
+  
+    set months [expr {round($days/30.0)}]
+    # Return to the nearest month if 30 days or more have elapsed
+    if {$months > 0 && $days > 29} {
+        return "$months [iif {$months==1} month months]"
     }
 
-    return "$days [iif {$days==1} day days]" 
+    set weeks [expr {round($days/7.0)}]
+    # Return to the nearest week if 5 days or more have elapsed
+    if {$weeks > 0 && $days > 5} {
+        return "$weeks [iif {$weeks==1} week weeks]"
+    }
+
+    return "$days [iif {$days==1} day days]"
 }
 
 doc qc::format_timestamp_rel_age {
