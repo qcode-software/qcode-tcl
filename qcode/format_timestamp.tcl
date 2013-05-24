@@ -27,7 +27,7 @@ proc qc::format_timestamp_http { string } {
 doc qc::format_timestamp_http {
     Examples {
 	% format_timestamp_http now
-        Tue, 12 Jun 2012 10:39:47 BST
+        Tue, 12 Jun 2012 10:39:47 GMT
     }
 }
 

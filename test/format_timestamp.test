@@ -14,10 +14,10 @@ namespace eval ::qcode::test {
     test format_timestamp_iso-1.1 {format_timestamp_iso uk} {format_timestamp_iso "23/5/12 11:11:11"} "2012&#8209;05&#8209;23 11:11:11"
     test format_timestamp_iso-1.2 {format_timestamp_iso long} {format_timestamp_iso "23rd May 2012 11:11:11"} "2012&#8209;05&#8209;23 11:11:11"
 
-    test format_timestamp_http-1.0 {format_timestamp_http relative} {format_timestamp_http now} [string map [list - "&#8209;"] [clock format [clock scan now] -format "%a, %d %b %Y %H:%M:%S %Z"]]
-    test format_timestamp_http-1.1 {format_timestamp_http uk} {format_timestamp_http "23/5/12 11:11:11"} {Wed, 23 May 2012 11:11:11 BST}
-    test format_timestamp_http-1.2 {format_timestamp_http iso} {format_timestamp_http "2012-05-23 11:11:11"} {Wed, 23 May 2012 11:11:11 BST}
-    test format_timestamp_http-1.3 {format_timestamp_http iso2} {format_timestamp_http "2012-05-23T11:11:11"} {Wed, 23 May 2012 11:11:11 BST}
+    test format_timestamp_http-1.0 {format_timestamp_http relative} {format_timestamp_http now} [string map [list - "&#8209;"] [clock format [clock scan now] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]]
+    test format_timestamp_http-1.1 {format_timestamp_http uk} {format_timestamp_http "23/5/12 11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
+    test format_timestamp_http-1.2 {format_timestamp_http iso} {format_timestamp_http "2012-05-23 11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
+    test format_timestamp_http-1.3 {format_timestamp_http iso2} {format_timestamp_http "2012-05-23T11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
 
     test format_timestamp_rel-1.0 {format_timestamp_rel now } {format_timestamp_rel now} [clock format [clock scan now] -format "%H:%M"]
     test format_timestamp_rel-1.1 {format_timestamp_rel tomorrow } {format_timestamp_rel tomorrow} [clock format [clock scan tomorrow] -format "%a %H:%M"]

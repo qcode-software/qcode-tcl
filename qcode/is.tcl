@@ -240,17 +240,17 @@ proc qc::is_timestamp_http { date } {
     #| only RFC 1123 format should be generated.
     # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
     if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)][,]\s\d{2}\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
-        return true
+        return 1
     }
     # RFC 850 - Sunday, 06-Nov-94 08:49:37 GMT
     if { [regexp {([(Monday)|(Tuesday)|(Wednesday)|(Thursday)|(Friday)|(Saturday)|(Sunday)][,]\s\d{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
-        return true
+        return 1
     }
     # ANCI C - Sun Nov  6 08:49:37 1994
-    if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)]\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\s\d\d?\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d \d{4})} $date] } {
-        return true
+    if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)]\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\s|\d)\d\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d \d{4})} $date] } {
+        return 1
     }
-    return false
+    return 0
 }
 
 proc qc::is_timestamp { date } {

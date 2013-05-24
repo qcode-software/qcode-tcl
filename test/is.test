@@ -218,6 +218,51 @@ namespace eval ::qcode::test {
         is_timestamp "2012-01-01"
     } -result {0}
 
+    test is_timestamp_http-1.0 {is_timestamp_http 12/12/12} -setup {
+    } -body {
+        is_timestamp_http 12/12/12
+    } -result {0}
+
+    test is_timestamp_http-1.1 {is_timestamp_http RFC 1123} -setup {
+    } -body {
+        is_timestamp_http "Sun, 06 Nov 1994 08:49:37 GMT"
+    } -result {1}
+
+    test is_timestamp_http-1.2 {is_timestamp_http RFC 1123 neg} -setup {
+    } -body {
+        is_timestamp_http "Sunday, 06 Nov 1994 08:49:37 GMT"
+    } -result {0}
+
+    test is_timestamp_http-1.3 {is_timestamp_http RFC 850 } -setup {
+    } -body {
+        is_timestamp_http "Sunday, 06-Nov-94 08:49:37 GMT"
+    } -result {1}
+
+    test is_timestamp_http-1.4 {is_timestamp_http RFC 850 neg} -setup {
+    } -body {
+        is_timestamp_http "Sunday, 06-Nov-1994 08:49:37 GMT"
+    } -result {0}
+
+    test is_timestamp_http-1.5 {is_timestamp_http ANSI C} -setup {
+    } -body {
+        is_timestamp_http "Sun Nov  6 08:49:37 1994"
+    } -result {1}
+
+    test is_timestamp_http-1.6 {is_timestamp_http ANSI C 2 digit} -setup {
+    } -body {
+        is_timestamp_http "Sun Nov 16 08:49:37 1994"
+    } -result {1}
+
+    test is_timestamp_http-1.7 {is_timestamp_http ANSI C neg} -setup {
+    } -body {
+        is_timestamp_http "Sun Nov 6 08:49:37 1994"
+    } -result {0}
+
+    test is_timestamp_http-1.8 {is_timestamp_http ANSI C neg2} -setup {
+    } -body {
+        is_timestamp_http "2013-05-24 10:17:01"
+    } -result {0}
+
     test is_email-1.0 {is_email partial email} -setup {
     } -body {
         is_email @gmail.com
