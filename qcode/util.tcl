@@ -1020,3 +1020,8 @@ doc qc::which {
     }
 }
 
+proc qc::string2hex s {
+    #| Convert string to hex
+    binary scan [encoding convertto utf-8 $s] H* hex
+    return [regsub -all (..) $hex {\\x\1}]    
+}
