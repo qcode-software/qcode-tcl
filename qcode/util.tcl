@@ -1020,8 +1020,14 @@ doc qc::which {
     }
 }
 
-proc qc::string2hex s {
+proc qc::string2hex {string} {
     #| Convert string to hex
-    binary scan [encoding convertto utf-8 $s] H* hex
+    binary scan [encoding convertto utf-8 $string] H* hex
     return [regsub -all (..) $hex {\\x\1}]    
+}
+doc qc::string2hex {
+    Examples {
+        % string2hex Hello[format %c 256]
+        \x48\x65\x6c\x6c\x6f\xc4\x80
+    }
 }
