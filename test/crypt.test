@@ -36,14 +36,28 @@ namespace eval ::qcode::test {
         user $user
         password $password
     "]
-    set pgcrypto_path [exec pg_config --sharedir]/contrib/pgcrypto.sql
     set failed [catch {
         pg_execute $conn {CREATE DATABASE test_database}
         pg_execute $conn {
             CREATE USER test_user WITH PASSWORD 'test_password';
             GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
         }
-        pg_execute $conn "\\i $pgcrypto_path"
+    } results options]
+    pg_disconnect $conn
+    if { $failed } {
+        return -options $options $results
+    }
+    # load pgcrypto.sql for test_database (must be done as superuser)
+    set pgcrypto [read [open [exec pg_config --sharedir]/contrib/pgcrypto.sql r]]
+    set conn [pg_connect -connlist "
+        host localhost
+        port 5432
+        dbname test_database
+        user $user
+        password $password
+    "]
+    set failed [catch {
+        pg_execute $conn $pgcrypto
     } results options]
     pg_disconnect $conn
     if { $failed } {
@@ -73,9 +87,93 @@ namespace eval ::qcode::test {
         # Begin the actual testing
         # ========================================
         # pkcs_padding_append
+        test pkcs_padding_append-1.0 {pkcs_padding_append - 1 byte unicode} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+            set list [list \
+                          [string repeat [format %c 0] 0] \
+                          [string repeat [format %c 0] 1] \
+                          [string repeat [format %c 0] 2] \
+                          [string repeat [format %c 0] 3] \
+                          [string repeat [format %c 0] 4] \
+                          [string repeat [format %c 0] 5] \
+                          [string repeat [format %c 0] 6] \
+                          [string repeat [format %c 0] 7] \
+                          [string repeat [format %c 0] 8] \
+                         ]
+            set results {}
+            foreach string $list {
+                lappend results [pkcs_padding_append $string]   
+            }
+            return $results
+        } -result [list \
+                       [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
+                       [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
+                       [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
+                       [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
+                       [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
+                       [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
+                       [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
+                       [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
+                       [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
+                      ]
+        
+        test pkcs_padding_append-1.1 {pkcs_padding_append - 2 byte unicode} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+           set list [list \
+                         [string repeat [format %c 256] 0] \
+                         [string repeat [format %c 256] 1] \
+                         [string repeat [format %c 256] 2] \
+                         [string repeat [format %c 256] 3] \
+                         [string repeat [format %c 256] 4] \
+                         [string repeat [format %c 256] 5] \
+                         [string repeat [format %c 256] 6] \
+                         [string repeat [format %c 256] 7] \
+                         [string repeat [format %c 256] 8] \
+                        ]
+            set results {}
+            foreach string $list {
+                lappend results [pkcs_padding_append $string]   
+            } 
+            return $results
+        } -result [list \
+                       [string repeat [format %c 256] 0][string repeat [format %c 8] 8] \
+                       [string repeat [format %c 256] 1][string repeat [format %c 7] 7] \
+                       [string repeat [format %c 256] 2][string repeat [format %c 6] 6] \
+                       [string repeat [format %c 256] 3][string repeat [format %c 5] 5] \
+                       [string repeat [format %c 256] 4][string repeat [format %c 4] 4] \
+                       [string repeat [format %c 256] 5][string repeat [format %c 3] 3] \
+                       [string repeat [format %c 256] 6][string repeat [format %c 2] 2] \
+                       [string repeat [format %c 256] 7][string repeat [format %c 1] 1] \
+                       [string repeat [format %c 256] 8][string repeat [format %c 8] 8] \
+                      ]
 
         # pkcs_padding_strip            
-
+        test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+            set list [list \
+                          [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
+                          [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
+                          [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
+                          [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
+                          [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
+                          [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
+                          [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
+                          [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
+                          [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
+                         ]
+            set results {}
+            foreach string $list {
+                lappend results [pkcs_padding_strip $string]   
+            }
+            return $results
+        } -result [list \
+                       [string repeat [format %c 0] 0] \
+                       [string repeat [format %c 0] 1] \
+                       [string repeat [format %c 0] 2] \
+                       [string repeat [format %c 0] 3] \
+                       [string repeat [format %c 0] 4] \
+                       [string repeat [format %c 0] 5] \
+                       [string repeat [format %c 0] 6] \
+                       [string repeat [format %c 0] 7] \
+                       [string repeat [format %c 0] 8] \
+                      ]
 
         # encrypt_bf_db
         test encrypt_bf_db-1.0 {encrypt_bf_db - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
@@ -85,14 +183,16 @@ namespace eval ::qcode::test {
         test encrypt_bf_db-1.1 {encrypt_bf_db - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
             set i 0
             set string ""
-            while { $i <= 500 } {
+            while { $i <= 300 } {
                 append string [format %c $i]   
-                set r1 [encrypt_bf_db $key $string]
-                set r2 [decrypt_bf_db $key $r1]
-                if { $r2 ne $string } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+                if { $i % 10 == 0 } {
+                    set r1 [encrypt_bf_db $key $string]
+                    set r2 [decrypt_bf_db $key $r1]
+                    if { $r2 ne $string } {
+                        # Return after first error
+                        return "Unable to successfully encrypt and decrypt \"$string\""
+                    }                
+                }
                 incr i
             }
             return ""
@@ -107,14 +207,16 @@ namespace eval ::qcode::test {
         test encrypt_bf_tcl-1.1 {encrypt_bf_tcl - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
             set i 0
             set string ""
-            while { $i <= 500 } {
-                append string [format %c $i]   
-                set r1 [encrypt_bf_tcl $key $string]
-                set r2 [decrypt_bf_tcl $key $r1]
-                if { $r2 ne $string } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+            while { $i <= 300 } {
+                append string [format %c $i]  
+                if { $i % 10 == 0 } { 
+                    set r1 [encrypt_bf_tcl $key $string]
+                    set r2 [decrypt_bf_tcl $key $r1]
+                    if { $r2 ne $string } {
+                        # Return after first error
+                        return "Unable to successfully encrypt and decrypt \"$string\""
+                    }                
+                }
                 incr i
             }
             return ""
@@ -123,14 +225,16 @@ namespace eval ::qcode::test {
         test encrypt_bf_tcl-1.2 {encrypt_bf-tcl - check compatibility with encrypt_bf_db} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
             set i 0
             set string ""
-            while { $i <= 500 } {
-                append string [format %c $i]   
-                set r1 [encrypt_bf_tcl $key $string]
-                set r2 [encrypt_bf_db $key $string]
-                if { [trim $r1] ne [trim $r2] } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+            while { $i <= 300 } {
+                if { $i % 10 == 0 } {
+                    append string [format %c $i]   
+                    set r1 [encrypt_bf_tcl $key $string]
+                    set r2 [encrypt_bf_db $key $string]
+                    if { [trim $r1] ne [trim $r2] } {
+                        # Return after first error
+                        return "Unable to successfully encrypt and decrypt \"$string\""
+                    }                
+                }
                 incr i
             }
             return ""
