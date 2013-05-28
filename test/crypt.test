@@ -48,7 +48,12 @@ namespace eval ::qcode::test {
         return -options $options $results
     }
     # load pgcrypto.sql for test_database (must be done as superuser)
-    set pgcrypto [read [open [exec pg_config --sharedir]/contrib/pgcrypto.sql r]]
+    regexp {PostgreSQL\s+([0-9]+\.[0-9]+)\.([0-9]+)} [exec pg_config --version] -> major_version minor_version
+    if { $major_version >= 9.1 } {
+        set pgcrypto "CREATE EXTENSION pgcrypto"
+    } else {
+        set pgcrypto [read [open [exec pg_config --sharedir]/contrib/pgcrypto.sql r]]
+    }
     set conn [pg_connect -connlist "
         host localhost
         port 5432
