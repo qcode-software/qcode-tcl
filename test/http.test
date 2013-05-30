@@ -95,7 +95,12 @@ namespace eval ::qcode::test {
          IANAEncoding2TclEncoding {latin1}
     } -result {iso8859-1}
 
-
+    test http_header-1.0 {http_header ok} -setup {} -body {
+        http_header Content-Type application/json
+    } -result {Content-Type: application/json}
+    test http_header-1.1 {http_header error} -setup {} -body {
+        http_header Rest-Sign "aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk"
+    } -returnCodes 1 -result "The value of http header, \"Rest-Sign: aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk\", contains newline characters."
 
     cleanupTests
 }

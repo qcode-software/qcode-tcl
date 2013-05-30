@@ -193,12 +193,19 @@ doc qc::http_get {
 }
 
 proc qc::http_header {name value} {
-    #| Return http header. Multi line header value are folded by begining continuation lines with a space.
-    # Convert to unix newlines for processing
-    regsub -all {\r\n} $value \n value
-    # Convert unix newlines to CRLF followed by a space
-    regsub -all {\n} $value "\r\n " value
+    #| Return http header. 
+    #| Raise an error if the value of the http header contains newline characters.
+    if { [regexp {\n} $value] } {
+        error "The value of http header, \"$name: $value\", contains newline characters."
+    }
     return "$name: $value"
+}
+
+doc qc::http_header {
+    Examples {
+        % http_header Content-Type application/json
+        Content-Type: application/json
+    }
 }
 
 proc qc::http_encoding {headers body} {
