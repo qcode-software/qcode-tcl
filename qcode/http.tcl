@@ -75,24 +75,24 @@ proc qc::http_post {args} {
     }
     set httpheaders {}
     if { [info exists authorization] } {
-	lappend httpheaders "Authorization: $authorization"
+	lappend httpheaders [qc::http_header "Authorization" $authorization]
     }
 
     if { [info exists content-type] } {
-	lappend httpheaders "Content-Type: ${content-type}"
+	lappend httpheaders [qc::http_header "Content-Type" ${content-type}
     }
 
     if { [info exists accept] } {
-	lappend httpheaders "Accept: $accept"
+	lappend httpheaders [qc::http_header "Accept" $accept
     }
 
     if { [info exists soapaction] } {
-	lappend httpheaders "SOAPAction: $soapaction"
+	lappend httpheaders [qc::http_header "SOAPAction" $soapaction]
     }
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
-
+   
     dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
@@ -145,7 +145,7 @@ proc qc::http_get {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
    
     dict2vars [qc::http_curl  -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
@@ -192,6 +192,14 @@ doc qc::http_get {
     }
 }
 
+proc qc::http_header {name value} {
+    #| Return http header. Multi line header value are folded by begining continuation lines with a space.
+    # Convert to unix newlines for processing
+    regsub -all {\r\n} $value \n value
+    # Convert unix newlines to CRLF followed by a space
+    regsub -all {\n} $value "\r\n " value
+    return "$name: $value"
+}
 
 proc qc::http_encoding {headers body} {
     #| Return the TCL encoding scheme used for http.
