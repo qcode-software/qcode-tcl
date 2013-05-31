@@ -295,6 +295,7 @@ proc qc::call { proc_name args } {
 	} 
     } else {
 	# Call a proc using args of matching names to local variables.
+        set largs {}
 	foreach arg [info args $proc_name] {
 	    upvar 1 $arg temp
 	    if { [info default $proc_name $arg default_value] && ![info exists temp]} {
