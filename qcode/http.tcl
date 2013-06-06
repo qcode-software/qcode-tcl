@@ -208,6 +208,46 @@ doc qc::http_header {
     }
 }
 
+proc qc::http_put {args} {
+    # usage http_put ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
+    args $args -timeout 60 -sslversion sslv3 -headers {} -infile ? -data ? url 
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+
+    if { [info exists data] && [info exists infile]} {
+        error "qc::http:put must have only 1 of -data or -infile specified"
+    } elseif { [info exists infile] } {
+        dict2vars [qc::http_curl -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+    } elseif { [info exists data] }  {
+        dict2vars [qc::http_curl -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+    } else {
+        error "qc::http:put must have 1 of -data or -infile specified"
+    }
+
+    switch $curlErrorNumber {
+	0 {
+	    switch $responsecode {
+		200 { 
+		    # OK
+		    return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html] 
+		}
+		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+		default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+	    }
+	}
+	28 {
+	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
 proc qc::http_encoding {headers body} {
     #| Return the TCL encoding scheme used for http.
     # Try to determine the http encoding from the following sources (in this order):
@@ -394,8 +434,14 @@ doc qc::http_exists {
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    args $args -timeout 60 -- url file
-    dict2vars [qc::http_curl -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    args $args -timeout 60 -headers {} -- url file
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+
+    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }
@@ -418,3 +464,34 @@ proc qc::http_save {args} {
 	}
     }
 }
+
+proc qc::http_delete {args} {
+    #| Send http DELETE request
+    args $args -timeout 60 -headers {} -- url
+
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders "$name: $value"
+    }
+
+    dict2vars [qc::http_curl -customrequest DELETE -httpheader $httpheaders -timeout $timeout -url $url -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    switch $responsecode {
+        204 -
+	200 { 
+	    # OK 
+	}
+	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+	500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+	default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+    }
+    switch $curlErrorNumber {
+	0 {
+	    # OK
+	    return 1
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
