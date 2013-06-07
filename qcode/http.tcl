@@ -209,8 +209,8 @@ doc qc::http_header {
 }
 
 proc qc::http_put {args} {
-    # usage http_put ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
-    args $args -timeout 60 -sslversion sslv3 -headers {} -infile ? -data ? url 
+    # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
+    args $args -header 0 -timeout 60 -sslversion sslv3 -headers {} -infile ? -data ? url 
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -220,9 +220,9 @@ proc qc::http_put {args} {
     if { [info exists data] && [info exists infile]} {
         error "qc::http:put must have only 1 of -data or -infile specified"
     } elseif { [info exists infile] } {
-        dict2vars [qc::http_curl -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
     } elseif { [info exists data] }  {
-        dict2vars [qc::http_curl -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
     } else {
         error "qc::http:put must have 1 of -data or -infile specified"
     }
