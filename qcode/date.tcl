@@ -211,6 +211,9 @@ doc qc:::date_tomorrow {
 
 proc qc::date_month { date } {
     #| Return the month number.
+    if { [regexp {^(\d{4})-(\d{2})-(\d{2})$} $date -> year month day] } {
+        return [cast_integer $month]
+    }
     return [cast_integer [clock format [cast_epoch $date] -format "%m"]]
 }
 
@@ -244,6 +247,9 @@ doc qc::date_doy {
 
 proc qc::date_year { date } {
     #| Return the year.
+    if { [regexp {^(\d{4})-(\d{2})-(\d{2})$} $date -> year month day] } {
+        return $year
+    }
     return [clock format [cast_epoch $date] -format "%Y"]
 }
 
@@ -260,6 +266,9 @@ doc qc::date_year {
 
 proc qc::date_dom { date } {
     #| Return the day of the month.
+    if { [regexp {^(\d{4})-(\d{2})-(\d{2})$} $date -> year month day] } {
+        return [cast_integer $day]
+    }
     return [cast_integer [clock format [cast_epoch $date] -format "%d"]]
 }
 
