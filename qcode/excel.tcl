@@ -10,12 +10,13 @@ proc qc::excel_file_create {args} {
     # column_meta: nested dict, eg. {1 {class "foo" width 20} 5 {width 50}}
     # row_meta: nested dict, eg. {0 {class "bar" height 20} 3 {class "foo"}}
     # cell_meta: nested dict, eg. {{5 2} {class "baz" type "string|number|formula|url"} {1 1} {class "bar"}}
-    args2vars $args data formats column_meta row_meta cell_meta
+    args2vars $args data formats column_meta row_meta cell_meta timeout
     default data {}
     default formats {}
     default column_meta {}
     default row_meta {}
     default cell_meta {}
+    default timeout 1000
 
     set filename [file_temp ""]
     ########################################
@@ -193,7 +194,7 @@ proc qc::excel_file_create {args} {
     set script_filename [file_temp $script]
     try {
         log $script_filename
-        exec_proxy perl $script_filename
+        exec_proxy -timeout $timeout perl $script_filename
         file delete $script_filename
     } {
         file delete $script_filename
