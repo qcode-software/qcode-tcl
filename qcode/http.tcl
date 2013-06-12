@@ -79,11 +79,11 @@ proc qc::http_post {args} {
     }
 
     if { [info exists content-type] } {
-	lappend httpheaders [qc::http_header "Content-Type" ${content-type}
+	lappend httpheaders [qc::http_header "Content-Type" ${content-type}]
     }
 
     if { [info exists accept] } {
-	lappend httpheaders [qc::http_header "Accept" $accept
+	lappend httpheaders [qc::http_header "Accept" $accept]
     }
 
     if { [info exists soapaction] } {
