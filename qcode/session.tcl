@@ -2,6 +2,7 @@ package provide qcode 1.17
 package require doc
 namespace eval qc {}
 
+package require uuid
 proc qc::session_new { employee_id } {
     #| Create a new session
     # Grap some random entropy
@@ -9,7 +10,8 @@ proc qc::session_new { employee_id } {
     fconfigure $file -translation binary
     set entropy [read $file 50]
     close $file
-    set session_id [qc::sha1 "[clock seconds]$entropy"]
+    set uuid [uuid::uuid generate]
+    set session_id [qc::sha1 "$uuid $entropy"]
     set ip [qc::conn_remote_ip]
     db_dml "insert into session [sql_insert session_id ip employee_id]"
     return $session_id
