@@ -405,7 +405,7 @@ doc qc::is_base64 {
 
 proc qc::is_int_castable {string} {
     #| Can input be cast to an integer?
-    try {
+    qc::try {
 	cast_integer $string
 	return true
     } {
@@ -427,7 +427,7 @@ doc qc::is_int_castable {
 }
 
 proc qc::is_decimal_castable {string} {
-    try {
+    qc::try {
 	cast_decimal $string
 	return true
     } {
@@ -448,7 +448,7 @@ doc qc::is_decimal_castable {
 
 proc qc::is_date_castable {string} {
     #| Can string be cast into date format?
-    try {
+    qc::try {
 	cast_date $string
 	return true
     } {
@@ -471,7 +471,7 @@ doc qc::is_date_castable {
 
 proc qc::is_timestamp_castable {string} {
     #| Can string be cast into timestamp format?
-    try {
+    qc::try {
 	cast_timestamp $string
 	return true
     } {

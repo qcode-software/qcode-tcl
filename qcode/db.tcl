@@ -402,7 +402,7 @@ proc qc::db_dml { args } {
     set qry [db_qry_parse $qry 1]
     if { [info commands ns_db] eq "ns_db" } {
         # AOL Server
-        try {
+        qc::try {
             ns_db dml $db $qry
         } {
             global errorInfo
@@ -410,7 +410,7 @@ proc qc::db_dml { args } {
         }
     } else {
         # Connected with db_connect
-        try {
+        qc::try {
             pg_execute $db $qry
         } {
             global errorInfo
@@ -725,7 +725,7 @@ proc qc::db_select_table {args} {
     set db [db_get_handle $db]
     if { [info commands ns_db] eq "ns_db" } {
         # AOL Server
-        try {
+        qc::try {
             set row [ns_db select $db $qry]
             lappend table [ns_set_keys $row]
             while { [ns_db getrow $db $row] } {
@@ -737,7 +737,7 @@ proc qc::db_select_table {args} {
         }
     } else {
         # Connected with db_connect
-        try {
+        qc::try {
             set results [pg_exec $db $qry]
             lappend table [pg_result $results -attributes]
             set table [concat $table [pg_result $results -llist]]
@@ -858,7 +858,7 @@ doc qc::db_col_varchar_length {
 proc qc::db_connect {args} {
     #| Connect to a postgresql database
     global _db
-    try {
+    qc::try {
         package require Pgtcl 1.5
         set _db [pg_connect -connlist $args]
     } {

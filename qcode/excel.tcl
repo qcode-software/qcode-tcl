@@ -192,7 +192,7 @@ proc qc::excel_file_create {args} {
     # Script execution
     ########################################
     set script_filename [file_temp $script]
-    try {
+    qc::try {
         log Debug $script_filename
         exec_proxy -timeout $timeout perl $script_filename
         file delete $script_filename

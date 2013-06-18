@@ -928,7 +928,7 @@ proc qc::exec_proxy {args} {
     }
     if { [info commands ns_proxy] eq "ns_proxy" } {
 	set handle [ns_proxy get exec]
-	try {
+	qc::try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
 	    return $result

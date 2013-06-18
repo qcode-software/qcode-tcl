@@ -38,7 +38,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     set file [ns_url2file [ns_conn url]]
 
     if { [llength [info procs "::$url"]] } {
-	try {
+	qc::try {
 	    set result [form_proc ::$url]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
 		# If conn is still open
