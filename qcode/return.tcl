@@ -113,15 +113,7 @@ proc qc::return_next { next_url } {
          
         } else {
             # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
-            if { ! [regexp -expanded {
-                # path
-                ^([a-zA-Z0-9_\-\.~+/%]+)?
-                # query
-                (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
-                # anchor
-                (\#[a-zA-Z0-9_\-\.~+/%]+)?
-                $
-            } $next_url] } {
+            if { ! [is_url -relative $next_url] } {
                 error "\"[html_escape $next_url]\" is not a valid url."
             }
         }

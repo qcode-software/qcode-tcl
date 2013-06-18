@@ -563,24 +563,38 @@ doc qc::is_hex {
     }
 }
 
-proc qc::is_url {url} {
+proc qc::is_url {args} {
     #| This is a more restrictive subset of all legal uri's defined by RFC 3986
     #| Relax as needed
-    return [regexp -expanded {
-	# protocol
-	^https?://
-	# domain
-	[a-z0-9\-\.]+
-	# port
-	(:[0-9]+)?
-	# path
-	([a-zA-Z0-9_\-\.~+/%]+)?
-	# query
-	(\?[a-zA-Z0-9_\-\.~+/%=&]+)?
-	# anchor
-	(\#[a-zA-Z0-9_\-\.~+/%]+)?
-	$
-    } $url]
+    args $args -relative -- url
+    default relative false
+    if { [true $relative] } {
+        return [regexp -expanded {
+            # path
+            ^([a-zA-Z0-9_\-\.~+/%]+)?
+            # query
+            (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+            # anchor
+            (\#[a-zA-Z0-9_\-\.~+/%]+)?
+            $
+        } $url]
+    } else {
+        return [regexp -expanded {
+            # protocol
+            ^https?://
+            # domain
+            [a-z0-9\-\.]+
+            # port
+            (:[0-9]+)?
+            # path
+            ([a-zA-Z0-9_\-\.~+/%]+)?
+            # query
+            (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+            # anchor
+            (\#[a-zA-Z0-9_\-\.~+/%]+)?
+            $
+        } $url]
+    }
 }
 
 doc qc::is_url {
