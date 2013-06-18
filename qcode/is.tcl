@@ -568,7 +568,7 @@ proc qc::is_url {args} {
     #| Relax as needed
     args $args -relative -- url
     default relative false
-    if { [true $relative] } {
+    if { $relative } {
         return [regexp -expanded {
             # path
             ^([a-zA-Z0-9_\-\.~+/%]+)?
