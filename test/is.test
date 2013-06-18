@@ -2733,6 +2733,39 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
         is_url ftp://www.domain.com
     } -result 0
 
+    test is_url-1.6 {is_url -relative} -body {
+        is_url -relative home.html
+    } -result 1
+
+    test is_url-1.7 {is_url -relative} -body {
+        is_url -relative /home.html
+    } -result 1
+
+    test is_url-1.8 {is_url -relative} -body {
+        is_url -relative http://www.domain.com
+    } -result 0
+
+    test is_url-1.9 {is_url -relative} -body {
+        is_url -relative page.html?foo=bar&test=baz
+    } -result 1
+
+
+    test is_url-1.10 {is_url -relative} -body {
+        is_url -relative index.tcl#here
+    } -result 1
+
+    test is_url-1.11 {is_url -relative} -body {
+        is_url -relative /folder/page.html
+    } -result 1
+
+    test is_url-1.12 {is_url -relative} -body {
+        is_url -relative /folder/page.html?form=variable&and=another&and=#anchor
+    } -result 1
+
+    test is_url-1.13 {is_url -relative} -body {
+        is_url -relative index.html?foo=bar?test=broken
+    } -result 0
+
     test is_ipv4-1.0 {is_ipv4 ip6} -setup {
     } -body {
         is_ipv4 2001:0db8:85a3:0042:0000:8a2e:0370:7334
