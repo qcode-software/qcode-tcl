@@ -91,7 +91,9 @@ proc qc::conn_url {} {
     #| Try to construct the full url of this request.
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
-    if { [ne $host ""] } {
+
+    if { $host ne "" && $port ne "" } {
+        # Proxied through nginx
 	if { [eq $port 80] } {
 	    return "http://$host[ns_conn url]"
 	} elseif { [eq $port 443] } {
@@ -101,8 +103,10 @@ proc qc::conn_url {} {
 	} else  {
 	    return "http://$host:$port[ns_conn url]"
 	}
+
     } else {
-	return [ns_conn url]
+        # Not proxied
+	return "[ns_conn location][ns_conn url]"
     }
 }
  
