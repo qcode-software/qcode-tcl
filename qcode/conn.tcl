@@ -38,7 +38,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     set file [ns_url2file [ns_conn url]]
 
     if { [llength [info procs "::$url"]] } {
-	try {
+	qc::try {
 	    set result [form_proc ::$url]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
 		# If conn is still open
@@ -91,7 +91,9 @@ proc qc::conn_url {} {
     #| Try to construct the full url of this request.
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
-    if { [ne $host ""] } {
+
+    if { $host ne "" && $port ne "" } {
+        # Proxied through nginx
 	if { [eq $port 80] } {
 	    return "http://$host[ns_conn url]"
 	} elseif { [eq $port 443] } {
@@ -101,8 +103,10 @@ proc qc::conn_url {} {
 	} else  {
 	    return "http://$host:$port[ns_conn url]"
 	}
+
     } else {
-	return [ns_conn url]
+        # Not proxied
+	return "[ns_conn location][ns_conn url]"
     }
 }
  

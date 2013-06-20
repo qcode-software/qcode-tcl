@@ -43,6 +43,8 @@ namespace eval ::qcode::test {
 
     test date_year-1.0 {date_year success} {qc::date_year 2007-04-30} 2007
 
+    test date_month-1.0 {date_month success} {qc::date_month 2007-04-30} 4
+
     test date_dom-1.0 {date_dom success} {qc::date_dom 2007-04-30} 30
 
     test date_dow-1.0 {date_dow success} {qc::date_dow 2007-05-01} 2

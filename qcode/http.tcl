@@ -45,7 +45,7 @@ proc qc::http_curl {args} {
 	    # default timeout 60seconds
 	    set timeout 60000
         }
-        try {
+        qc::try {
 	    set dict [ns_proxy eval $handle $script $timeout]
 	    ns_proxy release $handle
 	    return $dict
@@ -79,11 +79,11 @@ proc qc::http_post {args} {
     }
 
     if { [info exists content-type] } {
-	lappend httpheaders [qc::http_header "Content-Type" ${content-type}
+	lappend httpheaders [qc::http_header "Content-Type" ${content-type}]
     }
 
     if { [info exists accept] } {
-	lappend httpheaders [qc::http_header "Accept" $accept
+	lappend httpheaders [qc::http_header "Accept" $accept]
     }
 
     if { [info exists soapaction] } {

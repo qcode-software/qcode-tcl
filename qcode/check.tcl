@@ -106,9 +106,9 @@ proc qc::check {args} {
 	# Try to cast to the type specified if a proc exists
 	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
 	    # Implied cast
-	    try {set varValue [cast_decimal $varValue]}
+	    qc::try {set varValue [cast_decimal $varValue]}
 	} elseif { [info commands cast_$type] ne "" } {
-	    try {
+	    qc::try {
 		if { [info exists type_args($TYPE)] } {
 		    set varValue [cast_$type $varValue {*}$type_args($TYPE)]
 		} else {

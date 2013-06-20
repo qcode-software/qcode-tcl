@@ -62,7 +62,7 @@ proc qc::encrypt_bf_db {key plaintext} {
     set plaintext_base64 [base64::encode [encoding convertto utf-8 $plaintext]]
 
     # Try clause to prevent disclosure of encryption key by error Handler
-    try {
+    qc::try {
         db_1row {
             select 
             encode(
@@ -120,7 +120,7 @@ proc qc::decrypt_bf_db {key ciphertext} {
     set key_base64 [base64::encode $key]
 
     # Try clause to prevent disclosure of encryption key by error Handler
-    try {
+    qc::try {
         db_1row {
             select 
             encode(

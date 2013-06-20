@@ -257,7 +257,7 @@ doc qc::html_paragraph_layout {
 proc qc::html2text { html } {
     #| Wrapper for html2text.
     set html [string map [list "&#8209;" -] $html]  
-    try {
+    qc::try {
 	return [exec_proxy [qc::which html2text] -nobs << $html]
     } {
 	# html2text unable to convert (possibly invalid html).

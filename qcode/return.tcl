@@ -85,31 +85,49 @@ proc qc::return_chunk {string} {
     ns_write [format %X [string bytelength $string]]\r\n$string\r\n
 }
 
-proc qc::return_next { next_url } {   
+proc qc::return_next { next_url } {
     #| Redirect to an internal url
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
+
     if { ![regexp {^https?://} $next_url] } {
-	set next_url [string trimleft $next_url /]
-	if { [ne $host ""] } {
-	    if { [eq $port 80] || [eq $port ""] } {
-		set next_url "http://$host/$next_url"
-	    } elseif { [eq $port 443] } {
-		set next_url "https://$host/$next_url"
-	    } elseif { [eq $port 8443] } {
-		set next_url "https://$host:8443/$next_url"
-	    } else  {
-		set next_url "http://$host:$port/$next_url"
-	    }
-	}
-    }
-    # check that redirection is to the same domain
-    if { ![regexp "^https?://${host}(:\[0-9\]+)?(/|\$)" $next_url] } {
-	error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
-    }
-    # check for malicious mal-formed url
-    if { ![is_url $next_url] } {
-	error "\"[html_escape $next_url]\" is not a valid url."
+        # Relative url
+
+        if { $port ne "" && $host ne ""} {
+            # Port and host specified in headers (or by proxy)
+            set next_url [string trimleft $next_url /]
+            if { [eq $port 80] } {
+                set next_url "http://$host/$next_url"
+            } elseif { [eq $port 443] } {
+                set next_url "https://$host/$next_url"
+            } elseif { [eq $port 8443] } {
+                set next_url "https://$host:8443/$next_url"
+            } else  {
+                set next_url "http://$host:$port/$next_url"
+            } 
+
+            # check for malicious mal-formed url
+            if { ![is_url $next_url] } {
+                error "\"[html_escape $next_url]\" is not a valid url."
+            }
+         
+        } else {
+            # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
+            if { ! [is_url -relative $next_url] } {
+                error "\"[html_escape $next_url]\" is not a valid url."
+            }
+        }
+
+    } else {
+        # Absolute url
+        # check that redirection is to the same domain
+        if { ![regexp "^https?://${host}(:\[0-9\]+)?(/|\$)" $next_url] } {
+            error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
+        }
+        # check for malicious mal-formed url
+        if { ![is_url $next_url] } {
+            error "\"[html_escape $next_url]\" is not a valid url."
+        }
     }
     ns_returnredirect $next_url
 }
