@@ -59,7 +59,10 @@ proc qc::error_report {} {
     #| relevant information about http request.
     
     global errorMessage errorInfo errorCode
-       
+    # Copy error globals in case they are clobbered before we report them
+    set error_message $errorMessage
+    set error_info $errorInfo
+    set error_code $errorCode
     if { [ns_conn isconnected] } {
 	sset html {
 	    <html>
@@ -71,9 +74,9 @@ proc qc::error_report {} {
 	    <b>request:</b>[ns_conn request]<br>
 	    <b>remoteip:</b>[qc::conn_remote_ip]<br>
 	    <b>time:</b>[qc::format_timestamp now]<br>
-	    <b>errorMessage:</b> $errorMessage <br>
-	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
-	    <b>errorCode:</b> $errorCode
+	    <b>errorMessage:</b> $error_message <br>
+	    <b>errorInfo:</b> <pre>[html_escape $error_info]</pre><br>
+	    <b>errorCode:</b> $error_code
 	    <p>
 	    <h3>Form Variables:</h3>
 	    [qc::error_report_form_vars]
@@ -88,9 +91,9 @@ proc qc::error_report {} {
 	    <p>
 	    <b>hostname:</b>[ns_info hostname]<br>
 	    <b>time:</b>[qc::format_timestamp now]<br>
-	    <b>errorMessage:</b> $errorMessage <br>
-	    <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
-	    <b>errorCode:</b> $errorCode
+	    <b>errorMessage:</b> $error_message <br>
+	    <b>errorInfo:</b> <pre>[html_escape $error_info]</pre><br>
+	    <b>errorCode:</b> $error_code
 	    <p>
 	    </html>
 	}
