@@ -37,15 +37,15 @@ proc qc::html_table_sort {args} {
     if { [info exists cols] && [info exists sortCols] } {
 	set index [qc::ldict_search cols name [lindex $sortCols 0]]
 	if { $index !=-1 } {
-	    qc::ldict_set cols $index thClass clsSorted
+	    qc::ldict_set cols $index thClass sorted
 	}
     }
     set thead [qc::html_table_sort_header $cols $sortCols]
 
     set div_style ""
-    set div_class [list clsScroll]
+    set div_class [list scroll]
     if { [lower $height] eq "max" } {
-	lappend div_class dynamicResize
+	lappend div_class "dynamic-resize"
     } else {
 	set div_style [style_set $div_style height ${height}px]
     }
@@ -80,27 +80,27 @@ proc qc::html_table_sort_header { cols sortCols } {
 		    set class ""
 		}
 		if { [eq $sort_order ASC] } {
-		    if { [eq $class clsNumber] || [eq $class clsMoney] } {
+		    if { [eq $class number] || [eq $class money] } {
 			set indicator "Sorted Low to High"
-		    } elseif { [eq $class clsDate] } {
+		    } elseif { [eq $class date] } {
 			set indicator "Sorted Old to New"
 		    } else {
 			set indicator "Sorted A-Z"
 		    }
-		    lappend row "[html span $label class clsSort][html div $indicator class clsAsc]"
+		    lappend row "[html span $label class sort][html div $indicator class asc]"
 		} else {
-		    if { [eq $class clsNumber] || [eq $class clsMoney] } {
+		    if { [eq $class number] || [eq $class money] } {
 			set indicator "Sorted High to Low"
-		    } elseif { [eq $class clsDate] } {
+		    } elseif { [eq $class date] } {
 			set indicator "Sorted New to Old"
 		    } else {
 			set indicator "Sorted Z-A"
 		    }
-		    lappend row "[html span $label class clsSort][html div $indicator class clsDesc]"
+		    lappend row "[html span $label class sort][html div $indicator class desc]"
 		}
 	    } else {
 		# Sortable col
-		lappend row [html span $label class clsSort]
+		lappend row [html span $label class sort]
 	    }
 	} else {
 	    # Not sortable col

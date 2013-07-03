@@ -22,8 +22,8 @@ doc qc::html_table {
 	<h4>class</h4>
 	Specifies the css class attribute of the col element.<br>
 	The col class may be used to format the column cells.If a feature is not available through CSS then cell contents may be formatted.<br>
-	E.g. clsMoney is used to call format_money<br>
-	Defined for clsMoney,clsNumber,clsInteger,clsBool
+	E.g. money is used to call format_money<br>
+	Defined for money,number,integer,bool
 
 	<h4>width</h4>
 	The will set the width in the style attribute for the col element.
@@ -107,7 +107,7 @@ doc qc::html_table {
 
 	% set cols {
 	    {label Name width 200}
-	    {label Balance width 100 class clsMoney}
+	    {label Balance width 100 class money}
 	}
 	% html_table cols $cols tbody $tbody
 	or
@@ -115,7 +115,7 @@ doc qc::html_table {
 	<table>
 	<colgroup>
 	<col style="width:200">
-	<col class="clsMoney" style="width:100">
+	<col class="money" style="width:100">
 	</colgroup>
 	<thead>
 	<tr>
@@ -173,7 +173,7 @@ proc qc::html_table { args } {
     # Highlight th sorted
     if { [info exists cols] && [info exists sortCols] } {
 	set index [qc::ldict_search cols name [lindex $sortCols 0]]
-	if { $index !=-1 } {ldict_set cols $index thClass clsSorted}
+	if { $index !=-1 } {ldict_set cols $index thClass sorted}
     }
     # thead from labels
     if { [info exists cols] && [qc::html_table_wants_col_labels $cols] && ![info exists thead] } {
@@ -212,7 +212,7 @@ proc qc::html_table { args } {
 	    lappend argnames class
 	}
 	if { [lower $scrollHeight] eq "max" } {
-	    lappend class maximizeHeight
+	    lappend class "maximize-height"
 	    unset scrollHeight
 	    set argnames [lexclude $argnames scrollHeight]
 	}
@@ -419,9 +419,9 @@ proc qc::html_table_cols_from_table { tableVar cols } {
     foreach value [lindex $table 1] col $newcols {
 	if { ![dict exists $col class] } {
 	    if { [is_integer $value] } {
-		dict set col class clsNumber
+		dict set col class number
 	    } elseif { [is_decimal $value] } {
-		dict set col class clsMoney
+		dict set col class money
 	    }
 	}
 	lset newcols $index $col
@@ -513,11 +513,11 @@ proc qc::html_table_format {table cols} {
 	dict2vars $col class format dp zeros sigfigs commify percentage
 	if { [info exists class] } {
 	    switch -glob -- $class {
-		clsMoney* {default dp 2;default commify yes}
-		clsInteger* {default dp 0;default commify yes}
-		clsNumber* {default commify yes}
-		clsBool* {default format format_bool}
-		clsPerct {default percentage yes;default commify yes}
+		money* {default dp 2;default commify yes}
+		integer* {default dp 0;default commify yes}
+		number* {default commify yes}
+		bool* {default format format_bool}
+		perct {default percentage yes;default commify yes}
 	    }
 	}
 
@@ -651,7 +651,7 @@ proc qc::columns_show_hide_toolbar {args} {
     foreach dict $conf {
         if { [llength $dict] == 0 } {
             # Divider
-            lappend show_hide_controls [html div "" class "columnsShowHideControlDivider"]
+            lappend show_hide_controls [html div "" class "columns-show-hide-control-divider"]
         } else {
             # Show/Hide control
             dict_default dict table_selector "table" width "auto" sticky true value true
@@ -667,7 +667,7 @@ proc qc::columns_show_hide_toolbar {args} {
             }
             append show_hide_control [widget_bool {*}$args]
 
-            lappend show_hide_controls [html div $show_hide_control class "columnsShowHideControl" style [qc::style_set "" width $width]]
+            lappend show_hide_controls [html div $show_hide_control class "columns-show-hide-control" style [qc::style_set "" width $width]]
         }        
     }
     
@@ -675,5 +675,5 @@ proc qc::columns_show_hide_toolbar {args} {
     set row {}
     lappend row [html div $title class "title"]
     lappend row [html div [join $show_hide_controls " "]]
-    return [html_table tbody [list $row]  class columnsShowHideToolbar]
+    return [html_table tbody [list $row] class "columns-show-hide-toolbar"]
 }

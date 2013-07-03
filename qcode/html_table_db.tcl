@@ -34,10 +34,10 @@ proc qc::html_table_db {args} {
 	incr colIndex
     }
     if { ![info exists class] } {
-	set class [list clsDbGrid fixed]
+	set class [list "db-grid" fixed]
     } else {
-	if { "clsDbGrid" ni $class } {
-	    lappend class clsDbGrid
+	if { "db-grid" ni $class } {
+	    lappend class "db-grid"
 	}
 	if { "fixed" ni $class && "flex" ni $class } {
 	    lappend class fixed
@@ -69,7 +69,7 @@ proc qc::html_table_db_flexgrid {args} {
     # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL sortable
     set varNames [args2vars $args]
     if { [info exists rowHeight] } {
-        append html "<style type=\"text/css\">table.clsDbFlexGrid tr { height:${rowHeight}px;vertical-align:top}</style>"
+        append html "<style type=\"text/css\">table.db-flex-grid tr { height:${rowHeight}px;vertical-align:top}</style>"
     }
     default id oDbFlexGrid
     default enabled true
@@ -79,12 +79,17 @@ proc qc::html_table_db_flexgrid {args} {
         ns_set update $headers Pragma no-cache
         ns_set update $headers Cache-Control no-cache
     }
-    append html  "<div class=\"clsDbFlexGridDiv\">\n"
+    append html  "<div class=\"db-flex-grid-wrapper\">\n"
 
     if { ![info exists class] } {
-	set class [list clsDbFlexGrid]
-    } elseif { "clsDbFlexGrid" ni $class } {
-	lappend class clsDbFlexGrid
+	set class [list "db-grid" "flex"]
+    } else {
+        if { "db-grid" ni $class } {
+            lappend class "db-grid"
+        }
+        if { "flex" ni $class } {
+            lappend class "flex"
+        }
     }
 
     lappend varNames class id

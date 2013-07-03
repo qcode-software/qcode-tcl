@@ -274,10 +274,10 @@ proc qc::html_info_tables {args} {
     # WACKY
     #| Foreach dict in args return a table with 2 columns with name value in each row
     set cols {
-	{class clsBold}
+	{class bold}
 	{}
     }
-    set class cl
+    set class column
     foreach dict $args {
 	set tbody {}
 	foreach {name value} $dict {
@@ -285,18 +285,18 @@ proc qc::html_info_tables {args} {
 	}
 	lappend row [qc::html_table cols $cols class $class tbody $tbody]
     }
-    return [qc::html_table class clsColumar tbody [list $row]]
+    return [qc::html_table class "columns-container" tbody [list $row]]
 }
 
 doc qc::html_info_tables {
     Examples {
 	% html_info_tables {Name "Jimmy Tarbuck" Venue "Palace Ballroom"} {Name "Des O'Conner" Venue "Royal Palladium"}
-	<table class="clsColumar">
+	<table class="columns-container">
 	<tbody>
 	<tr>
-	<td><table class="cl">
+	<td><table class="column">
 	<colgroup>
-	<col class="clsBold">
+	<col class="bold">
 	<col>
 	</colgroup>
 	<tbody>
@@ -311,9 +311,9 @@ doc qc::html_info_tables {
 	</tbody>
 	</table>
 	</td>
-	<td><table class="cl">
+	<td><table class="column">
 	<colgroup>
-	<col class="clsBold">
+	<col class="bold">
 	<col>
 	</colgroup>
 	<tbody>
@@ -481,15 +481,15 @@ doc qc::html_styles_apply2td {
         <head>
 
         <style type="text/css">
-        col.clsNumber { 
+        col.number { 
 	    text-align:right;
         }
-        col.clsBold {
+        col.bold {
 	    font-weight:bold
         }
         </style></head><body><table width="100%">
         <colgroup>
-        <col class="clsBold"><col class="clsNumber">
+        <col class="bold"><col class="number">
         </colgroup><thead><tr>
         <th>Qty</th><th>Total</th>
         </tr></thead><tbody><tr>
@@ -502,15 +502,15 @@ doc qc::html_styles_apply2td {
         % qc:::html_styles_apply2td $html
         <html>
         <head><style type="text/css">
-        col.clsNumber { 
+        col.number { 
 	    text-align:right;
         }
-        col.clsBold {
+        col.bold {
 	    font-weight:bold
         }
         </style></head><body><table width="100%">
         <colgroup>
-        <col class="clsBold"><col class="clsNumber">
+        <col class="bold"><col class="number">
         </colgroup><thead><tr>
         <th>Qty</th><th>Total</th>
         </tr></thead><tbody><tr>

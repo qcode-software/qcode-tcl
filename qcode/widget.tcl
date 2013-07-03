@@ -39,7 +39,7 @@ proc qc::widget_label { args } {
     array set this $args
     default this(id) $this(name)
     if {[info exists this(required)] && [string is true $this(required)] } {
-	return [html label "$this(label)<span style=\"color:#CC0000\">*</span>" for $this(id) class clsRequired]
+	return [html label "$this(label)<span style=\"color:#CC0000\">*</span>" for $this(id) class required]
     } else {
 	return [html label $this(label) for $this(id)]
     }
@@ -56,7 +56,7 @@ doc qc::widget_label {
 	# Required form elements have a css class applied and a red asterisk.
 	# Hack the code to make it look different.
 	% widget_label name surname label Surname required yes
-	<label for="surname" class="clsRequired">Surname<span style="color:#CC0000">*</span></label>
+	<label for="surname" class="required">Surname<span style="color:#CC0000">*</span></label>
     }
 }
 
@@ -134,7 +134,7 @@ proc qc::widget_combo { args } {
     array set this $args
     args_check_required $args name value searchURL
     default this(searchLimit) 10
-    set this(class) clsDbFormCombo
+    set this(class) "db-form-combo"
     set this(AUTOCOMPLETE) off
     set html [qc::widget_text {*}[array get this]]
     if {[info exists this(boundName)]} {
@@ -163,7 +163,7 @@ doc qc::widget_combo {
     Examples {
 	% widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
 	widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
-	<input searchURL="customer_combo.xml" style="width:160px" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="clsDbFormCombo"><input type="hidden" name="customer_id" value="2343">
+	<input searchURL="customer_combo.xml" style="width:160px" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">
 	
 	% https://a-domain.co.uk/customer_combo.xml?name=customer_code&value=A&boundName=customer_id&searchLimit=10
 	
@@ -233,7 +233,7 @@ proc qc::widget_htmlarea { args } {
 	default this(id) $this(name)
     }
     set this(contentEditable) true
-    set this(class) clsDbFormHTMLArea
+    set this(class) "db-form-html-area"
     return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height]]
 }
 
@@ -243,7 +243,7 @@ doc qc::widget_htmlarea {
     }
     Examples {
 	% widget_htmlarea name notes value "A <i>little</i> note."
-	<div contentEditable="true" id="notes" style="width:160px;height:100px" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="clsDbFormHTMLArea">A <i>little</i> note.</div>
+	<div contentEditable="true" id="notes" style="width:160px;height:100px" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="db-form-html-area">A <i>little</i> note.</div>
     }
 }
 
@@ -274,7 +274,7 @@ doc qc::widget_textarea {
     }
     Examples {
 	% widget_textarea name notes value "Hi There"
-        <div contentEditable="true" id="notes" style="width:160px;height:100px" value="Hi There" name="notes" class="clsDbFormHTMLArea">Hi There</div>
+        <div contentEditable="true" id="notes" style="width:160px;height:100px" value="Hi There" name="notes">Hi There</div>
     }
 }
 
@@ -548,7 +548,7 @@ proc qc::widget_radiogroup { args } {
 	set label [qc::widget_label label $option_name name $id]
 	lappend buttons "$widget&nbsp;$label"
     }
-    return [html div [join $buttons "&nbsp; &nbsp;"] class clsRadioGroup name $group_name id $group_name]
+    return [html div [join $buttons "&nbsp; &nbsp;"] class "radio-group" name $group_name id $group_name]
 }
 
 doc qc::widget_radiogroup {
@@ -560,7 +560,7 @@ doc qc::widget_radiogroup {
     }
     Examples {
 	widget_radiogroup name sex value M options {Male M Female F}
-	<div class="clsRadioGroup" name="sex" id="sex">
+	<div class="radio-group" name="sex" id="sex">
 	<input id="sexM" value="M" name="sex" type="radio" checked>&nbsp;<label for="sexM">Male</label>
 	&nbsp; &nbsp;
 	<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label>
@@ -573,7 +573,7 @@ proc qc::widget_image_combo { args } {
     array set this $args
     args_check_required $args name value searchURL imageURL
     default this(searchLimit) 10
-    default this(class) imageCombo
+    default this(class) "image-combo"
     default this(width) 150
     default this(height) 150
     default this(defaultImage) "/Graphics/noimage.png"

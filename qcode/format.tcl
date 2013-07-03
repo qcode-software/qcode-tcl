@@ -289,19 +289,19 @@ proc qc::format_center { string width } {
 proc qc::format_bool { value {true Yes} {false No}} {
     #| Cast boolean and wrap in span tags with style
     if { [string is true -strict $value] } {
-	return "<span class=\"clsTrue\">$true</span>"
+	return "<span class=\"true\">$true</span>"
     } else {
-	return "<span class=\"clsFalse\">$false</span>"
+	return "<span class=\"false\">$false</span>"
     }
 }
 
 doc qc::format_bool {
     Examples {
 	% format_bool Y 
-	<span class="clsTrue">Yes</span>
+	<span class="true">Yes</span>
 	%
 	% format_bool No Aye Nay
-	<span class="clsFalse">Nay</span>
+	<span class="false">Nay</span>
     }
 }
 

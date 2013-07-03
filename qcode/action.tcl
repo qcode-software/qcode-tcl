@@ -2,9 +2,9 @@ package provide qcode 1.17
 namespace eval qc {}
 proc qc::action { description url {actionKey ""} } {
     if { [eq "" $actionKey] } {
-	return [html_a $description $url class clsAction onclick "return actionConfirm(this)"]
+	return [html_a $description $url class action onclick "return actionConfirm(this)"]
     } else {
-	return [html_a $description $url class clsAction actionKey $actionKey onclick "return actionConfirm(this)"]
+	return [html_a $description $url class action actionKey $actionKey onclick "return actionConfirm(this)"]
     }
 }
 
@@ -17,14 +17,14 @@ proc qc::action_print { description url {actionKey ""} } {
     set requireScriptX true
     
     if { [eq "" $actionKey] } {
-	return "[html span $description class clsAction onclick "printURL('$url')"] ( [html_a "view" $url] ) "
+	return "[html span $description class action onclick "printURL('$url')"] ( [html_a "view" $url] ) "
     } else {
-	return "[html span $description class clsAction onclick "printURL('$url')" actionKey $actionKey] ( [html_a "view" $url] ) "
+	return "[html span $description class action onclick "printURL('$url')" actionKey $actionKey] ( [html_a "view" $url] ) "
     }
 }
 
 proc qc::action_print_page {} {
-    return [html span Print class clsAction onclick "window.print()"]
+    return [html span Print class action onclick "window.print()"]
 }
 
 proc qc::action_menu {conf object_state} {

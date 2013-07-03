@@ -36,9 +36,9 @@ doc forms {
 
 proc qc::form_layout_table { args } {
     #| Construct an html table with 2 columns for labels and form elements
-    args $args -sticky -class clsForm -- conf
+    args $args -sticky -class "form-layout-table" -- conf
     set cols {
-	{class clsLabel}
+	{class label}
 	{}
     }
     if { [info exists sticky] } {
@@ -59,9 +59,9 @@ doc qc::form_layout_table {
 	    {name agree value no type checkbox label Agree}
 	}
 	% qc::form_layout_table $conf
-<table class="clsForm">
+<table class="form-layout-table">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>
@@ -99,10 +99,10 @@ proc qc::form_layout_tables { args } {
     #| Construct multi-column layout with a form table in each column
     args $args -sticky -- args
     set cols {
-	{class clsLabel}
+	{class label}
 	{}
     }
-    set class clsForm
+    set class "form-layout-table"
     foreach conf $args {
 	if { [info exists sticky] } {
 	    set tbody [uplevel 1 [list qc::form_layout_tbody -sticky -- $conf]]
@@ -111,7 +111,7 @@ proc qc::form_layout_tables { args } {
 	}
 	lappend row [qc::html_table cols $cols class $class tbody $tbody]
     }
-    set class clsColumar
+    set class "columns-container"
     set tbody [list $row]
     return [qc::html_table class $class tbody $tbody]
 }

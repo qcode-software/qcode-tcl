@@ -4,7 +4,7 @@ namespace eval qc {}
 proc qc::form_db { content args } {
     #| Produce HTML to be used with JavaScript behavior dbForm
     array set this $args
-    set this(class) clsDbForm
+    set this(class) "db-form"
     default this(id) oDbForm
     default this(method) POST
     if { ![info exists this(formType)] } {
@@ -15,10 +15,10 @@ proc qc::form_db { content args } {
 	}
     }
     append html [html_tag form {*}[array get this]] \n
-    append html "<div class=\"clsDbFormDiv\">\n"
+    append html "<div class=\"db-form-wrapper\">\n"
     append html $content \n
     append html "</div>\n"
-    append html "<div class=\"clsDbFormDivStatus\">\n"
+    append html "<div class=\"db-form-status\">\n"
     append html "</div>\n"
     append html "</form>"
 
@@ -28,7 +28,7 @@ proc qc::form_db { content args } {
 proc qc::form_db_plain { content args } {
     #| Produce HTML to be used with JavaScript behavior dbForm
     array set this $args
-    set this(class) clsDbForm
+    set this(class) "db-form"
     default this(id) oDbForm
     return [html form $content {*}[array get this]]
 }

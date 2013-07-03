@@ -9,7 +9,7 @@ proc qc::html_table_scroll {args} {
     default height 600
 
     set div_style ""
-    set div_class [list clsScroll]
+    set div_class [list "scroll"]
     if { [lower $height] eq "max" } {
 	lappend div_class dynamicResize
     } else {
