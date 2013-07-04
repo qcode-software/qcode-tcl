@@ -34,13 +34,16 @@ proc qc::html_table_db {args} {
 	incr colIndex
     }
     if { ![info exists class] } {
-	set class [list "db-grid" fixed]
+	set class [list "db-grid" fixed grid]
     } else {
 	if { "db-grid" ni $class } {
 	    lappend class "db-grid"
 	}
 	if { "fixed" ni $class && "flex" ni $class } {
 	    lappend class fixed
+	}
+	if { "grid" ni $class } {
+	    lappend class grid
 	}
     }
     # rowHeight
@@ -82,14 +85,17 @@ proc qc::html_table_db_flexgrid {args} {
     append html  "<div class=\"db-flex-grid-wrapper\">\n"
 
     if { ![info exists class] } {
-	set class [list "db-grid" "flex"]
+	set class [list "db-grid" flex grid]
     } else {
         if { "db-grid" ni $class } {
             lappend class "db-grid"
         }
         if { "flex" ni $class } {
-            lappend class "flex"
+            lappend class flex
         }
+	if { "grid" ni $class } {
+	    lappend class grid
+	}
     }
 
     lappend varNames class id
