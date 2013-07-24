@@ -644,7 +644,7 @@ proc qc::columns_show_hide_toolbar {args} {
     #        }
     #        append html [columns_show_hide_toolbar -title "Show/Hide Years: " $conf]
 
-    args $args -title "Show/Hide Columns: " -table_selector "table:not(.columns-show-hide-toolbar, :has(.columns-show-hide-toolbar))" -- conf
+    args $args -title "Show/Hide Columns: " -table_selector "table:not(:has(.columns-show-hide-toolbar),.columns-show-hide-toolbar)" -- conf
 
     # Column show/hide controls
     set show_hide_controls {}
