@@ -644,7 +644,7 @@ proc qc::columns_show_hide_toolbar {args} {
     #        }
     #        append html [columns_show_hide_toolbar -title "Show/Hide Years: " $conf]
 
-    args $args -title "Show/Hide Columns: " -- conf
+    args $args -title "Show/Hide Columns: " -table_selector "table:not(.columns-show-hide-toolbar, :has(.columns-show-hide-toolbar))" -- conf
 
     # Column show/hide controls
     set show_hide_controls {}
@@ -654,20 +654,22 @@ proc qc::columns_show_hide_toolbar {args} {
             lappend show_hide_controls [html div "" class "columns-show-hide-control-divider"]
         } else {
             # Show/Hide control
-            dict_default dict table_selector "table" width "auto" sticky true value true
-            dict2vars $dict label name col_selector table_selector width sticky sticky_url value 
+            dict_default dict table_selector $table_selector width "auto" sticky true value true
+
+            if { ! ([dict exists $dict label]
+                    && [dict exists $dict name]
+                    && [dict exists $dict col_selector])
+             } {
+                error "Missing config values in columns_show_hide_toolbar: [lexclude {label name col_selector} {*}[dict keys $dict]]"
+            }
 
             # Label
-            set show_hide_control [widget_label {*}[dict_from label name]]
+            set show_hide_control [widget_label {*}[dict_subset $dict label name]]
             
             # Checkbox
-            set args [dict_from name col_selector value table_selector sticky]
-            if { [info exists sticky_url] } {
-                lappend args sticky_url $sticky_url
-            }
-            append show_hide_control [widget_bool {*}$args]
+            append show_hide_control [widget_bool {*}[dict_subset $dict name col_selector value table_selector sticky sticky_url]]
 
-            lappend show_hide_controls [html div $show_hide_control class "columns-show-hide-control" style [qc::style_set "" width $width]]
+            lappend show_hide_controls [html div $show_hide_control class "columns-show-hide-control" style [qc::style_set "" width [dict get $dict width]]]
         }        
     }
     
