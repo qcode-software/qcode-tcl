@@ -34,17 +34,20 @@ proc qc::html_table_db {args} {
 	incr colIndex
     }
     if { ![info exists class] } {
-	set class [list "db-grid" fixed grid]
+	set class [list "db-grid" "fixed" "grid" "status-framed"]
     } else {
 	if { "db-grid" ni $class } {
 	    lappend class "db-grid"
 	}
 	if { "fixed" ni $class && "flex" ni $class } {
-	    lappend class fixed
+	    lappend class "fixed"
 	}
 	if { "grid" ni $class } {
-	    lappend class grid
+	    lappend class "grid"
 	}
+        if { "status-framed" ni $class } {
+            lappend class "status-framed"
+        }
     }
     # rowHeight
     if { [info exists rowHeight] } {
