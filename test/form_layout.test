@@ -18,9 +18,9 @@ namespace eval ::qcode::test {
         }
     } -body {
         form_layout_table $conf
-    } -cleanup {unset conf} -result {<table class="clsForm">
+    } -cleanup {unset conf} -result {<table class="form-layout-table">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>
@@ -65,7 +65,7 @@ namespace eval ::qcode::test {
         form_layout_table -class clsOther $conf
     } -cleanup {unset conf} -result {<table class="clsOther">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>
@@ -112,12 +112,12 @@ namespace eval ::qcode::test {
         }
     } -body {
         form_layout_tables $conf1 $conf2 $conf3
-    } -cleanup {unset conf1;unset conf2;unset conf3} -result {<table class="clsColumar">
+    } -cleanup {unset conf1;unset conf2;unset conf3} -result {<table class="columns-container">
 <tbody>
 <tr>
-<td><table class="clsForm">
+<td><table class="form-layout-table">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>
@@ -128,9 +128,9 @@ namespace eval ::qcode::test {
 </tbody>
 </table>
 </td>
-<td><table class="clsForm">
+<td><table class="form-layout-table">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>
@@ -145,9 +145,9 @@ namespace eval ::qcode::test {
 </tbody>
 </table>
 </td>
-<td><table class="clsForm">
+<td><table class="form-layout-table">
 <colgroup>
-<col class="clsLabel">
+<col class="label">
 <col>
 </colgroup>
 <tbody>

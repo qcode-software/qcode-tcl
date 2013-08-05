@@ -105,13 +105,13 @@ namespace eval ::qcode::test {
     test format_center-1.1 {format_center trunc to 10} {qc::format_center "Lamia of the Pool" 10} {Lamia of t}
     test format_center-1.2 {format_center do nothing} {qc::format_center "Lamia of the Pool" 17} {Lamia of the Pool}
     
-    test format_bool-1.0 {format_bool Y} {qc::format_bool Y} {<span class="clsTrue">Yes</span>}
-    test format_bool-1.1 {format_bool N} {qc::format_bool N} {<span class="clsFalse">No</span>}
-    test format_bool-1.2 {format_bool custom} {qc::format_bool true hai iie} {<span class="clsTrue">hai</span>}
-    test format_bool-1.3 {format_bool nonsense} {qc::format_bool eggmeat} {<span class="clsFalse">No</span>}
+    test format_bool-1.0 {format_bool Y} {qc::format_bool Y} {<span class="true">Yes</span>}
+    test format_bool-1.1 {format_bool N} {qc::format_bool N} {<span class="false">No</span>}
+    test format_bool-1.2 {format_bool custom} {qc::format_bool true hai iie} {<span class="true">hai</span>}
+    test format_bool-1.3 {format_bool nonsense} {qc::format_bool eggmeat} {<span class="false">No</span>}
 
-    test format_yesno-1.0 {format_yesno Y} {qc::format_yesno Y} {<span class="clsTrue">Yes</span>} 
-    test format_yesno-1.1 {format_yesno false} {qc::format_yesno false} {<span class="clsFalse">No</span>} 
+    test format_yesno-1.0 {format_yesno Y} {qc::format_yesno Y} {<span class="true">Yes</span>} 
+    test format_yesno-1.1 {format_yesno false} {qc::format_yesno false} {<span class="false">No</span>} 
 
     test format_number-1.0 {format_number default} {qc::format_number 123456} 123,456
     test format_number-1.1 {format_number no commify} {qc::format_number -commify no 123456} 123456

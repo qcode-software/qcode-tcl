@@ -19,7 +19,7 @@ namespace eval ::qcode::test {
     }  -cleanup {
         unset cols
         unset tbody
-    } -result {<div class="clsScroll" style="height:600px"><table>
+    } -result {<div class="scroll" style="height:600px"><table>
 <colgroup>
 <col name="sales_quote_no">
 <col name="customer_order_no">

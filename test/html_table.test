@@ -44,7 +44,7 @@ namespace eval ::qcode::test {
 	}
 	set cols {
 	    {label Name width 200}
-	    {label Balance width 100 class clsMoney}
+	    {label Balance width 100 class money}
 	}
     } -body {
         html_table tbody $tbody cols $cols
@@ -54,7 +54,7 @@ namespace eval ::qcode::test {
     } -result  {<table>
 <colgroup>
 <col style="width:200px;">
-<col class="clsMoney" style="width:100px;">
+<col class="money" style="width:100px;">
 </colgroup>
 <thead>
 <tr>
@@ -87,7 +87,7 @@ namespace eval ::qcode::test {
 	}
 	set cols {
 	    {label Name}
-	    {label Balance class clsMoney}
+	    {label Balance class money}
 	}
         set width 400
         set thClass someClass
@@ -109,7 +109,7 @@ namespace eval ::qcode::test {
     } -result  {<table width="400" thClass="someClass" scrollHeight="1000" class="scrollable">
 <colgroup>
 <col>
-<col class="clsMoney">
+<col class="money">
 </colgroup>
 <thead>
 <tr>
@@ -168,13 +168,13 @@ namespace eval ::qcode::test {
     test html_table_row_head-1.1 {html_table_row_head thClass} -setup {
 	set cols {
 	    {label Name}
-	    {label Balance thClass clsMoney}
+	    {label Balance thClass money}
 	}
     } -body {
         html_table_row_head {Kish Kash} "" $cols
     } -cleanup {unset cols} -result {<tr>
 <th>Kish</th>
-<th class="clsMoney">Kash</th>
+<th class="money">Kash</th>
 </tr>
 }
 
@@ -195,11 +195,11 @@ namespace eval ::qcode::test {
     } -body {
         html_table_colgroup {
             {width 50 label Name}
-            {label Balance class clsMoney }
+            {label Balance class money }
         }
     } -cleanup {} -result {<colgroup>
 <col style="width:50px;">
-<col class="clsMoney">
+<col class="money">
 </colgroup>
 }
 
@@ -207,14 +207,14 @@ namespace eval ::qcode::test {
     } -body {
         html_table_thead_from_cols {
             {width 50 label Name}
-            {label Balance class clsMoney }
+            {label Balance class money }
         }
     } -cleanup {} -result {{Name Balance}}
 
     test html_table_tfoot_sums-1.0 {html_table_tfoot_sums } -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney tfoot 95.295 }
+            {label Balance class money tfoot 95.295 }
         }
         set tbody {
             {"Jimmy Tarbuck" 23.56}
@@ -231,7 +231,7 @@ namespace eval ::qcode::test {
     test html_table_wants_sum-1.0 {html_table_wants_sum true} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney sum yes }
+            {label Balance class money sum yes }
         }
     } -body {
         html_table_wants_sum $cols 
@@ -242,7 +242,7 @@ namespace eval ::qcode::test {
     test html_table_wants_sum-1.1 {html_table_wants_sum not present} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney }
+            {label Balance class money }
         }
     } -body {
         html_table_wants_sum $cols 
@@ -253,7 +253,7 @@ namespace eval ::qcode::test {
     test html_table_wants_sum-1.2 {html_table_wants_sum false} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney sum no }
+            {label Balance class money sum no }
         }
     } -body {
         html_table_wants_sum $cols 
@@ -264,7 +264,7 @@ namespace eval ::qcode::test {
     test html_table_wants_col_labels-1.0 {html_table_wants_col_labels true} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney sum no }
+            {label Balance class money sum no }
         }
     } -body {
         html_table_wants_col_labels $cols 
@@ -275,7 +275,7 @@ namespace eval ::qcode::test {
     test html_table_wants_col_labels-1.1 {html_table_wants_col_labels false} -setup {
         set cols {
             {width 50 tfoot Total}
-            {class clsMoney sum no }
+            {class money sum no }
         }
     } -body {
         html_table_wants_col_labels $cols 
@@ -286,7 +286,7 @@ namespace eval ::qcode::test {
     test html_table_wants_col_labels-1.1 {html_table_wants_col_labels partial} -setup {
         set cols {
             {width 50 tfoot Total}
-            {class clsMoney sum no label Balance}
+            {class money sum no label Balance}
         }
     } -body {
         html_table_wants_col_labels $cols 
@@ -297,7 +297,7 @@ namespace eval ::qcode::test {
     test html_table_wants_format-1.0 {html_table_wants_format class} -setup {
         set cols {
             {label Name width 50 tfoot Total}
-            {class clsMoney sum no label Balance}
+            {class money sum no label Balance}
         }
     } -body {
         html_table_wants_format $cols 
@@ -308,7 +308,7 @@ namespace eval ::qcode::test {
     test html_table_wants_format-1.1 {html_table_wants_format format} -setup {
         set cols {
             {label Name width 50 tfoot Total}
-            {format clsMoney sum no label Balance}
+            {format money sum no label Balance}
         }
     } -body {
         html_table_wants_format $cols 
@@ -330,7 +330,7 @@ namespace eval ::qcode::test {
     test html_table_tbody_from_ldict-1.0 {html_table_tbody_from_ldict } -setup {
         set cols {
             {width 50 name Name tfoot Total}
-            {name Balance class clsMoney tfoot 95.295 }
+            {name Balance class money tfoot 95.295 }
         }
         set ldict {
             {Name "Jimmy Tarbuck" Balance 23.56}
@@ -344,10 +344,10 @@ namespace eval ::qcode::test {
         unset ldict
     } -result {{{Jimmy Tarbuck} 23.56} {{Des O'Conner} 15.632} {{Bob Monkhouse} 56.1}}
 
-    test html_table_format-1.0 {html_table_format clsMoney} -setup {
+    test html_table_format-1.0 {html_table_format money} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsMoney tfoot 95.295 }
+            {label Balance class money tfoot 95.295 }
         }
         set tbody {
             {"Jimmy Tarbuck" 2323.56}
@@ -361,10 +361,10 @@ namespace eval ::qcode::test {
         unset tbody
     } -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.63} {{Bob Monkhouse} 2,356.10}}
 
-    test html_table_format-1.1 {html_table_format clsInteger} -setup {
+    test html_table_format-1.1 {html_table_format integer} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsInteger tfoot 95.295 }
+            {label Balance class integer tfoot 95.295 }
         }
         set tbody {
             {"Jimmy Tarbuck" 2323.56}
@@ -378,10 +378,10 @@ namespace eval ::qcode::test {
         unset tbody
     } -result {{{Jimmy Tarbuck} 2,324} {{Des O'Conner} 2,316} {{Bob Monkhouse} 2,356}} 
 
-    test html_table_format-1.2 {html_table_format clsNumber} -setup {
+    test html_table_format-1.2 {html_table_format number} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsNumber tfoot 95.295 }
+            {label Balance class number tfoot 95.295 }
         }
         set tbody {
             {"Jimmy Tarbuck" 2323.56}
@@ -395,10 +395,10 @@ namespace eval ::qcode::test {
         unset tbody
     } -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.632} {{Bob Monkhouse} 2,356.1}}  
 
-    test html_table_format-1.3 {html_table_format clsPerct} -setup {
+    test html_table_format-1.3 {html_table_format perct} -setup {
         set cols {
             {width 50 label Name tfoot Total}
-            {label Balance class clsPerct tfoot 95.295 }
+            {label Balance class perct tfoot 95.295 }
         }
         set tbody {
             {"Jimmy Tarbuck" 2323.56}
@@ -447,7 +447,7 @@ namespace eval ::qcode::test {
         set Balance 0.99
         set cols {
             {width 50 name Name tfoot Total}
-            {name Balance class clsPerct tfoot 95.295 }
+            {name Balance class perct tfoot 95.295 }
         }
     } -body {
         html_tbody_row $cols
