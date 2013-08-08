@@ -80,18 +80,22 @@ proc qc::html_table_sort_header { cols sortCols } {
 		    set class ""
 		}
 		if { [eq $sort_order ASC] } {
-		    if { [eq $class number] || [eq $class money] } {
+		    if { "rank" in $class } {
+			set indicator "Sorted Top to Bottom"
+		    } elseif { "number" in $class || "money" in $class } {
 			set indicator "Sorted Low to High"
-		    } elseif { [eq $class date] } {
+		    } elseif { "date" in $class } {
 			set indicator "Sorted Old to New"
 		    } else {
 			set indicator "Sorted A-Z"
 		    }
 		    lappend row "[html span $label class sort][html div $indicator class asc]"
 		} else {
-		    if { [eq $class number] || [eq $class money] } {
+		    if { "rank" in $class } {
+			set indicator "Sorted Bottom to Top"
+		    } elseif { "number" in $class || "money" in $class } {
 			set indicator "Sorted High to Low"
-		    } elseif { [eq $class date] } {
+		    } elseif { "date" in $class } {
 			set indicator "Sorted New to Old"
 		    } else {
 			set indicator "Sorted Z-A"
