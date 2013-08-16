@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.1
 package require doc
 namespace eval qc {}
 proc qc::section {conf section default_url {section_var section}} {

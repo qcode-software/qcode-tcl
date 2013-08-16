@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.1
 package require doc
 namespace eval qc {}
 proc qc::form_db { content args } {
