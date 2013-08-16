@@ -9,21 +9,22 @@ doc authorisation {
 
 proc qc::authorise_token_create {args} {
     #| Create an authorisation token for this url
-    args $args -timestamped -referer [conn_url] -- target
-    default timestamped false
-    set current_employee [auth]
-
-    set hash_values $referer
-    append hash_values $target
-    if { $timestamped } {
-        append hash_values [expr {[clock seconds] / 10}]
+    dict2vars $args expires employee_id referrer target 
+    default expires "24 hours"
+    default employee_id [auth]
+    default referrer [conn_url]
+    if { ![regexp {^https?://} $target] } {
+        set target "[qc::conn_location]/[string trimleft $target /]"
     }
+    set interval [expr {[clock scan $expires] - [clock seconds]}]
+    set timestamp [expr {[clock seconds] / $interval}]
     db_1row {
-        select sha1(authorisation_key || :hash_values) as hash
+        select 
+        sha1(concat(authorisation_key,:target,:referrer,:timestamp)) as hash
         from employee
-        where employee_id=:current_employee
+        where employee_id=:employee_id
     }
-    return $hash
+    return "$employee_id $interval $hash"
 }
 
 doc qc::authorise_token_create {
@@ -33,55 +34,32 @@ doc qc::authorise_token_create {
 proc qc::authorise_token_check {args} {
     #| Check the authorisation token of the current request
     #| and return the employee_id if authorised
-    args $args -no_session -timestamped --
-    default no_session false timestamped false
-
-    if { $no_session && [auth_check] } {
-        return [auth]
+    if { ![form_var_exists authorisation_token] } {
+        error "Authorisation token missing" {} AUTHORISATION
     }
-
-    # Get the token from the form variables
-    if { ! [ns_set unique [ns_getform] authorisation_token] } {
-        error "Multiple tokens in request"
-    }
-    set token [ns_set get [ns_getform] authorisation_token]
-
+    set token [form_var_get authorisation_token]
+    lassign $token employee_id interval hash
+    check employee_id INT
+    check interval INT
     # referer
-    set hash_values [ns_set get [ns_conn headers] Referer]
-    append hash_values [conn_url]
-    if { $timestamped } {
-        set hash_values_2 $hash_values
-        set timestamp [expr {[clock seconds] / 10}]
-        append hash_values $timestamp
-        append hash_values_2 [expr {$timestamp - 1}]
-        set qry {
-            select employee_id
-            from employee
-            join (
-                  select distinct coalesce(effective_employee_id, employee_id) as employee_id
-                  from session
-                  ) s using(employee_id)
-            where (
-                   :token=sha1(authorisation_key || :hash_values)
-                   or
-                   :token=sha1(authorisation_key || :hash_values_2)
-                   )
-        }
-    } else {
-        set qry {
-            select employee_id
-            from employee
-            join (
-                  select distinct coalesce(effective_employee_id, employee_id) as employee_id
-                  from session
-                  ) s using(employee_id)
-            where :token=sha1(authorisation_key || :hash_values)
-        }
+    set referrer [ns_set get [ns_conn headers] Referer]
+    set target [conn_url]
+    set timestamp [expr {[clock seconds] / $interval}]
+   
+    set qry {
+        select 
+        sha1(concat(authorisation_key,:target,:referrer,:timestamp)) as check_hash
+        from employee
+        where employee_id=:employee_id
     }
     db_0or1row $qry {
-        error "Authorisation failed" {} AUTHORISATION
+        error "Authorisation failed. No such employee_id \"$employee_id\"" {} AUTHORISATION
     } {
-        return $employee_id
+        if { $hash eq $check_hash } {
+            return $employee_id
+        } else {
+            error "Authorisation failed. Invalid hash value." {} AUTHORISATION
+        }
     }
 }
 

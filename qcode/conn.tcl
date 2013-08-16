@@ -89,24 +89,50 @@ doc qc::conn_marshal {
 
 proc qc::conn_url {} {
     #| Try to construct the full url of this request.
+    return "[qc::conn_location][ns_conn url]"
+}
+
+proc qc::conn_location {} {
+    #| Try to construct the location
     set port [ns_set iget [ns_conn headers] Port]
     set host [ns_set iget [ns_conn headers] Host]
 
     if { $host ne "" && $port ne "" } {
         # Proxied through nginx
 	if { [eq $port 80] } {
-	    return "http://$host[ns_conn url]"
+	    return "http://$host"
 	} elseif { [eq $port 443] } {
-	    return "https://$host[ns_conn url]"
+	    return "https://$host"
 	} elseif { [eq $port 8443] } {
-	    return "https://$host:8443[ns_conn url]"
+	    return "https://$host:8443"
 	} else  {
-	    return "http://$host:$port[ns_conn url]"
+	    return "http://$host:$port"
 	}
-
     } else {
         # Not proxied
-	return "[ns_conn location][ns_conn url]"
+	return [ns_conn location]
+    }
+}
+
+proc qc::conn_port {} {
+    #| Try to detect connection port
+    if { [regexp {^(https?)://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_location] -> protocol port] } {
+        if { $port eq "" } {
+            return [expr {$protocol eq "http" ? "80" : "443"}]
+        } else {
+            return $port
+        }
+    } else {
+        error "Can't detect port in url \"[qc::conn_location]\""
+    }
+}
+
+proc qc::conn_protocol {} {
+    #| Try to detect the request protocol
+    if { [regexp {^(https?)://} [qc::conn_location] -> protocol] } {
+        return $protocol
+    } else {
+        error "Unknown connection protocol"
     }
 }
  

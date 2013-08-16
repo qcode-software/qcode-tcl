@@ -247,3 +247,11 @@ doc qc::url_path {
     }
 }
 
+proc qc::url_root {url} {
+    # Return the root of an url without GET string or anchor
+    if { [regexp {^https?://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?\#]*)?} $url root] } {
+	return $root
+    } else {
+        error "Url \"$url\" is not a valid URL"
+    }
+}
