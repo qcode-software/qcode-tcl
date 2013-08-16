@@ -1,4 +1,4 @@
-package provide qcode 2.1
+package provide qcode 2.0
 namespace eval qc {}
 package require base64 
 package require blowfish

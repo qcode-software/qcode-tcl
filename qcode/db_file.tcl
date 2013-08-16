@@ -1,4 +1,4 @@
-package provide qcode 2.1
+package provide qcode 2.0
 namespace eval qc {}
 
 proc qc::db_file_insert {args} {
