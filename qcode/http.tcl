@@ -73,6 +73,7 @@ proc qc::http_post {args} {
 	set data [join $pairs &]
 
     }
+
     set httpheaders {}
     if { [info exists authorization] } {
 	lappend httpheaders [qc::http_header "Authorization" $authorization]
@@ -93,7 +94,16 @@ proc qc::http_post {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
-    dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
+    if { [info exists content-type] && [string match "multipart/*" ${content-type}] } {
+        # eg. multipart/formdata
+        foreach mimepart $data {
+            lappend http_posts -httppost $mimepart
+        }
+        dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders {*}$http_posts] html responsecode curlErrorNumber
+    } else {
+        # eg. application/x-www-form-urlencoded
+        dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
+    }
 
     switch $curlErrorNumber {
 	0 {
