@@ -128,7 +128,6 @@ proc qc::widget_compare { args } {
 
     set html [qc::widget_select name $this(name)_op type select value $this(operator) {*}[dict_subset [array get this] options sticky tooltip title]]
     append html " "
-    # why isn't text input sticky too
     append html [qc::widget_text {*}[qc::dict_exclude [array get this] required operator options sticky]]
 
     return $html
