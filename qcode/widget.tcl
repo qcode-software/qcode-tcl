@@ -36,7 +36,6 @@ doc qc::widget {
 proc qc::widget_label { args } {
     #| Return an HTML form label element.
     args_check_required $args name label 
-    
     array set this $args
     default this(id) $this(name)
     set this(for) $this(id)
@@ -44,13 +43,14 @@ proc qc::widget_label { args } {
         set this(title) $this(tooltip)
     }
 
+    set attributes [dict_subset [array get this] for title]
     set html $this(label)
     if {[info exists this(required)] && [string is true $this(required)] } {
-        set this(class) required
+        dict set attributes class required
 	append html [html span * style "color:#CC0000;"]
     } 
 
-    return [html label $html {*}[dict_subset [array get this] for class title]]
+    return [html label $html {*}$attributes]
 }
 
 doc qc::widget_label {
@@ -76,7 +76,7 @@ proc qc::widget_text { args } {
     set this(type) text
     default this(id) $this(name)
     default this(width) 160
-    default this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
     if { [info exists this(tooltip)] } {
         set this(title) $this(tooltip)
     }
