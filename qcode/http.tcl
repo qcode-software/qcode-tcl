@@ -94,16 +94,20 @@ proc qc::http_post {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
+    set curl_args [list -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders]
+
     if { [info exists content-type] && [string match "multipart/*" ${content-type}] } {
         # eg. multipart/formdata
         foreach mimepart $data {
-            lappend http_posts -httppost $mimepart
+            lappend curl_args -httppost $mimepart
         }
-        dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders {*}$http_posts] html responsecode curlErrorNumber
+      
     } else {
         # eg. application/x-www-form-urlencoded
-        dict2vars [qc::http_curl -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0  -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders -postfields $data] html responsecode curlErrorNumber
+        lappend curl_args -postfields $data
     }
+
+    dict2vars [qc::http_curl {*}$curl_args] html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
@@ -146,6 +150,15 @@ doc qc::http_post {
         "json": null,
         "data": "data=Here%27s+the+POST+data"
         }
+        % 
+        % lappend data [list name "firstName" contents "Andres" contenttype "text/plain" contentheader [list "adios: goodbye"]]                                       \
+        % lappend data [list name "lastName"  contents "Garcia"]                          \
+        % lappend data [list name "file" file "httpPost.tcl" file "basico.tcl" contenttype text/plain filename "c:\\basico.tcl"]                            \
+        % lappend data  [list name "AnotherFile" filecontent "httpBufferPost.tcl"]         \
+        % lappend data  [list name "submit" contents "send"]
+        
+        % http_post -headers [list Authorization "OAuth $token"] -data $data -content-type "multipart/form-data" https://httpbin.org/post
+
     }
 }
 
