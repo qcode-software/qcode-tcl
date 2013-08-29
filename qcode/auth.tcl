@@ -105,10 +105,7 @@ proc qc::auth_password { employee_code password } {
         from employee 
         where 
         upper(employee_code)=upper(:employee_code) 
-        and password_hash in (
-                              crypt(:password,password_hash),  
-                              crypt(invert_case(:password),password_hash)
-                              )
+        and password_hash=crypt(:password,password_hash)
     }
     db_cache_0or1row $qry {
 	error "Password authentication failed" {} AUTH
@@ -129,10 +126,7 @@ proc qc::auth_password_check { employee_code password } {
         from employee 
         where 
         upper(employee_code)=upper(:employee_code) 
-        and password_hash in (
-                              crypt(:password,password_hash),  
-                              crypt(invert_case(:password),password_hash)
-                              )
+        and password_hash=crypt(:password,password_hash)
     }
     db_cache_0or1row $qry {
 	return false
