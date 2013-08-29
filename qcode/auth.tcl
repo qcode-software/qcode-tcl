@@ -99,7 +99,17 @@ doc qc::auth_hba_check {
 proc qc::auth_password { employee_code password } {
     #| Try to authenticate an employee based on employee_code and password
     #| On failure throw AUTH error
-    set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
+    set qry {
+        select 
+        employee_id 
+        from employee 
+        where 
+        upper(employee_code)=upper(:employee_code) 
+        and password_hash in (
+                              crypt(:password,password_hash),  
+                              crypt(invert_case(:password),password_hash)
+                              )
+    }
     db_cache_0or1row $qry {
 	error "Password authentication failed" {} AUTH
     } { 
@@ -113,7 +123,17 @@ doc qc::auth_password {
 
 proc qc::auth_password_check { employee_code password } {
     #| Check if we can authenticate an employee based on employee_code and password
-    set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
+    set qry {
+        select 
+        employee_id 
+        from employee 
+        where 
+        upper(employee_code)=upper(:employee_code) 
+        and password_hash in (
+                              crypt(:password,password_hash),  
+                              crypt(invert_case(:password),password_hash)
+                              )
+    }
     db_cache_0or1row $qry {
 	return false
     } { 
