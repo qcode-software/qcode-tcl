@@ -22,11 +22,11 @@ doc qc::widget {
 	widget name widgetName label labelText ?required yes?
     }
     Examples {
-        % qc::widget type text name textWidget value "Horses"
-        <input style="width:160px" id="textWidget" value="Horses" name="textWidget" type="text">
+        % qc::widget type text name textWidget value "Horses" tooltip "This is a tooltip"
+        <input style="width:160px" id="textWidget" value="Horses" name="textWidget" type="text" title="This is a tooltip">
 
-        % qc::widget type label name labelWidget label "This is a label"
-        <label for="labelWidget">This is a label</label>
+        % qc::widget type label name labelWidget label "This is a label" tooltip "This is a tooltip"
+        <label for="labelWidget" title="This is a tooltip">This is a label</label>
 
         % qc::widget type quantum name quantumWidget value "Everything" 
         No widget proc defined for quantum
@@ -38,11 +38,19 @@ proc qc::widget_label { args } {
     args_check_required $args name label 
     array set this $args
     default this(id) $this(name)
-    if {[info exists this(required)] && [string is true $this(required)] } {
-	return [html label "$this(label)<span style=\"color:#CC0000\">*</span>" for $this(id) class required]
-    } else {
-	return [html label $this(label) for $this(id)]
+    set this(for) $this(id)
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
     }
+
+    set attributes [dict_subset [array get this] for title]
+    set html $this(label)
+    if {[info exists this(required)] && [string is true $this(required)] } {
+        dict set attributes class required
+	append html [html span * style "color:#CC0000;"]
+    } 
+
+    return [html label $html {*}$attributes]
 }
 
 doc qc::widget_label {
@@ -52,8 +60,8 @@ doc qc::widget_label {
     Examples {
 	% widget_label name firstname label Firstname
 	<label for="firstname">Firstname</label>
-	
-	# Required form elements have a css class applied and a red asterisk.
+
+        # Required form elements have a css class applied and a red asterisk.
 	# Hack the code to make it look different.
 	% widget_label name surname label Surname required yes
 	<label for="surname" class="required">Surname<span style="color:#CC0000">*</span></label>
@@ -63,7 +71,16 @@ doc qc::widget_label {
 proc qc::widget_text { args } {
     #| Return an HTML form text input widget.
     args_check_required $args name value 
+
     array set this $args
+    set this(type) text
+    default this(id) $this(name)
+    default this(width) 160
+    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+
     if { [info exists this(sticky)] && [true $this(sticky)] } {
         # sticky values
         if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
@@ -72,17 +89,16 @@ proc qc::widget_text { args } {
             set this(value) [sticky_get $this(name)]
         }
     }
-    set this(type) text
-    if { [info exists this(name)] } { 
-	default this(id) $this(name)
-    }
-    default this(width) 160
-    set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
+
     if { [info exists this(disabled)] && [string is true $this(disabled)] } {
-	return [html span $this(value)][html_tag input type hidden name $this(name) value $this(value) id $this(id)]
+        set this(type) hidden
+        set html [html span $this(value) {*}[dict_subset [array get this] title]]
+        append html [html_tag input {*}[dict_subset [array get this] type name value id]]
     } else {
-	return [html_tag input {*}[qc::dict_exclude [array get this] required label width units]]
+	set html [html_tag input {*}[dict_exclude [array get this] required label width units tooltip]]
     }
+
+    return $html
 }
 
 doc qc::widget_text {
@@ -106,9 +122,13 @@ proc qc::widget_compare { args } {
     default this(operator) =
     default this(options) [list "greater than" ">" equals = "less than" "<"]
     default this(sticky) no
-    set html [qc::widget_select name $this(name)_op type select options $this(options) value $this(operator) sticky $this(sticky)]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+
+    set html [qc::widget_select name $this(name)_op type select value $this(operator) {*}[dict_subset [array get this] options sticky tooltip title]]
     append html " "
-    append html [qc::widget_text {*}[qc::dict_exclude $args required operator options sticky]]
+    append html [qc::widget_text {*}[qc::dict_exclude [array get this] required operator options sticky]]
 
     return $html
 }
@@ -234,7 +254,10 @@ proc qc::widget_htmlarea { args } {
     }
     set this(contentEditable) true
     set this(class) "db-form-html-area"
-    return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height tooltip]]
 }
 
 doc qc::widget_htmlarea {
@@ -265,7 +288,10 @@ proc qc::widget_textarea { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html textarea $this(value) {*}[qc::dict_exclude [array get this] type value label required units width height]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    set html [html textarea $this(value) {*}[qc::dict_exclude [array get this] type value label required units width height tooltip]]
 }
 
 doc qc::widget_textarea {
@@ -295,25 +321,31 @@ proc qc::widget_select { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    set html [html_tag select {*}[qc::dict_exclude [array get this] required label type options null_option value units]]
-    append html \n
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+
+    set options_html {}
     if { [string is true $this(null_option)] } {
-	append html "<option value=\"\">- Select -</option>\n"
+	lappend options_html "<option value=\"\">- Select -</option>"
     }
     foreach {name value} $this(options) {
 	if { [string equal $name $this(value)] || [string equal $value $this(value)] } {
 	    set name_selected $name
-	    append html [html option $name value $value selected true] \n
+	    lappend options_html [html option $name value $value selected true]
 	} else {
-	    append html [html option $name value $value] \n
+	    lappend options_html [html option $name value $value] 
 	}
     }
-    append html "</select>\n"
+
     if { [info exists this(disabled)] && [string is true $this(disabled)] } {
-	return [html span $name_selected][html_tag input type hidden name $this(name) value $this(value) id $this(id)]
+        set html [html span $name_selected {*}[dict_subset [array get this] title]]
+        append html [html_tag input type hidden {*}[dict_subset [array get this] name value id]]
     } else {
-	return $html
+        set html [html select [join $options_html \n] {*}[qc::dict_exclude [array get this] required label type options null_option value units tooltip]]
     }
+
+    return $html
 }
 
 doc qc::widget_select {
@@ -354,7 +386,10 @@ proc qc::widget_span { args } {
     if { [info exists this(height)] } {
 	set this(style) [qc::style_set [coalesce this(style) ""] height $this(height)]
     }
-    return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value width height]] 
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value width height tooltip]] 
 }
 
 doc qc::widget_span {
@@ -385,7 +420,10 @@ proc qc::widget_password { args } {
     }
     default this(width) 160
     set this(style) [qc::style_set [coalesce this(style) ""] width $this(width)]
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
 doc qc::widget_password {
@@ -417,7 +455,10 @@ proc qc::widget_bool { args } {
     set this(type) checkbox
     set this(value) true
     set this(boolean) true
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
 doc qc::widget_bool {
@@ -444,7 +485,10 @@ proc qc::widget_checkbox { args } {
 	default this(id) $this(name)
     }
     set this(type) checkbox
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
 doc qc::widget_checkbox {
@@ -470,7 +514,10 @@ proc qc::widget_button { args } {
     if { [info exists this(name)] } { 
 	default this(id) $this(name)
     }
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
 doc qc::widget_button {
@@ -491,7 +538,10 @@ proc qc::widget_submit { args } {
 	default this(id) $this(name)
     }
     set this(type) submit
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]] 
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]] 
 }
 
 doc qc::widget_submit {
@@ -513,7 +563,10 @@ proc qc::widget_radio { args } {
 	default this(id) $this(name)
     }
     default this(checked) false
-    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units]]
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+    return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
 doc qc::widget_radio {
@@ -544,8 +597,8 @@ proc qc::widget_radiogroup { args } {
     set buttons {}
     foreach {option_name option_value} $this(options) {
 	set id ${group_name}${option_value}
-	set widget [qc::widget_radio name $group_name value $option_value checked [eq $option_value $group_value] id $id]
-	set label [qc::widget_label label $option_name name $id]
+	set widget [qc::widget_radio name $group_name value $option_value checked [eq $option_value $group_value] id $id {*}[dict_subset [array get this] title tooltip]]
+	set label [qc::widget_label label $option_name name $id {*}[dict_subset [array get this] title tooltip]]
 	lappend buttons "$widget&nbsp;$label"
     }
     return [html div [join $buttons "&nbsp; &nbsp;"] class "radio-group" name $group_name id $group_name]

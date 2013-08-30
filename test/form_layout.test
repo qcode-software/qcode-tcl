@@ -38,12 +38,9 @@ namespace eval ::qcode::test {
 </tr>
 <tr>
 <td><label for="color">Colour</label></td>
-<td><select id="color" name="color" sticky="no">
-<option value="Red">1</option>
+<td><select id="color" name="color" sticky="no"><option value="Red">1</option>
 <option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</td>
+<option value="Green">3</option></select></td>
 </tr>
 <tr>
 <td></td>
@@ -83,12 +80,9 @@ namespace eval ::qcode::test {
 </tr>
 <tr>
 <td><label for="color">Colour</label></td>
-<td><select id="color" name="color" sticky="no">
-<option value="Red">1</option>
+<td><select id="color" name="color" sticky="no"><option value="Red">1</option>
 <option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</td>
+<option value="Green">3</option></select></td>
 </tr>
 <tr>
 <td></td>
@@ -153,12 +147,9 @@ namespace eval ::qcode::test {
 <tbody>
 <tr>
 <td><label for="color">Colour</label></td>
-<td><select id="color" name="color" sticky="no">
-<option value="Red">1</option>
+<td><select id="color" name="color" sticky="no"><option value="Red">1</option>
 <option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</td>
+<option value="Green">3</option></select></td>
 </tr>
 <tr>
 <td></td>
@@ -180,13 +171,10 @@ namespace eval ::qcode::test {
         }
     } -body {
         form_layout_tbody $conf
-    } -cleanup {unset conf} -result {{{<label for="country_code">Country</label>} {<select id="country_code" name="country_code" sticky="no">
-<option value="Scotland">SCO</option>
+    } -cleanup {unset conf} -result {{{<label for="country_code">Country</label>} {<select id="country_code" name="country_code" sticky="no"><option value="Scotland">SCO</option>
 <option value="England">ENG</option>
 <option value="Northern Ireland">NI</option>
-<option value="Wales">WAL</option>
-</select>
-}} {{<label for="postcode">Postcode</label>} {<input maxlength="10" style="width:100px" id="postcode" name="postcode" value="" type="text" sticky="no">}} {{<label for="house_no">House No/Name</label>} {<input maxlength="25" style="width:200px" id="house_no" name="house_no" value="" type="text" sticky="no">}}}
+<option value="Wales">WAL</option></select>}} {{<label for="postcode">Postcode</label>} {<input maxlength="10" style="width:100px" id="postcode" name="postcode" value="" type="text" sticky="no">}} {{<label for="house_no">House No/Name</label>} {<input maxlength="25" style="width:200px" id="house_no" name="house_no" value="" type="text" sticky="no">}}}
 
 
     test form_layout_list-1.0 {form_layout_list} -setup {
@@ -199,12 +187,9 @@ namespace eval ::qcode::test {
         }
     } -body {
         form_layout_list $conf
-    } -result {<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color">
-<option value="Red">1</option>
+    } -result {<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color"><option value="Red">1</option>
 <option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>}
+<option value="Green">3</option></select></div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>}
 
 
 
