@@ -143,9 +143,11 @@ doc qc::html_table {
 
 proc qc::html_table { args } {
     set argnames [args2vars $args]
-    # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable
+    # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable single_page_row_count first_page_row_count middle_page_row_count last_page_row_count
     # Some col keys have special meaning :- label class format thClass tfoot sum
+    set html ""
 
+    # Server side sorting
     if { [info exists sortCols] } {
 	default sortable yes
     } else {
@@ -154,7 +156,20 @@ proc qc::html_table { args } {
     if { [true $sortable] && [form_var_exists sortCols] } {
 	set sortCols [form_var_get sortCols]
     }
-   
+
+    # Maximum number of rows to display on a page (excluding thead and tfoot rows)
+    if { [info exists page_row_count] } {
+        default middle_page_row_count $page_row_count first_page_row_count $page_row_count last_page_row_count $page_row_count
+        default single_page_row_count [expr {$first_page_row_count + $last_page_row_count - $middle_page_row_count}]
+    }
+    if { [info exists single_page_row_count]
+         && [info exists first_page_row_count]
+         && [info exists middle_page_row_count]
+         && [info exists last_page_row_count] } {
+        set paged true
+    } else {
+        set paged false
+    }   
     
     # QRY
     if { [info exists qry] && ![info exists table] && ![info exists tbody] } {
@@ -217,57 +232,117 @@ proc qc::html_table { args } {
 	    set argnames [lexclude $argnames scrollHeight]
 	}
     }
-    # Write table tag
-    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable]]]
+    if { $paged } {
+        if { [info exists class] } {
+            lappend class paged
+        } else {
+            set class paged
+	    lappend argnames class
+        }
+    }
 
-    append html \n
     # Create colgroup and col children
     if { [info exists cols]} {
-        append html [qc::html_table_colgroup $cols]
+        set html_colgroup [qc::html_table_colgroup $cols]
     }
+
     # Create thead
     if { [info exists thead] } {
-        append html "<thead>\n"
-	set rowNumber 0
+        set html_rows {}
+        set rowNumber 0
         foreach row $thead {
-	    if { [info exists headerRowClasses] } {
-		set rowClass [lindex $headerRowClasses [expr {$rowNumber%[llength $headerRowClasses]}]]
-	    } else {
-		set rowClass {}
-	    }
-	    if { [info exists cols]} {
-		append html [qc::html_table_row_head $row $rowClass $cols]
-	    } else {
-		append html [qc::html_table_row_head $row $rowClass]
-	    }
-	    incr rowNumber
+            if { [info exists headerRowClasses] } {
+                set rowClass [lindex $headerRowClasses [expr {$rowNumber%[llength $headerRowClasses]}]]
+            } else {
+                set rowClass {}
+            }
+            if { [info exists cols]} {
+                lappend html_rows [qc::html_table_row_head $row $rowClass $cols]
+            } else {
+                lappend html_rows [qc::html_table_row_head $row $rowClass]
+            }
+            incr rowNumber
         }
-        append html "</thead>\n"
+        set header_row_count $rowNumber
+        set html_thead [html thead "\n[join $html_rows \n]"]
     }
-    # Create tbody
-    if { [info exists tbody] } {
-        append html "<tbody>\n"
-	set rowNumber 0
-        foreach row $tbody {
-	    if { [info exists rowClasses] } {
-		set rowClass [lindex $rowClasses [expr {$rowNumber%[llength $rowClasses]}]]
-	    } else {
-		set rowClass {}
-	    }
-	    append html [qc::html_table_row $row $rowClass]
-	    incr rowNumber
-        }
-        append html "</tbody>\n"
-    }
+
     # Create tfoot
     if { [info exists tfoot] } {
-        append html "<tfoot>\n"
-	foreach row $tfoot {
-	    append html [qc::html_table_row $row]
+        set html_rows {}
+        set rowNumber 0
+        foreach row $tfoot {
+            lappend html_rows [qc::html_table_row $row]
+            incr rowNumber
         }
-        append html "</tfoot>\n"
+        set footer_row_count $rowNumber
+        set html_tfoot [html tfoot "\n[join $html_rows \n]"]
     }
-    append html "</table>\n"
+
+    # Create tbodies
+    set html_tbodies {}
+    if { [info exists tbody] } {
+        set row_count [llength $tbody]
+        if { $paged } {
+            if { $row_count <= $single_page_row_count } {
+                set paged false
+            }
+        }
+        if { ! $paged } {
+            set first_page_row_count $row_count
+            set middle_page_row_count $row_count
+            set last_page_row_count $row_count
+        }
+
+        set html_rows {}
+        set rowNumber 0
+        if { [llength $tbody] == 0 } {
+            lappend html_tbodies [html tbody "\n"]
+        }
+        foreach row $tbody {
+            if { [info exists rowClasses] } {
+                set rowClass [lindex $rowClasses [expr {$rowNumber%[llength $rowClasses]}]]
+            } else {
+                set rowClass {}
+            }
+            lappend html_rows [qc::html_table_row $row $rowClass]
+            incr rowNumber
+            if { $rowNumber == $first_page_row_count
+                 || ($rowNumber > $first_page_row_count && [llength $html_rows] == $middle_page_row_count) } {
+                lappend html_tbodies [html tbody "\n[join $html_rows \n]"]
+                set html_rows {}
+            }
+        }
+        if { [llength $html_rows] > 0 } {
+            lappend html_tbodies [html tbody "\n[join $html_rows \n]"]
+        }
+        if { [llength $html_rows] > $last_page_row_count && [info exists tfoot] } {
+            lappend html_tbodies [html tbody "\n"]
+        }
+    } else {
+        lappend html_tbodies ""
+    }
+
+    # Create tables
+    set tables {}
+    set pageNumber 0
+    foreach html_tbody $html_tbodies {
+        incr pageNumber
+        set attributes [dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable single_page_row_count first_page_row_count middle_page_row_count last_page_row_count]]
+        set children {}
+        if { [info exists html_colgroup] } {
+            lappend children $html_colgroup
+        }
+        if { [info exists html_thead] } {
+            lappend children $html_thead
+        }
+        lappend children $html_tbody
+        if { [info exists html_tfoot] && $pageNumber == [llength $html_tbodies] } {
+            lappend children $html_tfoot
+        }
+        lappend tables [html table "\n[join $children \n]" {*}$attributes]
+    }
+    append html [join $tables \n]
     return $html
 }
 
@@ -678,4 +753,36 @@ proc qc::columns_show_hide_toolbar {args} {
     lappend row [html div $title class "title"]
     lappend row [html div [join $show_hide_controls " "]]
     return [html_table tbody [list $row] class "columns-show-hide-toolbar"]
+}
+
+proc qc::html_table_col_styles {table_selector cols} {
+    # Parse a table cols ldict and return a group of css rules to apply to columns.
+    set rules {}
+    set i 0
+    foreach col $cols {
+        foreach class [dict get $col class] {
+            switch $class {
+                number -
+                money -
+                perct -
+                integer -
+                date -
+                rank -
+                right {
+                    lappend rules "$table_selector tbody td:nth-child($i)" "text-align:right;"
+                }
+                center -
+                yes-no -
+                bool {
+                    lappend rules "$table_selector tbody td:nth-child($i)" "text-align:center;"
+                }
+            }
+        }
+        incr i
+    }
+    set list {}
+    foreach {selector declaration} $rules {
+        lappend list "$selector \{\n$declaration\n\}"
+    }
+    return [join $list \n]
 }
