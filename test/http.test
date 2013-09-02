@@ -3,6 +3,7 @@ eval ::tcltest::configure $argv
 # Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
+package require json
 namespace import qc::*
 
 namespace eval ::qcode::test {
@@ -101,6 +102,82 @@ namespace eval ::qcode::test {
     test http_header-1.1 {http_header error} -setup {} -body {
         http_header Rest-Sign "aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk"
     } -returnCodes 1 -result "The value of http header, \"Rest-Sign: aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk\", contains newline characters."
+
+    test http_post-1.0 {http_post} -body {
+        set response [http_post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"]
+        set dict [::json::json2dict $response]
+        if { [lsort [dict keys $dict]] ne {args data files form headers json origin url} } {
+            return "false: key mismatch"
+        }
+        foreach {varname value} {
+            args {}
+            data "data=Here%27s%20the%20POST%20data"
+            files {}
+            form {}
+            json null
+            url "http://httpbin.org/post"
+        } {
+            if { [dict get $dict $varname] ne $value } {
+                return "false: value $varname returns [dict get $dict $varname] (should have been $value)"
+            }
+        }
+        set headers [dict get $dict headers]
+        if { [lsort [dict keys $headers]] ne {Accept Connection Content-Length Content-Type Host} } {
+            return "false: header keys mismatch"
+        }
+        foreach {key value} {
+            Content-Type {text/plain; charset=utf-8}
+            Content-Length 33
+            Accept {text/plain; charset=utf-8}
+            Connection close
+            Host httpbin.org
+        } {
+            if { [dict get $headers $key] ne $value } {
+                return "false: header values mismatch"
+            }
+        }
+        return true
+    } -result true
+
+    test http_post-1.1 {http_post (multipart)} -setup {} -body {
+        set data [list {name foo contents Apples} {name bar contents Oranges}]
+        set response [http_post -headers {} -content-type "multipart/form-data" -data $data http://httpbin.org/post]
+
+        set dict [::json::json2dict $response]
+        if { [lsort [dict keys $dict]] ne {args data files form headers json origin url} } {
+            return false
+        }
+        foreach {name value} {
+            args {}
+            files {}
+            form {foo Apples bar Oranges}
+            json null
+            url http://httpbin.org/post
+            data {}
+        } {
+            if { [dict get $dict $name] ne $value } {
+                return false
+            }
+        }
+        set headers [dict get $dict headers]
+        if { [lsort [dict keys $headers]] ne {Accept Connection Content-Length Content-Type Host} } {
+            return false
+        }
+        foreach {name value} {
+            Accept */*
+            Content-Length 243
+            Connection close
+            Host httpbin.org
+        } {
+            if { [dict get $headers $name] ne $value } {
+                return false
+            }
+        }
+        if { ! [string match {multipart/form-data; boundary=*} [dict get $headers Content-Type]] } {
+            return false
+        }
+        return true
+    } -result true
 
     cleanupTests
 }
