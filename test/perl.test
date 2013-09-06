@@ -12,31 +12,31 @@ namespace eval ::qcode::test {
     # perl_quote
     test perl_quote-1.0 {perl_quote} -body {
         return [perl_quote {I'm here to say "hello"}]
-    } -result {"I'm here to say \"hello\""}
+    } -result {'I\'m here to say "hello"'}
 
 
     # list2perl_array
     test list2perl_array-1.0 {list2perl_array} -body {
-        return [list2perl_array [list one two {"hello"}]]
-    } -result {["one", "two", "\"hello\""]}
+        return [list2perl_array [list one two {"hello's"}]]
+    } -result {['one', 'two', '"hello\'s"']}
 
 
     # dict2perl_hash
     test dict2perl_hash-1.0 {dict2perlhash} -body {
-        return [dict2perl_hash {foo aa bar bb baz {"hello"}}]
-    } -result {{foo => "aa", bar => "bb", baz => "\"hello\""}}
+        return [dict2perl_hash {foo aa bar bb baz {"hello's"}}]
+    } -result {{foo => 'aa', bar => 'bb', baz => '"hello\'s"'}}
 
 
     # llist2perl_aarray
     test llist2perl_aarray-1.0 {list of lists to perl array of arrays} -body {
-        return [llist2perl_aarray [list [list a b c] [list {"hello"} {in "" quotes}] [list 1 2 3]]]
-    } -result {[["a", "b", "c"], ["\"hello\"", "in \"\" quotes"], ["1", "2", "3"]]}
+        return [llist2perl_aarray [list [list a b c] [list {"hello's"} {in "" quotes}] [list 1 2 3]]]
+    } -result {[['a', 'b', 'c'], ['"hello\'s"', 'in "" quotes'], ['1', '2', '3']]}
 
 
     # ddict2perl_hhash
     test ddict2perl_hhash-1.0 {nested dict to perl hash of hashes} -body {
-        return [ddict2perl_hhash {foo {a 1 b 2 c 3} bar {d four e {"five" six}}}]
-    } -result {{foo => {a => "1", b => "2", c => "3"}, bar => {d => "four", e => "\"five\" six"}}}
+        return [ddict2perl_hhash {foo {a 1 b 2 c 3} bar {d four e {'five' six}}}]
+    } -result {{foo => {a => '1', b => '2', c => '3'}, bar => {d => 'four', e => '\'five\' six'}}}
 
 
     cleanupTests
