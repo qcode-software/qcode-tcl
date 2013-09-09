@@ -14,7 +14,7 @@ proc qc::password_complexity_ok { args } {
     #| Return true if password meets min, max and minclasses complexity requirements
     #| Otherwise return false
     #| max size is limited to 72
-    #| Usage: password_complexity_check password min 2 max 10 minclasses 4
+    #| Usage: password_complexity_ok password min 2 max 10 minclasses 4
     qc::args $args password args
     qc::args2vars $args min max minclasses
         
