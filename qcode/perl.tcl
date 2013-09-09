@@ -4,7 +4,7 @@ namespace eval qc {}
 
 proc qc::perl_quote {value} {
     #| Quote a value for use as a perl scalar
-    return \'[string map [list \' \\\'] $value]\'
+    return '[string map [list ' \\'] $value]'
 }
 
 proc qc::list2perl_array {list} {
