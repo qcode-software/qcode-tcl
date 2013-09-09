@@ -9,12 +9,18 @@ doc authorisation {
 
 proc qc::authorise_token_create {args} {
     #| Create an authorisation token for this url
+    # TODO change referrer to source
     args2vars $args expires employee_id referrer target 
     default expires "24 hours"
-    default employee_id [auth]
     default referrer [conn_url]
+    if { ! [info exist employee_id] } {
+        set employee_id [auth]
+    }
+    if { ![regexp {^https?://} $referrer] } {
+        set referrer [url_root "[qc::conn_location]/[string trimleft $referrer /]"]
+    }
     if { ![regexp {^https?://} $target] } {
-        set target "[qc::conn_location]/[string trimleft $target /]"
+        set target [url_root "[qc::conn_location]/[string trimleft $target /]"]
     }
     set expiration_epoch [clock scan $expires]
     db_1row {
