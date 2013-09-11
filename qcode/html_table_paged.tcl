@@ -53,8 +53,6 @@ proc qc::html_table_paged { args } {
     set list {}
     foreach tbody $tbodies {
         dict set args tbody $tbody
-        puts $args
-        puts "KEYS: [dict keys $args]"
         lappend list [html_table {*}$args]
     }
     return [join $list \n]
