@@ -96,35 +96,6 @@ doc qc::auth_hba_check {
     Parent authentication
 }
 
-proc qc::auth_password { employee_code password } {
-    #| Try to authenticate an employee based on employee_code and password
-    #| On failure throw AUTH error
-    set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
-    db_cache_0or1row $qry {
-	error "Password authentication failed" {} AUTH
-    } { 
-	return $employee_id
-    }
-}
-
-doc qc::auth_password {
-    Parent authentication
-}
-
-proc qc::auth_password_check { employee_code password } {
-    #| Check if we can authenticate an employee based on employee_code and password
-    set qry {select employee_id from employee where upper(employee_code)=upper(:employee_code) and upper(password)=upper(:password::text) }
-    db_cache_0or1row $qry {
-	return false
-    } { 
-	return true
-    }
-}
-
-doc qc::auth_password_check {
-    Parent authentication
-}
-
 proc qc::auth_session { session_id } {
     #| Try to authenticate an employee based on the session_id given
     #| Return the employee_id if successful
