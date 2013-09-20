@@ -237,7 +237,7 @@ proc qc::http_put {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     if { [info exists data] && [info exists infile]} {
@@ -402,7 +402,7 @@ proc qc::http_head {args} {
     
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
@@ -467,7 +467,7 @@ proc qc::http_save {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
@@ -500,7 +500,7 @@ proc qc::http_delete {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl -customrequest DELETE -httpheader $httpheaders -timeout $timeout -url $url -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
