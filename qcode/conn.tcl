@@ -28,7 +28,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     #| If found call the proc with values from form variables that match the proc's argument names.
     #| The request suffix is used to decide which error handler to use.
     #| If no matching proc exists then try to return a file or a 404 not found.
-    if { [param_exists testing] && [param testing] } {
+    if { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
 	qc::reload
     }
     if { $error_handler eq "" } {
