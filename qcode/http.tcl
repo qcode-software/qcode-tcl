@@ -237,7 +237,7 @@ proc qc::http_put {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     if { [info exists data] && [info exists infile]} {
@@ -396,10 +396,16 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
 proc qc::http_head {args} {
     #| Return a dict of name value pairs returned by the server in the HTTP header
     # usage http_head ?-timeout timeout? ?-useragent useragent? url
-    args $args -timeout 60 -useragent ? url
+    args $args -headers {} -timeout 60 -useragent ? url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
-    dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] headers responsecode curlErrorNumber
+    
+    set httpheaders {}
+    foreach {name value} $headers {
+	lappend httpheaders [qc::http_header $name $value]
+    }
+
+    dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
 
 
     switch $curlErrorNumber {
@@ -461,7 +467,7 @@ proc qc::http_save {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
@@ -494,7 +500,7 @@ proc qc::http_delete {args} {
 
     set httpheaders {}
     foreach {name value} $headers {
-	lappend httpheaders "$name: $value"
+	lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl -customrequest DELETE -httpheader $httpheaders -timeout $timeout -url $url -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber

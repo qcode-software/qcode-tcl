@@ -41,11 +41,18 @@ proc qc::error_handler { } {
         }
 	default {
 	    log Error $errorInfo
-	    if { [eq $suffix .xml] } {
-		return2client xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"] filter_cc yes
-	    } else {
-		return2client code 500 html [qc::error_report] filter_cc yes
-	    }
+            if {  [eq $suffix .xml] && [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
+                return2client xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"] filter_cc yes
+            } elseif { [eq $suffix .xml] } {
+                # LIVE
+                return2client xml [qc::xml error "Internal Server Error. An email report has been sent to our engineers"] filter_cc yes
+	    } elseif { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
+                return2client code 500 html [qc::error_report] filter_cc yes
+            } else {
+	        # LIVE
+                return2client code 500 html [html h2 "Internal Server Error"][html p "An email report has been sent to our engineers."] filter_cc yes
+            }
+	    
 	    if { [qc::param_exists email_support] } {
 		set subject "[string toupper [ns_info server]] Bug - [string range $errorMessage 0 75]"
 		email_support subject $subject html [qc::error_report] 
