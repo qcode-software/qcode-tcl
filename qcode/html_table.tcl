@@ -154,6 +154,12 @@ proc qc::html_table { args } {
     if { [true $sortable] && [form_var_exists sortCols] } {
 	set sortCols [form_var_get sortCols]
     }
+
+    if { [info exists class] && "db-grid" in $class } {
+        set headers [ns_conn outputheaders]
+        ns_set update $headers Pragma no-cache
+        ns_set update $headers Cache-Control no-cache
+    }
    
     
     # QRY
