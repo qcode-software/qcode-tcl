@@ -36,10 +36,10 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     }
     set url [ns_conn url]
     set file [ns_url2file [ns_conn url]]
-
-    if { [llength [info procs "$namespace::$url"]] } {
+    
+    if { [llength [info procs "${namespace}::${url}"]] } {
 	qc::try {
-	    set result [form_proc $namespace::$url]
+	    set result [form_proc "${namespace}::${url}"]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
 		# If conn is still open
 		set content-type "[mime_type_guess [file tail $url]]; charset=utf-8"
