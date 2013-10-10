@@ -742,7 +742,7 @@ doc qc::max_nz {
 package require md5
 proc qc::md5 {string} {
     #| Returns the md5 hash of supplied string.
-    return [string tolower [md5::md5 -hex $string]]
+    return [string tolower [::md5::md5 -hex $string]]
 }
 
 doc qc::md5 {
