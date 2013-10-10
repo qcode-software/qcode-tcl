@@ -23,7 +23,7 @@ doc qc::conn_remote_ip {
     }
 }
 
-proc qc::conn_marshal { {error_handler qc::error_handler} } {
+proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
     #| If found call the proc with values from form variables that match the proc's argument names.
     #| The request suffix is used to decide which error handler to use.
@@ -37,9 +37,9 @@ proc qc::conn_marshal { {error_handler qc::error_handler} } {
     set url [ns_conn url]
     set file [ns_url2file [ns_conn url]]
 
-    if { [llength [info procs "::$url"]] } {
+    if { [llength [info procs "$namespace::$url"]] } {
 	qc::try {
-	    set result [form_proc ::$url]
+	    set result [form_proc $namespace::$url]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
 		# If conn is still open
 		set content-type "[mime_type_guess [file tail $url]]; charset=utf-8"
