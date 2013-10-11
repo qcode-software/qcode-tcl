@@ -16,6 +16,13 @@ proc qc::section_menu {conf section default_url section_var} {
     set lmenu {}
     foreach dict $conf {
 	set label [dict get $dict label]
+
+        if { [dict exists $dict class] } {
+            set class [dict get $dict class]
+        } else {
+            set class ""
+        }
+
 	# AccessKey
 	for {set i 0} {$i<[string length $label]} {incr i} {
 	    set letter [string index $label $i]
@@ -32,19 +39,21 @@ proc qc::section_menu {conf section default_url section_var} {
 
 	# Spacer - TLC
 	if { [dict exists $dict type] && [string equal [dict get $dict type] spacer] } {
-	    lappend lmenu [html span "" style "width:[dict get $dict width]px" class spacer]
+            lappend class "spacer"
+	    lappend lmenu [html span "" style "width:[dict get $dict width]px" class $class]
 	    continue
 	}
 
 	# Use default url with section
 	if {[string equal $label $section]} {
-	    lappend lmenu [html span $label class selected]
+            lappend class "selected"
+	    lappend lmenu [html span $label class $class]
 	} else {
 	    if { [dict exists $dict count] } {
 		set count [dict get $dict count]
-		lappend lmenu [html span "[html_a $link_label [url $default_url $section_var $label] accesskey $accesskey] ($count)"]
+		lappend lmenu [html span "[html_a $link_label [url $default_url $section_var $label] accesskey $accesskey] ($count)" class $class]
 	    } else {
-		lappend lmenu [html span [html_a $link_label [url $default_url $section_var $label] accesskey $accesskey]]
+		lappend lmenu [html span [html_a $link_label [url $default_url $section_var $label] accesskey $accesskey] class $class]
 	    }
 	}
     }
