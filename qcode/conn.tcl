@@ -28,6 +28,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     #| If found call the proc with values from form variables that match the proc's argument names.
     #| The request suffix is used to decide which error handler to use.
     #| If no matching proc exists then try to return a file or a 404 not found.
+
     if { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
 	qc::reload
     }
@@ -66,7 +67,11 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
 	    ns_returnfile 200 [ns_guesstype $file] $file
         }
     } else {
-	ns_returnnotfound
+        qc::try {
+            error "Page not found." {} NOT_FOUND
+        } {
+            $error_handler
+        }
     }
 }
 
