@@ -3,6 +3,7 @@ package require doc
 namespace eval qc {}
 
 proc qc::perm_get { perm_name property } {
+    # TODO
     #| Abstraction layer for accessing properties
     set qry { select * from perm where perm_name=:perm_name }
     db_cache_1row $qry
@@ -10,6 +11,7 @@ proc qc::perm_get { perm_name property } {
 }
 
 proc qc::perm { perm_name method } {
+    # TODO
     #| Test whether the current user can perform $method on $perm_name
     #| Throws an error and sets a global ldict errorList on failure.
     if { [string is false [perm_test $perm_name $method]] } {
@@ -20,6 +22,7 @@ proc qc::perm { perm_name method } {
 }
 
 proc qc::perms { body } {
+    # TODO
     #| Test each line of permissions
     #| Throws an error after all tests if any fail, and sets a global ldict errorList
     global errorList
@@ -43,6 +46,7 @@ proc qc::perms { body } {
 }
 
 proc qc::perm_test { perm_name method } {
+    # TODO
     #| Test whether the current user can perform $method on $perm_name
     #| Returns boolean
     set m [perm_method_abbrev $method]
@@ -52,6 +56,7 @@ proc qc::perm_test { perm_name method } {
 }
 
 proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
+    # TODO
     #| Evaluate if_code if current user has permission else else_code
     if { [perm_test $perm_name $method] } {
 	uplevel 1 $if_code
@@ -61,6 +66,7 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
 }
 
 proc qc::perm_test_employee { employee_id perm_name method } {
+    # TODO
     #| Test whether the user can perform $method on $perm_name
     #| Returns boolean
     set m [perm_method_abbrev $method]
@@ -69,6 +75,7 @@ proc qc::perm_test_employee { employee_id perm_name method } {
 }
 
 proc qc::perm_string_test { employee_id m perm_string } {
+    # TODO
     #| tests for method $m using all parties listed in $parties
     #| against the list of permissions in $perm_list
     #| return boolean 1 when permission is granted
@@ -80,6 +87,7 @@ proc qc::perm_string_test { employee_id m perm_string } {
 }
 
 proc qc::perm_method_abbrev { method } {
+    # TODO
     #| Return the single letter abbreviation for $method
     switch -glob -- $method {
 	append { return a }
@@ -90,6 +98,7 @@ proc qc::perm_method_abbrev { method } {
 }
 
 proc qc::perm_method_long { m } {
+    # TODO
     #| Return long name for single letter abbreviation
     switch $m {
 	a { return create }
@@ -100,6 +109,7 @@ proc qc::perm_method_long { m } {
 }
 
 proc qc::perm_method_description { m } {
+    # TODO
     #| Return a simple description of the method
     switch $m {
 	a { return Create }
@@ -110,6 +120,7 @@ proc qc::perm_method_description { m } {
 }
 
 proc qc::perm_string_add { perm_string employee_id m } {
+    # TODO
     #| Add method $m for $employee_id to $perm_string
     #| and return new perm_string
     if { [dict exists $perm_string $employee_id] } {
@@ -125,6 +136,7 @@ proc qc::perm_string_add { perm_string employee_id m } {
 }
 
 proc qc::perm_string_remove { perm_string employee_id m } {
+    # TODO
     #| Remove method $m for $employee_id to $perm_string
     #| and return new perm_string
     if { [dict exists $perm_string $employee_id] } {
@@ -142,6 +154,7 @@ proc qc::perm_string_remove { perm_string employee_id m } {
 }
 
 proc qc::perm_list_employees { perm_name method } {
+    # TODO
     #| List all employee_ids (excluding charlie root) who have $method permission on $perm_name
     set perm_string [perm_get $perm_name perm_string]
     set m [perm_method_abbrev $method]
