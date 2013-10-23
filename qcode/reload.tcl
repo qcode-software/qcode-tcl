@@ -10,15 +10,15 @@ proc qc::reload {args} {
         nsv_set tcl_libs $dir 1
         set files [glob -nocomplain [file join $dir *.tcl]]
         foreach file $files {
-            if { [nsv_exists mtimes $file] && [file mtime $file]!=[nsv_get mtimes $file] } {
-                namespace eval :: [list ns_eval -sync source $file]
-                nsv_set mtimes $file [file mtime $file]
-                log Notice "Reloading $file"
-            } else {
-                #log Notice "Loading $file"
+            if { ![nsv_exists mtimes $file] } {
+                ns_log Notice "Loading $file"
                 namespace eval :: [list source $file]
                 nsv_set mtimes $file [file mtime $file]
-            }
+            } elseif { [file mtime $file]!=[nsv_get mtimes $file] } {
+                namespace eval :: [list ns_eval -sync source $file]
+                nsv_set mtimes $file [file mtime $file]
+                ns_log Notice "Reloading $file"
+            } 
         }
     }
 }
