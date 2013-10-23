@@ -6,27 +6,25 @@ proc perm_set {employee_id perm_name args} {
     #| Configure employee permissions
     #| Usage: perm_set employee_id perm_name ?method? ?method?
     set methods [string toupper $args]
-    db_trans {
-        db_dml {
-            delete from employee_perm
-            where employee_id=:employee_id 
-            and perm_id in (
-                            select
-                            perm_id
-                            from perm
-                            join perm_class using (perm_class_id)
-                            where perm_name=:perm_name
-                            )
-        }
-    
-        db_dml {
-            insert into employee_perm (employee_id, perm_id)
-            select :employee_id, perm_id
-            from perm 
-            join perm_class using(perm_class_id)
-            where perm_name=:perm_name
-            and [qc::sql_where_in method $methods false]
-        }
+    db_dml {
+        -- Revoke any existing permissions on perm_name
+        delete from employee_perm
+        where employee_id=:employee_id 
+        and perm_id in (
+                        select
+                        perm_id
+                        from perm
+                        join perm_class using (perm_class_id)
+                        where perm_name=:perm_name
+                        );
+        
+        -- Grant the specified method permissions on perm_name
+        insert into employee_perm (employee_id, perm_id)
+        select :employee_id, perm_id
+        from perm 
+        join perm_class using(perm_class_id)
+        where perm_name=:perm_name
+        and [qc::sql_where_in method $methods false];
     }
 }
 
@@ -98,9 +96,6 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
 	uplevel 1 $else_code
     }
 }
-
-
-
 
 proc qc::perm_get { perm_name property } {
     # Deprecate
