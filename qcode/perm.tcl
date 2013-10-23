@@ -31,7 +31,7 @@ proc perm_set {employee_id perm_name args} {
 proc qc::perm_test_employee { employee_id perm_name method } {
     #| Test whether the user can perform $method on $perm_name
     #| Returns boolean
-    set method [string toupper $method]
+    set method [upper $method]
     db_0or1row {
         select 
         perm_id
@@ -60,7 +60,7 @@ proc qc::perm { perm_name method } {
     #| Throws an error and sets a global ldict errorList on failure.
     if { ! [perm_test $perm_name $method] } {
         global errorList
-        set errorList [list [dict create perm_name $perm_name method $method]]
+        set errorList [list [dict create perm_name $perm_name method [upper $method]]]
 	error "You do not have $method permission on $perm_name." {} PERM
     }
 }
@@ -78,7 +78,7 @@ proc qc::perms { body } {
             set perm_name [lindex [split $line " "] 0]
             set method [lindex [split $line " "] 1]
             if { ! [perm_test $perm_name $method] } {
-                lappend errorList [dict create perm_name $perm_name method $method]
+                lappend errorList [dict create perm_name $perm_name method [upper $method]]
                 lappend error_messages "You do not have $method permission on $perm_name."
             }
         }
