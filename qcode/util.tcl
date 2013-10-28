@@ -883,22 +883,29 @@ doc qc::debug {
 }
 
 proc qc::log {args} {
-    #| Write message to nsd log. If severity argument is not provided this defaults to "Notice". 
-    # Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
+    #| Write message to nsd log using App: prefix. 
+    # If severity argument is not provided this defaults to "Notice". 
     # Filter Message by masking anything that looks like a card number before writing to log file.
-    # Usage:
-    # TODO Aolserver only
-
+    # Usage: qc::log ?Severity? message
+    set list [list Debug Notice Error]
+      
     if { [llength $args]==1 } {
 	set severity Notice
 	set message [lindex $args 0]
     } elseif { [llength $args]==2 } {
 	set severity [lindex $args 0]
+        if { $severity ni $list } {
+            error "Severity must be one of \"$list\""
+        }
 	set message [lindex $args 1]
     } else {
 	error "Invalid args: usage log ?severity? message"
-    } 
-    ns_log $severity [qc::format_cc_masked_string $message]
+    }
+    # If not a defined log level turn it on.
+    if { "App:$severity" ni [ns_logctl severities] } {
+        ns_logctl severity App:$severity on
+    }
+    ns_log "App:$severity" [qc::format_cc_masked_string $message]
 }
 
 doc qc::log {

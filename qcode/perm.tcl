@@ -2,19 +2,65 @@ package provide qcode 2.0
 package require doc
 namespace eval qc {}
 
-proc qc::perm_get { perm_name property } {
-    #| Abstraction layer for accessing properties
-    set qry { select * from perm where perm_name=:perm_name }
-    db_cache_1row $qry
-    return [set $property]
+proc perm_set {employee_id perm_name args} {
+    #| Configure employee permissions
+    #| Usage: perm_set employee_id perm_name ?method? ?method?
+    set methods [string toupper $args]
+    db_dml {
+        -- Revoke any existing permissions on perm_name
+        delete from employee_perm
+        where employee_id=:employee_id 
+        and perm_id in (
+                        select
+                        perm_id
+                        from perm
+                        join perm_class using (perm_class_id)
+                        where perm_name=:perm_name
+                        );
+        
+        -- Grant the specified method permissions on perm_name
+        insert into employee_perm (employee_id, perm_id)
+        select :employee_id, perm_id
+        from perm 
+        join perm_class using(perm_class_id)
+        where perm_name=:perm_name
+        and [qc::sql_where_in method $methods false];
+    }
+}
+
+proc qc::perm_test_employee { employee_id perm_name method } {
+    #| Test whether the user can perform $method on $perm_name
+    #| Returns boolean
+    set method [upper $method]
+    db_0or1row {
+        select 
+        perm_id
+        from employee_perm
+        join perm using(perm_id)
+        join perm_class using(perm_class_id)
+        where 
+        employee_id=:employee_id
+        and perm_name=:perm_name
+        and method=:method        
+    } {
+        return false
+    } {
+        return true
+    }
+}
+
+proc qc::perm_test { perm_name method } {
+    #| Test whether the current user can perform $method on $perm_name
+    #| Returns boolean
+    return [qc::perm_test_employee [qc::auth] $perm_name $method]
 }
 
 proc qc::perm { perm_name method } {
     #| Test whether the current user can perform $method on $perm_name
     #| Throws an error and sets a global ldict errorList on failure.
-    if { [string is false [perm_test $perm_name $method]] } {
+    if { ! [perm_test $perm_name $method] } {
         global errorList
-        set errorList [list [dict create perm_name $perm_name method $method]]
+        set errorList [list [dict create perm_name $perm_name method [upper $method]]]
 	error "You do not have $method permission on $perm_name." {} PERM
     }
 }
@@ -31,8 +77,8 @@ proc qc::perms { body } {
         if {$line ne ""} {
             set perm_name [lindex [split $line " "] 0]
             set method [lindex [split $line " "] 1]
-            if { [string is false [perm_test $perm_name $method]] } {
-                lappend errorList [dict create perm_name $perm_name method $method]
+            if { ! [perm_test $perm_name $method] } {
+                lappend errorList [dict create perm_name $perm_name method [upper $method]]
                 lappend error_messages "You do not have $method permission on $perm_name."
             }
         }
@@ -40,15 +86,6 @@ proc qc::perms { body } {
     if { $errorList ne {} } {
         error [html_list $error_messages] {} PERM
     }
-}
-
-proc qc::perm_test { perm_name method } {
-    #| Test whether the current user can perform $method on $perm_name
-    #| Returns boolean
-    set m [perm_method_abbrev $method]
-    set employee_id [qc::auth]
-    set perm_string [perm_get $perm_name perm_string]
-    return [perm_string_test $employee_id $m $perm_string]
 }
 
 proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
@@ -60,15 +97,18 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
     }
 }
 
-proc qc::perm_test_employee { employee_id perm_name method } {
-    #| Test whether the user can perform $method on $perm_name
-    #| Returns boolean
-    set m [perm_method_abbrev $method]
-    set perm_string [perm_get $perm_name perm_string]
-    return [perm_string_test $employee_id $m $perm_string]
+proc qc::perm_get { perm_name property } {
+    # Deprecate
+    # TODO
+    #| Abstraction layer for accessing properties
+    set qry { select * from perm where perm_name=:perm_name }
+    db_cache_1row $qry
+    return [set $property]
 }
 
 proc qc::perm_string_test { employee_id m perm_string } {
+    # Deprecate
+    # TODO
     #| tests for method $m using all parties listed in $parties
     #| against the list of permissions in $perm_list
     #| return boolean 1 when permission is granted
@@ -80,6 +120,8 @@ proc qc::perm_string_test { employee_id m perm_string } {
 }
 
 proc qc::perm_method_abbrev { method } {
+    # Deprecate
+    # TODO
     #| Return the single letter abbreviation for $method
     switch -glob -- $method {
 	append { return a }
@@ -90,6 +132,8 @@ proc qc::perm_method_abbrev { method } {
 }
 
 proc qc::perm_method_long { m } {
+    # Deprecate
+    # TODO
     #| Return long name for single letter abbreviation
     switch $m {
 	a { return create }
@@ -100,6 +144,8 @@ proc qc::perm_method_long { m } {
 }
 
 proc qc::perm_method_description { m } {
+    # DEPRECATE
+    # TODO
     #| Return a simple description of the method
     switch $m {
 	a { return Create }
@@ -110,6 +156,8 @@ proc qc::perm_method_description { m } {
 }
 
 proc qc::perm_string_add { perm_string employee_id m } {
+    # DEPRECATE
+    # TODO
     #| Add method $m for $employee_id to $perm_string
     #| and return new perm_string
     if { [dict exists $perm_string $employee_id] } {
@@ -125,6 +173,8 @@ proc qc::perm_string_add { perm_string employee_id m } {
 }
 
 proc qc::perm_string_remove { perm_string employee_id m } {
+    # DEPRECATE
+    # TODO
     #| Remove method $m for $employee_id to $perm_string
     #| and return new perm_string
     if { [dict exists $perm_string $employee_id] } {
@@ -142,6 +192,8 @@ proc qc::perm_string_remove { perm_string employee_id m } {
 }
 
 proc qc::perm_list_employees { perm_name method } {
+    # DEPRECATE
+    # TODO
     #| List all employee_ids (excluding charlie root) who have $method permission on $perm_name
     set perm_string [perm_get $perm_name perm_string]
     set m [perm_method_abbrev $method]

@@ -4,7 +4,6 @@ namespace eval qc {}
 
 proc qc::error_handler { } {
     #| Return custom error responses depending value of errorCode.
-    
     set suffix [file extension [ns_conn url]]
     global errorMessage errorList errorInfo errorCode
     switch -glob -- $errorCode {
@@ -38,6 +37,9 @@ proc qc::error_handler { } {
 	    } else {
 		return2client code 401 html "Authentication Failed:$errorMessage"
 	    }
+        }
+        NOT_FOUND* {
+            return2client code 404 html "Not Found:$errorMessage"
         }
 	default {
 	    log Error $errorInfo
