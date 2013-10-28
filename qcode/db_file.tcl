@@ -57,6 +57,10 @@ proc qc::db_file_thumbnailer {file_id {width ""} {height ""}} {
     }
     set mime_type [ns_guesstype $filename]
     set headers [ns_conn headers]
+
+    set outputheaders [ns_conn outputheaders]
+    ns_set put $outputheaders "Last-Modified" [format_timestamp_http [cast_epoch $file_created]]
+
     if { [ns_set find $headers If-Modified-Since]!=-1 } {
 	set if_modified_since [ns_set iget $headers If-Modified-Since]
     }   
@@ -117,11 +121,6 @@ proc qc::db_file_thumbnailer {file_id {width ""} {height ""}} {
                 puts $id [base64::decode $base64]
                 close $id
                 ns_returnfile 200 $mime_type $tmp_file
-                db_dml {
-                    update image_cache
-                    set last_accessed=now()
-                    where cache_id=:cache_id
-                }
                 file delete $tmp_file
             }
 	} else {
