@@ -1058,3 +1058,9 @@ doc qc::string2hex {
         \x48\x65\x6c\x6c\x6f\xc4\x80
     }
 }
+
+proc qc::not_null {var} {
+    #| Test if this variable exists and is not the empty string
+    upvar $var value
+    return [expr {[info exists value] && $value ne "" }]
+}
