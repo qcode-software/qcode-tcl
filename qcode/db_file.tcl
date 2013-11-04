@@ -63,7 +63,7 @@ proc qc::db_file_thumbnailer {file_id {width ""} {height ""}} {
 
     if { [ns_set find $headers If-Modified-Since]!=-1 } {
 	set if_modified_since [ns_set iget $headers If-Modified-Since]
-    }   
+    }
     if { $width ne "" && $height ne "" } {
 	set key "$file_id $width $height"
     } else {
@@ -85,7 +85,6 @@ proc qc::db_file_thumbnailer {file_id {width ""} {height ""}} {
 	if { $width ne "" && $height ne "" } {
             db_0or1row {
                 select
-                cache_id,
                 encode(data, 'base64') as base64
                 from image_cache
                 where file_id=:file_id
@@ -171,5 +170,64 @@ proc qc::plupload.html {name chunk chunks file} {
     } else {
 	nsv_set pluploads $user_id $dict
 	return ""
+    }
+}
+
+proc qc::db_file_thumbnail_data {file_id {width ""} {height ""}} {
+    #| Returns base64-encoded image resized to the given width and height
+    # Generated thumbnails are cached
+
+    if { ! [in [ns_cache_names] images] } {
+	ns_cache create images -size [expr 100*1024*1024] 
+    }
+    if { $width ne "" && $height ne "" } {
+	set key "$file_id $width $height"
+    } else {
+	set key $file_id
+    }
+    if { [ne [ns_cache names images $key] ""] } {
+	# NS Cache exists
+        return [base64::encode [ns_cache_get images $key]]
+    } else {
+        if { $width eq "" || $height eq "" } {
+            db_1row {
+                select encode(data,'base64') as base64
+                from file
+                where file_id=:file_id
+            }
+            return $base64
+        } else {
+            db_0or1row {
+                select encode(data, 'base64') as base64
+                from image_cache
+                where file_id=:file_id
+                and width=:width
+                and height=:height
+            } {
+                set tmp_file [qc::db_file_export $file_id]
+                set thumb /tmp/[uuid::uuid generate]
+                # Call imagemagick convert 
+                exec_proxy -timeout 10000 convert -thumbnail ${width}x${height} -strip -quality 75% $tmp_file $thumb
+                file delete $tmp_file
+                set id [open $thumb r]
+                fconfigure $id -translation binary
+                set data [read $id]
+                close $id
+                file delete $thumb
+                ns_cache set images $key $data
+                set base64 [base64::encode $data]
+                set cache_id [db_seq image_cache_id_seq]
+                db_dml {
+                    insert into image_cache
+                    (cache_id, file_id, width, height, data)
+                    values
+                    (:cache_id, :file_id, :width, :height, decode(:base64, 'base64'));
+                }
+                return $base64
+            } {
+                ns_cache set images $key [base64::decode $base64]
+                return $base64
+            }
+        }
     }
 }
