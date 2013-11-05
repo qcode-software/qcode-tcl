@@ -119,8 +119,8 @@ proc qc::db_cache_foreach { args } {
     global errorCode errorInfo
 
      # save special db variables
-    upcopy 1 db_nrows      saved_db_nrows
-    upcopy 1 db_row_number saved_db_row_number
+    qc::upcopy 1 db_nrows      saved_db_nrows
+    qc::upcopy 1 db_row_number saved_db_row_number
 
     if { [info exists ttl] } {
 	set table [db_cache_select_table -ttl $ttl $qry 1]

@@ -19,7 +19,7 @@ doc qc::format_commify {
 }
 
 proc qc::format_money { value } {
-    return [format_commify [round $value 2]]
+    return [format_commify [qc::round $value 2]]
 }
 
 doc qc::format_money {
@@ -307,20 +307,20 @@ doc qc::format_bool {
 
 proc qc::format_yesno { value } {
     #| Call format_bool with default Yes/No
-    return [format_bool $value Yes No]
+    return [qc::format_bool $value Yes No]
 }
 
 proc qc::format_number {args} {
     #| format a number
     args $args -dp ? -sigfigs ? -commify yes -- value
     if { [info exists sigfigs] } {
-	set value [sigfigs $value $sigfigs]
+	set value [qc::sigfigs $value $sigfigs]
     }
     if { [info exists dp] } {
-	set value [round $value $dp]
+	set value [qc::round $value $dp]
     }
     if { [true $commify] } {
-	set value [format_commify $value]
+	set value [qc::format_commify $value]
     } 
     return $value
 }
@@ -330,10 +330,10 @@ proc qc::format_if_number {args} {
     args $args -dp ? -sigfigs ? -zeros yes -commify yes -- value
     if { [is_decimal $value] } {
 	if { [info exists sigfigs] && [is_integer $sigfigs]} {
-	    set value [sigfigs $value $sigfigs]
+	    set value [qc::sigfigs $value $sigfigs]
 	}
 	if { [info exists dp] && [is_integer $dp] } {
-	    set value [round $value $dp]
+	    set value [qc::round $value $dp]
 	}
 	if { !$zeros && $value==0 } {
 	    set value ""

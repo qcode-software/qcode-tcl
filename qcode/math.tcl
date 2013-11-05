@@ -269,7 +269,7 @@ proc qc::exp2string { number } {
     }
     set exp [string range $number [add $k 1] end]
     lassign [intplaces $mantissa] int places
-    set exp [subtr $exp $places]
+    set exp [expr {$exp - $places}]
     if { $exp > 0 } {
 	return $sign[append int [string repeat 0 $exp]]
     } else {
@@ -388,12 +388,12 @@ doc qc::mantissa_exponent {
 proc qc::sigfigs {x n} {
     #| Returns x to n significant figures
     if { $x==0 } { return 0 }
-    lassign [mantissa_exponent $x] m e
+    lassign [qc::mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]
     if { $n-$e-1>0 } {
-	return [round [expr {round(double($x)/$p)*$p}] [expr {$n-$e-1}]]
+	return [qc::round [expr {round(double($x)/$p)*$p}] [expr {$n-$e-1}]]
     } else {
-	return [round [expr {round(double($x)/$p)*$p}] 0]
+	return [qc::round [expr {round(double($x)/$p)*$p}] 0]
     }
 }
 
@@ -419,12 +419,12 @@ doc qc::sigfigs {
 proc qc::sigfigs_ceil {x n} {
     #| Returns x to n significant figures rounding up
     if { $x==0 } { return 0 }
-    lassign [mantissa_exponent $x] m e
+    lassign [qc::mantissa_exponent $x] m e
     set p [expr {pow(10,$e-$n+1)}]
     if { $n-$e-1>0 } {
-	return [round [expr {ceil(double($x)/$p)*$p}] [expr {$n-$e-1}]]
+	return [qc::round [expr {ceil(double($x)/$p)*$p}] [expr {$n-$e-1}]]
     } else {
-	return [round [expr {ceil(double($x)/$p)*$p}] 0]
+	return [qc::round [expr {ceil(double($x)/$p)*$p}] 0]
     }
 }
 

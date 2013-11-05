@@ -65,6 +65,13 @@ proc qc::check {args} {
 	    lappend TYPES CREDITCARD
 	    set allow_creditcards yes
 	    continue
+	} elseif {[info commands "::qc::is_$type"] ne ""} {
+	    lappend TYPES $TYPE
+	    set n [llength [info args "::qc::is_$type"]]
+	    if {$n>1} {
+		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
+		incr index [expr {$n-1}]
+	    }
 	} elseif {[info commands is_$type] ne ""} {
 	    lappend TYPES $TYPE
 	    set n [llength [info args is_$type]]
@@ -106,7 +113,15 @@ proc qc::check {args} {
 	# Try to cast to the type specified if a proc exists
 	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
 	    # Implied cast
-	    qc::try {set varValue [cast_decimal $varValue]}
+	    qc::try {set varValue [qc::cast_decimal $varValue]}
+	} elseif { [info commands "::qc::cast_$type"] ne "" } {
+	    qc::try {
+		if { [info exists type_args($TYPE)] } {
+		    set varValue ["qc::cast_$type" $varValue {*}$type_args($TYPE)]
+		} else {
+		    set varValue ["qc::cast_$type" $varValue]
+		}
+	    }
 	} elseif { [info commands cast_$type] ne "" } {
 	    qc::try {
 		if { [info exists type_args($TYPE)] } {
@@ -117,9 +132,13 @@ proc qc::check {args} {
 	    }
 	}
 	# Check
-	if {!([info exists type_args($TYPE)] && [is_$type $varValue {*}$type_args($TYPE)])
+	if {!([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] && [qc::is_$type $varValue {*}$type_args($TYPE)])
 	    && 
-	    !(![info exists type_args($TYPE)] && [is_$type $varValue])} {
+	    !(![info exists type_args($TYPE)] && [info commands "::qc::is_$type"] && [qc::is_$type $varValue])
+            &&
+            !([info exists type_args($TYPE)] && ![info commands "::qc::is_$type"] && [is_$type $varValue {*}$type_args($TYPE)])
+	    && 
+	    !(![info exists type_args($TYPE)] && ![info commands "::qc::is_$type"] && [is_$type $varValue])} {
 	    # Failed
 	    if { [info commands not_$type] ne "" } { 
 		if { [info exists type_args($TYPE)] } {

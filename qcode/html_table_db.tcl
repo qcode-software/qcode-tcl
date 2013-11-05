@@ -4,7 +4,7 @@ namespace eval qc {}
 
 proc qc::html_table_db {args} {
     # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL
-    set varNames [args2vars $args]
+    set varNames [qc::args2vars $args]
  
     if { [info exists data] && ![info exists tbody] } {
 	set tbody [qc::html_table_tbody_from_ldict $data $cols]
@@ -73,7 +73,7 @@ proc qc::html_table_db {args} {
 
 proc qc::html_table_db_flexgrid {args} {
     # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL sortable
-    set varNames [args2vars $args]
+    set varNames [qc::args2vars $args]
     if { [info exists rowHeight] } {
         append html "<style type=\"text/css\">table.db-flex-grid tr { height:${rowHeight}px;vertical-align:top}</style>"
     }

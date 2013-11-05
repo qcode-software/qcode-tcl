@@ -428,7 +428,7 @@ doc qc::is_int_castable {
 
 proc qc::is_decimal_castable {string} {
     qc::try {
-	cast_decimal $string
+	qc::cast_decimal $string
 	return true
     } {
 	return false

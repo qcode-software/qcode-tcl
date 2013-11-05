@@ -4,7 +4,7 @@ namespace eval qc {}
 proc qc::html_table_scroll {args} {
     # varNames can be one of
     # cols tbody tfoot height
-    set varNames [args2vars $args]
+    set varNames [qc::args2vars $args]
 
     default height 600
 

@@ -197,8 +197,8 @@ proc qc::sql_where_compare { args } {
 	    set sql_name $name
 	    set var_name $name
 	}
-	upcopy 1 $var_name value
-	upcopy 1 "${var_name}_op" operator
+	qc::upcopy 1 $var_name value
+	qc::upcopy 1 "${var_name}_op" operator
 	if { [info exists value] && [info exists operator] && [ne $value ""] } {
 	    # check operator
 	    if { ![in [list < = > <> <= >=] $operator] } { error "Unknown operator $operator" }

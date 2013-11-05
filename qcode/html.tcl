@@ -212,7 +212,7 @@ doc qc::html_a_replace {
 proc qc::html_id { name {value UNDEF}} {
     #| Wrap value in span tag and give it an ID
     if {[string equal $value UNDEF]} {
-	upcopy 1 $name value
+	qc::upcopy 1 $name value
     }
     default value ""
     return [html span $value id $name]

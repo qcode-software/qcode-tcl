@@ -5,7 +5,7 @@ namespace eval qc {}
 proc qc::return2client { args } {
     #| Return data to http client
     # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
-    set arg_names [args2vars $args]
+    set arg_names [qc::args2vars $args]
     if { [info exists html] } {
 	default content-type "text/html; charset=utf-8"
 	set var html

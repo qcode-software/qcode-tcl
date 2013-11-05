@@ -2,7 +2,7 @@ package provide qcode 2.0
 package require doc
 namespace eval qc {}
 proc qc::html_table_sort {args} {
-    args2vars $args
+    qc::args2vars $args
     default id tScroll
     default height 600
 

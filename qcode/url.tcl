@@ -117,7 +117,7 @@ proc qc::url_back { url args } {
     foreach name $args {
 	set value($name) [upset 1 $name]
     }
-    set value(next_url) [url_here]
+    set value(next_url) [qc::url_here]
     return [url $url {*}[array get value]]
 }
 

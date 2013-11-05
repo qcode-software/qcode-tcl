@@ -88,7 +88,7 @@ doc qc::format_timestamp {
 
 proc qc::format_timestamp_rel_age {timestamp} {
     #| Return the approximate relative age of a timestamp
-    set days [date_days $timestamp now]
+    set days [qc::date_days $timestamp now]
     if { $days == 0 } {
         return "today"
     }

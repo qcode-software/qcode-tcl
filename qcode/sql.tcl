@@ -179,7 +179,7 @@ proc qc::sql_sort { args } {
             # -limit option was used and limit is already set
         } elseif { [uplevel 1 {info exists limit}] } {
             #limit is set in callers namespace
-            upcopy 1 limit limit
+            qc::upcopy 1 limit limit
         } else {
             #it's not set anywhere - use a default
             set limit 100

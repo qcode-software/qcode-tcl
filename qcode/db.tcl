@@ -613,8 +613,8 @@ proc qc::db_foreach {args} {
     global errorCode errorInfo
 
      # save special db variables
-    upcopy 1 db_nrows      saved_db_nrows
-    upcopy 1 db_row_number saved_db_row_number
+    qc::upcopy 1 db_nrows      saved_db_nrows
+    qc::upcopy 1 db_row_number saved_db_row_number
 
     set table [db_select_table -db $db $qry 1] 
     set db_nrows [expr {[llength $table]-1}]

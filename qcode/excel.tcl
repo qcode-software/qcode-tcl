@@ -10,7 +10,7 @@ proc qc::excel_file_create {args} {
     # column_meta: nested dict, eg. {1 {class "foo" width 20} 5 {width 50}}
     # row_meta: nested dict, eg. {0 {class "bar" height 20} 3 {class "foo"}}
     # cell_meta: nested dict, eg. {{5 2} {class "baz" type "string|number|formula|url"} {1 1} {class "bar"}}
-    args2vars $args data formats column_meta row_meta cell_meta timeout
+    qc::args2vars $args data formats column_meta row_meta cell_meta timeout
     default data {}
     default formats {}
     default column_meta {}
@@ -18,7 +18,7 @@ proc qc::excel_file_create {args} {
     default cell_meta {}
     default timeout 1000
 
-    set filename [file_temp ""]
+    set filename [qc::file_temp ""]
     ########################################
     # Template
     ########################################
@@ -168,10 +168,10 @@ proc qc::excel_file_create {args} {
     set formats [qc::excel_formats $formats]
 
     # Colum meta-data - a dict of dicts becomes a hash of hashes
-    set column_meta [ddict2perl_hhash $column_meta]
+    set column_meta [qc::ddict2perl_hhash $column_meta]
 
     # Row meta-data - a dict of dicts becomes a hash of hashes
-    set row_meta [ddict2perl_hhash $row_meta]
+    set row_meta [qc::ddict2perl_hhash $row_meta]
 
     # Cell meta-data - a dict of dicts with lists for keys becomes a hash of hashes of hashes
     set cell_meta [cell_meta2perl $cell_meta]
@@ -191,7 +191,7 @@ proc qc::excel_file_create {args} {
     ########################################
     # Script execution
     ########################################
-    set script_filename [file_temp $script]
+    set script_filename [qc::file_temp $script]
     qc::try {
         log Debug $script_filename
         exec_proxy -timeout $timeout perl $script_filename

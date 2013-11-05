@@ -16,7 +16,7 @@ proc qc::auth {} {
 	return $current_employee_id
     }
     # Try session based auth
-    if { [cookie_exists session_id] } {
+    if { [qc::cookie_exists session_id] } {
 	set session_id [cookie_get session_id]
 	if { [qc::session_exists $session_id] } {
 	    qc::session_update $session_id
@@ -43,7 +43,7 @@ proc qc::auth_check {} {
     #| Check if we can authenticate the employee
     #| Return true or false
     # session based auth
-    if { [cookie_exists session_id]} {
+    if { [qc::cookie_exists session_id]} {
 	set session_id [cookie_get session_id]
 	if { [qc::session_exists $session_id] } {
 	    return true

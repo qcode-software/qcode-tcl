@@ -142,7 +142,7 @@ doc qc::html_table {
 }
 
 proc qc::html_table { args } {
-    set argnames [args2vars $args]
+    set argnames [qc::args2vars $args]
     # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable
     # Some col keys have special meaning :- label class format thClass tfoot sum
 
@@ -522,7 +522,7 @@ proc qc::html_table_format {table cols} {
 		money* {default dp 2;default commify yes}
 		integer* {default dp 0;default commify yes}
 		number* {default commify yes}
-		bool* {default format format_bool}
+		bool* {default format "qc::format_bool"}
 		perct {default percentage yes;default commify yes}
 	    }
 	}
@@ -571,10 +571,10 @@ proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage}
 	    set value [expr {$value*100}]
 	}
 	if { [info exists sigfigs] && [is_integer $sigfigs]} {
-	    set value [sigfigs $value $sigfigs]
+	    set value [qc::sigfigs $value $sigfigs]
 	}
 	if { [info exists dp] && [is_integer $dp] } {
-	    set value [round $value $dp]
+	    set value [qc::round $value $dp]
 	}
 	if { !$zeros && $value==0 } {
 	    set value ""
@@ -619,13 +619,13 @@ proc qc::page_html_table { args } {
 	if { $menu ne "" } {
 	    append menu " &nbsp;|&nbsp; "
 	}
-	append menu [qc::html_a_replace "Previous Page [expr {$offset-$limit+1}]...[expr {$offset}]" [url [url_here] offset [expr {$offset-$limit}]]]
+	append menu [qc::html_a_replace "Previous Page [expr {$offset-$limit+1}]...[expr {$offset}]" [url [qc::url_here] offset [expr {$offset-$limit}]]]
     }
     if { $count == $limit } {
 	if { $menu ne "" } {
 	    append menu " &nbsp;|&nbsp; "
 	}
-	append menu [qc::html_a_replace "Next Page [expr {$offset+$limit+1}]...[expr {$offset+2*$limit}]" [url [url_here] offset [expr {$offset+$limit}]]]
+	append menu [qc::html_a_replace "Next Page [expr {$offset+$limit+1}]...[expr {$offset+2*$limit}]" [url [qc::url_here] offset [expr {$offset+$limit}]]]
     }
 
     set html "

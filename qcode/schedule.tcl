@@ -17,7 +17,7 @@ proc qc::schedule {args} {
 	lappend switches -thread
     }
 
-    if { ![schedule_exists $proc_name] } {
+    if { ![qc::schedule_exists $proc_name] } {
 	switch -regexp -nocase -matchvar match -- $schedule {
 	    {^([0-9]+ +(seconds?|minutes?|hours?)($| +))+} {
 		set interval 0
@@ -33,16 +33,16 @@ proc qc::schedule {args} {
 		ns_schedule_proc {*}$switches $interval $proc_name {*}$args
 	    }
 	    {^([0-9]{1,2}):([0-9]{2})$} {
-		set hour [cast_int [lindex $match 1]]
-		set minute [cast_int [lindex $match 2]]
+		set hour [qc::cast_int [lindex $match 1]]
+		set minute [qc::cast_int [lindex $match 2]]
 		ns_schedule_daily {*}$switches $hour $minute $proc_name {*}$args
 	    }
 	    {^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) +([0-9]{1,2}):([0-9]{2})$} {
 		set day [lindex $match 1]
 		set dow_map {Sunday 0 Monday 1 Tuesday 2 Wednesday 3 Thursday 4 Friday 5 Saturday 6} 
 		set dow [string map -nocase $dow_map $day]
-		set hour [cast_int [lindex $match 2]]
-		set minute [cast_int [lindex $match 3]]
+		set hour [qc::cast_int [lindex $match 2]]
+		set minute [qc::cast_int [lindex $match 3]]
 		ns_schedule_weekly {*}$switches $dow $hour $minute $proc_name {*}$args
 	    }
 	    default {

@@ -40,7 +40,7 @@ proc qc::ofc_piechart {args} {
     
     # default colours
     set no_of_elements [llength $data]
-    set colors [list array {*}[ofc_colors $no_of_elements]]
+    set colors [list array {*}[qc::ofc_colors $no_of_elements]]
 
     # construct tson that will be used to generate json loaded by ofc. 
     set tson [list object \
@@ -121,7 +121,7 @@ proc qc::ofc_linechart {args} {
 	set id graph[incr0 ofc_id 1]
     }
 
-    set colors [ofc_colors]
+    set colors [qc::ofc_colors]
 
     # find min and max over all lines
     lappend min_values 0
@@ -131,7 +131,7 @@ proc qc::ofc_linechart {args} {
     foreach line $lines {
  	dict2vars $line label color data 
 	set number_of_points [llength $data]
-	default color [lshift colors]
+	default color [qc::lshift colors]
 	
 	lassign [ofc_line_element $label $color $data] tson x_labels min max 
 	lappend elements $tson
@@ -353,7 +353,7 @@ proc qc::ofc_barchart {args} {
 	set id graph[incr0 ofc_id 1]
     }
 
-    set colors [ofc_colors]
+    set colors [qc::ofc_colors]
     
     # find min and max over all bars
     lappend max_values 0
@@ -547,7 +547,7 @@ proc qc::ofc_bar2tson {colors data} {
     foreach datum $data {
 	dict2vars $datum label y tooltip
 	default tooltip "$label<br>#val# of #total#"
-	lappend tson_keys [list object text [list string $label] colour [lshift colors] font-size 13]
+	lappend tson_keys [list object text [list string $label] colour [qc::lshift colors] font-size 13]
 	lappend y_values [list object val $y tip [list string $tooltip]]
 	if { $y > 0 } {
 	    set pos_total [add $pos_total $y]
@@ -569,7 +569,7 @@ proc qc::ofc_step {min max} {
 	return 1 
     } else {
 	set step [expr {double(abs($max - $min)) /10}]
-	return [sigfigs_ceil $step 1] 
+	return [qc::sigfigs_ceil $step 1] 
     }
 }
 

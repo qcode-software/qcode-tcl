@@ -134,14 +134,14 @@ proc qc::tson2xml { tson } {
 	object {
 	    set list {}
 	    foreach {name value} [lrange $tson 1 end] {
-		lappend list <$name>[tson2xml $value]</$name>
+		lappend list <$name>[qc::tson2xml $value]</$name>
 	    }
 	    return [join $list "\n"]
 	}
 	array {
 	    set list {}
 	    foreach value [lrange $tson 1 end] {
-		lappend list <item>[tson2xml $value]</item>
+		lappend list <item>[qc::tson2xml $value]</item>
 	    }
 	    return [join $list ""]
 	}

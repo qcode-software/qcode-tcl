@@ -11,7 +11,7 @@ doc qc::email {
 }
 
 proc qc::email_send {args} {
-    set argnames [args2vars $args]
+    set argnames [qc::args2vars $args]
     # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?attachment? ?attachments? ?filename? ?filenames?
 
     #| attachments is a list of dicts
@@ -524,8 +524,8 @@ proc qc::email_support { args } {
     # Masking any card numbers before sending.
     # Usage: email_support subject $subject ?html $html? ?text $text?
 
-    args2vars $args subject html text
-    if { [param_exists hostname] } {
+    qc::args2vars $args subject html text
+    if { [qc::param_exists hostname] } {
         set hostname [param hostname]
     } else {
         set hostname [ns_info hostname]

@@ -165,7 +165,7 @@ proc qc::form_proc { proc_name } {
 	}
     }
     if { [eq [lindex [info args $proc_name] end] args] } {
-	lappend largs [form2dict {*}[lexclude [ns_set_keys [ns_getform]] {*}[info args $proc_name]]]
+	lappend largs [qc::form2dict {*}[lexclude [ns_set_keys [ns_getform]] {*}[info args $proc_name]]]
     }
     return [uplevel 0 $proc_name $largs]
 }

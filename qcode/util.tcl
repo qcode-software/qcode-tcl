@@ -349,7 +349,7 @@ proc qc::margin { cost price {dec_places 1} } {
     if { $price==0 } {
 	return ""
     } else {
-	return [round [expr {double($price-$cost)/$price*100}] $dec_places]
+	return [qc::round [expr {double($price-$cost)/$price*100}] $dec_places]
     }
 }
 
@@ -587,7 +587,7 @@ doc qc::mcsplit {
 
 proc qc::perct {x n {p 1}} {
     # TODO unused
-    return [round [expr {double($x)/$n*100}] $p]
+    return [qc::round [expr {double($x)/$n*100}] $p]
 }
 
 

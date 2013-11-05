@@ -140,7 +140,7 @@ proc qc::form_layout_tbody { args } {
 	}
 	if { ![info exists this(value)]} {
 	    # check caller variable for value
-	    upcopy $level $this(name) value
+	    qc::upcopy $level $this(name) value
 	    if { [info exists value] } {
 		set this(value) $value
 	    } else {
@@ -180,7 +180,7 @@ proc qc::form_layout_list {conf} {
 	default this(label) Unknown
 	default this(type) text
 	if { ![info exists this(value)]} {
-	    upcopy $level $this(name) value
+	    qc::upcopy $level $this(name) value
 	    if { [info exists value] } {
 		set this(value) $value
 	    } else {

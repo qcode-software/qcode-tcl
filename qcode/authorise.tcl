@@ -10,9 +10,9 @@ doc authorisation {
 proc qc::authorise_token_create {args} {
     #| Create an authorisation token for this url
     # TODO change referrer to source
-    args2vars $args expires employee_id referrer target 
+    qc::args2vars $args expires employee_id referrer target 
     default expires "24 hours"
-    default referrer [conn_url]
+    default referrer [qc::conn_url]
     if { ! [info exist employee_id] } {
         set employee_id [auth]
     }
@@ -59,7 +59,7 @@ proc qc::authorise_token {} {
         set referrer [url_root [ns_set get [ns_conn headers] Referer]]
     }
 
-    set target [conn_url]
+    set target [qc::conn_url]
    
     set qry {
         select 

@@ -19,7 +19,7 @@ proc qc::barcode128 {string} {
 		# Start char for 128 B has value 104 
 		lappend data [barcode_charcode_html 204] 104
 	    }
-	    set data [concat $data [barcode128partB $partB]]
+	    set data [concat $data [qc::barcode128partB $partB]]
 	} elseif {[regexp {^(([0-9]{0,3}[^0-9]+)+)(.*)$} $string -> partB . string]} {
 	    # e.g. 123A
 	    if { [llength $data] } {

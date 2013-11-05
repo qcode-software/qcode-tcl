@@ -26,7 +26,7 @@ doc qc::date_month_start {
 
 proc qc::date_month_end {date} {
     #| Return the date on the last day of the month for the date given
-    return [cast_date "[date_month_start $date] +1 month -1 day"]
+    return [cast_date "[qc::date_month_start $date] +1 month -1 day"]
 }
 
 doc qc::date_month_end {
@@ -113,7 +113,7 @@ doc qc::date_year_iso_end {
 
 proc qc::date_iso_year { date } {
     #| Return the ISO year.
-    return [cast_integer [clock format [cast_epoch $date] -format "%G"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%G"]]
 }
 
 doc qc::date_iso_year {
@@ -163,7 +163,7 @@ doc qc:::date_iso_week_end {
 
 proc qc::date_iso_week { date } {
     #| Return the ISO week number.
-    return [cast_integer [clock format [cast_epoch $date] -format "%V"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%V"]]
 }
 
 doc qc:::date_iso_week {
@@ -212,9 +212,9 @@ doc qc:::date_tomorrow {
 proc qc::date_month { date } {
     #| Return the month number.
     if { [regexp {^(\d{4})-(\d{2})-(\d{2})$} $date -> year month day] } {
-        return [cast_integer $month]
+        return [qc::cast_integer $month]
     }
-    return [cast_integer [clock format [cast_epoch $date] -format "%m"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%m"]]
 }
 
 doc qc::date_month {
@@ -230,7 +230,7 @@ doc qc::date_month {
 
 proc qc::date_doy { date } {
     #| Return the day of year number.
-    return [cast_integer [clock format [cast_epoch $date] -format "%j"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%j"]]
 }
 
 doc qc::date_doy {
@@ -267,9 +267,9 @@ doc qc::date_year {
 proc qc::date_dom { date } {
     #| Return the day of the month.
     if { [regexp {^(\d{4})-(\d{2})-(\d{2})$} $date -> year month day] } {
-        return [cast_integer $day]
+        return [qc::cast_integer $day]
     }
-    return [cast_integer [clock format [cast_epoch $date] -format "%d"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%d"]]
 }
 
 doc qc::date_dom {
@@ -285,7 +285,7 @@ doc qc::date_dom {
 
 proc qc::date_dow { date } {
     #| Return the day of the week.
-    return [cast_integer [clock format [cast_epoch $date] -format "%u"]]
+    return [qc::cast_integer [clock format [cast_epoch $date] -format "%u"]]
 }
 
 doc qc::date_dow {
@@ -392,7 +392,7 @@ doc qc::date_compare {
 
 proc qc::date_quarter {date} {
     #| Return the quarter the date is in
-    return [cast_int [expr {ceil(double([date_month $date])/3)}]]
+    return [qc::cast_int [expr {ceil(double([date_month $date])/3)}]]
 }
 
 doc qc::date_quarter {
@@ -406,7 +406,7 @@ doc qc::date_quarter {
 proc qc::date_quarter_start {date} {
     #| Return the date at the beginning of the quarter
     set year  [date_year $date]
-    set month [cast_int [expr {ceil(double([date_month $date])/3)*3-2}]]
+    set month [qc::cast_int [expr {ceil(double([date_month $date])/3)*3-2}]]
     return [cast_date "$year-$month-01"]
 }
 
@@ -565,7 +565,7 @@ doc qc::year_quarters {
 
 proc qc::time_hour { datetime } {
     #| Return the hour
-    return [cast_integer [clock format [cast_epoch $datetime] -format "%H"]]
+    return [qc::cast_integer [clock format [cast_epoch $datetime] -format "%H"]]
 }
 
 doc qc::time_hour {
