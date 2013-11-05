@@ -343,7 +343,7 @@ proc qc::s3 { args } {
                     global s3_timeout
                     set s3_timeout($upload_id) false
                     set timeout_ms [expr {($file_size/10240)*1000}]
-                    set max_attempts 10
+                    set max_attempt 10
                     log Debug "Timeout set as $timeout_ms ms"
                     set id [after $timeout_ms [list set s3_timeout($upload_id) true]]
                     set num_parts [expr {round(ceil($file_size/double($part_size)))}]
@@ -361,7 +361,7 @@ proc qc::s3 { args } {
 
                         set success false 
                         set attempt 1
-                        while { !$s3_timeout($upload_id) && !$success && $attempt <= $max_attempts } {
+                        while { !$s3_timeout($upload_id) && $attempt<=$max_attempt && !$success } {
                             try {
                                 set response [qc::s3_put -header 1 -nochecksum -infile $tempfile $bucket ${remote_path}?partNumber=${part_index}&uploadId=$upload_id]
                                 set success true
@@ -370,7 +370,7 @@ proc qc::s3 { args } {
                                 incr attempt
                             }
                         }
-                        if { $s3_timeout($upload_id) } { 
+                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } { 
                             #TODO should we abort or leave for potential recovery later?
                             try {
                                 qc::s3 upload abort $bucket $remote_path $upload_id
