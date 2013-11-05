@@ -149,8 +149,8 @@ proc qc::s3_put { args } {
         lappend headers Transfer-Encoding {}
         lappend headers Expect {}
         # Have timeout values roughly in proportion to the filesize
-        # In this case allowing 100,000 bytes per second
-        set timeout [expr {$data_size/100000}]
+        # In this case allowing 10 KB/s
+        set timeout [expr {$data_size/10240}]
         return [qc::http_put -header $header -headers $headers -timeout $timeout -infile $infile [s3_url $bucket]$path]
     } elseif { [info exists s3_copy] } {
         # we're copying a S3 file - skip the data processing and send the PUT request with x-amz-copy-source header
@@ -255,7 +255,7 @@ proc qc::s3 { args } {
         }
         put {
             # usage: s3 put bucket local_path {remote_filename}
-            # 5GB limit
+            # 5MB limit
             if { [llength $args] < 3 || [llength $args] > 4 } {
                 error "Wrong number of arguments. Usage: qc::s3 put mybucket local_filename {remote_filename}"
             } elseif { [llength $args] == 3 } {
@@ -339,10 +339,11 @@ proc qc::s3 { args } {
                     set part_index 1
                     set etag_dict [dict create]
                     set file_size [file size $local_path]
-                    # Timeout - allow 10240 B/s
+                    # Timeout - allow 10 KB/s
                     global s3_timeout
                     set s3_timeout($upload_id) false
                     set timeout_ms [expr {($file_size/10240)*1000}]
+                    set max_attempts 10
                     log Debug "Timeout set as $timeout_ms ms"
                     set id [after $timeout_ms [list set s3_timeout($upload_id) true]]
                     set num_parts [expr {round(ceil($file_size/double($part_size)))}]
@@ -360,13 +361,12 @@ proc qc::s3 { args } {
 
                         set success false 
                         set attempt 1
-                        while { !$s3_timeout($upload_id) && !$success } {
+                        while { !$s3_timeout($upload_id) && !$success && $attempt <= $max_attempts } {
                             try {
                                 set response [qc::s3_put -header 1 -nochecksum -infile $tempfile $bucket ${remote_path}?partNumber=${part_index}&uploadId=$upload_id]
                                 set success true
                             } {
                                 log Debug "Failed - retrying part $part_index of ${num_parts}... "
-                                after [expr {int(pow(2,$attempt)-1)}]
                                 incr attempt
                             }
                         }
