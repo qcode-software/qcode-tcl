@@ -135,6 +135,7 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
         return [base64::encode [ns_cache_get images $key]]
     } else {
         if { $max_width eq "" || $max_height eq "" } {
+            # Return the original file
             db_1row {
                 select encode(data,'base64') as base64
                 from file
@@ -142,6 +143,7 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
             }
             return $base64
         } else {
+            # Check image_cache table
             db_0or1row {
                 select encode(data, 'base64') as base64
                 from image_cache
@@ -156,9 +158,11 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
                       )
                      )
             } {
+                # Create the thumbnail and cache
                 db_file_thumbnail_cache_create $file_id $max_width $max_height
                 return [base64::encode [ns_cache_get images $key]]
             } {
+                # Store result in ns_cache
                 ns_cache set images $key [base64::decode $base64]
                 return $base64
             }
@@ -166,7 +170,7 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
     }
 }
 
-proc db_file_thumbnail_dimensions {file_id {max_width ""} {max_height ""}} {
+proc qc::db_file_thumbnail_dimensions {file_id {max_width ""} {max_height ""}} {
     #| Return the actual width and height (as [list $width $height]) of an image thumbnail,
     #| based on the file_id, max_width and max_height
     # Creates a cached thumbnail if it doesn't already exist.
@@ -194,7 +198,7 @@ proc db_file_thumbnail_dimensions {file_id {max_width ""} {max_height ""}} {
     return [list $width $height]
 }
 
-proc db_file_thumbnail_cache_create {file_id max_width max_height} {
+proc qc::db_file_thumbnail_cache_create {file_id max_width max_height} {
     #| Create a cached thumbnail of an image, return the cache_id
     # ONLY WORKS ON JPEGS AND PNGS -
     # TO DO - SUPPORT FOR OTHER IMAGE FORMATS
