@@ -3,11 +3,10 @@ eval ::tcltest::configure $argv
 # Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
-namespace import qc::*
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
-
+    namespace path ::qc
 
     test html-1.0 {html simple } -setup {
     } -body {

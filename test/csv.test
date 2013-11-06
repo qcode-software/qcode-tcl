@@ -3,11 +3,10 @@ eval ::tcltest::configure $argv
 # Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
-namespace import qc::*
 
 namespace eval ::qcode::test {
-
     namespace import ::tcltest::*
+    namespace path ::qc
 
     test csv2ll-1.00 {csv2ll success} -setup {
         set csv {"one","two","three"

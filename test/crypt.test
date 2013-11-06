@@ -4,10 +4,10 @@ eval ::tcltest::configure $argv
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
 package require Pgtcl
-namespace import qc::*
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
+    namespace path ::qc
     testConstraint requires_database true
 
     # The test user configuration.

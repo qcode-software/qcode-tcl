@@ -4,11 +4,10 @@ eval ::tcltest::configure $argv
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
 package require json
-namespace import qc::*
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
-
+    namespace path ::qc
     
     test http_encoding-1.0 {http_encoding xml } -setup {
     } -body {

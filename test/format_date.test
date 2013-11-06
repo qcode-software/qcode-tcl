@@ -3,10 +3,10 @@ eval ::tcltest::configure $argv
 # Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
 set auto_path [linsert $auto_path 0 ./qcode]
 package require qcode
-namespace import qc::*
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
+    namespace path ::qc
 
     test format_date-1.0 {format_date long form} {format_date "23rd June 2008"} "2008&#8209;06&#8209;23"
     test format_date-1.1 {format_date slashes} {format_date "23/06/08"} "2008&#8209;06&#8209;23"
