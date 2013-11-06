@@ -421,7 +421,6 @@ proc qc::html_style2inline {html style} {
 	}
 	set nodes [$doc selectNodes $xpath]
 
-
 	foreach node $nodes {
 	    if { [$node hasAttribute style] } {
 		$node setAttribute style [style_set [$node getAttribute style] {*}$styles]

@@ -863,15 +863,16 @@ doc qc::.. {
 }
 
 proc qc::debug {message} {
-    #| Write message to nsd log if Debugging is switched on.
+    #| If running in naviserver and debugging is switched on then write message to nsd log.
+    #| Otherwise write message to stdout.
     #| Filter message by masking anything that looks like a card number.
-    # TODO Aolserver only
-    ns_log Debug [qc::format_cc_masked_string $message]
+    log Debug [qc::format_cc_masked_string $message]
 }
 
 doc qc::debug {
     Description {
-        Write message to nsd log if Debugging is switched on.
+        If running in naviserver and debugging is switched on then write message to nsd log.
+        Otherwise write message to stdout.
         Filter message by masking anything that looks like a card number.
     }
     Usage {
@@ -883,12 +884,14 @@ doc qc::debug {
 }
 
 proc qc::log {args} {
-    #| Write message to nsd log using App: prefix. 
-    # If severity argument is not provided this defaults to "Notice". 
-    # Filter Message by masking anything that looks like a card number before writing to log file.
-    # Usage: qc::log ?Severity? message
+    #| If running in naviserver then write message to nsd log using App: prefix. 
+    #| Otherwise write message to stout or stderr.
+    #| Default severity argument to "Notice". 
+    #| Filter message by masking anything that looks like a card number.
+    #| Usage: qc::log ?Severity? message
+    
+    # Parse args
     set list [list Debug Notice Error]
-      
     if { [llength $args]==1 } {
 	set severity Notice
 	set message [lindex $args 0]
@@ -900,19 +903,35 @@ proc qc::log {args} {
 	set message [lindex $args 1]
     } else {
 	error "Invalid args: usage log ?severity? message"
-    }
-    # If not a defined log level turn it on.
-    if { "App:$severity" ni [ns_logctl severities] } {
-        ns_logctl severity App:$severity on
-    }
-    ns_log "App:$severity" [qc::format_cc_masked_string $message]
+    }    
+    
+    # Mask anything in message that looks like a card number 
+    set message [qc::format_cc_masked_string $message]
+
+    # Output message
+    if { [info commands ns_log] eq "ns_log" } {
+        # Write to naviserver's nsd log
+        if { "App:$severity" ni [ns_logctl severities] } {
+            # turn on this log level.
+            ns_logctl severity App:$severity on
+        }
+        ns_log "App:$severity" $message
+    } elseif { $severity eq "Error" } {
+        # Write to stderr
+        puts stderr $message
+    } else {
+        # Write to stdout
+        puts stdout  $message
+    }   
 }
 
 doc qc::log {
     Description {
-        Write message to nsd log. If severity argument is not provided this defaults to "Notice". 
-        Valid severity values: Notice, Warning, Error, Fatal, Bug, Debug, Dev or an Integer value.
-        Filter Message by masking anything that looks like a card number before writing to log file.
+        If running in naviserver then write message to nsd log using App: prefix. 
+        Otherwise write message to stout or stderr.
+        Default severity argument to "Notice". 
+        Filter message by masking anything that looks like a card number.
+        Usage: qc::log ?Severity? message
     }
     Usage {
         qc::log ?severity? message

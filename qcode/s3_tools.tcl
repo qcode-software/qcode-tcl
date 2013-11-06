@@ -8,7 +8,6 @@ namespace eval qc {}
 
 proc qc::s3_url {bucket} {
     set base s3.amazonaws.com
-    #set base s3-external-3.amazonaws.com
     if { $bucket eq ""} {
         return $base
     } else {
@@ -150,8 +149,8 @@ proc qc::s3_put { args } {
         lappend headers Transfer-Encoding {}
         lappend headers Expect {}
         # Have timeout values roughly in proportion to the filesize
-        # In this case allowing 100,000 bytes per second
-        set timeout [expr {$data_size/100000}]
+        # In this case allowing 10 KB/s
+        set timeout [expr {$data_size/10240}]
         return [qc::http_put -header $header -headers $headers -timeout $timeout -infile $infile [s3_url $bucket]$path]
     } elseif { [info exists s3_copy] } {
         # we're copying a S3 file - skip the data processing and send the PUT request with x-amz-copy-source header
@@ -233,10 +232,10 @@ proc qc::s3 { args } {
             if { [dict exists $head_dict x-amz-meta-content-md5] } {
                 set base64_md5 [dict get $head_dict x-amz-meta-content-md5]
             }
-            set file_size [dict get [qc::s3 head $bucket $remote_filename] Content-Length]
+            set file_size [dict get $head_dict Content-Length]
             # set timeout - allow 1Mb/s
             set timeout_secs [expr {max( (${file_size}*8)/1000000 , 60)} ]
-            puts "Timeout set at $timeout_secs seconds"
+            log Debug "Timeout set at $timeout_secs seconds"
             qc::s3_save -timeout $timeout_secs $bucket $remote_filename $local_filename
             if { [info exists base64_md5] } {
                 # Check the base64 md5 of the downloaded file matches what we put in the x-amz-meta-content-md5 metadata on upload
@@ -256,7 +255,7 @@ proc qc::s3 { args } {
         }
         put {
             # usage: s3 put bucket local_path {remote_filename}
-            # 5GB limit
+            # 5MB limit
             if { [llength $args] < 3 || [llength $args] > 4 } {
                 error "Wrong number of arguments. Usage: qc::s3 put mybucket local_filename {remote_filename}"
             } elseif { [llength $args] == 3 } {
@@ -292,8 +291,8 @@ proc qc::s3 { args } {
                     set content_md5 [qc::s3_base64_md5 -file $local_file]
                     set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_post -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket ${remote_file}?uploads] {/ns:InitiateMultipartUploadResult}]]
                     set upload_id [dict get $upload_dict UploadId]
-                    puts "Upload init for $remote_file to $bucket."
-                    puts "Upload_id: $upload_id"
+                    log Debug "Upload init for $remote_file to $bucket."
+                    log Debug "Upload_id: $upload_id"
                     return $upload_id
                 }
                 abort {
@@ -328,7 +327,7 @@ proc qc::s3 { args } {
                         lappend xml "<Part>[qc::xml_from PartNumber ETag]</Part>"
                     }
                     lappend xml {</CompleteMultipartUpload>}
-                    puts "Completing Upload to $remote_path in $bucket."
+                    log Debug "Completing Upload to $remote_path in $bucket."
                     return [qc::s3_post $bucket ${remote_path}?uploadId=$upload_id [join $xml \n]]
                 }
                 send {
@@ -337,15 +336,15 @@ proc qc::s3 { args } {
                     lassign $args -> -> bucket local_path remote_path upload_id
                     # bytes
                     set part_size [expr {1024*1024*5}]
-                    set retries 3
                     set part_index 1
                     set etag_dict [dict create]
                     set file_size [file size $local_path]
-                    # Timeout - allow 10240 B/s
+                    # Timeout - allow 10 KB/s
                     global s3_timeout
                     set s3_timeout($upload_id) false
                     set timeout_ms [expr {($file_size/10240)*1000}]
-                    puts "Timeout set as $timeout_ms ms"
+                    set max_attempt 10
+                    log Debug "Timeout set as $timeout_ms ms"
                     set id [after $timeout_ms [list set s3_timeout($upload_id) true]]
                     set num_parts [expr {round(ceil($file_size/double($part_size)))}]
                     set fh [open $local_path r]
@@ -356,23 +355,22 @@ proc qc::s3 { args } {
                         set tempfile [::fileutil::tempfile]
                         set tempfh [open $tempfile w]
                         fconfigure $tempfh -translation binary
-                        puts "Uploading ${local_path}: Sending part $part_index of $num_parts"
+                        log Debug "Uploading ${local_path}: Sending part $part_index of $num_parts"
                         puts -nonewline $tempfh [read $fh $part_size]
                         close $tempfh
 
                         set success false 
                         set attempt 1
-                        while { !$s3_timeout($upload_id) && !$success } {
+                        while { !$s3_timeout($upload_id) && $attempt<=$max_attempt && !$success } {
                             try {
                                 set response [qc::s3_put -header 1 -nochecksum -infile $tempfile $bucket ${remote_path}?partNumber=${part_index}&uploadId=$upload_id]
                                 set success true
                             } {
-                                puts stderr "Failed - retrying part $part_index of ${num_parts}... "
-                                after [expr {int(pow(2,$attempt)-1)}]
+                                log Debug "Failed - retrying part $part_index of ${num_parts}... "
                                 incr attempt
                             }
                         }
-                        if { $s3_timeout($upload_id) } { 
+                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } { 
                             #TODO should we abort or leave for potential recovery later?
                             try {
                                 qc::s3 upload abort $bucket $remote_path $upload_id
