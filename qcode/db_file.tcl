@@ -144,27 +144,36 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
             return $base64
         } else {
             # Check image_cache table
-            db_0or1row {
-                select encode(data, 'base64') as base64
-                from image_cache
-                where file_id=:file_id
-                and (
-                     (
-                      width=:max_width and height<=:max_height
-                      )
-                     or
-                     (
-                      width<=:max_width and height=:max_height
-                      )
-                     )
-            } {
-                # Create the thumbnail and cache
-                db_file_thumbnail_cache_create $file_id $max_width $max_height
-                return [base64::encode [ns_cache_get images $key]]
-            } {
-                # Store result in ns_cache
-                ns_cache set images $key [base64::decode $base64]
-                return $base64
+            db_trans {
+                # Lock file record to prevent duplicate cache creation
+                db_1row {
+                    select file_id
+                    from file
+                    where file_id=:file_id
+                    for update
+                }
+                db_0or1row {
+                    select encode(data, 'base64') as base64
+                    from image_cache
+                    where file_id=:file_id
+                    and (
+                         (
+                          width=:max_width and height<=:max_height
+                          )
+                         or
+                         (
+                          width<=:max_width and height=:max_height
+                          )
+                         )
+                } {
+                    # Create the thumbnail and cache
+                    db_file_thumbnail_cache_create $file_id $max_width $max_height
+                    return [base64::encode [ns_cache_get images $key]]
+                } {
+                    # Store result in ns_cache
+                    ns_cache set images $key [base64::decode $base64]
+                    return $base64
+                }
             }
         }
     }
@@ -174,25 +183,34 @@ proc qc::db_file_thumbnail_dimensions {file_id {max_width ""} {max_height ""}} {
     #| Return the actual width and height (as [list $width $height]) of an image thumbnail,
     #| based on the file_id, max_width and max_height
     # Creates a cached thumbnail if it doesn't already exist.
-    db_0or1row {
-        select width, height
-        from image_cache
-        where file_id=:file_id
-        and (
-             (
-              width=:max_width and height<=:max_height
-              )
-             or
-             (
-              width<=:max_width and height=:max_height
-              )
-             )
-    } {
-        set cache_id [db_file_thumbnail_cache_create $file_id $max_width $max_height]
+    db_trans {
+        # Lock file record to prevent duplicate cache creation
         db_1row {
+            select file_id
+            from file
+            where file_id=:file_id
+            for update
+        }
+        db_0or1row {
             select width, height
             from image_cache
-            where cache_id=:cache_id
+            where file_id=:file_id
+            and (
+                 (
+                  width=:max_width and height<=:max_height
+                  )
+                 or
+                 (
+                  width<=:max_width and height=:max_height
+                  )
+                 )
+        } {
+            set cache_id [db_file_thumbnail_cache_create $file_id $max_width $max_height]
+            db_1row {
+                select width, height
+                from image_cache
+                where cache_id=:cache_id
+            }
         }
     }
     return [list $width $height]
