@@ -86,7 +86,11 @@ proc qc::email_send {args} {
     if { [info exists html] } {
         # HTML with text alternative
         set alternative_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
-            
+        if { [string first "data:image/" $html]!=-1 } {
+            # Embedded image data
+            lassign [qc::email_html_embedded_images2attachments $html] html generated_attachments
+            lappend related_attachments {*}$generated_attachments
+        }
         set mime_body [qc::email_mime_html_alternative $html $alternative_boundary]
         set mime_headers [list Content-Type "multipart/alternative; boundary=\"$alternative_boundary\""]
     } else {
@@ -1176,4 +1180,24 @@ proc qc::qp_encode {string {encoded_word 0} {no_softbreak 0}} {
     }
 
     return $result
+}
+
+proc qc::email_html_embedded_images2attachments {html} {
+    #| Converts embedded images in the given html string to attachments
+    # Returns the html with image src cids, and an ldict of attachments
+    set attachments {}
+    dom parse -html $html doc
+    set nodes [$doc selectNodes "//img\[starts-with(@src,'data:image/')\]"]
+    
+    foreach node $nodes {
+        set src [$node getAttribute src]
+        regexp {^data:image/([a-z]+);base64,(.*)$} $src -> file_type base64
+        set filename [uuid::uuid generate].${file_type}
+        set cid ${filename}@[clock seconds]
+        lappend attachments [dict create encoding base64 data $base64 filename $filename cid $cid]
+        $node setAttribute src "cid:${cid}"
+    }
+    set html [$doc asHTML]
+    $doc delete
+    return [list $html $attachments]
 }
