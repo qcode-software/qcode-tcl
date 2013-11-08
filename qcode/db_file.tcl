@@ -36,7 +36,7 @@ proc qc::db_file_export {args} {
 
     default tmp_file /tmp/[uuid::uuid generate]
     db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
-    set id [open $tmp_file a+]
+    set id [open $tmp_file w]
     fconfigure $id -translation binary
     puts $id [base64::decode $base64]
     close $id
@@ -67,7 +67,7 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     } else { 
         set base64 [qc::db_file_thumbnail_data $file_id $max_width $max_height]
 	set tmp_file /tmp/[uuid::uuid generate]
-	set id [open $tmp_file a+]
+	set id [open $tmp_file w]
 	fconfigure $id -translation binary
         puts $id [base64::decode $base64]
         close $id
@@ -179,7 +179,7 @@ proc qc::db_file_thumbnail_data {file_id {max_width ""} {max_height ""}} {
     }
 }
 
-proc qc::db_file_thumbnail_dimensions {file_id {max_width ""} {max_height ""}} {
+proc qc::db_file_thumbnail_dimensions {file_id max_width max_height} {
     #| Return the actual width and height (as [list $width $height]) of an image thumbnail,
     #| based on the file_id, max_width and max_height
     # Creates a cached thumbnail if it doesn't already exist.
