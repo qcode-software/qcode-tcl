@@ -152,9 +152,13 @@ proc qc::conn_ie {} {
     }
     set header_set [ns_conn headers]
     set ui_string [ns_set get $header_set "User-Agent"]
-    if [regexp {[\s;]MSIE\s([1-9][0-9]*)\.[0-9]+[bB]?;} $ui_string -> version] {
-	return true
+    if { [regexp {[\s;]MSIE\s([1-9][0-9]*)\.[0-9]+[bB]?;} $ui_string] } {
+        # MSIE token only specified for IE < 11
+    	return true
+    } elseif { [regexp {Trident/[1-9][0-9]*\.[0-9]+} $ui_string] } {
+        # Trident layout engine for IE >= 9
+        return true
     } else {
-	return false
+        return false
     }
 }
