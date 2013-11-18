@@ -407,7 +407,7 @@ proc qc::excel_format {format} {
     return $attribute_dict
 }
 
-proc cell_meta2perl {cell_meta} {
+proc qc::cell_meta2perl {cell_meta} {
     #| Converts excel cell meta data from a nested dict to a perl hash of hashes
     set cell_meta_nested {}
     dict for {indices cell} $cell_meta {

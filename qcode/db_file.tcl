@@ -9,13 +9,13 @@ doc qc::db_file {
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
-    args $args -employee_id ? -mime_type ? -filename ? -- tmp_file
+    args $args -employee_id ? -mime_type ? -filename ? -- file_path
 
     default employee_id [auth]
-    default filename [file tail $tmp_file]
-    default mime_type [mime_type_guess [file tail $tmp_file]]
+    default filename [file tail $file_path]
+    default mime_type [mime_type_guess [file tail $file_path]]
    
-    set id [open $tmp_file r]
+    set id [open $file_path r]
     fconfigure $id -translation binary
     set data [base64::encode [read $id]]
     close $id
@@ -28,7 +28,6 @@ proc qc::db_file_insert {args} {
 	(:file_id,:employee_id,:filename,decode(:data, 'base64'))
     }
     db_dml $qry
-    file delete $tmp_file
     return $file_id
 }
 

@@ -149,7 +149,6 @@ namespace eval ::qcode::test {
         foreach {name value} {
             args {}
             files {}
-            form {foo Apples bar Oranges}
             json null
             url http://httpbin.org/post
             data {}
@@ -158,6 +157,15 @@ namespace eval ::qcode::test {
                 return false
             }
         }
+        foreach {name value} {
+            foo Apples
+            bar Oranges
+        } {
+            if { [dict get [dict get $dict form] $name] ne $value } {
+                return false
+            }
+        }
+
         set headers [dict get $dict headers]
         if { [lsort [dict keys $headers]] ne {Accept Connection Content-Length Content-Type Host} } {
             return false

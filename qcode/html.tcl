@@ -5,17 +5,38 @@ namespace eval qc {
 }
 
 proc qc::html2pdf { args } {
-    # usage html2pdf ?-encoding encoding? ?-timeout timeout? html
+    # | Looks for wkhtmltopdf binary to generate PDF.
+    # | If not found, use the URL specified by param pdfserver.
+    # | Currently v0.9.9 of wkhtmltopdf is supported.
+    # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? html
     args $args -encoding base64 -timeout 20 html
     if { ![in {base64 binary} $encoding] } {
         error "HTML2PDF: Unknown encoding $encoding"
     }
-
-    set url [param pdfserver]
-
-    set pdfDoc [qc::http_post -timeout $timeout -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
-
-    return $pdfDoc
+  
+    auto_reset
+    if { [auto_execok wkhtmltopdf] eq "" } {
+        # No binary found, send job to html2pdf server
+        set url [param pdfserver]
+        set pdf [qc::http_post -timeout $timeout -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
+        return $pdf
+    } else {
+        # The binary is present so use it.
+        set wkhtmltopdf [qc::which wkhtmltopdf]
+        package require fileutil
+        set filename [fileutil::tempfile]
+        set fh [open $filename r]
+        fconfigure $fh -translation binary
+        qc::exec_proxy -timeout [expr {$timeout * 1000}] << $html $wkhtmltopdf --page-size A4 --encoding UTF-8 --print-media-type -q - $filename
+        set pdf [read $fh]
+        close $fh
+        file delete $filename
+        if { $encoding eq "base64" } {
+            return [::base64::encode $pdf]
+        } else {
+            return $pdf
+        }
+    }
 }
 
 doc qc::html2pdf {
