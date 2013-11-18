@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export sitcky_* sticky2vars
+}
 
 proc qc::sticky_save {args} {
     #| Save form_vars for the given sticky_url or referrer

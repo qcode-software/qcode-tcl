@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export schedule schedule_id schedule_exists schedule_running schedule_stop schedule_start
+}
 
 proc qc::schedule {args} {
     #| Schedule proc for execution unless already scheduled. Start schedule if it is not already running.

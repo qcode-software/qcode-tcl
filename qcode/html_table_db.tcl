@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_db html_table_db_flexgrid
+}
 
 proc qc::html_table_db {args} {
     # cols tbody tfoot class height id initialFocus enabled addURL updateURL deleteURL dataURL

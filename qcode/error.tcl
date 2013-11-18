@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export error_handler error_report error_report_*
+}
 
 proc qc::error_handler { } {
     #| Return custom error responses depending value of errorCode.

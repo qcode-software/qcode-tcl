@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export perl_quote list2perl_array dict2perl_hash llist2perl_aaray ddict2perl_hhash
+}
 
 proc qc::perl_quote {value} {
     #| Quote a value for use as a perl scalar

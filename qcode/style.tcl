@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export style_set css_parse css_rule2dict
+}
+
 proc qc::style_set {rule args} {
     # example 
     # > qc::style_set "color:pink;font-weight:bold;" color green

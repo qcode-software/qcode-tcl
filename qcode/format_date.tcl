@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export format_date format_date_*
+}
 
 proc qc::format_date { date } {
     #| Format a date for the user

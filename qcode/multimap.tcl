@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export multimap_*
+}
 
 proc qc::multimap_get_first {args} {
     #| Return the value for the first matching key

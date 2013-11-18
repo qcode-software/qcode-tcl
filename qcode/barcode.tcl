@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export qc *
+    namespace export barcode128 barcode128partB barcode128partC barcode_charcode barcode_charcode_html
 }
 
 proc qc::barcode128 {string} {

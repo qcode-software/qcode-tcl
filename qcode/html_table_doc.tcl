@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_doc
+}
 
 proc qc::html_table_doc {args} {
     #| Create a 2 row table with labels on the first row and values on the 2nd row.

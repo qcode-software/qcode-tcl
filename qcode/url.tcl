@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export url url_*
+}
 
 proc qc::url { url args } {
     #| Take an url with or without url encoded vars and insert or replace vars based on 

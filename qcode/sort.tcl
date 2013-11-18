@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export sortcols_* sortcols2dict
+}
 
 proc qc::sortcols_push { sortCols colname {sortorder ASC} } {
     #| take a list of [colname1 order colname2 order ...]

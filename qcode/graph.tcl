@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export chart_*
+}
+
 proc qc::chart_sales {x_labels values tips key_text} {
     set y_max [sigfigs_ceil [max {*}$values] 2]
     set x_labels [chart_list2csv $x_labels]

@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export password_hash password_complexity_ok password_complexity_check
+}
 
 proc qc::password_hash { password {strength 7} } {
     #| Returns a salted password hash using blowfish with an iteration count of $strength

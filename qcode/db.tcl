@@ -1,7 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
-
+namespace eval qc {
+    namespace export db_*
+}
 
 doc qc::db {
     Title "Database API"

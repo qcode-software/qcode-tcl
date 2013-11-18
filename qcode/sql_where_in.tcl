@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export sql_where_in sql_where_in_not
+}
+
 proc qc::sql_where_in {column list {default false} } {
     # Construct part of a SQL WHERE clause using the IN construct.
     # SQL will test column against list of values.

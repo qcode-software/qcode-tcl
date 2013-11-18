@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export perm_set perm_test_employee perm_test perm perms perm_if
+}
 
 proc qc::perm_set {employee_id perm_name args} {
     #| Configure employee permissions

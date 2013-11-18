@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export ll_sum ll2csv
+}
 
 proc qc::ll_sum { llVar index } {
     #| Traverses a list of lists and returns the sum of values at $index in each list

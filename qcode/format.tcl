@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export format_*
+}
 
 proc qc::format_commify {number} {
     #| Commify number into groups of three 2314 -> 2,314

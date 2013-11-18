@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export qc *
+    namespace export barcode_eacn13 barcode_ean13_check_digit
 }
 
 proc qc::barcode_ean13 {number_to_encode} {

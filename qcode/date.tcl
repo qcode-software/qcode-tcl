@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export date_* dates years iso_year_iso_weeks year_months year_quarters time_hour
+}
 
 doc date {
     Title "Date Handling"

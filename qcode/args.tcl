@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export args2dict args2vars args_check_required args_definition_split args_split args
+}
 
 doc Args {
     Title "Argument Passing in TCL"

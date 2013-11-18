@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export email_* smtp_send smtp_recv sendmail email2multimap mime_type_guess qp_encode
+}
 package require mime
 package require base64 
 package require uuid

@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export table2ldict table2array table_sum
+}
 
 doc table {
     Title {Table Data Structure}

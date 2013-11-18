@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_sort html_table_sort_header
+}
+
 proc qc::html_table_sort {args} {
     qc::args2vars $args
     default id tScroll

@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export ldict_*
+}
 
 proc qc::ldict_set {ldictVar index key value} {
     #| Takes a list of dicts and sets the value for $key in the dict at $index

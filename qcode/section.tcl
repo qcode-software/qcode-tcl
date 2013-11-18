@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export section section_menu
+}
+
 proc qc::section {conf section default_url {section_var section}} {
     set html [qc::section_menu $conf $section $default_url $section_var]
     foreach dict $conf {
