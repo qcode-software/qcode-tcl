@@ -1,8 +1,9 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export param param_exists param_set
+    namespace export param_exists param_set param_get
 }
+namespace eval qc::param {}
 
 proc qc::param_get { param_name } {
     #| Return param value.
@@ -18,20 +19,11 @@ proc qc::param_get { param_name } {
         }
     } 
 
-    # Check for a muppet datastore
-    #
-    # Load the datastore if it exists
-    if { ![info exists ::qc::param::db] && [file exists /var/db/muppet] } {
-        # Read the datastore
-        set fh [open /var/db/muppet r]
-        array set ::qc::param::db [read -nonewline $fh]
-        close $fh
-    }
+    qc::param_datastore_load
     # Check the datastore
     if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
         return $::qc::param::db($param_name)
     }
-    
     # Check for naviserver params
     if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
         # Aolserver param
@@ -40,7 +32,6 @@ proc qc::param_get { param_name } {
     # I give up
     error "I don't know how to find param $param_name"
 }
-
 
 proc qc::param_exists { param_name } {
     #| Check for param existence.
@@ -53,13 +44,9 @@ proc qc::param_exists { param_name } {
 	    return true
         }
     }
-    if { ![info exists ::qc::param::db] && [file exists /var/db/muppet]} {
-        # read param db from disk
-        set fh [open /var/db/muppet r]
-        array set ::qc::param::db [read -nonewline $fh]
-        close $fh
-    } 
-    if { [info exists ::qc::param::db] && [qc::in [array names $::qc::param::db] $param_name] } {
+
+    qc::param_datastore_load
+    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
         return true
     }
     if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
@@ -90,19 +77,28 @@ proc qc::param_set { param_name param_value } {
             db_dml { update param set param_value=:param_value where param_name=:param_name }
         }
     } else {
-        # Load the datastore if it exists and isn't already in memory
-        if { ![info exists ::qc::param::db] && [file exists /var/db/muppet] } {
-            # Read the datastore
-            set fh [open /var/db/muppet r]
-            array set ::qc::param::db [read -nonewline $fh]
-            close $fh
-        }
+        # Attempt to use datastore
+        qc::param_datastore_load
         # Set the datastore
         array set ::qc::param::db [list $param_name $param_value]
-        # Write to disk
+        # Create dir in case this is first time we've run
+        file mkdir /var/db
+        # Write to datastore
         set fh [open /var/db/muppet w]
-        puts -nonewline $fh [array get $::qc::param::db]
+        puts -nonewline $fh [array get ::qc::param::db]
+        close $fh
+        file attributes /var/db/muppet -permissions 0600
+    }
+
+    return $param_value
+}
+
+proc qc::param_datastore_load {} {
+    #| Load the datastore if it exists and isn't already in memory and is readable
+    if { ![info exists ::qc::param::db] && [file exists /var/db/muppet] && [file readable /var/db/muppet]} {
+        # Read the datastore
+        set fh [open /var/db/muppet r]
+        array set ::qc::param::db [read -nonewline $fh]
         close $fh
     }
-    return $param_value
 }
