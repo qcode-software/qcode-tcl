@@ -176,7 +176,7 @@ proc qc::excel_file_create {args} {
     set row_meta [qc::ddict2perl_hhash $row_meta]
 
     # Cell meta-data - a dict of dicts with lists for keys becomes a hash of hashes of hashes
-    set cell_meta [cell_meta2perl $cell_meta]
+    set cell_meta [qc::cell_meta2perl $cell_meta]
 
 
     ########################################

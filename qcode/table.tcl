@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export table2ldict table2array table_sum
+    namespace export table_foreach table2ldict table2array table_sum
 }
 
 doc table {
