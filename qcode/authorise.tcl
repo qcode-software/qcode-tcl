@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export authorise_token_create authorise_token
+}
 
 doc authorisation {
     Title Authorisation

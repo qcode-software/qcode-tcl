@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_list
+}
 
 proc qc::html_table_list {args} {
     # DEPRECATED - only used in mla. This file to be deleted. 

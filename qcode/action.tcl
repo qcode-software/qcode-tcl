@@ -1,5 +1,8 @@
 package provide qcode 2.0
-namespace eval qc {}
+namespace eval qc {
+    namespace export action action_print action_print_page action_menu
+}
+
 proc qc::action { description url {actionKey ""} } {
     if { [eq "" $actionKey] } {
 	return [html_a $description $url class action onclick "return actionConfirm(this)"]

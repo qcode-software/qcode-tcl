@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export socket_*
+}
 
 proc qc::socket_open {host port timeout} {
     #| Open a TCP socket with timeout

@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_paged
+}
 
 proc qc::html_table_paged { args } {
     #| Split a table up into parts that fit on a printed page.

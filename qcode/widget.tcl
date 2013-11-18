@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export widget widget_*
+}
 
 proc qc::widget {args} {
     #| Look for a proc "widget_$type" to make the widget

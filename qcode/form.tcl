@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export form_var_* form2* form_proc
+}
 
 proc qc::form_var_names {} {
     #| Return a list of form variable names

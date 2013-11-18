@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export my
+}
 
 proc qc::my {args} {
     #| Multifunction proc to return information about the local OS.

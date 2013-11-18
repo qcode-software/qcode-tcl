@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table_scroll
+}
+
 proc qc::html_table_scroll {args} {
     # varNames can be one of
     # cols tbody tfoot height

@@ -4,7 +4,9 @@ package require md5
 package require base64
 package require tdom
 package require fileutil
-namespace eval qc {}
+namespace eval qc {
+    namespace export s3 s3_*
+}
 
 proc qc::s3_url {bucket} {
     set base s3.amazonaws.com

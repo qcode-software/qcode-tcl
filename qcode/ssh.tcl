@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export ssh scp ssh_call_proc
+}
 
 proc qc::ssh {args} {
     #| Execute an ssh command with some default options 

@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export ofc_*
+}
+
 ### chart.tcl ###
 
 # New Charts by Daniel Clark 

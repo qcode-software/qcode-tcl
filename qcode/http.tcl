@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export http_* IANAEncoding2TclEncoding
+}
 
 proc qc::http_curl {args} {
     #| This is a wrapper for TclCurl

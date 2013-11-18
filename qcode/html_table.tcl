@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_table html_table_row html_table_row_head html_table_colgroup html_thead_from_cols html_tfoot_sums html_wants_* html_cols_from_table html_tbody_* html_table_format html_table_format_* html_tbody_row page_html_table columns_show_hide_toolbar
+}
 
 doc qc::html_table {
     Usage {

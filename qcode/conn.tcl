@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export conn_*
+}
 
 proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection

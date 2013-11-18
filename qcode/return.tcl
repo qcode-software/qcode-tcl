@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export return2client return_*
+}
 
 proc qc::return2client { args } {
     #| Return data to http client

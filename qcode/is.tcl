@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export is_* contains_creditcard
+}
 
 proc qc::is_boolean {bool} {
     return [in {Y N YES NO TRUE FALSE T F 0 1} [upper $bool]]

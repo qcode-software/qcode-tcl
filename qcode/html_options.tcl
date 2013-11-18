@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export html_options_*
+}
 
 proc qc::html_options_db { qry } {
     #| Expects a qry use columns named "name" and "value"

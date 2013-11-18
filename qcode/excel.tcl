@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export excel_*
+}
 
 proc qc::excel_file_create {args} {
     #| Creates an xls file using the information provided

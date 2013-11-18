@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml
+}
 
 proc qc::tson_object { args } {
     #| Return a tson object from list of name value pairs in args

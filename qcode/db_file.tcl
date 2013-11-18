@@ -1,5 +1,7 @@
 package provide qcode 2.0
-namespace eval qc {}
+namespace eval qc {
+    namespace export db_file_* plupload
+}
 
 doc qc::db_file {
     Title {Database file storage}

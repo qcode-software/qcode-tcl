@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export session_*
+}
 
 package require uuid
 proc qc::session_new { employee_id } {

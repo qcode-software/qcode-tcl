@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export round round_up rshift10 intplaces add sum subtr mult exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
+}
 
 # Import Math functions
 namespace import ::tcl::mathfunc::max

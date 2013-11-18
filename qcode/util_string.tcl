@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export qc *
+    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
 }
 
 proc qc::upper { string } {

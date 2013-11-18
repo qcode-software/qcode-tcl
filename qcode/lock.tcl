@@ -1,6 +1,9 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export lock
+}
+
 proc qc::lock {lock_id timeout code} {
     #| Wait up to $timeout seconds to obtain a lock and then
     #| execute code 

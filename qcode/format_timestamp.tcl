@@ -1,6 +1,8 @@
 package provide qcode 2.0
 package require doc
-namespace eval qc {}
+namespace eval qc {
+    namespace export format_timestamp format_timestamp_* format_timestamp2hour
+}
 
 proc qc::format_timestamp_iso { string } {
     #| Format string as an ISO timestamp 
