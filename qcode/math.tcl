@@ -2,11 +2,11 @@ package provide qcode 2.0
 package require doc
 namespace eval qc {
     namespace export round round_up rshift10 intplaces add sum subtr mult exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
-}
 
-# Import Math functions
-namespace import ::tcl::mathfunc::max
-namespace import ::tcl::mathfunc::min
+    # Import Math functions
+    namespace import ::tcl::mathfunc::max
+    namespace import ::tcl::mathfunc::min
+}
 
 proc qc::round { value dec_places } {
     #| Perform rounding of $value to $dec_places places.
