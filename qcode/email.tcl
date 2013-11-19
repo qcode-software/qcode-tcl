@@ -532,12 +532,12 @@ proc qc::email_support { args } {
 
     qc::args2vars $args subject html text
     if { [qc::param_exists hostname] } {
-        set hostname [param hostname]
+        set hostname [qc::param_get hostname]
     } else {
         set hostname [ns_info hostname]
     }
     set email_args [list from "nsd@$hostname"]
-    lappend email_args to [param email_support]
+    lappend email_args to [qc::param_get email_support]
     lappend email_args subject [qc::format_cc_masked_string $subject]
     if { [info exists html] } {
 	lappend email_args html [qc::format_cc_masked_string $html]

@@ -17,7 +17,7 @@ proc qc::html2pdf { args } {
     auto_reset
     if { [auto_execok wkhtmltopdf] eq "" } {
         # No binary found, send job to html2pdf server
-        set url [param pdfserver]
+        set url [qc::param_get pdfserver]
         set pdf [qc::http_post -timeout $timeout -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
         return $pdf
     } else {
