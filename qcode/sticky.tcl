@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export sitcky_* sticky2vars
+    namespace export sticky_* sticky2vars
 }
 
 proc qc::sticky_save {args} {

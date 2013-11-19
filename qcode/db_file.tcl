@@ -1,6 +1,6 @@
 package provide qcode 2.0
 namespace eval qc {
-    namespace export db_file_* plupload
+    namespace export db_file_* plupload.html
 }
 
 doc qc::db_file {

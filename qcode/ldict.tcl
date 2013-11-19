@@ -1,7 +1,7 @@
 package provide qcode 2.0
 package require doc
 namespace eval qc {
-    namespace export ldict_*
+    namespace export ldict_* ldict2tbody
 }
 
 proc qc::ldict_set {ldictVar index key value} {
