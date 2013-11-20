@@ -14,6 +14,7 @@ proc write {filename string} {
     return $string
 }
 
+# Update all package provide statements in all *.tcl files in the tcl directory.
 set version [lindex $argv 0]
 set package_provide_text "package provide qcode $version"
 set reset_release_number false
@@ -33,7 +34,7 @@ foreach filename [glob -directory tcl -nocomplain *.tcl] {
         write $filename $modified_text
     }
 }
-
+# If changing to a new version reset the RELEASE number.
 if { $reset_release_number } {
     write RELEASE 0
 }
