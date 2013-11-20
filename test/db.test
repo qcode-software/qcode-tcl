@@ -1,7 +1,7 @@
 package require tcltest
 eval ::tcltest::configure $argv
-# Ensure package is loaded from ./qcode rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./qcode]
+# Ensure package is loaded from ./tcl rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./tcl]
 package require qcode
 package require Pgtcl
 

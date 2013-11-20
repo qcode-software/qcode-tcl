@@ -1,6 +1,6 @@
 NAME=qcode
 VERSION=2.0
-PACKAGEDIR=qcode
+PACKAGEDIR=tcl
 TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
 RELEASE=$(shell cat RELEASE)
@@ -19,6 +19,7 @@ test:
 	tclsh ./test_all.tcl -testdir $(TESTDIR)
 
 install:
+	./set-version-number.tcl ${VERSION}
 	./pkg_mkIndex $(PACKAGEDIR)
 	mkdir -p /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
 	cp $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)/
