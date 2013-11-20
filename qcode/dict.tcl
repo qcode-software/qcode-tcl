@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.01
 package require doc
 namespace eval qc {
     namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default

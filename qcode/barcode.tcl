@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.01
 package require doc
 namespace eval qc {
     namespace export barcode128 barcode128partB barcode128partC barcode_charcode barcode_charcode_html

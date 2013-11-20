@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.01
 package require doc
 namespace eval qc {
     namespace export sql_where_in sql_where_in_not

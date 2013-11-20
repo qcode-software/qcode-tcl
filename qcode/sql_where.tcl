@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.01
 package require doc
 namespace eval qc {
     namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
