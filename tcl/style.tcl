@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export style_set css_parse css_rule2dict
@@ -48,3 +48,4 @@ proc qc::css_rule2dict {rule} {
     set rule [string trim $rule ";"]
     set dict [split $rule ";:"]
 }
+

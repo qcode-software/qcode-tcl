@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export form_layout_*
@@ -226,3 +226,4 @@ doc qc::form_layout_list {
 </div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>
     }
 }
+

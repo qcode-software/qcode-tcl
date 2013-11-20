@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export return2client return_*
@@ -148,5 +148,6 @@ proc ns_returnmoved {url} {
   <P ALIGN=RIGHT><SMALL><I>[ns_info name]/[ns_info patchlevel] on [ns_conn location]</I></SMALL></P>
   </BODY></HTML>}]
 }
+
 
 

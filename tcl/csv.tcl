@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export csv2list csv2ll
@@ -80,4 +80,5 @@ two} three\", ,\"four ,} {2 3 4 {,
 } 9}
     }
 }
+
 

@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export schema_update
@@ -26,3 +26,4 @@ doc qc::schema_update {
 	
     }
 }
+

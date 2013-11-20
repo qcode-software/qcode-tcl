@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export check checks
@@ -248,4 +248,5 @@ doc qc::checks {
 	% 
     }
 }
+
 

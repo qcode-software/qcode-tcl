@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export barcode_ean13 barcode_ean13_check_digit
@@ -314,3 +314,4 @@ proc qc::barcode_ean13_check_digit { number } {
      }
   return $check
 }
+

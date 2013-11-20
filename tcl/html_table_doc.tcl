@@ -1,4 +1,4 @@
-package provide qcode 2.0
+package provide qcode 2.02
 package require doc
 namespace eval qc {
     namespace export html_table_doc
@@ -50,4 +50,5 @@ doc qc::html_table_doc {
 	</table>
     }
 }
+
 

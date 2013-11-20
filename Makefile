@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=2.0
+VERSION=2.02
 PACKAGEDIR=tcl
 TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
