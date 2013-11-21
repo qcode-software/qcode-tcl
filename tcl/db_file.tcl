@@ -11,7 +11,9 @@ proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
     args $args -employee_id ? -mime_type ? -filename ? -- file_path
 
-    default employee_id [auth]
+    if { ![info exists employee_id] } {
+        set employee_id [auth]
+    }
     default filename [file tail $file_path]
     default mime_type [mime_type_guess [file tail $file_path]]
    
