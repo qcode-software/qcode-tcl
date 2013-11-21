@@ -13,13 +13,13 @@ proc qc::reload {args} {
         set files [glob -nocomplain [file join $dir *.tcl]]
         foreach file $files {
             if { ![nsv_exists mtimes $file] } {
-                ns_log Notice "Loading $file"
+                log Notice "Loading $file"
                 namespace eval :: [list source $file]
                 nsv_set mtimes $file [file mtime $file]
             } elseif { [file mtime $file]!=[nsv_get mtimes $file] } {
                 namespace eval :: [list ns_eval -sync source $file]
                 nsv_set mtimes $file [file mtime $file]
-                ns_log Notice "Reloading $file"
+                log Notice "Reloading $file"
             } 
         }
     }
