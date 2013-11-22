@@ -14,8 +14,7 @@ proc qc::html2pdf { args } {
         error "HTML2PDF: Unknown encoding $encoding"
     }
   
-    auto_reset
-    if { [auto_execok wkhtmltopdf] eq "" } {
+    if { ! [file exists /usr/local/bin/wkhtmltopdf] } {
         # No binary found, send job to html2pdf server
         set url [qc::param_get pdfserver]
         set pdf [qc::http_post -timeout $timeout -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
