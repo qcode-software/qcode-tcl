@@ -11,14 +11,14 @@ REMOTEDIR=debian.qcode.co.uk
 .PHONY: all test
 
 all: test package upload clean incr-release
-package:
+package: set-version
 	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
-test:
+test:   set-version
 	./pkg_mkIndex $(PACKAGEDIR)
 	tclsh ./test_all.tcl -testdir $(TESTDIR)
 
-install:
+install: set-version
 	./set-version-number.tcl ${VERSION}
 	./pkg_mkIndex $(PACKAGEDIR)
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
@@ -35,6 +35,10 @@ clean:
 
 incr-release:
 	./incr-release-number.tcl
+
+set-version:
+	./set-version-number.tcl ${VERSION}
+	RELEASE=$(shell cat RELEASE)	
 
 uninstall:
 	rm -r /usr/lib/tcltk/$(NAME)$(VERSION)
