@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export sortcols_* sortcols2dict
@@ -106,4 +106,5 @@ proc qc::sortcols_from_qry { qry } {
 	return ""
     }
 }
+
 

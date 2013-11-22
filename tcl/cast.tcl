@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export cast_*
@@ -334,4 +334,5 @@ doc qc::cast_creditcard {
 	4213322211211112 is not a valid credit card number
     }
 }
+
 

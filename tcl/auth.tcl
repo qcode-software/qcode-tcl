@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export auth auth_check auth_hba auth_hba_check auth_session
@@ -112,5 +112,6 @@ proc qc::auth_session { session_id } {
 doc qc::auth_session {
     Parent authentication
 }
+
 
 

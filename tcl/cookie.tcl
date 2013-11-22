@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export cookie_*
@@ -118,4 +118,5 @@ doc qc::cookie_set {
 	% cookie_set tracking "" expires yesterday
     }
 }
+
 

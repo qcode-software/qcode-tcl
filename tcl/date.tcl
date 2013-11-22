@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export date_* dates years iso_year_iso_weeks year_months year_quarters time_hour
@@ -577,4 +577,5 @@ doc qc::time_hour {
 	% 16
     }
 }
+
 

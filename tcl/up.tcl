@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export upcopy upset
@@ -31,4 +31,5 @@ proc qc::upset { level upname {upvalue UNDEF}} {
 	return [set var $upvalue]
     }
 }
+
 

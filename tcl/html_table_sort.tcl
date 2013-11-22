@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export html_table_sort html_table_sort_header
@@ -117,4 +117,5 @@ proc qc::html_table_sort_header { cols sortCols } {
     lappend thead $row
     return $thead
 }
+
 

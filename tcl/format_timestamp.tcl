@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export format_timestamp format_timestamp_* format_timestamp2hour
@@ -122,4 +122,5 @@ doc qc::format_timestamp_rel_age {
         3 years
     }
 }
+
 

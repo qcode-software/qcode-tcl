@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export json2tson
@@ -286,5 +286,6 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
         }
     }
 }
+
 
 

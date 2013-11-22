@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export widget widget_*
@@ -641,3 +641,4 @@ proc qc::widget_image_combo { args } {
     append html [qc::widget_text {*}[qc::dict_exclude [array get this] class height type]]
     return [html div $html class $this(class)]
 }
+

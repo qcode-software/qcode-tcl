@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export error_handler error_report error_report_*
@@ -192,5 +192,6 @@ proc qc::error_report_cookies {} {
     }
     return $report
 }
+
 
 

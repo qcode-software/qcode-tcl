@@ -1,4 +1,4 @@
-package provide qcode 2.02
+package provide qcode 2.03
 package require doc
 namespace eval qc {
     namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default
@@ -256,4 +256,5 @@ proc qc::dict_default {dictVar args} {
     }
     return $dict
 }
+
 
