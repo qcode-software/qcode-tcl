@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=2.02
+VERSION=2.03
 PACKAGEDIR=tcl
 TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
@@ -21,9 +21,9 @@ test:
 install:
 	./set-version-number.tcl ${VERSION}
 	./pkg_mkIndex $(PACKAGEDIR)
-	mkdir -p /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
-	cp $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)/
-	cp LICENSE /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)/
+	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
+	cp $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
 
 upload:
 	scp $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
@@ -37,4 +37,4 @@ incr-release:
 	./incr-release-number.tcl
 
 uninstall:
-	rm -r /usr/lib/tcltk/$(PACKAGEDIR)$(VERSION)
+	rm -r /usr/lib/tcltk/$(NAME)$(VERSION)
