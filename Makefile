@@ -1,7 +1,5 @@
 NAME=qcode
 VERSION=2.03
-PACKAGEDIR=tcl
-TESTDIR=test
 MAINTAINER=hackers@qcode.co.uk
 RELEASE=$(shell cat RELEASE)
 REMOTEUSER=debian.qcode.co.uk
@@ -15,14 +13,14 @@ package: set-version
 	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
 test:   set-version
-	./pkg_mkIndex $(PACKAGEDIR)
-	tclsh ./test_all.tcl -testdir $(TESTDIR)
+	./pkg_mkIndex tcl
+	tclsh ./test_all.tcl -testdir test
 
 install: set-version
 	./set-version-number.tcl ${VERSION}
-	./pkg_mkIndex $(PACKAGEDIR)
+	./pkg_mkIndex tcl
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp $(PACKAGEDIR)/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp tcl/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
 
 upload:
