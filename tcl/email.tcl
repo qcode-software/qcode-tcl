@@ -165,6 +165,7 @@ proc qc::email_file2attachment {filename} {
     set fhandle [open $filename r]
     fconfigure $fhandle -buffering line -translation binary -blocking 1
     set base64 [::base64::encode [read $fhandle]]
+    close $fhandle
     set filename [file tail $filename]
     return [list encoding base64 data $base64 filename $filename]
 }
