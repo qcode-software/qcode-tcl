@@ -21,15 +21,6 @@ proc qc::my {args} {
 	    regexp {inet ([^/]*)/} [::exec ip addr show scope global | fgrep inet] -> ip
 	    return $ip
         }
-        username {
-            global env
-            # Attempts to return the original username by looking in SUDO_USER, then defaulting to whoami if empty
-            if { ![info exists env(SUDO_USER)] } {
-                return [::exec whoami]
-            } else {
-                return $env(SUDO_USER)
-            }
-        }
         arch {
             switch [::exec getconf LONG_BIT] {
                 64 { return "amd64" }

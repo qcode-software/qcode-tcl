@@ -5,61 +5,85 @@ namespace eval qc {
 }
 namespace eval qc::param {}
 
-proc qc::param_get { param_name } {
+proc qc::param_get { param_name args } {
     #| Return param value.
-
-    # Check the DB
-    if { [info commands ns_db] eq "ns_db" } {
-        # DB param
-        set qry {select param_value from param where param_name=:param_name}
-        db_cache_0or1row -ttl 86400 $qry {
-            # Not found in DB
-        } {
+    
+    if { [llength $args] > 0 } {
+        return [dict get [qc::param_get $param_name] {*}$args]
+    } else {
+        # Check the DB
+        if { [info commands ns_db] eq "ns_db" } {
+            # DB param
+            set qry {select param_value from param where param_name=:param_name}
+            db_cache_0or1row -ttl 86400 $qry {
+                # Not found in DB
+            } {
+                return $param_value
+            } 
+        } 
+        #TODO will throw an error under naviserver due to HOME env not being available
+        qc::param_datastore_load
+        # Check the datastore
+        if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
+            return $::qc::param::db($param_name)
+        }
+        # Check for naviserver params
+        if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
+            # Aolserver param
             return $param_value
         }
-    } 
-
-    qc::param_datastore_load
-    # Check the datastore
-    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-        return $::qc::param::db($param_name)
+        # I give up
+        error "I don't know how to find param $param_name"
     }
-    # Check for naviserver params
-    if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
-        # Aolserver param
-	return $param_value
-    }
-    # I give up
-    error "I don't know how to find param $param_name"
 }
 
-proc qc::param_exists { param_name } {
+proc qc::param_exists { param_name args } {
     #| Check for param existence.
-    if { [info commands ns_db] eq "ns_db" } {
-        # DB param
-        set qry {select param_value from param where param_name=:param_name}
-        db_cache_0or1row -ttl 86400 $qry {
-            # Not found in DB
-        } {
-	    return true
+    if { [llength $args] > 0 } {
+        if { [qc::param_exists $param_name] } {
+            return [dict exists [qc::param_get $param_name] {*}$args]
+        } else {
+            return false
         }
-    }
+    } else {
 
-    qc::param_datastore_load
-    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-        return true
-    }
-    if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
-        # Naviserver param
-	return true
-    }
+        if { [info commands ns_db] eq "ns_db" } {
+            # DB param
+            set qry {select param_value from param where param_name=:param_name}
+            db_cache_0or1row -ttl 86400 $qry {
+                # Not found in DB
+            } {
+                return true
+            }
+        }
+        qc::param_datastore_load
+        if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
+            return true
+        }
+        if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
+            # Naviserver param
+            return true
+        }
 
-    return false
+        return false
+    }
 }
 
-proc qc::param_set { param_name param_value } {
+proc qc::param_set { param_name args } {
     #| Attempt to set param_name to param_value
-
+    if { [llength $args] == 0 } {
+        error "Usage: qc::param_set name ?key ...? value" 
+    } elseif { [llength $args] > 1 } {
+        if { [qc::param_exists $param_name] } {
+            set param_value [qc::param_get $param_name]
+            dict set param_value {*}$args
+        } else {
+            dict set param_value {*}$args 
+        }
+        return [qc::param_set $param_name $param_value]
+    }
+    # 2 args
+    set param_value [lindex $args 0]
     # First check this doesn't exist in ns_config in which case it is read-only and we cannot set it here.
     if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
         # We cannot set this param programmatically
@@ -78,16 +102,16 @@ proc qc::param_set { param_name param_value } {
         }
     } else {
         # Attempt to use datastore
-        qc::param_datastore_load
+        set db [qc::param_datastore_load]
         # Set the datastore
         array set ::qc::param::db [list $param_name $param_value]
         # Create dir in case this is first time we've run
-        file mkdir /var/db
+        file mkdir [file dirname $db]
         # Write to datastore
-        set fh [open /var/db/muppet w]
+        set fh [open $db w]
         puts -nonewline $fh [array get ::qc::param::db]
         close $fh
-        file attributes /var/db/muppet -permissions 0600
+        file attributes $db -permissions 0600
     }
 
     return $param_value
@@ -95,12 +119,13 @@ proc qc::param_set { param_name param_value } {
 
 proc qc::param_datastore_load {} {
     #| Load the datastore if it exists and isn't already in memory and is readable
-    if { ![info exists ::qc::param::db] && [file exists /var/db/muppet] && [file readable /var/db/muppet]} {
-        # Read the datastore
-        set fh [open /var/db/muppet r]
+    if { ![info exists ::env(HOME)] } {
+	error "Don't know where your home directory is"
+    }
+    if { ![info exists ::qc::param::db] && [file exists $::env(HOME)/.muppet/db] } {
+        set fh [open $::env(HOME)/.muppet/db r]
         array set ::qc::param::db [read -nonewline $fh]
         close $fh
     }
+    return $::env(HOME)/.muppet/db
 }
-
-
