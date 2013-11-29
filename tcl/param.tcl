@@ -11,8 +11,8 @@ proc qc::param_get { param_name args } {
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
     } else {
-        # Check the DB
         if { [info commands ns_db] eq "ns_db" } {
+	    # Naviserver
             # DB param
             set qry {select param_value from param where param_name=:param_name}
             db_cache_0or1row -ttl 86400 $qry {
@@ -20,18 +20,20 @@ proc qc::param_get { param_name args } {
             } {
                 return $param_value
             } 
-        } 
-        #TODO will throw an error under naviserver due to HOME env not being available
-        qc::param_datastore_load
-        # Check the datastore
-        if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-            return $::qc::param::db($param_name)
-        }
-        # Check for naviserver params
-        if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
-            # Aolserver param
-            return $param_value
-        }
+
+	    # Check for naviserver params
+	    if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
+		# Naviserver param
+		return $param_value
+	    } 
+        } else {
+	    # Non-Naviserver env
+	    qc::param_datastore_load
+	    # Check the datastore
+	    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
+		return $::qc::param::db($param_name)
+	    }
+	}
         # I give up
         error "I don't know how to find param $param_name"
     }
@@ -48,6 +50,7 @@ proc qc::param_exists { param_name args } {
     } else {
 
         if { [info commands ns_db] eq "ns_db" } {
+	    # Naviserver env
             # DB param
             set qry {select param_value from param where param_name=:param_name}
             db_cache_0or1row -ttl 86400 $qry {
@@ -55,16 +58,18 @@ proc qc::param_exists { param_name args } {
             } {
                 return true
             }
-        }
-        qc::param_datastore_load
-        if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-            return true
-        }
-        if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
-            # Naviserver param
-            return true
-        }
-
+	    
+	    if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
+		# Naviserver param
+		return true
+	    }
+        } else {
+	    # Non-naviserver
+	    qc::param_datastore_load
+	    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
+		return true
+	    }
+	}
         return false
     }
 }
@@ -101,17 +106,8 @@ proc qc::param_set { param_name args } {
             db_dml { update param set param_value=:param_value where param_name=:param_name }
         }
     } else {
-        # Attempt to use datastore
-        set db [qc::param_datastore_load]
-        # Set the datastore
-        array set ::qc::param::db [list $param_name $param_value]
-        # Create dir in case this is first time we've run
-        file mkdir [file dirname $db]
-        # Write to datastore
-        set fh [open $db w]
-        puts -nonewline $fh [array get ::qc::param::db]
-        close $fh
-        file attributes $db -permissions 0600
+	array set ::qc::param::db [list $param_name $param_value]
+	qc::param_datastore_save
     }
 
     return $param_value
@@ -127,5 +123,20 @@ proc qc::param_datastore_load {} {
         array set ::qc::param::db [read -nonewline $fh]
         close $fh
     }
-    return $::env(HOME)/.muppet/db
+}
+
+proc qc::param_datastore_save {} {
+    #| Write out the params to disk.
+    if { ![info exists ::env(HOME)] } {
+	error "Don't know where your home directory is"
+    }
+    set filename "$::env(HOME)/.muppet/db"
+    if { ![file exists $filename] } {
+	file mkdir [file dirname $filename]
+    }
+    # Write to datastore
+    set fh [open $filename w]
+    puts -nonewline $fh [array get ::qc::param::db]
+    close $fh
+    file attributes $filename -permissions 0600
 }
