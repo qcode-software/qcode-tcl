@@ -164,7 +164,3 @@ proc qc::conn_ie {} {
         return false
     }
 }
-
-
-
-

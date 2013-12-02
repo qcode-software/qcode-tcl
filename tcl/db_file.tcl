@@ -258,6 +258,3 @@ proc qc::db_file_thumbnail_cache_create {file_id max_width max_height} {
     }
     return $cache_id
 }
-
-
-

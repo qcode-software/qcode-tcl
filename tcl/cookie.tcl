@@ -118,7 +118,3 @@ doc qc::cookie_set {
 	% cookie_set tracking "" expires yesterday
     }
 }
-
-
-
-

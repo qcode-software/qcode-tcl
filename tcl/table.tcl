@@ -107,7 +107,3 @@ proc qc::table_sum { table col_name } {
     }
     return $sum
 }
-
-
-
-

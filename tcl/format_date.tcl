@@ -128,7 +128,3 @@ doc qc::format_date_letter {
 	17th October 2007
     }
 }
-
-
-
-

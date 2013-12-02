@@ -24,7 +24,3 @@ proc qc::reload {args} {
         }
     }
 }
-
-
-
-

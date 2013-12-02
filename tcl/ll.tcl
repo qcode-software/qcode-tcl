@@ -68,7 +68,3 @@ doc qc::ll2csv {
         widget_c|7.99|1
     }
 }
-
-
-
-

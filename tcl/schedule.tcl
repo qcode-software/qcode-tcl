@@ -120,7 +120,3 @@ proc qc::schedule_start {proc_name} {
 	log Notice "Schedule $proc_name has been started" 
     }
 }
-
-
-
-

@@ -646,7 +646,3 @@ doc qc::is_cidrnetv4 {
         true
     }
 }
-
-
-
-

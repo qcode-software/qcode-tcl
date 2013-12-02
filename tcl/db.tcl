@@ -867,6 +867,3 @@ proc qc::db_connect {args} {
         error "Could not connect to database. $errorMessage" $errorInfo
     }
 }
-
-
-

@@ -59,6 +59,3 @@ proc qc::html_table_paged { args } {
     }
     return [join $list \n]
 }
-
-
-

@@ -54,7 +54,3 @@ proc qc::chart_list2csv {list} {
     }
     return [join $csv ,]
 }
-
-
-
-

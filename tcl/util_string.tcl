@@ -322,6 +322,3 @@ proc qc::strip_common_leading_whitespace {text} {
     }
     return $text
 }
-
-
-

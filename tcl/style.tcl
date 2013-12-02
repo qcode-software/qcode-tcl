@@ -48,7 +48,3 @@ proc qc::css_rule2dict {rule} {
     set rule [string trim $rule ";"]
     set dict [split $rule ";:"]
 }
-
-
-
-

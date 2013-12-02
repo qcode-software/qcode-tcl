@@ -226,7 +226,3 @@ doc qc::form_layout_list {
 </div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>
     }
 }
-
-
-
-

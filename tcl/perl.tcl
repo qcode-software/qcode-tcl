@@ -44,6 +44,3 @@ proc qc::ddict2perl_hhash {ddict} {
     }
     return \{[join $pairs ", "]\}
 }
-
-
-

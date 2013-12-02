@@ -302,7 +302,3 @@ doc qc::xml_encoding {
     
     }
 }
-
-
-
-

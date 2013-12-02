@@ -687,7 +687,3 @@ proc qc::columns_show_hide_toolbar {args} {
     lappend row [html div [join $show_hide_controls " "]]
     return [html_table tbody [list $row] class "columns-show-hide-toolbar"]
 }
-
-
-
-

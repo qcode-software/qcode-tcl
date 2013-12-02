@@ -609,7 +609,3 @@ proc qc::ofc_html {id json width height} {
 
     return $html
 }
-
-
-
-

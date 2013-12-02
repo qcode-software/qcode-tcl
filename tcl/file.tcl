@@ -26,7 +26,3 @@ doc qc::file_temp {
 	/tmp/ns.aCtGxR
     }
 }
-
-
-
-

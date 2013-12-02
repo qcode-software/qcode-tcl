@@ -442,7 +442,3 @@ proc qc::s3_xml_node2dict { node } {
     }
     return $dict
 }
-
-
-
-

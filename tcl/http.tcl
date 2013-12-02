@@ -525,8 +525,3 @@ proc qc::http_delete {args} {
 	}
     }
 }
-
-
-
-
-

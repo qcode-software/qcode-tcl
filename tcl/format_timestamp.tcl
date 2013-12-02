@@ -122,7 +122,3 @@ doc qc::format_timestamp_rel_age {
         3 years
     }
 }
-
-
-
-

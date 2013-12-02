@@ -421,6 +421,3 @@ proc qc::cell_meta2perl {cell_meta} {
     }
     return \{[join $row_hash_list ", "]\}
 }
-
-
-

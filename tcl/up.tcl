@@ -31,7 +31,3 @@ proc qc::upset { level upname {upvalue UNDEF}} {
 	return [set var $upvalue]
     }
 }
-
-
-
-

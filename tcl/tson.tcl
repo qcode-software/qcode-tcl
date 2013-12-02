@@ -182,7 +182,3 @@ doc qc::tson2xml {
 	<IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
     }
 }
-
-
-
-

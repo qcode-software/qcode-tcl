@@ -24,7 +24,3 @@ proc qc::html_table_scroll {args} {
 
     return $html
 }
-
-
-
-

@@ -110,7 +110,3 @@ proc qc::html_table_db_flexgrid {args} {
     append html "</div>\n"
     return $html
 }
-
-
-
-

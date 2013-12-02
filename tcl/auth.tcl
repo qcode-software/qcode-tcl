@@ -112,8 +112,3 @@ proc qc::auth_session { session_id } {
 doc qc::auth_session {
     Parent authentication
 }
-
-
-
-
-

@@ -347,7 +347,3 @@ doc qc::args {
         Illegal option "baz"
     }
 }
-
-
-
-

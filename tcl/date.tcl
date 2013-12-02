@@ -577,7 +577,3 @@ doc qc::time_hour {
 	% 16
     }
 }
-
-
-
-

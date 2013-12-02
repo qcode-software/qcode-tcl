@@ -74,7 +74,3 @@ proc qc::session_purge { {timeout_secs 0 } } {
     log Notice "session purge older than $timeout_secs secs"
     db_dml "delete from session where extract(seconds from current_timestamp-time_modified)>:timeout_secs"
 }
-
-
-
-

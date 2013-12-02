@@ -117,7 +117,3 @@ proc qc::html_table_sort_header { cols sortCols } {
     lappend thead $row
     return $thead
 }
-
-
-
-

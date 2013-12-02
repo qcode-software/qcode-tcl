@@ -139,7 +139,3 @@ doc qc::multimap_get_all {
 	% 
     }
 }
-
-
-
-

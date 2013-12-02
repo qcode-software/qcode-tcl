@@ -98,7 +98,3 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
 	uplevel 1 $else_code
     }
 }
-
-
-
-

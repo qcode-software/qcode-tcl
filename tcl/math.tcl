@@ -448,7 +448,3 @@ doc qc::sigfigs_ceil {
         12.3
     }
 }
-
-
-
-

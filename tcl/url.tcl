@@ -257,7 +257,3 @@ proc qc::url_root {url} {
         error "Url \"$url\" is not a valid URL"
     }
 }
-
-
-
-

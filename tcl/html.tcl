@@ -613,7 +613,3 @@ proc qc::strip_html {html} {
     #| Returns a string that is the HTML with all the HTML tags removed
     return [regsub -all -- {<[^>]+>} $html ""]
 }
-
-
-
-

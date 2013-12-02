@@ -355,7 +355,3 @@ doc qc::format_if_number {
 	Total
     }
 }
-
-
-
-

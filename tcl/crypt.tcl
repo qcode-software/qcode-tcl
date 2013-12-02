@@ -157,7 +157,3 @@ doc qc::decrypt_bf {
         Hello World
     }
 }
-
-
-
-

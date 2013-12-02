@@ -50,8 +50,3 @@ doc qc::html_table_doc {
 	</table>
     }
 }
-
-
-
-
-

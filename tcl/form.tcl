@@ -192,8 +192,3 @@ doc qc::form_proc {
 	John said Hello World
     }
 }
-
-
-
-
-

@@ -68,7 +68,3 @@ proc qc::action_menu {conf object_state} {
     }
     return [html_menu $lmenu]
 }
-
-
-
-

@@ -83,6 +83,3 @@ proc qc::authorise_token {} {
 doc qc::authorise_token {
     Parent authorisation
 }
-
-
-

@@ -310,11 +310,3 @@ doc qc::db_cache_ldict {
 	{firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus surname McNeil}
     }
 }
-
-
-
-
-
-
-
-

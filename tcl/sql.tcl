@@ -335,6 +335,3 @@ doc qc::sql_where_postcode {
         delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
     }   
 }
-
-
-

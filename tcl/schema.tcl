@@ -26,7 +26,3 @@ doc qc::schema_update {
 	
     }
 }
-
-
-
-

@@ -106,7 +106,3 @@ proc qc::sortcols_from_qry { qry } {
 	return ""
     }
 }
-
-
-
-

@@ -286,8 +286,3 @@ doc qc::sql_where_word_in {
 	select * from users where name ~ '(^| )Jimmy($| )'
     }
 }
-
-
-
-
-

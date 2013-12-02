@@ -161,7 +161,3 @@ doc qc::ns_set_values {
 	}
     }
 }
-
-
-
-

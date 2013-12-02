@@ -18,7 +18,3 @@ proc qc::soap_template {xml method {namespace ""} } {
     }
     return $soap
 }
-
-
-
-

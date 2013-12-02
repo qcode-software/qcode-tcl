@@ -72,7 +72,3 @@ proc qc::password_complexity_check { args } {
     }
     return true
 }
-
-
-
-

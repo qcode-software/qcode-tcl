@@ -138,7 +138,3 @@ proc qc::socket_gets_if_ready { sock } {
         set sock_state($sock,read) "done"
     } 
 }
-
-
-
-

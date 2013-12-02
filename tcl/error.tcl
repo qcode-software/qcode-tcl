@@ -192,8 +192,3 @@ proc qc::error_report_cookies {} {
     }
     return $report
 }
-
-
-
-
-

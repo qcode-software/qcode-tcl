@@ -234,7 +234,3 @@ doc qc::ldict2tbody {
         {widget_a {Widget Type A} 9.99} {widget_b {Widget Type B} 8.99} {widget_c {Widget Type C} 7.99}
     }
 }
-
-
-
-

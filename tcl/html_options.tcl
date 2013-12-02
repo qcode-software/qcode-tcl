@@ -59,7 +59,3 @@ doc qc::html_options_simple {
 	red red orange orange blue blue green green
     }
 }
-
-
-
-

@@ -72,7 +72,3 @@ doc qc::sql_where_in_not {
 	true
     }
 }
-
-
-
-

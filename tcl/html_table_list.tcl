@@ -17,8 +17,3 @@ proc qc::html_table_list {args} {
     append html "</div>\n"
     return $html
 }
-
-
-
-
-

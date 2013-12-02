@@ -17,7 +17,3 @@ proc qc::sftp_put {args} {
     puts -nonewline $file $data
     close $file
 }
-
-
-
-

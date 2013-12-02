@@ -555,7 +555,3 @@ doc qc::lapply {
         Kagan Bolton Scheunemann
     }
 }
-
-
-
-

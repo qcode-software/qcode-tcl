@@ -90,7 +90,3 @@ proc qc::sticky_default {args} {
 	}
     }
 }
-
-
-
-

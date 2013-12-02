@@ -314,7 +314,3 @@ proc qc::barcode_ean13_check_digit { number } {
      }
   return $check
 }
-
-
-
-

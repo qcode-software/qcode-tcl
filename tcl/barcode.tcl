@@ -116,8 +116,3 @@ proc qc::barcode_charcode_html { value } {
 	return "&#[expr {$value+100}];"
     }
 }
-
-
-
-
-

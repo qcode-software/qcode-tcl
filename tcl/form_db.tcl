@@ -35,7 +35,3 @@ proc qc::form_db_plain { content args } {
     default this(id) oDbForm
     return [html form $content {*}[array get this]]
 }
-
-
-
-

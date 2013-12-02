@@ -62,9 +62,3 @@ proc qc::section_menu {conf section default_url section_var} {
     }
     return [html div [join $lmenu ""] class "section-menu"]
 }
-
-
-
-
-
-

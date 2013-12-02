@@ -38,7 +38,3 @@ proc qc::ssh_call_proc {args} {
     file delete $filename
     return $out
 }
-
-
-
-

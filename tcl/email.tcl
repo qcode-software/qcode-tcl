@@ -1204,7 +1204,3 @@ proc qc::email_html_embedded_images2attachments {html} {
     $doc delete
     return [list $html $attachments]
 }
-
-
-
-

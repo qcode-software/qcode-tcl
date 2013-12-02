@@ -28,7 +28,3 @@ proc qc::lock {lock_id timeout code} {
 	}
     }
 }
-
-
-
-

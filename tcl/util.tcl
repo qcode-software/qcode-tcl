@@ -1064,7 +1064,3 @@ proc qc::not_null {var} {
     upvar $var value
     return [expr {[info exists value] && $value ne "" }]
 }
-
-
-
-

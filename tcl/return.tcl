@@ -148,9 +148,3 @@ proc ns_returnmoved {url} {
   <P ALIGN=RIGHT><SMALL><I>[ns_info name]/[ns_info patchlevel] on [ns_conn location]</I></SMALL></P>
   </BODY></HTML>}]
 }
-
-
-
-
-
-
