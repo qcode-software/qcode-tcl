@@ -1,4 +1,4 @@
-package provide qcode 2.03.0
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export section section_menu
@@ -62,6 +62,7 @@ proc qc::section_menu {conf section default_url section_var} {
     }
     return [html div [join $lmenu ""] class "section-menu"]
 }
+
 
 
 

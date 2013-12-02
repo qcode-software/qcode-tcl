@@ -1,4 +1,4 @@
-package provide qcode 2.03.0
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export args2dict args2vars args_check_required args_definition_split args_split args
@@ -347,6 +347,7 @@ doc qc::args {
         Illegal option "baz"
     }
 }
+
 
 
 

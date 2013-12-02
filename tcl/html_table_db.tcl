@@ -1,4 +1,4 @@
-package provide qcode 2.03.0
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export html_table_db html_table_db_flexgrid
@@ -110,6 +110,7 @@ proc qc::html_table_db_flexgrid {args} {
     append html "</div>\n"
     return $html
 }
+
 
 
 

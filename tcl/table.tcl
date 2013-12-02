@@ -1,4 +1,4 @@
-package provide qcode 2.03.0
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export table_foreach table2ldict table2array table_sum
@@ -107,6 +107,7 @@ proc qc::table_sum { table col_name } {
     }
     return $sum
 }
+
 
 
 

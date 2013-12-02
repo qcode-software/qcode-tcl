@@ -1,4 +1,4 @@
-package provide qcode 2.03.0
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export excel_*
@@ -421,5 +421,6 @@ proc qc::cell_meta2perl {cell_meta} {
     }
     return \{[join $row_hash_list ", "]\}
 }
+
 
 
