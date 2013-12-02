@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.03.0
 package require doc
 namespace eval qc {
     namespace export html_table_paged
@@ -59,4 +59,5 @@ proc qc::html_table_paged { args } {
     }
     return [join $list \n]
 }
+
 

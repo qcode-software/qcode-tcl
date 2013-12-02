@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.03.0
 package require doc
 namespace eval qc {
     namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode
@@ -335,4 +335,5 @@ doc qc::sql_where_postcode {
         delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
     }   
 }
+
 

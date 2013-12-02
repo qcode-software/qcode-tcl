@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.03.0
 package require doc
 namespace eval qc {
     namespace export sticky_* sticky2vars
@@ -90,5 +90,6 @@ proc qc::sticky_default {args} {
 	}
     }
 }
+
 
 

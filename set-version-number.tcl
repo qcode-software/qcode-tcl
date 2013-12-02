@@ -17,7 +17,7 @@ proc write {filename string} {
 # Update all package provide statements in all *.tcl files in the tcl directory.
 set package [lindex $argv 0]
 set version [lindex $argv 1]
-if { $argc != 2 || ![regexp {[0-9]+\.[0-9]+} $version] } {
+if { $argc != 2 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
     error "Usage: set-version-number package version"
 }
 set package_provide_text "package provide $package $version"
@@ -26,8 +26,8 @@ foreach filename [glob -directory tcl -nocomplain *.tcl] {
     set original_text [cat $filename]
     set modified_text $original_text
     
-    foreach {match current_version} [regexp -all -inline {package +provide +[^ ]+ +([0-9]+\.[0-9]+)} $modified_text] {
-        if { $current_version < $version } {
+    foreach {match current_version} [regexp -all -inline {package +provide +[^ ]+ +([0-9]+\.[0-9]+\.[0-9])} $modified_text] {
+        if { $current_version ne $version } {
             set reset_release_number true
         }
 

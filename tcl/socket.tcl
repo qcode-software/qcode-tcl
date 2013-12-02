@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.03.0
 package require doc
 namespace eval qc {
     namespace export socket_*
@@ -138,5 +138,6 @@ proc qc::socket_gets_if_ready { sock } {
         set sock_state($sock,read) "done"
     } 
 }
+
 
 

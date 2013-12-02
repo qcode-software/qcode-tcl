@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.03.0
 package require doc
 namespace eval qc {
     namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
@@ -322,4 +322,5 @@ proc qc::strip_common_leading_whitespace {text} {
     }
     return $text
 }
+
 
