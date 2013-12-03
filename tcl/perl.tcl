@@ -1,4 +1,4 @@
-package provide qcode 2.4.0
+package provide qcode 2.4.1
 package require doc
 namespace eval qc {
     namespace export perl_quote list2perl_array dict2perl_hash llist2perl_aarray ddict2perl_hhash

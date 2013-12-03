@@ -1,4 +1,4 @@
-package provide qcode 2.4.0
+package provide qcode 2.4.1
 package require sha1
 package require md5
 package require base64
@@ -25,8 +25,9 @@ proc qc::s3_auth_headers { args } {
     # eg s3_auth_headers -content_type image/jpeg -content_md5 xxxxxx PUT /pics/image.jpg mybucket
 
     # AWS credentials
-    set access_key [dict get [qc::param_get [qc::param_get aws_default]] access_key]
-    set secret_access_key [dict get [qc::param_get [qc::param_get aws_default]] secret_access_key]
+    set account [qc::param_get aws default]
+    set access_key [qc::param_get aws $account access_key]
+    set secret_access_key [qc::param_get aws $account secret_access_key]
 
     set date [qc::format_timestamp_http now]
    
