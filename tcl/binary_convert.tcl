@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {}
 
@@ -245,3 +245,4 @@ doc qc::binary_format {
 	43.402 Gb
     }
 }
+

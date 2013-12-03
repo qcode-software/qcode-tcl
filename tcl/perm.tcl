@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export perm_set perm_test_employee perm_test perm perms perm_if
@@ -98,5 +98,3 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
 	uplevel 1 $else_code
     }
 }
-
-

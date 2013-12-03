@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export format_*
@@ -355,5 +355,3 @@ doc qc::format_if_number {
 	Total
     }
 }
-
-

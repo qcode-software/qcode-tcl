@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html
@@ -613,5 +613,3 @@ proc qc::strip_html {html} {
     #| Returns a string that is the HTML with all the HTML tags removed
     return [regsub -all -- {<[^>]+>} $html ""]
 }
-
-

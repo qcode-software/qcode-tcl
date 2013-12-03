@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export http_* IANAEncoding2TclEncoding
@@ -525,6 +525,3 @@ proc qc::http_delete {args} {
 	}
     }
 }
-
-
-

@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export my
@@ -20,15 +20,6 @@ proc qc::my {args} {
         ip {
 	    regexp {inet ([^/]*)/} [::exec ip addr show scope global | fgrep inet] -> ip
 	    return $ip
-        }
-        username {
-            global env
-            # Attempts to return the original username by looking in SUDO_USER, then defaulting to whoami if empty
-            if { ![info exists env(SUDO_USER)] } {
-                return [::exec whoami]
-            } else {
-                return $env(SUDO_USER)
-            }
         }
         arch {
             switch [::exec getconf LONG_BIT] {
@@ -90,6 +81,3 @@ doc qc::my {
         i-13f1333f
     }
 }
-
-
-

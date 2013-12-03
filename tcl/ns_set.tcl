@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export ns_set_*
@@ -161,5 +161,3 @@ doc qc::ns_set_values {
 	}
     }
 }
-
-

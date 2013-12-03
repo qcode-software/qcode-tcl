@@ -9,7 +9,7 @@ proc cat {filename} {
 
 proc write {filename string} {
     set file [open $filename w]
-    puts $file $string
+    puts -nonewline $file $string
     close $file
     return $string
 }

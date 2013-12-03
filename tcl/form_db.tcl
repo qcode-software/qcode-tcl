@@ -1,4 +1,4 @@
-package provide qcode 2.03
+package provide qcode 2.4.0
 package require doc
 namespace eval qc {
     namespace export form_db form_db_plain
@@ -35,5 +35,3 @@ proc qc::form_db_plain { content args } {
     default this(id) oDbForm
     return [html form $content {*}[array get this]]
 }
-
-
