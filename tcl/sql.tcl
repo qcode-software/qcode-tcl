@@ -1,7 +1,7 @@
 package provide qcode 2.03
 package require doc
 namespace eval qc {
-    namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode
+    namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with
 }
 
 proc qc::sql_set {args} {
@@ -336,3 +336,61 @@ doc qc::sql_where_postcode {
     }   
 }
 
+proc qc::sql_insert_or_update_with {table primary_key_cols dict} {
+    #| Run an insert or update query against this table after checking the primary key for existence.
+    # Pass column name/value pairs in the dict
+    if { [llength $primary_key_cols]==0 } {
+        error "You must specify one or more primary key columns"
+    }
+    set list {}
+    foreach col $primary_key_cols {
+        lappend list "\"$col\"=[db_quote [dict get $dict $col]]"
+    }
+    set sql_where [join $list " and "]
+    db_1row "
+        select count(*) as count
+        from \"$table\"
+        where $sql_where
+    "
+    if { $count > 0 } {
+        return "
+            update \"$table\"
+            set [sql_set_with {*}[dict_exclude $dict {*}$primary_key_cols]]
+            where $sql_where
+        "
+    } else {
+        return "
+            insert into \"$table\"
+            [sql_insert_with {*}$dict]
+        "
+    }
+}
+
+proc qc::sql_insert_or_update {table primary_key_cols cols} {
+    #| Run an insert or update query against this table after checking the primary key for existence.
+    # Pass column name/value pairs in the dict
+    set list {}
+    foreach col $primary_key_cols {
+        lappend list "$col=:$col"
+    }
+    set sql_where [join $list " and "]
+    set qry "
+        select count(*) as count
+        from \"$table\"
+        where $sql_where
+    "
+    uplevel 1 [list db_1row $qry]
+    upvar 1 count count
+    if { $count > 0 } {
+        return "
+            update \"$table\"
+            set [sql_set {*}$cols] 
+            where $sql_where
+        "
+    } else {
+        return "
+            insert into \"$table\"
+            [sql_insert {*}$primary_key_cols {*}$cols]
+        "
+    }
+}
