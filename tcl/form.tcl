@@ -1,4 +1,4 @@
-package provide qcode 2.4.1
+package provide qcode 2.5.0
 package require doc
 namespace eval qc {
     namespace export form_var_* form2* form_proc

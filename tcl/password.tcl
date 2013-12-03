@@ -1,4 +1,4 @@
-package provide qcode 2.4.1
+package provide qcode 2.5.0
 package require doc
 namespace eval qc {
     namespace export password_hash password_complexity_ok password_complexity_check

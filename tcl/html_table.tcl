@@ -1,4 +1,4 @@
-package provide qcode 2.4.1
+package provide qcode 2.5.0
 package require doc
 namespace eval qc {
     namespace export html_table html_table_row html_table_row_head html_table_colgroup html_table_thead_from_cols html_table_tfoot_sums html_table_wants_* html_table_cols_from_table html_table_tbody_* html_table_format html_table_format_* html_tbody_row page_html_table columns_show_hide_toolbar

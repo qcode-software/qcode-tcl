@@ -1,4 +1,4 @@
-package provide qcode 2.4.1
+package provide qcode 2.5.0
 package require doc
 namespace eval qc {
     namespace export round round_up rshift10 intplaces add sum subtr mult exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
