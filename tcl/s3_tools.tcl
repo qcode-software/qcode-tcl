@@ -8,13 +8,9 @@ namespace eval qc {
     namespace export s3 s3_*
 }
 
-proc qc::s3_url {bucket} {
-    set base s3.amazonaws.com
-    if { $bucket eq ""} {
-        return $base
-    } else {
-        return ${bucket}.${base}
-    }
+proc qc::s3_url { {bucket ""} } {
+    lappend bucket "s3.amazonaws.com"
+    return [join $bucket "."]
 }
 
 proc qc::s3_auth_headers { args } {
