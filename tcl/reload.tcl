@@ -12,13 +12,17 @@ proc qc::reload {args} {
         nsv_set tcl_libs $dir 1
         set files [glob -nocomplain [file join $dir *.tcl]]
         foreach file $files {
-            if { ![nsv_exists mtimes $file] } {
+            set fh [open $file r]
+            set md5 [qc::md5 [read $fh]]
+            close $fh
+            
+            if { ![nsv_exists tcl_lib_md5 $file] } {
                 log Notice "Loading $file"
                 namespace eval :: [list source $file]
-                nsv_set mtimes $file [file mtime $file]
-            } elseif { [file mtime $file]!=[nsv_get mtimes $file] } {
+                nsv_set tcl_lib_md5 $file $md5
+            } elseif { $md5 ne [nsv_get tcl_lib_md5 $file] } {
                 namespace eval :: [list ns_eval -sync source $file]
-                nsv_set mtimes $file [file mtime $file]
+                nsv_set tcl_lib_md5 $file $md5
                 log Notice "Reloading $file"
             } 
         }
