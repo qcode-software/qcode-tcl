@@ -13,18 +13,25 @@ proc qc::s3_url { {bucket ""} } {
     return [join $bucket "."]
 }
 
+proc qc::aws_credentials_set { access_key secret_key } {
+    #| Set globals containing AWS credentials
+    set ::env(AWS_ACCESS_KEY_ID) $access_key
+    set ::env(AWS_SECRET_ACCESS_KEY) $secret_key
+    return true
+}
+
+proc qc::aws_region_set { region } {
+    #| Set global containing AWS region
+    set ::env(AWS_DEFAULT_REGION) $region
+    return true
+}
+
 proc qc::s3_auth_headers { args } {
     #| Constructs the required s3 authentication header for the request type in question.
     #| See: http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
- 
     qc::args $args -amz_headers "" -content_type "" -content_md5 "" -- verb path bucket 
     # eg s3_auth_headers -content_type image/jpeg -content_md5 xxxxxx PUT /pics/image.jpg mybucket
-
-    # AWS credentials
-    set account [qc::param_get aws default]
-    set access_key [qc::param_get aws $account access_key]
-    set secret_access_key [qc::param_get aws $account secret_access_key]
-
+    
     set date [qc::format_timestamp_http now]
    
     if { $bucket ne "" } {
@@ -65,8 +72,8 @@ proc qc::s3_auth_headers { args } {
     lappend string_to_sign "$date"
     lappend string_to_sign "${canonicalized_amz_headers}${canonicalized_resource}"
     set string_to_sign [join $string_to_sign \n]
-    set signature [::base64::encode [::sha1::hmac -bin $secret_access_key $string_to_sign]]
-    set authorization "AWS ${access_key}:$signature"
+    set signature [::base64::encode [::sha1::hmac -bin ${::env(AWS_SECRET_ACCESS_KEY)} $string_to_sign]]
+    set authorization "AWS ${::env(AWS_ACCESS_KEY_ID)}:$signature"
 
     return [list Host [s3_url $bucket] Date $date Authorization $authorization]
 }
@@ -188,6 +195,11 @@ proc qc::s3_base64_md5 { args } {
 proc qc::s3 { args } {
     #| Access Amazon S3 buckets via REST API
     # Usage: s3 subcommand {args}
+
+    if { ![info exists ::env(AWS_ACCESS_KEY_ID)] || ![info exists ::env(AWS_SECRET_ACCESS_KEY)] } {
+        error "No AWS credentials set."
+    }
+
     switch [lindex $args 0] {
         md5 {
             #| Just print the base64 md5 of a local file for reference
