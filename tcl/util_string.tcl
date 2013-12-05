@@ -1,4 +1,4 @@
-package provide qcode 2.5.0
+package provide qcode 2.6.0
 package require doc
 namespace eval qc {
     namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace

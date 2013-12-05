@@ -1,4 +1,4 @@
-package provide qcode 2.5.0
+package provide qcode 2.6.0
 package require doc
 namespace eval qc {
     namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with
