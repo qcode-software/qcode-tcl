@@ -5,12 +5,7 @@ package require base64
 package require tdom
 package require fileutil
 namespace eval qc {
-    namespace export s3 s3_*
-}
-
-proc qc::s3_url { {bucket ""} } {
-    lappend bucket "s3.amazonaws.com"
-    return [join $bucket "."]
+    namespace export s3 s3_* aws_*
 }
 
 proc qc::aws_credentials_set { access_key secret_key } {
@@ -24,6 +19,11 @@ proc qc::aws_region_set { region } {
     #| Set global containing AWS region
     set ::env(AWS_DEFAULT_REGION) $region
     return true
+}
+
+proc qc::s3_url { {bucket ""} } {
+    lappend bucket "s3.amazonaws.com"
+    return [join $bucket "."]
 }
 
 proc qc::s3_auth_headers { args } {
