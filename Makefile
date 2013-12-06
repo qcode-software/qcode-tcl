@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=2.6.0
+VERSION=2.6.1
 $(shell ./set-version-number.tcl ${NAME} ${VERSION})
 RELEASE=$(shell cat RELEASE)
 MAINTAINER=hackers@qcode.co.uk
