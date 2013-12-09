@@ -1,4 +1,4 @@
-package provide qcode 2.6.1
+package provide qcode 2.6.2
 package require doc
 namespace eval qc {
     namespace export style_set css_parse css_rule2dict

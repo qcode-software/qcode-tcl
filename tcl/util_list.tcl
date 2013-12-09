@@ -1,4 +1,4 @@
-package provide qcode 2.6.1
+package provide qcode 2.6.2
 package require doc
 namespace eval qc {
     namespace export lshift lunshift lintersect lexclude lexclude2 lunion ldelete lmove lunique lequal lsort_using in lpage ltotitle list2csv lconcat lsum laverage lreplace_values lapply

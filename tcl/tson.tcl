@@ -1,4 +1,4 @@
-package provide qcode 2.6.1
+package provide qcode 2.6.2
 package require doc
 namespace eval qc {
     namespace export tson_object json_quote tson2json tson_object_from tson2xml
