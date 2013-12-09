@@ -1,4 +1,4 @@
-package provide qcode 2.6.2
+package provide qcode 2.6.3
 package require doc
 namespace eval qc {
     namespace export ssh scp ssh_call_proc
