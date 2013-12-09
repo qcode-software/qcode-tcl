@@ -61,8 +61,9 @@ proc qc::html_table_db {args} {
     #
     if { [string is true $enabled] } {
 	set headers [ns_conn outputheaders]
+	ns_set update $headers Expires "Fri, 01 Jan 1990 00:00:00 GMT"
 	ns_set update $headers Pragma no-cache
-	ns_set update $headers Cache-Control no-cache
+	ns_set update $headers Cache-Control "no-cache, no-store, max-age=0, must-revalidate"
     }
 
     set scrollHeight $height
