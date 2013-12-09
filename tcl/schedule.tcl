@@ -1,4 +1,4 @@
-package provide qcode 2.5.0
+package provide qcode 2.6.1
 package require doc
 namespace eval qc {
     namespace export schedule schedule_id schedule_exists schedule_running schedule_stop schedule_start

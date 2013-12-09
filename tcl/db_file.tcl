@@ -1,4 +1,4 @@
-package provide qcode 2.5.0
+package provide qcode 2.6.1
 namespace eval qc {
     namespace export db_file_* plupload.html
 }
@@ -9,13 +9,12 @@ doc qc::db_file {
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
-    args $args -employee_id ? -mime_type ? -filename ? -- file_path
+    args $args -employee_id ? -filename ? -- file_path
 
     if { ![info exists employee_id] } {
         set employee_id [auth]
     }
     default filename [file tail $file_path]
-    default mime_type [mime_type_guess [file tail $file_path]]
    
     set id [open $file_path r]
     fconfigure $id -translation binary
@@ -31,6 +30,18 @@ proc qc::db_file_insert {args} {
     }
     db_dml $qry
     return $file_id
+}
+
+proc qc::db_file_copy {file_id} {
+    #| Make a copy of this file
+    set new_file_id [db_seq file_id_seq]
+    db_dml {
+        insert into file 
+        (file_id,employee_id,filename,data)
+	select :new_file_id,employee_id,filename,data
+        from file where file_id=:file_id
+    }
+    return $new_file_id
 }
 
 proc qc::db_file_export {args} {
