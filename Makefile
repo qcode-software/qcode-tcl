@@ -1,7 +1,7 @@
 NAME=qcode
 VERSION=2.6.2
 $(shell ./set-version-number.tcl ${NAME} ${VERSION})
-RELEASE=$(shell cat RELEASE)
+RELEASE=0
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=debian.qcode.co.uk
 REMOTEHOST=debian.qcode.co.uk
@@ -9,7 +9,7 @@ REMOTEDIR=debian.qcode.co.uk
 
 .PHONY: all test
 
-all: test package upload clean incr-release
+all: test package upload clean
 package: 
 	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
@@ -30,9 +30,6 @@ upload:
 
 clean:
 	rm $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb
-
-incr-release:
-	./incr-release-number.tcl
 
 uninstall:
 	rm -r /usr/lib/tcltk/$(NAME)$(VERSION)
