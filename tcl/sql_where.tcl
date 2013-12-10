@@ -1,5 +1,6 @@
 package provide qcode 2.6.1
 package require doc
+package require textutil
 namespace eval qc {
     namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
 }
@@ -18,10 +19,11 @@ proc qc::sql_where { args } {
 	    } elseif { [string equal $value "NOT NULL"] } {
 		lappend list "$name IS NOT NULL"
 	    } else {
+                lassign [::textutil::split::splitx $value ::] value type
                 if { [info exists nocase] } {
-		    lappend list "lower($name)=lower([db_quote $value])"
+		    lappend list "lower($name)=lower([db_quote $value $type])"
                 } else {
-		    lappend list "$name=[db_quote $value]"
+		    lappend list "$name=[db_quote $value $type]"
                 }
 	    }
 	}
