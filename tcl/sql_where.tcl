@@ -10,28 +10,38 @@ proc qc::sql_where { args } {
     #| Construct part of SQL WHERE clause using varNames
     #| in a pass-by-name list or a dict.
     #| Any empty values or non-existent variables are ignored
-    set dict [args2dict $args]
+    if { [lindex $args 0] eq "~" } {
+        # Passing by name
+        qc::lshift args
+        set dict [dict create]
+        foreach col_name $args {
+            lassign [::textutil::split::splitx $col_name ::] var_name -
+            dict set dict $col_name [upset 1 $var_name]
+        }
+    } else {
+        set dict $args
+    }
     set list {}
     foreach {name value} $dict {
-	if { [ne $value ""] } {
-	    if { [string equal $value NULL] } {
-		lappend list "$name IS NULL"
-	    } elseif { [string equal $value "NOT NULL"] } {
-		lappend list "$name IS NOT NULL"
-	    } else {
-                lassign [::textutil::split::splitx $value ::] value type
+        if { [ne $value ""] } {
+            if { [string equal $value NULL] } {
+                lappend list "$name IS NULL"
+            } elseif { [string equal $value "NOT NULL"] } {
+                lappend list "$name IS NOT NULL"
+            } else {
+                lassign [::textutil::split::splitx $name ::] -> type
                 if { [info exists nocase] } {
-		    lappend list "lower($name)=lower([db_quote $value $type])"
+                    lappend list "lower($name)=lower([db_quote $value $type])"
                 } else {
-		    lappend list "$name=[db_quote $value $type]"
+                    lappend list "$name=[db_quote $value $type]"
                 }
-	    }
-	}
+            }
+        }
     }
     if { [llength $list]==0 } {
-	return true
+        return true
     } else {
-	return [join $list " and "]
+        return [join $list " and "]
     }
 }
 
@@ -227,7 +237,8 @@ proc qc::sql_where_compare_set { name operator value } {
 	if { [eq $value NULL] && [eq $operator =] } {
 	    return "$name IS NULL"
 	} else {
-	    return "${name}${operator}[db_quote $value]"
+            lassign [::textutil::split::splitx $name ::] -> type
+	    return "${name}${operator}[db_quote $value $type]"
 	}
     } else {
 	return true

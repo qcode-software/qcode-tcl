@@ -8,8 +8,8 @@ namespace eval qc {
 proc qc::sql_where_in {column list {default false} } {
     # Construct part of a SQL WHERE clause using the IN construct.
     # SQL will test column against list of values.
+    lassign [::textutil::split::splitx $column ::] -> type
     foreach item $list {
-        lassign [::textutil::split::splitx $item ::] item type
 	lappend lquoted [db_quote $item $type]
     }
     if {[llength $list]==0} {
