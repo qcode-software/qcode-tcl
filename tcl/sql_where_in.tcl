@@ -42,8 +42,9 @@ doc qc::sql_where_in {
 }
 
 proc qc::sql_where_in_not {column list {default true}} {
+    lassign [::textutil::split::splitx $column ::] -> type
     foreach item $list {
-	lappend lquoted [db_quote $item]
+	lappend lquoted [db_quote $item $type]
     }
     if {[llength $list]==0} {
 	return $default
