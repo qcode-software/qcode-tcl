@@ -125,9 +125,7 @@ proc qc::db_qry_parse {qry {level 0} } {
     set qry [string map {\\: \0} $qry]
   
     # Colon variable substitution
-    set re {
-	([^:\\]):
-	([a-z_][a-z0-9_]*)  
+    set type_re {
 	(::(
 	    bigint
 	    |int8
@@ -187,6 +185,11 @@ proc qc::db_qry_parse {qry {level 0} } {
 	    )(?=[^a-z0-9]|$)
 	    )?
     }
+    set re {
+	([^:\\]):
+	([a-z_][a-z0-9_]*)  
+    }
+    append re $type_re
     regsub -all -nocase -expanded $re $qry {\1[::qc::db_quote [set {\2}] {\4}]} qry
 
     # Eval with uplevel
@@ -195,7 +198,9 @@ proc qc::db_qry_parse {qry {level 0} } {
     # =NULL to IS NULL
     if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]} {
 	# A select query
-	regsub -all {=NULL(::\S+)?} $qry { IS NULL} qry
+        set null_re {=NULL}
+        append null_re $type_re
+	regsub -all -expanded $null_re $qry { IS NULL} qry
     }
     return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
 }
