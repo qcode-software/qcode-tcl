@@ -195,7 +195,7 @@ proc qc::db_qry_parse {qry {level 0} } {
     # =NULL to IS NULL
     if {[regexp -nocase {^[ \t\r\n]*select[ \t\r\n]} $qry]} {
 	# A select query
-	regsub -all {=NULL} $qry { IS NULL} qry
+	regsub -all {=NULL(::\S+)?} $qry { IS NULL} qry
     }
     return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
 }
