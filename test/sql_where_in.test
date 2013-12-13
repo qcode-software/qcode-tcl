@@ -18,6 +18,11 @@ namespace eval ::qcode::test {
         sql_where_in name [list]
     } -cleanup {} -result {false}
 
+    test sql_where_in-1.2 {sql_where_in type} -setup {
+    } -body {
+        sql_where_in name::text [list Beth 9999 Brian]
+    } -cleanup {} -result {name::text in ('Beth'::text,'9999'::text,'Brian'::text)}
+
     test sql_where_in_not-1.0 {sql_where_in_not } -setup {
     } -body {
         sql_where_in_not name [list Beth Patti Brian]

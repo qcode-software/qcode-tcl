@@ -118,14 +118,29 @@ namespace eval ::qcode::test {
             db_qry_parse {update nosuchtable set message=:bar where title=:foo}
         } -result {update nosuchtable set message='it''s "fun" to use quotes' where title='hello'}
 
+        # db_qry_parse
+        test db_qry_parse-1.1 {db_qry_parse null} -body {
+            set foo ""
+            set bar "hello"
+            db_qry_parse {select * from nosuchtable where title=:foo and message=:bar}
+        } -result {select * from nosuchtable where title IS NULL and message='hello'}
+
+        # db_qry_parse
+        test db_qry_parse-1.2 {db_qry_parse type} -body {
+            set foo ""
+            set bar "1234"
+            db_qry_parse {select * from nosuchtable where title=:foo::text and message=:bar::character varying}
+        } -result {select * from nosuchtable where title IS NULL and message='1234'::character varying}
+
         # db_quote
         test db_quote-1.0 {db_quote} -body {
             set foo 1
             set bar one
             set baz {backslash\\}
             set thud {don't "forget" quotes}
-            return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud]"
-        } -result {1 'one' E'backslash\\\\' 'don''t "forget" quotes'}
+            set fred 999
+            return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud] [db_quote $fred text] [db_quote $fred]"
+        } -result {1 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text 999}
 
         # db_escape_regexp
         test db_escape_regexp-1.0 {db_escape_regexp} -body {

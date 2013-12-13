@@ -1,4 +1,4 @@
-package provide qcode 2.6.3
+package provide qcode 2.6.4
 package require doc
 namespace eval qc {
     # Tcl 8.5 only

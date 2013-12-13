@@ -33,6 +33,25 @@ namespace eval ::qcode::test {
         sql_where name "Townes O'Reilly" email ""
     } -cleanup {} -result {name='Townes O''Reilly'}
 
+    test sql_where-1.5 {sql_where type} -setup {
+    } -body {
+        sql_where name::text "Townes van Zandt" tel_no::text 1234
+    } -cleanup {} -result {name::text='Townes van Zandt'::text and tel_no::text='1234'::text}
+
+    test sql_where-1.6 {sql_where by name} -setup {
+        set name "Townes Van Zandt"
+        set email "townes@tecumseh.com"
+    } -body {
+        sql_where ~ name email 
+    } -cleanup {} -result {name='Townes Van Zandt' and email='townes@tecumseh.com'}
+
+    test sql_where-1.7 {sql_where by name typed} -setup {
+        set name "Townes Van Zandt"
+        set tel_no 1234
+    } -body {
+        sql_where ~ name::text tel_no::text
+    } -cleanup {} -result {name::text='Townes Van Zandt'::text and tel_no::text='1234'::text}
+
     test sql_where_like-1.0 {sql_where_like} -setup {
     } -body {
         sql_where_like name "Townes Van Zandt" email "townes@tecumseh.com"
