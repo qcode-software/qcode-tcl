@@ -9,9 +9,9 @@ REMOTEDIR=debian.qcode.co.uk
 
 .PHONY: all test
 
-all: test package upload clean
+all: test package upload git-tag clean
 package: 
-	checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
+	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
 test:   
 	./pkg_mkIndex tcl
@@ -31,5 +31,6 @@ upload:
 clean:
 	rm $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb
 
-uninstall:
-	rm -r /usr/lib/tcltk/$(NAME)$(VERSION)
+git-tag:
+	git tag -a "v$(VERSION)" -m "create tag v$(VERSION)"
+	git push origin --tags
