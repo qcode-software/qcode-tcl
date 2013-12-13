@@ -1,5 +1,6 @@
 package provide qcode 2.6.3
 package require doc
+package require textutil
 namespace eval qc {
     namespace export sql_where_in sql_where_in_not
 }
@@ -7,8 +8,9 @@ namespace eval qc {
 proc qc::sql_where_in {column list {default false} } {
     # Construct part of a SQL WHERE clause using the IN construct.
     # SQL will test column against list of values.
+    lassign [::textutil::split::splitx $column ::] -> type
     foreach item $list {
-	lappend lquoted [db_quote $item]
+	lappend lquoted [db_quote $item $type]
     }
     if {[llength $list]==0} {
 	return $default
@@ -40,8 +42,9 @@ doc qc::sql_where_in {
 }
 
 proc qc::sql_where_in_not {column list {default true}} {
+    lassign [::textutil::split::splitx $column ::] -> type
     foreach item $list {
-	lappend lquoted [db_quote $item]
+	lappend lquoted [db_quote $item $type]
     }
     if {[llength $list]==0} {
 	return $default

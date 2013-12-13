@@ -226,11 +226,11 @@ proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {ja
     return [join $list ,\n]
 }
 
-proc qc::sql_in {list} {
+proc qc::sql_in {list {type ""}} {
     #| Return a SQL comma separated list
     set sql {}
     foreach value $list {
-	lappend sql [db_quote $value]
+	lappend sql [db_quote $value $type]
     }
     if { [llength $sql]==0 } {
 	return "(NULL)"
