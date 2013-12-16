@@ -1,4 +1,4 @@
-package provide qcode 2.6.4
+package provide qcode 2.6.5
 namespace eval qc {
     namespace export pkcs_padding_append pkcs_padding_strip encrypt_bf_tcl encrypt_bf_db encrypt_bf decrypt_bf_tcl decrypt_bf_db decrypt_bf
 }

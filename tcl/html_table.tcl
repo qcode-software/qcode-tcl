@@ -1,4 +1,4 @@
-package provide qcode 2.6.4
+package provide qcode 2.6.5
 package require doc
 namespace eval qc {
     namespace export html_table html_table_row html_table_row_head html_table_colgroup html_table_thead_from_cols html_table_tfoot_sums html_table_wants_* html_table_cols_from_table html_table_tbody_* html_table_format html_table_format_* html_tbody_row page_html_table columns_show_hide_toolbar
@@ -159,8 +159,9 @@ proc qc::html_table { args } {
 
     if { [info exists class] && "db-grid" in $class } {
         set headers [ns_conn outputheaders]
+	ns_set update $headers Expires "Fri, 01 Jan 1990 00:00:00 GMT"
         ns_set update $headers Pragma no-cache
-        ns_set update $headers Cache-Control no-cache
+        ns_set update $headers Cache-Control "no-cache, no-store, max-age=0, must-revalidate"
     }
    
     
