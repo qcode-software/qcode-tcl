@@ -16,7 +16,9 @@ proc qc::sql_where { args } {
         set dict [dict create]
         foreach col_name $args {
             lassign [::textutil::split::splitx $col_name ::] var_name -
-            dict set dict $col_name [upset 1 $var_name]
+            if { [uplevel info exists $var_name] } {
+                dict set dict $col_name [upset 1 $var_name]
+            }
         }
     } else {
         set dict $args
