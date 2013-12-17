@@ -16,12 +16,12 @@ namespace eval ::qcode::test {
     test sql_set_with-1.0 {sql_set_with} -setup {
     } -body {
         sql_set_with name "Amadou" email "amadou@mali.com" user_code 911
-    } -cleanup {} -result {"name"='Amadou',"email"='amadou@mali.com',"user_code"=911}
+    } -cleanup {} -result {"name"='Amadou',"email"='amadou@mali.com',"user_code"='911'}
 
     test sql_set_with-1.1 {sql_set_with needs quoting} -setup {
     } -body {
         sql_set_with name "" email "Amado'u <amadou@mali.com>" user_code 911
-    } -cleanup {} -result {"name"=NULL,"email"='Amado''u <amadou@mali.com>',"user_code"=911}
+    } -cleanup {} -result {"name"=NULL,"email"='Amado''u <amadou@mali.com>',"user_code"='911'}
 
     test sql_insert-1.0 {sql_insert} -setup {
     } -body {
@@ -31,12 +31,12 @@ namespace eval ::qcode::test {
     test sql_insert_with-1.0 {sql_insert_with} -setup {
     } -body {
         sql_insert_with name "Amadou" email "amadou@mali.com" user_code 911
-    } -cleanup {} -result {( "name","email","user_code" ) values ( 'Amadou','amadou@mali.com',911 )}
+    } -cleanup {} -result {( "name","email","user_code" ) values ( 'Amadou','amadou@mali.com','911' )}
 
     test sql_insert_with-1.1 {sql_insert_with needs quoting} -setup {
     } -body {
         sql_insert_with name "" email "Amado'u <amadou@mali.com>" user_code 911
-    } -cleanup {} -result {( "name","email","user_code" ) values ( NULL,'Amado''u <amadou@mali.com>',911 )}
+    } -cleanup {} -result {( "name","email","user_code" ) values ( NULL,'Amado''u <amadou@mali.com>','911' )}
 
     test sql_sort-1.0 {sql_sort} -setup {
     } -body {
