@@ -1,4 +1,4 @@
-package provide qcode 2.6.6
+
 package require sha1
 package require md5
 package require base64

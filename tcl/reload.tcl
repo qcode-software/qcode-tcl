@@ -1,4 +1,4 @@
-package provide qcode 2.6.6
+
 package require doc
 namespace eval qc {
     namespace export reload

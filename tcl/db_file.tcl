@@ -1,4 +1,4 @@
-package provide qcode 2.6.6
+
 namespace eval qc {
     namespace export db_file_* plupload.html
 }

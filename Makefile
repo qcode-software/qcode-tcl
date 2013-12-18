@@ -1,6 +1,5 @@
 NAME=qcode
-VERSION=2.6.6
-$(shell ./set-version-number.tcl ${NAME} ${VERSION})
+VERSION=2.6.7
 RELEASE=0
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=debian.qcode.co.uk
@@ -18,10 +17,14 @@ test:
 	tclsh ./test_all.tcl -testdir test
 
 install: 
-	./pkg_mkIndex tcl
+	rm -rf package$(VERSION)
+	mkdir package$(VERSION)
+	./package.tcl package$(VERSION) ${NAME} ${VERSION}
+	./pkg_mkIndex package$(VERSION)
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp tcl/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp package$(VERSION)/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
+	rm -rf package$(VERSION)
 
 upload:
 	scp $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	

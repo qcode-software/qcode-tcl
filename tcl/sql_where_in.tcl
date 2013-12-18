@@ -1,4 +1,4 @@
-package provide qcode 2.6.6
+
 package require doc
 package require textutil
 namespace eval qc {
