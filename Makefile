@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=2.6.7
+VERSION=2.6.8
 RELEASE=0
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=debian.qcode.co.uk
@@ -12,19 +12,21 @@ all: test package upload git-tag clean
 package: 
 	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
-test:   
-	./pkg_mkIndex tcl
-	tclsh ./test_all.tcl -testdir test
+tcl-package :
+	rm -rf package
+	mkdir package
+	./package.tcl package ${NAME} ${VERSION}
+	./pkg_mkIndex package
 
-install: 
-	rm -rf package$(VERSION)
-	mkdir package$(VERSION)
-	./package.tcl package$(VERSION) ${NAME} ${VERSION}
-	./pkg_mkIndex package$(VERSION)
+test: tcl-package 
+	tclsh ./test_all.tcl -testdir test
+	rm -rf package
+
+install: tcl-package
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp package$(VERSION)/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp package/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
-	rm -rf package$(VERSION)
+	rm -rf package
 
 upload:
 	scp $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
