@@ -1,4 +1,4 @@
-package provide qcode 2.6.5
+package provide qcode 2.6.6
 package require doc
 namespace eval qc {
     namespace export email_* smtp_send smtp_recv sendmail email2multimap mime_type_guess qp_encode
