@@ -229,7 +229,7 @@ proc qc::url_path {url} {
     # Return just the url path
     if { [regexp {^https?://[a-z0-9_]+(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
 	return $path
-    } elseif { [regexp {^(/[^\?]*)} $url -> path] } {
+    } elseif { [regexp {^(/?[^\?]*)} $url -> path] } {
 	return $path 
     } else {
 	return ""
