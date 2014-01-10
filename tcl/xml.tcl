@@ -1,4 +1,3 @@
-package provide qcode 2.6.5
 package require doc
 namespace eval qc {
     namespace export xml xml_* xml2dict

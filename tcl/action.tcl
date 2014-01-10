@@ -1,4 +1,4 @@
-package provide qcode 2.6.5
+
 namespace eval qc {
     namespace export action action_print action_print_page action_menu
 }
