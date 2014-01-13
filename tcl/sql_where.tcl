@@ -265,7 +265,7 @@ proc qc::sql_where_or { args } {
     if { [llength $list]==0 } {
 	return true
     } else {
-	return [join $list " or "]
+	return ([join $list " or "])
     }
 }
 
