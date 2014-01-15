@@ -109,12 +109,12 @@ proc qc::http_post {args} {
         lappend curl_args -postfields $data
     }
 
-    dict2vars [qc::http_curl {*}$curl_args] html responsecode curlErrorNumber
+    dict2vars [qc::http_curl {*}$curl_args] return_headers html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
-		return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html]
+		return [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
 	    } else {
 		# raise an error
 		switch $responsecode {
@@ -173,14 +173,14 @@ proc qc::http_get {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
-    dict2vars [qc::http_curl  -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+    dict2vars [qc::http_curl  -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
 	    switch $responsecode {
 		200 { 
 		    # OK
-		    return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html] 
+		    return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
 		}
 		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
 		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
@@ -245,9 +245,9 @@ proc qc::http_put {args} {
     if { [info exists data] && [info exists infile]} {
         error "qc::http:put must have only 1 of -data or -infile specified"
     } elseif { [info exists infile] } {
-        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
     } elseif { [info exists data] }  {
-        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
     } else {
         error "qc::http:put must have 1 of -data or -infile specified"
     }
@@ -257,7 +257,7 @@ proc qc::http_put {args} {
 	    switch $responsecode {
 		200 { 
 		    # OK
-		    return [encoding convertfrom [qc::http_encoding [array get return_headers] $html] $html] 
+		    return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
 		}
 		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
 		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
