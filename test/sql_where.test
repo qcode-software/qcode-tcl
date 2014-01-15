@@ -145,12 +145,12 @@ namespace eval ::qcode::test {
     test sql_where_or-1.0 {sql_where_or} -setup {
     } -body {
         sql_where_or name "Townes Van Zandt" email "townes.van@zandt.com"
-    } -cleanup {} -result {name='Townes Van Zandt' or email='townes.van@zandt.com'}
+    } -cleanup {} -result {(name='Townes Van Zandt' or email='townes.van@zandt.com')}
 
     test sql_where_or-1.1 {sql_where_or empty clause} -setup {
     } -body {
         sql_where_or name "Townes Van Zandt" tel "" email "townes.van@zandt.com"
-    } -cleanup {} -result {name='Townes Van Zandt' or email='townes.van@zandt.com'}
+    } -cleanup {} -result {(name='Townes Van Zandt' or email='townes.van@zandt.com')}
 
     test sql_where_or-1.2 {sql_where_or all empty } -setup {
     } -body {
@@ -160,12 +160,12 @@ namespace eval ::qcode::test {
     test sql_where_or-1.3 {sql_where_or null } -setup {
     } -body {
         sql_where_or name "Townes Van Zandt" tel NULL email "NOT NULL"
-    } -cleanup {} -result {name='Townes Van Zandt' or tel IS NULL or email IS NOT NULL}
+    } -cleanup {} -result {(name='Townes Van Zandt' or tel IS NULL or email IS NOT NULL)}
 
     test sql_where_or-1.4 {sql_where_or quote } -setup {
     } -body {
         sql_where_or name "Bill O'Reilly" tel NULL email "NOT NULL"
-    } -cleanup {} -result {name='Bill O''Reilly' or tel IS NULL or email IS NOT NULL}
+    } -cleanup {} -result {(name='Bill O''Reilly' or tel IS NULL or email IS NOT NULL)}
 
     test sql_where_word_in-1.0 {sql_where_word_in} -setup {
     } -body {

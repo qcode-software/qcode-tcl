@@ -60,9 +60,12 @@ proc qc::db_file_export {args} {
 proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     #| Return image file resized to the given width and height.
     # Generated thumbnails are cached.
-    db_1row {
+    db_0or1row {
 	select filename, upload_date::timestamp(0) as file_created 
 	from file where file_id=:file_id
+    } {
+        # File not found
+        error "File file_id:\"$file_id\" not found" {} NOT_FOUND
     }
     set mime_type [ns_guesstype $filename]
     set headers [ns_conn headers]
