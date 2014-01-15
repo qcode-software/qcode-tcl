@@ -140,7 +140,7 @@ namespace eval ::qcode::test {
             set thud {don't "forget" quotes}
             set fred 999
             return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud] [db_quote $fred text] [db_quote $fred]"
-        } -result {1 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text 999}
+        } -result {'1' 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text '999'}
 
         # db_escape_regexp
         test db_escape_regexp-1.0 {db_escape_regexp} -body {
