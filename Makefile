@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=2.6.10
+VERSION=3.0.2
 RELEASE=0
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=debian.qcode.co.uk

@@ -40,12 +40,12 @@ proc qc::db_qry_parse {qry {level 0} } {
     while { $start<[string length $qry] \
 		&& [regexp -indices -nocase -expanded -start $start -- {[a-z_][a-z0-9_]*(
 									       (?:\[
-										(?: [0-9]+
+										(?: '?[0-9]+'?
 										 | [:$][a-z_][a-z0-9_]*
 										 | [a-z_]+\([^\)]*\)
 										 )
 										(?:
-										 :[0-9]+
+										 :'?[0-9]+'?
 										 | :\$[a-z_][a-z0-9_]*
 										 | \\::[a-z_][a-z0-9_]*
 										 | :[a-z_]+\([^\)]*\)
