@@ -265,15 +265,21 @@ doc qc::sql_array2list {
     }
 }
 
-proc qc::sql_list2array {list} {
+proc qc::sql_list2array { args } {
     #| Convert a list into a PostgrSQL array literal.
+    qc::args $args -type "" -- list
     foreach item $list {
 	lappend lquoted [db_quote $item]
     }
-    if {[llength $list]==0} {
-	return array\[\]
+    if { $type ne ""} {
+        set sql_cast "::${type}\[\]"
     } else {
-	return array\[[join $lquoted ,]\]
+        set sql_cast ""
+    }
+    if {[llength $list]==0} {
+	return array\[\]$sql_cast
+    } else {
+	return array\[[join $lquoted ,]\]$sql_cast
     }
 }
 
