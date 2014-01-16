@@ -269,7 +269,7 @@ proc qc::sql_list2array { args } {
     #| Convert a list into a PostgrSQL array literal.
     qc::args $args -type "" -- list
     foreach item $list {
-	lappend lquoted [db_quote $item]
+	lappend lquoted [db_quote $item $type]
     }
     if { $type ne ""} {
         set sql_cast "::${type}\[\]"
@@ -287,6 +287,10 @@ doc qc::sql_list2array {
     Examples {
 	% qc::sql_list2array [list "John West" "George East" Harry]
 	array['John West','George East','Harry']
+	% qc::sql_list2array [list 1 2 3 4]
+	array['1','2','3','4']
+	% qc::sql_list2array -type int [list 1 2 3 4]
+	array[1::int,2::int,3::int,4::int]::int[]
     }
 }
 

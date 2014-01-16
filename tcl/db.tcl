@@ -244,6 +244,51 @@ proc qc::db_quote { value {type ""}} {
 	return "${value}${sql_cast}"
     }
      
+     
+     set re_numeric_types {
+         ^(
+         bigint
+         |int8
+         |bigserial
+         |serial8
+         |double\s+precision
+         |float8
+         |integer
+         |int
+         |int4
+         |numeric(\([^,]+,[^\)]+\))?
+         |decimal(\([^,]+,[^\)]+\))?
+         |real
+         |float4
+         |smallint
+         |int2
+         |serial
+         |serial4
+         |money
+         )$
+     }
+
+    if { [regexp -nocase -expanded $re_numeric_types $type] } {
+        # integer no leading zeros
+        # -123456
+        if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {
+         return "${value}${sql_cast}"
+        }
+        # double greater than 1
+        if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value] } {
+         return "${value}${sql_cast}"
+        }
+        # decimal less than 1
+        # in form .23 or 0.23
+        if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
+         return "${sign}0.${tail}${sql_cast}"
+        }
+        # scientific notation        
+        if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
+         return "${value}${sql_cast}"
+        }
+    } 
+
     # quote everything as a string
     # replace ' with '' and \ with \\ 
     # (tcl also uses slash to escape hence \\ in string map)
