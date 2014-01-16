@@ -271,16 +271,16 @@ proc qc::sql_list2array {list} {
 	lappend lquoted [db_quote $item]
     }
     if {[llength $list]==0} {
-	return \{\}
+	return array\[\]
     } else {
-	return \{[join $lquoted ,]\}
+	return array\[[join $lquoted ,]\]
     }
 }
 
 doc qc::sql_list2array {
     Examples {
 	% qc::sql_list2array [list "John West" "George East" Harry]
-	{'John West','George East','Harry'}
+	array['John West','George East','Harry']
     }
 }
 
