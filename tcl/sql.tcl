@@ -1,7 +1,7 @@
 
 package require doc
 namespace eval qc {
-    namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with
+    namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with sql_limit
 }
 
 proc qc::sql_set {args} {
@@ -392,5 +392,14 @@ proc qc::sql_insert_or_update {table primary_key_cols cols} {
             insert into \"$table\"
             [sql_insert {*}$primary_key_cols {*}$cols]
         "
+    }
+}
+
+proc qc::sql_limit {limit} {
+    #| Helper to construct limit clause
+    if { $limit ne "" } {
+        return "limit [db_quote $limit]"
+    } else {
+        return ""
     }
 }
