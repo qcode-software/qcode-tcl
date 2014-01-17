@@ -18,7 +18,7 @@ proc qc::reload {args} {
             
             if { ![nsv_exists tcl_lib_md5 $file] } {
                 log Notice "Loading $file"
-                namespace eval :: [list source $file]
+                namespace eval :: [list ns_eval -sync source $file]
                 nsv_set tcl_lib_md5 $file $md5
             } elseif { $md5 ne [nsv_get tcl_lib_md5 $file] } {
                 namespace eval :: [list ns_eval -sync source $file]
