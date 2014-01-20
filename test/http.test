@@ -121,7 +121,7 @@ namespace eval ::qcode::test {
             }
         }
         set headers [dict get $dict headers]
-        if { [lsort [dict keys $headers]] ne {Accept Connection Content-Length Content-Type Host} } {
+        if { [lsort [dict keys [dict remove $headers X-Request-Id]]] ne {Accept Connection Content-Length Content-Type Host} } {
             return "false: header keys mismatch"
         }
         foreach {key value} {
@@ -167,7 +167,7 @@ namespace eval ::qcode::test {
         }
 
         set headers [dict get $dict headers]
-        if { [lsort [dict keys $headers]] ne {Accept Connection Content-Length Content-Type Host} } {
+        if { [lsort [dict keys [dict remove $headers X-Request-Id]]] ne {Accept Connection Content-Length Content-Type Host} } {
             return false
         }
         foreach {name value} {
