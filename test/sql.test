@@ -76,12 +76,12 @@ namespace eval ::qcode::test {
     test sql_list2array-1.0 {sql_list2array} -setup {
     } -body {
         sql_list2array [list "Four 'Tet" "Sleigh Bells" Bauhaus]
-    } -cleanup {} -result {{'Four ''Tet','Sleigh Bells','Bauhaus'}}
+    } -cleanup {} -result {array['Four ''Tet','Sleigh Bells','Bauhaus']}
 
     test sql_list2array-1.1 {sql_list2array empty} -setup {
     } -body {
         sql_list2array [list]
-    } -cleanup {} -result {{}}
+    } -cleanup {} -result {array[]}
 
     test sql_where_postcode-1.0 {sql_where_postcode full} -setup {
     } -body {
