@@ -44,7 +44,7 @@ doc qc::sql_where_in {
 proc qc::sql_where_in_not { args } {
     #| Construct part of a SQL WHERE clause using the NOT IN construct.
     # SQL will test column against list of values.
-    qc::args $args -type "" -- column list {default false}
+    qc::args $args -type "" -- column list {default true}
 
     foreach item $list {
 	lappend lquoted [db_quote $item $type]
