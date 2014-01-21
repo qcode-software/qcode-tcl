@@ -1,43 +1,29 @@
 
 package require doc
-package require textutil
 namespace eval qc {
     namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
 }
 
 proc qc::sql_where { args } {
-    qc::args $args -nocase -- args
+    qc::args $args -nocase -type "" -- args
     #| Construct part of SQL WHERE clause using varNames
     #| in a pass-by-name list or a dict.
     #| Any empty values or non-existent variables are ignored
-    if { [lindex $args 0] eq "~" } {
-        # Passing by name
-        qc::lshift args
-        set dict [dict create]
-        foreach col_name $args {
-            lassign [::textutil::split::splitx $col_name ::] var_name -
-            if { [uplevel info exists $var_name] } {
-                dict set dict $col_name [upset 1 $var_name]
-            }
-        }
-    } else {
-        set dict $args
-    }
+    set dict [qc::args2dict $args]
     set list {}
     foreach {name value} $dict {
         if { [ne $value ""] } {
-            if { [string equal $value NULL] } {
+         if { [string equal $value NULL] } {
                 lappend list "$name IS NULL"
-            } elseif { [string equal $value "NOT NULL"] } {
+         } elseif { [string equal $value "NOT NULL"] } {
                 lappend list "$name IS NOT NULL"
-            } else {
-                lassign [::textutil::split::splitx $name ::] -> type
+         } else {
                 if { [info exists nocase] } {
-                    lappend list "lower($name)=lower([db_quote $value $type])"
+                 lappend list "lower($name)=lower([db_quote $value $type])"
                 } else {
-                    lappend list "$name=[db_quote $value $type]"
+                 lappend list "$name=[db_quote $value $type]"
                 }
-            }
+         }
         }
     }
     if { [llength $list]==0 } {
@@ -232,14 +218,14 @@ proc qc::sql_where_compare { args } {
     }
 }
 
-proc qc::sql_where_compare_set { name operator value } {
+proc qc::sql_where_compare_set { args } {
+    qc::args $args -type "" --  name operator value
     if { [ne $value ""] } {
 	# check operator
 	if { ![in [list < = > <> <= >=] $operator] } { error "Unknown operator $operator" }
 	if { [eq $value NULL] && [eq $operator =] } {
 	    return "$name IS NULL"
 	} else {
-            lassign [::textutil::split::splitx $name ::] -> type
 	    return "${name}${operator}[db_quote $value $type]"
 	}
     } else {
