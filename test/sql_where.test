@@ -35,8 +35,8 @@ namespace eval ::qcode::test {
 
     test sql_where-1.5 {sql_where type} -setup {
     } -body {
-        sql_where name::text "Townes van Zandt" tel_no::text 1234
-    } -cleanup {} -result {name::text='Townes van Zandt'::text and tel_no::text='1234'::text}
+        sql_where -type text name "Townes van Zandt" tel_no 1234
+    } -cleanup {} -result {name='Townes van Zandt'::text and tel_no='1234'::text}
 
     test sql_where-1.6 {sql_where by name} -setup {
         set name "Townes Van Zandt"
@@ -49,8 +49,8 @@ namespace eval ::qcode::test {
         set name "Townes Van Zandt"
         set tel_no 1234
     } -body {
-        sql_where ~ name::text tel_no::text
-    } -cleanup {} -result {name::text='Townes Van Zandt'::text and tel_no::text='1234'::text}
+        sql_where -type text ~ name tel_no
+    } -cleanup {} -result {name='Townes Van Zandt'::text and tel_no='1234'::text}
 
     test sql_where_like-1.0 {sql_where_like} -setup {
     } -body {
@@ -141,6 +141,16 @@ namespace eval ::qcode::test {
     } -body {
         sql_where_compare_set name <> "Bill O'Reilly"
     }  -cleanup {} -result {name<>'Bill O''Reilly'}
+
+    test sql_where_compare_set-1.5 {sql_where_compare_set numeric} -setup {
+    } -body {
+        sql_where_compare_set cost < 100
+    }  -cleanup {} -result {cost<'100'}
+
+    test sql_where_compare_set-1.6 {sql_where_compare_set numeric typed} -setup {
+    } -body {
+        sql_where_compare_set -type int cost < 100
+    }  -cleanup {} -result {cost<100::int}
 
     test sql_where_or-1.0 {sql_where_or} -setup {
     } -body {

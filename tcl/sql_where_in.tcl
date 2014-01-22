@@ -1,14 +1,14 @@
 
 package require doc
-package require textutil
 namespace eval qc {
     namespace export sql_where_in sql_where_in_not
 }
 
-proc qc::sql_where_in {column list {default false} } {
-    # Construct part of a SQL WHERE clause using the IN construct.
+proc qc::sql_where_in {args } {
+    #| Construct part of a SQL WHERE clause using the IN construct.
     # SQL will test column against list of values.
-    lassign [::textutil::split::splitx $column ::] -> type
+    qc::args $args -type "" -- column list {default false}
+
     foreach item $list {
 	lappend lquoted [db_quote $item $type]
     }
@@ -41,8 +41,11 @@ doc qc::sql_where_in {
     }
 }
 
-proc qc::sql_where_in_not {column list {default true}} {
-    lassign [::textutil::split::splitx $column ::] -> type
+proc qc::sql_where_in_not { args } {
+    #| Construct part of a SQL WHERE clause using the NOT IN construct.
+    # SQL will test column against list of values.
+    qc::args $args -type "" -- column list {default true}
+
     foreach item $list {
 	lappend lquoted [db_quote $item $type]
     }
