@@ -1,7 +1,7 @@
 
 package require doc
 namespace eval qc {
-    namespace export file_temp
+    namespace export file_temp file_write
 }
 
 proc qc::file_temp {text {mode 0600}} {
@@ -27,7 +27,7 @@ doc qc::file_temp {
     }
 }
 
-proc qc::file_write {filename text} {
+proc qc::file_write {filename contents {perms ""}} {
     # Return true if file has changed by writing to it.
     if { $perms ne "" } {
 	set perms [qc::format_right0 $perms 5]
@@ -51,7 +51,7 @@ proc qc::file_write {filename text} {
 	close $handle
 	return true
     } else {
-	if { ![file exists $filename] || [cat $filename] ne $contents || [file attributes $filename -permissions]!=$perms } { 
+	if { ![file exists $filename] || [qc::cat $filename] ne $contents || [file attributes $filename -permissions]!=$perms } { 
 	    log "writing ${filename} ..."
 	    set handle [open $filename w+ 00600]
 	    puts -nonewline $handle $contents
@@ -66,4 +66,21 @@ proc qc::file_write {filename text} {
 	    return false
 	}
     }
+}
+
+proc qc::cat {filename} {
+    if { [regexp {^([^@]+)@([^:]+[^\\]):(.+)$} $filename -> username host path]} {
+	set handle [open "| ssh $username@$host cat $path" r]
+	set contents [read $handle]
+	close $handle
+    } elseif { [regexp {^([^:]+[^\\]):(.+)$} $filename -> host path] } {
+	set handle [open "| ssh $host cat $path" r]
+	set contents [read $handle]
+	close $handle
+    } else {
+	set handle [open $filename r]
+	set contents [read $handle]
+	close $handle
+    }
+    return $contents
 }
