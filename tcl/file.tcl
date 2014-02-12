@@ -26,3 +26,44 @@ doc qc::file_temp {
 	/tmp/ns.aCtGxR
     }
 }
+
+proc qc::file_write {filename text} {
+    # Return true if file has changed by writing to it.
+    if { $perms ne "" } {
+	set perms [qc::format_right0 $perms 5]
+    }
+    if { [regexp {^([^@]+)@([^:]+[^\\]):(.+)$} $filename -> username host path]} {
+	if { $perms ne "" } {
+	    set handle [open "| ssh $username@$host \"touch $path && chmod $perms $path && cat > $path\"" w]
+	} else {
+	    set handle [open "| ssh $username@$host \"cat > $path\"" w]
+	}
+	puts -nonewline $handle $contents
+	close $handle
+	return true
+    } elseif { [regexp {^([^:]+[^\\]):(.+)$} $filename -> host path] } {
+	if { $perms ne "" } {
+	    set handle [open "| ssh $host \"touch $path && chmod $perms $path && cat > $path\"" w]
+	} else {
+	    set handle [open "| ssh $host \"cat > $path\"" w]
+	}
+	puts -nonewline $handle $contents
+	close $handle
+	return true
+    } else {
+	if { ![file exists $filename] || [cat $filename] ne $contents || [file attributes $filename -permissions]!=$perms } { 
+	    log "writing ${filename} ..."
+	    set handle [open $filename w+ 00600]
+	    puts -nonewline $handle $contents
+	    close $handle
+	    if { $perms ne "" } {
+		# set file permissions
+		file attributes $filename -permissions $perms
+	    }
+	    log "written"
+	    return true
+	} else {
+	    return false
+	}
+    }
+}
