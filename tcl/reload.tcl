@@ -32,6 +32,6 @@ proc qc::reload {args} {
         }
     }
     if { $reloaded } {
-        ns_memoize_flush ::$pattern
+        ns_memoize_flush
     }
 }
