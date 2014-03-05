@@ -8,6 +8,7 @@ proc qc::reload {args} {
     if {[llength $args]==0} {
         set args [nsv_array names tcl_libs]
     }
+    set reloaded false
     foreach dir $args {
         nsv_set tcl_libs $dir 1
         set files [glob -nocomplain [file join $dir *.tcl]]
@@ -20,11 +21,17 @@ proc qc::reload {args} {
                 log Notice "Loading $file"
                 namespace eval :: [list ns_eval -sync source $file]
                 nsv_set tcl_lib_md5 $file $md5
+                set reloaded true
+
             } elseif { $md5 ne [nsv_get tcl_lib_md5 $file] } {
                 namespace eval :: [list ns_eval -sync source $file]
                 nsv_set tcl_lib_md5 $file $md5
                 log Notice "Reloading $file"
+                set reloaded true
             } 
         }
+    }
+    if { $reloaded } {
+        ns_memoize_flush
     }
 }
