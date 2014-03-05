@@ -32,15 +32,6 @@ proc qc::reload {args} {
         }
     }
     if { $reloaded } {
-        foreach proc_name [info procs ::*] {
-            set md5 [qc::md5 [info body ::$proc_name]]
-            set pattern [string map {* \*} $proc_name]
-            if { ( ! [nsv_exists tcl_proc_md5 $proc_name])
-                 || $md5 ne [nsv_get tcl_proc_md5 $proc_name] } {
-                log Notice "Flushing memoized proc $proc_name"
-                ns_memoize_flush ::$pattern
-                nsv_set tcl_proc_md5 $proc_name $md5
-            }
-        }
+        ns_memoize_flush ::$pattern
     }
 }
