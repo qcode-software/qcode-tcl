@@ -162,7 +162,7 @@ proc qc::sql_where_col_starts { args } {
     if { [llength $list]==0 } {
 	return true
     } else {
-	return [join $list " $logic "]
+	return ([join $list " $logic "])
     }
 }
 
@@ -271,7 +271,7 @@ proc qc::sql_where_word_in { args } {
     if { [llength $list]==0 } {
 	return true
     } else {
-	return [join $list " and "]
+	return ([join $list " and "])
     }
 }
 
