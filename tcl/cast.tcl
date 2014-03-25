@@ -134,8 +134,8 @@ proc qc::cast_epoch { string } {
     if { [regexp {^(19\d\d|20\d\d)(\d\d)(\d\d)$} $string -> year month day] } {
 	return [clock scan "$year-$month-$day"]
     }
-    # Already an epoch
-    if { [string is integer -strict $string] && $string>31 } {
+    # Already an epoch but not a month or year
+    if { [string is integer -strict $string] && $string>9999 } {
 	return $string
     }
     # Exact ISO date
@@ -188,24 +188,35 @@ proc qc::cast_epoch { string } {
 	set year [clock format [clock seconds] -format "%Y"]
 	return [clock scan "$year-$month-$day $time"]
     }
-    if { [regexp {(^|[^0-9])(\d{4})([^0-9]|$)} $string -> start year end] } {
+    if { [regexp {(^|[^0-9])([12]\d{3})([^0-9]|$)} $string -> start year end] } {
 	#### Matched YEAR ####
 	# year && month && dom
 	# 23 June 2006 or June 23rd 2006
-	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end] \
-	     && [regexp -nocase -- {(^|\W)(\d{1,2})(st|nd|rd|th)?(\W|$)} $string -> start dom suffix end] } {
-	    # month and dom
-	    return [clock scan "$dom $month_name $year $time"]
-	}
+	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end] } {
+            if { [regexp -nocase -- {(^|\W)(\d{1,2})(st|nd|rd|th)?(\W|$)} $string -> start dom suffix end] } {
+                # month and dom
+                return [clock scan "$dom $month_name $year $time"]
+            } else {
+                # Jan 2006
+                return [clock scan "01 $month_name $year"]
+            }
+        } else {
+            # 2006
+            return [clock scan "01 January $year"]
+        }
     } else {
 	#### NO YEAR ####
 	# no year && month && dom
 	# 23rd June or Sept 11th
-	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end] \
-		 && [regexp -nocase -- {(^|\W)(\d{1,2})(st|nd|rd|th)(\W|$)} $string -> start dom suffix end] } {	 
-	    set year [clock format [clock seconds] -format "%Y"]
-	    return [clock scan "$dom $month_name $year $time"]
-	}
+	if { [regexp -nocase -- {(^|[^a-zA-Z])(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)([^a-zA-Z]|$)} $string -> start month_name end] } {
+            set year [clock format [clock seconds] -format "%Y"]
+            if {[regexp -nocase -- {(^|\W)(\d{1,2})(st|nd|rd|th)(\W|$)} $string -> start dom suffix end] } {	 
+                return [clock scan "$dom $month_name $year $time"]
+            } else {
+                # Jan
+                return [clock scan "01 $month_name $year"]   
+            }
+        }
 	# dd or dd+suffix eg 23rd or 2nd ONLY 
 	if { [regexp -nocase -- {(^|\W)(\d{1,2})(st|nd|rd|th)?(\W|$)} $string -> start day suffix end] } {
 	    set year [clock format [clock seconds] -format "%Y"]

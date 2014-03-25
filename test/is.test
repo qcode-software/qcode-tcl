@@ -2606,7 +2606,7 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is_date_castable-1.3 {is_date_castable month only} -setup {
     } -body {
         is_date_castable May
-    } -result false
+    } -result true
 
     test is_date_castable-1.4 {is_date_castable illegal} -setup {
     } -body {
