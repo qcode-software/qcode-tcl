@@ -337,8 +337,6 @@ doc qc::cast_creditcard {
 
 proc qc::cast_period {string} {
     #| Return a pair of dates defining the period.
-    set string [trim $string]
-
     if { [regexp {^([12]\d{3})$} $string -> year] } {
         # Exact match for year eg "2006"
         set from_date [date_year_start $year-01-01]
