@@ -63,6 +63,15 @@ namespace eval ::qcode::test {
     } -returnCodes error -result "4213322211211112 is not a valid credit card number"
     test cast_creditcard-1.1 {cast_creditcard spaces} {qc::cast_creditcard "4111 1111 1111 1111"} 4111111111111111
 
+
+    test cast_period-1.0 {qc::cast_period ""} -body {qc::cast_period ""} -result "Could not parse string \"\" into dates that define a period." -returnCodes error 
+    test cast_period-1.1 {qc::cast_period "Jan"} {qc::cast_period "Jan"} [list 2014-01-01 2014-01-31]
+    test cast_period-1.2 {qc::cast_period "January"} {qc::cast_period "January"} [list 2014-01-01 2014-01-31]
+    test cast_period-1.3 {qc::cast_period "2014"} {qc::cast_period "2014"} [list 2014-01-01 2014-12-31]
+    test cast_period-1.4 {qc::cast_period "Jan 2014"} {qc::cast_period "Jan 2013"} [list 2013-01-01 2013-01-31]
+    test cast_period-1.5 {qc::cast_period "January 2014"} {qc::cast_period "January 2013"} [list 2013-01-01 2013-01-31]
+    test cast_period-1.6 {qc::cast_period "Febuary 2014"} -body {qc::cast_period "Febuary 2013"} -result "Could not parse string \"Febuary 2013\" into dates that define a period." -returnCodes error 
+
     cleanupTests
 }
 namespace delete ::qcode::test

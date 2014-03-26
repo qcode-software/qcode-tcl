@@ -334,3 +334,49 @@ doc qc::cast_creditcard {
 	4213322211211112 is not a valid credit card number
     }
 }
+
+proc qc::cast_period {string} {
+    #| Return a pair of dates defining the period.
+    if { [regexp {^([12]\d{3})$} $string -> year] } {
+        # Exact match for year eg "2006"
+        set from_date [date_year_start $year-01-01]
+        set to_date [date_year_end $year-01-01]
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)$} $string -> month_name] } {
+        # Exact match for month eg "Jan" (assume this year)
+        set epoch [clock scan "01 $month_name [date_year now]"]
+        set from_date [date_month_start $epoch]
+        set to_date [date_month_end $epoch]
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([12]\d{3})$} $string -> month_name year] } {
+        # Exact match for month year eg "Jan 2006"
+        set epoch [clock scan "01 $month_name $year"]
+        set from_date [date_month_start $epoch]
+        set to_date [date_month_end $epoch]
+
+    } else {
+        # error - could not parse string
+        error "Could not parse string \"$string\" into dates that define a period."
+    }
+    
+    return [list $from_date $to_date]
+}
+
+doc qc::cast_period {
+    Examples {
+	% cast_period "2014"
+	2014-01-01 2014-12-31
+	%
+        % cast_period "Jan"
+	2014-01-01 2014-01-31
+	%
+        % cast_period "January"
+	2014-01-01 2014-01-31
+	%
+        % cast_period "Jan 2013"
+	2013-01-01 2013-01-31
+	%
+        % cast_period "January 2013"
+	2013-01-01 2013-01-31
+    }
+}
