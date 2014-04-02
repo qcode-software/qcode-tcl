@@ -1,5 +1,5 @@
 NAME=qcode
-VERSION=3.1.1
+VERSION=3.3.0
 RELEASE=0
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=debian.qcode.co.uk
@@ -8,7 +8,7 @@ REMOTEDIR=debian.qcode.co.uk
 
 .PHONY: all test
 
-all: test package upload git-tag clean
+all: test package upload clean
 package: 
 	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(NAME)-$(VERSION) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
@@ -35,7 +35,3 @@ upload:
 
 clean:
 	rm $(NAME)-$(VERSION)_$(VERSION)-$(RELEASE)_all.deb
-
-git-tag:
-	git tag -a "v$(VERSION)" -m "create tag v$(VERSION)"
-	git push origin --tags
