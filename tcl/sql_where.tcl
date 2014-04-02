@@ -255,35 +255,73 @@ proc qc::sql_where_or { args } {
     }
 }
 
-proc qc::sql_where_word_in { args } {
-    #| Construct part of SQL WHERE clause using varNames
-    #| in a pass-by-name list or a dict.
-    #| Any empty values or non-existent variables are ignored
-    set dict [args2dict $args]
+proc qc::sql_where_word_in { name value } {
+    #| Deprecated proc name - use qc::sql_where_words_in 
+    return [sql_where_words_in $name $value]
+}
+
+proc qc::sql_where_phrase_words_in { args } {
+    #| Where clause to match the words in each phrase
+    qc::args $args -all -- name args
     set list {}
-    foreach {name value} $dict {
-	if { [info exists value] && [ne $value ""] } {
-	    foreach word [split $value] {
-		lappend list "$name ~ [db_quote "( |^)[db_escape_regexp $word]( |$)"]"
-	    }
-	}
+    foreach phrase $args {
+	lappend list "([qc::sql_where_words_in $name $phrase])"
     }
-    if { [llength $list]==0 } {
-	return true
+    if { [llength $list] > 0 } {
+        if { [info exists all] } {
+            return "[join $list " and "]"
+        } else {
+            return "([join $list " or "])"
+        }
     } else {
-	return ([join $list " and "])
+        return true
     }
 }
 
-doc qc::sql_where_word_in {
+proc qc::sql_where_words_in { name phrase } {
+    #| Where clause to match all words in the phrase in any order.
+    set list {}
+    if { [ne $phrase ""] } {
+        foreach word [split $phrase] {
+            lappend list "$name ~ [db_quote "( |^)[db_escape_regexp $word]( |$)"]"
+	}
+        return [join $list " and "]
+    } else {
+	return true
+    } 
+}
+
+doc qc::sql_where_words_in {
     Parent db
-    Usage {sql_where_word_in ?varName1 varName2 varName3 ...?}
+    Usage {sql_where_words_in name phrase}
     Description {
 	Construct part of a SQL WHERE clause to find a word in a string
     }
     Examples {
-	% set name Jimmy
-	% set qry "select * from users where [sql_where_word_in name $name]"
-	select * from users where name ~ '(^| )Jimmy($| )'
+	% set name "Jimmy Carr"
+	% set qry "select * from users where [sql_where_words_in name $name]"
+	select * from users where name ~ '( |^)Jimmy( |$)' and name ~ '( |^)Carr( |$)'
     }
 }
+
+proc qc::sql_where_phrases_in { args } {
+    #| Where clause to evaluate to true if $phrase occurrs in sql expression $name
+    qc::args $args -all -- name args
+    set list {}
+    foreach phrase $args {
+        if { [ne $phrase ""] } {
+            lappend list "$name ~ [db_quote "( |^)[db_escape_regexp $phrase]( |$)"]"
+        }
+    }
+    if { [llength $list] > 0 } {
+        if { [info exists all] } {
+            return [join $list " and "]
+        } else {
+            return [join $list " or "]
+        }
+    } else {
+        return true
+    }
+}
+
+
