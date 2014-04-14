@@ -317,7 +317,7 @@ proc qc::sql_where_phrases_in { args } {
         if { [info exists all] } {
             return [join $list " and "]
         } else {
-            return [join $list " or "]
+            return ([join $list " or "])
         }
     } else {
         return true
