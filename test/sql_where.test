@@ -200,7 +200,7 @@ namespace eval ::qcode::test {
     test sql_where_phrases_in-1.0 {sql_where_phrases_in} -setup {
     } -body {
         sql_where_phrases_in name "Townes Van Zandt" "Johnny Cash"
-    } -cleanup {} -result {name ~ '( |^)Townes Van Zandt( |$)' or name ~ '( |^)Johnny Cash( |$)'}
+    } -cleanup {} -result {(name ~ '( |^)Townes Van Zandt( |$)' or name ~ '( |^)Johnny Cash( |$)')}
 
     test sql_where_phrases_in-1.1 {sql_where_phrases_in all} -setup {
     } -body {
