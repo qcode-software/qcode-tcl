@@ -2,11 +2,12 @@
 #| Copy tcl files into package directory and add package provide statements
 
 # Parse args
-set package_dir [lindex $argv 0]
-set package [lindex $argv 1]
-set version [lindex $argv 2]
-if { $argc != 3 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
-    error "Usage: package.tcl dir package version"
+set from_dir [lindex $argv 0]
+set to_dir [lindex $argv 1]
+set package [lindex $argv 2]
+set version [lindex $argv 3]
+if { $argc != 4 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
+    error "Usage: package.tcl from_dir to_dir package version"
 }
 
 proc cat {filename} {
@@ -23,7 +24,6 @@ proc write {filename string} {
     return $string
 }
 
-set dir [file normalize [file dirname [info script]]]
-foreach filename [lsort [glob $dir/tcl/*.tcl]] {
-    write $package_dir/[file tail $filename] "package provide $package $version\n[cat $filename]"
+foreach filename [lsort [glob $from_dir/*.tcl]] {
+    write $to_dir/[file tail $filename] "package provide $package $version\n[cat $filename]"
 }
