@@ -407,7 +407,10 @@ proc qc::list2csv {list {comma ,}} {
     set out ""
     set separator {}
     foreach field $list {
-	if { [string first $separator $field]==-1 && [string first \" $field]==-1 } {
+	if { [string first $separator $field]==-1
+             && [string first \" $field]==-1
+             && [string first \n $field]==-1
+         } {
 	    append out $separator$field
 	} else {
 	    append out $separator\"[string map [list \" \"\"] $field]\"
