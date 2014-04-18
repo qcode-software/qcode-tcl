@@ -309,6 +309,11 @@ namespace eval ::qcode::test {
         list2csv [list] 
     } -cleanup {} -result {}
 
+    test list2csv-1.6 {list2csv } -setup {
+    } -body {
+        list2csv [list Jeff "Tom\r\n" Dave "Kerry\n"]
+    } -cleanup {} -result "Jeff,\"Tom\r\n\",Dave,\"Kerry\n\""
+
     test lconcat-1.0 {lconcat result} -setup {
         set test_list [list Q W E R T Y]
     } -body {
