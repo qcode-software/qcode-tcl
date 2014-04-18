@@ -316,8 +316,10 @@ proc qc::sql_where_phrases_in { args } {
     if { [llength $list] > 0 } {
         if { [info exists all] } {
             return [join $list " and "]
-        } else {
+        } elseif { [llength $list] > 1 } {
             return ([join $list " or "])
+        } else {
+            return [lindex $list 0]
         }
     } else {
         return true
