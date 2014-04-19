@@ -121,6 +121,10 @@ doc qc::cast_timestamp {
     }
 }
 
+proc qc::cast_timestamptz {string} {
+    #| Try to convert the given string into an ISO datetime with timezone.
+    return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]
+}
 
 proc qc::cast_epoch { string } {
     #| Try to convert the given string into an epoch
@@ -155,6 +159,18 @@ proc qc::cast_epoch { string } {
         if { $sec ne "" } {
             set time "$time:$sec"
         }
+	return [clock scan "$year-$month-$day $time" -timezone "$timezone"]
+    }
+    # rfc-822 style dates used in emails.
+    # "Fri, 17 Aug 2012 12:51:36 +0100"
+    if { [regexp {(\d{1,2}) +(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December) +(\d{4}) +(\d{1,2}:\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?\s?(Z|[-+]\d\d(:?\d\d)?)} $string -> day mon year time sec timezone] } {
+        if { $timezone eq "Z" } {
+            set timezone "+00"
+        }
+        if { $sec ne "" } {
+            set time "$time:$sec"
+        }
+        set month [expr {[lsearch {January February March April May June July August September October November December} "${mon}*"]+1}]
 	return [clock scan "$year-$month-$day $time" -timezone "$timezone"]
     }
     # ISO datetime Don't match the end of line for e.g. "2009-04-06 12:25:18.343"

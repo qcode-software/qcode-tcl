@@ -22,6 +22,11 @@ doc qc::format_timestamp_iso {
     }
 }
 
+proc qc::format_timestamptz { string } {
+    #| Format string as an ISO timestamp with time zone
+    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]]
+}
+
 proc qc::format_timestamp_http { string } {
     #| Format string as http timestamp according to RFC 1123
     return [clock format [cast_epoch $string] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]
