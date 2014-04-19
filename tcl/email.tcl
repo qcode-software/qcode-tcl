@@ -354,6 +354,17 @@ doc qc::sendmail {
     }
 }
 
+proc qc::email_header_value {value} {
+    #| Decode an encoded header value as per rfc-2047
+    # eg. =?UTF-8?B?UWNvZGUgUm9ja3M=?=
+    if { [regexp {^=\?[^ \?]+\?[QBqb]\?[^ ]+?=$} $value] } {
+        lassign [mime::word_decode $value] charset method string
+        return [encoding convertfrom $charset $string]
+    } else {
+        return $value
+    }
+}
+
 proc qc::email2multimap {text} {
     # Convert an email message into a multimap data structure
     # Header values are mapped as key value pairs
@@ -370,9 +381,9 @@ proc qc::email2multimap {text} {
     foreach line [split $head \n] {
 	lassign [split_pair $line :] key value
 	# Check if value is encoded
-	lappend email $key $value
+	lappend email $key [qc::email_header_value $value]
     }
-
+    
     if { [multimap_exists $email Content-Type] } {
 	set bodies {}
 	array set header [email_header_values Content-Type [multimap_get_first $email Content-Type]]
