@@ -101,6 +101,92 @@ namespace eval ::qcode::test {
         url someplace.html next_url someplace_else.html?name=Mr+Test+Test&email=test@test.com
     } -cleanup {} -result {someplace.html?next_url=someplace_else.html%3fname%3dMr%2bTest%2bTest%26email%3dtest%40test.com}
     
+    # url_match
+    test url_match-1.0 {url_match identical urls} -body {
+        url_match /foo /foo
+    } -result true
+
+    test url_match-1.1 {url_match completely different urls} -body {
+        url_match /foo /bar
+    } -result false
+
+    test url_match-1.2 {url_match urls with params} -body {
+        url_match /shape?width=12&height=14 /shape?width=12&height=14
+    } -result true
+
+    test url_match-1.3 {url_match re-ordered params} -body {
+        url_match /shape?width=12&height=14 /shape?height=14&width=12
+    } -result true
+
+    test url_match-1.4 {url_match urls with different params} -body {
+        url_match /shape?width=12&height=14 /shape?center=2&radius=3
+    } -result false
+
+    test url_match-1.5 {url_match urls with redundant params} -body {
+        url_match /shape?width=12&height=14 /shape?width=12&height=14&depth=3
+    } -result true
+
+    test url_match-1.6 {url_match urls with insufficient params} -body {
+        url_match /shape?width=12&height=14&depth=3 /shape?width=12&height=14
+    } -result false
+
+    test url_match-1.7 {url_match urls list params} -body {
+        url_match /shape?colors=red&colors=green&height=12 /shape?height=12&colors=green&colors=red
+    } -result true
+
+    test url_match-1.8 {url_match urls unmatched list params} -body {
+        url_match /shape?colors=red&colors=green&height=12 /shape?height=12&colors=red&colors=blue
+    } -result false
+
+    test url_match-1.9 {url_match urls repeated params} -body {
+        url_match /matches?score=1&score=1&score=5&sides=2 /matches?sides=2&score=5&score=1&score=1&score=1
+    } -result true
+
+    test url_match-1.10 {url_match urls unmatched repeated params} -body {
+        url_match /matches?score=1&score=1&score=5&sides=2 /matches?sides=2&&score=5score=1
+    } -result false
+
+    test url_match-1.11 {url_match hash} -body {
+        url_match /home#test /home?foo=bar#test
+    } -result true
+
+    test url_match-1.12 {url_match missing hash} -body {
+        url_match /home#test /home?foo=bar
+    } -result false
+
+    test url_match-1.13 {url_match redundant hash} -body {
+        url_match /home /home?foo=bar#test
+    } -result true
+
+    # url_parts
+    test url_parts-1.0 {url parts with everything} -body {
+        url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2#flowers"
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash flowers}
+
+    test url_parts-1.1 {url parts with no port} -body {
+        url_parts "https://www.qcode.test.co.uk/homepage?width=12&age=2#flowers"
+    } -result {base https://www.qcode.test.co.uk/homepage params {width 12 age 2} hash flowers}
+
+    test url_parts-1.2 {url parts with no protocol} -body {
+        url_parts "www.qcode.test.co.uk/homepage?width=12&age=2#flowers"
+    } -result {base www.qcode.test.co.uk/homepage params {width 12 age 2} hash flowers}
+
+    test url_parts-1.3 {url parts with no domain} -body {
+        url_parts "/homepage?width=12&age=2#flowers"
+    } -result {base /homepage params {width 12 age 2} hash flowers}
+
+    test url_parts-1.4 {url parts with no params} -body {
+        url_parts "https://www.qcode.test.co.uk:80/homepage#flowers"
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {} hash flowers}
+
+    test url_parts-1.5 {url parts with no hash} -body {
+        url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2"
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash {}}
+
+    test url_parts-1.6 {url parts with minimum url} -body {
+        url_parts "homepage"
+    } -result {base homepage params {} hash {}}
+
     cleanupTests
 }
 namespace delete ::qcode::test

@@ -257,3 +257,68 @@ proc qc::url_root {url} {
         error "Url \"$url\" is not a valid URL"
     }
 }
+
+proc qc::url_match {canonical_url test_url} {
+    set c_parts [url_parts $canonical_url]
+    set t_parts [url_parts $test_url]
+    if { [dict get $c_parts base] ne [dict get $t_parts base] } {
+        return false
+    }
+    if { [dict get $c_parts hash] ni [list "" [dict get $t_parts hash]] } {
+        return false
+    }
+
+    set c_params [dict get $c_parts params]
+    set t_params [dict get $t_parts params]
+    foreach {c_name c_value} $c_params {
+        set matched false
+        foreach {t_name t_value} $t_params {
+            if { $c_name eq $t_name
+                 && $c_value eq $t_value } {
+                multimap_unset_first t_params $c_name $t_value
+                set matched true
+                break
+            }
+        }
+        if { ! $matched } {
+            return false
+        }
+    }
+
+    return true
+}
+
+proc qc::url_parts {url} {
+    set pattern {
+        ^
+        # base
+        (
+         # root (optional)
+         (?:
+          # protocol
+          https?://
+          # domain
+          [a-z0-9\-\.]+
+          # port (optional)
+          (?::[0-9]+)?
+          )?
+         # path
+         [a-zA-Z0-9_\-\.~+/%]+
+         )
+
+        # query (optional)
+        (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+
+        # hash (optional)
+        (\#[a-zA-Z0-9_\-\.~+/%]+)?
+        $
+    }
+    if { [regexp -expanded $pattern $url -> base query_string hash] } {
+        set hash [string trimleft $hash #]
+        set query_string [string trimleft $query_string ?]
+        set query_map [split $query_string &=]
+        return [dict create base $base params $query_map hash $hash]
+    } else {
+        error "Unable to parse url $url"
+    }
+}

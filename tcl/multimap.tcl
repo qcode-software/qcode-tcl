@@ -13,10 +13,10 @@ proc qc::multimap_get_first {args} {
             lappend switches -${switch}
         }
     }
-    set index [lsearch {*}$switches $multimap $key]
+    set index [lsearch {*}$switches [multimap_keys $multimap] $key]
 
-    if { $index%2 == 0 } {
-	return [lindex $multimap [expr {$index+1}]]
+    if { $index > -1 } {
+	return [lindex $multimap [expr {($index*2)+1}]]
     } else {
 	error "multimap does not contain the key:$key it contains \"$multimap\""
     }
@@ -43,10 +43,10 @@ proc qc::multimap_set_first {args} {
             lappend switches -${switch}
         }
     }
-    set index [lsearch {*}$switches $multimap $key]
+    set index [lsearch {*}$switches [multimap_keys $multimap] $key]
 
-    if { $index%2 == 0 } {
-	lset multimap [expr {$index+1}] $value
+    if { $index > -1 } {
+	lset multimap [expr {($index*2)+1}] $value
     } else {
 	lappend multimap $key $value
     }
@@ -63,12 +63,32 @@ doc qc::multimap_set_first {
     }
 }
 
-proc qc::multimap_unset_first { multimapVariable key } {
+proc qc::multimap_unset_first { multimapVariable key args } {
     #| Delete the first matching key/value pair from the multimap
+    if { [llength $args] > 1 } {
+        error "Invalid usage of multimap_unset_first"
+    }
     upvar 1 $multimapVariable multimap
-    set index [lsearch $multimap $key]
-    if { $index%2 == 0 } {
-	set multimap [lreplace $multimap $index [expr {$index+1}]]
+    if { [llength $args] == 1 } {
+        set search_value [lindex $args 0]
+        set index 0
+        foreach {name value} $multimap {
+            if { $name eq $key && $value eq $search_value } {
+                set multimap [lreplace $multimap $index [expr {$index+1}]]
+                return $multimap
+            }
+            incr index 2
+        }
+    } else {
+        set search_value [lindex $args 0]
+        set index 0
+        foreach {name value} $multimap {
+            if { $name eq $key } {
+                set multimap [lreplace $multimap $index [expr {$index+1}]]
+                return $multimap
+            }
+            incr index 2
+        }
     }
 }
 
@@ -83,7 +103,7 @@ doc qc::multimap_unset_first {
 
 proc qc::multimap_exists { multimap key } {
     #| Check if a value exists for this key
-    if { [lsearch $multimap $key]%2 == 0} {
+    if { [lsearch [multimap_keys $multimap] $key] > -1 } {
 	return 1
     } else {
 	return 0
