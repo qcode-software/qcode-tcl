@@ -158,6 +158,10 @@ namespace eval ::qcode::test {
         url_match /home /home?foo=bar#test
     } -result true
 
+    test url_match-1.14 {url_match differing hashes} -body {
+        url_match /home#comments /home#article
+    } -result false
+
     # url_parts
     test url_parts-1.0 {url parts with everything} -body {
         url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2#flowers"
