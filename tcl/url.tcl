@@ -300,15 +300,17 @@ proc qc::url_parts {url} {
         ^
         # base
         (
-         # root (optional)
-         (?:
-          # protocol
-          https?://
-          # domain
-          [a-z0-9\-\.]+
-          # port (optional)
-          (?::[0-9]+)?
-          )?
+         # protocol
+         https?://
+         # domain
+         [a-z0-9\-\.]+
+         # port (optional)
+         (?::[0-9]+)?
+         # path
+         /[a-zA-Z0-9_\-\.~+/%]*
+
+         |
+
          # path
          [a-zA-Z0-9_\-\.~+/%]+
          )
