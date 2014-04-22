@@ -259,6 +259,12 @@ proc qc::url_root {url} {
 }
 
 proc qc::url_match {canonical_url test_url} {
+    #| Test if a test url matches a "canonical" url.
+    # To match, they must have the same base, if the canonical url has a hash then
+    # the test url must have the same hash, and every name/value pair in the
+    # canonical url's query must appear at least the same number of times in the
+    # test url's query.
+
     set c_parts [url_parts $canonical_url]
     set t_parts [url_parts $test_url]
     if { [dict get $c_parts base] ne [dict get $t_parts base] } {
@@ -289,6 +295,7 @@ proc qc::url_match {canonical_url test_url} {
 }
 
 proc qc::url_parts {url} {
+    #| Return a dict containing the base, hash, params (as a multimap) of url
     set pattern {
         ^
         # base
