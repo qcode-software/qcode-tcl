@@ -162,6 +162,14 @@ namespace eval ::qcode::test {
         url_match /home#comments /home#article
     } -result false
 
+    test url_match-1.15 {url_match with no path} -body {
+        url_match https://www.qcode.test.co.uk:80 https://www.qcode.test.co.uk:80
+    } -result true
+
+    test url_match-1.16 {url_match with no path, different urls} -body {
+        url_match https://www.qcode.test.co.uk:80 https://coolwebsite.com:80
+    } -result false
+
     # url_parts
     test url_parts-1.0 {url parts with everything} -body {
         url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2#flowers"
@@ -187,9 +195,13 @@ namespace eval ::qcode::test {
         url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2"
     } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash {}}
 
-    test url_parts-1.6 {url parts with minimum url} -body {
+    test url_parts-1.6 {url parts with path only} -body {
         url_parts "homepage"
     } -result {base homepage params {} hash {}}
+
+    test url_parts-1.7 {url parts with no path} -body {
+        url_parts "https://www.qcode.test.co.uk:80"
+    } -result {base https://www.qcode.test.co.uk:80 params {} hash {}}
 
     cleanupTests
 }

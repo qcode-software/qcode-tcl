@@ -298,31 +298,34 @@ proc qc::url_parts {url} {
     #| Return a dict containing the base, hash, params (as a multimap) of url
     set pattern {
         ^
-        # base
-        (
-         # protocol
-         https?://
-         # domain
-         [a-z0-9\-\.]+
-         # port (optional)
-         (?::[0-9]+)?
-         # path
-         /[a-zA-Z0-9_\-\.~+/%]*
-
+        (?:
+         (
+          # base with no path - protocol, domain, and port (optional)
+          https?://[a-z0-9\-\.]+(?::[0-9]+)?
+          )
          |
+         (
+          # base with protocol, domain, port (optional), and abs_path
+          https?://[a-z0-9\-\.]+(?::[0-9]+)?/[a-zA-Z0-9_\-\.~+/%]*
+          |
+          # base with path only
+          [a-zA-Z0-9_\-\.~+/%]+
+          )
 
-         # path
-         [a-zA-Z0-9_\-\.~+/%]+
+         # query (optional)
+         (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+
+         # hash (optional)
+         (\#[a-zA-Z0-9_\-\.~+/%]+)?
          )
-
-        # query (optional)
-        (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
-
-        # hash (optional)
-        (\#[a-zA-Z0-9_\-\.~+/%]+)?
         $
     }
-    if { [regexp -expanded $pattern $url -> base query_string hash] } {
+    if { [regexp -expanded $pattern $url -> base1 base2 query_string hash] } {
+        if { $base1 ne "" } {
+            set base $base1
+        } else {
+            set base $base2
+        }
         set hash [string trimleft $hash #]
         set query_string [string trimleft $query_string ?]
         set query_map [split $query_string &=]
