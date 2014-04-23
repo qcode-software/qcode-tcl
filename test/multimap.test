@@ -9,7 +9,7 @@ namespace eval ::qcode::test {
     namespace path ::qc
 
     # multimap_get_first
-    test multimap_get_first-1.0 {multimap_get_first } -setup {
+    test multimap_get_first-1.0 {multimap_get_first} -setup {
     } -body {
         multimap_get_first [list from John from Jill from Gail to Kim subject Hi] from
     } -cleanup {} -result {John}
@@ -23,6 +23,10 @@ namespace eval ::qcode::test {
     } -body {
         multimap_get_first -nocase [list from John from Jill from Gail to Kim subject Hi] FROM
     } -cleanup {} -result {John}
+
+    test multimap_get_first-1.3 {multimap_get_first value matching key} -body {
+        multimap_get_first [list Name Job Job Carpenter Age 26] Job
+    } -result {Carpenter}
 
     # multimap_set_first
     test multimap_set_first-1.0 {multimap_set_first } -setup {
@@ -49,15 +53,20 @@ namespace eval ::qcode::test {
         multimap_set_first -nocase multimap FROM Johnny
     } -cleanup {unset multimap} -result {from Johnny from Jill from Gail to Kim subject Hi}
 
+    test multimap_set_first-1.4 {multimap_set_first value matching key} -setup {
+        set multimap [list Name Job Job Carpenter Age 26]
+    } -body {
+        multimap_set_first multimap Job Sailor
+    } -cleanup {unset multimap} -result {Name Job Job Sailor Age 26}
 
     # multimap_unset_first
-    test multimap_unset_first-1.0 {multimap_unset_first } -setup {
+    test multimap_unset_first-1.0 {multimap_unset_first} -setup {
         set multimap [list from John from Jill from Gail to Kim subject Hi]
     } -body {
         multimap_unset_first multimap from 
     } -cleanup {unset multimap} -result {from Jill from Gail to Kim subject Hi}
 
-    test multimap_unset_first-1.1 {multimap_unset_first key not present } -setup {
+    test multimap_unset_first-1.1 {multimap_unset_first key not present} -setup {
         set multimap [list from John from Jill from Gail to Kim subject Hi]
         multimap_unset_first multimap text 
     } -body {
@@ -70,8 +79,35 @@ namespace eval ::qcode::test {
         multimap_unset_first multimap from 
     } -cleanup {unset multimap} -result {}
 
+    test multimap_unset_first-1.3 {multimap_unset_first with value} -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+    } -body {
+        multimap_unset_first multimap from Jill
+    } -cleanup {unset multimap} -result {from John from Gail to Kim subject Hi}
+
+    test multimap_unset_first-1.4 {multimap_unset_first with value key not present} -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+        multimap_unset_first multimap text hello
+    } -body {
+        set multimap
+    } -cleanup {unset multimap} -result {from John from Jill from Gail to Kim subject Hi}
+
+    test multimap_unset_first-1.5 {multimap_unset_first with value, value not present} -setup {
+        set multimap [list from John from Jill from Gail to Kim subject Hi]
+        multimap_unset_first multimap from Santa
+    } -body {
+        set multimap
+    } -cleanup {unset multimap} -result {from John from Jill from Gail to Kim subject Hi}
+
+    test multimap_unset_first-1.6 {multimap_unset_first with value, empty} -setup {
+        set multimap [list]
+        multimap_unset_first multimap from Santa
+    } -body {
+        set multimap
+    } -cleanup {unset multimap} -result {}
+
     # multimap_exists
-    test multimap_exists-1.0 {multimap_exists positive } -setup {
+    test multimap_exists-1.0 {multimap_exists positive} -setup {
         set multimap [list from John from Jill from Gail to Kim subject Hi]
     } -body {
         multimap_exists $multimap from

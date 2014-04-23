@@ -257,3 +257,80 @@ proc qc::url_root {url} {
         error "Url \"$url\" is not a valid URL"
     }
 }
+
+proc qc::url_match {canonical_url test_url} {
+    #| Test if a test url matches a "canonical" url.
+    # To match, they must have the same base, if the canonical url has a hash then
+    # the test url must have the same hash, and every name/value pair in the
+    # canonical url's query must appear at least the same number of times in the
+    # test url's query.
+
+    set c_parts [url_parts $canonical_url]
+    set t_parts [url_parts $test_url]
+    if { [dict get $c_parts base] ne [dict get $t_parts base] } {
+        return false
+    }
+    if { [dict get $c_parts hash] ni [list "" [dict get $t_parts hash]] } {
+        return false
+    }
+
+    set c_params [dict get $c_parts params]
+    set t_params [dict get $t_parts params]
+    foreach {c_name c_value} $c_params {
+        set matched false
+        foreach {t_name t_value} $t_params {
+            if { $c_name eq $t_name
+                 && $c_value eq $t_value } {
+                multimap_unset_first t_params $c_name $t_value
+                set matched true
+                break
+            }
+        }
+        if { ! $matched } {
+            return false
+        }
+    }
+
+    return true
+}
+
+proc qc::url_parts {url} {
+    #| Return a dict containing the base, hash, params (as a multimap) of url
+    set pattern {
+        ^
+        (?:
+         (
+          # base with no path - protocol, domain, and port (optional)
+          https?://[a-z0-9\-\.]+(?::[0-9]+)?
+          )
+         |
+         (
+          # base with protocol, domain, port (optional), and abs_path
+          https?://[a-z0-9\-\.]+(?::[0-9]+)?/[a-zA-Z0-9_\-\.~+/%]*
+          |
+          # base with path only
+          [a-zA-Z0-9_\-\.~+/%]+
+          )
+
+         # query (optional)
+         (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+
+         # hash (optional)
+         (\#[a-zA-Z0-9_\-\.~+/%]+)?
+         )
+        $
+    }
+    if { [regexp -expanded $pattern $url -> base1 base2 query_string hash] } {
+        if { $base1 ne "" } {
+            set base $base1
+        } else {
+            set base $base2
+        }
+        set hash [string trimleft $hash #]
+        set query_string [string trimleft $query_string ?]
+        set query_map [split $query_string &=]
+        return [dict create base $base params $query_map hash $hash]
+    } else {
+        error "Unable to parse url $url"
+    }
+}
