@@ -66,7 +66,7 @@ doc qc::multimap_set_first {
 proc qc::multimap_unset_first { multimapVariable key args } {
     #| Delete the first matching key/value pair from the multimap
     if { [llength $args] > 1 } {
-        error "Invalid usage of multimap_unset_first"
+        error "Usage: qc::multimap_unset_first multimapVariable key ?value?"
     }
     upvar 1 $multimapVariable multimap
     if { [llength $args] == 1 } {
