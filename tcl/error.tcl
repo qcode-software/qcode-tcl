@@ -112,20 +112,18 @@ proc qc::error_report {} {
     return $html
 }
 
-proc qc::error_report_no_conn {} {
+proc qc::error_report_no_conn { message info code } {
     #| Return html error report, used when there was no http connection when error occurred.
-   
-    global errorMessage errorInfo errorCode
-     
+    
     set html {
         <html>
         <h2>Software Bug</h2>
         <p>
         <b>hostname:</b>[ns_info hostname]<br>
         <b>time:</b>[qc::format_timestamp now]<br>
-        <b>errorMessage:</b> $errorMessage <br>
-        <b>errorInfo:</b> <pre>[html_escape $errorInfo]</pre><br>
-        <b>errorCode:</b> $errorCode
+        <b>errorMessage:</b> $message <br>
+        <b>errorInfo:</b> <pre>[html_escape $info]</pre><br>
+        <b>errorCode:</b> $code
         <p>
         </html>
     }
