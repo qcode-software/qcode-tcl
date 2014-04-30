@@ -370,9 +370,9 @@ proc qc::email2multimap {text} {
     foreach line [split $head \n] {
 	lassign [split_pair $line :] key value
 	# Check if value is encoded
-	lappend email $key $value
+	lappend email $key [qc::email_header_value_decode $value]
     }
-
+    
     if { [multimap_exists $email Content-Type] } {
 	set bodies {}
 	array set header [email_header_values Content-Type [multimap_get_first $email Content-Type]]
@@ -447,6 +447,17 @@ Lg==
 MIME-Version 1.0 Received {by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)} Date {Fri, 17 Aug 2012 12:51:36 +0100} Delivered-To bernhard@qcode.co.uk Message-ID <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com> Subject Memo From {Bernhard van Woerden <bernhard@qcode.co.uk>} To {Bernhard van Woerden <bernhard@qcode.co.uk>} Content-Type {multipart/mixed; boundary=0016e6d9a38e403c6904c774c888} bodies {{Content-Type {multipart/alternative; boundary=0016e6d9a38e403c6004c774c886} bodies {{Content-Type {text/plain; charset=ISO-8859-1} body {Please see the attached.
 
 - Bernhard}} {Content-Type {text/html; charset=ISO-8859-1} body {Please see the attached.<div><br></div><div>- Bernhard</div>}}}} {Content-Type {text/plain; charset=US-ASCII; name="Memo.txt"} Content-Disposition {attachment; filename="Memo.txt"} Content-Transfer-Encoding base64 X-Attachment-Id f_h5z7vyc30 body {Would the last person to leave please turn the lights off.}}}    
+    }
+}
+
+proc qc::email_header_value_decode {value} {
+    #| Decode an encoded header value as per rfc-2047
+    # eg. =?UTF-8?B?UWNvZGUgUm9ja3M=?=
+    if { [regexp {^=\?[^ \?]+\?[QBqb]\?[^ ]+?=$} $value] } {
+        lassign [mime::word_decode $value] charset method string
+        return [encoding convertfrom $charset $string]
+    } else {
+        return $value
     }
 }
 
