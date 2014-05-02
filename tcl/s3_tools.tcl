@@ -298,9 +298,11 @@ proc qc::s3 { args } {
             switch [lindex $args 1] {
                 init {
                     # s3 upload init bucket local_file remote_file
-                    lassign $args -> -> bucket local_file remote_file
+                    lassign $args -> -> bucket local_file remote_file content_type
                     set content_md5 [qc::s3_base64_md5 -file $local_file]
-                    set content_type [qc::mime_type_guess $local_file]
+                    if {$content_type eq ""} {
+                        set content_type [qc::mime_type_guess $local_file]
+                    }
                     set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_post -content_type $content_type -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket ${remote_file}?uploads] {/ns:InitiateMultipartUploadResult}]]
                     set upload_id [dict get $upload_dict UploadId]
                     log Debug "Upload init for $remote_file to $bucket."
@@ -404,10 +406,10 @@ proc qc::s3 { args } {
                 }
                 default {
                     # Top level multipart upload
-                    # usage: s3 upload bucket local_path remote_path
+                    # usage: s3 upload bucket local_path remote_path {content_type}
                     # TODO could be extended to retry upload part failures
-                    lassign $args -> bucket local_file remote_file 
-                    set upload_id [qc::s3 upload init $bucket $local_file $remote_file]
+                    lassign $args -> bucket local_file remote_file content_type
+                    set upload_id [qc::s3 upload init $bucket $local_file $remote_file $content_type]
                     set etag_dict [qc::s3 upload send $bucket $local_file $remote_file $upload_id]
                     qc::s3 upload complete $bucket $remote_file $upload_id $etag_dict
                 }
