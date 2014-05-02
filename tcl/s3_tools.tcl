@@ -93,24 +93,24 @@ proc qc::s3_head { bucket path } {
 }
 
 proc qc::s3_post { args } {
-    qc::args $args -amz_headers "" bucket path {data ""}
+    qc::args $args -amz_headers "" -content_type {application/xml} -- bucket path {data ""}
     #| Construct the http POST request to S3 including auth headers
     if { $data ne "" } {
         # Used for posting XML
-        set content_type {application/xml}
         set content_md5 [qc::s3_base64_md5 -data $data]
         set headers [s3_auth_headers -content_type $content_type -content_md5 $content_md5 POST $path $bucket] 
         lappend headers Content-MD5 $content_md5
         lappend headers Content-Type $content_type
         set result [qc::http_post -valid_response_codes {100 200 202} -headers $headers -data $data [s3_url $bucket]$path]
     } else {
-        set content_type {application/x-www-form-urlencoded}
         if { $amz_headers ne "" } {
             set headers [s3_auth_headers -amz_headers $amz_headers -content_type $content_type POST $path $bucket] 
             lappend headers {*}$amz_headers
+            lappend headers Content-Type $content_type
             set result [qc::http_post -headers $headers [s3_url $bucket]$path]
         } else {
             set headers [s3_auth_headers -content_type $content_type POST $path $bucket] 
+            lappend headers Content-Type $content_type
             set result [qc::http_post -headers $headers [s3_url $bucket]$path]
         }
     }
@@ -300,7 +300,8 @@ proc qc::s3 { args } {
                     # s3 upload init bucket local_file remote_file
                     lassign $args -> -> bucket local_file remote_file
                     set content_md5 [qc::s3_base64_md5 -file $local_file]
-                    set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_post -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket ${remote_file}?uploads] {/ns:InitiateMultipartUploadResult}]]
+                    set content_type [qc::mime_type_guess $local_file]
+                    set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_post -content_type $content_type -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket ${remote_file}?uploads] {/ns:InitiateMultipartUploadResult}]]
                     set upload_id [dict get $upload_dict UploadId]
                     log Debug "Upload init for $remote_file to $bucket."
                     log Debug "Upload_id: $upload_id"
