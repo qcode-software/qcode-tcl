@@ -353,7 +353,8 @@ proc qc::s3 { args } {
                     # Timeout - allow 10 KB/s
                     global s3_timeout
                     set s3_timeout($upload_id) false
-                    set timeout_ms [expr {($file_size/10240)*1000}]
+                    # Set timeout based on file size, but don't make it less than 10,000ms
+                    set timeout_ms [expr { max(round((double($file_size)/10240)*1000),10000) }]
                     set max_attempt 10
                     log Debug "Timeout set as $timeout_ms ms"
                     set id [after $timeout_ms [list set s3_timeout($upload_id) true]]
