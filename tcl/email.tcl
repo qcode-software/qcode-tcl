@@ -566,7 +566,8 @@ proc qc::mime_type_guess { filename } {
     
     set default_type "*/*"
 
-    if { ![regexp {^\S+(\.[a-z]+)$} [qc::lower $filename] -> ext] } {
+    set ext [file extension [string tolower $filename]]
+    if { $ext eq "" } {
         return $default_type
     }
    
