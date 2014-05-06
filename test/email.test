@@ -126,6 +126,7 @@ Lg==
     test mime_type_guess-1.1 {mime_type_guess zip} {mime_type_guess file.zip} application/zip
     test mime_type_guess-1.2 {mime_type_guess shtml} {mime_type_guess another_file.shtml} text/html
     test mime_type_guess-1.3 {mime_type_guess pdf} {mime_type_guess another_file.old.pdf} application/pdf
+    test mime_type_guess-1.4 {mime_type_guess space} {mime_type_guess "another file.jpg"} image/jpeg
 
     set email_send_setup {
         # Backup ::qc::sendmail before overriding
