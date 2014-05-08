@@ -525,3 +525,20 @@ proc qc::http_delete {args} {
 	}
     }
 }
+
+proc qc::http_url_resolve {url} {
+    #| Return resolved url after following redirects
+    dict2vars [qc::http_curl -nobody 0 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout 60 -followlocation 1] headers responsecode curlErrorNumber
+    
+    if { $curlErrorNumber != 0 } {
+        return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+    } elseif { $responsecode != 200 } {
+        return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"
+    } else {
+        if { [dict exists $headers Location] } {
+            return [dict get $headers Location]
+        } else {
+            return $url
+        }
+    }
+}
