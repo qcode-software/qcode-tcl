@@ -530,7 +530,7 @@ proc qc::http_url_resolve {args} {
     #| Return resolved url after following redirects
     args $args -timeout 60 -sslversion sslv3 -- url
 
-    dict2vars [qc::http_curl -headervar headers -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] headers responsecode curlErrorNumber
+    dict2vars [qc::http_curl -headervar headers -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1  -bodyvar html] headers responsecode curlErrorNumber
     
     if { $curlErrorNumber != 0 } {
         return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
