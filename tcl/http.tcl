@@ -11,15 +11,27 @@ proc qc::http_curl {args} {
 	proc main {args} {
 	    package require TclCurl
 	    set curlHandle [curl::init]
+            if { [set index [lsearch $args -infovar]]!=-1 } {
+                set infovar [lindex $args [expr {$index+1}]]
+                set args [lreplace $args $index [expr {$index+1}]]
+            }
 	    $curlHandle configure {*}$args
 	    catch { $curlHandle perform } curlErrorNumber
 	    set responsecode [$curlHandle getinfo responsecode]
+            if { [info exists infovar] } {
+                foreach property {effectiveurl httpcode responsecode filetime totaltime namelookuptime connecttime pretransfertime sizeupload sizedownload speeddownload speedupload headersize requestsize sslverifyresult contentlengthdownload contentlengthupload starttransfertime contenttype redirecttime redirectcount httpauthavail proxyauthavail oserrno numconnects sslengines httpconnectcode cookielist ftpentrypath redirecturl primaryip appconnecttime certinfo conditionunmet} { 
+                    dict set $infovar $property [$curlHandle getinfo $property] 
+                }
+            }
 	    $curlHandle cleanup
 	    set dict {}
 	    foreach var [info locals] {
 		switch -- $var {
 		    args -
 		    dict -
+                    infovar -
+                    index -
+                    property -
 		    curlHandle {}
 		    default {
 			if { [array exists $var] } {
@@ -528,16 +540,11 @@ proc qc::http_delete {args} {
 
 proc qc::http_url_resolve {args} {
     #| Return resolved url after following redirects
-    args $args -timeout 60 -sslversion sslv3 -- url
+    #
+    # Misconfigured clickthrough servers may not redirect HEAD requests so always request a body by default
+    args $args -timeout 60 -sslversion sslv3 -nobody 0 -- url
 
-    dict2vars [qc::http_curl -headervar headers -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1  -bodyvar html] headers responsecode curlErrorNumber
-    
-    if { $curlErrorNumber != 0 } {
-        return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
-    } 
-    if { [dict exists $headers Location] } {
-        return [dict get $headers Location]
-    } else {
-        return $url
-    }
+    dict2vars [qc::http_curl -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info
+
+    return [dict get $info effectiveurl]
 }
