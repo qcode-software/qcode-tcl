@@ -544,7 +544,15 @@ proc qc::http_url_resolve {args} {
     # Misconfigured clickthrough servers may not redirect HEAD requests so always request a body by default
     args $args -timeout 60 -sslversion sslv3 -nobody 0 -- url
 
-    dict2vars [qc::http_curl -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info
+    dict2vars [qc::http_curl -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info curlErrorNumber
 
-    return [dict get $info effectiveurl]
+    switch $curlErrorNumber {
+	0 {
+	    # OK
+	    return [dict get $info effectiveurl]
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }    
 }
