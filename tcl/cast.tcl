@@ -139,8 +139,13 @@ proc qc::cast_epoch { string } {
 	return [clock scan "$year-$month-$day"]
     }
     # Already an epoch
-    if { [string is integer -strict $string] && $string>31 } {
-	return $string
+    if { [string is wideinteger -strict $string] } {
+        if { $string>10000000000 } {
+            # Probably milliseconds past epoch, return epoch in seconds (10000000000 = year 999999 in secs past epoch)
+            return [expr {${string}/1000}]
+        } elseif { $string>31 } {
+            return $string
+        }
     }
     # Exact ISO date
     if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})$} $string -> year month day] } {
