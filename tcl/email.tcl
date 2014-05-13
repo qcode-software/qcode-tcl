@@ -380,8 +380,8 @@ proc qc::email2multimap {text} {
 	if { [string match multipart/* $header(Content-Type)] } {
             # Multi-part MIME
 	    foreach part [lrange [mcsplit $body "--$header(boundary)"] 1 end-1] {
-		lappend bodies [qc::email2multimap [string trim $part]]
-	    }
+                lappend bodies [qc::email2multimap $part]
+            }
 	    lappend email bodies $bodies
 	} else {
 	    # One part MIME
