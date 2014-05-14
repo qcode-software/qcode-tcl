@@ -140,8 +140,8 @@ proc qc::cast_epoch { string } {
     }
     # Already an epoch
     if { [string is wideinteger -strict $string] } {
-        if { $string>10000000000 } {
-            # Probably milliseconds past epoch, return epoch in seconds (10000000000 = year 999999 in secs past epoch)
+        if { $string > [clock scan "5000-01-01"] } {
+            # Interpret as milliseconds past epoch
             return [expr {${string}/1000}]
         } elseif { $string>31 } {
             return $string
