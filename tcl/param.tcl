@@ -106,6 +106,7 @@ proc qc::param_set { param_name args } {
             db_dml { update param set param_value=:param_value where param_name=:param_name }
         }
     } else {
+	qc::param_datastore_load
 	array set ::qc::param::db [list $param_name $param_value]
 	qc::param_datastore_save
     }
@@ -136,6 +137,7 @@ proc qc::param_datastore_save {} {
     }
     # Write to datastore
     set fh [open $filename w]
+
     puts -nonewline $fh [array get ::qc::param::db]
     close $fh
     file attributes $filename -permissions 0600
