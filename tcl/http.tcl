@@ -19,7 +19,7 @@ proc qc::http_curl {args} {
 	    catch { $curlHandle perform } curlErrorNumber
 	    set responsecode [$curlHandle getinfo responsecode]
             if { [info exists infovar] } {
-                foreach property {effectiveurl httpcode responsecode filetime totaltime namelookuptime connecttime pretransfertime sizeupload sizedownload speeddownload speedupload headersize requestsize sslverifyresult contentlengthdownload contentlengthupload starttransfertime contenttype redirecttime redirectcount httpauthavail proxyauthavail oserrno numconnects sslengines httpconnectcode cookielist ftpentrypath redirecturl primaryip appconnecttime certinfo conditionunmet} { 
+                foreach property {effectiveurl httpcode responsecode filetime totaltime namelookuptime connecttime pretransfertime starttransfertime sizeupload sizedownload speeddownload speedupload headersize requestsize sslverifyresult contentlengthdownload contentlengthupload contenttype} { 
                     dict set $infovar $property [$curlHandle getinfo $property] 
                 }
             }
