@@ -203,8 +203,8 @@ doc qc::email_addresses {
 proc qc::email_mime_html_alternative {html boundary} {
     #| Helper to return mime part for html part with plain text alternative
     set text [html2text $html]
-    lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode $text]]
-    lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode $html]]
+    lappend parts [list headers [list Content-Type "text/plain;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode [encoding convertto utf-8 $text]]]
+    lappend parts [list headers [list Content-Type "text/html;charset=\"utf-8\"" Content-Transfer-Encoding quoted-printable] body [qc::qp_encode [encoding convertto utf-8 $html]]]
     return [qc::email_mime_join $parts $boundary]
 }
 
@@ -387,16 +387,21 @@ proc qc::email2multimap {text} {
 	    # One part MIME
 	    # Content-Transfer-Encoding
 	    if { [multimap_exists $email Content-Transfer-Encoding] } {
+                if { [info exists header(charset)] } {
+                    set encoding [IANAEncoding2TclEncoding $header(charset)]
+                } else {
+                    set encoding iso8859-1
+                }
 		switch [multimap_get_first $email Content-Transfer-Encoding] {
 		    7bit -
 		    8bit -
 		    binary {
 		    }
 		    quoted-printable {
-			set body [::mime::qp_decode $body]
+			set body [encoding convertfrom $encoding [::mime::qp_decode $body]]
 		    }
 		    base64 {
-			set body [::base64::decode $body]
+			set body [encoding convertfrom $encoding [::base64::decode $body]]
 		    }
 		}
 	    }
