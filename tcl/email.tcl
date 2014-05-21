@@ -87,7 +87,7 @@ proc qc::email_send {args} {
 
     if { [info exists html] } {
         # HTML with text alternative
-        set alternative_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+        set alternative_boundary [uuid::uuid generate]
         if { [string first "data:image/" $html]!=-1 } {
             # Embedded image data
             lassign [qc::email_html_embedded_images2attachments $html] html generated_attachments
@@ -103,7 +103,7 @@ proc qc::email_send {args} {
     
     if { [llength $related_attachments] } {
         # Related attachments have a cid that can be referenced in email's html
-        set related_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+        set related_boundary [uuid::uuid generate]
         set related_parts [list [list headers $mime_headers body $mime_body]]
         foreach attachment $related_attachments {
 	    lappend related_parts [qc::email_mime_attachment $attachment]
@@ -114,7 +114,7 @@ proc qc::email_send {args} {
     }
     if { [llength $mixed_attachments] } {
         # Mixed attachments (standard attachments)
-        set mixed_boundary [format "%x" [clock seconds]][format "%x" [clock clicks]]
+        set mixed_boundary [uuid::uuid generate]
         set mixed_parts [list [list headers $mime_headers body $mime_body]]
         foreach attachment $mixed_attachments {
 	    lappend mixed_parts [qc::email_mime_attachment $attachment]
