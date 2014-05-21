@@ -387,24 +387,27 @@ proc qc::email2multimap {text} {
 	    # One part MIME
 	    # Content-Transfer-Encoding
 	    if { [multimap_exists $email Content-Transfer-Encoding] } {
-                if { [info exists header(charset)] } {
-                    set encoding [IANAEncoding2TclEncoding $header(charset)]
-                } else {
-                    set encoding iso8859-1
-                }
-		switch [multimap_get_first $email Content-Transfer-Encoding] {
+                switch [multimap_get_first $email Content-Transfer-Encoding] {
 		    7bit -
 		    8bit -
 		    binary {
 		    }
 		    quoted-printable {
-			set body [encoding convertfrom $encoding [::mime::qp_decode $body]]
+			set body [::mime::qp_decode $body]
+                        if { [info exists header(charset)] } {
+                            set encoding [IANAEncoding2TclEncoding $header(charset)]
+                            set body [encoding convertfrom $encoding $body]
+                        } 
 		    }
 		    base64 {
-			set body [encoding convertfrom $encoding [::base64::decode $body]]
+			set body [::base64::decode $body]
+                        if { [info exists header(charset)] } {
+                            set encoding [IANAEncoding2TclEncoding $header(charset)]
+                            set body [encoding convertfrom $encoding $body]
+                        } 
 		    }
 		}
-	    }
+            }
 	    lappend email body $body
 	}
     } else {
