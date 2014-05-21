@@ -277,10 +277,10 @@ doc qc::html_paragraph_layout {
 }
 
 proc qc::html2text { html } {
-    #| Wrapper for html2text.
-    set html [string map [list "&#8209;" -] $html]  
+    #| Wrapper for html2text. Input encoding UTF-8, Output encoding UTF-8
+    set html [string map [list "&#8209;" -] $html] 
     qc::try {
-	return [exec_proxy [qc::which html2text] -nobs << $html]
+	return [encoding convertfrom utf-8 [exec_proxy [qc::which html2text] -utf8 -nobs << [encoding convertto utf-8 $html]]]
     } {
 	# html2text unable to convert (possibly invalid html).
 	# Return text by removing all html tags and any style and script elements.
