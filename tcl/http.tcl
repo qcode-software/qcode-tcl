@@ -76,8 +76,8 @@ proc qc::http_curl {args} {
 proc qc::http_post {args} {
     #| Perform an HTTP POST
     # args is name value name value ... list
-    # usage http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
-    args $args -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
+    # usage http_post ?-noproxy? ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
+    args $args -noproxy -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
 
     if { ![info exists data]} {
 	set pairs {}
@@ -85,7 +85,6 @@ proc qc::http_post {args} {
 	    lappend pairs "[qc::url_encode $name $encoding]=[qc::url_encode $value $encoding]"
 	}
 	set data [join $pairs &]
-
     }
 
     set httpheaders {}
@@ -108,7 +107,7 @@ proc qc::http_post {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
-    set curl_args [list -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders]
+    set curl_args [list {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders]
 
     if { [info exists content-type] && [string match "multipart/*" ${content-type}] } {
         # eg. multipart/formdata
@@ -177,15 +176,14 @@ doc qc::http_post {
 }
 
 proc qc::http_get {args} {
-    # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? url
-    args $args -timeout 60 -sslversion sslv3 -headers {} url
+    # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
+    args $args -timeout 60 -sslversion sslv3 -headers {} -noproxy -- url
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders [qc::http_header $name $value]
     }
-   
-    dict2vars [qc::http_curl  -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+    dict2vars [qc::http_curl {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
