@@ -70,7 +70,21 @@ namespace eval ::qcode::test {
     test cast_period-1.3 {qc::cast_period "2014"} {qc::cast_period "2014"} [list 2014-01-01 2014-12-31]
     test cast_period-1.4 {qc::cast_period "Jan 2014"} {qc::cast_period "Jan 2013"} [list 2013-01-01 2013-01-31]
     test cast_period-1.5 {qc::cast_period "January 2014"} {qc::cast_period "January 2013"} [list 2013-01-01 2013-01-31]
-    test cast_period-1.6 {qc::cast_period "Febuary 2014"} -body {qc::cast_period "Febuary 2013"} -result "Could not parse string \"Febuary 2013\" into dates that define a period." -returnCodes error 
+    test cast_period-1.6 {qc::cast_period "Jan 2014 March 2014"} {qc::cast_period "Jan 2014 March 2014"} [list 2014-01-01 2014-03-31]
+    test cast_period-1.7 {qc::cast_period "Febuary 2014"} -body {qc::cast_period "Febuary 2013"} -result "Could not parse string \"Febuary 2013\" into dates that define a period." -returnCodes error 
+    test cast_period-1.8 {qc::cast_period "1st Febuary 2014 to 14th February 2014"} {qc::cast_period "1st Febuary 2014 to 14th February 2014"} [list 2014-02-01 2014-02-14]
+    test cast_period-1.9 {qc::cast_period "1st Febuary 2014"} {qc::cast_period "1st Febuary 2014"} [list 2014-02-01 2014-02-01]
+
+
+    test is_period-1.0 {qc::is_period ""} {qc::is_period ""} "false"
+    test is_period-1.1 {qc::is_period "Jan"} {qc::is_period "Jan"} "true"
+    test is_period-1.2 {qc::is_period "January"} {qc::is_period "January"} "true"
+    test is_period-1.3 {qc::is_period "2014"} {qc::is_period "2014"} "true"
+    test is_period-1.4 {qc::is_period "Jan 2014"} {qc::is_period "Jan 2013"} "true"
+    test is_period-1.5 {qc::is_period "January 2014"} {qc::is_period "January 2014"} "true"
+    test is_period-1.6 {qc::is_period "Jan 2014 March 2014"} {qc::is_period "Jan 2014 March 2014"} "true"
+    test is_period-1.7 {qc::is_period "Febuary 2014"} {qc::is_period "Febuary 2014"} "false"
+    test is_period-1.8 {qc::is_period "1st Febuary 2014 to 14th February 2014"} {qc::is_period "1st Febuary 2014 to 14th February 2014"} "true"
 
     cleanupTests
 }

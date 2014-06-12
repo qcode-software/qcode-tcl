@@ -358,7 +358,11 @@ doc qc::cast_creditcard {
 
 proc qc::cast_period {string} {
     #| Return a pair of dates defining the period.
-    if { [regexp {^([12]\d{3})$} $string -> year] } {
+    if { [qc::is_date_castable $string] } {
+        # String is a castable date eg "2014-01-01, 01/01/14, Jan 01 2014 etc
+        set from_date [qc::cast_date $string]
+        set to_date $from_date
+    } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
         # Exact match for year eg "2006"
         set from_date [date_year_start $year-01-01]
         set to_date [date_year_end $year-01-01]
@@ -375,6 +379,11 @@ proc qc::cast_period {string} {
         set from_date [date_month_start $epoch]
         set to_date [date_month_end $epoch]
 
+    } elseif { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
+        # Period defined by two periods eg "Jan 2011 to March 2011"
+        lassign [qc::cast_period $period1] from_date .
+        lassign [qc::cast_period $period2] . to_date
+
     } else {
         # error - could not parse string
         error "Could not parse string \"$string\" into dates that define a period."
@@ -385,6 +394,12 @@ proc qc::cast_period {string} {
 
 doc qc::cast_period {
     Examples {
+	% cast_period "2014-01-01"
+	2014-01-01 2014-01-01
+	%
+        % cast_period "Jan 1st 2014"
+	2014-01-01
+	%
 	% cast_period "2014"
 	2014-01-01 2014-12-31
 	%
@@ -399,5 +414,81 @@ doc qc::cast_period {
 	%
         % cast_period "January 2013"
 	2013-01-01 2013-01-31
+	%
+        % cast_period "January 2013 to March 2013"
+	2013-01-01 2013-03-31
+	%
+        % cast_period "1st Jan 2013 to 14th Jan 2013"
+        2013-01-01 2013-01-14
+    }
+}
+
+proc qc::is_period {string} {
+    #| Test if string can be casted to a pair of dates defining a period.
+    if { [qc::is_date_castable $string] } {
+        # String is a castable date eg "2014-01-01, 01/01/14, Jan 01 2014 etc
+        return true
+
+    } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
+        # Exact match for year eg "2006"
+        return true
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)$} $string -> month_name] } {
+        # Exact match for month eg "Jan" (assume this year)
+        return true
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([12]\d{3})$} $string -> month_name year] } {
+        # Exact match for month year eg "Jan 2006"
+        return true
+
+    } elseif { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
+        # Period defined by two periods eg "Jan 2011 to March 2011"
+        if { [qc::is_period [qc::trim $period1]] && [qc::is_period [qc::trim $period2]] } {
+            return true
+        } else {
+            return false
+        }
+
+    } else {
+        # error - could not parse string
+        return false
+
+    }
+}
+
+doc qc::is_period {
+    Examples {
+	% is_period "2014-01-01"
+	true
+	%
+        % is_period "Jan 1st 2014"
+	true
+	%
+	% is_period "2014"
+	true
+	%
+        % is_period "Jan"
+        true
+	%
+        % is_period "January"
+        true
+	%
+        % is_period "Jan 2013"
+        true
+	%
+        % is_period "January 2013"
+        true
+	%
+        % is_period "January 2013 to March 2013"
+        true
+	%
+        & is_period "Jan2013"
+        false
+	%
+        % is_period "January 2013 March 2013"
+        false        
+	%
+        % is_period "1st Jan 2013 to 14th Jan 2013"
+        true
     }
 }
