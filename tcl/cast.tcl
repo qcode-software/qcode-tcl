@@ -358,10 +358,21 @@ doc qc::cast_creditcard {
 
 proc qc::cast_period {string} {
     #| Return a pair of dates defining the period.
-    if { [qc::is_date_castable $string] } {
-        # String is a castable date eg "2014-01-01, 01/01/14, Jan 01 2014 etc
+    if { [qc::is_date $string] } {
+        # String is an iso date eg "2014-01-01"
+        set from_date $string
+        set to_date $from_date
+
+    } elseif { [regexp -nocase -- {^([0-9]+)(?:st|th|nd|rd)?\s+(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([12]\d{3})$} $string] } {
+        # String is a castable date eg "Jan 1st 2014"
         set from_date [qc::cast_date $string]
         set to_date $from_date
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([0-9]+)(?:st|th|nd|rd)?\s+([12]\d{3})$} $string] } {
+        # String is a castable date eg "1st Jan 2014"
+        set from_date [qc::cast_date $string]
+        set to_date $from_date
+
     } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
         # Exact match for year eg "2006"
         set from_date [date_year_start $year-01-01]
@@ -425,8 +436,16 @@ doc qc::cast_period {
 
 proc qc::is_period {string} {
     #| Test if string can be casted to a pair of dates defining a period.
-    if { [qc::is_date_castable $string] } {
-        # String is a castable date eg "2014-01-01, 01/01/14, Jan 01 2014 etc
+    if { [qc::is_date $string] } {
+        # String is an iso date eg "2014-01-01"
+        return true
+
+    } elseif { [regexp -nocase -- {^([0-9]+)(?:st|th|nd|rd)?\s+(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([12]\d{3})$} $string -> month_name year] } {
+        # String is a castable date eg "Jan 1st 2014"
+        return true
+
+    } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([0-9]+)(?:st|th|nd|rd)?\s+([12]\d{3})$} $string -> month_name year] } {
+        # String is a castable date eg "1st Jan 2014"
         return true
 
     } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
@@ -443,12 +462,11 @@ proc qc::is_period {string} {
 
     } elseif { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
         # Period defined by two periods eg "Jan 2011 to March 2011"
-        if { [qc::is_period [qc::trim $period1]] && [qc::is_period [qc::trim $period2]] } {
+        if { [qc::is_period $period1] && [qc::is_period $period2] } {
             return true
         } else {
             return false
         }
-
     } else {
         # error - could not parse string
         return false
