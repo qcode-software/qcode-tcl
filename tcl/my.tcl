@@ -37,8 +37,12 @@ proc qc::my {args} {
             return $total_mem
         }
         instance_id {
-            # EC2 only
-            return [qc::http_get http://169.254.169.254/latest/meta-data/instance-id]
+            # AWS only
+            return [qc::aws_metadata instance-id]
+        }
+        availability_zone {
+            # AWS only
+            return [qc::aws_metadata placement/availability-zone]
         }
     }
 }
