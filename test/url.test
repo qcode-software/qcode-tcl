@@ -203,6 +203,22 @@ namespace eval ::qcode::test {
         url_parts "https://www.qcode.test.co.uk:80"
     } -result {base https://www.qcode.test.co.uk:80 params {} hash {}}
 
+    test url_parts-1.8 {url parts with all safe chars } -body {
+        url_parts {https://www.qcode.test.com/test/this,(123)+is-strange!%for%2F$url*'x'.html}
+    } -result {base {https://www.qcode.test.com/test/this,(123)+is-strange!%for%2F$url*'x'.html} params {} hash {}}
+
+    test url_parts-1.9 {url parts with all safe chars no domain } -body {
+        url_parts {/test/this,(123)+is-strange!%for%2F$url*'x'.html}
+    } -result {base {/test/this,(123)+is-strange!%for%2F$url*'x'.html} params {} hash {}}
+    
+    test url_parts-1.10 {url parts with all safe chars no domain and query} -body {
+        url_parts {/test/this,(123)+is-strange!%for%2F$url*'x'.html?width(a)=123&width(b)=321}
+    } -result {base {/test/this,(123)+is-strange!%for%2F$url*'x'.html} params {width(a) 123 width(b) 321} hash {}}
+
+    test url_parts-1.11 {url parts with all safe chars no domain and hash} -body {
+        url_parts {/test/this,(123)+is-strange!%for%2F$url*'x'.html#placeholder(a)}
+    } -result {base {/test/this,(123)+is-strange!%for%2F$url*'x'.html} params {} hash placeholder(a)}
+
     cleanupTests
 }
 namespace delete ::qcode::test
