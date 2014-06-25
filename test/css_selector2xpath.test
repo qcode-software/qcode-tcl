@@ -1,0 +1,62 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require qcode
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    test css_selector2xpath-1.0 {css_selector2xpath} -setup {
+        set samples {
+            {*} {//*}
+            {p} {//p}
+            {p span} {//p//span}
+            {p > span} {//p/span}
+            {p + span} {//p/following-sibling::*[1]/self::span}
+            {p ~ span} {//p/following-sibling::span}
+            {p[foo]} {//p[@foo]}
+            {[foo="bar"]} {//*[@foo='bar']}
+            {[foo~="bar"]} {//*[contains(concat(' ',@foo,' '),' bar ')]}
+            {[foo^="bar"]} {//*[starts-with(@foo,'bar')]}
+            {[foo$="bar"]} {//*[substring(@foo,string-length(@foo) - string-length('bar') = 'bar')]}
+            {[foo*="bar"]} {//*[contains(@foo,'bar')]}
+            {[foo|="en"]} {//*[starts-with(@foo,'bar') or starts-with(@foo,'bar-')]}
+            {:root} {//*[count(ancestor::*)=0]}
+            {p:nth-child(2)} {//p[(count(preceding-sibling::*) + 1) = 2]}
+            {:nth-child(3n + 1)} {//*[(count(preceding-sibling::*) + 1) >= 1 and ((count(preceding-sibling::*) + 1) mod 3) = 1]}
+            {:nth-child(odd)} {//*[(count(preceding-sibling::*) + 1) >= 1 and ((count(preceding-sibling::*) + 1) mod 2) = 1]}
+            {:nth-child(2n)} {//*[(count(preceding-sibling::*) + 1) >= 0 and ((count(preceding-sibling::*) + 1) mod 2) = 0]}
+            {:nth-child(even)} {//*[(count(preceding-sibling::*) + 1) >= 0 and ((count(preceding-sibling::*) + 1) mod 2) = 0]}
+            {:nth-child(3n - 1)} {//*[((count(preceding-sibling::*) + 1) mod 3) = 2]}
+            {:nth-child(-3n+1)} {//*[((count(preceding-sibling::*) + 1) <= 1) and ((count(preceding-sibling::*) + 1) mod 3) = 1]}
+            {:nth-child(-3n-1)} {//*[false()]}
+            {:nth-last-child(2)} {//*[(count(following-sibling::*) + 1) = 2]}
+            {p:nth-of-type(2)} {//p[(count(preceding-sibling::p) + 1) = 2]}
+            {p:nth-last-of-type(2)} {//p[(count(following-sibling::p) + 1) = 2]}
+            {:first-child} {//*[count(preceding-sibling::*) = 0]}
+            {:last-child} {//*[count(following-sibling::*) = 0]}
+            {p:first-of-type} {//p[count(preceding-sibling::p) = 0]}
+            {p:last-of-type} {//p[count(following-sibling::p) = 0]}
+            {p:only-child} {//p[last()=1]}
+            {p + span:only-child} {//p/following-sibling::*[1]/self::span[last()=1]}
+            {p:only-of-type} {//p[count(preceding-sibling::p) + count(following-sibling::p) = 0]}
+            {:empty} {//*[count(*)=0]}
+            {p.blue} {//p[contains(concat(' ',@class,' '),' blue ')]}
+            {p.blue.bird} {//p[contains(concat(' ',@class,' '),' blue ')][contains(concat(' ',@class,' '),' bird ')]}
+            {p#myid} {//p[@id='myid']}
+        }
+    } -body {
+        foreach {selector xpath} $samples {
+            set returned [css_selector2xpath $selector]
+            if { $xpath != $returned } {
+                return "$selector returned $returned, expected $xpath"
+            }
+        }
+        return "done"
+    } -cleanup {unset samples} -result {done}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
