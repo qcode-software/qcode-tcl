@@ -21,7 +21,7 @@ proc qc::css_selector2xpath {selector {xpath ""}} {
             + { append xpath {/following-sibling::*[1]/self::} }
         }
 
-        # Shift next combinator from selector string
+        # Shift next simple selector sequence from the selector string
         set depth 0
         set sequence ""
         for {set i 0} {$i < [string length $selector]} {incr i} {
