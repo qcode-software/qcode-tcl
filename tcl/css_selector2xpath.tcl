@@ -1,4 +1,4 @@
-package requrire doc
+package require doc
 namespace eval qc {
     namespace export css_selector2xpath
 }
@@ -15,23 +15,38 @@ proc qc::css_selector2xpath {selector {xpath ""}} {
     set sequence_combinator_list [list]
     while { $selector ne "" } {
         switch $combinator {
-            " " { append xpath "//" }
-            > { append xpath "/" }
-            ~ { append xpath "/following-sibling::" }
-            + { append xpath "/following-sibling::*[1]/self::" }
+            " " { append xpath {//} }
+            > { append xpath {/} }
+            ~ { append xpath {/following-sibling::} }
+            + { append xpath {/following-sibling::*[1]/self::} }
         }
 
-        if { ! [regexp {^([^\s>+~]+)(.*?)$} $selector -> sequence remainder] } {
-            error "Unable to parse $selector"
+        # Shift next combinator from selector string
+        set depth 0
+        set sequence ""
+        for {set i 0} {$i < [string length $selector]} {incr i} {
+            switch [string index $selector $i] {
+                \( - \[ {incr depth}
+                \) - \] {incr depth -1}
+                " " - > - ~ - + {
+                    if { $depth == 0 } {
+                        break
+                    }
+                }
+            }
+            append sequence [string index $selector $i]               
         }
-        set selector $remainder
+        if { $depth > 0 } {
+            error "Unable to parse selector $selector - unclosed parentheses"
+        }
+        set selector [string range $selector $i end]
 
         append xpath [qc::css_simple_selector_sequence2xpath $sequence]
 
         if { $selector ne "" } {
             # Shift next combinator from selector string
             if { ! [regexp {^\s*([\s>+~])\s*(.+?)$} $selector -> combinator remainder] } {
-                error "Unable to parse $selector"
+                error "Unable to parse combinator / sequence from selector string $selector"
             }
             set selector $remainder
         }
@@ -51,17 +66,14 @@ proc qc::css_simple_selector_sequence2xpath {sequence} {
     }
 
     # Css type and universal selectors have the same syntax as XPath node tests
-    if { regexp {[^a-zA-Z0-9]} $element_type } {
-        error "Error parsing $sequence"
+    if { [regexp {[^a-zA-Z0-9*]} $element_type] } {
+        error "Unable to parse $sequence - Invalid element type"
     }
     append xpath $element_type
 
     while { $sequence ne "" } {
         # Shift next simple selector from simple selector sequence
         set simple_selector [string index $sequence 0]
-        if { $simple_selector ni {\[ : . \#} } {
-            error "Unable to parse $selector"
-        }
         set depth 0
         set end false
         for {set i 1} {$i < [string length $sequence]} {incr i} {
@@ -80,7 +92,7 @@ proc qc::css_simple_selector_sequence2xpath {sequence} {
             append simple_selector [string index $sequence $i]
         }
         if { $depth > 0 } {
-            error "Unable to parse $selector"
+            error "Unable to parse $sequence - unclosed parentheses"
         }
         set sequence [string range $sequence $i end]
 
@@ -95,7 +107,7 @@ proc qc::css_simple_selector2xpath {simple_selector {element_type *}} {
     switch [string index $simple_selector 0] {
         . { # class selector
             set class [string range $simple_selector 1 end]
-            return "contains(concat(' ', normalize-space(@class), ' '),[qc::xpath_literal " $class "]))"
+            return "contains(concat(' ',normalize-space(@class),' '),[qc::xpath_literal " $class "])"
         }
         \# { # id selector
             set id [string range $simple_selector 1 end]
@@ -106,8 +118,8 @@ proc qc::css_simple_selector2xpath {simple_selector {element_type *}} {
             return [qc::css_pseudo_class2xpath $pseudo_class $element_type]
         }
         \[ { #attribute selector
-            if { [string index $simple_selector end] ne \] } {
-                error "Unable to parse $selector"
+            if { [string index $simple_selector end] ne "\]" } {
+                error "Unable to parse $simple_selector"
             }
             set attribute_selector [string range $simple_selector 1 end-1]
             return [qc::css_attribute_selector2xpath $attribute_selector]
@@ -140,7 +152,7 @@ proc qc::css_attribute_selector2xpath {attribute_selector} {
         }
         |= {
             # Attribute is hyphen separated list of values starting with $value
-            return "@${attribute}=[qc::xpath_literal $value] or @${attribute}=[qc::xpath_literal "${value}-"]"
+            return "@${attribute}=[qc::xpath_literal $value] or starts-with(@${attribute},[qc::xpath_literal "${value}-"])"
         }
         ^= {
             # Attribute starts with $value
@@ -234,38 +246,38 @@ proc qc::css_pseudo_class2xpath {pseudo_class {element_type *}} {
                 }
                 return "not([qc::css_simple_selector2xpath $argument])"
             } {
-                if { regexp {[^a-zA-Z0-9]} $element_type } {
+                if { regexp {[^a-zA-Z0-9*]} $element_type } {
                     error "Error parsing pseudo-class $pseudo_class"
                 }
                 return "not($agument)"
             }
         }
         only-of-type {
-            if { $element_type eq * } {
+            if { $element_type eq "*" } {
                 error "x-of-type psuedo-classes not supported without explicit type"
             }
             return "count(preceding-sibling::${element_type}) + count(following-sibling::${element_type}) = 0"
         }
         nth-of-type {
-            if { $element_type eq * } {
+            if { $element_type eq "*" } {
                 error "x-of-type psuedo-classes not supported without explicit type"
             }
             return [nth_term $argument "(count(preceding-sibling::${element_type}) + 1)"]
         }
         nth-last-of-type {
-            if { $element_type eq * } {
+            if { $element_type eq "*" } {
                 error "x-of-type psuedo-classes not supported without explicit type"
             }
             return [nth_term $argument "(count(following-sibling::${element_type}) + 1)"]
         }
         first-of-type {
-            if { $element_type eq * } {
+            if { $element_type eq "*" } {
                 error "x-of-type psuedo-classes not supported without explicit type"
             }
             return "count(preceding-sibling::${element_type}) = 0"
         }
         last-of-type {
-            if { $element_type eq * } {
+            if { $element_type eq "*" } {
                 error "x-of-type psuedo-classes not supported without explicit type"
             }
             return "count(following-sibling::${element_type}) = 0"
@@ -300,8 +312,8 @@ proc qc::nth_term {expression n} {
                 error "Unable to parse nth-term \"$expression\""
             }
             switch $keyword {
-                odd {set a 2; set b 0}
-                even {set a 2; set b 1}
+                odd {set a 2; set b 1}
+                even {set a 2; set b 0}
             }
         }
     }
@@ -321,7 +333,7 @@ proc qc::nth_term {expression n} {
         return "$n = $b"
     } elseif { $a > 0 } {
         set mod [expr {$b % $a}]
-        if { $b >= 0 } {
+        if { $b > 0 } {
             return "$n >= $b and ($n mod $a) = $mod"
         } else {
             return "($n mod $a) = $mod"
@@ -343,5 +355,5 @@ proc qc::xpath_literal {string} {
     if { [string first \" $string] == -1 } {
         return "\"$string\""
     }
-    return "concat('[join [split $string '] {' ,"'" , '}]')"
+    return "concat('[join [split $string '] {',"'",'}]')"
 }
