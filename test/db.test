@@ -132,6 +132,13 @@ namespace eval ::qcode::test {
             db_qry_parse {select * from nosuchtable where title=:foo::text and message=:bar::character varying}
         } -result {select * from nosuchtable where title IS NULL and message='1234'::character varying}
 
+        # db_qry_parse
+        test db_qry_parse-1.3 {db_qry_parse ascii control} -body {
+            set foo ""
+            set bar "A string containing\u0001 control chars"
+            db_qry_parse {select * from nosuchtable where title=:foo::text and message=:bar::character varying}
+        } -result {select * from nosuchtable where title IS NULL and message='A string containing control chars'::character varying}
+
         # db_quote
         test db_quote-1.0 {db_quote} -body {
             set foo 1

@@ -15,6 +15,9 @@ proc qc::db_qry_parse {qry {level 0} } {
     #| of $varname in the caller level $level's env
     incr level
 
+    # Filter out ASCII control chars
+    set qry [regsub -all {[\u0000-\u0004]+} $qry ""] 
+
     # Quoted fields: Escape colons with \0 and []$\\
     # regsub -all won't work because the regexp need to be applied repeatedly to anchor correctly
     set start 0
@@ -190,7 +193,8 @@ proc qc::db_qry_parse {qry {level 0} } {
 	([a-z_][a-z0-9_]*)  
     }
     append re $type_re
-    regsub -all -nocase -expanded $re $qry {\1[::qc::db_quote [set {\2}] {\4}]} qry
+    # Also filter out ascii control characters from variables
+    regsub -all -nocase -expanded $re $qry {\1[::qc::db_quote [regsub -all {[\u0000-\u0004]+} [set {\2}] ""] {\4}]} qry
 
     # Eval with uplevel
     set qry [uplevel $level [list subst $qry]]
@@ -202,6 +206,7 @@ proc qc::db_qry_parse {qry {level 0} } {
         append null_re $type_re
 	regsub -all -expanded $null_re $qry { IS NULL} qry
     }
+
     return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
 }
 
