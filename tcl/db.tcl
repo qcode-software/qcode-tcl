@@ -189,7 +189,6 @@ proc qc::db_qry_parse {qry {level 0} } {
 	([a-z_][a-z0-9_]*)  
     }
     append re $type_re
-    # Also filter out ascii control characters from variables
     regsub -all -nocase -expanded $re $qry {\1[::qc::db_quote [set {\2}] {\4}]} qry
 
     # Eval with uplevel
