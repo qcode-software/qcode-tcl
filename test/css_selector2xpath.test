@@ -1,0 +1,168 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require qcode
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    test xpath_literal-1.0 {xpath_literal} -setup {
+    } -body {
+        xpath_literal foo
+    } -cleanup {
+    } -result {'foo'}
+
+    test xpath_literal-1.1 {xpath_literal with apostrophy} -setup {
+    } -body {
+        xpath_literal {isn't}
+    } -cleanup {
+    } -result {"isn't"}
+
+    test xpath_literal-1.1 {xpath_literal with both} -setup {
+    } -body {
+        xpath_literal {isn't "funny"}
+    } -cleanup {
+    } -result {concat('isn',"'",'t "funny"')}
+    
+
+    test nth_term-1.0 {nth_term b only} -setup {
+    } -body {
+        nth_term "3" "position"
+    } -cleanup {
+    } -result {position = 3}
+
+    test nth_term-1.1 {nth_term a only} -setup {
+    } -body {
+        nth_term "5n" "position"
+    } -cleanup {
+    } -result {(position mod 5) = 0}
+
+    test nth_term-1.2 {nth_term +a +b} -setup {
+    } -body {
+        nth_term "5n+2" "position"
+    } -cleanup {
+    } -result {position >= 2 and (position mod 5) = 2}
+
+    test nth_term-1.3 {nth_term +a -b} -setup {
+    } -body {
+        nth_term "5n - 2" "position"
+    } -cleanup {
+    } -result {(position mod 5) = 3}
+
+    test nth_term-1.4 {nth_term -a +b} -setup {
+    } -body {
+        nth_term "-5n + 2" "position"
+    } -cleanup {
+    } -result {(position <= 2) and (position mod -5) = 2}
+
+    test nth_term-1.5 {nth_term -a -b} -setup {
+    } -body {
+        nth_term "-5n - 2" "position"
+    } -cleanup {
+    } -result {false()}
+
+    test nth_term-1.6 {nth_term even} -setup {
+    } -body {
+        nth_term "even" "position"
+    } -cleanup {
+    } -result {(position mod 2) = 0}
+
+    test nth_term-1.7 {nth_term odd} -setup {
+    } -body {
+        nth_term "odd" "position"
+    } -cleanup {
+    } -result {position >= 1 and (position mod 2) = 1}
+
+
+    test css_pseudo_class2xpath-1.0 {css_pseudo_class2xpath first-child} -setup {
+    } -body {
+        css_pseudo_class2xpath "first-child"
+    } -cleanup {
+    } -result {count(preceding-sibling::*) = 0}
+
+    
+    test css_attribute_selector2xpath-1.0 {css_attribute_selector2xpath [foo="bar"]} -setup {
+    } -body {
+        css_attribute_selector2xpath {foo="bar"}
+    } -cleanup {
+    } -result {@foo='bar'}
+
+
+    test css_simple_selector2xpath-1.0 {css_simple_selector2xpath .class} -setup {
+    } -body {
+        css_simple_selector2xpath {.apple}
+    } -cleanup {
+    } -result {contains(concat(' ',normalize-space(@class),' '),' apple ')}
+
+    test css_simple_selector2xpath-1.1 {css_simple_selector2xpath #myid} -setup {
+    } -body {
+        css_simple_selector2xpath "\#myid"
+    } -cleanup {
+    } -result {@id='myid'}
+
+
+    test css_simple_selector_sequence2xpath-1.0 {css_simple_selector_sequence2xpath *} -setup {
+    } -body {
+        css_simple_selector_sequence2xpath *
+    } -cleanup {
+    } -result {*}
+
+    test css_simple_selector_sequence2xpath-1.1 {css_simple_selector_sequence2xpath p} -setup {
+    } -body {
+        css_simple_selector_sequence2xpath p
+    } -cleanup {
+    } -result {p}
+    
+    
+    test css_selector2xpath-1.0 {css_selector2xpath} -setup {
+        set samples {
+            {*} {//*}
+            {p} {//p}
+            {p span} {//p//span}
+            {p > span} {//p/span}
+            {p + span} {//p/following-sibling::*[1]/self::span}
+            {p ~ span} {//p/following-sibling::span}
+            {p[foo]} {//p[@foo]}
+            {[foo="bar"]} {//*[@foo='bar']}
+            {[foo~="bar"]} {//*[contains(concat(' ',normalize-space(@foo),' '),' bar ')]}
+            {[foo^="bar"]} {//*[starts-with(@foo,'bar')]}
+            {[foo$="bar"]} {//*[substring(@foo,string-length(@foo) - string-length('bar')) = 'bar']}
+            {[foo*="bar"]} {//*[contains(@foo,'bar')]}
+            {[foo|="en"]} {//*[@foo='en' or starts-with(@foo,'en-')]}
+            {:root} {//*[count(ancestor::*)=0]}
+            {p:nth-child(2)} {//p[(count(preceding-sibling::*) + 1) = 2]}
+            {:nth-last-child(2)} {//*[(count(following-sibling::*) + 1) = 2]}
+            {p:nth-of-type(2)} {//p[(count(preceding-sibling::p) + 1) = 2]}
+            {p:nth-last-of-type(2)} {//p[(count(following-sibling::p) + 1) = 2]}
+            {:first-child} {//*[count(preceding-sibling::*) = 0]}
+            {:last-child} {//*[count(following-sibling::*) = 0]}
+            {p:first-of-type} {//p[count(preceding-sibling::p) = 0]}
+            {p:last-of-type} {//p[count(following-sibling::p) = 0]}
+            {p:only-child} {//p[last()=1]}
+            {p + span:only-child} {//p/following-sibling::*[1]/self::span[last()=1]}
+            {p:only-of-type} {//p[count(preceding-sibling::p) + count(following-sibling::p) = 0]}
+            {:empty} {//*[count(*)=0]}
+            {p.blue} {//p[contains(concat(' ',normalize-space(@class),' '),' blue ')]}
+            {p.blue.bird} {//p[contains(concat(' ',normalize-space(@class),' '),' blue ')][contains(concat(' ',normalize-space(@class),' '),' bird ')]}
+            {p#myid} {//p[@id='myid']}
+        }
+    } -body {
+        foreach {selector xpath} $samples {
+            qc::try {
+                set returned [css_selector2xpath $selector]
+            } {
+                global errorMessage
+                return "Error: \"$errorMessage\" while parsing $selector, expected $xpath"
+            }
+            if { $xpath != $returned } {
+                return "$selector returned $returned, expected $xpath"
+            }
+        }
+        return "done"
+    } -cleanup {unset samples} -result {done}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
