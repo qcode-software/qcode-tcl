@@ -15,14 +15,11 @@ proc qc::db_qry_parse {qry {level 0} } {
     #| of $varname in the caller level $level's env
     incr level
 
-    # Filter out ASCII control chars
-    set qry [regsub -all {[\u0000-\u0004]+} $qry ""] 
-
     # Quoted fields: Escape colons with \0 and []$\\
     # regsub -all won't work because the regexp need to be applied repeatedly to anchor correctly
     set start 0
     while { $start<[string length $qry] && [regexp -indices -start $start -- {(^|[^'])'(([^']|'')*)'([^']|$)} $qry -> left field . right] } {
-	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $field 0] [lindex $field 1]]]]
+	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \\u003A [ \\u005B ] \\u005D $ \\u0024 \\ \\u005C} [string range $qry [lindex $field 0] [lindex $field 1]]]]
 	set start [lindex $right 0]
     }
 
@@ -30,10 +27,9 @@ proc qc::db_qry_parse {qry {level 0} } {
     set start 0
     while { $start<[string length $qry] \
 		&& [regexp -indices -start $start -- {(\$[a-zA-Z0-9_]*?\$)(.*?)(\1)} $qry -> left field right] } {
-	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \0 [ \1 ] \2 $ \3 \\ \4} [string range $qry [lindex $left 0] [lindex $right 1]]]]
+	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \\u003A [ \\u005B ] \\u005D $ \\u0024 \\ \\u005C} [string range $qry [lindex $left 0] [lindex $right 1]]]]
 	set start [expr {[lindex $right 1]+1}]
     }
-
   
     ## SQL Arrays ##
     # May be multi-dimensional, indexed or slices, with numbers, $variables, :variables, or sql_functions()
@@ -206,8 +202,7 @@ proc qc::db_qry_parse {qry {level 0} } {
         append null_re $type_re
 	regsub -all -expanded $null_re $qry { IS NULL} qry
     }
-
-    return [string map {\0 : \1 [ \2 ] \3 $ \4 \\} $qry]
+    return $qry
 }
 
 doc qc::db_qry_parse {
