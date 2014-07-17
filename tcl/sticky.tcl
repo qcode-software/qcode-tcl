@@ -18,7 +18,6 @@ proc qc::sticky_save {args} {
     } else {
 	set url [url_path [ns_set iget [ns_conn headers] Referer]]
     }
-    set employee_id [auth]
   
     if { [llength $args] == 0 } {
 	# set all vars
@@ -27,7 +26,7 @@ proc qc::sticky_save {args} {
     # set vars
     foreach name $args {
 	if { [uplevel 1 [list info exists $name]] } {
-	    sticky_set $employee_id $url $name [upset 1 $name]
+	    sticky_set -url $url $name [upset 1 $name]
 	}
     }
 }
@@ -53,9 +52,12 @@ proc qc::sticky_exists {args} {
     }
 }
 
-proc qc::sticky_set {employee_id url name value} {
+proc qc::sticky_set {args} {
     #| Insert or Update the sticky record
     # trim whitespace
+    args $args -url ? -employee_id ? name value
+    default employee_id [auth]
+    default url [url_path [qc::conn_url]]
     set value [string trim $value]
     db_trans {
         db_1row {select employee_id from employee where employee_id=:employee_id for update}
