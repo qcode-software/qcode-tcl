@@ -164,3 +164,8 @@ proc qc::conn_ie {} {
         return false
     }
 }
+
+proc qc::conn_path {} {
+    set request [ns_conn request]
+    return [qc::url_request_path $request]
+}

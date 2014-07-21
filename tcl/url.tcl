@@ -301,15 +301,15 @@ proc qc::url_parts {url} {
         (?:
          (
           # base with no path - protocol, domain, and port (optional)
-          https?://[a-z0-9\-\.]+(?::[0-9]+)?
+          (https?)://([a-z0-9\-\.]+)(?::([0-9]+))?
           )
          |
          (
           # base with protocol, domain, port (optional), and abs_path
-          https?://[a-z0-9\-\.]+(?::[0-9]+)?/[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]*
+          (https?)://([a-z0-9\-\.]+)(?::([0-9]+))?(/[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]*)
           |
           # base with path only
-          [a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+
+          ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+)
           )
 
          # query (optional)
@@ -320,17 +320,38 @@ proc qc::url_parts {url} {
          )
         $
     }
-    if { [regexp -expanded $pattern $url -> base1 base2 query_string hash] } {
+    if { [regexp -expanded $pattern $url -> \
+              base1 protocol1 domain1 port1 \
+              base2 protocol2 domain2 port2 path1 \
+              path2 \
+              query_string hash] } {
         if { $base1 ne "" } {
-            set base $base1
+            lassign [list $base1 $protocol1 $domain1 $port1 ""] base protocol domain port path
+        } elseif { $base2 ne "" } {
+            lassign [list $base2 $protocol2 $domain2 $port2 $path1] base protocol domain port path
         } else {
-            set base $base2
+            lassign [list "" "" "" "" $path2] base protocol domain port path
         }
         set hash [string trimleft $hash #]
         set query_string [string trimleft $query_string ?]
-        set query_map [split $query_string &=]
-        return [dict create base $base params $query_map hash $hash]
+        set params [split $query_string &=]
+        return [qc::dict_from base params hash protocol domain port path]
     } else {
         error "Unable to parse url $url"
     }
+}
+
+proc qc::url_request_path {request} {
+    set request_regexp {^
+        ([A-Z]+)
+        \s
+        ([^ ]+)
+        \s
+        HTTP/([1-9][0-9]*\.[1-9][0-9]*)
+        $}
+    if { ! [regexp -expanded $request_regexp $request -> request_method request_uri http_version] } {
+        error "bad request line"
+    }
+    set parts [qc::url_parts $request_uri]
+    return [dict get $parts path]
 }
