@@ -297,52 +297,44 @@ proc qc::url_match {canonical_url test_url} {
 proc qc::url_parts {url} {
     #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
     # and path of url
-    set pattern {
-        ^
-        (?:
-         (
-          # base with no path - protocol, domain, and port (optional)
-          (https?)://([a-z0-9\-\.]+)(?::([0-9]+))?
-          )
-         |
-         (
-          # base with protocol, domain, port (optional), and abs_path
-          (https?)://([a-z0-9\-\.]+)(?::([0-9]+))?(/[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]*)
-          |
-          # base with path only
-          ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+)
-          )
-
-         # query (optional)
-         (\?[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),=&:]+)?
-
-         # hash (optional)
-         (\#[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+)?
+    set pattern {^
+        # base with protocol, domain, port (optional), and abs_path (optional)
+        (
+         (https?)://
+         ([a-z0-9\-\.]+)
+         (?::([0-9]+))?
+         (/[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]*)?
          )
-        $
-    }
-    if { [regexp -expanded $pattern $url -> \
-              base1 protocol1 domain1 port1 \
-              base2 protocol2 domain2 port2 path1 \
-              path2 \
-              query_string hash] } {
-        if { $base1 ne "" } {
-            lassign [list $base1 $protocol1 $domain1 $port1 ""] base protocol domain port path
-        } elseif { $base2 ne "" } {
-            set base $base2
-            if { $protocol2 ne "" } {
-                lassign [list $protocol2 $domain2 $port2 $path1] protocol domain port path
-            } else {
-                lassign [list "" "" "" $path2] protocol domain port path
-            }
-        }
-        set hash [string trimleft $hash #]
-        set query_string [string trimleft $query_string ?]
-        set params [split $query_string &=]
+        
+        # query (optional)
+        (?: \? ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),=&:]+) )?
+        
+        # hash (optional)
+        (?: \# ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+) )?
+        $}
+    if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
+        set params [split $query &=]
         return [qc::dict_from base params hash protocol domain port path]
-    } else {
-        error "Unable to parse url $url"
     }
+
+    set pattern {^
+        # base with path (abs or rel) only
+        ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+)
+        
+        # query (optional)
+        (?: \? ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),=&:]+) )?
+        
+        # hash (optional)
+        (?: \# ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+) )?
+        $}
+    if { [regexp -expanded $pattern $url -> path query hash] } {
+        lassign [list "" "" ""] protocol domain port
+        set base $path
+        set params [split $query &=]
+        return [qc::dict_from base params hash protocol domain port path]
+    }
+
+    error "Unable to parse url $url"
 }
 
 proc qc::url_request_path {request} {
