@@ -328,9 +328,12 @@ proc qc::url_parts {url} {
         if { $base1 ne "" } {
             lassign [list $base1 $protocol1 $domain1 $port1 ""] base protocol domain port path
         } elseif { $base2 ne "" } {
-            lassign [list $base2 $protocol2 $domain2 $port2 $path1] base protocol domain port path
-        } else {
-            lassign [list "" "" "" "" $path2] base protocol domain port path
+            set base $base2
+            if { $protocol2 ne "" } {
+                lassign [list $protocol2 $domain2 $port2 $path1] protocol domain port path
+            } else {
+                lassign [list "" "" "" $path2] protocol domain port path
+            }
         }
         set hash [string trimleft $hash #]
         set query_string [string trimleft $query_string ?]
@@ -349,7 +352,8 @@ proc qc::url_request_path {request} {
         \s
         HTTP/([1-9][0-9]*\.[1-9][0-9]*)
         $}
-    if { ! [regexp -expanded $request_regexp $request -> request_method request_uri http_version] } {
+    if { ! [regexp -expanded $request_regexp $request \
+                -> request_method request_uri http_version] } {
         error "bad request line"
     }
     set parts [qc::url_parts $request_uri]
