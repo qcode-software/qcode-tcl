@@ -295,7 +295,8 @@ proc qc::url_match {canonical_url test_url} {
 }
 
 proc qc::url_parts {url} {
-    #| Return a dict containing the base, hash, params (as a multimap) of url
+    #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
+    # and path of url
     set pattern {
         ^
         (?:
@@ -345,6 +346,8 @@ proc qc::url_parts {url} {
 }
 
 proc qc::url_request_path {request} {
+    #| Return the path of an http request line
+    # (eg. takes "GET /homepage?foo=bar HTTP/1.1", returns "/homepage")
     set request_regexp {^
         ([A-Z]+)
         \s

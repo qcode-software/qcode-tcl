@@ -166,6 +166,7 @@ proc qc::conn_ie {} {
 }
 
 proc qc::conn_path {} {
+    #| Return the path of the current connection
     set request [ns_conn request]
     return [qc::url_request_path $request]
 }
