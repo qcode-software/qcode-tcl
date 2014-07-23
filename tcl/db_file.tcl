@@ -127,6 +127,7 @@ proc qc::plupload.html {name chunk chunks file} {
 	foreach file $files {
 	    file delete $file
 	}
+        file delete /tmp/$id
 	dict unset dict $id
 	return $file_id	
     } else {
