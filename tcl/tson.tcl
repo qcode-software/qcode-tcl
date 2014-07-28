@@ -9,12 +9,16 @@ proc qc::tson_object { args } {
     # Cannot be used to create nested objects
     # EXAMPLE:  
     # % tson_object firstname "Daniel" surname "Clark" age 23
-    # object firstname {string Daniel} surname {string Clark} age 23
+    # object firstname {string Daniel} surname {string Clark} age {number 23}
 
     set tson [list object]
     
     foreach {name value} $args {
-	if { [is_decimal $value] || [in {true false null} $value] } {
+	if { ([is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+            lappend tson $name [list number $value]
+        } elseif { $value in [list true false] } {
+	    lappend tson $name [list boolean $value]
+	} elseif { $value eq "null" } {
 	    lappend tson $name $value
 	} else { 
 	    lappend tson $name [list string $value]
@@ -26,7 +30,7 @@ proc qc::tson_object { args } {
 doc qc::tson_object {
     Examples {
 	% qc::tson_object legs 4 eyes 2 coat fur call meow
-	object legs 4 eyes 2 coat {string fur} call {string meow}
+	object legs {number 4} eyes {number 2} coat {string fur} call {string meow}
     }
 }
 
@@ -62,8 +66,14 @@ proc qc::tson2json { tson } {
 	string {
 	    return [json_quote [lindex $tson 1]]
 	}
+        number {
+            return [lindex $tson 1]
+        }
+        boolean {
+            return [lindex $tson 1]
+        }
 	default {
-	    if { [string is double -strict $tson] || [in {true false null} $tson]} {
+	    if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
 		return $tson
 	    } else {
 		return [json_quote $tson]
@@ -86,19 +96,19 @@ doc qc::tson2json {
 		     IDs [list array 116 943 234 38793]]]
 
 	% tson2json $tson
-	{ 
-	    "Image": {
-		"Width": 800,
-		"Height": 600,
-		"Title": "View from the 15th Floor",
-		"Thumbnail": {
-		    "Url": "http://www.example.com/image/481989943",
-		    "Height": 125,
-		    "Width": "100"
-		},
-		"IDs": [116,943,234,38793]
-	    }
-	}
+	{
+            "Image": {
+                "Width": 800,
+                "Height": 600,
+                "Title": "View from the 15th Floor",
+                "Thumbnail": {
+                    "Url": "http://www.example.com/image/481989943",
+                    "Height": 125,
+                    "Width": "100"
+                },
+                "IDs": [116,943,234,38793]
+            }
+        }
     }
 }
 
@@ -150,8 +160,14 @@ proc qc::tson2xml { tson } {
 	string {
 	    return [qc::xml_escape [lindex $tson 1]]
 	}
+        number {
+            return [lindex $tson 1]
+        }
+        boolean {
+            return [lindex $tson 1]
+        }
 	default {
-	    if { [string is double -strict $tson] || [in {true false null} $tson]} {
+	    if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
 		return $tson
 	    } else {
 		return [qc::xml_escape $tson]
@@ -174,11 +190,11 @@ doc qc::tson2xml {
 		     IDs [list array 116 943 234 38793]]]
 	% qc::tson2xml $tson
 	<Image><Width>800</Width>
-	<Height>600</Height>
-	<Title>View from the 15th Floor</Title>
-	<Thumbnail><Url>http://www.example.com/image/481989943</Url>
-	<Height>125</Height>
-	<Width>100</Width></Thumbnail>
-	<IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
+        <Height>600</Height>
+        <Title>View from the 15th Floor</Title>
+        <Thumbnail><Url>http://www.example.com/image/481989943</Url>
+        <Height>125</Height>
+        <Width>100</Width></Thumbnail>
+        <IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
     }
 }
