@@ -30,7 +30,7 @@ proc qc::tson_object { args } {
 doc qc::tson_object {
     Examples {
 	% qc::tson_object legs 4 eyes 2 coat fur call meow
-	object legs 4 eyes 2 coat {string fur} call {string meow}
+	object legs {number 4} eyes {number 2} coat {string fur} call {string meow}
     }
 }
 
@@ -96,19 +96,19 @@ doc qc::tson2json {
 		     IDs [list array 116 943 234 38793]]]
 
 	% tson2json $tson
-	{ 
-	    "Image": {
-		"Width": 800,
-		"Height": 600,
-		"Title": "View from the 15th Floor",
-		"Thumbnail": {
-		    "Url": "http://www.example.com/image/481989943",
-		    "Height": 125,
-		    "Width": "100"
-		},
-		"IDs": [116,943,234,38793]
-	    }
-	}
+	{
+            "Image": {
+                "Width": 800,
+                "Height": 600,
+                "Title": "View from the 15th Floor",
+                "Thumbnail": {
+                    "Url": "http://www.example.com/image/481989943",
+                    "Height": 125,
+                    "Width": "100"
+                },
+                "IDs": [116,943,234,38793]
+            }
+        }
     }
 }
 
@@ -190,11 +190,11 @@ doc qc::tson2xml {
 		     IDs [list array 116 943 234 38793]]]
 	% qc::tson2xml $tson
 	<Image><Width>800</Width>
-	<Height>600</Height>
-	<Title>View from the 15th Floor</Title>
-	<Thumbnail><Url>http://www.example.com/image/481989943</Url>
-	<Height>125</Height>
-	<Width>100</Width></Thumbnail>
-	<IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
+        <Height>600</Height>
+        <Title>View from the 15th Floor</Title>
+        <Thumbnail><Url>http://www.example.com/image/481989943</Url>
+        <Height>125</Height>
+        <Width>100</Width></Thumbnail>
+        <IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
     }
 }
