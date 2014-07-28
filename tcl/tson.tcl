@@ -9,12 +9,16 @@ proc qc::tson_object { args } {
     # Cannot be used to create nested objects
     # EXAMPLE:  
     # % tson_object firstname "Daniel" surname "Clark" age 23
-    # object firstname {string Daniel} surname {string Clark} age 23
+    # object firstname {string Daniel} surname {string Clark} age {number 23}
 
     set tson [list object]
     
     foreach {name value} $args {
-	if { [is_decimal $value] || [in {true false null} $value] } {
+	if { ([is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+            lappend tson $name [list number $value]
+        } elseif { $value in [list true false] } {
+	    lappend tson $name [list boolean $value]
+	} elseif { $value eq "null" } {
 	    lappend tson $name $value
 	} else { 
 	    lappend tson $name [list string $value]
@@ -62,8 +66,14 @@ proc qc::tson2json { tson } {
 	string {
 	    return [json_quote [lindex $tson 1]]
 	}
+        number {
+            return [lindex $tson 1]
+        }
+        boolean {
+            return [lindex $tson 1]
+        }
 	default {
-	    if { [string is double -strict $tson] || [in {true false null} $tson]} {
+	    if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
 		return $tson
 	    } else {
 		return [json_quote $tson]
@@ -150,8 +160,14 @@ proc qc::tson2xml { tson } {
 	string {
 	    return [qc::xml_escape [lindex $tson 1]]
 	}
+        number {
+            return [lindex $tson 1]
+        }
+        boolean {
+            return [lindex $tson 1]
+        }
 	default {
-	    if { [string is double -strict $tson] || [in {true false null} $tson]} {
+	    if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
 		return $tson
 	    } else {
 		return [qc::xml_escape $tson]
