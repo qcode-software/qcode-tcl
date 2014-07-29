@@ -345,7 +345,7 @@ proc qc::url_request_path {request} {
         \s
         ([^ ]+)
         \s
-        HTTP/([1-9][0-9]*\.[1-9][0-9]*)
+        HTTP/([0-9]+\.[0-9]+)
         $}
     if { ! [regexp -expanded $request_regexp $request \
                 -> request_method request_uri http_version] } {
