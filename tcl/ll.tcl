@@ -68,3 +68,39 @@ doc qc::ll2csv {
         widget_c|7.99|1
     }
 }
+
+proc qc::ll2pg_copy {ll} {
+    #| Return data in the format accepted by postgresql's copy statements
+    set pg_copy_data ""
+    foreach list $ll {
+        set temp {}
+        foreach value $list {
+            if { $value eq "" } {
+                # Encode empty string as NULL
+                set value \\N
+            } else {
+                # Escape backslash, newline, carriage return, tab characters
+                set value [string map {\\ \\\\ \n \\n \r \\r \t \\t \v \\v} $value]
+            }
+            lappend temp $value
+        }
+        append pg_copy_data "[join $temp \t]\n"
+    }
+    return $pg_copy_data
+}
+
+doc qc::ll2pg_copy {
+    Parent db
+    Usage {ll2pg_copy ll}
+    Description {
+	Convert a list of lists data structure into the format accepted by postgresql's copy statements
+    }
+    Examples {
+	% qc::ll2pg_copy [list [Daniel Clark daniel@qcode.co.uk] [list Bernhard "van Woerden" bernhard@qcode.co.uk] [list David Osborne david@qcode.co.uk]]
+	Daniel	Clark	daniel@qcode.co.uk
+        Bernhard	van Woerden	bernhard@qcode.co.uk
+        David	Osborne	david@qcode.co.uk
+        
+        %
+    }
+}

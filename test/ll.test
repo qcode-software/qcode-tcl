@@ -40,6 +40,13 @@ namespace eval ::qcode::test {
         unset llist
     } -result {}
 
+    test ll2pg_copy-1.0 {ll2pg_copy} -setup {} -body {
+        qc::ll2pg_copy [list [list Daniel Clark daniel@qcode.co.uk] [list Bernhard "van Woerden" bernhard@qcode.co.uk] [list David Osborne david@qcode.co.uk]]
+    } -cleanup {} -result "Daniel\tClark\tdaniel@qcode.co.uk\nBernhard\tvan Woerden\tbernhard@qcode.co.uk\nDavid\tOsborne\tdavid@qcode.co.uk\n"
+
+    test ll2pg_copy-1.1 {ll2pg_copy} -setup {} -body {
+        qc::ll2pg_copy [list [list Daniel Clark ""] [list Bernhard\r\n "van\tWoerden" bernhard@qcode.co.uk] [list David\\ Osborne david@qcode.co.uk]]
+    } -cleanup {} -result "Daniel\tClark\t\\N\nBernhard\\r\\n\tvan\\tWoerden\tbernhard@qcode.co.uk\nDavid\\\\\tOsborne\tdavid@qcode.co.uk\n"
 
     cleanupTests
 }
