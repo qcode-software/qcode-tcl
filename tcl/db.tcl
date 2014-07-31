@@ -18,17 +18,23 @@ proc qc::db_qry_parse {qry {level 0} } {
     # Quoted fields: Escape colons with \0 and []$\\
     # regsub -all won't work because the regexp need to be applied repeatedly to anchor correctly
     set start 0
-    while { $start<[string length $qry] && [regexp -indices -start $start -- {(^|[^'])'(([^']|'')*)'([^']|$)} $qry -> left field . right] } {
+    while { $start<[set length [string length $qry]] && [regexp -indices -start $start -- {(^|[^'])'(([^']|'')*)'([^']|$)} $qry -> left field . right] } {
 	set qry [string replace $qry [lindex $field 0] [lindex $field 1] [string map {: \\u003A [ \\u005B ] \\u005D $ \\u0024 \\ \\u005C} [string range $qry [lindex $field 0] [lindex $field 1]]]]
-	set start [lindex $right 0]
+        # Calculate how many characters we've added to the string
+        set offset [expr [string length $qry]-$length]
+        # Offset the start of the next iteration by the increase in string length
+	set start [expr [lindex $right 0]+$offset]
     }
 
     # Dollar Quoted fields
     set start 0
-    while { $start<[string length $qry] \
+    while { $start<[set length [string length $qry]] \
 		&& [regexp -indices -start $start -- {(\$[a-zA-Z0-9_]*?\$)(.*?)(\1)} $qry -> left field right] } {
 	set qry [string replace $qry [lindex $left 0] [lindex $right 1] [string map {: \\u003A [ \\u005B ] \\u005D $ \\u0024 \\ \\u005C} [string range $qry [lindex $left 0] [lindex $right 1]]]]
-	set start [expr {[lindex $right 1]+1}]
+        # Calculate how many characters we've added to the string
+        set offset [expr [string length $qry]-$length]
+        # Offset the start of the next iteration by the increase in string length
+	set start [expr {[lindex $right 1]+1+$offset}]
     }
   
     ## SQL Arrays ##

@@ -138,6 +138,12 @@ namespace eval ::qcode::test {
             db_qry_parse {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message=:bar::character varying}
         } -result {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message='barr'::character varying}
 
+        # db_qry_parse
+        test db_qry_parse-1.4 {db_qry_parse multiple quoting} -body {
+            set bar "barr"
+            db_qry_parse {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email=:bar::character varying}
+        } -result {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email='barr'::character varying}
+
         # db_quote
         test db_quote-1.0 {db_quote} -body {
             set foo 1
