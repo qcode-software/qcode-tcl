@@ -297,36 +297,41 @@ proc qc::url_match {canonical_url test_url} {
 proc qc::url_parts {url} {
     #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
     # and path of url
-    set pattern {^
+    set pchar {[a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]}
+    set query_char "(?:${pchar}|/|\\?)"
+    set hash_char "(?:${pchar}|/|\\?)"
+    set path_char "(?:${pchar}|/)"
+
+    set pattern [subst -nocommands -nobackslashes {^
         # base with protocol, domain, port (optional), and abs_path (optional)
         (
          (https?)://
          ([a-z0-9\-\.]+)
          (?::([0-9]+))?
-         (/[a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]*)?
+         (/${path_char}*)?
          )
         
         # query (optional)
-        (?: \? ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),=&:]+) )?
+        (?:\?(${query_char}+))?
         
         # hash (optional)
-        (?: \# ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+) )?
-        $}
+        (?:\#(${hash_char}+))?
+        $}]
     if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
         set params [split $query &=]
         return [qc::dict_from base params hash protocol domain port path]
     }
 
-    set pattern {^
+    set pattern [subst -nocommands -nobackslashes {^
         # base with path (abs or rel) only
-        ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+)
+        (${path_char}+)
         
         # query (optional)
-        (?: \? ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),=&:]+) )?
+        (?:\?(${query_char}+))?
         
         # hash (optional)
-        (?: \# ([a-zA-Z0-9_\-\.~+/%\$!\*'\(\),:]+) )?
-        $}
+        (?:\#(${hash_char}+))?
+        $}]
     if { [regexp -expanded $pattern $url -> path query hash] } {
         lassign [list "" "" ""] protocol domain port
         set base $path
