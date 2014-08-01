@@ -415,7 +415,7 @@ proc qc::html_style2inline {html style} {
     package require tdom
     dom parse -html $html doc
     foreach {selector styles} $data {
-	set nodes {}
+      	set nodes {}
 	set xpath ""
 	foreach part $selector {
 	    if { [regexp {^[a-zA-Z][a-zA-Z0-9]*$} $part] } {
@@ -433,15 +433,24 @@ proc qc::html_style2inline {html style} {
                 foreach class [split $classes "."] {
                     append xpath \[contains(@class,\"$class\")\]
                 }
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-]*)$} $part -> id] } {
+	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> id] } {
 		# #id selector
-		append xpath //*\[contains(@id,\"$id\")\]
-	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9\-]*)$} $part -> tag id] } {
+                append xpath //*\[contains(@id,\"$id\")\]
+	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> id classes] } {
+		# #id.class.otherclass selector
+                append xpath //*\[contains(@id,\"$id\")\]
+                foreach class [split $classes "."] {
+                    append xpath \[contains(@class,\"$class\")\]
+                }
+	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> tag id] } {
 		# tag#id selector
 		append xpath //$tag\[contains(@id,\"$id\")\]
+	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*):nth-child\(([0-9]+)\)$} $part -> tag nth_child] } {
+		# tag:nth-child() selector
+		append xpath //$tag\[position()=$nth_child\]
 	    }
 	}
-	set nodes [$doc selectNodes $xpath]
+        set nodes [$doc selectNodes $xpath]
 
 	foreach node $nodes {
 	    if { [$node hasAttribute style] } {
