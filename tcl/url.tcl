@@ -53,8 +53,7 @@ proc qc::url_unset { url var_name } {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
-        # check this case
-	array set this {}
+       	array set this {}
     }
     # Unset required value
     if { [info exists this($var_name)] } {
@@ -93,7 +92,6 @@ proc qc::url_to_html_hidden { url } {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
-        # check this case
 	array set this {}
     }
     append html [html_hidden_set {*}[array get this]]
