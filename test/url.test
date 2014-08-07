@@ -158,19 +158,19 @@ namespace eval ::qcode::test {
         url_match /matches?score=1&score=1&score=5&sides=2 /matches?sides=2&&score=5score=1
     } -result false
 
-    test url_match-1.11 {url_match hash} -body {
+    test url_match-1.11 {url_match fragment} -body {
         url_match /home#test /home?foo=bar#test
     } -result true
 
-    test url_match-1.12 {url_match missing hash} -body {
+    test url_match-1.12 {url_match missing fragment} -body {
         url_match /home#test /home?foo=bar
     } -result false
 
-    test url_match-1.13 {url_match redundant hash} -body {
+    test url_match-1.13 {url_match redundant fragment} -body {
         url_match /home /home?foo=bar#test
     } -result true
 
-    test url_match-1.14 {url_match differing hashes} -body {
+    test url_match-1.14 {url_match differing fragments} -body {
         url_match /home#comments /home#article
     } -result false
 
@@ -250,16 +250,16 @@ namespace eval ::qcode::test {
     } -result {http://somedomain.com/somewhere.html?b=2}
 
     test url_unset-1.3 {url_unset} -body {
-        url_unset somewhere.html#somehash a
-    } -result {somewhere.html#somehash}
+        url_unset somewhere.html#somefragment a
+    } -result {somewhere.html#somefragment}
 
     test url_unset-1.4 {url_unset} -body {
-        url_unset somewhere.html?a=1&b=2#somehash a
-    } -result {somewhere.html?b=2#somehash}
+        url_unset somewhere.html?a=1&b=2#somefragment a
+    } -result {somewhere.html?b=2#somefragment}
     
     test url_unset-1.5 {url_unset} -body {
-        url_unset http://somedomain.com/somewhere.html?a=1&b=2#somehash a
-    } -result {http://somedomain.com/somewhere.html?b=2#somehash}
+        url_unset http://somedomain.com/somewhere.html?a=1&b=2#somefragment a
+    } -result {http://somedomain.com/somewhere.html?b=2#somefragment}
     
     # url_to_html_hidden
     test url_to_html_hidden-1.0 {url_to_html_hidden} -body {
@@ -271,7 +271,7 @@ namespace eval ::qcode::test {
     } -result "<input type=\"hidden\" name=\"a\" value=\"1\" id=\"a\">\n<input type=\"hidden\" name=\"b\" value=\"2\" id=\"b\">\n"
 
     test url_to_html_hidden-1.2 {url_to_html_hidden} -body {
-        url_to_html_hidden http://somedomain.com/somewhere.html?a=1&b=2#somehash
+        url_to_html_hidden http://somedomain.com/somewhere.html?a=1&b=2#somefragment
     } -result "<input type=\"hidden\" name=\"a\" value=\"1\" id=\"a\">\n<input type=\"hidden\" name=\"b\" value=\"2\" id=\"b\">\n"
     
 
