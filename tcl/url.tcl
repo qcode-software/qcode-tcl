@@ -11,7 +11,7 @@ proc qc::url { url args } {
 
     # Are there existing encoded vars path?var1=name1...
     set dict [args2dict $args]
-    if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
+    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string hash] } {
 	foreach {name value} [split $query_string &=] {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
@@ -26,9 +26,9 @@ proc qc::url { url args } {
 	lappend pairs "[url_encode $name]=[url_encode $value]"
     }
     if { [llength $pairs] != 0 } {
-	return "$path?[join $pairs &]"
+	return "$path?[join $pairs &]$hash"
     } else {
-	return $path
+	return ${path}${hash}
     }
 }
 
@@ -48,11 +48,12 @@ doc qc::url {
 
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
-    if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
+    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string hash] } {
 	foreach {name value} [split $query_string &=] {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
+        # check this case
 	array set this {}
     }
     # Unset required value
@@ -65,9 +66,9 @@ proc qc::url_unset { url var_name } {
 	lappend pairs "[url_encode $name]=[url_encode $this($name)]"
     }
     if { [llength $pairs] != 0 } {
-	return "$path?[join $pairs &]"
+	return "$path?[join $pairs &]$hash"
     } else {
-	return $path
+	return ${path}${hash}
     }
 }
 
@@ -87,11 +88,12 @@ doc qc::url_unset {
 proc qc::url_to_html_hidden { url } {
     #| Convert a url with form vars into html hidden input tags
     set html ""
-    if { [regexp {([^\?\#]+)\??(.*)} $url -> path query_string] } {
+    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string hash] } {
 	foreach {name value} [split $query_string &=] {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
 	}
     } else {
+        # check this case
 	array set this {}
     }
     append html [html_hidden_set {*}[array get this]]
