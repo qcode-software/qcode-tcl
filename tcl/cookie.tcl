@@ -14,9 +14,9 @@ proc qc::cookie_get { name } {
     set headers [ns_conn headers]
     set cookie [ns_set iget $headers Cookie]
     # Be relaxed about encoding names
-    if { [set start [string first "[url_encode $name]=" $cookie]] != -1 \
-	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
-	     || [set start [string first "$name=" $cookie]] != -1  } {
+    if { [set start [string first " [url_encode $name]=" " $cookie"]] != -1 \
+	     || [set start [string first " [qc::url_encode $name]=" " $cookie"]] != -1 \
+	     || [set start [string first " $name=" " $cookie"]] != -1  } {
 	set start [string first "=" $cookie $start]
 	if { [set end [string first ";" $cookie $start]]!=-1 } {
 	    return [qc::url_decode [string range $cookie [expr {$start+1}] [expr {$end-1}]]]
@@ -47,9 +47,9 @@ proc qc::cookie_exists { name } {
     }
     set headers [ns_conn headers]
     set cookie [ns_set iget $headers Cookie]
-    if { [string first "[url_encode $name]=" $cookie] != -1 \
-	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
-	     || [string first "$name=" $cookie] != -1 } {
+    if { [string first " [url_encode $name]=" " $cookie"] != -1 \
+	     || [set start [string first " [qc::url_encode $name]=" " $cookie"]] != -1 \
+	     || [string first " $name=" " $cookie"] != -1 } {
 	return true
     } else {
 	return false
