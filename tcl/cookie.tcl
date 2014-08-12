@@ -40,7 +40,7 @@ proc qc::cookie_get { search_name } {
     if { [multimap_exists $cookie_map $search_name] } {
         return [multimap_get_first $cookie_map $search_name]
     } else {
-	error "Cookie [qc::url_decode $name] does not exist"
+	error "Cookie [qc::url_decode $search_name] does not exist"
     }
 }
 
