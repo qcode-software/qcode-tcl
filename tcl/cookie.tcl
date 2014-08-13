@@ -9,22 +9,38 @@ doc cookie {
     Url {/qc/wiki/CookiePage}
 }
 
-proc qc::cookie_get { name } {
+proc qc::cookie_string2multimap {cookie_string} {
+    #| Extracts a multimap of name-value pairs from a cookie string
+    set cookie_map {}
+    set re {
+        \A
+        ([^[:cntrl:]()<>@,;:\\\"/\[\]?={}\ \t]+)
+        =
+        (\"[^[:cntrl:]\s\",;\\]+\"|[^[:cntrl:]\s\",;\\]+)
+        (?:$|;\ )
+    }
+    set start 0
+    while { $start < [string length $cookie_string] } {
+        if { ! [regexp -expanded -indices -start $start $re $cookie_string range_indices name_indices value_indices] } {
+            error "Cookie parsing error"
+        }
+        set name [string range $cookie_string {*}$name_indices]
+        set value [string trim [string range $cookie_string {*}$value_indices] \"]
+        lappend cookie_map [qc::url_decode $name] [qc::url_decode $value]
+        set start [expr {[lindex $range_indices 1] + 1}]
+    }
+    return $cookie_map
+}
+
+proc qc::cookie_get { search_name } {
     #| Get a cookie value or throw an error
     set headers [ns_conn headers]
-    set cookie [ns_set iget $headers Cookie]
-    # Be relaxed about encoding names
-    if { [set start [string first "[url_encode $name]=" $cookie]] != -1 \
-	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
-	     || [set start [string first "$name=" $cookie]] != -1  } {
-	set start [string first "=" $cookie $start]
-	if { [set end [string first ";" $cookie $start]]!=-1 } {
-	    return [qc::url_decode [string range $cookie [expr {$start+1}] [expr {$end-1}]]]
-	} else {
-	    return [qc::url_decode [string range $cookie [expr {$start+1}] end]]
-	}
+    set cookie_string [ns_set iget $headers Cookie]
+    set cookie_map [qc::cookie_string2multimap $cookie_string]
+    if { [multimap_exists $cookie_map $search_name] } {
+        return [multimap_get_first $cookie_map $search_name]
     } else {
-	error "Cookie [qc::url_decode $name] does not exist"
+	error "Cookie [qc::url_decode $search_name] does not exist"
     }
 }
 
@@ -46,14 +62,9 @@ proc qc::cookie_exists { name } {
 	return false
     }
     set headers [ns_conn headers]
-    set cookie [ns_set iget $headers Cookie]
-    if { [string first "[url_encode $name]=" $cookie] != -1 \
-	     || [set start [string first "[qc::url_encode $name]=" $cookie]] != -1 \
-	     || [string first "$name=" $cookie] != -1 } {
-	return true
-    } else {
-	return false
-    }
+    set cookie_string [ns_set iget $headers Cookie]
+    set cookie_map [qc::cookie_string2multimap $cookie_string]
+    return [multimap_exists $cookie_map [qc::url_encode $name]]
 }
 
 doc qc::cookie_exists {
