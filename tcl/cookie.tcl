@@ -9,25 +9,55 @@ doc cookie {
     Url {/qc/wiki/CookiePage}
 }
 
+proc qc::cookie_string_is_valid {cookie_string} {
+    #| Test if the cookie string conforms to the RFC
+    set re {
+        ^
+        ([^[:cntrl:]()<>@,;:\\\"/\[\]?={}\ \t]+
+        =
+        (\"[^[:cntrl:]\s\",;\\]+\"|[^[:cntrl:]\s\",;\\]+)
+        (
+         ;\ [^[:cntrl:]()<>@,;:\\\"/\[\]?={}\ \t]+
+         =
+         (\"[^[:cntrl:]\s\",;\\]+\"|[^[:cntrl:]\s\",;\\]+)
+         )*)?
+        $
+    }
+    return [regexp -expanded $re $cookie_string]
+}
+
 proc qc::cookie_string2multimap {cookie_string} {
     #| Extracts a multimap of name-value pairs from a cookie string
     set cookie_map {}
-    set re {
-        \A
-        ([^[:cntrl:]()<>@,;:\\\"/\[\]?={}\ \t]+)
-        =
-        (\"[^[:cntrl:]\s\",;\\]+\"|[^[:cntrl:]\s\",;\\]+)
-        (?:$|;\ )
+    set cookie_string [trim $cookie_string]
+    if { [string first ";" $cookie_string] == -1 && [string first = $cookie_string] == -1 } {
+        return $cookie_map
     }
-    set start 0
-    while { $start < [string length $cookie_string] } {
-        if { ! [regexp -expanded -indices -start $start $re $cookie_string range_indices name_indices value_indices] } {
-            error "Cookie parsing error"
+    while { $cookie_string ne "" } {
+        set index [string first ";" $cookie_string]
+        if { $index == -1 } {
+            set cookie_fragment $cookie_string
+            set cookie_string ""
+        } else {
+            set cookie_fragment [string range $cookie_string 0 [expr {$index - 1}]]
+            set cookie_string [string range $cookie_string [expr {$index + 1}] end]
         }
-        set name [string range $cookie_string {*}$name_indices]
-        set value [string trim [string range $cookie_string {*}$value_indices] \"]
-        lappend cookie_map [qc::url_decode $name] [qc::url_decode $value]
-        set start [expr {[lindex $range_indices 1] + 1}]
+        set index2 [string first = $cookie_fragment]
+        if { $index2 == -1 } {
+            set name $cookie_fragment
+            set value ""
+        } else {
+            set name [string range $cookie_fragment 0 [expr {$index2 - 1}]]
+            set value [string range $cookie_fragment [expr {$index2 + 1}] end]
+        }
+        set name [string trim $name]
+        set value [string trim $value]
+        if { [string index $value 0] eq "\"" && [string index $value end] eq "\"" } {
+            set value [string range $value 1 end-1]
+        }
+        if { $name ne "" } {
+            lappend cookie_map [qc::url_decode $name] [qc::url_decode $value]
+        }
     }
     return $cookie_map
 }
@@ -63,6 +93,9 @@ proc qc::cookie_exists { name } {
     }
     set headers [ns_conn headers]
     set cookie_string [ns_set iget $headers Cookie]
+    if { ! [qc::cookie_string_is_valid $cookie_string] } {
+        return false
+    }
     set cookie_map [qc::cookie_string2multimap $cookie_string]
     return [multimap_exists $cookie_map [qc::url_encode $name]]
 }
