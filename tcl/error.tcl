@@ -81,11 +81,11 @@ proc qc::error_report {} {
 	    An error has occurred while processing your request.
 	    <p>
 	    <b>hostname:</b>[ns_info hostname]<br>
-	    <b>url:</b>[ns_conn url]<br>
-	    <b>request:</b>[ns_conn request]<br>
+	    <b>url:</b>[html_escape [ns_conn url]]<br>
+	    <b>request:</b>[html_escape [ns_conn request]]<br>
 	    <b>remoteip:</b>[qc::conn_remote_ip]<br>
 	    <b>time:</b>[qc::format_timestamp now]<br>
-	    <b>errorMessage:</b> $error_message <br>
+	    <b>errorMessage:</b> [html_escape $error_message]<br>
 	    <b>errorInfo:</b> <pre>[html_escape $error_info]</pre><br>
 	    <b>errorCode:</b> $error_code
 	    <p>
@@ -102,7 +102,7 @@ proc qc::error_report {} {
 	    <p>
 	    <b>hostname:</b>[ns_info hostname]<br>
 	    <b>time:</b>[qc::format_timestamp now]<br>
-	    <b>errorMessage:</b> $error_message <br>
+	    <b>errorMessage:</b> [html_escape $error_message] <br>
 	    <b>errorInfo:</b> <pre>[html_escape $error_info]</pre><br>
 	    <b>errorCode:</b> $error_code
 	    <p>
