@@ -24,7 +24,7 @@ doc qc::is_boolean {
 }
 
 proc qc::is_integer {int} {
-    if { [string is integer -strict $int] } {
+    if { [string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647 } {
 	return 1
     } else {
 	return 0

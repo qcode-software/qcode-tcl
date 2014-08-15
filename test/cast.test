@@ -12,6 +12,11 @@ namespace eval ::qcode::test {
     test cast_integer-1.1 {cast_integer leading zeros} {qc::cast_integer "001"} 1
     test cast_integer-1.2 {cast_integer percentages} {qc::cast_integer "10%"} 10
     test cast_integer-1.3 {cast_integer e notation} {qc::cast_integer "43e2"} 4300
+    test cast_integer-1.4 {cast_integer upper limit} {qc::cast_integer "2147483647"} 2147483647
+    test cast_integer-1.5 {cast_integer outside integer range} -body {qc::cast_integer "2147483648"} -result "Could not cast 2147483648 to integer" -returnCodes error 
+    test cast_integer-1.6 {cast_integer outside integer range} -body {qc::cast_integer "2e100"} -result "Could not cast 2e100 to integer" -returnCodes error 
+    test cast_integer-1.7 {cast_integer lower limit} {qc::cast_integer "-2147483648"} -2147483648
+    test cast_integer-1.8 {cast_integer outside integer range} -body {qc::cast_integer "-2147483649"} -result "Could not cast -2147483649 to integer" -returnCodes error 
 
     test cast_decimal-1.0 {cast_decimal commas} {qc::cast_decimal "2,305.25"} 2305.25
     test cast_decimal-1.1 {cast_decimal percentages} {qc::cast_decimal "100%"} 100
