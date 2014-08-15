@@ -58,6 +58,12 @@ namespace eval ::qcode::test {
         is_integer true
     } -result {0}
 
+    test is_integer-1.4 {is_integer upper limit} {qc::is_integer "2147483647"} 1
+    test is_integer-1.5 {is_integer outside integer range} {qc::is_integer "2147483648"} 0
+    test is_integer-1.6 {is_integer outside integer range} {qc::is_integer "2e100"} 0
+    test is_integer-1.7 {is_integer lower limit} {qc::is_integer "-2147483648"} 1
+    test is_integer-1.8 {is_integer outside integer range} {qc::is_integer "-2147483649"} 0
+
     test is_pos-1.0 {is_pos -1 } -setup {
     } -body {
         is_pos -1

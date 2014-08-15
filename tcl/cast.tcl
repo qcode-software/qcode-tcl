@@ -24,7 +24,7 @@ proc qc::cast_integer {string} {
     if { [string first . $string]!=-1 } {
 	set string [qc::round $string 0]
     }
-    if { [string is integer -strict $string] } {
+    if { [qc::is_integer $string] } {
 	return $string
     } else {
 	error "Could not cast $original to integer" {} CAST
