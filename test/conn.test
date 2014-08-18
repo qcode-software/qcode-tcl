@@ -1,0 +1,165 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require qcode
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    test conn_request_is_valid-1.0 {conn_request_is_valid *} -body {
+        if { [conn_request_is_valid "GET * HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.1 {conn_request_is_valid POST, HTTP/1.0} -body {
+        if { [conn_request_is_valid "POST * HTTP/1.0"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.2 {conn_request_is_valid nonsense} -body {
+        if { [conn_request_is_valid "foobarbaz"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.3 {conn_request_is_valid root} -body {
+        if { [conn_request_is_valid "GET / HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.4 {conn_request_is_valid root abs uri} -body {
+        if { [conn_request_is_valid "GET http://foo.bar/ HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.5 {conn_request_is_valid https and port root abs uri} -body {
+        if { [conn_request_is_valid "GET https://foo.bar:123/ HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.6 {conn_request_is_valid abs uri} -body {
+        if { [conn_request_is_valid "GET http://foo.bar/hello/world HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.7 {conn_request_is_valid abs path} -body {
+        if { [conn_request_is_valid "GET /hello/world HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.8 {conn_request_is_valid rel path} -body {
+        if { [conn_request_is_valid "GET hello/world HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.9 {conn_request_is_valid abs uri root with query} -body {
+        if { [conn_request_is_valid "GET http://foo.bar/?world=baz HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.10 {conn_request_is_valid abs uri path and query} -body {
+        if { [conn_request_is_valid "GET http://foo.bar/hello/apples?world=baz HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test conn_request_is_valid-1.11 {conn_request_is_valid missing method} -body {
+        if { [conn_request_is_valid "http://foo.bar/hello HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.12 {conn_request_is_valid missing version} -body {
+        if { [conn_request_is_valid "GET http://foo.bar/hello"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.13 {conn_request_is_valid missing uri} -body {
+        if { [conn_request_is_valid "GET HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.14 {conn_request_is_valid hash (not valid in request line)} -body {
+        if { [conn_request_is_valid "GET https://foo.bar/hello#test HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.15 {conn_request_is_valid invalid \"} -body {
+        if { [conn_request_is_valid "GET https://foo.bar/hello\"test HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.16 {conn_request_is_valid invalid \[} -body {
+        if { [conn_request_is_valid "GET https://foo.bar/hello\[test HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.17 {conn_request_is_valid invalid space} -body {
+        if { [conn_request_is_valid "GET https://foo.bar/hello test HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test conn_request_is_valid-1.18 {conn_request_is_valid url encoded} -body {
+        if { [conn_request_is_valid "GET https://foo.bar/hello%20test HTTP/1.1"] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
