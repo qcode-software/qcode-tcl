@@ -172,6 +172,7 @@ proc qc::conn_path {} {
 }
 
 proc qc::conn_request_is_valid {request} {
+    #| Test if the given request string is valid
     set pchar {
         [a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]
     }
