@@ -168,7 +168,7 @@ proc qc::conn_ie {} {
 proc qc::conn_path {} {
     #| Return the path of the current connection
     set request [ns_conn request]
-    if { ! [conn_request_is_valid] } {
+    if { ! [conn_request_is_valid $request] } {
         error "\"$request\" is not a valid request." {} BAD_REQUEST
     } else {
         return [qc::url_request_path $request]
