@@ -43,6 +43,9 @@ proc qc::error_handler { } {
         NOT_FOUND* {
             return2client code 404 html "Not Found:$errorMessage"
         }
+        BAD_REQUEST* {
+            return2client code 400 html "Bad Request:$errorMessage"
+        }
 	default {
 	    log Error $errorInfo
             if {  [eq $suffix .xml] && [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
