@@ -185,7 +185,7 @@ proc qc::conn_request_is_valid {request} {
     }]
     set path_char [subst {
         (${pchar}|/)
-    }
+    }]
     set abs_uri [subst -nocommands -nobackslashes {
         https?://([a-z0-9\-\.]+)(:[0-9]+)?
         (/${path_char}*)?
