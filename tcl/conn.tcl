@@ -170,3 +170,41 @@ proc qc::conn_path {} {
     set request [ns_conn request]
     return [qc::url_request_path $request]
 }
+
+proc qc::conn_request_is_valid {request} {
+    #| Test if the given request string is valid
+    set pchar {
+        [a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]
+    }
+    set query_char [subst -nobackslashes {
+        (${pchar}|/|\?)
+    }]
+    set path_char [subst {
+        (${pchar}|/)
+    }
+    set abs_uri [subst -nocommands -nobackslashes {
+        https?://([a-z0-9\-\.]+)(:[0-9]+)?
+        (/${path_char}*)?
+        (\?${query_char}+)?
+    }]
+    set abs_path [subst -nobackslashes {
+        /${path_char}*
+        (\?${query_char}+)?
+    }]
+    set method {
+        ([A-Z]+)
+    }
+    set http_version {
+        HTTP/([0-9]+\.[0-9]+)
+    }
+    set re [subst -nocommands -nobackslashes {
+        ^
+        $method
+        \s
+        (\*|${abs_uri}|${abs_path})
+        \s
+        $http_version
+        $
+    }]
+    return [regexp -expanded $re $request]
+}
