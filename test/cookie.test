@@ -64,6 +64,38 @@ namespace eval ::qcode::test {
         }
     } -result {true}
 
+    test cookie_string_is_valid-1.7 {cookie_string_is_valid empty first value} -body {
+        if { [qc::cookie_string_is_valid {foo=; quu=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test cookie_string_is_valid-1.8 {cookie_string_is_valid empty later value} -body {
+        if { [qc::cookie_string_is_valid {foo=bar; quu=}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test cookie_string_is_valid-1.9 {cookie_string_is_valid quoted empty first value} -body {
+        if { [qc::cookie_string_is_valid {foo=""; quu=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test cookie_string_is_valid-1.10 {cookie_string_is_valid quoted empty later value} -body {
+        if { [qc::cookie_string_is_valid {foo=bar; quu=""}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
 
     test cookie_string2multimap-1.0 {cookie_string2multimap one pair} -body {
         return [qc::cookie_string2multimap {foo=bar}]
