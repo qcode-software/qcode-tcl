@@ -96,6 +96,70 @@ namespace eval ::qcode::test {
         }
     } -result {true}
 
+    test cookie_string_is_valid-1.11 {cookie_string_is_valid with additional equals} -body {
+        if { [qc::cookie_string_is_valid {foo=bar=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {true}
+
+    test cookie_string_is_valid-1.12 {cookie_string_is_valid with spaces in name} -body {
+        if { [qc::cookie_string_is_valid {foo bar=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.13 {cookie_string_is_valid with additional spaces between pairs} -body {
+        if { [qc::cookie_string_is_valid {foo=bar;  quu=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.14 {cookie_string_is_valid with leading spaces} -body {
+        if { [qc::cookie_string_is_valid { foo=bar; quu=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.15 {cookie_string_is_valid with trailing spaces} -body {
+        if { [qc::cookie_string_is_valid {foo=bar; quu=baz }] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.16 {cookie_string_is_valid with missing} -body {
+        if { [qc::cookie_string_is_valid {foo=bar;quu=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.17 {cookie_string_is_valid with empty name 1} -body {
+        if { [qc::cookie_string_is_valid {=bar; foo=baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
+    test cookie_string_is_valid-1.18 {cookie_string_is_valid with empty name 2} -body {
+        if { [qc::cookie_string_is_valid {foo=bar; =baz}] } {
+            return true
+        } else {
+            return false
+        }
+    } -result {false}
+
 
     test cookie_string2multimap-1.0 {cookie_string2multimap one pair} -body {
         return [qc::cookie_string2multimap {foo=bar}]
@@ -116,6 +180,11 @@ namespace eval ::qcode::test {
     test cookie_string2multimap-1.4 {cookie_string2multimap url_encoded} -body {
         return [qc::cookie_string2multimap {foo%20bar=qu%20baz}]
     } -result {{foo bar} {qu baz}}
+
+    test cookie_string2multimap-1.5 {cookie_string2multimap empty values} -body {
+        return [qc::cookie_string2multimap {foo=; bar=""}]
+    } -result {foo {} bar {}}
+
 
     cleanupTests
 }
