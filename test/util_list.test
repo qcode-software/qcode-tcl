@@ -279,6 +279,7 @@ namespace eval ::qcode::test {
         ltotitle [list jeff {"tom"} cctv dave KERRY]
     } -cleanup {} -result {jeff {"tom"} cctv dave KERRY}
 
+    # list2csv
     test list2csv-1.0 {list2csv } -setup {
     } -body {
         list2csv [list Jeff Tom Dave Kerry]
@@ -309,11 +310,22 @@ namespace eval ::qcode::test {
         list2csv [list] 
     } -cleanup {} -result {}
 
-    test list2csv-1.6 {list2csv } -setup {
+    test list2csv-1.6 {list2csv quote newlines} -setup {
     } -body {
         list2csv [list Jeff "Tom\r\n" Dave "Kerry\n"]
     } -cleanup {} -result "Jeff,\"Tom\r\n\",Dave,\"Kerry\n\""
 
+    test list2csv-1.7 {list2csv quote commas} -setup {
+    } -body {
+        list2csv [list "hello" "world, apples"]
+    } -cleanup {} -result {hello,"world, apples"}
+
+    test list2csv-1.8 {list2csv quote commas in first string} -setup {
+    } -body {
+        list2csv [list "hello, world" "apples"]
+    } -cleanup {} -result {"hello, world",apples}
+
+    # lconcat
     test lconcat-1.0 {lconcat result} -setup {
         set test_list [list Q W E R T Y]
     } -body {
