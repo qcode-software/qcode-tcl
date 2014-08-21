@@ -3,6 +3,7 @@ namespace eval qc {
 }
 
 proc qc::file_is_valid_image {file} {
+    #| file (on local file system) is of an image type that we can stat.
     package require jpeg
     package require png
 
@@ -10,6 +11,7 @@ proc qc::file_is_valid_image {file} {
 }
 
 proc qc::image_file_info {file} {
+    #| dict of width, height, and type of file (from local filesystem)
     package require jpeg
     package require png
 
