@@ -1,6 +1,6 @@
 
 namespace eval qc {
-    namespace export db_file_* plupload.html
+    namespace export db_file_* plupload.html plupload_file
 }
 
 doc qc::db_file {
@@ -93,12 +93,13 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     }
 }
 
-proc qc::plupload.html {name chunk chunks file} {
-    # Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
-    # File inserted into file table.
+proc plupload_file {name chunk chunks file} {
+    #| Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
+    # returns filename of concat file when upload is complete ("" otherwise)
     set user_id [qc::auth]
     set id $name
     set tmp_file /tmp/$id.$chunk
+
     # Move the AOLserver generated tmp file to one we will keep
     file rename [ns_getformfile file] $tmp_file
     if { [nsv_exists pluploads $user_id] } {
@@ -122,17 +123,39 @@ proc qc::plupload.html {name chunk chunks file} {
     if { $complete } {
 	# Join parts together
 	exec_proxy cat {*}$files > /tmp/$id
-	set file_id [qc::db_file_insert -employee_id $user_id -filename [dict get $dict $id filename] /tmp/$id]
 	# Clean up
 	foreach file $files {
 	    file delete $file
 	}
-        file delete /tmp/$id
 	dict unset dict $id
-	return $file_id	
+	nsv_set pluploads $user_id $dict
+	return /tmp/$id
     } else {
 	nsv_set pluploads $user_id $dict
 	return ""
+    }
+}
+
+proc qc::plupload.html {name chunk chunks file} {
+    #| Upload a file chunk, insert the completed file into the db when complete.
+    set user_id [qc::auth]
+    set tmp_file [qc::plupload_file $name $chunk $chunks $file]
+    if { $tmp_file ne "" } {
+	set file_id [qc::db_file_insert -employee_id $user_id -filename $file $tmp_file]
+        if { [param_exists image_db_table] && [qc::file_is_valid_image $tmp_file] } {
+            set image_table [param_get image_db_table]
+            dict2vars [qc::image_file_info $tmp_file] width height type
+            db_dml {
+                insert into \"[string map {\" \"\"} $image_table]\"
+                (file_id, width, height, type)
+                values
+                (:file_id, :width, :height, :type)
+            }
+        }
+        file delete $tmp_file
+        return $file_id
+    } else {
+        return ""
     }
 }
 
