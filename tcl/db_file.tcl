@@ -93,7 +93,7 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     }
 }
 
-proc plupload_file {name chunk chunks file} {
+proc qc::plupload_file {name chunk chunks file} {
     #| Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
     # returns filename of concat file when upload is complete ("" otherwise)
     set user_id [qc::auth]
