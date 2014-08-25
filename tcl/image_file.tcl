@@ -22,7 +22,7 @@ proc qc::image_file_info {file} {
         qc::dict2vars [png::imageInfo $file] width height
         set type png
     } elseif { [qc::is_gif $file] } {
-        lassign [qc::gif_size $file] width height
+        lassign [qc::gif_dimensions $file] width height
         set type gif
     } else {
         error "Unrecognised image type"
@@ -49,7 +49,7 @@ proc qc::is_gif {name} {
     }
  }
 
-proc qc::gif_size {name} {
+proc qc::gif_dimensions {name} {
     set f [open $name r]
     fconfigure $f -translation binary
     # read GIF signature -- check that this is
