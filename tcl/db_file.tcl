@@ -9,12 +9,16 @@ doc qc::db_file {
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
-    args $args -employee_id ? -filename ? -- file_path
+    args $args -employee_id ? -filename ? -mime_type ? -- file_path
 
     if { ![info exists employee_id] } {
         set employee_id [auth]
     }
     default filename [file tail $file_path]
+
+    if { ! [info exists mime_type] } {
+        set mime_tyoe [ns_guesstype $filename]
+    }
    
     set id [open $file_path r]
     fconfigure $id -translation binary
@@ -24,12 +28,13 @@ proc qc::db_file_insert {args} {
     set file_id [db_seq file_id_seq]
     set qry {
 	insert into file 
-	(file_id,employee_id,filename,data)
+	(file_id,employee_id,filename,data,mime_type)
 	values 
-	(:file_id,:employee_id,:filename,decode(:data, 'base64'))
+	(:file_id,:employee_id,:filename,decode(:data, 'base64'),:mime_type)
     }
     db_dml $qry
     return $file_id
+
 }
 
 proc qc::db_file_copy {file_id} {
@@ -136,12 +141,16 @@ proc qc::plupload_file {name chunk chunks file} {
     }
 }
 
-proc qc::plupload.html {name chunk chunks file} {
+proc qc::plupload.html {name chunk chunks file filename {mime_type ""}} {
     #| Upload a file chunk, insert the completed file into the db when complete.
-    set user_id [qc::auth]
+    set flags [dict create -filename $filename]
+    dict set flags -employee_id [qc::auth]
+    if { $mime_type ne "" } {
+        dict set flags -mime_type $mime_type
+    }
     set tmp_file [qc::plupload_file $name $chunk $chunks $file]
     if { $tmp_file ne "" } {
-	set file_id [qc::db_file_insert -employee_id $user_id -filename $file $tmp_file]
+	set file_id [qc::db_file_insert {*}$flags $tmp_file]
         if { [param_exists image_db_table] && [qc::file_is_valid_image $tmp_file] } {
             set image_table [param_get image_db_table]
             dict2vars [qc::image_file_info $tmp_file] width height type
