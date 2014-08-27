@@ -17,7 +17,7 @@ proc qc::db_file_insert {args} {
     default filename [file tail $file_path]
 
     if { ! [info exists mime_type] } {
-        set mime_tyoe [ns_guesstype $filename]
+        set mime_type [ns_guesstype $filename]
     }
    
     set id [open $file_path r]
