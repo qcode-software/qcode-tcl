@@ -62,9 +62,9 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
         }
         ns_set put $outputheaders "Last-Modified" $last_modified
     
-        set if_modified_since [ns_set iget [ns_conn headers] If-Modified-Since]
-        set if_modified_since [lindex [split $if_modified_since ";"] 0]
-        if { [qc::is_timestamp_http $if_modified_since] && $file_mtime <= [clock scan $if_modified_since] } {
+        set if_modified_since [qc::conn_if_modified_since]
+        if { [qc::is_timestamp_http $if_modified_since]
+             && $file_mtime <= [clock scan $if_modified_since] } {
             ns_return 304 {} {}
         } else {
 	    ns_returnfile 200 [ns_guesstype $file] $file
@@ -212,4 +212,12 @@ proc qc::conn_request_is_valid {request} {
         $
     }]
     return [regexp -expanded $re $request]
+}
+
+proc qc::conn_if_modified_since {} {
+    if { [ns_set find $headers If-Modified-Since]!=-1 } {
+        return [lindex [split [ns_set iget [ns_conn headers] If-Modified-Since] ";"] 0]
+    } else {
+        return ""
+    }
 }
