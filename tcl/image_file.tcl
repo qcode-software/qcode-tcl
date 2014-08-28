@@ -11,23 +11,23 @@ proc qc::file_is_valid_image {file} {
 }
 
 proc qc::image_file_info {file} {
-    #| dict of width, height, and type of file (from local filesystem)
+    #| dict of width, height, and mime_type of file (from local filesystem)
     package require jpeg
     package require png
 
     if { [jpeg::isJPEG $file] } {
         lassign [jpeg::dimensions $file] width height
-        set type jpg
+        set mime_type "image/jpeg"
     } elseif { [png::isPNG $file] } {
         qc::dict2vars [png::imageInfo $file] width height
-        set type png
+        set mime_type "image/png"
     } elseif { [qc::is_gif $file] } {
         lassign [qc::gif_dimensions $file] width height
-        set type gif
+        set mime_type "image/gif"
     } else {
         error "Unrecognised image type"
     }
-    return [qc::dict_from width height type]
+    return [qc::dict_from width height mime_type]
 }
 
 proc qc::is_gif {name} {
