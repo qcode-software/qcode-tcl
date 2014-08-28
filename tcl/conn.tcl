@@ -215,6 +215,8 @@ proc qc::conn_request_is_valid {request} {
 }
 
 proc qc::conn_if_modified_since {} {
+    #| Return the value of the current If-Modified-Since header, if one exists, or "" otherwise.
+    # discard Netscape-style additional params
     if { [ns_set find $headers If-Modified-Since]!=-1 } {
         return [lindex [split [ns_set iget [ns_conn headers] If-Modified-Since] ";"] 0]
     } else {
