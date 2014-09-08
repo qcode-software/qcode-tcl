@@ -19,7 +19,7 @@ proc qc::cast_integer {string} {
     set string [string map {, {} % {}} $string]
     # Strip leading zeros if followed by digit
     # This copes with 0 and 00
-    regexp {^0+([0-9]+)$} $string -> string
+    regsub {^(-?)0+([0-9]+)$} $string {\1\2} string
     # Convert decimals
     if { [string first . $string]!=-1 } {
 	set string [qc::round $string 0]

@@ -269,7 +269,7 @@ proc qc::exp2string { number } {
 	set mantissa [string range $number 0 [add $k -1]]
 	set sign ""
     }
-    set exp [string range $number [add $k 1] end]
+    set exp [qc::cast_int [string range $number [add $k 1] end]]
     lassign [intplaces $mantissa] int places
     set exp [expr {$exp - $places}]
     if { $exp > 0 } {
