@@ -151,11 +151,10 @@ proc qc::plupload.html {name chunk chunks file filename {mime_type ""}} {
     set tmp_file [qc::plupload_file $name $chunk $chunks $file]
     if { $tmp_file ne "" } {
 	set file_id [qc::db_file_insert {*}$flags $tmp_file]
-        if { [param_exists image_db_table] && [qc::file_is_valid_image $tmp_file] } {
-            set image_table [param_get image_db_table]
+        if { [qc::file_is_valid_image $tmp_file] } {
             dict2vars [qc::image_file_info $tmp_file] width height
             db_dml {
-                insert into \"[string map {\" \"\"} $image_table]\"
+                insert into image
                 (file_id, width, height)
                 values
                 (:file_id, :width, :height)
