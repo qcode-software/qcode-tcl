@@ -1,6 +1,6 @@
 
 namespace eval qc {
-    namespace export db_file_* plupload.html plupload_file
+    namespace export db_file_* file_upload
 }
 
 doc qc::db_file {
@@ -98,59 +98,19 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     }
 }
 
-proc qc::plupload_file {name chunk chunks file} {
-    #| Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
-    # returns filename of concat file when upload is complete ("" otherwise)
-    set user_id [qc::auth]
-    set id $name
-    set tmp_file /tmp/$id.$chunk
-
-    # Move the AOLserver generated tmp file to one we will keep
-    file rename [ns_getformfile file] $tmp_file
-    if { [nsv_exists pluploads $user_id] } {
-	set dict [nsv_get pluploads $user_id]
-    } else {
-	set dict {}
-    }
-    dict set dict $id $chunk $tmp_file
-    dict set dict $id chunks $chunks
-    dict set dict $id filename $file
-
-    set complete true
-    foreach chunk [.. 0 $chunks-1] {
-	if { ![dict exists $dict $id $chunk] } {
-	    set complete false
-	    break
-	} else {
-	    lappend files /tmp/$id.$chunk
-	}
-    }
-    if { $complete } {
-	# Join parts together
-	exec_proxy cat {*}$files > /tmp/$id
-	# Clean up
-	foreach file $files {
-	    file delete $file
-	}
-	dict unset dict $id
-	nsv_set pluploads $user_id $dict
-	return /tmp/$id
-    } else {
-	nsv_set pluploads $user_id $dict
-	return ""
-    }
-}
-
-proc qc::plupload.html {name chunk chunks file filename {mime_type ""}} {
+proc qc::db_file_upload {name chunk chunks file {filename ""} {mime_type ""}} {
     #| Upload a file chunk, insert the completed file into the db when complete.
+    if { $filename eq "" } {
+        set filename $file
+    }
     set flags [dict create -filename $filename]
     dict set flags -employee_id [qc::auth]
     if { $mime_type ne "" } {
         dict set flags -mime_type $mime_type
     }
-    set tmp_file [qc::plupload_file $name $chunk $chunks $file]
+    set tmp_file [qc::file_upload $name $chunk $chunks $file]
     if { $tmp_file ne "" } {
-	set file_id [qc::db_file_insert {*}$flags $tmp_file]
+        set file_id [qc::db_file_insert {*}$flags $tmp_file]
         if { [qc::file_is_valid_image $tmp_file] } {
             dict2vars [qc::image_file_info $tmp_file] width height
             db_dml {
