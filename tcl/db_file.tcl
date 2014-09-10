@@ -1,6 +1,6 @@
 
 namespace eval qc {
-    namespace export db_file_* file_upload
+    namespace export db_file_* file_upload plupload.html
 }
 
 doc qc::db_file {
