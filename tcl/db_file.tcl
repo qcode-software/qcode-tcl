@@ -1,6 +1,6 @@
 
 namespace eval qc {
-    namespace export db_file_* plupload.html
+    namespace export db_file_* file_upload plupload.html
 }
 
 doc qc::db_file {
@@ -9,12 +9,16 @@ doc qc::db_file {
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
-    args $args -employee_id ? -filename ? -- file_path
+    args $args -employee_id ? -filename ? -mime_type ? -- file_path
 
     if { ![info exists employee_id] } {
         set employee_id [auth]
     }
     default filename [file tail $file_path]
+
+    if { ! [info exists mime_type] } {
+        set mime_type [ns_guesstype $filename]
+    }
    
     set id [open $file_path r]
     fconfigure $id -translation binary
@@ -24,12 +28,13 @@ proc qc::db_file_insert {args} {
     set file_id [db_seq file_id_seq]
     set qry {
 	insert into file 
-	(file_id,employee_id,filename,data)
+	(file_id,employee_id,filename,data,mime_type)
 	values 
-	(:file_id,:employee_id,:filename,decode(:data, 'base64'))
+	(:file_id,:employee_id,:filename,decode(:data, 'base64'),:mime_type)
     }
     db_dml $qry
     return $file_id
+
 }
 
 proc qc::db_file_copy {file_id} {
@@ -94,45 +99,36 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
 }
 
 proc qc::plupload.html {name chunk chunks file} {
-    # Keeps uploaded file parts sent by plupload and concat them once all parts have been sent.
-    # File inserted into file table.
-    set user_id [qc::auth]
-    set id $name
-    set tmp_file /tmp/$id.$chunk
-    # Move the AOLserver generated tmp file to one we will keep
-    file rename [ns_getformfile file] $tmp_file
-    if { [nsv_exists pluploads $user_id] } {
-	set dict [nsv_get pluploads $user_id]
-    } else {
-	set dict {}
-    }
-    dict set dict $id $chunk $tmp_file
-    dict set dict $id chunks $chunks
-    dict set dict $id filename $file
+    # Deprecated
+    return [db_file_upload $name $chunk $chunks $file]
+}
 
-    set complete true
-    foreach chunk [.. 0 $chunks-1] {
-	if { ![dict exists $dict $id $chunk] } {
-	    set complete false
-	    break
-	} else {
-	    lappend files /tmp/$id.$chunk
-	}
+proc qc::db_file_upload {name chunk chunks file {filename ""} {mime_type ""}} {
+    #| Upload a file chunk, insert the completed file into the db when complete.
+    if { $filename eq "" } {
+        set filename $file
     }
-    if { $complete } {
-	# Join parts together
-	exec_proxy cat {*}$files > /tmp/$id
-	set file_id [qc::db_file_insert -employee_id $user_id -filename [dict get $dict $id filename] /tmp/$id]
-	# Clean up
-	foreach file $files {
-	    file delete $file
-	}
-        file delete /tmp/$id
-	dict unset dict $id
-	return $file_id	
+    set flags [dict create -filename $filename]
+    dict set flags -employee_id [qc::auth]
+    if { $mime_type ne "" } {
+        dict set flags -mime_type $mime_type
+    }
+    set tmp_file [qc::file_upload $name $chunk $chunks $file]
+    if { $tmp_file ne "" } {
+        set file_id [qc::db_file_insert {*}$flags $tmp_file]
+        if { [qc::file_is_valid_image $tmp_file] } {
+            dict2vars [qc::image_file_info $tmp_file] width height
+            db_dml {
+                insert into image
+                (file_id, width, height)
+                values
+                (:file_id, :width, :height)
+            }
+        }
+        file delete $tmp_file
+        return $file_id
     } else {
-	nsv_set pluploads $user_id $dict
-	return ""
+        return ""
     }
 }
 
