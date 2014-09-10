@@ -98,6 +98,11 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     }
 }
 
+proc qc::plupload.html {name chunk chunks file} {
+    # Deprecated
+    return [db_file_upload $name $chunk $chunks $file]
+}
+
 proc qc::db_file_upload {name chunk chunks file {filename ""} {mime_type ""}} {
     #| Upload a file chunk, insert the completed file into the db when complete.
     if { $filename eq "" } {
