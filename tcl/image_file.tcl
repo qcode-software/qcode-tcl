@@ -1,5 +1,29 @@
 namespace eval qc {
-    namespace export file_is_valid_image image_file_info
+    namespace export file_is_valid_image image_file_info image_resize
+}
+
+proc qc::image_resize {file_id max_width max_height} {
+    #| Resize an image, return dict of file location width height.
+    # Create thumbnail
+    set tmp_file [qc::db_file_export $file_id]
+    set file /tmp/[uuid::uuid generate]
+    # Call imagemagick convert
+    set exec_proxy_flags {
+        -timeout 10000
+    }
+    set exec_flags {
+        -ignorestderr
+    }
+    set convert_flags [subst {
+        -quiet
+        -thumbnail ${max_width}x${max_height}
+        -strip
+        -quality 75%
+    }]
+    exec_proxy {*}$exec_proxy_flags {*}$exec_flags convert {*}$convert_flags $tmp_file $file
+    file delete $tmp_file    
+    dict2vars [qc::image_file_info $file] width height
+    return [qc::dict_from file width height]
 }
 
 proc qc::file_is_valid_image {file} {
