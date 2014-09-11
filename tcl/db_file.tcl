@@ -74,7 +74,7 @@ proc qc::db_file_thumbnailer {file_id {max_width ""} {max_height ""}} {
     ns_set put $outputheaders "Last-Modified" [format_timestamp_http [cast_epoch $file_created]]
 
     set if_modified_since [qc::conn_if_modified_since]
-    if { [qc::is_timestamp_http $if_modified_since
+    if { [qc::is_timestamp_http $if_modified_since]
           && [clock scan $if_modified_since] >= [clock scan $file_created] } {
 	# Return 304 - Unchanged
 	ns_return 304 $mime_type ""
