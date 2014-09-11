@@ -125,13 +125,13 @@ proc qc::format_timestamp_rel_age {args} {
     set weeks [expr {round($days/7.0)}]
     # Return to the nearest week if 5 days or more have elapsed
     if {$weeks > 0 && $days > 5} {
-        set rel_age "$weeks [iif {$weeks==1} week weeks] ago"
+        set rel_age "$weeks [iif {$weeks==1} week weeks]"
         if { [info exists long] } {
             append rel_age " ago"
         }
         return $rel_age
     }
-    set rel_age "$days [iif {$days==1} day days] ago"
+    set rel_age "$days [iif {$days==1} day days]"
     if { [info exists long] } {
         append rel_age " ago"
     }
