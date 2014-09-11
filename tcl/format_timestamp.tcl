@@ -93,8 +93,10 @@ doc qc::format_timestamp {
     }
 }
 
-proc qc::format_timestamp_rel_age {timestamp} {
+proc qc::format_timestamp_rel_age {args} {
     #| Return the approximate relative age of a timestamp
+    qc::args $args -long -- timestamp
+    
     set days [qc::date_days $timestamp now]
     if { $days == 0 } {
         return "today"
@@ -103,27 +105,44 @@ proc qc::format_timestamp_rel_age {timestamp} {
     set years [expr {round ($days/365.0)}]
     # Return to the nearest year if 361 days or more have elapsed
     if { $years > 0 && $days > 360} {
-        return "$years [iif {$years==1} year years]"
+        set rel_age "$years [iif {$years==1} year years]"
+        if { [info exists long] } {
+            append rel_age " ago"
+        }
+        return $rel_age
     }
   
     set months [expr {round($days/30.0)}]
     # Return to the nearest month if 30 days or more have elapsed
     if {$months > 0 && $days > 29} {
-        return "$months [iif {$months==1} month months]"
+        set rel_age "$months [iif {$months==1} month months]"
+        if { [info exists long] } {
+            append rel_age " ago"
+        }
+        return $rel_age
     }
 
     set weeks [expr {round($days/7.0)}]
     # Return to the nearest week if 5 days or more have elapsed
     if {$weeks > 0 && $days > 5} {
-        return "$weeks [iif {$weeks==1} week weeks]"
+        set rel_age "$weeks [iif {$weeks==1} week weeks] ago"
+        if { [info exists long] } {
+            append rel_age " ago"
+        }
+        return $rel_age
     }
-
-    return "$days [iif {$days==1} day days]"
+    set rel_age "$days [iif {$days==1} day days] ago"
+    if { [info exists long] } {
+        append rel_age " ago"
+    }
+    return $rel_age
 }
 
 doc qc::format_timestamp_rel_age {
     Examples {
-        % format_timestamp_rel_age "2009-10-12 12:12:12"
-        3 years
+        % qc::format_timestamp_rel_age "2009-10-12 12:12:12"
+        5 years
+        % qc::format_timestamp_rel_age -long "2009-10-12 12:12:12"
+        5 years ago
     }
 }
