@@ -98,7 +98,7 @@ proc qc::cat {filename} {
     return $contents
 }
 
-proc file2url {file} {
+proc qc::file2url {file} {
     # Takes a file and returns url path relative to www root.
     if { [regexp "^[ns_pagepath](.+)\$" $file -> url] } {
         return $url
