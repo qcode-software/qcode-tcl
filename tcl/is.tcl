@@ -270,7 +270,7 @@ doc qc::is_timestamp {
 }
 
 proc qc::is_email { email } {
-    return [regexp {^[a-zA-Z0-9_\-]+(\.[a-zA-Z0-9_\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
+    return [regexp {^[a-zA-Z0-9_\-]+([\.\+][a-zA-Z0-9_\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
 }
 
 doc qc::is_email {
