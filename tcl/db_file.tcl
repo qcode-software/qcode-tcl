@@ -42,8 +42,8 @@ proc qc::db_file_copy {file_id} {
     set new_file_id [db_seq file_id_seq]
     db_dml {
         insert into file 
-        (file_id,employee_id,filename,data)
-	select :new_file_id,employee_id,filename,data
+        (file_id,employee_id,filename,data,mime_type)
+	select :new_file_id,employee_id,filename,data,mime_type
         from file where file_id=:file_id
     }
     return $new_file_id
