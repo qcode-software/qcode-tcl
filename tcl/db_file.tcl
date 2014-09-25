@@ -230,8 +230,6 @@ proc qc::db_file_thumbnail_dimensions {file_id max_width max_height} {
 
 proc qc::db_file_thumbnail_cache_create {file_id max_width max_height} {
     #| Create a cached thumbnail of an image, return the cache_id
-    # ONLY WORKS ON JPEGS AND PNGS -
-    # TO DO - SUPPORT FOR OTHER IMAGE FORMATS
     if { ! [in [ns_cache_names] images] } {
 	ns_cache create images -size [expr 100*1024*1024] 
     }
