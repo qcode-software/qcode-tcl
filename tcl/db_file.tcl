@@ -237,26 +237,14 @@ proc qc::db_file_thumbnail_cache_create {file_id max_width max_height} {
     }
     set key "$file_id $max_width $max_height"
 
-    set tmp_file [qc::db_file_export $file_id]
-    set thumb /tmp/[uuid::uuid generate]
-    # Call imagemagick convert 
-    exec_proxy -timeout 10000 -ignorestderr convert -quiet -thumbnail ${max_width}x${max_height} -strip -quality 75% $tmp_file $thumb
-    file delete $tmp_file
-    set id [open $thumb r]
+    dict2vars [qc::image_resize $file_id $max_width $max_height] file width height
+
+    set id [open $file r]
     fconfigure $id -translation binary
     set data [read $id]
     close $id
+    file delete $file
 
-    if { [jpeg::isJPEG $thumb] } {
-        lassign [jpeg::dimensions $thumb] width height
-    } elseif { [png::isPNG $thumb] } {
-        qc::dict2vars [png::imageInfo $thumb] width height
-    } else {
-        file delete $thumb
-        error "Unrecognised image type"
-    }
-
-    file delete $thumb
     ns_cache set images $key $data
     set base64 [base64::encode $data]
     set cache_id [db_seq image_cache_id_seq]
