@@ -1,7 +1,7 @@
 
 package require doc
 namespace eval qc {
-    namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
+    namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in sql_where_words_in sql_where_phrases_in
 }
 
 proc qc::sql_where { args } {
@@ -325,5 +325,3 @@ proc qc::sql_where_phrases_in { args } {
         return true
     }
 }
-
-
