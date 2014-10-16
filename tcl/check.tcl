@@ -156,7 +156,7 @@ proc qc::check {args} {
     }
 
     # HTML Markup OFF by default
-    if { !$allow_html && [regexp {<[^>]+>} $varValue] } {
+    if { !$allow_html && [regexp {[<>]} $varValue] } {
 	error "\"[html_escape $varValue]\" contains HTML which is not allowed for $varName" {} USER
     }
 
