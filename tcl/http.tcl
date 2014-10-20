@@ -77,7 +77,7 @@ proc qc::http_post {args} {
     #| Perform an HTTP POST
     # args is name value name value ... list
     # usage http_post ?-noproxy? ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
-    args $args -noproxy -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
+    args $args -noproxy -timeout 60 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
 
     if { ![info exists data]} {
 	set pairs {}
@@ -107,7 +107,7 @@ proc qc::http_post {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
-    set curl_args [list {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders]
+    set curl_args [list {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -bodyvar html -post 1 -httpheader $httpheaders]
 
     if { [info exists content-type] && [string match "multipart/*" ${content-type}] } {
         # eg. multipart/formdata
@@ -177,13 +177,13 @@ doc qc::http_post {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
-    args $args -timeout 60 -sslversion sslv3 -headers {} -noproxy -- url
+    args $args -timeout 60 -headers {} -noproxy -- url
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders [qc::http_header $name $value]
     }
-    dict2vars [qc::http_curl {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+    dict2vars [qc::http_curl {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
@@ -245,7 +245,7 @@ doc qc::http_header {
 
 proc qc::http_put {args} {
     # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
-    args $args -header 0 -timeout 60 -sslversion sslv3 -headers {} -infile ? -data ? url 
+    args $args -header 0 -timeout 60 -headers {} -infile ? -data ? url 
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -255,9 +255,9 @@ proc qc::http_put {args} {
     if { [info exists data] && [info exists infile]} {
         error "qc::http:put must have only 1 of -data or -infile specified"
     } elseif { [info exists infile] } {
-        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
     } elseif { [info exists data] }  {
-        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
     } else {
         error "qc::http:put must have 1 of -data or -infile specified"
     }
@@ -540,9 +540,9 @@ proc qc::http_url_resolve {args} {
     #| Return resolved url after following redirects
     #
     # Misconfigured clickthrough servers may not redirect HEAD requests so always request a body by default
-    args $args -timeout 60 -sslversion sslv3 -nobody 0 -- url
+    args $args -timeout 60 -nobody 0 -- url
 
-    dict2vars [qc::http_curl -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info curlErrorNumber
+    dict2vars [qc::http_curl -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
