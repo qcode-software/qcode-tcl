@@ -615,6 +615,18 @@ Lg==
     }
     test email_send-1.13 {email_send multiple recipients, bcc, cc recipients and reply-to} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
+    # email_send test 1.14 - sender
+    set mail_from sender@test.com 
+set rcpts [list to@test.com]
+    set lines [list "Hello World"]
+    set body [join $lines \r\n]
+    set headers [list Sender sender@test.com From from@test.com To to@test.com Subject {Test Email} Reply-To reply-to@test.com Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}]
+    set result [dict_from mail_from rcpts body headers]
+    set test_body {
+        email_send to "to@test.com" from "from@test.com" reply-to "reply-to@test.com" sender "sender@test.com" subject "Test Email" text "Hello World"       
+    }
+    test email_send-1.14 {email_send sender} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
+
 
     cleanupTests
 
