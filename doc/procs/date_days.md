@@ -14,4 +14,4 @@ Return the number of days between from_date and to_date
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

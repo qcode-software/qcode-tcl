@@ -14,4 +14,4 @@ Keeps uploaded file parts sent by chunked upload and concat them once all parts 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

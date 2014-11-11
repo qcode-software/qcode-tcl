@@ -14,4 +14,4 @@ Helper to return mime part for html part with plain text alternative
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

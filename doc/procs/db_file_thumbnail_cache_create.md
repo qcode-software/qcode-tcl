@@ -14,4 +14,4 @@ Create a cached thumbnail of an image, return the cache_id
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

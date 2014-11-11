@@ -29,4 +29,4 @@ wait for proxy &quot;exec-proxy-0&quot; failed: timeout waiting for evaluation
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

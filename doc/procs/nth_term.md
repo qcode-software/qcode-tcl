@@ -14,4 +14,4 @@ Given an XPath expression $n returning the position of the current node in some 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

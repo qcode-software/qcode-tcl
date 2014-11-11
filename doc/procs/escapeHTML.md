@@ -26,4 +26,4 @@ This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;.
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

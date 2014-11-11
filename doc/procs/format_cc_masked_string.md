@@ -25,4 +25,4 @@ Any old 4111 **** **** 1111 or other 5555 **** **** 4444
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

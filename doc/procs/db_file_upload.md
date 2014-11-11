@@ -14,4 +14,4 @@ Upload a file chunk, insert the completed file into the db when complete.
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

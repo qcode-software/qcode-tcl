@@ -27,4 +27,4 @@ object foo {string Hello} bar {string {World&#39;s Apart}}
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

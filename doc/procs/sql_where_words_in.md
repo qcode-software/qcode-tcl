@@ -24,4 +24,4 @@ select * from users where name ~ &#39;( |^)Jimmy( |$)&#39; and name ~ &#39;( |^)
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

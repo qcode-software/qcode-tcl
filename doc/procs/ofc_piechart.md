@@ -36,4 +36,4 @@ qc::return_html [ofc_piechart -id $id -title $title -animate $animate -width $wi
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

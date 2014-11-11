@@ -14,4 +14,4 @@ Simple wrapper which queries AWS instance metadata for the requested category
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

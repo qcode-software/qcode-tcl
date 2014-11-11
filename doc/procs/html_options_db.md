@@ -24,4 +24,4 @@ Afghanistan AF Albania AL Algeria DZ ..... Yemen YE Yugoslavia YU Zambia ZM Zimb
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

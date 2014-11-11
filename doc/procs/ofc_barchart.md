@@ -52,4 +52,4 @@ qc::return_html [ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_a
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

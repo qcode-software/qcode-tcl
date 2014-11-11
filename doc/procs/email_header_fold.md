@@ -25,4 +25,4 @@ Non ASCII is treated like this pound sign =?UTF-8?Q?=C2=A3?=
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

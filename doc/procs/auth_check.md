@@ -14,4 +14,4 @@ Check if we can authenticate the employee<br/>Return true or false
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

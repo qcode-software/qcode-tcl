@@ -14,4 +14,4 @@ Create or update cols from table data structure<br/>use table to set label and n
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

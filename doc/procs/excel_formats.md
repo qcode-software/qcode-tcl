@@ -14,4 +14,4 @@ Converts a nested dict of class definitions to a perl hash of excel formats
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

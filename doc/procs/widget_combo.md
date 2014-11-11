@@ -81,4 +81,4 @@ widget_combo name customer_code value FOO boundName customer_id boundValue 2343 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

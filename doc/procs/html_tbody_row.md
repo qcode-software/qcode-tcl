@@ -14,4 +14,4 @@ Return a list to append to a tbody using variables corresponding to col names in
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

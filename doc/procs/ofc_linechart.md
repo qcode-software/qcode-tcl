@@ -60,4 +60,4 @@ qc::return_html [ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -14,4 +14,4 @@ Make a local copy of upname<br/>from level $level as $localname
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

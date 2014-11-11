@@ -14,4 +14,4 @@ Return the host indicated in the HTTP/1.1 headers
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

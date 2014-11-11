@@ -14,4 +14,4 @@ Applies any relevent col styles as inline styles on td, tr, or tfoot elements<br
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -14,4 +14,4 @@ Returns a number from 0 to 1 indicating how similar the 2 strings are<br/>using 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -24,4 +24,4 @@ Special characters like &amp;#159; and reserved characters like &amp;lt; &amp;gt
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

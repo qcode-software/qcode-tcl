@@ -14,4 +14,4 @@ Return html error report. If there was a http connection when error occurred rep
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

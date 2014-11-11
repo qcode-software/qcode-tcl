@@ -33,4 +33,4 @@ select * from customer where email ~* &#39;^andrew\.&#39;
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

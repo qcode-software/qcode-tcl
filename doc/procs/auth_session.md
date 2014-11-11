@@ -14,4 +14,4 @@ Try to authenticate an employee based on the session_id given<br/>Return the emp
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

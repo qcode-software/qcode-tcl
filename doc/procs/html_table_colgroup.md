@@ -14,4 +14,4 @@ Create the html for the colgroup<br/>col elements wrapped in a colgroup
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

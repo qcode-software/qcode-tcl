@@ -14,4 +14,4 @@ Wrapper for html2text. Input encoding UTF-8, Output encoding UTF-8
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

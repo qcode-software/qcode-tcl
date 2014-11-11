@@ -30,4 +30,4 @@ select * from users where name ~ &#39;^J&#39; and email ~ &#39;^jim&#39;
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

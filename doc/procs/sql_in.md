@@ -26,4 +26,4 @@ select * from users where surname in (&#39;Campbell&#39;,&#39;Graham&#39;,&#39;F
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

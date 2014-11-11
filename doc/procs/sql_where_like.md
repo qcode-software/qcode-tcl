@@ -28,4 +28,4 @@ select * from users where users.name ~~* &#39;%Jimmy%&#39; and users.name ~~* &#
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

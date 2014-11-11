@@ -33,4 +33,4 @@ two} three\&quot;, ,\&quot;four ,} {2 3 4 {,
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

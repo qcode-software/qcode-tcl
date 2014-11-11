@@ -14,4 +14,4 @@ Return the actual width and height (as [list $width $height]) of an image thumbn
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

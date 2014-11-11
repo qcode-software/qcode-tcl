@@ -24,4 +24,4 @@ fed9e24fe3df8ca8c093fca78e546ddc
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

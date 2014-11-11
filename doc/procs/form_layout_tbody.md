@@ -14,4 +14,4 @@ Construct a 2-column tbody for form elements.<br/>For most input elements the la
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

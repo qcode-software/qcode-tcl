@@ -14,4 +14,4 @@ Produce HTML to be used with JavaScript behavior dbForm
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -23,4 +23,4 @@ Hello &amp;lt;strong&amp;gt;Brave&amp;lt;/strong&amp;gt; &amp;amp; &amp;quot;Wis
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

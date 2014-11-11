@@ -14,4 +14,4 @@ Convert a css pseudo-class selector to an XPath expression
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

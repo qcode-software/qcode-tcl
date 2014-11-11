@@ -14,4 +14,4 @@ Return the value of the current If-Modified-Since header, if one exists, or "" o
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -14,4 +14,4 @@ Deprecated proc name - use qc::sql_where_words_in
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

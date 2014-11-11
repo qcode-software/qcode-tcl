@@ -14,4 +14,4 @@ Try to authenticate who the current employee is<br/>based on ip address<br/>On f
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

@@ -25,4 +25,4 @@ widget_button name foo value &quot;Click Me&quot; onclick &quot;alert(&#39;Hi&#3
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

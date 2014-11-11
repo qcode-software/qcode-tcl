@@ -14,4 +14,4 @@ dict of width, height, and mime_type of file (from local filesystem)
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

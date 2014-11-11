@@ -24,4 +24,4 @@ other-url.html?foo=2&amp;foo=45&amp;bar=Hello%20World
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

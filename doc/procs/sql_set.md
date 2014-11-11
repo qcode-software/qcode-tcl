@@ -34,4 +34,4 @@ update users set name=:name, email=:email where user_id=:user_id
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

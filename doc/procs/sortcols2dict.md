@@ -14,4 +14,4 @@ Accept args in format col1,col2,col3 DESC,col4 ASC<br/>or col1 col2 col3 DESC co
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

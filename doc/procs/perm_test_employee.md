@@ -14,4 +14,4 @@ Test whether the user can perform $method on $perm_name<br/>Returns boolean
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

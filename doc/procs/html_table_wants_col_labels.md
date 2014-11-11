@@ -14,4 +14,4 @@ Look through the list of cols to see if any of them<br/>have used a "label text"
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

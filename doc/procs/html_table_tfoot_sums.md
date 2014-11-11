@@ -14,4 +14,4 @@ Check if "sum yes" or "avg yes" is specified in the cols object and<br/>add colu
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

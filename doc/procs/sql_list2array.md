@@ -27,4 +27,4 @@ array[1::int,2::int,3::int,4::int]::int[]
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

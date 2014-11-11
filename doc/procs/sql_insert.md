@@ -33,4 +33,4 @@ insert into users (user_id,name,email,password) VALUES (:user_id,:name,:email,:p
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

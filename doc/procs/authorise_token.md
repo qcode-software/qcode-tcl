@@ -14,4 +14,4 @@ Check the authorisation token of the current request<br/>and return the employee
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

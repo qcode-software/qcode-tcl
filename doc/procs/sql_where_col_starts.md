@@ -26,4 +26,4 @@ name ~ &#39;^Jim&#39; or name ~ &#39;^Mac&#39;
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

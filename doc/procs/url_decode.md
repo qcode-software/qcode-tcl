@@ -26,4 +26,4 @@ someplace.html?order_number=911&amp;title=ca sáu
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

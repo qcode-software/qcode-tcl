@@ -14,4 +14,4 @@ Convert a css simple selector (but not a type or universal selector) to an XPath
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

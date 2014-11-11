@@ -14,4 +14,4 @@ Take a proc definition and args and write a Tcl script that can be run on the re
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

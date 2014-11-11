@@ -25,4 +25,4 @@ from me@here.com to you@there.com msg {Get off my land.} to andyou@there.com to 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

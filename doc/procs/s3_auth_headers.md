@@ -14,4 +14,4 @@ Constructs the required s3 authentication header for the request type in questio
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

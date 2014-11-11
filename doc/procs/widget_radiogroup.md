@@ -29,4 +29,4 @@ widget_radiogroup name sex value M options {Male M Female F}
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

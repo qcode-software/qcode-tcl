@@ -14,4 +14,4 @@ Assume callers_args is a dict of name value pairs<br/>check that all the keys gi
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

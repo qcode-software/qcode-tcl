@@ -14,4 +14,4 @@ Configure employee permissions<br/>Usage: perm_set employee_id perm_name ?method
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

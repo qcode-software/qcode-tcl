@@ -23,4 +23,4 @@ object legs {number 4} eyes {number 2} coat {string fur} call {string meow}
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

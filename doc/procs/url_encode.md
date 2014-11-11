@@ -26,4 +26,4 @@ someplace.html%3forder_number%3d911%26title%3dca+s%e1u
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

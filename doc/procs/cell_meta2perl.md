@@ -14,4 +14,4 @@ Converts excel cell meta data from a nested dict to a perl hash of hashes
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

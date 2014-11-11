@@ -14,4 +14,4 @@ Returns a string that is the HTML with all the HTML tags removed
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

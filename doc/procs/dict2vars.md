@@ -39,4 +39,4 @@ can&#39;t read &quot;d&quot;: no such variable
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

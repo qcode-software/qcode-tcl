@@ -26,4 +26,4 @@ set html [html_a &quot;Do something to order $order_number and return&quot; [url
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

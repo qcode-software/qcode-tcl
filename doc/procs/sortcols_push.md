@@ -14,4 +14,4 @@ take a list of [colname1 order colname2 order ...]<br/>and reorder putting $coln
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

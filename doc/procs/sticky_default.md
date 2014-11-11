@@ -14,4 +14,4 @@ Set var values in the caller's namespace using sticky values if not passed in fo
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

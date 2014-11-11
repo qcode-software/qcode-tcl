@@ -14,4 +14,4 @@ Returns true if date is an acceptable HTTP timestamp. Note although all three sh
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

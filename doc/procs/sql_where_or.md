@@ -14,4 +14,4 @@ Return a SQL where clause. Any empty values or non-existent variables are ignore
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"

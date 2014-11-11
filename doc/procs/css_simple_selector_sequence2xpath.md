@@ -14,4 +14,4 @@ Convert a css simple selector sequence to an XPath node test + predicate
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"
