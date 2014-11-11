@@ -4,10 +4,7 @@ namespace eval qc {
     namespace export db_*
 }
 
-doc qc::db {
-    Title "Database API"
-    Url {/qc/wiki/DatabaseApi}
-}
+
 
 proc qc::db_qry_parse {qry {level 0} } {
     #| parses a SQL query replacing bind variables
@@ -210,26 +207,7 @@ proc qc::db_qry_parse {qry {level 0} } {
     return $qry
 }
 
-doc qc::db_qry_parse {
-    Parent db
-    Usage {db_qry_parse qry ?level?}
-    Description {
-	Escape and substitute bind variables in a SQL query. Bind variables are marked with a colon followed by the variable name e.g. :varname The parser will use values of corresponding TCL variables in this namespace or go up the number of levels defined. Values are escaped using db_quote e.g O'Conner becomes O''Conner. Variables that contain an empty string will be treated as NULL (see example below). 
-    }
-    Examples {
-	% set order_number 123
-	% db_qry_parse {select order_date from sales_order where order order_number=:order_number}
-	% select order_date from sales_order where order_number=123
 
-	% set name O'Conner
-	% db_qry_parse {select * from users where name=:name}
-	% select * from users where name='O''Conner'
-
-	% set name ""
-	% db_qry_parse {select * from users where name=:name}
-	% select * from users where name IS NULL
-    }
-}
 
 proc qc::db_quote { value {type ""}} {
     #| quotes SQL values by escaping single quotes with \'
@@ -304,28 +282,7 @@ proc qc::db_quote { value {type ""}} {
     }
 }
 
-doc qc::db_quote {
-    Parent db
-    Description {
-	Escape strings that contain single quotes e.g. O'Neil becomes 'O''Neil' Empty strings are replaced with NULL. Numbers are left unchanged. 
-    }
-    Examples {
-	% db_quote 23
-	% 23
 
-	% db_quote 0800
-	% '0800'
-
-	% db_quote MacKay
-	% 'MacKay'
-
-	% db_quote O'Neil
-	% 'O''Neil'
-
-	% db_quote ""
-	% NULL
-    }
-}
 
 proc qc::db_escape_regexp { string } {
     # The postgresql parser performs substitution 
@@ -353,27 +310,7 @@ proc qc::db_escape_regexp { string } {
     return [string map $list $string]
 }
 
-doc qc::db_escape_regexp {
-    Parent db
-    Usage {db_escape_regexp string}
-    Description {
-	Used to escape regular expression metacharacters. 
-    }
-    Examples {
-	% db_escape_regexp Finlay.son
-	% Finlay\.son
 
-	% db_escape_regexp "*fish"
-	% \*fish
-
-	% db_escape_regexp {C:\one\tow}
-	% C:\\one\\tow
-
-	% set email andrew.
-	% set qry "select * from customer where email ~* [db_quote "^[db_escape_regexp $email]"]"
-	select * from customer where email ~* '^andrew\.'
-    }
-}
 
 proc qc::db_get_handle {{poolname DEFAULT}} {
     # Return db handle 
@@ -398,14 +335,7 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
     }
 }
 
-doc qc::db_get_handle {
-    Parent db
-    Description {
-	Return a database handle.
-	Keep one handle per pool for current thread in a thread global variable.
-	At thread exit AOLserver will release the db handle.
-    }
-}
+
 
 proc qc::db_dml { args } {
     args $args -db DEFAULT -- qry
@@ -431,16 +361,7 @@ proc qc::db_dml { args } {
     }
 }
 
-doc qc::db_dml {
-    Parent db
-    Usage {db_dml qry}
-    Description {Execute a SQL dml statement}
-    Examples {
-	% db_dml {update users set email='foo@bar.com' where user_id=23}
 
-	% db_dml {insert into users (user_id,name,email) values (1,'john','john@example.com') }
-    }
-}
 
 proc qc::db_trans {args} {
     #| Execute code within a transaction
@@ -485,37 +406,7 @@ proc qc::db_trans {args} {
     }
 }
 
-doc qc::db_trans {
-    Parent db
-    Usage {db_trans code ?on_error_code?}
-    Description {
-	Execute code within a database transaction.
-	Rollback on database or tcl error.
-    }
-    Examples {
-	db_trans {
-	    db_dml {update account set balance=balance-10 where account_id=1}
-	    db_dml {update account set balance=balance+10 where account_id=2}
-	}
 
-	db_trans {
-	    # Select for update
-	    db_1row {select order_state from sales_order where order_number=123 for update}
-	    if { ![string equal $order_state OPEN ] } {
-		# Throw error and ROLLBACK
-		error "Can't invoice sales order $order_number because it is not OPEN"
-	    }
-	    # Perform action that requires order to be OPEN
-	    invoice_sales_order 123
-	}
-
-	db_trans {
-	    blow-up
-	} {
-	    # cleanup here
-	}
-    }
-}
 
 proc qc::db_1row { args } {
     # Select 1 row from the database using the qry.
@@ -532,23 +423,7 @@ proc qc::db_1row { args } {
     return
 }
 
-doc qc::db_1row {
-    Parent db
-    Usage {db_1row qry}
-    Description {
-	Select one row from the database using the qry. Place variables corresponding to column names in the caller's namespace Throw an error if more or less than 1 row is returned.
-    }
-    Examples {
-	% db_1row {select order_date from sales_order where order order_number=123}
-	% set order_date
-	2007-01-23
-	%
-	% set order_number 567545
-	% db_1row {select order_date from sales_order where order order_number=:order_number}
-	% set order_date
-	2006-02-05
-    }
-}
+
 
 proc qc::db_0or1row {args} {
     # Select zero or one row from the database using the qry.
@@ -589,31 +464,7 @@ proc qc::db_0or1row {args} {
     }
 }
 
-doc qc::db_0or1row {
-    Parent db
-    Usage {db_0or1row qry ?no_rows_code? ?one_row_code?}
-    Description {
-	Select zero or one row from the database using the qry.
-	If zero rows are returned then run no_rows_code else 
-	place variables corresponding to column names in the caller's namespace and execute one_row_body
-    }
-    Examples {
-	% db_0or1row {select order_date from sales_orders where order order_number=123} {
-	    puts "No Rows Found"
-	} {
-	    puts "Order Date $order_date"
-	}
-	No Rows Found
-	%
-	set order_number 654456
-	db_0or1row {select order_date from sales_orders where order order_number=:order_number} {
-	    puts "No Rows Found"
-	} {
-	    puts "Order Date $order_date"
-	}
-	Order Date 2007-06-04
-    }
-}
+
 
 proc qc::db_foreach {args} {
     #| Place variables corresponding to column names in the caller's namespace
@@ -682,32 +533,7 @@ proc qc::db_foreach {args} {
     }
 }
 
-doc qc::db_foreach {
-    Parent db
-    Description {
-	Place variables corresponding to column names in the caller's namespace for each row returned.
-	Set special variables db_nrows and db_row_number in caller's namespace to
-	indicate the number of rows returned and the current row.
-	Nested foreach statements clean up special variables so they apply to the current scope.
-    }
-    Examples {
-	% set qry {select firstname,surname from users order by surname} 
-	% db_foreach $qry {
-	    lappend list "$surname, $firstname"
-	}
 
-	% set category Lights
-	% set qry {
-	    select product_code,description,price 
-	    from products 
-	    where category=:category 
-	    order by product_code
-	}
-	% db_foreach $qry {
-	    append html &lt;li&gt;$db_row_number $product_code $description $price&lt;/li&gt;
-	}
-    }
-}
 
 proc qc::db_seq {args} {
     args $args -db DEFAULT -- seq_name
@@ -717,15 +543,7 @@ proc qc::db_seq {args} {
     return $next_id
 }
 
-doc qc::db_seq {
-    Parent db
-    Description {Fetch the next value from the sequence named seq_name}
-    Examples {
-	% db_dml {create sequence sales_order_no_seq}
-	% set sales_order_no [db_seq sales_order_no_seq]
-	% 1
-    }
-}
+
 
 proc qc::db_select_table {args} {
     # Select results of qry into a table
@@ -762,18 +580,7 @@ proc qc::db_select_table {args} {
     }
 }
 
-doc qc::db_select_table {
-    Parent db
-    Description {Select the results of the query into a <proc>table</proc>. Substitute and quote bind variables starting with a colon.}
-    Examples {
-	% db_select_table {select user_id,firstname,surname from users}
-	% {user_id firstname surname} {73214205 Jimmy Tarbuck} {73214206 Des O'Conner} {73214208 Bob Monkhouse}
 
-	% set surname MacDonald
-	% db_select_table {select id,firstname,surname from users where surname=:surname}
-	% {user_id firstname surname} {83214205 Angus MacDonald} {83214206 Iain MacDonald} {83214208 Donald MacDonald}
-    }
-}
 
 proc qc::db_select_csv { qry {level 0} } {
     #| Select qry into csv report
@@ -786,17 +593,7 @@ proc qc::db_select_csv { qry {level 0} } {
     return [join $lines \r\n]
 }
 
-doc qc::db_select_csv {
-    Parent db
-    Description {Select the results of the SQL qry into a csv report. First row contains column names.Lines separated with windows \\r\\n}
-    Examples {
-	% db_select_csv {select user_id,firstname,surname from users}
-	user_id,firstname,surname
-	83214205,Angus,MacDonald
-	83214206,Iain,MacDonald
-	83214208,Donald,MacDonald
-    }
-}
+
 
 proc qc::db_select_ldict { qry } {
     # Select the results of qry into a ldict
@@ -804,15 +601,7 @@ proc qc::db_select_ldict { qry } {
     return [qc::table2ldict $table]
 }
 
-doc qc::db_select_ldict {
-    Parent db
-    Description {Select the results of the SQL qry into a ldict. An ldict is a list of dicts}
-    Examples {
-	% set qry {select firstname,surname from users}
-	% db_select_ldict $qry
-	{firstname John surname Mackay} {firstname Andrew surname MacDonald} {firstname Angus surname McNeil}
-    }
-}
+
 
 proc qc::db_select_dict { qry } {
     # Select 0 or 1 row from the database using the qry.
@@ -858,14 +647,7 @@ proc qc::db_col_varchar_length { table_name col_name } {
     }
 }
 
-doc qc::db_col_varchar_length {
-    Parent db
-    Examples {
-	# A table sales_orders has column delivery_address1 type varchar(100)
-	% db_col_varchar_length sales_orders delivery_address1
-	100
-    }
-}
+
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database

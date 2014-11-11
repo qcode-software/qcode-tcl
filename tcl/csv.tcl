@@ -63,20 +63,6 @@ proc qc::csv2ll {csv } {
     return $result
 }
 
-doc qc::csv2ll {
-    Examples {
-	% set csv {"one","two","three"
-4,5,6}
-	% csv2ll $csv
-	{one two three} {4 5 6}
-	%
-	set csv {,"one
-two","three"",",",""four",","
-2,3,4,",
-",9}
-	% csv2ll $csv
-	{{} {one
-two} three\", ,\"four ,} {2 3 4 {,
-} 9}
+ 9}
     }
 }

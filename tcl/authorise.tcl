@@ -34,9 +34,7 @@ proc qc::authorise_token_create {args} {
     return "$employee_id $expiration_epoch $hash"
 }
 
-doc qc::authorise_token_create {
-    Parent authorisation
-}
+
 
 proc qc::authorise_token {} {
     #| Check the authorisation token of the current request
@@ -80,6 +78,4 @@ proc qc::authorise_token {} {
     }
 }
 
-doc qc::authorise_token {
-    Parent authorisation
-}
+

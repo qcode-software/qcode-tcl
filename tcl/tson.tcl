@@ -27,24 +27,14 @@ proc qc::tson_object { args } {
 
     return $tson
 }
-doc qc::tson_object {
-    Examples {
-	% qc::tson_object legs 4 eyes 2 coat fur call meow
-	object legs {number 4} eyes {number 2} coat {string fur} call {string meow}
-    }
-}
+
 
 proc qc::json_quote {value} {
     #| Return a json string literal with appropriate escapes
     return "\"[string map {\" \\\" \\ \\\\ \n \\n \r \\r \f \\f \b \\b \t \\t} $value]\""
 }
 
-doc qc::json_quote {
-    Examples {
-	% qc::json_quote {He said "Hello World!"}
-	"He said \"Hello World!\""
-    }
-}
+
 
 proc qc::tson2json { tson } {
     #| Convert tson to json
@@ -82,35 +72,7 @@ proc qc::tson2json { tson } {
     }
 }
 
-doc qc::tson2json {
-    Examples {
-	% set tson [list object Image \
-		    [list object \
-		     Width 800 \
-		     Height 600 \
-		     Title {View from the 15th Floor} \
-		     Thumbnail [list object \
-				Url http://www.example.com/image/481989943 \
-				Height 125 \
-				Width [list string 100]] \
-		     IDs [list array 116 943 234 38793]]]
 
-	% tson2json $tson
-	{
-            "Image": {
-                "Width": 800,
-                "Height": 600,
-                "Title": "View from the 15th Floor",
-                "Thumbnail": {
-                    "Url": "http://www.example.com/image/481989943",
-                    "Height": 125,
-                    "Width": "100"
-                },
-                "IDs": [116,943,234,38793]
-            }
-        }
-    }
-}
 
 proc qc::tson_object_from { args } {
     #| Take a list of var names and return a tson object
@@ -126,16 +88,7 @@ proc qc::tson_object_from { args } {
     return [tson_object {*}$dict]
 }
 
-doc qc::tson_object_from {
-    Examples {
-	% set foo Hello
-	Hello
-	% set bar "World's Apart"
-	World's Apart
-	% qc::tson_object_from foo bar
-	object foo {string Hello} bar {string {World's Apart}}
-    }
-}
+
 
 proc qc::tson2xml { tson } {
     # not dealt with attributes 
@@ -176,25 +129,4 @@ proc qc::tson2xml { tson } {
     }
 }
 
-doc qc::tson2xml {
-    Examples {
-	% set tson [list object Image \
-		    [list object \
-		     Width 800 \
-		     Height 600 \
-		     Title {View from the 15th Floor} \
-		     Thumbnail [list object \
-				Url http://www.example.com/image/481989943 \
-				Height 125 \
-				Width [list string 100]] \
-		     IDs [list array 116 943 234 38793]]]
-	% qc::tson2xml $tson
-	<Image><Width>800</Width>
-        <Height>600</Height>
-        <Title>View from the 15th Floor</Title>
-        <Thumbnail><Url>http://www.example.com/image/481989943</Url>
-        <Height>125</Height>
-        <Width>100</Width></Thumbnail>
-        <IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>
-    }
-}
+

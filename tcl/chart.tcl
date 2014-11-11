@@ -66,29 +66,7 @@ proc qc::ofc_piechart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc qc::ofc_piechart {
-    Usage {
-	ofc_piechart ?-id id? ?-title title? ?-animate animate? ?-width width? ?-height height? data
-    }
-    Description {
-	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc/ofc_pie_examples.html"]
-    }
-    Examples {
-	set data [list {label "Label 1" value 12} {label "Label 2" value 14}]
 
-	Example 1: Minumum arguments usage.
-	qc::return_html [ofc_piechart $data]
-
-	Example 2: Full argument usage.   
-	set id chart2
-	set title {label "My Wizzzy Pie Chart" font-size 25px}  
-	set animate true
-	set width 50%
-	set height 50%  
-	qc::return_html [ofc_piechart -id $id -title $title -animate $animate -width $width -height $height -- $data]
-    }
-}
 
 proc /doc/ofc_pie_examples.html {} {
     sset html {
@@ -221,55 +199,7 @@ proc qc::ofc_linechart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc qc::ofc_linechart {
-    Usage {
-	ofc_linechart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? lines
-    }
-    Description {
-	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc/ofc_line_examples.html"]
-    }
-    Examples {
-	set data1 [list \ 
-		   [list x Jan y 500] \ 
-		   [list x Feb y 550] \ 
-		   [list x Mar y 700] \ 
-		   [list x Apr y 670] \ 
-		   [list x May y 730]]
-	set data2 [list \
-		       [list x Jan y 50 tooltip "Adwords (Jan)<br>50 Bananas"] \ 
-		   [list x Feb y 65 tooltip "Adwords (Feb)<br>65 Bananas"] \ 
-		   [list x Mar y -3 tooltip "Adwords (Mar)<br>-3 Bananas"] \ 
-		   [list x Apr y 67 tooltip "Adwords (Apr)<br>67 Bananas"] \ 
-		   [list x May y 73 tooltip "Adwords (May)<br>73 Bananas"]]
-	set data3 [list \
-		       [list x Jan y 500 tooltip "Froogle (Jan)<br>500 Apples"] \ 
-		   [list x Feb y 605 tooltip "Froogle (Feb)<br>605 Apples"] \ 
-		   [list x Mar y 700 tooltip "Froogle (Mar)<br>700 Apples"] \ 
-		   [list x Apr y 607 tooltip "Froogle (Apr)<br>607 Apples"] \ 
-		   [list x May y 703 tooltip "Froogle (May)<br>703 Apples"]]
 
-	Example 1: Minimum Arguments Usage.
-	set lines [list \ 
-		   [list label "Direct" data $data1] \ 
-		   [list label "Adwords" data $data2] \ 
-		   [list label "Froogle" data $data3]]
-	qc::return_html [ofc_linechart $lines]
-
-	Example 2: Full Arguments Usage.
-	set id chart2
-	set title {label "My Wizzy Line Chart" font-size 20px}
-	set x_axis {label "Months" grid_step 1 label_step 1}
-	set y_axis {label "Orders" min -100 max 800 step 100} 
-	set width 50%
-	set height 25%  
-	set lines [list \ 
-		   [list label "Direct" color #00FF33 data $data1] \ 
-		   [list label "Adwords" color #FF0033 data $data2] \ 
-		   [list label "Froogle" color #3333CC data $data3]]
-	qc::return_html [ofc_linechart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $lines]
-    }
-}
 
 proc /doc/ofc_line_examples.html {} { 
 
@@ -458,45 +388,7 @@ proc qc::ofc_barchart {args} {
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
 
-doc qc::ofc_barchart {
-    Usage {
-	ofc_barchart ?-id id? ?-title title? ?-x_axis x_axis? ?-y_axis y_axis? ?-width width? ?-height height? bars
-    }
-    Description {
-	<h2>See Examples in Action</h2>
-	[html_a "Examples" "/doc/ofc_bar_examples.html"]
-    }
-    Examples {
-	set data1 [list \ 
-		   [list label Direct y 500] \ 
-		   [list label Adwords y 750] \ 
-		   [list label Froogle y 70]]
-	set data2 [list \ 
-		   [list label Direct y 560 tooltip "Direct (Jan)<br>560 of 1005 Orders"] \ 
-		   [list label Adwords y 395 tooltip "Adwords (Feb)<br>395 of 1005 Orders"] \ 
-		   [list label Froogle y 50 tooltip "Froogle (Mar)<br>50 of 1005 Orders"]]
-	set data3 [list \ 
-		   [list label Direct y 600 tooltip "Direct (Jan)<br>600 of 1410 Orders"] \ 
-		   [list label Adwords y 360 tooltip "Adwords (Feb)<br>360 of 1410 Orders"] \ 
-		   [list label Froogle y 450 tooltip "Froogle (Mar)<br>450 of 1410 Orders"]]
-	set bars [list \ 
-		  [list x Jan data $data1] \ 
-		  [list x Feb data $data2] \ 
-		  [list x March data $data3]]
 
-	Example 1: Minimum Arguments Usage.
-	qc::return_html [ofc_barchart $bars]
-
-	Example 2: Full Arguments Usage.
-	set id chart2
-	set title {label "My Wizzy Bar Chart" font-size 20px}
-	set x_axis {label "Months" grid_step 1 label_step 1}
-	set y_axis {label "Orders" min 0 max 1500 step 250} 
-	set width 50%
-	set height 25%  
-	qc::return_html [ofc_barchart -id $id -title $title -x_axis $x_axis -y_axis $y_axis -width $width -height $height --  $bars]
-    }
-}
 
 proc /doc/ofc_bar_examples.html {} { 
 

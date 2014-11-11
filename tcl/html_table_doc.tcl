@@ -21,32 +21,4 @@ proc qc::html_table_doc {args} {
     return [qc::html_table [dict_from {*}$varNames]]
 }
 
-doc qc::html_table_doc {
-    Examples {
-	% set cols {
-	    {label "Sales Quote No." name sales_quote_no}
-	    {label "Customer Order No." name customer_order_no}
-	}
-	% set sales_quote_no 12343
-	% set customer_order_no Tel/Bill
-	% qc::html_table_doc cols $cols class document
-	<table class="document">
-	<colgroup>
-	<col name="sales_quote_no">
-	<col name="customer_order_no">
-	</colgroup>
-	<thead>
-	<tr>
-	<th>Sales Quote No.</th>
-	<th>Customer Order No.</th>
-	</tr>
-	</thead>
-	<tbody>
-	<tr>
-	<td>12343</td>
-	<td>Tel/Bill</td>
-	</tr>
-	</tbody>
-	</table>
-    }
-}
+

@@ -3,9 +3,7 @@ namespace eval qc {
     namespace export db_file_* file_upload plupload.html
 }
 
-doc qc::db_file {
-    Title {Database file storage}
-}
+
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table

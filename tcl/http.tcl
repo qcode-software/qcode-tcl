@@ -144,36 +144,7 @@ proc qc::http_post {args} {
     }
 }
 
-doc qc::http_post {
-    Usage { http_post ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value? }
-    Examples {
-        % qc::http_post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"
-        {
-            "files": {},
-            "form": {},
-            "url": "http://httpbin.org/post",
-            "args": {},
-            "headers": {
-                "Content-Length": "27",
-                "Host": "httpbin.org",
-                "Content-Type": "text/plain; charset=utf-8",
-                "Connection": "keep-alive",
-                "Accept": "text/plain; charset=utf-8"
-            },
-        "json": null,
-        "data": "data=Here%27s+the+POST+data"
-        }
-        % 
-        % lappend data [list name "firstName" contents "Andres" contenttype "text/plain" contentheader [list "adios: goodbye"]]                                       \
-        % lappend data [list name "lastName"  contents "Garcia"]                          \
-        % lappend data [list name "file" file "httpPost.tcl" file "basico.tcl" contenttype text/plain filename "c:\\basico.tcl"]                            \
-        % lappend data  [list name "AnotherFile" filecontent "httpBufferPost.tcl"]         \
-        % lappend data  [list name "submit" contents "send"]
-        
-        % http_post -headers [list Authorization "OAuth $token"] -data $data -content-type "multipart/form-data" https://httpbin.org/post
 
-    }
-}
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
@@ -206,26 +177,7 @@ proc qc::http_get {args} {
     }
 }
 
-doc qc::http_get {
-    Usage { http_get  ?-timeout timeout? ?-headers {name value name value ...}? url }
-    Examples {
-        > qc::http_get http://httpbin.org/get?ourformvar=999&anotherformvar=123
-        {
-        "url": "http://httpbin.org/get?ourformvar=999&anotherformvar=123",
-        "headers": {
-            "Content-Length": "",
-            "Host": "httpbin.org",
-            "Content-Type": "",
-            "Connection": "keep-alive",
-            "Accept": "*/*"
-        },
-        "args": {
-            "anotherformvar": "123",
-            "ourformvar": "999"
-        },
-        }
-    }
-}
+
 
 proc qc::http_header {name value} {
     #| Return http header. 
@@ -236,12 +188,7 @@ proc qc::http_header {name value} {
     return "$name: $value"
 }
 
-doc qc::http_header {
-    Examples {
-        % http_header Content-Type application/json
-        Content-Type: application/json
-    }
-}
+
 
 proc qc::http_put {args} {
     # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
@@ -441,12 +388,7 @@ proc qc::http_head {args} {
     }
 }
 
-doc qc::http_head {
-    Examples {
-	% qc::http_head www.google.co.uk
-	% Expires -1 http {HTTP/1.1 200 OK} Transfer-Encoding chunked X-Frame-Options SAMEORIGIN Content-Type {text/html; charset=ISO-8859-1} Cache-Control {private, max-age=0} Date {Thu, 23 Aug 2012 14:42:23 GMT} X-XSS-Protection {1; mode=block} Server gws P3P {CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657 for more info."} Set-Cookie {{PREF=ID=a756df18ac806a1b:FF=0:TM=1345732943:LM=1345732943:S=pks7ngzKuTVPwX92; expires=Sat, 23-Aug-2014 14:42:23 GMT; path=/; domain=.google.co.uk} {NID=63=RM68tXvZZYQ6EMUebcB7iyXIbKwXH1PoXgkNyomu_tF5-DBQ1vhBw_o8A_n0N-zhdNbTp7_eOZ8A90i3VsxT19TvuW9ld-kiidOfY-Tn8jaDVXs3C7i6em6ITp3MFLbn; expires=Fri, 22-Feb-2013 14:42:23 GMT; path=/; domain=.google.co.uk; HttpOnly}}
-    }
-}
+
 
 proc qc::http_exists {args} {
     #| Test if an URL returns a valid response
@@ -463,15 +405,7 @@ proc qc::http_exists {args} {
     }
 }
 
-doc qc::http_exists {
-    Examples  {
-	% qc::http_exists www.qcode.co.uk
-	true
-	
-	% qc::http_exists www.qcode.co.uk/foo
-	false
-    }
-}
+
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.

@@ -32,19 +32,7 @@ proc qc::url { url args } {
     }
 }
 
-doc qc::url {
-    Description {
-        Take an url with or without url encoded vars and insert or replace vars based on<br> 
-        the supplied pairs of var & value.
-    }
-    Usage {
-        qc::url url ?var value? ...
-    }
-    Examples {
-        % qc::url afile.html?foo=Goodbye foo "Hello" bar "There"
-        afile.html?foo=Hello&bar=There
-    }
-}
+
 
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
@@ -71,18 +59,7 @@ proc qc::url_unset { url var_name } {
     }
 }
 
-doc qc::url_unset {
-    Description {
-        Unset a url encoded variable in url
-    }
-    Usage {
-        qc::url_unset url var_name
-    }
-    Examples {
-        > qc::url_unset afile.html?foo=Hello&bar=There bar
-        afile.html?foo=Hello
-    }
-}
+
 
 proc qc::url_to_html_hidden { url } {
     #| Convert a url with form vars into html hidden input tags
@@ -98,19 +75,7 @@ proc qc::url_to_html_hidden { url } {
     return $html
 }
 
-doc qc::url_to_html_hidden {
-    Description {
-        Convert a url with form vars into html hidden input tags.<br>
-    }
-    Usage {
-        qc::url_to_html_hidden url
-    }
-    Examples {
-        > qc::url_to_html_hidden afile.html?foo=Hello&bar=There
-        <input type="hidden" name="foo" value="Hello" id="foo">
-        <input type="hidden" name="bar" value="There" id="bar">
-    }
-}
+
 
 proc qc::url_back { url args } {
     #| Creates a link to url with a formvar next_url which links back to the current page.
@@ -123,20 +88,7 @@ proc qc::url_back { url args } {
     return [url $url {*}[array get value]]
 }
 
-doc qc::url_back {
-    Description {
-        Creates a link to url with a formvar next_url which links back to the current page.<br>
-        Preserve vars passed in via GET or POST
-    }
-    Usage {
-        qc::url_back url args
-    }
-    Examples {
-        set order_number 911
-        set html [html_a "Do something to order $order_number and return" [url_back destination.html order_number]] 
-        <a href="destination.html?order_number=911&amp;next_url=https%3a%2f%2fwww.domain.co.uk%2fsource.html%3forder_number%3d911">Do something to order 911 and return</a>
-    }
-}
+
 
 proc qc::url_here {} {
     #| Encode form_vars from GET and POST in this url.
@@ -144,18 +96,7 @@ proc qc::url_here {} {
     return [qc::form2url [qc::conn_url]]
 }
 
-doc qc::url_here {
-    Description {
-        Encode form_vars from GET and POST in this url.
-    }
-    Usage {
-        qc::url_here
-    }
-    Examples {
-        # On page somePage.html?order_number=911
-        set return_url [url_here]
-    }
-}
+
 
 proc qc::url_encoding_init {} {
     #| Initialise url encode/decode maps in the qc namespace

@@ -74,17 +74,7 @@ proc qc::cookie_get { search_name } {
     }
 }
 
-doc qc::cookie_get {
-    Parent cookie
-    Examples {
-	% cookie_get session_id
-	12345654321
-	% 
-	% If the cookie cannot be found an error is thrown
-	% cookie_get foo
-	Cookie foo does not exist
-    }
-}
+
 
 proc qc::cookie_exists { name } {
     #| Test if the cookie exists
@@ -100,16 +90,7 @@ proc qc::cookie_exists { name } {
     return [multimap_exists $cookie_map [qc::url_encode $name]]
 }
 
-doc qc::cookie_exists {
-    Parent cookie
-    Examples {
-	% cookie_exists session_id
-	true
-	%
-	% cookie_exists foo
-	false
-    }
-}
+
 
 proc qc::cookie_set {name value args} {
     #| Set a cookie in outgoing headers for the current conection.
@@ -153,12 +134,4 @@ proc qc::cookie_set {name value args} {
     ns_set put $headers "Set-Cookie" $cookie
 }
 
-doc qc::cookie_set {
-    Parent cookie
-    Examples {
-	% cookie_set tracking Google expires "+30 days"
-	%
-	# delete a cookie
-	% cookie_set tracking "" expires yesterday
-    }
-}
+

@@ -12,22 +12,7 @@ proc qc::lshift { stack } {
     return $value 
 }
 
-doc qc::lshift {
-    Description {
-        Return leftmost value from list and remove it
-    }
-    Usage {
-        qc::lshift listVar
-    }
-    Examples {
-        % proc call { args } {
-        set proc_name [qc::lshift args]
-        return [$proc_name {*}$args]
-        }
-        % call qc::base 16 15
-        F
-    }
-}
+
 
 proc qc::lunshift { stack value } {
     #| Adds $value as leftmost item in the list
@@ -38,22 +23,7 @@ proc qc::lunshift { stack value } {
     set list [linsert $list 0 $value]
 }
 
-doc qc::lunshift {
-    Description {
-        Adds $value as leftmost item in the list
-    }
-    Usage {
-        qc::lunshift listVar value
-    }
-    Examples {
-        % set items [list a b c d]
-        a b c d
-        % qc::lunshift items z
-        z a b c d
-        % set items
-        z a b c d
-    }
-}
+
 
 global tcl_version
 if { $tcl_version<8.5 } {
@@ -65,44 +35,7 @@ if { $tcl_version<8.5 } {
 	}
 	return $rlist
     }
-    doc qc::lreverse {
-        Description {
-            Returns list in reverse order
-        }
-        Usage {
-            qc::lreverse list
-        }
-        Examples {
-            % set items [list a b c d]
-            a b c d
-            % qc::lreverse $items
-            d c b a
-        }
-    }
-    proc lassign {list args} {
-        #| List assign for Tcl <8.5 
-	foreach value $list variableName $args {
-	    upset 1 $variableName $value
-	}
-    }
-    doc qc::lassign {
-        Description {
-            Assigns the supplied vars to the corresponding list item values
-        }
-        Usage {
-            qc::lassign list var ?var? ?var? ?var? ...
-        }
-        Examples {
-            % set items [list Angus Jamison Jock Mackay]     
-            Angus Jamison Jock Mackay
-            % lassign $items firstname middlename1 middlename2 surname
-            % set firstname
-            Angus
-            % set surname
-            Mackay
-        }
-    }   
-}
+    
 
 proc qc::lintersect { a b } {
     #| Returns the intersection of 2 lists
@@ -116,22 +49,7 @@ proc qc::lintersect { a b } {
     return $result
 }
 
-doc qc::lintersect {
-    Description {
-        Returns the intersection of 2 lists
-    }
-    Usage {
-        qc::lintersect list list
-    }
-    Examples {
-        % set list1 [list a b c d e]
-        a b c d e
-        % set list2 [list d e f g h]
-        d e f g h
-        % qc::lintersect $list1 $list2
-        d e
-    }
-}
+
 
 proc qc::lexclude { list args } {
     #| Return $list with and values listed in $args excluded
@@ -144,24 +62,7 @@ proc qc::lexclude { list args } {
     return $result
 }
 
-doc qc::lexclude {
-    Description {
-        Return $list with and values listed in $args excluded
-    }
-    Usage {
-        qc::lexclude list value ?value? ?value? ...
-    }
-    Examples {
-        % set items [list Angus Jamison Jock Mackay]     
-        Angus Jamison Jock Mackay
-        % qc::lexclude $items "Jock" "Mackay"
-        Angus Jamison
-        % set items [list 1 2 2 2 3 4 4 4 4]
-        1 2 2 2 3 4 4 4 4
-        % qc::lexclude $items 2
-        1 3 4 4 4 4
-    }
-}
+
 
 proc qc::lexclude2 { list args } { 
     #| Alternative implementation of qc::lexclude
@@ -179,22 +80,7 @@ proc qc::lunion { a b } {
     return [lsort -unique $result]
 }
 
-doc qc::lunion {
-    Description {
-        Return union of 2 lists
-    }
-    Usage {
-        qc::lunion list list
-    }
-    Examples {
-        % set l1 [list 4 3 3 2 1]
-        4 3 3 2 1
-        % set l2 [list 1 3 5 7]
-        1 3 5 7
-        % qc::lunion $l1 $l2
-        1 2 3 4 5 7
-    }
-}
+
 
 proc qc::ldelete {listVar index} {
     #| Deletes item at $index of list
@@ -203,42 +89,14 @@ proc qc::ldelete {listVar index} {
     set list [lreplace [K $list [set list {}]] $index $index]
 }
 
-doc qc::ldelete {
-    Description {
-        Deletes item at $index of list
-    }
-    Usage {
-        qc::ldelete listVar index
-    }
-    Examples {
-        % set items [list "Mr" "Angus" "Jamison"]
-        Mr Angus Jamison
-        % qc::ldelete items 0
-        Angus Jamison
-        % set items
-        Angus Jamison
-    }
-}
+
 
 proc qc::lmove {list from to} {
     #| Move an element in a list from one place to another
     return [linsert [lreplace $list $from $from] $to [lindex $list $from]]
 }
 
-doc qc::lmove {
-    Description {
-        Move an element in a list from one place to another
-    }
-    Usage {
-        qc::lmove list from_index to_index
-    }
-    Examples {
-        % set items [list a b d c e]
-        a b d c e
-        % qc::lmove $items 2 3
-        a b c d e
-    }
-}
+
 
 proc qc::lunique {list} {
     #| Returns a list of distinct list values
@@ -252,20 +110,7 @@ proc qc::lunique {list} {
     return $result
 }
 
-doc qc::lunique {
-    Description {
-        Returns a list of distinct list values
-    }
-    Usage {
-        qc::lunique list
-    }
-    Examples {
-        % set items [list 1 1 1 2 2 3 4 5 5 6 6 6 6]
-        1 1 1 2 2 3 4 5 5 6 6 6 6
-        % qc::lunique $items
-        1 2 3 4 5 6
-    }
-}
+
 
 proc qc::lequal {a b} {
     #| Compare 2 list 
@@ -286,20 +131,7 @@ proc qc::lsort_using { list order } {
     return $list
 }
 
-doc qc::lsort_using {
-    Description {
-        Apply an arbitrary sort order to a list
-    }
-    Usage {
-        qc::lsort_using list order
-    }
-    Examples {
-        % set items [list R W E Q]
-        R W E Q
-        % qc::lsort_using $items {Q W E R T Y}
-        Q W E R
-    }
-}
+
 
 # ::tcl::mathop::in has different argument sequence
 #namespace import ::tcl::mathop::in
@@ -315,22 +147,7 @@ proc qc::in { list item } {
     }
 }
 
-doc qc::in {
-    Description {
-        Return 1 if $item appears in $list
-    }
-    Usage {
-        qc::in list item
-    }
-    Examples {
-        % set banned_hosts [list "polaris" "trident" "poseiden"]
-        polaris trident poseiden
-        % qc::in $banned_hosts "arctic"
-        0
-        % qc::in $banned_hosts "trident"
-        1
-    }
-}
+
 
 proc qc::lpage { list page_length } {
     #| Split list into sublists of length $page_length
@@ -344,30 +161,7 @@ proc qc::lpage { list page_length } {
     return $lpage
 }
 
-doc qc::lpage {
-    Description {
-        Split list into sublists of length $page_length
-    }
-    Usage {
-        qc::lpage list page_length
-    }
-    Examples {
-        % set items [list {code AA sales 9.99} {code BB sales 0} {code CC sales 100} {code DD sales 32} {code EE sales 65}]
-        {code AA sales 9.99} {code BB sales 0} {code CC sales 100} {code DD sales 32} {code EE sales 65}
-        % set page_content [qc::lpage $items 3]
-        {{code AA sales 9.99} {code BB sales 0} {code CC sales 100}} {{code DD sales 32} {code EE sales 65} {}}
-        % set pages [llength $page_content]
-        2
-        % for {set page 1} {$page<=$pages} {incr page} {
-            puts "[lindex $page_content [expr {$page-1}]]"
-            puts "Page $page of $pages"
-            }
-        {code AA sales 9.99} {code BB sales 0} {code CC sales 100}
-        Page 1 of 2
-        {code DD sales 32} {code EE sales 65} {}
-        Page 2 of 2
-    }
-}
+
 
 proc qc::ltotitle {list} {
     #| Make each word totitle excepting some industry specific acronyms
@@ -387,20 +181,7 @@ proc qc::ltotitle {list} {
     }
 }
 
-doc qc::ltotitle {
-    Description {
-        Make each word totitle excepting some industry specific acronyms
-    }
-    Usage {
-        qc::ltotitle list
-    }
-    Examples {
-        % set items [list jeff tom dave KERRY CCTV]
-        jeff tom dave KERRY CCTV
-        % qc::ltotitle $items
-        Jeff Tom Dave Kerry CCTV
-    }
-}
+
 
 proc qc::list2csv {list {comma ,}} {
     #| Convert list to CSV (use of comma can be overridden)
@@ -420,22 +201,7 @@ proc qc::list2csv {list {comma ,}} {
     return $out
 }
 
-doc qc::list2csv {
-    Description {
-        Convert list to CSV (use of comma as delimiter can be overridden)
-    }
-    Usage {
-        qc::list2csv list ?delimiter?
-    }
-    Examples {
-        % set items [list "jeff" "tom" "dave" "KERRY"]
-        jeff tom dave KERRY
-        % qc::list2csv [qc::ltotitle $items]
-        Jeff,Tom,Dave,Kerry
-        % qc::list2csv [qc::ltotitle $items] |
-        Jeff|Tom|Dave|Kerry
-    }
-}
+
 
 proc qc::lconcat {listVar list} {
     #| Concatenate list onto supplied listVar
@@ -443,24 +209,7 @@ proc qc::lconcat {listVar list} {
     set var [concat $var $list]
 }
 
-doc qc::lconcat {
-    Description {
-        Concatenate list onto supplied listVar
-    }
-    Usage {
-        qc::lconcat listVar list
-    }
-    Examples {
-        % set l1 [list 4 3 3 2 1]
-        4 3 3 2 1
-        % set l2 [list 1 3 5 7]
-        1 3 5 7
-        % qc::lconcat l1 $l2
-        4 3 3 2 1 1 3 5 7
-        % set l1
-        4 3 3 2 1 1 3 5 7
-    }
-}
+
 
 proc qc::lsum {list} {
     #| Return sum of all list items
@@ -471,40 +220,14 @@ proc qc::lsum {list} {
     return $total
 }
 
-doc qc::lsum {
-    Description {
-        Returns the sum of a list of numeric items.
-    }
-    Usage {
-        qc::lsum list
-    }
-    Examples {
-        % set items [list 1 2 1 100]
-        1 2 1 100
-        % qc::lsum $items
-        104
-    }
-}
+
 
 proc qc::laverage {list} {
     #| Returns average of all list elements
     return [expr {double([lsum $list])/[llength $list]}]
 }
 
-doc qc::laverage {
-    Description {
-        Returns average of all list elements
-    }
-    Usage {
-        qc::laverage list
-    }
-    Examples {
-        % set items [list 1 2 1 100]
-        1 2 1 100
-        % qc::laverage $items
-        26.0
-    }
-}
+
 
 proc qc::lreplace_values {list find replace} {
     #| Replace any occurrence of $find in $list with $replace
@@ -516,20 +239,7 @@ proc qc::lreplace_values {list find replace} {
     return $list
 }
 
-doc qc::lreplace_values {
-    Description {
-        Replace any occurrence of $find in $list with $replace
-    }
-    Usage {
-        qc::lreplace_values list find replace
-    }
-    Examples {
-        % set items [list 9.99 8.49 6.49 NULL 10.99 NULL 1.99]
-        9.99 8.49 6.49 NULL 10.99 NULL 1.99
-        % qc::lreplace_values $items NULL 0
-        9.99 8.49 6.49 0 10.99 0 1.99
-    }
-}
+
 
 proc qc::lapply { func list } {
     #| Apply the named procedure to all elements in the list and return a list of the results
@@ -540,21 +250,4 @@ proc qc::lapply { func list } {
     return $result
 }
 
-doc qc::lapply {
-    Description {
-        Apply the named procedure to all elements in the list and return a list of the results
-    }
-    Usage {
-        qc::lapply func list
-    }
-    Examples {
-        % proc employee_get { id } {
-            set employee_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
-            return [dict get $employee_dict $id]
-        }
-        % set employee_subset [list 1 3 4]
-        1 3 4
-        % qc::lapply employee_get $employee_subset
-        Kagan Bolton Scheunemann
-    }
-}
+

@@ -18,11 +18,4 @@ proc qc::schema_update {version code} {
     }
 }
 
-doc qc::schema_update {
-    Examples {
-	schema_update 19 {
-	    db_dml { alter table product add column ean bigint }
-	}
-	
-    }
-}
+

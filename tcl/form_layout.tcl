@@ -51,51 +51,7 @@ proc qc::form_layout_table { args } {
     return [qc::html_table cols $cols class $class tbody $tbody]
 }
 
-doc qc::form_layout_table {
-    Examples {
-	% set conf {
-	    {name firstname value {} label Firstname width 200}
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-	}
-	% qc::form_layout_table $conf
-<table class="form-layout-table">
-<colgroup>
-<col class="label">
-<col>
-</colgroup>
-<tbody>
-<tr>
-<td><label for="firstname">Firstname</label></td>
-<td><input style="width:200px" id="firstname" name="firstname" value="" type="text" sticky="no"></td>
-</tr>
-<tr>
-<td><label for="surname">Surname</label></td>
-<td><input style="width:250px" id="surname" name="surname" value="" type="text" sticky="no"></td>
-</tr>
-<tr>
-<td><label for="email_address">Email</label></td>
-<td><input style="width:160px" name="email" value="" id="email_address" type="text" sticky="no"></td>
-</tr>
-<tr>
-<td><label for="color">Colour</label></td>
-<td><select id="color" name="color" sticky="no">
-<option value="Red">1</option>
-<option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</td>
-</tr>
-<tr>
-<td></td>
-<td><input id="agree" name="agree" value="no" type="checkbox" sticky="no"> <label for="agree">Agree</label></td>
-</tr>
-</tbody>
-</table>
-    }
-}
+
 
 proc qc::form_layout_tables { args } {
     #| Construct multi-column layout with a form table in each column
@@ -208,21 +164,4 @@ proc qc::form_layout_list {conf} {
     return $html
 }
 
-doc qc::form_layout_list {
-    Examples {
-	% set conf {
-	    {name firstname value {} label Firstname width 200}
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-	}
-	% qc::form_layout_list $conf
-<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color">
-<option value="Red">1</option>
-<option value="Blue">2</option>
-<option value="Green">3</option>
-</select>
-</div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>
-    }
-}
+

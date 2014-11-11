@@ -18,12 +18,7 @@ proc qc::conn_remote_ip {} {
     return $ip
 }
 
-doc qc::conn_remote_ip {
-    Examples {
-	% conn_remote_ip
-	12.34.56.78
-    }
-}
+
 
 proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
@@ -78,22 +73,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     }
 }
 
-doc qc::conn_marshal {
-    Examples {
-	# We can use ns_register_proc to get conn_marshal to handle .html requests with
-	% ns_register_proc GET  /*.html conn_marshal
-	% ns_register_proc POST /*.html conn_marshal
-	% ns_register_proc HEAD /*.html conn_marshal
-	
-	# If we then create a proc
-	proc /foo.html {greeting name} {
-	    return "You said $greeting $name"
-	}
-	# a request for /foo.html?greeting=Hello&name=John would result in a call to 
-	/foo.html Hello John
-	# and return "You said Hello John"
-    }
-}
+
 
 proc qc::conn_url {} {
     #| Try to construct the full url of this request.

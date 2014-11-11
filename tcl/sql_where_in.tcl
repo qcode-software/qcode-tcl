@@ -21,25 +21,7 @@ proc qc::sql_where_in {args } {
     }
 }
 
-doc qc::sql_where_in {
-    Parent db
-    Usage {sql_where_in colName list ?defaultValue?}
-    Description {
-	Construct part of a SQL WHERE clause using the IN construct.<br>
-	SQL will test column against list of values.
-	If list is empty return default value (normally false).
-    }    
-    Examples {
-	% sql_where_in name {Jimmy Bob Des}
-	name in ('Jimmy','Bob','Des')
-	%
-	% sql_where_in t.status_id [list 1 3 5 6]
-	t.status_id in (1,3,5,6)
-	%
-	% sql_where_in col "" true
-	true
-    }
-}
+
 
 proc qc::sql_where_in_not { args } {
     #| Construct part of a SQL WHERE clause using the NOT IN construct.
@@ -58,23 +40,4 @@ proc qc::sql_where_in_not { args } {
     }
 }
 
-doc qc::sql_where_in_not {
-    Parent db
-    Usage {sql_where_in_not colName list ?defaultValue?}
-    Description {
-	Negation of <proc>sql_where_in</proc>
-	Construct part of a SQL WHERE clause using the IN construct.<br>
-	SQL will test where column is not in the list of values.
-	If list is empty return default value (normally true).
-    }    
-    Examples {
-	% sql_where_in_not name {Jimmy Bob Des}
-	name not in ('Jimmy','Bob','Des')
-	%
-	% sql_where_in_not t.status_id [list 1 3 5 6]
-	t.status_id not in (1,3,5,6)
-	%
-	% sql_where_in_not col ""
-	true
-    }
-}
+

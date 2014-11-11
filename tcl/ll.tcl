@@ -20,20 +20,7 @@ proc qc::ll_sum { llVar index } {
     return $sum
 }
 
-doc qc::ll_sum {
-    Description {
-        Traverses a list of lists and returns the sum of values at $index in each list
-    }
-    Usage {
-        qc::ll_sum llVar index
-    }
-    Examples {
-        1> set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}]
-        {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}
-        2> qc::ll_sum llist 2
-        39
-    }
-}
+
 
 proc qc::ll2csv {ll {comma ,}} {
     #| Convert a list of lists into a csv.
@@ -45,29 +32,7 @@ proc qc::ll2csv {ll {comma ,}} {
     return [join $lines \r\n]
 }
 
-doc qc::ll2csv {
-    Description {
-        Convert a list of lists into a csv.
-        Defaults to comma separated but allows the passing of alternative delimiters.
-    }
-    Usage {
-        qc::ll2csv llist ?separator?
-    }
-    Examples {
-        % set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}]
-        {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}
 
-        % qc::ll2csv $llist
-        widget_a,9.99,19
-        widget_b,8.99,19
-        widget_c,7.99,1
-
-        % qc::ll2csv $llist |
-        widget_a|9.99|19
-        widget_b|8.99|19
-        widget_c|7.99|1
-    }
-}
 
 proc qc::ll2pg_copy {ll} {
     #| Return data in the format accepted by postgresql's copy statements
@@ -89,18 +54,3 @@ proc qc::ll2pg_copy {ll} {
     return $pg_copy_data
 }
 
-doc qc::ll2pg_copy {
-    Parent db
-    Usage {ll2pg_copy ll}
-    Description {
-	Convert a list of lists data structure into the format accepted by postgresql's copy statements
-    }
-    Examples {
-	% qc::ll2pg_copy [list [Daniel Clark daniel@qcode.co.uk] [list Bernhard "van Woerden" bernhard@qcode.co.uk] [list David Osborne david@qcode.co.uk]]
-	Daniel	Clark	daniel@qcode.co.uk
-        Bernhard	van Woerden	bernhard@qcode.co.uk
-        David	Osborne	david@qcode.co.uk
-        
-        %
-    }
-}

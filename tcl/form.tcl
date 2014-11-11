@@ -23,33 +23,7 @@ proc qc::form2vars {args}  {
     }
 }
 
-doc qc::form2vars {
-    Description {
-	Create variables in the caller's namespace corresponding to the form data. If a list of variable names is specified then only create variables in that list if corresponding form data exists;otherwise create variables for all the names in the form data.
-	<p>
-	Where a form variable appears many times return values as list
-    }
-    Usage {
-	form2vars ?varName? ?varName? ...
-    }
-    Examples {
-	# some-page.html?firstname=Jimmy&surname=Tarbuck
-	% form2vars firstname surname
-	% set firstname
-	Jimmy
-	% set surname
-	Tarbuck
-	%
-	# A repeated variable name will result in a list
-	# some-page.html?foo=1&foo=3&foo=56&bar=34
-	form2vars
-	# form2vars called with no args sets all form variables
-	set foo
-	1 3 56
-	set bar
-	34
-    }
-}
+
 
 proc qc::form_var_get { var_name } {
     #| If the form variable exists return its value otherwise throw an error.
@@ -74,22 +48,7 @@ proc qc::form_var_get { var_name } {
     error "No such form variable \"$var_name\""
 }
 
-doc qc::form_var_get {
-    Examples {
-	# some-page.html?foo=2&foo=45&bar=Hello%20World
-	% form_var_get foo
-	2 45
-	% form_var_get bar
-	Hello World
-	%
-	% form_var baz
-	No such form variable "baz"
-	%
-	# some-page.html?foo[]=a&foo[]=b
-	% form_var_get foo
-	a b
-    }
-}
+
 
 proc qc::form_var_exists { var_name } {
     #| Test whether a form variable exists or not.
@@ -105,15 +64,7 @@ proc qc::form_var_exists { var_name } {
     }
 }
 
-doc qc::form_var_exists {
-    Examples {
-	# some-page.html?foo=2&foo=45&bar=Hello%20World
-	% form_var_exists foo
-	1
-	% form_var_exists baz
-	0
-    }
-}
+
 
 proc qc::form2dict {args}  {
     #| Create dict corresponding to the form data.
@@ -139,13 +90,7 @@ proc qc::form2url { url } {
     return $url
 }
 
-doc qc::form2url {
-    Examples {
-	# some-page.html?foo=2&foo=45&bar=Hello%20World
-	form2url other-url.html
-	other-url.html?foo=2&foo=45&bar=Hello%20World
-    }
-}
+
 
 proc qc::form_proc { proc_name } {
     #| Call proc_name using corresponding form variables
@@ -172,23 +117,4 @@ proc qc::form_proc { proc_name } {
     return [uplevel 0 $proc_name $largs]
 }
 
-doc qc::form_proc {
-    Description {
-	Call proc_name using corresponding form variables
-	if the last variable name is called args then it is filled with a dict containing name value
-	pairs for the remaining form data.
-	See <proc>conn_marshal</proc> for a way of using this.
-    }
-    Examples {
-	# Lets say we have a proc called hello
-	proc hello {name message} {
-	    return_html "$name said $message"
-	}
-	# When handling a request for some-url.html?name=John&message=Hello%20World
-	% form_proc hello
-	John said Hello World
-	# equivalent to
-	% hello John "Hello World"
-	John said Hello World
-    }
-}
+

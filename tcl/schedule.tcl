@@ -58,15 +58,7 @@ proc qc::schedule {args} {
     }
 }
 
-doc qc::schedule {
-    Examples {
-	% schedule -thread "50 seconds" my_proc
-	% schedule -thread "5 minutes" my_proc foo bar
-	% schedule "1 hour" another_proc
-	% schedule "10:15" daily_tasks yellow
-	% schedule "Monday 10:15" monday_tasks
-    }
-}
+
 
 proc qc::schedule_id {proc_name} {
     #| Return id for schedule proc_name.    

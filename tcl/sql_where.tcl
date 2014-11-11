@@ -33,28 +33,7 @@ proc qc::sql_where { args } {
     }
 }
 
-doc qc::sql_where {
-    Parent db
-    Usage {sql_where varName1 ?varName2 varName3 ...?}
-    Description {
-	Construct a SQL <i>WHERE</i> clause based on local TCL variables.<br>
-	Don't use the variable if it does not exist or its value is the empty string.<br>
-	Return <code>true</code> if all variables are empty or non-existent.
-    }
-    Examples {
-	% set email jimmy@tarbuck.com
-	% sql_where email
-	email='jimmy@tarbuck.com'
-	% 
-	% set name Jimmy
-	% set qry "select * from users where [sql_where name $name email $email]"
-	select * from users where name='Jimmy' and email='jimmy@tarbuck.com'
-	%
-	% set product_code ""
-	set qry "select * from products where [sql_where product_code $product_code category $category] LIMIT 100"
-	select * from products where true LIMIT 100
-    }
-}
+
 
 proc qc::sql_where_like { args } {
     #| Construct part of SQL WHERE clause using varNames
@@ -76,22 +55,7 @@ proc qc::sql_where_like { args } {
     }
 }
 
-doc qc::sql_where_like {
-    Parent db
-    Usage {sql_where_like ?varName1 varName2 varName3 ...?}
-    Description {
-	Construct part of a SQL WHERE clause using Postgresql's LIKE operator
-    }
-    Examples {
-	% set name Jimmy
-	% set qry "select * from users where [sql_where_like name]"
-	select * from users where name ~~* '%Jimmy%'
-	%
-	% set name "Jimmy Tarbuck"
-	% set qry "select * from users where [sql_where_like users.name]"
-	select * from users where users.name ~~* '%Jimmy%' and users.name ~~* '%Tarbuck%'
-    }
-}
+
 
 proc qc::sql_where_cols_start { args } {
     #| Construct part of SQL WHERE clause using varNames
@@ -118,24 +82,7 @@ proc qc::sql_where_cols_start { args } {
     }
 }
 
-doc qc::sql_where_cols_start {
-    Parent db
-    Usage {sql_where_cols_start ?varName1 varName2 varName3 ...?}
-    Description {
-	Construct a SQL <i>WHERE</i> clause based on local variables.<br>
-	Ignore any empty values or non-existent variables.
-	Return <code>true</code> if all variables are empty or non-existent.
-    }
-    Examples {
-	% set email jim
-	% sql_where_cols_start email
-	email ~ '^jim'
-	% 
-	% set name J
-	% set qry "select * from users where [sql_where_cols_start name email]"
-	select * from users where name ~ '^J' and email ~ '^jim'
-    }
-}
+
 
 proc qc::sql_where_col_starts { args } {
     #| Construct part of SQL WHERE clause with a regexp matching 
@@ -166,20 +113,7 @@ proc qc::sql_where_col_starts { args } {
     }
 }
 
-doc qc::sql_where_col_starts {
-    Parent db
-    Usage {sql_where_col_starts colName value1 ?value2 value3...?}
-    Description {
-	Construct a SQL <i>WHERE</i> clause matching the start of the column value.
-    }
-    Examples {
-	% sql_where_col_starts email jim
-	email ~ '^jim'
-	% 
-	% sql_where_col_starts name Jim Mac
-	name ~ '^Jim' or name ~ '^Mac'
-    }
-}
+
 
 proc qc::sql_where_combo { col_name value } {
     if { [ne $value ""] } {
@@ -291,18 +225,7 @@ proc qc::sql_where_words_in { name phrase } {
     } 
 }
 
-doc qc::sql_where_words_in {
-    Parent db
-    Usage {sql_where_words_in name phrase}
-    Description {
-	Construct part of a SQL WHERE clause to find a word in a string
-    }
-    Examples {
-	% set name "Jimmy Carr"
-	% set qry "select * from users where [sql_where_words_in name $name]"
-	select * from users where name ~ '( |^)Jimmy( |$)' and name ~ '( |^)Carr( |$)'
-    }
-}
+
 
 proc qc::sql_where_phrases_in { args } {
     #| Where clause to evaluate to true if $phrase occurrs in sql expression $name

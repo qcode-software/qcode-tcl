@@ -33,13 +33,7 @@ proc qc::auth {} {
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
-doc qc::auth {
-    Parent authentication
-    Examples {
-	% set employee_id [auth]
-	23
-    }
-}
+
 
 proc qc::auth_check {} {
     #| Check if we can authenticate the employee
@@ -60,9 +54,7 @@ proc qc::auth_check {} {
     return false
 }
 
-doc qc::auth_check {
-    Parent authentication
-}
+
 
 proc qc::auth_hba {} {
     #| Try to authenticate who the current employee is
@@ -77,9 +69,7 @@ proc qc::auth_hba {} {
     } 
 }
 
-doc qc::auth_hba {
-    Parent authentication
-}
+
 
 proc qc::auth_hba_check {} {
     #| Check if the current user can be authenticated
@@ -94,9 +84,7 @@ proc qc::auth_hba_check {} {
     } 
 }
 
-doc qc::auth_hba_check {
-    Parent authentication
-}
+
 
 proc qc::auth_session { session_id } {
     #| Try to authenticate an employee based on the session_id given
@@ -109,6 +97,4 @@ proc qc::auth_session { session_id } {
     }
 }
 
-doc qc::auth_session {
-    Parent authentication
-}
+

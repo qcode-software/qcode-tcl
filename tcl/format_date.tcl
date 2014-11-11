@@ -10,64 +10,28 @@ proc qc::format_date { date } {
     return [string map [list - "&#8209;"] [clock format [cast_epoch $date] -format "%Y-%m-%d"]]
 }
 
-doc qc::format_date {
-    Parent date
-    Examples {
-	% format_date "23rd June 2008"
-	% 2008-06-23
-	%
-	% format_date 2/5/08
-	% 2008-05-02
-    }
-}
+
 
 proc qc::format_date_iso { date } {
     #| Format a date as an ISO 8601 string like 2006-04-28
     return [clock format [cast_epoch $date] -format "%Y-%m-%d"]
 }
 
-doc qc::format_date_iso {
-    Parent date
-    Examples {
-	% format_date "23rd June 2008"
-	% 2008-06-23
-	%
-	% format_date 2/5/08
-	% 2008-05-02
-    }
-}
+
 
 proc qc::format_date_uk { date } {
     #| Format a date in UK format e.g. 27/03/07
     return [clock format [cast_epoch $date] -format "%d/%m/%y"]
 }
 
-doc qc::format_date_uk {
-    Parent date
-    Examples {
-	% format_date_uk 2008-06-23
-	23/06/08
-	% 
-	% format_date_uk today
-	17/10/07
-    }
-}
+
 
 proc qc::format_date_uk_long { date } {
     #| Format a date in UK format with a 4 digit year e.g. 27/03/2007
     return [clock format [cast_epoch $date] -format "%d/%m/%Y"]
 }
 
-doc qc::format_date_uk_long {
-    Parent date
-    Examples {
-	% format_date_uk 2008-06-23
-	23/06/2008
-	% 
-	% format_date_uk today
-	17/10/2007
-    }
-}
+
 
 proc qc::format_date_rel { date } {
     #| Format the date relatively depending on age
@@ -96,22 +60,7 @@ proc qc::format_date_rel { date } {
     }
 }
 
-doc qc::format_date_rel {
-    Parent date
-    Examples {
-	% format_date_rel now
-	Today
-	% 
-	% format_date_rel tomorrow
-	Thu 18th
-	%
-	% format_date_rel "next month"
-	NOV 17th
-	%
-	% format_date_rel "next year"
-	2008-10-17
-    }
-}
+
 
 proc qc::format_date_letter { date } {
     #| Format a date as would be used on a letter
@@ -121,10 +70,4 @@ proc qc::format_date_letter { date } {
     return "[format_ordinal $dom] [clock format $epoch -format "%B %Y"]"
 }
 
-doc qc::format_date_letter {
-    Parent date
-    Examples {
-	% format_date_letter now
-	17th October 2007
-    }
-}
+

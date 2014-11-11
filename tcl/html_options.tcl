@@ -15,13 +15,7 @@ proc qc::html_options_db { qry } {
     return $options
 }
 
-doc qc::html_options_db {
-    Examples {
-	% set qry {select country as name,country_code as value from countries order by country}
-	% qc::html_options_db $qry
-	Afghanistan AF Albania AL Algeria DZ ..... Yemen YE Yugoslavia YU Zambia ZM Zimbabwe ZW
-    }
-}
+
 
 proc qc::html_options_db_cache { qry {ttl 86400}} {
     #| Expects a qry use columns named "name" and "value"
@@ -35,13 +29,7 @@ proc qc::html_options_db_cache { qry {ttl 86400}} {
     return $options
 }
 
-doc qc::html_options_db_cache {
-    Examples {
-	% set qry {select country as name,country_code as value from countries order by country}
-	% qc::html_options_db_cache $qry
-	Afghanistan AF Albania AL Algeria DZ ..... Yemen YE Yugoslavia YU Zambia ZM Zimbabwe ZW
-    }
-}
+
 
 proc qc::html_options_simple { args } {
     #| Use list items as both name and value
@@ -53,9 +41,4 @@ proc qc::html_options_simple { args } {
     return $options
 }
 
-doc qc::html_options_simple {
-    Examples {
-	% qc::html_options_simple red orange blue green
-	red red orange orange blue blue green green
-    }
-}
+

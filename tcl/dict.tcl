@@ -32,27 +32,7 @@ proc qc::dict_exists { args } {
     }
 }
 
-doc qc::dict_exists {
-    Usage {
-	qc::dict_exists dict ?key? ?key? ...
-    }
-    Examples {
-	% set dict {a 1 b {b1 1 b2 2} c 3}
-	a 1 b {b1 1 b2 2} c 3
-	
-	% qc::dict_exists $dict a
-	1
-	
-	% qc::dict_exists $dict b b1
-	1
-	
-	% qc::dict_exists $dict d
-	0
-	
-	% qc::dict_exists $dict c d
-	0
-    }
-}
+
 
 proc qc::dict_subset {dict args} {
     #| Return a dict made up of the keys given.
@@ -65,27 +45,7 @@ proc qc::dict_subset {dict args} {
     return $result
 }
 
-doc qc::dict_subset {
-    Usage {
-	qc::dict_subset dict ?key? ?key? ...
-    }
-    Examples {
-	% set dict {a 1 b {b1 1 b2 2} c 3}
-	a 1 b {b1 1 b2 2} c 3
-	
-	% qc::dict_subset $dict a
-	a 1
-	
-	% qc::dict_subset $dict b c
-	b {b1 1 b2 2} c 3
-	
-	% qc::dict_subset $dict c d
-	c 3
-	
-	% qc::dict_subset $dict d
-	 
-    }
-}
+
 
 proc qc::dict_exclude {dict args} {
     #| Return an dict excluding the keys given.
@@ -98,27 +58,7 @@ proc qc::dict_exclude {dict args} {
     return $temp
 }
 
-doc qc::dict_exclude {
-    Usage {
-	qc::dict_exclude dict ?key? ?key? ...
-    }
-    Examples {
-	% set dict {a 1 b {b1 1 b2 2} c 3}
-	a 1 b {b1 1 b2 2} c 3
-	
-	% qc::dict_exclude $dict a
-	b {b1 1 b2 2} c 3
-	
-	% qc::dict_exclude $dict b c
-	a 1
-	
-	% qc::dict_exclude $dict c d
-	a 1 b {b1 1 b2 2}
-	
-	% qc::dict_exclude $dict d
-	a 1 b {b1 1 b2 2} c 3
-    }
-}
+
 
 proc qc::dict_sort {dictVariable} {
     #| Sort the top level dict contained in dictVariable by ascending key values.
@@ -136,18 +76,7 @@ proc qc::dict_sort {dictVariable} {
     return $dict
 }
     
-doc qc::dict_sort {
-    Examples {
-	% set dict {a 1 b 3 c 2}
-	a 1 b 3 c 2
-	
-	% qc::dict_sort dict
-	a 1 c 2 b 3
-	
-	% set dict
-	a 1 c 2 b 3
-    }
-}
+
 
 proc qc::dict2xml { dict } {
     #| Convert top level {key value} pairs in dict value to xml elements.
@@ -159,17 +88,7 @@ proc qc::dict2xml { dict } {
     return [join $list \n]
 }
 
-doc qc::dict2xml {
-    Examples {
-	% set dict {a 1 b 2 c 3}
-	a 1 b 2 c 3
-	
-	% qc::dict2xml $dict
-	<a>1</a>
-	<b>2</b>
-	<c>3</c>
-    }
-}
+
 
 proc qc::dict_from { args } {
     #| Take a list of var names and return a dict.
@@ -185,20 +104,7 @@ proc qc::dict_from { args } {
     return $dict
 }
 
-doc qc::dict_from {
-    Usage {
-	qc::dict_from ?varName? ?varName? ...
-    }
-    Examples {
-	% set a 1; set b 2; set c 3
-	
-	% qc::dict_from a b
-	a 1 b 2 
 
-	% qc::dict_from c d
-	Can't create dict with d: No such variable
-    }
-}
 
 proc qc::dict2vars { dict args } {
     #| Set all or a subset of the {key value} pairs in dict as variables in the caller.
@@ -222,29 +128,7 @@ proc qc::dict2vars { dict args } {
     }
 }
 
-doc qc::dict2vars {
-    Usage {
-	qc::dict2vars dict ?varName? ?varName? ...
-    }
-    Examples {
-	% set dict { a 1 b 2 c 3}
-	a 1 b 2 c 3
-	% set d 4
-	4
-	
-	% qc::dict2vars $dict
-	% puts "a:$a, b:$b, c:$c, d:$d"
-	a:1, b:2, c:3, d:4
 
-	% qc::dict2vars $dict a b
-	% puts "a:$a, b:$b"
-	a:1, b:2
-
-	% qc::dict2vars $dict a b d
-	% puts "a:$a, b:$b, d:$d"
-	can't read "d": no such variable
-    }
-}
 
 proc qc::dict_default {dictVar args} {
     #| Set default values in the dict if they do not exist

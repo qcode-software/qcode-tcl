@@ -15,17 +15,7 @@ proc qc::file_temp {text {mode 0600}} {
     return $filename
 }
 
-doc qc::file_temp {
-    Examples {
-	% set csv {
-	    Jimmy,1
-	    Des,3
-	    Bob,6
-	}
-	% file_temp $csv
-	/tmp/ns.aCtGxR
-    }
-}
+
 
 proc qc::file_write {filename contents {perms ""}} {
     # Return true if file has changed by writing to it.

@@ -57,40 +57,7 @@ proc qc::try { try_code { catch_code ""} } {
     }
 }
 
-doc qc::try {
-    Usage {try try_code ?catch_code?}
-    Description {
-	Try to execute the code <code>try_code</code> and catch any error. If an error occurs then run <code>catch_code</code>.
-	<p>
-	The global variables errorCode,errorInfo and errorMessage store info about the error.<br>
-	[html_a errorCode {http://www.tcl.tk/man/tcl8.4/TclCmd/tclvars.htm\#M18}] - may also be user defined <br>
-	[html_a errorInfo {http://www.tcl.tk/man/tcl8.4/TclCmd/tclvars.htm\#M25}] - TCL stack trace.<br>
-	errorMessage - the result of executing the <code>try_code</code>
-	The global errorMessage stores the result of exectuting the <code>try_code</code>.
-    }
-    Examples {
-	% try {
-	    expr 3/0
-	} {
-	    global errorMessage errorInfo
-	    puts "An error was caught here."
-	    puts "The error message was \"$errorMessage\" with errorCode \"$errorCode\""
-	    puts "The stack trace was \n$errorInfo"
-	}
 
-	An error was caught here.
-	The error message was "divide by zero" with errorCode "ARITH DIVZERO {divide by zero}"
-	The stack trace was
-	divide by zero
-	    while executing
-	"expr 3/0"
-	    ("uplevel" body line 2)
-	    invoked from within
-	"uplevel 1 $try_code "
-
-	
-    }
-}
 
 proc qc::default { args } {
     #| If a variable does not exists then set its value to defaultValue
@@ -102,23 +69,7 @@ proc qc::default { args } {
     }
 }
 
-doc qc::default {
-    Usage {default varName defaultValue ?varName defaultValue? ...}
-    Description {
-	If a variable does not exists then set its value to <i>defaultValue</i>
-    }
-    Examples {
-	% set foo 1
-	% default foo 2
-	1
-	# foo is unaffected
-	% 
-	% default bar Yes
-	Yes
-	% set bar
-	Yes
-    }
-}
+
 
 proc qc::setif { varName ifValue defaultValue } {
     #| Set varName to be defaultValue if varName is set to ifValue or does not exist
@@ -128,28 +79,7 @@ proc qc::setif { varName ifValue defaultValue } {
     } 
 }
 
-doc qc::setif {
-    Usage {
-        qc::setif varName ifValue defaultValue
-    }
-    Description {
-        Set varName to be defaultValue if varName is set to ifValue or does not exist
-    }
-    Examples {
-        % set background-color
-        NULL
-        % qc::setif background-color NULL white
-        white
-        % set background-color
-        white
-        % set background-color red
-        red
-        % qc::setif background-color NULL white
-        %
-        % set background-color
-        red
-    }
-}
+
 
 proc qc::sset { varName value } {
     #| Set varName to value after having performed a subst.
@@ -163,31 +93,7 @@ proc qc::sset { varName value } {
     uplevel "set $varName \[[list subst $value]\]"
 }
 
-doc qc::sset {
-    Description {
-        Set varName to value after having performed a <code>subst</code>.
-    }
-    Usage {
-        qc::sset varName value
-    }
-    Examples {
-        % set album "Brighten The Corners"
-        Brighten The Corners
-        % set band "Pavement"
-        Pavement
-        % qc::sset xml {
-	        <discography-entry>
-		        [qc::xml band $band]
-		        [qc::xml album $album]
-	        </discography-entry>
-        }
-    
-        <discography-entry>
-        <band>Pavement</band>
-        <album>Brighten The Corners</album>
-        </discography-entry>
-    }
-}
+
 
 proc qc::sappend { varName value } {
     #| Append value to the contents of varName having first performed a subst
@@ -202,35 +108,7 @@ proc qc::sappend { varName value } {
     uplevel "append $varName \[[list subst $value]\]"
 }
 
-doc qc::sappend {
-    Description {
-        Append value to the contents of varName having first performed a <code>subst</code>.
-    }
-    Usage {
-        qc::sappend varName value
-    }
-    Examples {
-        % set album "Welcome to Mali"
-        Welcome to Mali
-        % set band "Amadou & Mariam"
-        Amadou & Mariam
-        % qc::sappend xml {
-	        <discography-item>
-		        [qc::xml band $band]
-		        [qc::xml album $album]
-	        </discography-item>
-        }
-    
-        <discography-item>
-        <band>Pavement</band>
-        <album>Brighten The Corners</album>
-        </discography-item>
-        <discography-item>
-        <band>Amadou &amp; Mariam</band>
-        <album>Welcome to Mali</album>
-        </discography-item>
-    }
-}
+
 
 proc qc::coalesce { varName altValue } {
     #| If varName exists then return its value
@@ -243,15 +121,7 @@ proc qc::coalesce { varName altValue } {
     }
 }
 
-doc qc::coalesce {
-    Examples {
-	% set foo 23
-	% coalesce foo 13
-	23
-	% coalesce bar 13
-	13
-    }
-}
+
 	
 proc qc::incr0 { varName amount } {
     #| Increment the value of varName by amount
@@ -264,24 +134,7 @@ proc qc::incr0 { varName amount } {
     return $var
 }
 
-doc qc::incr0 {
-    Description {
-        Increment the value of varName by $amount.
-    }
-    Usage {
-        qc::incr0 varName amount
-    }
-    Examples {
-        % set total
-        can't read "total": no such variable
-        % qc::incr0 total 100
-        100
-        % set total
-        100
-        % qc::incr0 total 50
-        150
-    }
-}
+
 
 proc qc::call { proc_name args } {
     #| Calls a procedure using local variables as arguments.
@@ -311,38 +164,7 @@ proc qc::call { proc_name args } {
     }
 }
 
-doc qc::call {
-    Description {
-        Calls a procedure using local variables as arguments.
-    }
-    Usage {
-        qc::call proc_name args
-    }
-    Examples {
-        % proc employee_record_hash { firstname middlename surname employee_id start_date dept branch } { 
-            package require md5
-            return [::md5::md5 -hex [list $firstname $middlename $surname $employee_id $start_date $dept $branch]]
-        }
-        % qc::call employee_record_hash
-        Cannot use variable "firstname" to call proc qc::"employee_record_hash":no such variable "firstname"
-        % set firstname "Angus"
-        Angus
-        % set middlename "Jamison"
-        Jamison
-        % set surname "Mackay"
-        Mackay
-        % set employee_id 999
-        999
-        % set start_date "2012-06-01"
-        2012-06-01
-        % set dept "Accounts"
-        Accounts
-        % set branch "Edinburgh"
-        Edinburgh
-        % set employee_hash [qc::call employee_record_hash]
-        51A01DE13B5C7B5863743A3E5485237D
-    }
-}
+
 
 proc qc::margin { cost price {dec_places 1} } {
     #| Calculates the gross margin on supplied cost and revenue
@@ -353,22 +175,7 @@ proc qc::margin { cost price {dec_places 1} } {
     }
 }
 
-doc qc::margin {
-    Description {
-        Calculates the gross margin on supplied cost and revenue
-    }
-    Usage {
-        qc::margin cost price ?dec_places?
-    }
-    Examples {
-        % qc::margin 0.40 2.99
-        86.6
-        % qc::margin 0.40 2.99 3
-        86.622
-        % qc::margin 0.40 0.40
-        0.0
-    }
-}
+
 
 proc qc::breakpoint {{s {}}} {
     # From tcl cookbook
@@ -398,20 +205,7 @@ proc qc::trunc {string length} {
     return [string range $string 0 [expr {$length-1}]]
 }
 
-doc qc::trunc {
-    Description {
-        Truncates string to specified length
-    }
-    Usage {
-        qc::trunc string length
-    }
-    Examples {
-        % set string "This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately."
-        This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately.
-        % set string_varchar50 [qc::trunc $string 50]
-        This is a longer string than would be allowed in v
-    }
-}
+
 
 proc qc::iif { expr true false } {
     #| Inline if statement
@@ -422,24 +216,7 @@ proc qc::iif { expr true false } {
     }
 }
 
-doc qc::iif {
-    Description {
-        Inline if statement which returns the appropriate value depending on the boolean expr
-    }
-    Usage {
-        qc::iif expr true_value false_value
-    }
-    Examples {
-        % proc xmas_sleeps { date } {
-        set days [qc::date_days $date "2012-12-25"]
-        return "There [qc::iif {$days==1} "is $days sleep" "are $days sleeps"] before xmas"
-        }
-        % xmas_sleeps 2012-08-21
-        There are 126 sleeps before xmas
-        % xmas_sleeps 2012-12-24
-        There is 1 sleep before xmas
-    }
-}
+
 
 proc qc::? { expr true false } {
     #| Shorthand version of qc::iif
@@ -460,23 +237,7 @@ proc qc::true { string {true true} {false false} } {
     }
 }
 
-doc qc::true {
-    Description {
-        Test if string is true. Recognised forms are "yes/no" "true/false" or 1/0.
-        Optionally set the values to return for each case.
-    }
-    Usage {
-        qc::true string ?true_return_value? ?false_return_value?
-    }
-    Examples {
-        % qc::true 1
-        true
-        % qc::true no
-        false
-        % qc::true true yes no
-        yes
-    }
-}
+
 
 
 proc qc::false { string {true true} {false false} } {
@@ -489,63 +250,21 @@ proc qc::false { string {true true} {false false} } {
     }
 }
 
-doc qc::false {
-    Description {
-        Test if string is false. Recognised forms are "yes/no" "true/false" or 1/0.
-        Optionally set the values to return for each case.
-    }
-    Usage {
-        qc::false string ?true_return_value? ?false_return_value?
-    }
-    Examples {
-        % qc::false 1
-        false
-        % qc::false no
-        true
-        % qc::false true yes no
-        no
-    }
-}
+
 
 proc qc::escapeHTML { html } {
     #| TODO Deprecate for html_escape: Convert reserved HTML characters in a string into entities
     return [string map {< &lt; > &gt; & &amp; \" &quot; ' &\#39;} $html]
 }
 
-doc qc::escapeHTML {
-    Description {
-        Convert reserved HTML characters in a string into entities.
-    }
-    Usage {
-        qc::escapeHTML html
-    }
-    Examples {
-        % set text "This stuff is all true '1<2 & 3>2'." 
-        This stuff is all true '1<2 & 3>2'.
-        % set html "<html><p>[qc::escapeHTML $text]</p></html>"
-        <html><p>This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;.</p></html>
-    }
-}
+
 
 proc qc::unescapeHTML { text } {
     #| Convert HTML entities back to their ascii characters
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
 
-doc qc::unescapeHTML {
-    Description {
-        Convert HTML entities back to their ascii characters.
-    }
-    Usage {
-        qc::unescapeHTML html
-    }
-    Examples {
-        % set escaped_html "This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;."
-        This stuff is all true &#39;1&lt;2 &amp; 3&gt;2&#39;.
-        % qc::unescapeHTML $escaped_html
-        This stuff is all true '1<2 & 3>2'.
-    }
-}
+
 
 proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
     # TODO unused
@@ -568,22 +287,7 @@ proc qc::mcsplit {string splitString} {
     return [split [string map [list $splitString $mc] $string] $mc]
 }
 
-doc qc::mcsplit {
-    Description {
-        Split the string on the supplied string which can be of arbitrary length (unlike split).
-    }
-    Usage {
-        qc::mcsplit sting splitString
-    }
-    Examples {
-        % set test "this||is||a||delimited||string"
-        this||is||a||delimited||string
-        % split $test {||}
-        this {} is {} a {} delimited {} string
-        % qc::mcsplit $test {||}
-        this is a delimited string
-    }
-}
+
 
 proc qc::perct {x n {p 1}} {
     # TODO unused
@@ -608,20 +312,7 @@ proc qc::subsets {l n} {
     return $result
 }
 
-doc qc::subsets {
-    Description {
-        Returns all possible subsets of length n from list l.
-    }
-    Usage {
-        qc::subsets list length
-    }
-    Examples {
-        % qc::subsets [list a b c d e f g h i] 9
-        {a b c d e f g h i}
-        % qc::subsets [list a b c d e f g h i] 8
-        {a b c d e f g h} {a b c d e f g i} {a b c d e f h i} {a b c d e g h i} {a b c d f g h i} {a b c e f g h i} {a b d e f g h i} {a c d e f g h i} {b c d e f g h i}
-    }
-}
+
 
 proc qc::permutations {list} {
     #| Returns all permuations of the supplied list
@@ -640,20 +331,7 @@ proc qc::permutations {list} {
     return $res
 }
 
-doc qc::permutations {
-    Description {
-        Returns all permuations of the supplied list
-    }
-    Usage {
-        qc::permutations list 
-    }
-    Examples {
-        % qc::permutations [list a b c]
-        {c b a} {c a b} {b c a} {a c b} {b a c} {a b c}
-        % qc::permutations [list a]
-        a
-    }
-}
+
 
 proc qc::split_pair {string delimiter} {
     #| split a string into 2 parts at the first occurence of the delimiter
@@ -667,18 +345,7 @@ proc qc::split_pair {string delimiter} {
     return $list
 }
 
-doc qc::split_pair {
-    Description {
-        Split a string into 2 parts at the first occurence of the delimiter
-    }
-    Usage {
-        qc::split_pair string delimiter 
-    }
-    Examples {
-        % qc::split_pair "key=key_value" =
-        key key_value
-    }
-}
+
 
 proc qc::min_nz {args} {
     # TODO Unused
@@ -696,18 +363,7 @@ proc qc::min_nz {args} {
     }
 }
 
-doc qc::min_nz {
-    Description {
-        Return the minimum supplied value which is non zero 
-    }
-    Usage {
-        qc::min_nz val1 ?val2? ?val3? ...
-    }
-    Examples {
-        % qc::min_nz 0 1 5 7 3
-        1
-    }
-}
+
 
 proc qc::max_nz {args} {
     #| Return the maximum supplied value which is non zero 
@@ -724,20 +380,7 @@ proc qc::max_nz {args} {
     }
 }
 
-doc qc::max_nz {
-    Description {
-        Return the maximum supplied value which is non zero 
-    }
-    Usage {
-        qc::max_nz val1 ?val2? ?val3? ...
-    }
-    Examples {
-        % qc::max_nz 0 1 5 7 3
-        7
-        % qc::max_nz 0 0 0 0 0
-        % 
-    }
-}
+
 
 package require md5
 proc qc::md5 {string} {
@@ -745,18 +388,7 @@ proc qc::md5 {string} {
     return [string tolower [::md5::md5 -hex $string]]
 }
 
-doc qc::md5 {
-    Description {
-        Returns the md5 hash of supplied string.
-    }
-    Usage {
-        qc::md5 string
-    }
-    Examples {
-        1> qc::md5 {This string requires hashing}
-        fed9e24fe3df8ca8c093fca78e546ddc
-    }
-}
+
 
 package require sha1
 proc qc::sha1 {string} {
@@ -869,19 +501,7 @@ proc qc::debug {message} {
     log Debug [qc::format_cc_masked_string $message]
 }
 
-doc qc::debug {
-    Description {
-        If running in naviserver and debugging is switched on then write message to nsd log.
-        Otherwise write message to stdout.
-        Filter message by masking anything that looks like a card number.
-    }
-    Usage {
-        qc::debug message
-    }
-    Examples {
-        qc::debug "Something bad happened."
-    }
-}
+
 
 proc qc::log {args} {
     #| If running in naviserver then write message to nsd log using App: prefix. 
@@ -925,23 +545,7 @@ proc qc::log {args} {
     }   
 }
 
-doc qc::log {
-    Description {
-        If running in naviserver then write message to nsd log using App: prefix. 
-        Otherwise write message to stout or stderr.
-        Default severity argument to "Notice". 
-        Filter message by masking anything that looks like a card number.
-        Usage: qc::log ?Severity? message
-    }
-    Usage {
-        qc::log ?severity? message
-    }
-    Examples {
-        % qc::log Debug "Debug this"
-        % qc::log Notice "Notice this"
-        % qc::log "Notice this"
-    }
-}
+
 
 proc qc::exec_proxy {args} {
     #| Execute the given command.
@@ -968,23 +572,7 @@ proc qc::exec_proxy {args} {
     }
 }
 
-doc qc::exec_proxy {
-    Description {
-        Execute the supplied command.
-        If running on aolserver will use ns_proxy, otherwise the command is executed directly.
-        A timeout can be optionally supplied in milliseconds. 
-        Note, timeout is ignored if not running via ns_proxy.
-    }
-    Usage {
-        qc::exec_proxy ?-timeout ms? command ?arg? ?arg? ...
-    }
-    Examples {
-        % qc::exec_proxy hostname
-        myhostname
-        1> qc::exec_proxy -timeout 1000 wget http://cdimage.debian.org/debian-cd/6.0.5/amd64/iso-cd/debian-6.0.5-amd64-CD-1.iso
-        wait for proxy "exec-proxy-0" failed: timeout waiting for evaluation
-    }
-}
+
 
 proc qc::info_proc { proc_name } {
     #| Return the Tcl source code definition of a Tcl proc.
@@ -1005,21 +593,7 @@ proc qc::info_proc { proc_name } {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }
 
-doc qc::info_proc {
-    Description {
-        Return the Tcl source code definition of a Tcl proc.
-    }
-    Usage {
-        qc::info_proc proc_name
-    }
-    Examples {
-        % qc::info_proc trim
-        proc qc::trim {string} {
-            #| Removes and leading or trailing white space.
-            return [string trim $string]
-        }
-    }
-}   
+   
 
 proc qc::which {command} {
     #| Return path of unix command - cache result in nsv on AOLserver if present
@@ -1034,30 +608,14 @@ proc qc::which {command} {
     return $which
 }
 
-doc qc::which {
-    Description {
-        Return path of unix command - cache result in nsv on AOLserver if present
-    }
-    Usage {
-        qc::which command
-    }
-    Examples {
-        % qc::which sftp
-        /usr/bin/sftp
-    }
-}
+
 
 proc qc::string2hex {string} {
     #| Convert string to hex
     binary scan [encoding convertto utf-8 $string] H* hex
     return [regsub -all (..) $hex {\\x\1}]    
 }
-doc qc::string2hex {
-    Examples {
-        % string2hex Hello[format %c 256]
-        \x48\x65\x6c\x6c\x6f\xc4\x80
-    }
-}
+
 
 proc qc::not_null {var} {
     #| Test if this variable exists and is not the empty string
