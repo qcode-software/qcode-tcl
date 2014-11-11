@@ -1,7 +1,7 @@
 qc::check
 =========
 
-part of [Checking User Input](../qc/wiki/ValidationPage)
+part of [Checking User Input](../validation.md)
 
 Usage
 -----

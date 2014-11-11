@@ -1,7 +1,7 @@
 qc::db_qry_parse
 ================
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::auth_check
 ==============
 
-part of [Authentication](../qc/wiki/AuthPage)
+part of [Authentication](../auth.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::format_date_rel
 ===================
 
-part of [Date Handling](../qc/wiki/DateHandling)
+part of [Date Handling](../date.md)
 
 Usage
 -----

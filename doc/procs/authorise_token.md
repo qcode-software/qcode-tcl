@@ -1,7 +1,7 @@
 qc::authorise_token
 ===================
 
-part of [Authorisation](../qc/wiki/AuthorisePage)
+part of [Authorisation](../auth.md)
 
 Usage
 -----

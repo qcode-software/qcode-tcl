@@ -1,7 +1,7 @@
 qc::cast_date
 =============
 
-part of [Casting Procs](../qc/wiki/CastPage)
+part of [Casting Procs](../cast.md)
 
 Usage
 -----

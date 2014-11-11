@@ -164,8 +164,7 @@ proc proc_doc {proc_name} {
         set examples [qc::strip_common_leading_whitespace $examples]
 	# Trailing newline + space at end
 	regsub -all {\n[ \t]+$} $examples {} examples
-	# Escape html
-	set examples [qc::html_escape $examples]
+
 	# Highlight comments
 	#regsub -line -all {^\#.*} $examples {<span class="comment">&</span>} examples
 	append md "```tcl\n$examples\n```\n"
@@ -180,7 +179,7 @@ proc proc_doc {proc_name} {
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
-[qcode]: www.qcode.co.uk "Qcode Software"
+[qcode]: http://www.qcode.co.uk "Qcode Software"
 }
 
 return [string trim $md]

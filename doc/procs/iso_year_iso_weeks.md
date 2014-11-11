@@ -1,7 +1,7 @@
 qc::iso_year_iso_weeks
 ======================
 
-part of [Date Handling](../qc/wiki/DateHandling)
+part of [Date Handling](../date.md)
 
 Usage
 -----

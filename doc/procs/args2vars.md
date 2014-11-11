@@ -1,7 +1,7 @@
 qc::args2vars
 =============
 
-part of [Argument Passing in TCL](../qc/wiki/ArgPassing)
+part of [Argument Passing in TCL](../args.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::db_get_handle
 =================
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----

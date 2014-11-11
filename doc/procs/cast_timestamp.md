@@ -1,7 +1,7 @@
 qc::cast_timestamp
 ==================
 
-part of [Casting Procs](../qc/wiki/CastPage)
+part of [Casting Procs](../cast.md)
 
 Usage
 -----

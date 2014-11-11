@@ -1,7 +1,7 @@
 qc::date_month_start
 ====================
 
-part of [Date Handling](../qc/wiki/DateHandling)
+part of [Date Handling](../date.md)
 
 Usage
 -----

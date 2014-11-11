@@ -1,7 +1,7 @@
 qc::email_address
 =================
 
-part of [Sending Email](../qc/wiki/SendingEmail)
+part of [Sending Email](../email.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::auth_hba_check
 ==================
 
-part of [Authentication](../qc/wiki/AuthPage)
+part of [Authentication](../auth.md)
 
 Usage
 -----

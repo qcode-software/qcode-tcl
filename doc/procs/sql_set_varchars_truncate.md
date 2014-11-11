@@ -1,7 +1,7 @@
 qc::sql_set_varchars_truncate
 =============================
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::sql_where_col_starts
 ========================
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::date_dow
 ============
 
-part of [Date Handling](../qc/wiki/DateHandling)
+part of [Date Handling](../date.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::db_col_varchar_length
 =========================
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----

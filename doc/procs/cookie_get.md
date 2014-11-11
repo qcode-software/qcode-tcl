@@ -1,7 +1,7 @@
 qc::cookie_get
 ==============
 
-part of [Cookie Handling](../qc/wiki/CookiePage)
+part of [Cookie Handling](../cookie.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::ll2pg_copy
 ==============
 
-part of [Database API](../qc/wiki/DatabaseApi)
+part of [Database API](../db.md)
 
 Usage
 -----
