@@ -1,0 +1,17 @@
+qc::action_print
+================
+
+part of [Docs](.)
+
+Usage
+-----
+`qc::action_print description url ?actionKey?`
+
+Description
+-----------
+Return script action to print or link to view
+
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: www.qcode.co.uk "Qcode Software"

@@ -1,0 +1,17 @@
+qc::session_sudo
+================
+
+part of [Docs](.)
+
+Usage
+-----
+`qc::session_sudo session_id effective_employee_id`
+
+Description
+-----------
+Sudo enables a user to use the priviliges of another user.
+
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: www.qcode.co.uk "Qcode Software"

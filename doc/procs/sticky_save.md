@@ -1,0 +1,17 @@
+qc::sticky_save
+===============
+
+part of [Docs](.)
+
+Usage
+-----
+`qc::sticky_save args`
+
+Description
+-----------
+Save form_vars for the given sticky_url or referrer
+
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: www.qcode.co.uk "Qcode Software"

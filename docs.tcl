@@ -85,7 +85,7 @@ proc proc_description { proc_name } {
     foreach line [regexp -all -inline -line {^[ \t]*\#\|.*} $body] {
 	lappend lines [string trim $line " \#|"]
     }
-    return [join $lines <br>]
+    return [join $lines <br/>]
 }
 
 proc proc_usage {proc_name} {
@@ -101,6 +101,14 @@ proc proc_usage {proc_name} {
     return "[string trimleft [proc_fqn $proc_name] :] $largs"
 }
 
+proc md_h1 {string} {
+    return "\n$string\n[string repeat "=" [string length $string]]\n\n"
+}
+
+proc md_h2 {string} {
+    return "\n$string\n[string repeat "-" [string length $string]]\n"
+}
+
 proc proc_doc {proc_name} {
     # HTML documentation for a proc
     
@@ -112,11 +120,8 @@ proc proc_doc {proc_name} {
 	    break
 	} 
     }
-    set html "<!DOCTYPE html><html><head>"
-    append html [qc::html title [string trimleft $proc_name :]]
-    append html [qc::html link "" href ../default.css rel stylesheet type text/css]
-    append html </head><body>
-    append html [qc::html h1 [string trimleft $proc_name :]]
+    
+    append md [md_h1 [string trimleft $proc_name :]]
     
     # Parent
     set title Docs
@@ -133,31 +138,28 @@ proc proc_doc {proc_name} {
 	    }
 	}
     }
-    append html "part of [qc::html_a $title $url]"
+    append md "part of \[$title\]($url)\n"
 
-
-    append html <hr>
 
     # Usage
-    append html [qc::html h2 Usage]
+    append md [md_h2 Usage]
     if { [dict exists $data Usage] } {
-	append html [dict get $data Usage]
+	append md "`[dict get $data Usage]`\n"
     } else {
-	append html [proc_usage $proc_name]
+	append md "`[proc_usage $proc_name]`\n"
     }
     # Description
     if { ![dict exists $data Description] } {
 	set description [proc_description $proc_name]
     } else {
-        set description [dict get $data Description]
+        set description [string trim [dict get $data Description]]
     }
     set description [qc::strip_common_leading_whitespace $description]
-    set description [markdown2html $description]
-    append html [qc::html h2 Description]
-    append html $description
+    append md [md_h2 Description]
+    append md "$description\n"
     # Examples
     if { [dict exists $data Examples] } {
-	append html [qc::html h2 Examples]
+	append md [md_h2 Examples]
 	set examples [dict get $data Examples]
         set examples [qc::strip_common_leading_whitespace $examples]
 	# Trailing newline + space at end
@@ -165,24 +167,23 @@ proc proc_doc {proc_name} {
 	# Escape html
 	set examples [qc::html_escape $examples]
 	# Highlight comments
-	regsub -line -all {^\#.*} $examples {<span class="comment">&</span>} examples
-	append html [qc::html pre $examples class example]
+	#regsub -line -all {^\#.*} $examples {<span class="comment">&</span>} examples
+	append md "```tcl\n$examples\n```\n"
     }
     # See Also
     if { [dict exists $data "See Also"] } {
-	append html [qc::html h2 "See Also"]
-	append html [dict get $data "See Also"]
+	append md [md_h2 "See Also"]
+	append md [dict get $data "See Also"]
     } 
-    # Source
-    append html [qc::html h2 Source]
-    append html [qc::html pre [proc_source_code $proc_name] class source]
-    append html <hr>
-    append html "&copy; 2004-2012 Qcode Software Limited"
-    return $html
+  
+    append md {
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: www.qcode.co.uk "Qcode Software"
 }
 
-proc markdown2html {markdown} {
-    return [exec ruby /var/lib/gems/1.8/gems/github-markdown-0.5.3/bin/gfm << $markdown]
+return [string trim $md]
 }
 
 if { [llength $argv]!=2 } {
@@ -199,25 +200,11 @@ foreach proc_name $list {
 	set fqpn [proc_fqn $proc_name $ns]
 	set short_name [namespace tail $fqpn]
 
-	set html [proc_doc [proc_fqn $proc_name]]
-	set filename $dir/$ns/${short_name}.html
+	set md [proc_doc [proc_fqn $proc_name]]
+	set filename $dir/${short_name}.md
 	set handle [open $filename w+ 00644]
-	puts -nonewline $handle $html
+	puts -nonewline $handle $md
 	close $handle
     }
 }
 
-# Convert markdown files to html
-cd $dir
-foreach file [glob *.md] { 
-    set file [file rootname $file] ; 
-    set html "<!DOCTYPE html><html><head>"
-    append html [qc::html title [string trimleft $proc_name :]]
-    append html [qc::html link "" href ../default.css rel stylesheet type text/css]
-    append html </head><body>
-    append html [markdown2html [read [set handle [open $file.md]]]]
-    close $handle
-
-    puts $file; 
-    exec ruby  /var/lib/gems/1.8/gems/github-markdown-0.5.3/bin/gfm < $file.md > $file.html 
-}
