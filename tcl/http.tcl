@@ -77,7 +77,7 @@ proc qc::http_post {args} {
     #| Perform an HTTP POST
     # args is name value name value ... list
     # usage http_post ?-noproxy? ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
-    args $args -noproxy -timeout 60 -sslversion sslv3 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
+    args $args -noproxy -timeout 60 -sslversion tlsv1 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
 
     if { ![info exists data]} {
 	set pairs {}
@@ -177,7 +177,7 @@ doc qc::http_post {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
-    args $args -timeout 60 -sslversion sslv3 -headers {} -noproxy -- url
+    args $args -timeout 60 -sslversion tlsv1 -headers {} -noproxy -- url
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -245,7 +245,7 @@ doc qc::http_header {
 
 proc qc::http_put {args} {
     # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
-    args $args -header 0 -timeout 60 -sslversion sslv3 -headers {} -infile ? -data ? url 
+    args $args -header 0 -timeout 60 -sslversion tlsv1 -headers {} -infile ? -data ? url 
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -540,7 +540,7 @@ proc qc::http_url_resolve {args} {
     #| Return resolved url after following redirects
     #
     # Misconfigured clickthrough servers may not redirect HEAD requests so always request a body by default
-    args $args -timeout 60 -sslversion sslv3 -nobody 0 -- url
+    args $args -timeout 60 -sslversion tlsv1 -nobody 0 -- url
 
     dict2vars [qc::http_curl -url $url -sslversion $sslversion -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -nobody $nobody -infovar info -bodyvar html] info curlErrorNumber
 
