@@ -1,7 +1,7 @@
  # Sending Email
 Requires an MTA listening locally on port 25. 
 
-[email_send](//qc/proc/email_send)
+[email_send](procs/email_send.md)
 
 ## Examples
 
