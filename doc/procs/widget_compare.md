@@ -19,12 +19,12 @@ Examples
 
 % widget_compare name price value 10 operator =
 widget_compare name price value 10 operator =
-&lt;select id=&quot;price_op&quot; name=&quot;price_op&quot;&gt;
-&lt;option value=&quot;&amp;gt;&quot;&gt;greater than&lt;/option&gt;
-&lt;option value=&quot;=&quot; selected&gt;equals&lt;/option&gt;
-&lt;option value=&quot;&amp;lt;&quot;&gt;less than&lt;/option&gt;
-&lt;/select&gt;
-&lt;input style=&quot;width:160px&quot; id=&quot;price&quot; value=&quot;10&quot; name=&quot;price&quot; type=&quot;text&quot;&gt;
+<select id="price_op" name="price_op">
+<option value="&gt;">greater than</option>
+<option value="=" selected>equals</option>
+<option value="&lt;">less than</option>
+</select>
+<input style="width:160px" id="price" value="10" name="price" type="text">
 
 ```
 

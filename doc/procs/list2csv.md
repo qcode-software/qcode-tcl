@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set items [list &quot;jeff&quot; &quot;tom&quot; &quot;dave&quot; &quot;KERRY&quot;]
+% set items [list "jeff" "tom" "dave" "KERRY"]
 jeff tom dave KERRY
 % qc::list2csv [qc::ltotitle $items]
 Jeff,Tom,Dave,Kerry

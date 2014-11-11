@@ -18,7 +18,7 @@ Examples
 ```tcl
 
 % set total
-can&#39;t read &quot;total&quot;: no such variable
+can't read "total": no such variable
 % qc::incr0 total 100
 100
 % set total

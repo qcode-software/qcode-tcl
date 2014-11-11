@@ -21,9 +21,9 @@ Examples
 
 # Cache results for 20 seconds.
 % db_cache_0or1row -ttl 20 {select order_date from sales_orders where order order_number=123} {
-    puts &quot;No Rows Found&quot;
+    puts "No Rows Found"
 } {
-    puts &quot;Order Date $order_date&quot;
+    puts "Order Date $order_date"
 }
 No Rows Found
 

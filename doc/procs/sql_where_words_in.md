@@ -15,9 +15,9 @@ Examples
 --------
 ```tcl
 
-% set name &quot;Jimmy Carr&quot;
-% set qry &quot;select * from users where [sql_where_words_in name $name]&quot;
-select * from users where name ~ &#39;( |^)Jimmy( |$)&#39; and name ~ &#39;( |^)Carr( |$)&#39;
+% set name "Jimmy Carr"
+% set qry "select * from users where [sql_where_words_in name $name]"
+select * from users where name ~ '( |^)Jimmy( |$)' and name ~ '( |^)Carr( |$)'
 
 ```
 

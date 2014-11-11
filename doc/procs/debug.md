@@ -19,7 +19,7 @@ Examples
 --------
 ```tcl
 
-qc::debug &quot;Something bad happened.&quot;
+qc::debug "Something bad happened."
 ```
 
 ----------------------------------

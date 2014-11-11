@@ -15,9 +15,9 @@ Examples
 --------
 ```tcl
 
-% qc::is_varchar &quot;Too long string&quot; 14
+% qc::is_varchar "Too long string" 14
 0
-% qc::is_varchar &quot;Small Enough&quot; 14
+% qc::is_varchar "Small Enough" 14
 1
 ```
 

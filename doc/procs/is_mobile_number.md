@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::is_mobile_number &quot; 0 7  986 21299     9&quot;
+% qc::is_mobile_number " 0 7  986 21299     9"
 true
 % qc::is_mobile_number 09777112112
 false

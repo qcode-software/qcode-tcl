@@ -18,7 +18,7 @@ Examples
 % date_year_start 2006-05-06
 % 2006-01-02
 %
-% date_year_start &quot;2 years ago&quot;
+% date_year_start "2 years ago"
 % 2005-01-03
 
 ```

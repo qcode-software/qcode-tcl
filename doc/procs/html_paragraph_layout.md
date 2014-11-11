@@ -15,8 +15,8 @@ Examples
 --------
 ```tcl
 
-% html_paragraph_layout Name &quot;Jimmy Tarbuck&quot; Venue &quot;Palace Ballroom&quot;
-&lt;p&gt;&lt;b&gt;Name&lt;/b&gt;&lt;br&gt;Jimmy Tarbuck&lt;/p&gt;&lt;p&gt;&lt;b&gt;Venue&lt;/b&gt;&lt;br&gt;Palace Ballroom&lt;/p&gt;
+% html_paragraph_layout Name "Jimmy Tarbuck" Venue "Palace Ballroom"
+<p><b>Name</b><br>Jimmy Tarbuck</p><p><b>Venue</b><br>Palace Ballroom</p>
 
 ```
 

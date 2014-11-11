@@ -15,8 +15,8 @@ Examples
 --------
 ```tcl
 
-% qc::html_unescape [qc::html_escape {Hello &lt;strong&gt;Brave&lt;/strong&gt; &amp; &quot;Wise&quot; Ones}]
-Hello &lt;strong&gt;Brave&lt;/strong&gt; &amp; &quot;Wise&quot; Ones
+% qc::html_unescape [qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}]
+Hello <strong>Brave</strong> & "Wise" Ones
 
 ```
 

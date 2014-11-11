@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::split_pair &quot;key=key_value&quot; =
+% qc::split_pair "key=key_value" =
 key key_value
 ```
 

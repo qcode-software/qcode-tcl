@@ -19,7 +19,7 @@ Examples
 --------
 ```tcl
 
-# some-page.html?firstname=Jimmy&amp;surname=Tarbuck
+# some-page.html?firstname=Jimmy&surname=Tarbuck
 % form2vars firstname surname
 % set firstname
 Jimmy
@@ -27,7 +27,7 @@ Jimmy
 Tarbuck
 %
 # A repeated variable name will result in a list
-# some-page.html?foo=1&amp;foo=3&amp;foo=56&amp;bar=34
+# some-page.html?foo=1&foo=3&foo=56&bar=34
 form2vars
 # form2vars called with no args sets all form variables
 set foo

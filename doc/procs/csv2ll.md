@@ -15,18 +15,18 @@ Examples
 --------
 ```tcl
 
-    % set csv {&quot;one&quot;,&quot;two&quot;,&quot;three&quot;
+    % set csv {"one","two","three"
 4,5,6}
     % csv2ll $csv
     {one two three} {4 5 6}
     %
-    set csv {,&quot;one
-two&quot;,&quot;three&quot;&quot;,&quot;,&quot;,&quot;&quot;four&quot;,&quot;,&quot;
-2,3,4,&quot;,
-&quot;,9}
+    set csv {,"one
+two","three"",",",""four",","
+2,3,4,",
+",9}
     % csv2ll $csv
     {{} {one
-two} three\&quot;, ,\&quot;four ,} {2 3 4 {,
+two} three\", ,\"four ,} {2 3 4 {,
 } 9}
 ```
 

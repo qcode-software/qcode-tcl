@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% encrypt_bf_tcl secretkey &quot;Hello World&quot;
+% encrypt_bf_tcl secretkey "Hello World"
 wYYxpOLlcLa7VDcRSERH9g==
 ```
 

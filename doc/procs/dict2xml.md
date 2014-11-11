@@ -19,9 +19,9 @@ Examples
 a 1 b 2 c 3
 
 % qc::dict2xml $dict
-&lt;a&gt;1&lt;/a&gt;
-&lt;b&gt;2&lt;/b&gt;
-&lt;c&gt;3&lt;/c&gt;
+<a>1</a>
+<b>2</b>
+<c>3</c>
 
 ```
 

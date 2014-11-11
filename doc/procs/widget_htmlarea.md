@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-% widget_htmlarea name notes value &quot;A &lt;i&gt;little&lt;/i&gt; note.&quot;
-&lt;div contentEditable=&quot;true&quot; id=&quot;notes&quot; style=&quot;width:160px;height:100px&quot; value=&quot;A &amp;lt;i&amp;gt;little&amp;lt;/i&amp;gt; note.&quot; name=&quot;notes&quot; class=&quot;db-form-html-area&quot;&gt;A &lt;i&gt;little&lt;/i&gt; note.&lt;/div&gt;
+% widget_htmlarea name notes value "A <i>little</i> note."
+<div contentEditable="true" id="notes" style="width:160px;height:100px" value="A &lt;i&gt;little&lt;/i&gt; note." name="notes" class="db-form-html-area">A <i>little</i> note.</div>
 
 ```
 

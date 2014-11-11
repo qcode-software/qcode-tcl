@@ -21,10 +21,10 @@ Today
 % format_date_rel tomorrow
 Thu 18th
 %
-% format_date_rel &quot;next month&quot;
+% format_date_rel "next month"
 NOV 17th
 %
-% format_date_rel &quot;next year&quot;
+% format_date_rel "next year"
 2008-10-17
 
 ```

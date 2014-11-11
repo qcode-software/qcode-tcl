@@ -39,20 +39,20 @@ set data {
 }
 set formats {
     a {
-        &quot;font-family&quot; &quot;Times New Roman&quot;
-        &quot;font-size&quot; &quot;12&quot;
-        &quot;color&quot; &quot;white&quot;
-        &quot;font-weight&quot; &quot;bold&quot;
-        &quot;font-style&quot; &quot;italic&quot;
-        &quot;text-decoration&quot; &quot;underline&quot;
-        &quot;text-align&quot; &quot;center&quot;
-        &quot;vertical-align&quot; &quot;top&quot;
-        &quot;background-color&quot; &quot;blue&quot;
-        &quot;border&quot; &quot;2px solid red&quot;
+        "font-family" "Times New Roman"
+        "font-size" "12"
+        "color" "white"
+        "font-weight" "bold"
+        "font-style" "italic"
+        "text-decoration" "underline"
+        "text-align" "center"
+        "vertical-align" "top"
+        "background-color" "blue"
+        "border" "2px solid red"
     }
     b {
-        &quot;border-bottom&quot; &quot;1px double blue&quot;
-        &quot;text-decoration&quot; &quot;line-through&quot;
+        "border-bottom" "1px double blue"
+        "text-decoration" "line-through"
     }
 }
 set column_meta {
@@ -70,8 +70,8 @@ set cell_meta {
 
 set filename [qc::excel_file_create ~ data formats column_meta row_meta cell_meta]
 
-ns_set update [ns_conn outputheaders] content-disposition &quot;attachment; filename=test_spreadsheet.xls&quot;
-set mime_type &quot;application/vnd.ms-excel&quot;
+ns_set update [ns_conn outputheaders] content-disposition "attachment; filename=test_spreadsheet.xls"
+set mime_type "application/vnd.ms-excel"
 ns_returnfile 200 $mime_type $filename
 file delete $filename
 ```

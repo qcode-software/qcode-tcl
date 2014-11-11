@@ -18,7 +18,7 @@ Examples
 % date_dom 2007-05-06
 % 6
 %
-% date_dom &quot;2 days ago&quot;
+% date_dom "2 days ago"
 % 4
 
 ```

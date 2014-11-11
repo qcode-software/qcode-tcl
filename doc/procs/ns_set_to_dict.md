@@ -17,9 +17,9 @@ Examples
 --------
 ```tcl
 
-1&gt; set set_id [ns_set create this_set from me@here.com to you@there.com msg  &quot;Get off my land.&quot;]
+1> set set_id [ns_set create this_set from me@here.com to you@there.com msg  "Get off my land."]
 d3
-2&gt; qc::ns_set_to_dict $set_id
+2> qc::ns_set_to_dict $set_id
 from me@here.com to you@there.com msg {Get off my land.}
 ```
 

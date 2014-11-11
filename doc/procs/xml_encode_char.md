@@ -18,11 +18,11 @@ Examples
 ```tcl
 
 % qc::xml_encode_char a
-&amp;#97;
+&#97;
 % qc::xml_encode_char \u009F
-&amp;#159;
+&#159;
 % qc::xml_encode_char !
-&amp;#33;
+&#33;
 ```
 
 ----------------------------------

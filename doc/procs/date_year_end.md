@@ -18,7 +18,7 @@ Examples
 % date_year_end 2007-05-06
 % 2007-12-31
 %
-% date_year_end &quot;last year&quot;
+% date_year_end "last year"
 % 2006-12-31
 
 ```

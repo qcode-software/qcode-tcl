@@ -16,13 +16,13 @@ Examples
 ```tcl
 
 % html_tag input name firstname
-&lt;input name=&quot;firstname&quot;&gt;
+<input name="firstname">
 %
-% html_tag input name firstname value &quot;Des O&#39;Conner&quot;
-&lt;input name=&quot;firstname&quot; value=&quot;Des O&#39;Conner&quot;&gt;
+% html_tag input name firstname value "Des O'Conner"
+<input name="firstname" value="Des O'Conner">
 %
-% html_tag input name firstname value &quot;Des O&#39;Conner&quot; disabled yes
-&lt;input name=&quot;firstname&quot; value=&quot;Des O&#39;Conner&quot; disabled&gt;
+% html_tag input name firstname value "Des O'Conner" disabled yes
+<input name="firstname" value="Des O'Conner" disabled>
 
 ```
 

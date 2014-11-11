@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% format_date &quot;23rd June 2008&quot;
+% format_date "23rd June 2008"
 % 2008-06-23
 %
 % format_date 2/5/08

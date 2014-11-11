@@ -19,15 +19,15 @@ Examples
 % 23
 
 % db_quote 0800
-% &#39;0800&#39;
+% '0800'
 
 % db_quote MacKay
-% &#39;MacKay&#39;
+% 'MacKay'
 
-% db_quote O&#39;Neil
-% &#39;O&#39;&#39;Neil&#39;
+% db_quote O'Neil
+% 'O''Neil'
 
-% db_quote &quot;&quot;
+% db_quote ""
 % NULL
 
 ```

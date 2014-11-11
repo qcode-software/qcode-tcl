@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set string &quot;       Testing          &quot;
+% set string "       Testing          "
     Testing          
 % qc::trim $string
 Testing

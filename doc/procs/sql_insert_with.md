@@ -15,8 +15,8 @@ Examples
 --------
 ```tcl
 
-% qc::sql_insert_with user_id 1 name &quot;Joe D&#39;Amato&quot; email joe@example.com password munroe
-( &quot;user_id&quot;,&quot;name&quot;,&quot;email&quot;,&quot;password&quot; ) values ( 1,&#39;Joe D&#39;&#39;Amato&#39;,&#39;joe@example.com&#39;,&#39;munroe&#39; )
+% qc::sql_insert_with user_id 1 name "Joe D'Amato" email joe@example.com password munroe
+( "user_id","name","email","password" ) values ( 1,'Joe D''Amato','joe@example.com','munroe' )
 
 ```
 

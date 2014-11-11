@@ -18,7 +18,7 @@ Examples
 ```tcl
 
 widget_radio name sex value male
-&lt;input id=&quot;sex&quot; value=&quot;male&quot; name=&quot;sex&quot; type=&quot;radio&quot;&gt;
+<input id="sex" value="male" name="sex" type="radio">
 
 ```
 

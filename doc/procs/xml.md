@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-% qc::xml message &quot;This is the message&quot; [dict create messageType text]
-&lt;message messageType=&quot;text&quot;&gt;This is the message&lt;/message&gt;
+% qc::xml message "This is the message" [dict create messageType text]
+<message messageType="text">This is the message</message>
 ```
 
 ----------------------------------

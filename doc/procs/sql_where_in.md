@@ -18,12 +18,12 @@ Examples
 ```tcl
 
 % sql_where_in name {Jimmy Bob Des}
-name in (&#39;Jimmy&#39;,&#39;Bob&#39;,&#39;Des&#39;)
+name in ('Jimmy','Bob','Des')
 %
 % sql_where_in t.status_id [list 1 3 5 6]
 t.status_id in (1,3,5,6)
 %
-% sql_where_in col &quot;&quot; true
+% sql_where_in col "" true
 true
 
 ```

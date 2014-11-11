@@ -15,9 +15,9 @@ Examples
 --------
 ```tcl
 
-# some-page.html?foo=2&amp;foo=45&amp;bar=Hello%20World
+# some-page.html?foo=2&foo=45&bar=Hello%20World
 form2url other-url.html
-other-url.html?foo=2&amp;foo=45&amp;bar=Hello%20World
+other-url.html?foo=2&foo=45&bar=Hello%20World
 
 ```
 

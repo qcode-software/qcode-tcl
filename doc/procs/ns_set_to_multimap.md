@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-1&gt; set set_id [ns_set create this_set from me@here.com to you@there.com msg  &quot;Get off my land.&quot; to andyou@there.com to youtoo@there.com]
-2&gt; qc::ns_set_to_multimap  $set_id
+1> set set_id [ns_set create this_set from me@here.com to you@there.com msg  "Get off my land." to andyou@there.com to youtoo@there.com]
+2> qc::ns_set_to_multimap  $set_id
 from me@here.com to you@there.com msg {Get off my land.} to andyou@there.com to youtoo@there.com
 ```
 

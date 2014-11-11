@@ -19,7 +19,7 @@ Examples
 
 % set items [list Angus Jamison Jock Mackay]     
 Angus Jamison Jock Mackay
-% qc::lexclude $items &quot;Jock&quot; &quot;Mackay&quot;
+% qc::lexclude $items "Jock" "Mackay"
 Angus Jamison
 % set items [list 1 2 2 2 3 4 4 4 4]
 1 2 2 2 3 4 4 4 4

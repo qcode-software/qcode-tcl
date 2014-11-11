@@ -18,10 +18,10 @@ Examples
 % format_timestamp_iso now
 2007-11-05 17:30:14
 %
-% format_timestamp_iso &quot;23/5/2008 10:11:28&quot;
+% format_timestamp_iso "23/5/2008 10:11:28"
 2008-05-23 10:11:28
 %
-% format_timestamp_iso &quot;23rd June 2008 10:11&quot;
+% format_timestamp_iso "23rd June 2008 10:11"
 2008-06-23 10:11:00
 
 ```

@@ -15,26 +15,26 @@ Examples
 --------
 ```tcl
 
-% qc::http_post -timeout 30 -content-type &quot;text/plain; charset=utf-8&quot; -accept &quot;text/plain; charset=utf-8&quot; -- http://httpbin.org/post data &quot;Here&#39;s the POST data&quot;
+% qc::http_post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"
 {
-    &quot;files&quot;: {},
-    &quot;form&quot;: {},
-    &quot;url&quot;: &quot;http://httpbin.org/post&quot;,
-    &quot;args&quot;: {},
-    &quot;headers&quot;: {
-        &quot;Content-Length&quot;: &quot;27&quot;,
-        &quot;Host&quot;: &quot;httpbin.org&quot;,
-        &quot;Content-Type&quot;: &quot;text/plain; charset=utf-8&quot;,
-        &quot;Connection&quot;: &quot;keep-alive&quot;,
-        &quot;Accept&quot;: &quot;text/plain; charset=utf-8&quot;
+    "files": {},
+    "form": {},
+    "url": "http://httpbin.org/post",
+    "args": {},
+    "headers": {
+        "Content-Length": "27",
+        "Host": "httpbin.org",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Connection": "keep-alive",
+        "Accept": "text/plain; charset=utf-8"
     },
-&quot;json&quot;: null,
-&quot;data&quot;: &quot;data=Here%27s+the+POST+data&quot;
+"json": null,
+"data": "data=Here%27s+the+POST+data"
 }
 % 
-% lappend data [list name &quot;firstName&quot; contents &quot;Andres&quot; contenttype &quot;text/plain&quot; contentheader [list &quot;adios: goodbye&quot;]]                                        % lappend data [list name &quot;lastName&quot;  contents &quot;Garcia&quot;]                           % lappend data [list name &quot;file&quot; file &quot;httpPost.tcl&quot; file &quot;basico.tcl&quot; contenttype text/plain filename &quot;c:\\basico.tcl&quot;]                             % lappend data  [list name &quot;AnotherFile&quot; filecontent &quot;httpBufferPost.tcl&quot;]          % lappend data  [list name &quot;submit&quot; contents &quot;send&quot;]
+% lappend data [list name "firstName" contents "Andres" contenttype "text/plain" contentheader [list "adios: goodbye"]]                                        % lappend data [list name "lastName"  contents "Garcia"]                           % lappend data [list name "file" file "httpPost.tcl" file "basico.tcl" contenttype text/plain filename "c:\\basico.tcl"]                             % lappend data  [list name "AnotherFile" filecontent "httpBufferPost.tcl"]          % lappend data  [list name "submit" contents "send"]
 
-% http_post -headers [list Authorization &quot;OAuth $token&quot;] -data $data -content-type &quot;multipart/form-data&quot; https://httpbin.org/post
+% http_post -headers [list Authorization "OAuth $token"] -data $data -content-type "multipart/form-data" https://httpbin.org/post
 
 ```
 

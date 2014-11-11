@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-widget_submit name foo value &quot;Submit&quot;
-&lt;input id=&quot;foo&quot; value=&quot;Submit&quot; name=&quot;foo&quot; type=&quot;submit&quot;&gt;
+widget_submit name foo value "Submit"
+<input id="foo" value="Submit" name="foo" type="submit">
 
 ```
 

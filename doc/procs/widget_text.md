@@ -17,12 +17,12 @@ Examples
 --------
 ```tcl
 
-% widget_text name firstname value &quot;&quot; id firstname width 400
-&lt;input style=&quot;width:400px&quot; id=&quot;firstname&quot; value=&quot;&quot; name=&quot;firstname&quot; type=&quot;text&quot;&gt;
+% widget_text name firstname value "" id firstname width 400
+<input style="width:400px" id="firstname" value="" name="firstname" type="text">
 
 # Disabled text controls are shown as non-editable text plus hidden form variable to pass the form variable.
-% widget_text name firstname value &quot;Jimmy&quot; id firstname disabled yes
-&lt;span&gt;Jimmy&lt;/span&gt;&lt;input type=&quot;hidden&quot; name=&quot;firstname&quot; value=&quot;Jimmy&quot; id=&quot;firstname&quot;&gt;
+% widget_text name firstname value "Jimmy" id firstname disabled yes
+<span>Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">
 
 ```
 

@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::upper &quot;This will be changed to upper case.&quot;
+% qc::upper "This will be changed to upper case."
 THIS WILL BE CHANGED TO UPPER CASE.
 ```
 

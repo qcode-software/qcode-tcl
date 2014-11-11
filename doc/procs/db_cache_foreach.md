@@ -22,7 +22,7 @@ Examples
 
 % set qry {select firstname,surname from users order by surname} 
 % db_cache_foreach -ttl 20 $qry {
-    lappend list &quot;$surname, $firstname&quot;
+    lappend list "$surname, $firstname"
 }
 
 ```

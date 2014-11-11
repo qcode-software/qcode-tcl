@@ -18,7 +18,7 @@ Examples
 % sql_insert user_id name email password
 (user_id,name,email,password) VALUES (:user_id,:name,:email,:password)
 %
-% set qry &quot;insert into users [sql_insert user_id name email password]&quot;
+% set qry "insert into users [sql_insert user_id name email password]"
 insert into users (user_id,name,email,password) VALUES (:user_id,:name,:email,:password)
 %
 % set user_id 3

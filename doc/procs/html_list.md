@@ -18,12 +18,12 @@ Examples
 % set list [list one two three four]
 one two three four
 % html_list $list
-&lt;ul&gt;
-&lt;li&gt;one&lt;/li&gt;
-&lt;li&gt;two&lt;/li&gt;
-&lt;li&gt;three&lt;/li&gt;
-&lt;li&gt;four&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+<li>one</li>
+<li>two</li>
+<li>three</li>
+<li>four</li>
+</ul>
 
 ```
 

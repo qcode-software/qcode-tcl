@@ -20,10 +20,10 @@ Examples
 ```tcl
 
 % widget_bool name spam value no
-&lt;input boolean=&quot;true&quot; id=&quot;spam&quot; value=&quot;true&quot; name=&quot;spam&quot; type=&quot;checkbox&quot;&gt;
+<input boolean="true" id="spam" value="true" name="spam" type="checkbox">
 
 % widget_bool name spam value yes
-&lt;input boolean=&quot;true&quot; id=&quot;spam&quot; value=&quot;true&quot; name=&quot;spam&quot; type=&quot;checkbox&quot; checked&gt;
+<input boolean="true" id="spam" value="true" name="spam" type="checkbox" checked>
 
 ```
 

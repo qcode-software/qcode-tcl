@@ -17,25 +17,25 @@ Examples
 --------
 ```tcl
 
-% set album &quot;Welcome to Mali&quot;
+% set album "Welcome to Mali"
 Welcome to Mali
-% set band &quot;Amadou &amp; Mariam&quot;
-Amadou &amp; Mariam
+% set band "Amadou & Mariam"
+Amadou & Mariam
 % qc::sappend xml {
-    &lt;discography-item&gt;
+    <discography-item>
         [qc::xml band $band]
         [qc::xml album $album]
-    &lt;/discography-item&gt;
+    </discography-item>
 }
     
-&lt;discography-item&gt;
-&lt;band&gt;Pavement&lt;/band&gt;
-&lt;album&gt;Brighten The Corners&lt;/album&gt;
-&lt;/discography-item&gt;
-&lt;discography-item&gt;
-&lt;band&gt;Amadou &amp;amp; Mariam&lt;/band&gt;
-&lt;album&gt;Welcome to Mali&lt;/album&gt;
-&lt;/discography-item&gt;
+<discography-item>
+<band>Pavement</band>
+<album>Brighten The Corners</album>
+</discography-item>
+<discography-item>
+<band>Amadou &amp; Mariam</band>
+<album>Welcome to Mali</album>
+</discography-item>
 ```
 
 ----------------------------------

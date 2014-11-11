@@ -17,9 +17,9 @@ Examples
 --------
 ```tcl
 
-&gt; qc::url_encode &quot;someplace.html?order_number=911&amp;title=ca sáu&quot;
+> qc::url_encode "someplace.html?order_number=911&title=ca sáu"
 someplace.html%3forder_number%3d911%26title%3dca+s%c3%a1u
-&gt; qc::url_encode &quot;someplace.html?order_number=911&amp;title=ca sáu&quot; iso8859-1
+> qc::url_encode "someplace.html?order_number=911&title=ca sáu" iso8859-1
 someplace.html%3forder_number%3d911%26title%3dca+s%e1u
 ```
 

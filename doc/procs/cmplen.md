@@ -17,11 +17,11 @@ Examples
 --------
 ```tcl
 
-% qc::cmplen &quot;ox&quot; &quot;hippopotamus&quot;
+% qc::cmplen "ox" "hippopotamus"
 -1
-% qc::cmplen &quot;hippopotamus&quot; &quot;ox&quot;
+% qc::cmplen "hippopotamus" "ox"
 1
-% qc::cmplen &quot;ox&quot; &quot;ox&quot;
+% qc::cmplen "ox" "ox"
 0
 ```
 

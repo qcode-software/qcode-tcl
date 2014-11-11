@@ -15,47 +15,47 @@ Examples
 --------
 ```tcl
 
-% html_info_tables {Name &quot;Jimmy Tarbuck&quot; Venue &quot;Palace Ballroom&quot;} {Name &quot;Des O&#39;Conner&quot; Venue &quot;Royal Palladium&quot;}
-&lt;table class=&quot;columns-container&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;table class=&quot;column&quot;&gt;
-&lt;colgroup&gt;
-&lt;col class=&quot;bold&quot;&gt;
-&lt;col&gt;
-&lt;/colgroup&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;Name&lt;/td&gt;
-&lt;td&gt;Jimmy Tarbuck&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Venue&lt;/td&gt;
-&lt;td&gt;Palace Ballroom&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;/td&gt;
-&lt;td&gt;&lt;table class=&quot;column&quot;&gt;
-&lt;colgroup&gt;
-&lt;col class=&quot;bold&quot;&gt;
-&lt;col&gt;
-&lt;/colgroup&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;Name&lt;/td&gt;
-&lt;td&gt;Des O&#39;Conner&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Venue&lt;/td&gt;
-&lt;td&gt;Royal Palladium&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
+% html_info_tables {Name "Jimmy Tarbuck" Venue "Palace Ballroom"} {Name "Des O'Conner" Venue "Royal Palladium"}
+<table class="columns-container">
+<tbody>
+<tr>
+<td><table class="column">
+<colgroup>
+<col class="bold">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Jimmy Tarbuck</td>
+</tr>
+<tr>
+<td>Venue</td>
+<td>Palace Ballroom</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td><table class="column">
+<colgroup>
+<col class="bold">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Des O'Conner</td>
+</tr>
+<tr>
+<td>Venue</td>
+<td>Royal Palladium</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
 
 ```
 

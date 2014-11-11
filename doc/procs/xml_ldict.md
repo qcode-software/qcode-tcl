@@ -17,14 +17,14 @@ Examples
 --------
 ```tcl
 
-% set data [list {product_code &quot;AA&quot; sales &quot;9.99&quot; qty 99} {product_code &quot;BB&quot; sales 0 qty 1000}]
-{product_code &quot;AA&quot; sales &quot;9.99&quot; qty 99} {product_code &quot;BB&quot; sales 0 qty 1000}
-% set xml &quot;&lt;records&gt;[qc::xml_ldict record $data]&lt;/records&gt;&quot;
-&lt;records&gt;&lt;record&gt;&lt;product_code&gt;AA&lt;/product_code&gt;
-&lt;sales&gt;9.99&lt;/sales&gt;
-&lt;qty&gt;99&lt;/qty&gt;&lt;/record&gt;&lt;record&gt;&lt;product_code&gt;BB&lt;/product_code&gt;
-&lt;sales&gt;0&lt;/sales&gt;
-&lt;qty&gt;1000&lt;/qty&gt;&lt;/record&gt;&lt;/records&gt;
+% set data [list {product_code "AA" sales "9.99" qty 99} {product_code "BB" sales 0 qty 1000}]
+{product_code "AA" sales "9.99" qty 99} {product_code "BB" sales 0 qty 1000}
+% set xml "<records>[qc::xml_ldict record $data]</records>"
+<records><record><product_code>AA</product_code>
+<sales>9.99</sales>
+<qty>99</qty></record><record><product_code>BB</product_code>
+<sales>0</sales>
+<qty>1000</qty></record></records>
 ```
 
 ----------------------------------

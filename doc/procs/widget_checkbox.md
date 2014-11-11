@@ -19,7 +19,7 @@ Examples
 ```tcl
 
 % widget_checkbox name order_no value 3215
-&lt;input id=&quot;order_no&quot; value=&quot;3215&quot; name=&quot;order_no&quot; type=&quot;checkbox&quot;&gt;
+<input id="order_no" value="3215" name="order_no" type="checkbox">
 
 
 ```

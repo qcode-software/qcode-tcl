@@ -23,13 +23,13 @@ Examples
 43.4 GB
     % qc::binary_format 44444 megabyte
 43.4 GB
-% qc::binary_format &quot;44444Mb&quot;
+% qc::binary_format "44444Mb"
 43.4 Gb
-    % qc::binary_format &quot;44444Mbit&quot;
+    % qc::binary_format "44444Mbit"
 43.4 Gb
-    % qc::binary_format &quot;44444 megabit&quot;
+    % qc::binary_format "44444 megabit"
 43.4 Gb
-    % qc::binary_format &quot;44444 megabit&quot;
+    % qc::binary_format "44444 megabit"
 43.4 Gb
 % qc::binary_format -sigfigs 5 44444 Mb
 43.402 Gb

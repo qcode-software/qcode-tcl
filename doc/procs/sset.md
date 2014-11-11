@@ -17,21 +17,21 @@ Examples
 --------
 ```tcl
 
-% set album &quot;Brighten The Corners&quot;
+% set album "Brighten The Corners"
 Brighten The Corners
-% set band &quot;Pavement&quot;
+% set band "Pavement"
 Pavement
 % qc::sset xml {
-    &lt;discography-entry&gt;
+    <discography-entry>
         [qc::xml band $band]
         [qc::xml album $album]
-    &lt;/discography-entry&gt;
+    </discography-entry>
 }
     
-&lt;discography-entry&gt;
-&lt;band&gt;Pavement&lt;/band&gt;
-&lt;album&gt;Brighten The Corners&lt;/album&gt;
-&lt;/discography-entry&gt;
+<discography-entry>
+<band>Pavement</band>
+<album>Brighten The Corners</album>
+</discography-entry>
 ```
 
 ----------------------------------

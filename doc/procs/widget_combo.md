@@ -28,52 +28,52 @@ Examples
 
 % widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
 widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
-&lt;input searchURL=&quot;customer_combo.xml&quot; style=&quot;width:160px&quot; type=&quot;text&quot; id=&quot;customer_code&quot; boundName=&quot;customer_id&quot; name=&quot;customer_code&quot; AUTOCOMPLETE=&quot;off&quot; searchLimit=&quot;10&quot; boundValue=&quot;2343&quot; value=&quot;FOO&quot; class=&quot;db-form-combo&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;customer_id&quot; value=&quot;2343&quot;&gt;
+<input searchURL="customer_combo.xml" style="width:160px" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">
 
-% https://a-domain.co.uk/customer_combo.xml?name=customer_code&amp;value=A&amp;boundName=customer_id&amp;searchLimit=10
+% https://a-domain.co.uk/customer_combo.xml?name=customer_code&value=A&boundName=customer_id&searchLimit=10
 
-&lt;records&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A &amp; R PLUMBING&lt;/customer_code&gt;
-&lt;customer_id&gt;27706&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A W PLUMBERS&lt;/customer_code&gt;
-&lt;customer_id&gt;278004&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A&amp;A PLUMBERS&lt;/customer_code&gt;
-&lt;customer_id&gt;21162&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A&amp;G PLUMING SUPPLIES&lt;/customer_code&gt;
-&lt;customer_id&gt;2819&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A&amp;J THOMPSON&lt;/customer_code&gt;
-&lt;customer_id&gt;2083&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A&amp;J KEITH SMITH&lt;/customer_code&gt;
-&lt;customer_id&gt;2469&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A1&lt;/customer_code&gt;
-&lt;customer_id&gt;3758&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;A1 FIFE&lt;/customer_code&gt;
-&lt;customer_id&gt;308993&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;ABACUS PERTH&lt;/customer_code&gt;
-&lt;customer_id&gt;2466&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;record&gt;
-&lt;customer_code&gt;ABBEY KNIFE&lt;/customer_code&gt;
-&lt;customer_id&gt;3627&lt;/customer_id&gt;
-&lt;/record&gt;
-&lt;/records&gt;
+<records>
+<record>
+<customer_code>A & R PLUMBING</customer_code>
+<customer_id>27706</customer_id>
+</record>
+<record>
+<customer_code>A W PLUMBERS</customer_code>
+<customer_id>278004</customer_id>
+</record>
+<record>
+<customer_code>A&A PLUMBERS</customer_code>
+<customer_id>21162</customer_id>
+</record>
+<record>
+<customer_code>A&G PLUMING SUPPLIES</customer_code>
+<customer_id>2819</customer_id>
+</record>
+<record>
+<customer_code>A&J THOMPSON</customer_code>
+<customer_id>2083</customer_id>
+</record>
+<record>
+<customer_code>A&J KEITH SMITH</customer_code>
+<customer_id>2469</customer_id>
+</record>
+<record>
+<customer_code>A1</customer_code>
+<customer_id>3758</customer_id>
+</record>
+<record>
+<customer_code>A1 FIFE</customer_code>
+<customer_id>308993</customer_id>
+</record>
+<record>
+<customer_code>ABACUS PERTH</customer_code>
+<customer_id>2466</customer_id>
+</record>
+<record>
+<customer_code>ABBEY KNIFE</customer_code>
+<customer_id>3627</customer_id>
+</record>
+</records>
 
 
 ```

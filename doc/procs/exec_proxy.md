@@ -22,8 +22,8 @@ Examples
 
 % qc::exec_proxy hostname
 myhostname
-1&gt; qc::exec_proxy -timeout 1000 wget http://cdimage.debian.org/debian-cd/6.0.5/amd64/iso-cd/debian-6.0.5-amd64-CD-1.iso
-wait for proxy &quot;exec-proxy-0&quot; failed: timeout waiting for evaluation
+1> qc::exec_proxy -timeout 1000 wget http://cdimage.debian.org/debian-cd/6.0.5/amd64/iso-cd/debian-6.0.5-amd64-CD-1.iso
+wait for proxy "exec-proxy-0" failed: timeout waiting for evaluation
 ```
 
 ----------------------------------

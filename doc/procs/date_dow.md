@@ -18,7 +18,7 @@ Examples
 % date_dow 2007-05-06
 % 7
 %
-% date_dow &quot;2 days ago&quot;
+% date_dow "2 days ago"
 % 3
 
 ```

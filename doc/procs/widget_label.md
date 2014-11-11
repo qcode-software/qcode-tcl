@@ -18,12 +18,12 @@ Examples
 ```tcl
 
 % widget_label name firstname label Firstname
-&lt;label for=&quot;firstname&quot;&gt;Firstname&lt;/label&gt;
+<label for="firstname">Firstname</label>
 
     # Required form elements have a css class applied and a red asterisk.
 # Hack the code to make it look different.
 % widget_label name surname label Surname required yes
-&lt;label for=&quot;surname&quot; class=&quot;required&quot;&gt;Surname&lt;span style=&quot;color:#CC0000&quot;&gt;*&lt;/span&gt;&lt;/label&gt;
+<label for="surname" class="required">Surname<span style="color:#CC0000">*</span></label>
 
 ```
 

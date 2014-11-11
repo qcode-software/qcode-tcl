@@ -15,8 +15,8 @@ Examples
 --------
 ```tcl
 
-% puts &quot;&gt;&gt;[format_left Dunstable 10]&lt;&lt;&quot;
-&gt;&gt;Dunstable &lt;&lt;
+% puts ">>[format_left Dunstable 10]<<"
+>>Dunstable <<
 % format_left Dunstable 6
 Dunsta
 

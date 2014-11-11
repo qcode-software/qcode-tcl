@@ -18,7 +18,7 @@ Examples
 ```tcl
 
 % widget_span name foo value bar
-&lt;span id=&quot;foo&quot;&gt;bar&lt;/span&gt;
+<span id="foo">bar</span>
 
 ```
 

@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::url_path &quot;/someplace.html?order_number=911&amp;title=casáu&quot;
+% qc::url_path "/someplace.html?order_number=911&title=casáu"
 /someplace.html
 ```
 

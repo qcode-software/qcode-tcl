@@ -21,7 +21,7 @@ Examples
 % format_timestamp_rel yesterday
 Sun 17:34
 %
-% format_timestamp_rel &quot;next week&quot;
+% format_timestamp_rel "next week"
 Sep 7th
 
 ```

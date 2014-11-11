@@ -18,14 +18,14 @@ Examples
 --------
 ```tcl
 
-set data [list {label &quot;Label 1&quot; value 12} {label &quot;Label 2&quot; value 14}]
+set data [list {label "Label 1" value 12} {label "Label 2" value 14}]
 
 Example 1: Minumum arguments usage.
 qc::return_html [ofc_piechart $data]
 
 Example 2: Full argument usage.   
 set id chart2
-set title {label &quot;My Wizzzy Pie Chart&quot; font-size 25px}  
+set title {label "My Wizzzy Pie Chart" font-size 25px}  
 set animate true
 set width 50%
 set height 50%  

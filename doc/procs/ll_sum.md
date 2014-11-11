@@ -17,9 +17,9 @@ Examples
 --------
 ```tcl
 
-1&gt; set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}]
+1> set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}]
 {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}
-2&gt; qc::ll_sum llist 2
+2> qc::ll_sum llist 2
 39
 ```
 

@@ -23,7 +23,7 @@ Examples
 %
 % proc test {args} {
     set varNames [args2vars $args]
-    return &quot;foo $foo bar $bar baz $baz&quot;
+    return "foo $foo bar $bar baz $baz"
   }
 %
 % test foo James bar Robert baz Desmond
@@ -39,7 +39,7 @@ foo James bar Robert baz Desmond
 % proc test {args} {
     # name foo and bar as the only variables to set
     set varNames [args2vars $args foo bar]
-    return &quot;foo $foo bar $bar&quot;
+    return "foo $foo bar $bar"
   }
 %
 % test foo James bar Robert baz Desmond

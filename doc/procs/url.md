@@ -18,8 +18,8 @@ Examples
 --------
 ```tcl
 
-% qc::url afile.html?foo=Goodbye foo &quot;Hello&quot; bar &quot;There&quot;
-afile.html?foo=Hello&amp;bar=There
+% qc::url afile.html?foo=Goodbye foo "Hello" bar "There"
+afile.html?foo=Hello&bar=There
 ```
 
 ----------------------------------

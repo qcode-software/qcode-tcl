@@ -19,11 +19,11 @@ Examples
 
 % set email jim
 % sql_where_cols_start email
-email ~ &#39;^jim&#39;
+email ~ '^jim'
 % 
 % set name J
-% set qry &quot;select * from users where [sql_where_cols_start name email]&quot;
-select * from users where name ~ &#39;^J&#39; and email ~ &#39;^jim&#39;
+% set qry "select * from users where [sql_where_cols_start name email]"
+select * from users where name ~ '^J' and email ~ '^jim'
 
 ```
 

@@ -18,14 +18,14 @@ Examples
 % set table {
     {firstname surname telephone}
     {Jimmy Tarbuck 999}
-    {Des O&#39;Conner 123}
+    {Des O'Conner 123}
     {Bob Monkhouse 321}
 }
 % table_foreach $table {
-    append html &quot;&lt;li&gt;$firstname $surname $telephone&lt;/li&gt;&quot;
+    append html "<li>$firstname $surname $telephone</li>"
 }
 % set html 
-&lt;li&gt;Jimmy Tarbuck 999&lt;/li&gt;&lt;li&gt;Des O&#39;Conner 123&lt;/li&gt;&lt;li&gt;Bob Monkhouse 321&lt;/li&gt;
+<li>Jimmy Tarbuck 999</li><li>Des O'Conner 123</li><li>Bob Monkhouse 321</li>
 
 ```
 

@@ -25,20 +25,20 @@ Examples
     expr 3/0
 } {
     global errorMessage errorInfo
-    puts &quot;An error was caught here.&quot;
-    puts &quot;The error message was \&quot;$errorMessage\&quot; with errorCode \&quot;$errorCode\&quot;&quot;
-    puts &quot;The stack trace was \n$errorInfo&quot;
+    puts "An error was caught here."
+    puts "The error message was \"$errorMessage\" with errorCode \"$errorCode\""
+    puts "The stack trace was \n$errorInfo"
 }
 
 An error was caught here.
-The error message was &quot;divide by zero&quot; with errorCode &quot;ARITH DIVZERO {divide by zero}&quot;
+The error message was "divide by zero" with errorCode "ARITH DIVZERO {divide by zero}"
 The stack trace was
 divide by zero
     while executing
-&quot;expr 3/0&quot;
-    (&quot;uplevel&quot; body line 2)
+"expr 3/0"
+    ("uplevel" body line 2)
     invoked from within
-&quot;uplevel 1 $try_code &quot;
+"uplevel 1 $try_code "
 
 
 

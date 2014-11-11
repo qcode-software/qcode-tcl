@@ -16,12 +16,12 @@ Examples
 ```tcl
 
 % set name Jimmy
-% set qry &quot;select * from users where [sql_where_like name]&quot;
-select * from users where name ~~* &#39;%Jimmy%&#39;
+% set qry "select * from users where [sql_where_like name]"
+select * from users where name ~~* '%Jimmy%'
 %
-% set name &quot;Jimmy Tarbuck&quot;
-% set qry &quot;select * from users where [sql_where_like users.name]&quot;
-select * from users where users.name ~~* &#39;%Jimmy%&#39; and users.name ~~* &#39;%Tarbuck%&#39;
+% set name "Jimmy Tarbuck"
+% set qry "select * from users where [sql_where_like users.name]"
+select * from users where users.name ~~* '%Jimmy%' and users.name ~~* '%Tarbuck%'
 
 ```
 

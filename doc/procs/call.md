@@ -22,20 +22,20 @@ Examples
     return [::md5::md5 -hex [list $firstname $middlename $surname $employee_id $start_date $dept $branch]]
 }
 % qc::call employee_record_hash
-Cannot use variable &quot;firstname&quot; to call proc qc::&quot;employee_record_hash&quot;:no such variable &quot;firstname&quot;
-% set firstname &quot;Angus&quot;
+Cannot use variable "firstname" to call proc qc::"employee_record_hash":no such variable "firstname"
+% set firstname "Angus"
 Angus
-% set middlename &quot;Jamison&quot;
+% set middlename "Jamison"
 Jamison
-% set surname &quot;Mackay&quot;
+% set surname "Mackay"
 Mackay
 % set employee_id 999
 999
-% set start_date &quot;2012-06-01&quot;
+% set start_date "2012-06-01"
 2012-06-01
-% set dept &quot;Accounts&quot;
+% set dept "Accounts"
 Accounts
-% set branch &quot;Edinburgh&quot;
+% set branch "Edinburgh"
 Edinburgh
 % set employee_hash [qc::call employee_record_hash]
 51A01DE13B5C7B5863743A3E5485237D

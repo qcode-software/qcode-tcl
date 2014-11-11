@@ -15,16 +15,16 @@ Examples
 --------
 ```tcl
 
-# some-page.html?foo=2&amp;foo=45&amp;bar=Hello%20World
+# some-page.html?foo=2&foo=45&bar=Hello%20World
 % form_var_get foo
 2 45
 % form_var_get bar
 Hello World
 %
 % form_var baz
-No such form variable &quot;baz&quot;
+No such form variable "baz"
 %
-# some-page.html?foo[]=a&amp;foo[]=b
+# some-page.html?foo[]=a&foo[]=b
 % form_var_get foo
 a b
 

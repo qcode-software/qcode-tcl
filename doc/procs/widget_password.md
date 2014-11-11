@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-% widget_password name password value &quot;&quot; 
-&lt;input style=&quot;width:160px&quot; id=&quot;password&quot; value=&quot;&quot; name=&quot;password&quot; type=&quot;password&quot;&gt;
+% widget_password name password value "" 
+<input style="width:160px" id="password" value="" name="password" type="password">
 
 ```
 

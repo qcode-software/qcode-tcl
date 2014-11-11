@@ -15,10 +15,10 @@ Examples
 --------
 ```tcl
 
-% cast_creditcard &quot;4111 1111 1111 1111&quot;
+% cast_creditcard "4111 1111 1111 1111"
 4111111111111111
 %
-% cast_creditcard &quot;4213 3222 1121 1112&quot;
+% cast_creditcard "4213 3222 1121 1112"
 4213322211211112 is not a valid credit card number
 
 ```

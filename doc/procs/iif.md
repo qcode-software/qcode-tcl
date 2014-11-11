@@ -18,8 +18,8 @@ Examples
 ```tcl
 
 % proc xmas_sleeps { date } {
-set days [qc::date_days $date &quot;2012-12-25&quot;]
-return &quot;There [qc::iif {$days==1} &quot;is $days sleep&quot; &quot;are $days sleeps&quot;] before xmas&quot;
+set days [qc::date_days $date "2012-12-25"]
+return "There [qc::iif {$days==1} "is $days sleep" "are $days sleeps"] before xmas"
 }
 % xmas_sleeps 2012-08-21
 There are 126 sleeps before xmas

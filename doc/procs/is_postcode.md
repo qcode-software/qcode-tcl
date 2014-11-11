@@ -17,9 +17,9 @@ Examples
 
 % qc::is_postcode EH3
 0
-% qc::is_postcode &quot;BFPO 61&quot;
+% qc::is_postcode "BFPO 61"
 1
-% qc::is_postcode &quot;EH3 9EE&quot;
+% qc::is_postcode "EH3 9EE"
 1
 ```
 

@@ -17,11 +17,11 @@ Examples
 --------
 ```tcl
 
-% set banned_hosts [list &quot;polaris&quot; &quot;trident&quot; &quot;poseiden&quot;]
+% set banned_hosts [list "polaris" "trident" "poseiden"]
 polaris trident poseiden
-% qc::in $banned_hosts &quot;arctic&quot;
+% qc::in $banned_hosts "arctic"
 0
-% qc::in $banned_hosts &quot;trident&quot;
+% qc::in $banned_hosts "trident"
 1
 ```
 

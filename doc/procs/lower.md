@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::lower &quot;THIS WILL BE CHANGED TO LOWER&quot;
+% qc::lower "THIS WILL BE CHANGED TO LOWER"
 this will be changed to lower
 ```
 

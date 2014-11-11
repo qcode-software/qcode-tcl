@@ -16,7 +16,7 @@ Examples
 ```tcl
 
 % db_select_table {select user_id,firstname,surname from users}
-% {user_id firstname surname} {73214205 Jimmy Tarbuck} {73214206 Des O&#39;Conner} {73214208 Bob Monkhouse}
+% {user_id firstname surname} {73214205 Jimmy Tarbuck} {73214206 Des O'Conner} {73214208 Bob Monkhouse}
 
 % set surname MacDonald
 % db_select_table {select id,firstname,surname from users where surname=:surname}

@@ -15,19 +15,19 @@ Examples
 --------
 ```tcl
 
-&gt; qc::http_get http://httpbin.org/get?ourformvar=999&amp;anotherformvar=123
+> qc::http_get http://httpbin.org/get?ourformvar=999&anotherformvar=123
 {
-&quot;url&quot;: &quot;http://httpbin.org/get?ourformvar=999&amp;anotherformvar=123&quot;,
-&quot;headers&quot;: {
-    &quot;Content-Length&quot;: &quot;&quot;,
-    &quot;Host&quot;: &quot;httpbin.org&quot;,
-    &quot;Content-Type&quot;: &quot;&quot;,
-    &quot;Connection&quot;: &quot;keep-alive&quot;,
-    &quot;Accept&quot;: &quot;*/*&quot;
+"url": "http://httpbin.org/get?ourformvar=999&anotherformvar=123",
+"headers": {
+    "Content-Length": "",
+    "Host": "httpbin.org",
+    "Content-Type": "",
+    "Connection": "keep-alive",
+    "Accept": "*/*"
 },
-&quot;args&quot;: {
-    &quot;anotherformvar&quot;: &quot;123&quot;,
-    &quot;ourformvar&quot;: &quot;999&quot;
+"args": {
+    "anotherformvar": "123",
+    "ourformvar": "999"
 },
 }
 ```

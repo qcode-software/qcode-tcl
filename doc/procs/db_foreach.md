@@ -20,7 +20,7 @@ Examples
 
 % set qry {select firstname,surname from users order by surname} 
 % db_foreach $qry {
-    lappend list &quot;$surname, $firstname&quot;
+    lappend list "$surname, $firstname"
 }
 
 % set category Lights
@@ -31,7 +31,7 @@ Examples
     order by product_code
 }
 % db_foreach $qry {
-    append html &amp;lt;li&amp;gt;$db_row_number $product_code $description $price&amp;lt;/li&amp;gt;
+    append html &lt;li&gt;$db_row_number $product_code $description $price&lt;/li&gt;
 }
 
 ```

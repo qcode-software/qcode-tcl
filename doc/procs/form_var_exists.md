@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-# some-page.html?foo=2&amp;foo=45&amp;bar=Hello%20World
+# some-page.html?foo=2&foo=45&bar=Hello%20World
 % form_var_exists foo
 1
 % form_var_exists baz

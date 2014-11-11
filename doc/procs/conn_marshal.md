@@ -22,11 +22,11 @@ Examples
 
 # If we then create a proc
 proc /foo.html {greeting name} {
-    return &quot;You said $greeting $name&quot;
+    return "You said $greeting $name"
 }
-# a request for /foo.html?greeting=Hello&amp;name=John would result in a call to 
+# a request for /foo.html?greeting=Hello&name=John would result in a call to 
 /foo.html Hello John
-# and return &quot;You said Hello John&quot;
+# and return "You said Hello John"
 
 ```
 

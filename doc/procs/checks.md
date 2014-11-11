@@ -17,19 +17,19 @@ Examples
 --------
 ```tcl
 
-% set order_date &quot;never&quot;
-% set delivery_name &quot;James Donald Alexander MacKenzie&quot;
-% set carrier &quot;&quot;
+% set order_date "never"
+% set delivery_name "James Donald Alexander MacKenzie"
+% set carrier ""
 % checks {
     order_date DATE
     delivery_name STRING30 NOT NULL
-    carrier NOT NULL &quot;Please enter the carrier.&quot;
+    carrier NOT NULL "Please enter the carrier."
 }
-&lt;ul&gt;
-&lt;li&gt;&quot;never&quot; is not a valid date for order_date&lt;/li&gt;
-&lt;li&gt;&quot;James Donald Alexander MacKenzie&quot; is too long for delivery_name. The maximum length is 30 characters.&lt;/li&gt;
-&lt;li&gt;Please enter the carrier.&lt;/li&gt;
-&lt;/ul&gt;
+<ul>
+<li>"never" is not a valid date for order_date</li>
+<li>"James Donald Alexander MacKenzie" is too long for delivery_name. The maximum length is 30 characters.</li>
+<li>Please enter the carrier.</li>
+</ul>
 % 
 
 ```

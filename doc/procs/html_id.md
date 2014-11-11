@@ -16,7 +16,7 @@ Examples
 ```tcl
 
 % html_id total 23.50
-&lt;span id=&quot;total&quot;&gt;23.50&lt;/span&gt;
+<span id="total">23.50</span>
 
 
 ```

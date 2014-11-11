@@ -15,37 +15,37 @@ Examples
 --------
 ```tcl
 
-% is_period &quot;2014-01-01&quot;
+% is_period "2014-01-01"
 true
 %
-% is_period &quot;Jan 1st 2014&quot;
+% is_period "Jan 1st 2014"
 true
 %
-% is_period &quot;2014&quot;
+% is_period "2014"
 true
 %
-% is_period &quot;Jan&quot;
+% is_period "Jan"
 true
 %
-% is_period &quot;January&quot;
+% is_period "January"
 true
 %
-% is_period &quot;Jan 2013&quot;
+% is_period "Jan 2013"
 true
 %
-% is_period &quot;January 2013&quot;
+% is_period "January 2013"
 true
 %
-% is_period &quot;January 2013 to March 2013&quot;
+% is_period "January 2013 to March 2013"
 true
 %
-&amp; is_period &quot;Jan2013&quot;
+& is_period "Jan2013"
 false
 %
-% is_period &quot;January 2013 March 2013&quot;
+% is_period "January 2013 March 2013"
 false        
 %
-% is_period &quot;1st Jan 2013 to 14th Jan 2013&quot;
+% is_period "1st Jan 2013 to 14th Jan 2013"
 true
 ```
 

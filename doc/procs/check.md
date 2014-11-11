@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set order_date &quot;23rd June 2007&quot;
+% set order_date "23rd June 2007"
 % check order_date DATE
 2007-06-23
 # The check passes and order_date is cast into the type DATE
@@ -26,14 +26,14 @@ Examples
 %
 % set amount mistake
 % check amount POS DECIMAL 
-&quot;mistake&quot; is not a positive value for amount
+"mistake" is not a positive value for amount
 %
 % set qty eight
-% check qty INT &quot;Please enter a whole number of days.&quot;
+% check qty INT "Please enter a whole number of days."
 Please enter a whole number of days.
 %
 # NULL VALUES are valid unless excluded
-% set surname &quot;&quot;
+% set surname ""
 % check surname STRING 30
 %
 % check surname STRING 30 NOT NULL
@@ -41,9 +41,9 @@ surname is empty
 %
 # String length for use with varchar(n) database columns
 # can be checked with STRING n
-% set name &quot;James Donald Alexander MacKenzie&quot;
+% set name "James Donald Alexander MacKenzie"
 check name STRING 30
-&quot;James Donald Alexander MacKenzie&quot; is too long for name. The maximum length is 30 characters.
+"James Donald Alexander MacKenzie" is too long for name. The maximum length is 30 characters.
 
 ```
 

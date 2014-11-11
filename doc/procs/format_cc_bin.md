@@ -17,7 +17,7 @@ Examples
 
 % format_cc_bin 4111111111111111
 411111
-% format_cc_bin &quot;4111 **** **** 1111&quot; 4
+% format_cc_bin "4111 **** **** 1111" 4
 4111
 
 ```

@@ -21,9 +21,9 @@ Examples
 --------
 ```tcl
 
-% qc::log Debug &quot;Debug this&quot;
-% qc::log Notice &quot;Notice this&quot;
-% qc::log &quot;Notice this&quot;
+% qc::log Debug "Debug this"
+% qc::log Notice "Notice this"
+% qc::log "Notice this"
 ```
 
 ----------------------------------

@@ -15,11 +15,11 @@ Examples
 --------
 ```tcl
 
-% schedule -thread &quot;50 seconds&quot; my_proc
-% schedule -thread &quot;5 minutes&quot; my_proc foo bar
-% schedule &quot;1 hour&quot; another_proc
-% schedule &quot;10:15&quot; daily_tasks yellow
-% schedule &quot;Monday 10:15&quot; monday_tasks
+% schedule -thread "50 seconds" my_proc
+% schedule -thread "5 minutes" my_proc foo bar
+% schedule "1 hour" another_proc
+% schedule "10:15" daily_tasks yellow
+% schedule "Monday 10:15" monday_tasks
 
 ```
 

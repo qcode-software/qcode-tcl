@@ -18,7 +18,7 @@ Examples
 % date_month_name 2007-08-06
 % August
 %
-% date_month_name &quot;2 days ago&quot;
+% date_month_name "2 days ago"
 % April
 
 ```

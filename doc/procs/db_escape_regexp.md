@@ -18,15 +18,15 @@ Examples
 % db_escape_regexp Finlay.son
 % Finlay\.son
 
-% db_escape_regexp &quot;*fish&quot;
+% db_escape_regexp "*fish"
 % \*fish
 
 % db_escape_regexp {C:\one\tow}
 % C:\\one\\tow
 
 % set email andrew.
-% set qry &quot;select * from customer where email ~* [db_quote &quot;^[db_escape_regexp $email]&quot;]&quot;
-select * from customer where email ~* &#39;^andrew\.&#39;
+% set qry "select * from customer where email ~* [db_quote "^[db_escape_regexp $email]"]"
+select * from customer where email ~* '^andrew\.'
 
 ```
 

@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-&gt; qc::url_unset afile.html?foo=Hello&amp;bar=There bar
+> qc::url_unset afile.html?foo=Hello&bar=There bar
 afile.html?foo=Hello
 ```
 

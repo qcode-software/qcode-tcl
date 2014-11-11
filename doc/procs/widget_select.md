@@ -22,13 +22,13 @@ Examples
 --------
 ```tcl
 
-% widget_select name letter value &quot;&quot; options {Alpha A Bravo B Charlie C} null_option yes
-&lt;select id=&quot;letter&quot; name=&quot;letter&quot;&gt;
-&lt;option value=&quot;&quot;&gt;- Select -&lt;/option&gt;
-&lt;option value=&quot;A&quot;&gt;Alpha&lt;/option&gt;
-&lt;option value=&quot;B&quot;&gt;Bravo&lt;/option&gt;
-&lt;option value=&quot;C&quot;&gt;Charlie&lt;/option&gt;
-&lt;/select&gt;
+% widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
+<select id="letter" name="letter">
+<option value="">- Select -</option>
+<option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option>
+</select>
 
 ```
 

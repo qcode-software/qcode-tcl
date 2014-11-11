@@ -23,7 +23,7 @@ Examples
 a 1 b 2 
 
 % qc::dict_from c d
-Can&#39;t create dict with d: No such variable
+Can't create dict with d: No such variable
 
 ```
 

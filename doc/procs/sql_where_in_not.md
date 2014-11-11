@@ -19,12 +19,12 @@ Examples
 ```tcl
 
 % sql_where_in_not name {Jimmy Bob Des}
-name not in (&#39;Jimmy&#39;,&#39;Bob&#39;,&#39;Des&#39;)
+name not in ('Jimmy','Bob','Des')
 %
 % sql_where_in_not t.status_id [list 1 3 5 6]
 t.status_id not in (1,3,5,6)
 %
-% sql_where_in_not col &quot;&quot;
+% sql_where_in_not col ""
 true
 
 ```

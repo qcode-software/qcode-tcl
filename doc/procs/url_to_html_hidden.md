@@ -17,9 +17,9 @@ Examples
 --------
 ```tcl
 
-&gt; qc::url_to_html_hidden afile.html?foo=Hello&amp;bar=There
-&lt;input type=&quot;hidden&quot; name=&quot;foo&quot; value=&quot;Hello&quot; id=&quot;foo&quot;&gt;
-&lt;input type=&quot;hidden&quot; name=&quot;bar&quot; value=&quot;There&quot; id=&quot;bar&quot;&gt;
+> qc::url_to_html_hidden afile.html?foo=Hello&bar=There
+<input type="hidden" name="foo" value="Hello" id="foo">
+<input type="hidden" name="bar" value="There" id="bar">
 ```
 
 ----------------------------------

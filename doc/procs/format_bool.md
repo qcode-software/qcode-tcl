@@ -16,10 +16,10 @@ Examples
 ```tcl
 
 % format_bool Y 
-&lt;span class=&quot;true&quot;&gt;Yes&lt;/span&gt;
+<span class="true">Yes</span>
 %
 % format_bool No Aye Nay
-&lt;span class=&quot;false&quot;&gt;Nay&lt;/span&gt;
+<span class="false">Nay</span>
 
 ```
 

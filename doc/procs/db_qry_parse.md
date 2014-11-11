@@ -19,11 +19,11 @@ Examples
 % db_qry_parse {select order_date from sales_order where order order_number=:order_number}
 % select order_date from sales_order where order_number=123
 
-% set name O&#39;Conner
+% set name O'Conner
 % db_qry_parse {select * from users where name=:name}
-% select * from users where name=&#39;O&#39;&#39;Conner&#39;
+% select * from users where name='O''Conner'
 
-% set name &quot;&quot;
+% set name ""
 % db_qry_parse {select * from users where name=:name}
 % select * from users where name IS NULL
 

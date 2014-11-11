@@ -17,11 +17,11 @@ Examples
 
 % qc::binary_convert 2048 KB MB
 2.0
-% qc::binary_convert &quot;3072MB&quot; GB
+% qc::binary_convert "3072MB" GB
 3.0
-% qc::binary_convert &quot;3 GB&quot; kilobyte
+% qc::binary_convert "3 GB" kilobyte
 3145728.0
-    % qc::binary_convert &quot;3 GibiByte&quot; KibiB
+    % qc::binary_convert "3 GibiByte" KibiB
 3145728.0
 
 ```

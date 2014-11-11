@@ -17,7 +17,7 @@ Examples
 
 % qc::is_date_castable 10
 true
-% qc::is_date_castable &quot;June 22nd&quot;
+% qc::is_date_castable "June 22nd"
 true
 % qc::is_date_castable tomorrow
 true

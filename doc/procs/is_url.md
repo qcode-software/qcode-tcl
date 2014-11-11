@@ -19,7 +19,7 @@ Examples
 0
 % qc::is_url http://www.google.co.uk
 1
-% qc::is_url https://www.google.co.uk:443/subdir?formvar1=foo&amp;formvar2=bar#anchor 
+% qc::is_url https://www.google.co.uk:443/subdir?formvar1=foo&formvar2=bar#anchor 
 1
 ```
 

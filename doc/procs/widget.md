@@ -17,13 +17,13 @@ Examples
 --------
 ```tcl
 
-% qc::widget type text name textWidget value &quot;Horses&quot; tooltip &quot;This is a tooltip&quot;
-&lt;input style=&quot;width:160px&quot; id=&quot;textWidget&quot; value=&quot;Horses&quot; name=&quot;textWidget&quot; type=&quot;text&quot; title=&quot;This is a tooltip&quot;&gt;
+% qc::widget type text name textWidget value "Horses" tooltip "This is a tooltip"
+<input style="width:160px" id="textWidget" value="Horses" name="textWidget" type="text" title="This is a tooltip">
 
-% qc::widget type label name labelWidget label &quot;This is a label&quot; tooltip &quot;This is a tooltip&quot;
-&lt;label for=&quot;labelWidget&quot; title=&quot;This is a tooltip&quot;&gt;This is a label&lt;/label&gt;
+% qc::widget type label name labelWidget label "This is a label" tooltip "This is a tooltip"
+<label for="labelWidget" title="This is a tooltip">This is a label</label>
 
-% qc::widget type quantum name quantumWidget value &quot;Everything&quot; 
+% qc::widget type quantum name quantumWidget value "Everything" 
 No widget proc defined for quantum
 ```
 

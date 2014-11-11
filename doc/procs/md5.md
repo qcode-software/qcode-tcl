@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-1&gt; qc::md5 {This string requires hashing}
+1> qc::md5 {This string requires hashing}
 fed9e24fe3df8ca8c093fca78e546ddc
 ```
 

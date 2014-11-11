@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-    % qc::email_address {&quot;Joe Biden&quot; &lt;joe@biden.com&gt;}
+    % qc::email_address {"Joe Biden" <joe@biden.com>}
 joe@biden.com
 ```
 

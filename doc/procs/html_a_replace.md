@@ -16,10 +16,10 @@ Examples
 ```tcl
 
 % html_a_replace Google http://www.google.co.uk 
-&lt;a href=&quot;http://www.google.co.uk&quot; onclick=&quot;location.replace(this.href);return false;&quot;&gt;Google&lt;/a&gt;
+<a href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
 %
-% html_a_replace Google http://www.google.co.uk title &quot;Google Search&quot; class highlight
-    &lt;a title=&quot;Google Search&quot; class=&quot;highlight&quot; href=&quot;http://www.google.co.uk&quot; onclick=&quot;location.replace(this.href);return false;&quot;&gt;Google&lt;/a&gt;
+% html_a_replace Google http://www.google.co.uk title "Google Search" class highlight
+    <a title="Google Search" class="highlight" href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
 
 ```
 

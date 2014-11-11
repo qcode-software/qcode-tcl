@@ -15,11 +15,11 @@ Examples
 --------
 ```tcl
 
-% qc::contains_creditcard &quot;This is a string with a CC number 4111111111111111 in it.&quot;
+% qc::contains_creditcard "This is a string with a CC number 4111111111111111 in it."
 true
-% qc::contains_creditcard &quot;There&#39;s just a phone number here 01311111111 so nothing to see&quot;
+% qc::contains_creditcard "There's just a phone number here 01311111111 so nothing to see"
 false
-% qc::contains_creditcard &quot;It won&#39;t be fooled by CC-like numbers due to the luhn 10 check 4111111111111112&quot;
+% qc::contains_creditcard "It won't be fooled by CC-like numbers due to the luhn 10 check 4111111111111112"
 false
 ```
 

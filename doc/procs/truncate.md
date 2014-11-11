@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set string &quot;This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately.&quot;
+% set string "This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately."
 This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately.
 set string_varchar50 [qc::truncate  $string 50]
 This is a longer string than would be allowed in 

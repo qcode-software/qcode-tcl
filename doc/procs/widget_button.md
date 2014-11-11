@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-widget_button name foo value &quot;Click Me&quot; onclick &quot;alert(&#39;Hi&#39;);&quot;
-&lt;input id=&quot;foo&quot; value=&quot;Click Me&quot; name=&quot;foo&quot; type=&quot;button&quot; onclick=&quot;alert(&#39;Hi&#39;);&quot;&gt;
+widget_button name foo value "Click Me" onclick "alert('Hi');"
+<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">
 
 ```
 

@@ -17,7 +17,7 @@ Examples
 
 % format_cc_masked 4111111111111111
 4111 11** **** 1111
-% format_cc_masked &quot;4111 1111 1111 1111&quot; 4 4
+% format_cc_masked "4111 1111 1111 1111" 4 4
 4111 **** **** 1111
 
 ```

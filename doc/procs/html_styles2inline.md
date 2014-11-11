@@ -16,42 +16,42 @@ Examples
 ```tcl
 
     % set html {
-    &lt;html&gt;
-    &lt;head&gt;
-    &lt;style type=&quot;text/css&quot;&gt;
+    <html>
+    <head>
+    <style type="text/css">
     body {
     font-family: Arial, Helvetica, sans-serif;
     font-size:84%;
     }
     table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
-    &lt;/style&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;p&gt;Hello&lt;/p&gt;
-        &lt;table&gt;
-            &lt;tr&gt;&lt;td&gt;Table entry&lt;/td&gt;&lt;/tr&gt;
-        &lt;/table&gt;
-    &lt;/body&gt;
-    &lt;/html&gt;
+    </style>
+    </head>
+    <body>
+        <p>Hello</p>
+        <table>
+            <tr><td>Table entry</td></tr>
+        </table>
+    </body>
+    </html>
     }
 
 % qc::html_styles2inline $html
-    &lt;html&gt;
-    &lt;head&gt;&lt;style type=&quot;text/css&quot;&gt;
+    <html>
+    <head><style type="text/css">
     body {
     font-family: Arial, Helvetica, sans-serif;
     font-size:84%;
     }
     table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
-    &lt;/style&gt;
-    &lt;/head&gt;
-    &lt;body style=&quot;font-family:Arial, Helvetica, sans-serif;font-size:84%&quot;&gt;
-        &lt;p&gt;Hello&lt;/p&gt;
-        &lt;table style=&quot;font-family:Arial, Helvetica, sans-serif;font-size:100%&quot;&gt;
-            &lt;tr&gt;&lt;td&gt;Table entry&lt;/td&gt;&lt;/tr&gt;
-        &lt;/table&gt;
-    &lt;/body&gt;
-    &lt;/html&gt;
+    </style>
+    </head>
+    <body style="font-family:Arial, Helvetica, sans-serif;font-size:84%">
+        <p>Hello</p>
+        <table style="font-family:Arial, Helvetica, sans-serif;font-size:100%">
+            <tr><td>Table entry</td></tr>
+        </table>
+    </body>
+    </html>
 
 ```
 

@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-% widget_textarea name notes value &quot;Hi There&quot;
-    &lt;div contentEditable=&quot;true&quot; id=&quot;notes&quot; style=&quot;width:160px;height:100px&quot; value=&quot;Hi There&quot; name=&quot;notes&quot;&gt;Hi There&lt;/div&gt;
+% widget_textarea name notes value "Hi There"
+    <div contentEditable="true" id="notes" style="width:160px;height:100px" value="Hi There" name="notes">Hi There</div>
 
 ```
 

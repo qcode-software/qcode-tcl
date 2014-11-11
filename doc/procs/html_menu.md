@@ -16,7 +16,7 @@ Examples
 ```tcl
 
 % html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
-    &lt;a href=&quot;sales.html&quot;&gt;Sales&lt;/a&gt; &amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp; &lt;a href=&quot;sales.html&quot;&gt;Purchasing&lt;/a&gt; &amp;nbsp;&lt;b&gt;|&lt;/b&gt;&amp;nbsp; &lt;a href=&quot;sales.html&quot;&gt;Accounts&lt;/a&gt;
+    <a href="sales.html">Sales</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Purchasing</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Accounts</a>
 
 ```
 

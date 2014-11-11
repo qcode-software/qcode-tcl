@@ -23,7 +23,7 @@ name=:name, email=:email
 % set name Jimmy
 % set email jimmy@foo.com
 %
-% set qry &quot;update users set [sql_set name email] where user_id=:user_id&quot;
+% set qry "update users set [sql_set name email] where user_id=:user_id"
 update users set name=:name, email=:email where user_id=:user_id
 %
 # UPDATE THE DATABASE

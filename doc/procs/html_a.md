@@ -16,10 +16,10 @@ Examples
 ```tcl
 
 % html_a Google http://www.google.co.uk 
-&lt;a href=&quot;http://www.google.co.uk&quot;&gt;Google&lt;/a&gt;
+<a href="http://www.google.co.uk">Google</a>
 %
-% html_a Google http://www.google.co.uk title &quot;Google Search&quot; class highlight
-&lt;a title=&quot;Google Search&quot; class=&quot;highlight&quot; href=&quot;http://www.google.co.uk&quot;&gt;Google&lt;/a&gt;
+% html_a Google http://www.google.co.uk title "Google Search" class highlight
+<a title="Google Search" class="highlight" href="http://www.google.co.uk">Google</a>
 
 ```
 

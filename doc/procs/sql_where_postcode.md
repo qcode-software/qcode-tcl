@@ -15,14 +15,14 @@ Examples
 --------
 ```tcl
 
-% qc::sql_where_postcode &quot;delivery_postcode&quot; &quot;IV2 5DZ&quot;
-delivery_postcode ~ E&#39;^IV2\\s5DZ$&#39;
-% qc::sql_where_postcode &quot;delivery_postcode&quot; &quot;IV&quot;
-delivery_postcode ~ E&#39;^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$&#39;
-% qc::sql_where_postcode &quot;delivery_postcode&quot; &quot;I&quot;
-delivery_postcode ~ E&#39;^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$&#39;
-% qc::sql_where_postcode &quot;delivery_postcode&quot; &quot;&quot;
-delivery_postcode ~ E&#39;^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$&#39;
+% qc::sql_where_postcode "delivery_postcode" "IV2 5DZ"
+delivery_postcode ~ E'^IV2\\s5DZ$'
+% qc::sql_where_postcode "delivery_postcode" "IV"
+delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
+% qc::sql_where_postcode "delivery_postcode" "I"
+delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
+% qc::sql_where_postcode "delivery_postcode" ""
+delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
 ```
 
 ----------------------------------

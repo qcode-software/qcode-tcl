@@ -15,10 +15,10 @@ Examples
 --------
 ```tcl
 
-% cookie_set tracking Google expires &quot;+30 days&quot;
+% cookie_set tracking Google expires "+30 days"
 %
 # delete a cookie
-% cookie_set tracking &quot;&quot; expires yesterday
+% cookie_set tracking "" expires yesterday
 
 ```
 

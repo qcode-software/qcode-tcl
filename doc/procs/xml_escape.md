@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-% qc::xml_escape &quot;Special characters like \u009F and reserved characters like &lt; &gt; and &amp; are escaped&quot;
-Special characters like &amp;#159; and reserved characters like &amp;lt; &amp;gt; and &amp;amp; are escaped
+% qc::xml_escape "Special characters like \u009F and reserved characters like < > and & are escaped"
+Special characters like &#159; and reserved characters like &lt; &gt; and &amp; are escaped
 ```
 
 ----------------------------------

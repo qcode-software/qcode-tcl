@@ -90,27 +90,27 @@ Examples
 ```tcl
 
 % set tbody {
-    {&quot;Jimmy Tarbuck&quot; 23.56}
-    {&quot;Des O&#39;Conner&quot;  15.632}
-    {&quot;Bob Monkhouse&quot; 56.1}
+    {"Jimmy Tarbuck" 23.56}
+    {"Des O'Conner"  15.632}
+    {"Bob Monkhouse" 56.1}
 }
 % html_table tbody $tbody
-&lt;table&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;Jimmy Tarbuck&lt;/td&gt;
-&lt;td&gt;23.56&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Des O&#39;Conner&lt;/td&gt;
-&lt;td&gt;15.632&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Bob Monkhouse&lt;/td&gt;
-&lt;td&gt;56.1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
+<table>
+<tbody>
+<tr>
+<td>Jimmy Tarbuck</td>
+<td>23.56</td>
+</tr>
+<tr>
+<td>Des O'Conner</td>
+<td>15.632</td>
+</tr>
+<tr>
+<td>Bob Monkhouse</td>
+<td>56.1</td>
+</tr>
+</tbody>
+</table>
 
 % set cols {
     {label Name width 200}
@@ -119,32 +119,32 @@ Examples
 % html_table cols $cols tbody $tbody
 or
 % html_table ~ cols tbody
-&lt;table&gt;
-&lt;colgroup&gt;
-&lt;col style=&quot;width:200&quot;&gt;
-&lt;col class=&quot;money&quot; style=&quot;width:100&quot;&gt;
-&lt;/colgroup&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Name&lt;/th&gt;
-&lt;th&gt;Balance&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;Jimmy Tarbuck&lt;/td&gt;
-&lt;td&gt;23.56&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Des O&#39;Conner&lt;/td&gt;
-&lt;td&gt;15.63&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Bob Monkhouse&lt;/td&gt;
-&lt;td&gt;56.10&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
+<table>
+<colgroup>
+<col style="width:200">
+<col class="money" style="width:100">
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Balance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jimmy Tarbuck</td>
+<td>23.56</td>
+</tr>
+<tr>
+<td>Des O'Conner</td>
+<td>15.63</td>
+</tr>
+<tr>
+<td>Bob Monkhouse</td>
+<td>56.10</td>
+</tr>
+</tbody>
+</table>
 
 ```
 

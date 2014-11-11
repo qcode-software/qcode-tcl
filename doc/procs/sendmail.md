@@ -16,7 +16,7 @@ Examples
 ```tcl
 
 % 
-% sendmail $mail_from $rcpt_to $text Subject $subject Date [qc::format_timestamp_http now] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type &quot;text/plain; charset=utf-8&quot; From $from To $to
+% sendmail $mail_from $rcpt_to $text Subject $subject Date [qc::format_timestamp_http now] MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type "text/plain; charset=utf-8" From $from To $to
 
 ```
 

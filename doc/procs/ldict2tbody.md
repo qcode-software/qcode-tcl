@@ -17,8 +17,8 @@ Examples
 --------
 ```tcl
 
-set dict_list [list {code AAA product widget_a desc &quot;Widget Type A&quot; price 9.99 qty 10} {code BBB product widget_b desc &quot;Widget Type B&quot; price 8.99 qty 19} {code CCC product widget_c desc &quot;Widget Type C&quot; price 7.99 qty 1}]
-{code AAA product widget_a desc &quot;Widget Type A&quot; price 9.99 qty 10} {code BBB product widget_b desc &quot;Widget Type B&quot; price 8.99 qty 19} {code CCC product widget_c desc &quot;Widget Type C&quot; price 7.99 qty 1}
+set dict_list [list {code AAA product widget_a desc "Widget Type A" price 9.99 qty 10} {code BBB product widget_b desc "Widget Type B" price 8.99 qty 19} {code CCC product widget_c desc "Widget Type C" price 7.99 qty 1}]
+{code AAA product widget_a desc "Widget Type A" price 9.99 qty 10} {code BBB product widget_b desc "Widget Type B" price 8.99 qty 19} {code CCC product widget_c desc "Widget Type C" price 7.99 qty 1}
 % set tbody_cols [list product desc price]
 product desc price
 % set tbody [qc::ldict2tbody $dict_list $tbody_cols]

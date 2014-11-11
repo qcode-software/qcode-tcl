@@ -18,17 +18,17 @@ Examples
 ```tcl
 
 % db_0or1row {select order_date from sales_orders where order order_number=123} {
-    puts &quot;No Rows Found&quot;
+    puts "No Rows Found"
 } {
-    puts &quot;Order Date $order_date&quot;
+    puts "Order Date $order_date"
 }
 No Rows Found
 %
 set order_number 654456
 db_0or1row {select order_date from sales_orders where order order_number=:order_number} {
-    puts &quot;No Rows Found&quot;
+    puts "No Rows Found"
 } {
-    puts &quot;Order Date $order_date&quot;
+    puts "Order Date $order_date"
 }
 Order Date 2007-06-04
 

@@ -19,14 +19,14 @@ Examples
 
 % set email jimmy@tarbuck.com
 % sql_where email
-email=&#39;jimmy@tarbuck.com&#39;
+email='jimmy@tarbuck.com'
 % 
 % set name Jimmy
-% set qry &quot;select * from users where [sql_where name $name email $email]&quot;
-select * from users where name=&#39;Jimmy&#39; and email=&#39;jimmy@tarbuck.com&#39;
+% set qry "select * from users where [sql_where name $name email $email]"
+select * from users where name='Jimmy' and email='jimmy@tarbuck.com'
 %
-% set product_code &quot;&quot;
-set qry &quot;select * from products where [sql_where product_code $product_code category $category] LIMIT 100&quot;
+% set product_code ""
+set qry "select * from products where [sql_where product_code $product_code category $category] LIMIT 100"
 select * from products where true LIMIT 100
 
 ```

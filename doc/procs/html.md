@@ -15,20 +15,20 @@ Examples
 --------
 ```tcl
 
-% html span &quot;Hello There&quot;
-&lt;span&gt;Hello There&lt;/span&gt;
+% html span "Hello There"
+<span>Hello There</span>
 %
-% html span &quot;Hello There&quot; class greeting
-&lt;span class=&quot;greeting&quot;&gt;Hello There&lt;/span&gt;
+% html span "Hello There" class greeting
+<span class="greeting">Hello There</span>
 %
-% html span &quot;Hello There&quot; class greeting value Escape&amp;Me
-&lt;span class=&quot;greeting&quot; value=&quot;Escape&amp;amp;Me&quot;&gt;Hello There&lt;/span&gt;
+% html span "Hello There" class greeting value Escape&Me
+<span class="greeting" value="Escape&amp;Me">Hello There</span>
 %
-% html span &quot;Hello There&quot; class greeting id oSpan value &quot;don&#39;t \&quot;quote\&quot; me&quot;
-&lt;span class=&quot;greeting&quot; value=&quot;don&#39;t &amp;#34;quote&amp;#34; me&quot;&gt;Hello There&lt;/span&gt;
+% html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
+<span class="greeting" value="don't &#34;quote&#34; me">Hello There</span>
 %
-%  html span &quot;Hello There&quot; class greeting id oSpan value &quot;don&#39;t \&quot;quote\&quot; me&quot;
-&lt;span class=&quot;greeting&quot; id=&quot;oSpan&quot; value=&quot;don&#39;t &amp;#34;quote&amp;#34; me&quot;&gt;Hello There&lt;/span&gt;
+%  html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
+<span class="greeting" id="oSpan" value="don't &#34;quote&#34; me">Hello There</span>
 
 ```
 

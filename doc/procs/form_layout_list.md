@@ -19,16 +19,16 @@ Examples
         {name firstname value {} label Firstname width 200}
         {name surname value {} label Surname width 250}
         {name email value {} label Email id email_address}
-        {name color value &quot;&quot; label Colour type select options {1 Red 2 Blue 3 Green}}
+        {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
         {name agree value no type checkbox label Agree}
     }
     % qc::form_layout_list $conf
-&lt;div style=&quot;padding-bottom:1em;&quot;&gt;&lt;label for=&quot;firstname&quot;&gt;Firstname&lt;/label&gt;&lt;br&gt;&lt;input style=&quot;width:200px&quot; id=&quot;firstname&quot; name=&quot;firstname&quot; value=&quot;&quot; type=&quot;text&quot;&gt;&lt;/div&gt;&lt;div style=&quot;padding-bottom:1em;&quot;&gt;&lt;label for=&quot;surname&quot;&gt;Surname&lt;/label&gt;&lt;br&gt;&lt;input style=&quot;width:250px&quot; id=&quot;surname&quot; name=&quot;surname&quot; value=&quot;&quot; type=&quot;text&quot;&gt;&lt;/div&gt;&lt;div style=&quot;padding-bottom:1em;&quot;&gt;&lt;label for=&quot;email_address&quot;&gt;Email&lt;/label&gt;&lt;br&gt;&lt;input style=&quot;width:160px&quot; name=&quot;email&quot; value=&quot;&quot; id=&quot;email_address&quot; type=&quot;text&quot;&gt;&lt;/div&gt;&lt;div style=&quot;padding-bottom:1em;&quot;&gt;&lt;label for=&quot;color&quot;&gt;Colour&lt;/label&gt;&lt;br&gt;&lt;select id=&quot;color&quot; name=&quot;color&quot;&gt;
-&lt;option value=&quot;Red&quot;&gt;1&lt;/option&gt;
-&lt;option value=&quot;Blue&quot;&gt;2&lt;/option&gt;
-&lt;option value=&quot;Green&quot;&gt;3&lt;/option&gt;
-&lt;/select&gt;
-&lt;/div&gt;&lt;div style=&quot;padding-bottom:1em;&quot;&gt;&lt;input id=&quot;agree&quot; name=&quot;agree&quot; value=&quot;no&quot; type=&quot;checkbox&quot;&gt; &lt;label for=&quot;agree&quot;&gt;Agree&lt;/label&gt;&lt;/div&gt;
+<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color">
+<option value="Red">1</option>
+<option value="Blue">2</option>
+<option value="Green">3</option>
+</select>
+</div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>
 ```
 
 ----------------------------------

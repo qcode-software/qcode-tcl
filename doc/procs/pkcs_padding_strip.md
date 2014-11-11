@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% set pkcs_padding_append &quot;Hello World\5\5\5\5\5&quot;
+% set pkcs_padding_append "Hello World\5\5\5\5\5"
 Hello World
 
 ```

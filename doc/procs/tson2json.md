@@ -19,16 +19,16 @@ Examples
 
 % tson2json $tson
 {
-        &quot;Image&quot;: {
-            &quot;Width&quot;: 800,
-            &quot;Height&quot;: 600,
-            &quot;Title&quot;: &quot;View from the 15th Floor&quot;,
-            &quot;Thumbnail&quot;: {
-                &quot;Url&quot;: &quot;http://www.example.com/image/481989943&quot;,
-                &quot;Height&quot;: 125,
-                &quot;Width&quot;: &quot;100&quot;
+        "Image": {
+            "Width": 800,
+            "Height": 600,
+            "Title": "View from the 15th Floor",
+            "Thumbnail": {
+                "Url": "http://www.example.com/image/481989943",
+                "Height": 125,
+                "Width": "100"
             },
-            &quot;IDs&quot;: [116,943,234,38793]
+            "IDs": [116,943,234,38793]
         }
     }
 

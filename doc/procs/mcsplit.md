@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set test &quot;this||is||a||delimited||string&quot;
+% set test "this||is||a||delimited||string"
 this||is||a||delimited||string
 % split $test {||}
 this {} is {} a {} delimited {} string

@@ -17,13 +17,13 @@ Examples
 --------
 ```tcl
 
-% set name &quot;Angus Jamison&quot;
+% set name "Angus Jamison"
 Angus Jamison
-% set number &quot;01311111122&quot;
+% set number "01311111122"
 01311111122
-% set xml &quot;&lt;record&gt;[qc::xml_from name number]&lt;/record&gt;&quot;
-&lt;record&gt;&lt;name&gt;Angus Jamison&lt;/name&gt;
-&lt;number&gt;01311111122&lt;/number&gt;&lt;/record&gt;
+% set xml "<record>[qc::xml_from name number]</record>"
+<record><name>Angus Jamison</name>
+<number>01311111122</number></record>
 ```
 
 ----------------------------------

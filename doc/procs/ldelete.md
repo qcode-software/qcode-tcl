@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% set items [list &quot;Mr&quot; &quot;Angus&quot; &quot;Jamison&quot;]
+% set items [list "Mr" "Angus" "Jamison"]
 Mr Angus Jamison
 % qc::ldelete items 0
 Angus Jamison

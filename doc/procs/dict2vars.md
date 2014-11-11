@@ -23,16 +23,16 @@ a 1 b 2 c 3
 4
 
 % qc::dict2vars $dict
-% puts &quot;a:$a, b:$b, c:$c, d:$d&quot;
+% puts "a:$a, b:$b, c:$c, d:$d"
 a:1, b:2, c:3, d:4
 
 % qc::dict2vars $dict a b
-% puts &quot;a:$a, b:$b&quot;
+% puts "a:$a, b:$b"
 a:1, b:2
 
 % qc::dict2vars $dict a b d
-% puts &quot;a:$a, b:$b, d:$d&quot;
-can&#39;t read &quot;d&quot;: no such variable
+% puts "a:$a, b:$b, d:$d"
+can't read "d": no such variable
 
 ```
 

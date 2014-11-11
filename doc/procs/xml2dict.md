@@ -21,14 +21,14 @@ Examples
 ```tcl
 
 % set xml {
-&lt;?xml version=&quot;1.0&quot;?&gt;
-    &lt;messages&gt;
-   &lt;note&gt;
-        &lt;to&gt;Bill&lt;/to&gt;
-        &lt;from&gt;Ben&lt;/from&gt;
-        &lt;body&gt;Information&lt;/body&gt;
-    &lt;/note&gt;
-&lt;/messages&gt;
+<?xml version="1.0"?>
+    <messages>
+   <note>
+        <to>Bill</to>
+        <from>Ben</from>
+        <body>Information</body>
+    </note>
+</messages>
 }
 
 % xml2dict $xml messages
@@ -40,19 +40,19 @@ XML parse error
     
 
 % set xml {
-&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;messages&gt;
-    &lt;note&gt;
-        &lt;to&gt;Bill&lt;/to&gt;
-        &lt;from&gt;Ben&lt;/from&gt;
-        &lt;body type=&quot;text&quot;&gt;Information&lt;/body&gt;
-    &lt;/note&gt;
-    &lt;note&gt;
-        &lt;to&gt;Ben&lt;/to&gt;
-        &lt;from&gt;Bill&lt;/from&gt;
-        &lt;body&gt;What&lt;/body&gt;
-    &lt;/note&gt;
-&lt;/messages&gt;
+<?xml version="1.0"?>
+<messages>
+    <note>
+        <to>Bill</to>
+        <from>Ben</from>
+        <body type="text">Information</body>
+    </note>
+    <note>
+        <to>Ben</to>
+        <from>Bill</from>
+        <body>What</body>
+    </note>
+</messages>
 }
 
 % xml2dict $xml note

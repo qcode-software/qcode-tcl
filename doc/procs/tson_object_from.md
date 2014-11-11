@@ -17,10 +17,10 @@ Examples
 
 % set foo Hello
 Hello
-% set bar &quot;World&#39;s Apart&quot;
-World&#39;s Apart
+% set bar "World's Apart"
+World's Apart
 % qc::tson_object_from foo bar
-object foo {string Hello} bar {string {World&#39;s Apart}}
+object foo {string Hello} bar {string {World's Apart}}
 
 ```
 

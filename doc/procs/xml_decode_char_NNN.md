@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::xml_decode_char_NNN &quot;&amp;#167; and &amp;#166; are special characters.&quot;
+% qc::xml_decode_char_NNN "&#167; and &#166; are special characters."
  § and ¦ are special characters.
 ```
 

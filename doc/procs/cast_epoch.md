@@ -26,10 +26,10 @@ Examples
 1192489200
 % 
 # times can be hh:mm or hh:mm:ss
-% cast_epoch &quot;2007-10-16 10:12:36&quot;
+% cast_epoch "2007-10-16 10:12:36"
 1192525956
     # With ISO offset timezone in formats -hh, -hhmm or -hh:mm
-    % cast_epoch &quot;2007-10-16 12:14:34.15445 +05&quot;
+    % cast_epoch "2007-10-16 12:14:34.15445 +05"
     1192518874
 
 ```

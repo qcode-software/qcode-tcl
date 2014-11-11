@@ -18,11 +18,11 @@ Examples
 ```tcl
 
 widget_radiogroup name sex value M options {Male M Female F}
-&lt;div class=&quot;radio-group&quot; name=&quot;sex&quot; id=&quot;sex&quot;&gt;
-&lt;input id=&quot;sexM&quot; value=&quot;M&quot; name=&quot;sex&quot; type=&quot;radio&quot; checked&gt;&amp;nbsp;&lt;label for=&quot;sexM&quot;&gt;Male&lt;/label&gt;
-&amp;nbsp; &amp;nbsp;
-&lt;input id=&quot;sexF&quot; value=&quot;F&quot; name=&quot;sex&quot; type=&quot;radio&quot;&gt;&amp;nbsp;&lt;label for=&quot;sexF&quot;&gt;Female&lt;/label&gt;
-&lt;/div&gt;
+<div class="radio-group" name="sex" id="sex">
+<input id="sexM" value="M" name="sex" type="radio" checked>&nbsp;<label for="sexM">Male</label>
+&nbsp; &nbsp;
+<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label>
+</div>
 
 ```
 

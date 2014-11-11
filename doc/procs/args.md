@@ -39,9 +39,9 @@ Examples
     qc::args $args -foo ? -bar 0 --
         # If called without any options, foo will be undefined, and bar will be 0.
         if { [info exists foo] } {
-            return &quot;foo $foo bar $bar&quot;
+            return "foo $foo bar $bar"
         } else {
-            return &quot;foo UNDEF bar $bar&quot;
+            return "foo UNDEF bar $bar"
         }
   }
 
@@ -55,7 +55,7 @@ Examples
     qc::args $args -foo --
         # If called without any options, both will be undefined unless a default is manually set as in this case.
         qc::default foo false
-        return &quot;foo is $foo&quot;
+        return "foo is $foo"
 }
 
     % switch_test
@@ -67,7 +67,7 @@ Examples
     % proc test {args} {
         qc::args $args -foo -bar bar_default -- thud grunt
         qc::default foo false
-        return &quot;foo $foo bar $bar thud $thud grunt $grunt&quot;
+        return "foo $foo bar $bar thud $thud grunt $grunt"
     }
 
     % test -bar 999 -foo quux quuux
@@ -80,10 +80,10 @@ Examples
     Too few values
 
     % test quux quuux quuuux
-    Too many values; expected 2 but got 3 in &quot;quux quuux quuuux&quot;
+    Too many values; expected 2 but got 3 in "quux quuux quuuux"
     
     % test quux quuux -baz 999
-    Illegal option &quot;baz&quot;
+    Illegal option "baz"
 
 ```
 

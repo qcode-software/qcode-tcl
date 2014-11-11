@@ -22,13 +22,13 @@ Examples
 % cast_date yesterday
 2007-05-11
 %
-% cast_date &quot;June 23rd&quot;
+% cast_date "June 23rd"
 2007-06-23
 %
 % cast_date 16
 % 2007-10-16
 %
-% cast_date &quot;23rd 2008 June&quot;
+% cast_date "23rd 2008 June"
 2008-06-23
 
 ```

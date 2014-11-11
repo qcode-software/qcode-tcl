@@ -18,7 +18,7 @@ Examples
 % date_month 2007-05-06
 % 5
 %
-% date_month &quot;last month&quot;
+% date_month "last month"
 % 4
 
 ```

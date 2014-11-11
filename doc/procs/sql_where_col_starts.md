@@ -16,10 +16,10 @@ Examples
 ```tcl
 
 % sql_where_col_starts email jim
-email ~ &#39;^jim&#39;
+email ~ '^jim'
 % 
 % sql_where_col_starts name Jim Mac
-name ~ &#39;^Jim&#39; or name ~ &#39;^Mac&#39;
+name ~ '^Jim' or name ~ '^Mac'
 
 ```
 

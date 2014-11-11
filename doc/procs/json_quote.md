@@ -15,8 +15,8 @@ Examples
 --------
 ```tcl
 
-% qc::json_quote {He said &quot;Hello World!&quot;}
-&quot;He said \&quot;Hello World!\&quot;&quot;
+% qc::json_quote {He said "Hello World!"}
+"He said \"Hello World!\""
 
 ```
 

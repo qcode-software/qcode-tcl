@@ -17,7 +17,7 @@ Examples
 
 % format_cc_tail 4111111111111111
 1111
-% format_cc_tail &quot;4111 **** **** 1111&quot; 4
+% format_cc_tail "4111 **** **** 1111" 4
 1111
 
 ```

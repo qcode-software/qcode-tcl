@@ -20,13 +20,13 @@ Examples
 
 # Lets say we have a proc called hello
 proc hello {name message} {
-    return_html &quot;$name said $message&quot;
+    return_html "$name said $message"
 }
-# When handling a request for some-url.html?name=John&amp;message=Hello%20World
+# When handling a request for some-url.html?name=John&message=Hello%20World
 % form_proc hello
 John said Hello World
 # equivalent to
-% hello John &quot;Hello World&quot;
+% hello John "Hello World"
 John said Hello World
 
 ```

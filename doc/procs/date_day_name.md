@@ -18,7 +18,7 @@ Examples
 % date_day_name 2007-05-06
 % Sunday
 %
-% date_day_name &quot;2 days ago&quot;
+% date_day_name "2 days ago"
 % Monday
 
 ```
