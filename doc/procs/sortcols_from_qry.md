@@ -1,7 +1,7 @@
 qc::sortcols_from_qry
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::contains_creditcard
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

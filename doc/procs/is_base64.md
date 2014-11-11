@@ -1,7 +1,7 @@
 qc::is_base64
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

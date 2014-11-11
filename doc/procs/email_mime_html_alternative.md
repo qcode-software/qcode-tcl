@@ -1,7 +1,7 @@
 qc::email_mime_html_alternative
 ===============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

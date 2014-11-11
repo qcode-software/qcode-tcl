@@ -1,7 +1,7 @@
 qc::sql_array2list
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

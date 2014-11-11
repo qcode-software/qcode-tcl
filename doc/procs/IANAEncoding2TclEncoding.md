@@ -1,7 +1,7 @@
 qc::IANAEncoding2TclEncoding
 ============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

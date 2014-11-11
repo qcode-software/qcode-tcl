@@ -1,7 +1,7 @@
 qc::session_new
 ===============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

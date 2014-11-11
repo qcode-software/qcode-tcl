@@ -1,7 +1,7 @@
 qc::form_proc
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

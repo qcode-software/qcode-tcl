@@ -1,7 +1,7 @@
 qc::pkcs_padding_strip
 ======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

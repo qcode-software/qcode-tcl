@@ -1,7 +1,7 @@
 qc::db_cache_0or1row
 ====================
 
-part of [Cached Database API](../)
+part of [Cached Database API](../db_cache.md)
 
 Usage
 -----

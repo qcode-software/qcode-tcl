@@ -1,7 +1,7 @@
 qc::css_attribute_selector2xpath
 ================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

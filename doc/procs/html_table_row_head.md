@@ -1,7 +1,7 @@
 qc::html_table_row_head
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

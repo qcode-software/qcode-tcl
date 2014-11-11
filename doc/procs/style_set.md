@@ -1,7 +1,7 @@
 qc::style_set
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

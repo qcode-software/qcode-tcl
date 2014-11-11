@@ -1,7 +1,7 @@
 qc::cookie_string_is_valid
 ==========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

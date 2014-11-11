@@ -1,7 +1,7 @@
 qc::format_commify
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

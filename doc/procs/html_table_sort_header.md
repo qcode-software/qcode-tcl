@@ -1,7 +1,7 @@
 qc::html_table_sort_header
 ==========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

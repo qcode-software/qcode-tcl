@@ -1,7 +1,7 @@
 qc::xml_encode_char
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

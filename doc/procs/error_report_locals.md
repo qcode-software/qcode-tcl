@@ -1,7 +1,7 @@
 qc::error_report_locals
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

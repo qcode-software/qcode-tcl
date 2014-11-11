@@ -1,7 +1,7 @@
 qc::sql_insert_with
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

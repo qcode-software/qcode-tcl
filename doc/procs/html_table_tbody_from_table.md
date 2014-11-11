@@ -1,7 +1,7 @@
 qc::html_table_tbody_from_table
 ===============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

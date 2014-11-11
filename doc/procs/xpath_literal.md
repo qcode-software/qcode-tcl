@@ -1,7 +1,7 @@
 qc::xpath_literal
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

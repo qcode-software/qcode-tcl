@@ -1,7 +1,7 @@
 qc::param_datastore_save
 ========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

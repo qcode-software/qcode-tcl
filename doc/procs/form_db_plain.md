@@ -1,7 +1,7 @@
 qc::form_db_plain
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

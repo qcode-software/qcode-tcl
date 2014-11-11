@@ -1,7 +1,7 @@
 qc::html_col_styles_apply2td
 ============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

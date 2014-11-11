@@ -1,7 +1,7 @@
 qc::binary_convert_unit_prefix2mult
 ===================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

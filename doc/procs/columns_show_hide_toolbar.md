@@ -1,7 +1,7 @@
 qc::columns_show_hide_toolbar
 =============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

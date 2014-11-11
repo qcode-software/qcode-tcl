@@ -1,7 +1,7 @@
 qc::css_pseudo_class2xpath
 ==========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::session_purge
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

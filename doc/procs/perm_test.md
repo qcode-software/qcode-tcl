@@ -1,7 +1,7 @@
 qc::perm_test
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

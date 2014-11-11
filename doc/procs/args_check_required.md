@@ -1,7 +1,7 @@
 qc::args_check_required
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

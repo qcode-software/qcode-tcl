@@ -1,7 +1,7 @@
 qc::date_yesterday
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

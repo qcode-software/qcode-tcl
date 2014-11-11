@@ -1,7 +1,7 @@
 qc::s3_xml_select
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::is_mobile_number
 ====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

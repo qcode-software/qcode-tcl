@@ -1,7 +1,7 @@
 qc::dict2perl_hash
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

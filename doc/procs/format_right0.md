@@ -1,7 +1,7 @@
 qc::format_right0
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

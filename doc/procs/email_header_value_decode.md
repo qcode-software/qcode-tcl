@@ -1,7 +1,7 @@
 qc::email_header_value_decode
 =============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::plupload.html
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

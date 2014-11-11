@@ -1,7 +1,7 @@
 qc::is_creditcard_masked
 ========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

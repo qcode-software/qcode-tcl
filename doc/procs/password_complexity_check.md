@@ -1,7 +1,7 @@
 qc::password_complexity_check
 =============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

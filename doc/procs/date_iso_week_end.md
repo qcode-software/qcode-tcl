@@ -1,7 +1,7 @@
 qc::date_iso_week_end
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

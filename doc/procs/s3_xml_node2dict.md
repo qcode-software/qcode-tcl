@@ -1,7 +1,7 @@
 qc::s3_xml_node2dict
 ====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

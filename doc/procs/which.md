@@ -1,7 +1,7 @@
 qc::which
 =========
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

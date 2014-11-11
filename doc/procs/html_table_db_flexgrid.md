@@ -1,7 +1,7 @@
 qc::html_table_db_flexgrid
 ==========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

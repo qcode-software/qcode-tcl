@@ -1,7 +1,7 @@
 qc::excel_file_create
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::schedule_start
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::sticky_default
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

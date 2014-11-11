@@ -1,7 +1,7 @@
 qc::ofc_bar2tson
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

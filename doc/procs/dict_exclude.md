@@ -1,7 +1,7 @@
 qc::dict_exclude
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

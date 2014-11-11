@@ -1,7 +1,7 @@
 qc::widget_button
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

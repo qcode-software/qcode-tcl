@@ -1,7 +1,7 @@
 qc::table2array
 ===============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

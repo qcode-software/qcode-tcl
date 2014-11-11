@@ -1,7 +1,7 @@
 qc::setif
 =========
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

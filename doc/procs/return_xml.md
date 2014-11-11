@@ -1,7 +1,7 @@
 qc::return_xml
 ==============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

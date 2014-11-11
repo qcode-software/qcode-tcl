@@ -1,7 +1,7 @@
 qc::s3_auth_headers
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

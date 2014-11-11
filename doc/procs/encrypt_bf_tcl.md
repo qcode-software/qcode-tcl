@@ -1,7 +1,7 @@
 qc::encrypt_bf_tcl
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

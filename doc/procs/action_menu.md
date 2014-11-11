@@ -1,7 +1,7 @@
 qc::action_menu
 ===============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

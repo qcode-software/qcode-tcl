@@ -1,7 +1,7 @@
 qc::return_next
 ===============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

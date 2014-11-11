@@ -1,7 +1,7 @@
 qc::sigfigs_ceil
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

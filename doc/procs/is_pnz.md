@@ -1,7 +1,7 @@
 qc::is_pnz
 ==========
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

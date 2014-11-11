@@ -1,7 +1,7 @@
 qc::cell_meta2perl
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

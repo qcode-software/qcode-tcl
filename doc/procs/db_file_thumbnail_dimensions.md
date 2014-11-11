@@ -1,7 +1,7 @@
 qc::db_file_thumbnail_dimensions
 ================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

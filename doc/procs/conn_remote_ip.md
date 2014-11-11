@@ -1,7 +1,7 @@
 qc::conn_remote_ip
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

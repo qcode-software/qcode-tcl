@@ -1,7 +1,7 @@
 qc::url_parts
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

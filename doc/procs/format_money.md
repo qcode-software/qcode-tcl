@@ -1,7 +1,7 @@
 qc::format_money
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

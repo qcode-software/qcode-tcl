@@ -1,7 +1,7 @@
 qc::strip_common_leading_whitespace
 ===================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

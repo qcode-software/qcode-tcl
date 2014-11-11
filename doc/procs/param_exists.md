@@ -1,7 +1,7 @@
 qc::param_exists
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

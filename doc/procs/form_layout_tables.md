@@ -1,7 +1,7 @@
 qc::form_layout_tables
 ======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::format_timestamp_rel
 ========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::format_cc_masked_string
 ===========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

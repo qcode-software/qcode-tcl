@@ -1,7 +1,7 @@
 qc::widget_compare
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::html_table_thead_from_cols
 ==============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::html_a_replace
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

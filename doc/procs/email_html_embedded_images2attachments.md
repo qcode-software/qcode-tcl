@@ -1,7 +1,7 @@
 qc::email_html_embedded_images2attachments
 ==========================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

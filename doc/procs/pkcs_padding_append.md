@@ -1,7 +1,7 @@
 qc::pkcs_padding_append
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

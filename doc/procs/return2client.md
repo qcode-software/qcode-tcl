@@ -1,7 +1,7 @@
 qc::return2client
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

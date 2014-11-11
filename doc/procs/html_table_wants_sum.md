@@ -1,7 +1,7 @@
 qc::html_table_wants_sum
 ========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

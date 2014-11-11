@@ -1,7 +1,7 @@
 qc::sql_where_compare
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

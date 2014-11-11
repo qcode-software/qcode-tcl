@@ -1,7 +1,7 @@
 qc::conn_host
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

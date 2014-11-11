@@ -1,7 +1,7 @@
 qc::conn_marshal
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

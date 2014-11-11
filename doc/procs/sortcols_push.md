@@ -1,7 +1,7 @@
 qc::sortcols_push
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::image_file_info
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

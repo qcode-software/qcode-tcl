@@ -1,7 +1,7 @@
 qc::sql_where_word_in
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

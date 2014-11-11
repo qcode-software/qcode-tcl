@@ -1,7 +1,7 @@
 qc::table_foreach
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

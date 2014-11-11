@@ -1,7 +1,7 @@
 qc::html_table_list
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

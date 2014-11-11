@@ -1,7 +1,7 @@
 qc::format_cc_tail
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

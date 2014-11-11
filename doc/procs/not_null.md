@@ -1,7 +1,7 @@
 qc::not_null
 ============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

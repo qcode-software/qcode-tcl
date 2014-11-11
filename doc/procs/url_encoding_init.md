@@ -1,7 +1,7 @@
 qc::url_encoding_init
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::html_tag
 ============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

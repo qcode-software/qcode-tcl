@@ -1,7 +1,7 @@
 qc::ns_set_to_dict
 ==================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

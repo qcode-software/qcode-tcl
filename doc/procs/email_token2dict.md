@@ -1,7 +1,7 @@
 qc::email_token2dict
 ====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

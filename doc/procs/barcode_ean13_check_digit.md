@@ -1,7 +1,7 @@
 qc::barcode_ean13_check_digit
 =============================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

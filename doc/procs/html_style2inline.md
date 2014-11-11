@@ -1,7 +1,7 @@
 qc::html_style2inline
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

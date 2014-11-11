@@ -1,7 +1,7 @@
 qc::perm_test_employee
 ======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

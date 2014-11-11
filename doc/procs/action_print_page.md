@@ -1,7 +1,7 @@
 qc::action_print_page
 =====================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

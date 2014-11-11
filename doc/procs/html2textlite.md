@@ -1,7 +1,7 @@
 qc::html2textlite
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

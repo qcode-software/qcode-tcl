@@ -1,7 +1,7 @@
 qc::is_hex
 ==========
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

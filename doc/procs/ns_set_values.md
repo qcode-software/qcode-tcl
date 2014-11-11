@@ -1,7 +1,7 @@
 qc::ns_set_values
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

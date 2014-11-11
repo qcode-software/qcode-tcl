@@ -1,7 +1,7 @@
 qc::html_paragraph_layout
 =========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

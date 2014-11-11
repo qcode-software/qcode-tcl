@@ -1,7 +1,7 @@
 qc::url_to_html_hidden
 ======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

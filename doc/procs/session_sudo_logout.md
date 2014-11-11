@@ -1,7 +1,7 @@
 qc::session_sudo_logout
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

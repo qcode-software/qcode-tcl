@@ -1,7 +1,7 @@
 qc::html2text
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

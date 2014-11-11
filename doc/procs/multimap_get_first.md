@@ -1,7 +1,7 @@
 qc::multimap_get_first
 ======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

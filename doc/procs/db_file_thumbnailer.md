@@ -1,7 +1,7 @@
 qc::db_file_thumbnailer
 =======================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

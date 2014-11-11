@@ -1,7 +1,7 @@
 qc::round_up
 ============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

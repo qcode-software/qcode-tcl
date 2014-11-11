@@ -1,7 +1,7 @@
 qc::html_table_format_cell_if_number
 ====================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

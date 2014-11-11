@@ -1,7 +1,7 @@
 qc::db_file_thumbnail_cache_create
 ==================================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

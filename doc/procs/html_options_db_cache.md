@@ -1,7 +1,7 @@
 qc::html_options_db_cache
 =========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

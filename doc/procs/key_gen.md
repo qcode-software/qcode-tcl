@@ -1,7 +1,7 @@
 qc::key_gen
 ===========
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

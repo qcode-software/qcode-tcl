@@ -1,7 +1,7 @@
 qc::s3_base64_md5
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

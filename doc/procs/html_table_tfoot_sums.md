@@ -1,7 +1,7 @@
 qc::html_table_tfoot_sums
 =========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::ssh_call_proc
 =================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::ldict_search
 ================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::socket_gets_if_ready
 ========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

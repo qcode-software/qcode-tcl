@@ -1,7 +1,7 @@
 qc::socket_puts
 ===============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::list2perl_array
 ===================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::db_cache_select_table
 =========================
 
-part of [Cached Database API](../)
+part of [Cached Database API](../db_cache.md)
 
 Usage
 -----

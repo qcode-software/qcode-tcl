@@ -1,7 +1,7 @@
 qc::format_timestamp2hour
 =========================
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----

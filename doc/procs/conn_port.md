@@ -1,7 +1,7 @@
 qc::conn_port
 =============
 
-part of [Docs](.)
+part of [Docs](../index.md)
 
 Usage
 -----
