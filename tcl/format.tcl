@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export format_*
 }
@@ -10,13 +8,9 @@ proc qc::format_commify {number} {
     return $number
 }
 
-
-
 proc qc::format_money { value } {
     return [format_commify [qc::round $value 2]]
 }
-
-
 
 proc qc::format_dec { value dec_places } {
     #| Round and commify decimal
@@ -24,15 +18,11 @@ proc qc::format_dec { value dec_places } {
     return [format_commify [qc::round $value $dec_places]]
 }
 
-
-
 proc qc::format_int {value} {
     # Round to integer and commify
     # 2314.235 -> 2,314
     return [format_commify [qc::round $value 0]]
 }
-
-
 
 proc qc::format_linebreak {string width} {
     #| Split $string into a list of lines without exceeding $width
@@ -53,16 +43,12 @@ proc qc::format_linebreak {string width} {
     lappend result $string
 }
 
-
-
 proc qc::format_cc {cc_no} {
     #| Format a credit card number in groups of 4 digits
     #| strip non digits
     regsub -all {[^0-9]} $cc_no {} cc_no
     return [join [format_linebreak $cc_no 4] " "]
 }
-
-
 
 proc qc::format_cc_bin {cc_no {prefix 6}} {
     #| First prefix digits of cc_no
@@ -72,8 +58,6 @@ proc qc::format_cc_bin {cc_no {prefix 6}} {
     return [string range $cc_no 0 "$prefix-1"]
 }
 
-
-
 proc qc::format_cc_tail {cc_no {suffix 4}} {
     #| First prefix digits of cc_no
     if { $suffix > 4 } { error "suffix must be less than 4" }
@@ -81,8 +65,6 @@ proc qc::format_cc_tail {cc_no {suffix 4}} {
     regsub -all {[^0-9\*]} $cc_no {} cc_no
     return [string range $cc_no "end-[expr {$suffix - 1}]" end]
 }
-
-
 
 proc qc::format_cc_masked {cc_no {prefix 6} {suffix 4}} {
     if { ![is_creditcard $cc_no] } {
@@ -98,8 +80,6 @@ proc qc::format_cc_masked {cc_no {prefix 6} {suffix 4}} {
 
     return [join [format_linebreak $masked_cc_no 4] " "]
 }
-
-
 
 proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
     if { $prefix > 6 } { error "prefix must be less than 6" }
@@ -130,8 +110,6 @@ proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
     return $masked_string
 }
 
-
-
 proc qc::format_ordinal {number} {
     #| Format number with suffix 23 -> 23rd or 4 -> 4th
     # Taken from TCL Wiki RS
@@ -146,8 +124,6 @@ proc qc::format_ordinal {number} {
     append number $suffix
 }
 
-
-
 # TODO Could this be named differently? Not sure a user would expect this to truncate
 # strings longer than $width
 proc qc::format_right0 {string width} {
@@ -155,21 +131,15 @@ proc qc::format_right0 {string width} {
     return [format "%0${width}.${width}s" $string]
 }
 
-
-
 proc qc::format_left {string width} {
     #| Padd with spaces left justified
     return [format "%-${width}.${width}s" $string]
 }
 
-
-
 proc qc::format_right {string width} {
     # Pad with spaces right justified
     return [format "%${width}.${width}s" $string]
 }
-
-
 
 proc qc::format_center { string width } {
     #| Pad string with spaces to be aligned centrally
@@ -187,8 +157,6 @@ proc qc::format_bool { value {true Yes} {false No}} {
 	return "<span class=\"false\">$false</span>"
     }
 }
-
-
 
 proc qc::format_yesno { value } {
     #| Call format_bool with default Yes/No
@@ -229,5 +197,4 @@ proc qc::format_if_number {args} {
     }
     return $value
 }
-
 

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export ofc_*
 }
@@ -65,8 +63,6 @@ proc qc::ofc_piechart {args} {
 
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
-
-
 
 proc /doc/ofc_pie_examples.html {} {
     sset html {
@@ -198,8 +194,6 @@ proc qc::ofc_linechart {args} {
     
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
-
-
 
 proc /doc/ofc_line_examples.html {} { 
 
@@ -387,8 +381,6 @@ proc qc::ofc_barchart {args} {
     
     set html [ofc_html $id [tson2json $tson] $width $height]
 }
-
-
 
 proc /doc/ofc_bar_examples.html {} { 
 

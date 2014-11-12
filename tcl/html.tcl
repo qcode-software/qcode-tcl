@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html
 }
@@ -55,13 +53,10 @@ doc qc::html2pdf {
     }
 }
 
-
 proc qc::html {tagName nodeValue args} {
     #| Generate an html node
     return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"
 }
-
-
 
 proc qc::html_tag { tagName args } {
     #| Generate just the opening html tag
@@ -82,21 +77,15 @@ proc qc::html_tag { tagName args } {
     }
 }
 
-
-
 proc qc::html_escape {html} {
     #| Convert html markup characters to HTML entities
     return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
 }
 
-
-
 proc qc::html_unescape { text } {
     #| Convert html entities back to text
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
-
-
 
 proc qc::html_hidden { args } {
     #| Create hidden fields from vars
@@ -107,8 +96,6 @@ proc qc::html_hidden { args } {
     return $html
 }
 
-
-
 proc qc::html_hidden_set { args } {
     #| Create hidden fields from list of name value pairs.
     set html {}
@@ -117,8 +104,6 @@ proc qc::html_hidden_set { args } {
     }
     return $html
 }
-
-
 
 proc qc::html_list { list args } {
     #| Convert list into HTML list.
@@ -130,23 +115,17 @@ proc qc::html_list { list args } {
     return $html
 }
 
-
-
 proc qc::html_a { link url args } {
     # Create a HTML hyperlink 
     lappend args href $url
     return [html a $link {*}$args]
 }
 
-
-
 proc qc::html_a_replace { link url args } {
     # Used to replace browser history state so browser back button will not record these urls.
     lappend args onclick "location.replace(this.href);return false;"
     return [html_a $link $url {*}$args]
 }
-
-
 
 proc qc::html_id { name {value UNDEF}} {
     #| Wrap value in span tag and give it an ID
@@ -157,14 +136,10 @@ proc qc::html_id { name {value UNDEF}} {
     return [html span $value id $name]
 }
 
-
-
 proc qc::html_menu { lmenu } {
     #| Join items to form a horizontal menu
     return [join $lmenu " &nbsp;<b>|</b>&nbsp; "]
 }
-
-
 
 proc qc::html_paragraph_layout {args} {
     #| Construct paragraph elements as a bold title with the detail below it by default.
@@ -174,8 +149,6 @@ proc qc::html_paragraph_layout {args} {
     }
     return $html
 }
-
-
 
 proc qc::html2text { html } {
     #| Wrapper for html2text. Input encoding UTF-8, Output encoding UTF-8
@@ -211,8 +184,6 @@ proc qc::html_info_tables {args} {
     return [qc::html_table class "columns-container" tbody [list $row]]
 }
 
-
-
 proc qc::html_styles2inline {html} {
     #| Applies defined styles in html head as inline styles for relevant elements in body
     set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
@@ -223,8 +194,6 @@ proc qc::html_styles2inline {html} {
     }
     return $html
 }
-
-
 
 proc qc::html_style2inline {html style} {
     #| Helper proc for qc::html_styles2inline
@@ -327,8 +296,6 @@ proc qc::html_col_styles_apply2td {html} {
     return $html
 }
 
-
-
 proc qc::html_clean {html} {
 
     # Get rid of unnecessary tags
@@ -371,7 +338,6 @@ proc qc::html_clean {html} {
 
 	set start [expr {[lindex $match 0]+[string length $replace]}]
     }
-
 
     set start 0
     while { $start<[string length $html] && \

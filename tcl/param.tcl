@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export param_exists param_set param_get
 }

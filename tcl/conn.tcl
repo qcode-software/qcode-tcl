@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export conn_*
 }
@@ -17,8 +15,6 @@ proc qc::conn_remote_ip {} {
     }
     return $ip
 }
-
-
 
 proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
@@ -72,8 +68,6 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
         }
     }
 }
-
-
 
 proc qc::conn_url {} {
     #| Try to construct the full url of this request.

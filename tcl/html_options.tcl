@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export html_options_*
 }
@@ -15,8 +13,6 @@ proc qc::html_options_db { qry } {
     return $options
 }
 
-
-
 proc qc::html_options_db_cache { qry {ttl 86400}} {
     #| Expects a qry use columns named "name" and "value"
     #| Use aliases where required.
@@ -29,8 +25,6 @@ proc qc::html_options_db_cache { qry {ttl 86400}} {
     return $options
 }
 
-
-
 proc qc::html_options_simple { args } {
     #| Use list items as both name and value
     #| Eg Converts one two three -> one one two two three three
@@ -40,5 +34,4 @@ proc qc::html_options_simple { args } {
     }
     return $options
 }
-
 

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export round round_up rshift10 intplaces add sum subtr mult exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
 
@@ -58,15 +56,11 @@ proc qc::round { value dec_places } {
     }
 }
 
-
-
 proc qc::round_up { value trunc_places } {
     #| Round up to the nearest $trunc_places decimal places
     set value [expr {double(ceil($value*pow(10,$trunc_places)))/pow(10,$trunc_places)}]
     return [format "%.${trunc_places}f" $value]
 }
-
-
 
 proc qc::rshift10 {int dec_places} {
     #| Format right aligned padding left
@@ -92,8 +86,6 @@ proc qc::rshift10 {int dec_places} {
     }
 }
 
-
-
 proc qc::intplaces { number } {
     #| Shift the decimal point n places to the right until $number is an int. Return int and n.
     set k  [string first . $number]
@@ -113,14 +105,10 @@ proc qc::intplaces { number } {
     return [list $number $dec_places]
 }
 
-
-
 proc qc::add { n1 n2 } {
     #| Adds 2 numbers with check for overflow
     return [expr {$n1 + $n2}]
 }
-
-
 
 proc qc::sum { sum args } {
     #| Returns the sum of list of number.
@@ -130,21 +118,15 @@ proc qc::sum { sum args } {
     return $sum
 }
 
-
-
 proc qc::subtr { n1 n2 } {
     #| Subtracts with check for overflow
     return [expr {$n1 - $n2}]
 }
 
-
-
 proc qc::mult { n1 n2 } {
     #| Multiplies 2 numbers with check for overflow
     return [expr {$n1*$n2}]
 }
-
-
 
 proc qc::exp2string { number } {
     #| Convert floats including exponentials to strings
@@ -170,8 +152,6 @@ proc qc::exp2string { number } {
     }
 }
 
-
-
 proc qc::base {base number} {
     #| Convert supplied number to specified base 
     set negative [regexp ^-(.+) $number -> number] ;# (1)
@@ -188,8 +168,6 @@ proc qc::base {base number} {
     if $negative {set res -$res}
     set res
  }
-
-
 
 proc qc::frombase {base number} {
     #| Converts a number from the specified base to base 10
@@ -209,8 +187,6 @@ proc qc::frombase {base number} {
     set res
 }
 
-
-
 proc qc::mantissa_exponent {x} {
     #| Returns the mantissa and exponent which would be used to represent x
     if { $x==0 } { return [list 0 0] }
@@ -219,8 +195,6 @@ proc qc::mantissa_exponent {x} {
     while { abs($m)<1.0 } { incr e -1; set m [expr {$m*10}] }
     return [list $m $e]
 }
-
-
 
 proc qc::sigfigs {x n} {
     #| Returns x to n significant figures
@@ -234,8 +208,6 @@ proc qc::sigfigs {x n} {
     }
 }
 
-
-
 proc qc::sigfigs_ceil {x n} {
     #| Returns x to n significant figures rounding up
     if { $x==0 } { return 0 }
@@ -247,5 +219,4 @@ proc qc::sigfigs_ceil {x n} {
 	return [qc::round [expr {ceil(double($x)/$p)*$p}] 0]
     }
 }
-
 

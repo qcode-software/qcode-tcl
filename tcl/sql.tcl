@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with sql_limit
 }
@@ -11,17 +9,12 @@ proc qc::sql_set {args} {
     return [join $set_list ,]
 }
 
-
-
 proc qc::sql_set_varchars_truncate {table args} {
     foreach name $args {
         lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
     }
     return [join $set_list ,]
 }
-
-
-
 
 proc qc::sql_set_with {args} {
     foreach {name value} $args {
@@ -38,8 +31,6 @@ proc qc::sql_insert { args } {
     return "( [join $cols ,] ) values ( [join $values ,] )" 
 }
 
-
-
 proc qc::sql_insert_with { args } {
     #| Construct a SQL INSERT statement using the name value pairs given
     foreach {name value} $args {
@@ -48,8 +39,6 @@ proc qc::sql_insert_with { args } {
     }
     return "( [join $cols ,] ) values ( [join $values ,] )" 
 }
-
-
 
 proc qc::sql_sort { args } {
     args $args -paging -limit ? -nulls last -- args
@@ -146,8 +135,6 @@ proc qc::sql_sort { args } {
     }
 }
 
-
-
 proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan feb mar apr may jun jul aug sep oct nov dec}}} {
     #| SQL case for crosstab style queries
     set alt_value [db_quote $alt_value]
@@ -170,15 +157,11 @@ proc qc::sql_in {list {type ""}} {
     }
 }
 
-
-
 proc qc::sql_array2list {array} {
     # Convert Postgresql 1-dimensional Array to a Tcl list
     set list [csv2list [string map [list \{ "" \} "" \\\" \"\"] $array]]
     return [lreplace_values $list NULL ""]
 }
-
-
 
 proc qc::sql_list2array { args } {
     #| Convert a list into a PostgrSQL array literal.
@@ -197,8 +180,6 @@ proc qc::sql_list2array { args } {
 	return array\[[join $lquoted ,]\]$sql_cast
     }
 }
-
-
 
 proc qc::sql_where_postcode {column postcode} {
     #| Search for rows matching this full or partial UK postcode.
@@ -238,8 +219,6 @@ proc qc::sql_where_postcode {column postcode} {
     
     return [db_qry_parse "$column ~ :regexp"]
 }
-
-
 
 proc qc::sql_insert_or_update_with {table primary_key_cols dict} {
     #| Run an insert or update query against this table after checking the primary key for existence.

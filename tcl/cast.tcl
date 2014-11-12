@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export cast_*
-}
-
-doc cast {
-    Title "Casting Procs"
-    Url {/qc/wiki/CastPage}
 }
 
 proc qc::cast_integer {string} {
@@ -31,8 +24,6 @@ proc qc::cast_integer {string} {
     }
 }
 
-
-
 proc qc::cast_int {string} {
     return [qc::cast_integer $string]
 }
@@ -52,21 +43,15 @@ proc qc::cast_decimal {string {precision ""}} {
     }
 }
 
-
-
 proc qc::cast_date {string} {
     #| Try to convert the given string into an ISO date.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d"]
 }
 
-
-
 proc qc::cast_timestamp {string} {
     #| Try to convert the given string into an ISO datetime.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
 }
-
-
 
 proc qc::cast_timestamptz {string} {
     #| Try to convert the given string into an ISO datetime with timezone.
@@ -188,8 +173,6 @@ proc qc::cast_epoch { string } {
     return [clock scan $string]
 }
 
-
-
 proc qc::cast_boolean { string {true t} {false f} } {
     #| Cast a string as a boolean
     # strip html
@@ -203,8 +186,6 @@ proc qc::cast_boolean { string {true t} {false f} } {
 	error "Can't cast \"$string\" to boolean data type"
     }
 }
-
-
 
 proc qc::cast_bool { string {true t} {false f} } {
     return [qc::cast_boolean $string $true $false]
@@ -236,8 +217,6 @@ proc qc::cast_postcode { postcode } {
     }
 }
 
-
-
 proc qc::cast_creditcard { no } {
     regsub -all {[^0-9]} $no "" no
     if { [is_creditcard $no] } {
@@ -246,8 +225,6 @@ proc qc::cast_creditcard { no } {
 	error "$no is not a valid credit card number"
     }
 }
-
-
 
 proc qc::cast_period {string} {
     #| Return a pair of dates defining the period.
@@ -312,8 +289,6 @@ proc qc::cast_period {string} {
     
     return [list $from_date $to_date]
 }
-
-
 
 proc qc::is_period {string} {
     #| Test if string can be casted to a pair of dates defining a period.
@@ -398,5 +373,4 @@ proc qc::is_period {string} {
         return false
     }
 }
-
 

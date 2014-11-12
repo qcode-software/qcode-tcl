@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export authorise_token_create authorise_token
-}
-
-doc authorisation {
-    Title Authorisation
-    Url {/qc/wiki/AuthorisePage}
 }
 
 proc qc::authorise_token_create {args} {
@@ -33,8 +26,6 @@ proc qc::authorise_token_create {args} {
     }
     return "$employee_id $expiration_epoch $hash"
 }
-
-
 
 proc qc::authorise_token {} {
     #| Check the authorisation token of the current request
@@ -77,5 +68,3 @@ proc qc::authorise_token {} {
         }
     }
 }
-
-

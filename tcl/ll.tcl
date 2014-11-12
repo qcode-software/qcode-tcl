@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export ll_sum ll2csv
 }
@@ -20,8 +18,6 @@ proc qc::ll_sum { llVar index } {
     return $sum
 }
 
-
-
 proc qc::ll2csv {ll {comma ,}} {
     #| Convert a list of lists into a csv.
     #| Defaults to comma separated but allows the passing of alternative delimiters.
@@ -31,8 +27,6 @@ proc qc::ll2csv {ll {comma ,}} {
     }
     return [join $lines \r\n]
 }
-
-
 
 proc qc::ll2pg_copy {ll} {
     #| Return data in the format accepted by postgresql's copy statements

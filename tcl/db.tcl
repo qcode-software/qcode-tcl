@@ -1,10 +1,6 @@
-
-package require doc
 namespace eval qc {
     namespace export db_*
 }
-
-
 
 proc qc::db_qry_parse {qry {level 0} } {
     #| parses a SQL query replacing bind variables
@@ -207,8 +203,6 @@ proc qc::db_qry_parse {qry {level 0} } {
     return $qry
 }
 
-
-
 proc qc::db_quote { value {type ""}} {
     #| quotes SQL values by escaping single quotes with \'
     #| leaves integers and doubles alone
@@ -282,8 +276,6 @@ proc qc::db_quote { value {type ""}} {
     }
 }
 
-
-
 proc qc::db_escape_regexp { string } {
     # The postgresql parser performs substitution 
     # before passing the regexp to the regexp engine
@@ -310,8 +302,6 @@ proc qc::db_escape_regexp { string } {
     return [string map $list $string]
 }
 
-
-
 proc qc::db_get_handle {{poolname DEFAULT}} {
     # Return db handle 
     # Keep one handle per pool for current thread.
@@ -334,8 +324,6 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
         return $_db
     }
 }
-
-
 
 proc qc::db_dml { args } {
     args $args -db DEFAULT -- qry
@@ -360,8 +348,6 @@ proc qc::db_dml { args } {
         }
     }
 }
-
-
 
 proc qc::db_trans {args} {
     #| Execute code within a transaction
@@ -406,8 +392,6 @@ proc qc::db_trans {args} {
     }
 }
 
-
-
 proc qc::db_1row { args } {
     # Select 1 row from the database using the qry.
     # Place variables corresponding to column names in the caller's namespace
@@ -422,8 +406,6 @@ proc qc::db_1row { args } {
     foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
     return
 }
-
-
 
 proc qc::db_0or1row {args} {
     # Select zero or one row from the database using the qry.
@@ -463,8 +445,6 @@ proc qc::db_0or1row {args} {
 	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
     }
 }
-
-
 
 proc qc::db_foreach {args} {
     #| Place variables corresponding to column names in the caller's namespace
@@ -533,8 +513,6 @@ proc qc::db_foreach {args} {
     }
 }
 
-
-
 proc qc::db_seq {args} {
     args $args -db DEFAULT -- seq_name
     # Fetch the next value from the sequence named seq_name
@@ -542,8 +520,6 @@ proc qc::db_seq {args} {
     db_1row -db $db $qry
     return $next_id
 }
-
-
 
 proc qc::db_select_table {args} {
     # Select results of qry into a table
@@ -580,8 +556,6 @@ proc qc::db_select_table {args} {
     }
 }
 
-
-
 proc qc::db_select_csv { qry {level 0} } {
     #| Select qry into csv report
     #| First row contains column names
@@ -593,15 +567,11 @@ proc qc::db_select_csv { qry {level 0} } {
     return [join $lines \r\n]
 }
 
-
-
 proc qc::db_select_ldict { qry } {
     # Select the results of qry into a ldict
     set table [db_select_table $qry 1]
     return [qc::table2ldict $table]
 }
-
-
 
 proc qc::db_select_dict { qry } {
     # Select 0 or 1 row from the database using the qry.
@@ -646,8 +616,6 @@ proc qc::db_col_varchar_length { table_name col_name } {
     error "Col \"$col_name\" is not type varchar it is type \"$type\""
     }
 }
-
-
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database

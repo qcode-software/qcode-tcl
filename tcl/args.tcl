@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export args2dict args2vars args_check_required args_definition_split args_split args
-}
-
-doc Args {
-    Title "Argument Passing in TCL"
-    Url {/ArgPassing.md}
 }
 
 proc qc::args2dict {callers_args} {
@@ -30,8 +23,6 @@ proc qc::args2dict {callers_args} {
 	return $callers_args
     }
 }
-
-
 
 proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
@@ -60,8 +51,6 @@ proc qc::args2vars {callers_args args} {
     }
     return $varNames
 }
-
-
 
 proc qc::args_check_required {callers_args args} {
     #| Assume callers_args is a dict of name value pairs
@@ -203,5 +192,4 @@ proc qc::args {callers_args args} {
 	upset 1 args [lrange $callers_others $index end]
     }
 }
-
 

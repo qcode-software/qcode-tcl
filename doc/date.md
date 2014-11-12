@@ -1,12 +1,15 @@
 Title: Date Handling
 CSS: default.css
 
-# Date Handling
-part of [Qcode Documentation](../index.html)
+Date Handling
+======================
+part of [Qcode Documentation](index.md)
 
 * * *
 
-## Date Representation
+Date Representation
+--------------------------
+
 
 Dates in qcode are represented using a limited ISO 8601 format of YYYY-MM-DD.
 
@@ -14,7 +17,9 @@ This format matches the default postgresql *date* data type and should be unambi
 
 Testing if a string is a valid date is done using [is_date].
 
-## Parsing Date Strings
+Parsing Date Strings
+--------------------------
+
 The proc [cast_date] will try to convert a wide variety of date strings into an ISO date.
 
 <pre class="tcl example">
@@ -31,7 +36,8 @@ The proc [cast_date] will try to convert a wide variety of date strings into an 
 
 The proc [cast_epoch] does the real work of parsing date strings into a [unix epoch](http://en.wikipedia.org/wiki/Unix_time)
 
-## Date Calculations
+Date Calculations
+--------------------------
 Tcl does a great job of parsing strings to carry out simple date calculations.
 
 <pre class="tcl example">
@@ -42,7 +48,8 @@ Tcl does a great job of parsing strings to carry out simple date calculations.
 2007-04-05
 </pre>
 
-## Date Helpers
+Date Helpers
+--------------------------
 
 * [date_compare]
 * [date_day_name]
@@ -72,7 +79,8 @@ Tcl does a great job of parsing strings to carry out simple date calculations.
 * [date_year_iso_end]
 * [dates]
 
-## Formatting Dates
+Formatting Dates
+--------------------------
 
 Tcl provides a rich set of features to format dates but here are a few useful shortcuts.
 
@@ -85,38 +93,38 @@ Tcl provides a rich set of features to format dates but here are a few useful sh
 
 * * *
 
-[is_date]: qc/is_date.html
-[cast_date]: qc/cast_date.html
-[cast_epoch]: qc/cast_epoch.html
+[is_date]: procs/is_date.md
+[cast_date]: procs/cast_date.md
+[cast_epoch]: procs/cast_epoch.md
 
-[date_compare]: qc/date_compare.html
-[date_day_name]: qc/date_day_name.html
-[date_day_shortname]: qc/date_day_shortname.html
-[date_dom]: qc/date_dom.html
+[date_compare]: procs/date_compare.md
+[date_day_name]: procs/date_day_name.md
+[date_day_shortname]: procs/date_day_shortname.md
+[date_dom]: procs/date_dom.md
 
-[date_month]: qc/date_month.html
-[date_month_name]: qc/date_month_name.html
-[date_month_shortname]: qc/date_month_shortname.html
-[date_month_start]: qc/date_month_start.html
-[date_month_end]: qc/date_month_end.html
+[date_month]: procs/date_month.md
+[date_month_name]: procs/date_month_name.md
+[date_month_shortname]: procs/date_month_shortname.md
+[date_month_start]: procs/date_month_start.md
+[date_month_end]: procs/date_month_end.md
 
-[date_quarter]: qc/date_quarter.html
-[date_quarter_start]: qc/date_quarter_start.html
-[date_quarter_end]: qc/date_quarter_end.html
+[date_quarter]: procs/date_quarter.md
+[date_quarter_start]: procs/date_quarter_start.md
+[date_quarter_end]: procs/date_quarter_end.md
 
-[date_year]: qc/date_year.html
+[date_year]: procs/date_year.md
 
-[date_year_start]: qc/date_year_start.html
-[date_year_end]: qc/date_year_end.html
+[date_year_start]: procs/date_year_start.md
+[date_year_end]: procs/date_year_end.md
 
-[date_year_iso_start]: qc/date_year_iso_start.html
-[date_year_iso_end]: qc/date_year_iso_end.html
+[date_year_iso_start]: procs/date_year_iso_start.md
+[date_year_iso_end]: procs/date_year_iso_end.md
 
 
-[dates]: qc/dates.html
-[format_date]: qc/format_date.html
-[format_date_iso]: qc/format_date_iso.html
-[format_date_letter]: qc/format_date_letter.html
-[format_date_rel]: qc/format_date_rel.html
-[format_date_uk]: qc/format_date_uk.html
-[format_date_uk_long]: qc/format_date_uk_long.html
+[dates]: procs/dates.md
+[format_date]: procs/format_date.md
+[format_date_iso]: procs/format_date_iso.md
+[format_date_letter]: procs/format_date_letter.md
+[format_date_rel]: procs/format_date_rel.md
+[format_date_uk]: procs/format_date_uk.md
+[format_date_uk_long]: procs/format_date_uk_long.md

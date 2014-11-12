@@ -1,6 +1,9 @@
-# Error Handling
+Error Handling
+======================
 
-## qc::conn_marshal
+qc::conn_marshal
+--------------------------
+
 If ns_register_proc is used to register the [qc::conn_marshal](procs/conn_marshal.md) to deal with incoming requests, errors are by default passed to [qc::error_handler](procs/error_handler.md).
 
 Errors are classified by the global errorCode.
@@ -25,7 +28,9 @@ If the errorCode does not classify the error as one of the above then it is a bu
 We can report back an [error_report](procs/error_report.md) back to the user or in a public application then a generic error message.
 An email will be sent to the support email with details of the error report.
 
-## scheduled tasks
+scheduled tasks
+--------------------------
+
 
 Each scheduled task needs to be wrapped in a [try](/qc/proc/qc::try) clause with custom [error reporting](procs/error_report_no_conn.md).eg.
 	

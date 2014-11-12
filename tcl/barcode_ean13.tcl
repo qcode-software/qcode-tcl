@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export barcode_ean13 barcode_ean13_check_digit
 }
@@ -106,8 +104,6 @@ proc qc::barcode_ean13 {number_to_encode} {
 	}
 	incr i;
     }
-
-
 
      # process 2 digit extra addon if it exits;
     if {[string length $extra_addon] == 2} {

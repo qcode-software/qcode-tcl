@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default
 }
@@ -32,8 +30,6 @@ proc qc::dict_exists { args } {
     }
 }
 
-
-
 proc qc::dict_subset {dict args} {
     #| Return a dict made up of the keys given.
     set result {}
@@ -45,8 +41,6 @@ proc qc::dict_subset {dict args} {
     return $result
 }
 
-
-
 proc qc::dict_exclude {dict args} {
     #| Return an dict excluding the keys given.
     set temp {}
@@ -57,8 +51,6 @@ proc qc::dict_exclude {dict args} {
     }
     return $temp
 }
-
-
 
 proc qc::dict_sort {dictVariable} {
     #| Sort the top level dict contained in dictVariable by ascending key values.
@@ -77,7 +69,6 @@ proc qc::dict_sort {dictVariable} {
 }
     
 
-
 proc qc::dict2xml { dict } {
     #| Convert top level {key value} pairs in dict value to xml elements.
     #| Return xml.
@@ -87,8 +78,6 @@ proc qc::dict2xml { dict } {
     }
     return [join $list \n]
 }
-
-
 
 proc qc::dict_from { args } {
     #| Take a list of var names and return a dict.
@@ -103,8 +92,6 @@ proc qc::dict_from { args } {
     }
     return $dict
 }
-
-
 
 proc qc::dict2vars { dict args } {
     #| Set all or a subset of the {key value} pairs in dict as variables in the caller.
@@ -127,8 +114,6 @@ proc qc::dict2vars { dict args } {
 	}
     }
 }
-
-
 
 proc qc::dict_default {dictVar args} {
     #| Set default values in the dict if they do not exist

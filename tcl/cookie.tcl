@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export cookie_*
-}
-
-doc cookie {
-    Title "Cookie Handling"
-    Url {/qc/wiki/CookiePage}
 }
 
 proc qc::cookie_string_is_valid {cookie_string} {
@@ -74,8 +67,6 @@ proc qc::cookie_get { search_name } {
     }
 }
 
-
-
 proc qc::cookie_exists { name } {
     #| Test if the cookie exists
     if { ![ns_conn isconnected] } {
@@ -89,8 +80,6 @@ proc qc::cookie_exists { name } {
     set cookie_map [qc::cookie_string2multimap $cookie_string]
     return [multimap_exists $cookie_map [qc::url_encode $name]]
 }
-
-
 
 proc qc::cookie_set {name value args} {
     #| Set a cookie in outgoing headers for the current conection.
@@ -133,5 +122,4 @@ proc qc::cookie_set {name value args} {
 
     ns_set put $headers "Set-Cookie" $cookie
 }
-
 

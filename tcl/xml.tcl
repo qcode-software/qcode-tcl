@@ -1,4 +1,3 @@
-package require doc
 namespace eval qc {
     namespace export xml xml_* xml2dict
 }
@@ -16,8 +15,6 @@ proc qc::xml { tagName nodeValue {dict_att ""} } {
     }
 }
 
-
-
 proc qc::xml_escape { string } {
     #| Escape reserved characters and converts characters above 127 to entity decimal
     # Escape < > &
@@ -30,11 +27,7 @@ proc qc::xml_escape { string } {
     return [subst $string]
 }
 
-
-
 proc qc::xml_encode_char {string} {scan $string %c t; return "&#$t\;"}
-
-
 
 proc qc::xml_decode_char_NNN {string} {
     #| Convert entity decimal format to ascii character
@@ -71,8 +64,6 @@ proc qc::xml_from { args } {
     return [join $xml \n]
 }
 
-
-
 proc qc::xml_ldict { li_tag ldict } {
     #| Create xml structure from a list of dicts
     set xml ""
@@ -81,8 +72,6 @@ proc qc::xml_ldict { li_tag ldict } {
     }
     return $xml
 }
-
-
 
 proc qc::xml2dict { xml root_element } {
     #| Converts an XML structure in the form of a text string into a dict.
@@ -111,8 +100,6 @@ proc qc::xml2dict { xml root_element } {
     return $dict
 }
 
-
-
 proc qc::xml_encoding {xml} {
     #| Return the TCL encoding scheme used for an xml document.
     # Try to determine encoding from the encoding attribute in the xml declaration.
@@ -126,5 +113,4 @@ proc qc::xml_encoding {xml} {
 	return utf-8
     }
 }
-
 

@@ -1,4 +1,3 @@
-
 namespace eval qc {
     namespace export action action_print action_print_page action_menu
 }

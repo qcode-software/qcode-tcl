@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export form_var_* form2* form_proc
 }
@@ -22,8 +20,6 @@ proc qc::form2vars {args}  {
 	}
     }
 }
-
-
 
 proc qc::form_var_get { var_name } {
     #| If the form variable exists return its value otherwise throw an error.
@@ -48,8 +44,6 @@ proc qc::form_var_get { var_name } {
     error "No such form variable \"$var_name\""
 }
 
-
-
 proc qc::form_var_exists { var_name } {
     #| Test whether a form variable exists or not.
     # Also check for PHP style repeated variables foo[]=1 foo[]=2 using name foo
@@ -63,8 +57,6 @@ proc qc::form_var_exists { var_name } {
 	return 0
     }
 }
-
-
 
 proc qc::form2dict {args}  {
     #| Create dict corresponding to the form data.
@@ -90,8 +82,6 @@ proc qc::form2url { url } {
     return $url
 }
 
-
-
 proc qc::form_proc { proc_name } {
     #| Call proc_name using corresponding form variables
     set largs {}
@@ -116,5 +106,4 @@ proc qc::form_proc { proc_name } {
     }
     return [uplevel 0 $proc_name $largs]
 }
-
 

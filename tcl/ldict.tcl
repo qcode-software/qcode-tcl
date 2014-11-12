@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export ldict_* ldict2tbody
 }
@@ -11,8 +9,6 @@ proc qc::ldict_set {ldictVar index key value} {
     dict set dict $key $value
     lset ldict $index $dict
 }
-
-
 
 proc qc::ldict_sum { ldictVar key } {
     #| Traverse a dict list and sum all dict values for given key.
@@ -31,8 +27,6 @@ proc qc::ldict_sum { ldictVar key } {
     return $sum
 }
 
-
-
 proc qc::ldict_max { ldictVar key } {
     set max {}
     upvar 1 $ldictVar ldict
@@ -49,8 +43,6 @@ proc qc::ldict_max { ldictVar key } {
     return $max
 }
 
-
-
 proc qc::ldict_values { ldictVar key } {
     #| Return a list of the values of this key
     #| in each dict in the ldict
@@ -61,8 +53,6 @@ proc qc::ldict_values { ldictVar key } {
     }
     return $list
 }
-
-
 
 proc qc::ldict_exists {ldict key} {
     #| Return the first index of the dict that contains the the key $key
@@ -75,8 +65,6 @@ proc qc::ldict_exists {ldict key} {
     }
     return -1
 }
-
-
 
 proc qc::ldict_search {ldictVar key value} {
     #| Return the first index of the dict that contains the value $value for the key $key
@@ -91,8 +79,6 @@ proc qc::ldict_search {ldictVar key value} {
     return -1
 }
 
-
-
 proc qc::ldict_exclude { ldict key } {
     #| Remove all occurances of $key from the dicts in $ldict
     set newldict {}
@@ -101,8 +87,6 @@ proc qc::ldict_exclude { ldict key } {
     }
     return $newldict
 }
-
-
 
 proc qc::ldict2tbody {ldict colnames} {
     #| Take a ldict and a list of col names to convert into tbody
@@ -120,5 +104,4 @@ proc qc::ldict2tbody {ldict colnames} {
     }
     return $tbody
 }
-
 

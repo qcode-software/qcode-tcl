@@ -1,39 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export form_layout_*
-}
-
-doc forms {
-    Title "Qcode Forms"
-    Description {
-	<h3>Widgets</h3>
-	<ul>
-	<li>Form Label <proc>widget_label</proc></li>
-	<li>Text Input Box <proc>widget_text</proc></li>
-	<li>Combo Input Widget <proc>widget_combo</proc></li>
-	<li>HTML Editor Control <proc>widget_htmlarea</proc></li>
-	<li>Textarea Input <proc>widget_textarea</proc></li>
-	<li>Compare Input Control <proc>widget_compare</proc></li>
-	<li>Drop Down List <proc>widget_select</proc></li>
-	<li>Checkbox Control <proc>widget_checkbox</proc></li>
-	<li>Boolean Checkbox <proc>widget_bool</proc></li>
-	<li>Password Text Input <proc>widget_password</proc></li>
-	<li>Submit Button <proc>widget_submit</proc></li>
-	<li>Button <proc>widget_button</proc></li>
-	<li>Radio Button <proc>widget_radio</proc></li>
-	<li>Radio Button Group <proc>widget_radiogroup</proc></li>
-	<li>Span <proc>widget_span</proc></li>
-	</ul>
-	<h3>Form Layout</h3>
-	<ul>
-	<li><proc>form_layout_tbody</proc></li>
-	<li><proc>form_layout_table</proc></li>
-	<li><proc>form_layout_tables</proc></li>
-	<li><proc>form_layout_list</proc></li>
-	</ul>
-    }
-
 }
 
 proc qc::form_layout_table { args } {
@@ -50,8 +16,6 @@ proc qc::form_layout_table { args } {
     }
     return [qc::html_table cols $cols class $class tbody $tbody]
 }
-
-
 
 proc qc::form_layout_tables { args } {
     #| Construct multi-column layout with a form table in each column
@@ -163,5 +127,4 @@ proc qc::form_layout_list {conf} {
     }
     return $html
 }
-
 

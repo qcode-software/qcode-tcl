@@ -1,24 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export db_cache_*
-}
-
-doc db_cache {
-    Title "Cached Database API"
-    Description {
-	The procs 
-	<ul>
-	<li><proc>db_cache_1row</proc>
-	<li><proc>db_cache_0or1row</proc>
-	<li><proc>db_cache_foreach</proc> and
-	<li><proc>db_cache_select_table</proc>
-	</ul>
-	provide a database cache by storing results of executed queries in either a time limited ns_cache cache (if a ttl is specified), or a global array which will persist for the life of the thread (if no ttl is specified). A hash of each qry used as the index.<br>
-	Each time a cached proc is called, it checks to see if cached results exist. If the cached results exist then it returns the cached results rather than going to fetch a fresh copy from the database.
-	<p>
-	The cached version of db procs can give speed improvements where the same query is executed repeatedly but at the expense of more memory usage. The operating system may already cache parts of the filesystem and the database may cache some query results.      
-    }
 }
 
 proc qc::db_cache_1row { args } {
@@ -37,8 +18,6 @@ proc qc::db_cache_1row { args } {
     foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
     return
 }
-
-
 
 proc qc::db_cache_0or1row { args } {
     # Cached equivalent of db_0or1row
@@ -80,8 +59,6 @@ proc qc::db_cache_0or1row { args } {
 	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
     }
 }
-
-
 
 proc qc::db_cache_foreach { args } {
     # Cached equivalent of db_foreach
@@ -150,8 +127,6 @@ proc qc::db_cache_foreach { args } {
     }
 }
 
-
-
 proc qc::db_cache_select_table { args } {
     #| Check if the results of the qry have already been saved.
     #| If never saved (or has expired due to ttl) then run the qry and place the results
@@ -192,8 +167,6 @@ proc qc::db_cache_select_table { args } {
     }
 }
 
-
-
 proc qc::db_cache_clear { {qry ""} } {
     #| Clear the cache for the qry or all
     set hash [qc::md5 [db_qry_parse $qry 1]]
@@ -220,13 +193,10 @@ proc qc::db_cache_clear { {qry ""} } {
     }
 }
 
-
-
 proc qc::db_cache_ldict { qry } {
     #| Cached equivalent of db_select_ldict
     #| Select the results of qry into a ldict
     set table [db_cache_select_table $qry 1]
     return [qc::table2ldict $table]
 }
-
 

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {}
 
 proc qc::binary_convert_unit_prefix2mult {prefix} {
@@ -80,8 +78,6 @@ proc qc::binary_convert_unit_prefix2mult {prefix} {
     return [expr {pow(1024,$power)}]
 }
 
-
-
 proc qc::binary_convert {args} {
     #| Convert binary file size units.
     #| Usage: qc::binary_convert size from_unit to_unit
@@ -123,8 +119,6 @@ proc qc::binary_convert {args} {
 
     return $size
 }
-
-
 
 proc qc::binary_format {args} {
     #| Return formatted string to display a binary file size in the most appropriate units.
@@ -192,6 +186,4 @@ proc qc::binary_format {args} {
     # Convert to desired unit prefix, round to sigfigs and append units to the string
     return "[qc::sigfigs [qc::binary_convert $size $units ${unit_prefix}${units}] $sigfigs] ${unit_prefix}${units}"
 }
-
-
 

@@ -1,4 +1,5 @@
-# Form Variables
+Form Variables
+======================
 
 Form variables are the name value pairs sent with HTTP GET requests or POST submissions.
 
@@ -10,7 +11,8 @@ URL Encoded string of name value pairs joined by = sign.
 http://www.jmarshall.com/easy/http/#postmethod
 Data is send within the body of the POST.
 
-## Repeated Variable Names
+Repeated Variable Names
+--------------------------
 Some HTML input elements like checkboxes 
 	
 	<input type="checkbox" name="email_id" value=="1">

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export tson_object json_quote tson2json tson_object_from tson2xml
 }
@@ -28,13 +26,10 @@ proc qc::tson_object { args } {
     return $tson
 }
 
-
 proc qc::json_quote {value} {
     #| Return a json string literal with appropriate escapes
     return "\"[string map {\" \\\" \\ \\\\ \n \\n \r \\r \f \\f \b \\b \t \\t} $value]\""
 }
-
-
 
 proc qc::tson2json { tson } {
     #| Convert tson to json
@@ -72,8 +67,6 @@ proc qc::tson2json { tson } {
     }
 }
 
-
-
 proc qc::tson_object_from { args } {
     #| Take a list of var names and return a tson object
     set dict {}
@@ -87,8 +80,6 @@ proc qc::tson_object_from { args } {
     }
     return [tson_object {*}$dict]
 }
-
-
 
 proc qc::tson2xml { tson } {
     # not dealt with attributes 
@@ -128,5 +119,4 @@ proc qc::tson2xml { tson } {
 	}
     }
 }
-
 

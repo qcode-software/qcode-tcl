@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
 }
@@ -9,21 +7,15 @@ proc qc::upper { string } {
     return [string toupper $string]
 }
 
-
-
 proc qc::lower { string } {
     #| Convert string to lower case
     return [string tolower $string]
 }
 
-
-
 proc qc::trim { string } {
     #| Removes and leading or trailing white space.
     return [string trim $string]
 }
-
-
 
 proc qc::truncate {string length} {
     #| Truncate to nearest word boundary to create string of at the most of specified length
@@ -36,8 +28,6 @@ proc qc::truncate {string length} {
     }
     return [string range $string 0 [expr {$position-1}]]
 }
-
-
 
 # We'll begin with a box, and the plural is boxes;
 # but the plural of ox became oxen not oxes.
@@ -119,8 +109,6 @@ proc qc::plural word {
     return ${word}s
 }
 
-
-
 proc qc::singular word {
     # TODO unused
     switch -- $word {
@@ -177,8 +165,6 @@ proc qc::cmplen {string1 string2} {
 	return 1
     }
 }
-
-
 
 proc qc::levenshtein_distance {s t} {
     # Returns the number of edits required to turn one string into the other.

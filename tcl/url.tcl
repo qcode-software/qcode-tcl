@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export url url_*
 }
@@ -32,8 +30,6 @@ proc qc::url { url args } {
     }
 }
 
-
-
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
     if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
@@ -59,8 +55,6 @@ proc qc::url_unset { url var_name } {
     }
 }
 
-
-
 proc qc::url_to_html_hidden { url } {
     #| Convert a url with form vars into html hidden input tags
     set html ""
@@ -75,8 +69,6 @@ proc qc::url_to_html_hidden { url } {
     return $html
 }
 
-
-
 proc qc::url_back { url args } {
     #| Creates a link to url with a formvar next_url which links back to the current page.
     #| Preserve vars passed in via GET or POST
@@ -88,15 +80,11 @@ proc qc::url_back { url args } {
     return [url $url {*}[array get value]]
 }
 
-
-
 proc qc::url_here {} {
     #| Encode form_vars from GET and POST in this url.
     # TODO Aolserver only
     return [qc::form2url [qc::conn_url]]
 }
-
-
 
 proc qc::url_encoding_init {} {
     #| Initialise url encode/decode maps in the qc namespace

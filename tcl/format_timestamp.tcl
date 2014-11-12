@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export format_timestamp format_timestamp_* format_timestamp2hour
 }
@@ -8,8 +6,6 @@ proc qc::format_timestamp_iso { string } {
     #| Format string as an ISO timestamp 
     return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
 }
-
-
 
 proc qc::format_timestamptz { string } {
     #| Format string as an ISO timestamp with time zone
@@ -20,7 +16,6 @@ proc qc::format_timestamp_http { string } {
     #| Format string as http timestamp according to RFC 1123
     return [clock format [cast_epoch $string] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]
 }
-
 
 proc qc::format_timestamp_rel { string } {
     #| Format relative to age with date and time
@@ -41,8 +36,6 @@ proc qc::format_timestamp_rel { string } {
     return [clock format $epoch -format "%Y-%m-%d"]
 }
 
-
-
 proc qc::format_timestamp2hour { string } {
     return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
 }
@@ -52,8 +45,6 @@ proc qc::format_timestamp { string } {
     #| Will be customizable in future but at present chooses the ISO format.
     return [format_timestamp_iso $string]
 }
-
-
 
 proc qc::format_timestamp_rel_age {args} {
     #| Return the approximate relative age of a timestamp
@@ -99,5 +90,4 @@ proc qc::format_timestamp_rel_age {args} {
     }
     return $rel_age
 }
-
 

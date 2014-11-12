@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export is_* contains_creditcard
 }
@@ -7,8 +5,6 @@ namespace eval qc {
 proc qc::is_boolean {bool} {
     return [in {Y N YES NO TRUE FALSE T F 0 1} [upper $bool]]
 }
-
-
 
 proc qc::is_integer {int} {
     if { [string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647 } {
@@ -18,8 +14,6 @@ proc qc::is_integer {int} {
     }
 }
 
-
-
 proc qc::is_pos {number} {
     if { [is_decimal $number] && $number>=0 } {
 	return 1
@@ -27,8 +21,6 @@ proc qc::is_pos {number} {
 	return 0
     }
 }
-
-
 
 proc qc::is_pnz {number} {
     if { [is_decimal $number] && $number>0 } {
@@ -38,8 +30,6 @@ proc qc::is_pnz {number} {
     }
 }
 
-
-
 proc qc::is_non_zero_integer {int} {
     if { [is_integer $int] && $int!=0 } {
 	return 1
@@ -48,8 +38,6 @@ proc qc::is_non_zero_integer {int} {
     }
 }
 
-
-
 proc qc::is_non_zero {number} {
     if { [is_decimal $number] && $number!=0 } {
 	return 1
@@ -57,8 +45,6 @@ proc qc::is_non_zero {number} {
 	return 0
     }
 }
-
-
 
 proc qc::is_pnz_int { int } {
     # positive non zero integer
@@ -69,8 +55,6 @@ proc qc::is_pnz_int { int } {
     }
 }
 
-
-
 proc qc::is_decimal { number } {
     if { [string is double -strict $number]} {
 	return 1
@@ -78,8 +62,6 @@ proc qc::is_decimal { number } {
 	return 0
     }
 }
-
-
 
 proc qc::is_positive_decimal { number } {
     if { [string is double -strict $number] && $number>=0 } {
@@ -89,9 +71,6 @@ proc qc::is_positive_decimal { number } {
     }
 }
 
-
-
-
 proc qc::is_non_zero_decimal { number } {
     if { [string is double -strict $number] && $number!=0 } {
 	return 1
@@ -99,8 +78,6 @@ proc qc::is_non_zero_decimal { number } {
 	return 0
     }
 }
-
-
 
 proc qc::is_pnz_decimal { price } {
     # positive non-zero double
@@ -111,14 +88,10 @@ proc qc::is_pnz_decimal { price } {
     }
 }
 
-
-
 proc qc::is_date { date } {
     # dates are expected to be in iso format 
     return [regexp {^\d{4}-\d{2}-\d{2}$} $date]   
 }
-
-
 
 proc qc::is_timestamp_http { date } {
     #| Returns true if date is an acceptable HTTP timestamp. Note although all three should be accepted,
@@ -143,20 +116,14 @@ proc qc::is_timestamp { date } {
     return [regexp {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$} $date]   
 }
 
-
-
 proc qc::is_email { email } {
     return [regexp {^[a-zA-Z0-9_\-]+(\.[a-zA-Z0-9_\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
 }
-
-
 
 proc qc::is_postcode { postcode } {
     # uk postcode
     return [expr [regexp {^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]]
 }
-
-
 
 proc qc::is_creditcard { no } {
     #| Checks if no is an allowable credit card number
@@ -186,8 +153,6 @@ proc qc::is_creditcard { no } {
     }
 }
 
-
-
 proc qc::is_creditcard_masked { no } {
     #| Check the credit card number is masked to PCI requirements
     regsub -all {[^0-9\*]} $no "" no
@@ -195,8 +160,6 @@ proc qc::is_creditcard_masked { no } {
     # 13-19 chars masked with < 6 prefix and < 4 suffix digits
     return [expr [regexp {[0-9\*]{13,19}} $no] && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $no]]
 }
-
-
 
 proc qc::is_varchar {string length} {
     #| Checks string would fit in a varchar of length $length
@@ -206,8 +169,6 @@ proc qc::is_varchar {string length} {
 	return 0
     }
 }
-
-
 
 proc qc::is_base64 {string} {
     #| Checks input has only allowable base64 characters and is of the correct format
@@ -219,8 +180,6 @@ proc qc::is_base64 {string} {
     }
 }
 
-
-
 proc qc::is_int_castable {string} {
     #| Can input be cast to an integer?
     qc::try {
@@ -231,8 +190,6 @@ proc qc::is_int_castable {string} {
     }
 }
 
-
-
 proc qc::is_decimal_castable {string} {
     qc::try {
 	qc::cast_decimal $string
@@ -241,8 +198,6 @@ proc qc::is_decimal_castable {string} {
 	return false
     }
 }
-
-
 
 proc qc::is_date_castable {string} {
     #| Can string be cast into date format?
@@ -254,8 +209,6 @@ proc qc::is_date_castable {string} {
     }
 }
 
-
-
 proc qc::is_timestamp_castable {string} {
     #| Can string be cast into timestamp format?
     qc::try {
@@ -266,8 +219,6 @@ proc qc::is_timestamp_castable {string} {
     }
 }
 
-
-
 proc qc::is_mobile_number {string} {
     # uk mobile telephone number
     regsub -all {[^0-9]} $string {} tel_no
@@ -277,8 +228,6 @@ proc qc::is_mobile_number {string} {
 	return false
     }
 }
-
-
 
 proc qc::contains_creditcard {string} {
     #| Checks string for occurrences of credit card numbers
@@ -301,14 +250,10 @@ proc qc::contains_creditcard {string} {
     return false
 }
 
-
-
 proc qc::is_hex {string} {
     #| Does the input look like a hex number?
     return [regexp -nocase {^[0-9a-f]*$} $string]
 }
-
-
 
 proc qc::is_url {args} {
     #| This is a more restrictive subset of all legal uri's defined by RFC 3986
@@ -344,8 +289,6 @@ proc qc::is_url {args} {
     }
 }
 
-
-
 proc qc::is_ipv4 {string} {
     # TODO checks structure only, will allow 9999.9999.9999.9999
     if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$} $string] } {
@@ -355,8 +298,6 @@ proc qc::is_ipv4 {string} {
     }
 }
 
-
-
 proc qc::is_cidrnetv4 {string} {
     if { [regexp {^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+$} $string] } {
         return true
@@ -364,5 +305,4 @@ proc qc::is_cidrnetv4 {string} {
         return false
     }
 }
-
 

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     # Tcl 8.5 only
     namespace import ::tcl::mathop::eq
@@ -57,8 +55,6 @@ proc qc::try { try_code { catch_code ""} } {
     }
 }
 
-
-
 proc qc::default { args } {
     #| If a variable does not exists then set its value to defaultValue
     foreach {varName defaultValue} $args {
@@ -69,8 +65,6 @@ proc qc::default { args } {
     }
 }
 
-
-
 proc qc::setif { varName ifValue defaultValue } {
     #| Set varName to be defaultValue if varName is set to ifValue or does not exist
     upvar 1 $varName value
@@ -78,8 +72,6 @@ proc qc::setif { varName ifValue defaultValue } {
 	set value $defaultValue
     } 
 }
-
-
 
 proc qc::sset { varName value } {
     #| Set varName to value after having performed a subst.
@@ -92,8 +84,6 @@ proc qc::sset { varName value } {
     # subst in uplevel namespace
     uplevel "set $varName \[[list subst $value]\]"
 }
-
-
 
 proc qc::sappend { varName value } {
     #| Append value to the contents of varName having first performed a subst
@@ -108,8 +98,6 @@ proc qc::sappend { varName value } {
     uplevel "append $varName \[[list subst $value]\]"
 }
 
-
-
 proc qc::coalesce { varName altValue } {
     #| If varName exists then return its value
     #| else return the altvalue
@@ -120,7 +108,6 @@ proc qc::coalesce { varName altValue } {
 	return $altValue
     }
 }
-
 
 	
 proc qc::incr0 { varName amount } {
@@ -133,8 +120,6 @@ proc qc::incr0 { varName amount } {
     }
     return $var
 }
-
-
 
 proc qc::call { proc_name args } {
     #| Calls a procedure using local variables as arguments.
@@ -164,8 +149,6 @@ proc qc::call { proc_name args } {
     }
 }
 
-
-
 proc qc::margin { cost price {dec_places 1} } {
     #| Calculates the gross margin on supplied cost and revenue
     if { $price==0 } {
@@ -174,8 +157,6 @@ proc qc::margin { cost price {dec_places 1} } {
 	return [qc::round [expr {double($price-$cost)/$price*100}] $dec_places]
     }
 }
-
-
 
 proc qc::breakpoint {{s {}}} {
     # From tcl cookbook
@@ -205,8 +186,6 @@ proc qc::trunc {string length} {
     return [string range $string 0 [expr {$length-1}]]
 }
 
-
-
 proc qc::iif { expr true false } {
     #| Inline if statement
     if { [uplevel 1 eval expr $expr] } {
@@ -215,8 +194,6 @@ proc qc::iif { expr true false } {
 	return $false
     }
 }
-
-
 
 proc qc::? { expr true false } {
     #| Shorthand version of qc::iif
@@ -237,9 +214,6 @@ proc qc::true { string {true true} {false false} } {
     }
 }
 
-
-
-
 proc qc::false { string {true true} {false false} } {
     #| Test if string is false. Recognised forms are "yes/no" "true/false" or 1/0.
     #| Optionally set the values to return for each case.
@@ -250,21 +224,15 @@ proc qc::false { string {true true} {false false} } {
     }
 }
 
-
-
 proc qc::escapeHTML { html } {
     #| TODO Deprecate for html_escape: Convert reserved HTML characters in a string into entities
     return [string map {< &lt; > &gt; & &amp; \" &quot; ' &\#39;} $html]
 }
 
-
-
 proc qc::unescapeHTML { text } {
     #| Convert HTML entities back to their ascii characters
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
 }
-
-
 
 proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
     # TODO unused
@@ -287,13 +255,10 @@ proc qc::mcsplit {string splitString} {
     return [split [string map [list $splitString $mc] $string] $mc]
 }
 
-
-
 proc qc::perct {x n {p 1}} {
     # TODO unused
     return [qc::round [expr {double($x)/$n*100}] $p]
 }
-
 
 proc qc::subsets {l n} {
     #| Returns all possible subsets of length n from list l
@@ -312,8 +277,6 @@ proc qc::subsets {l n} {
     return $result
 }
 
-
-
 proc qc::permutations {list} {
     #| Returns all permuations of the supplied list
     set res [list [lrange $list 0 0]]
@@ -331,8 +294,6 @@ proc qc::permutations {list} {
     return $res
 }
 
-
-
 proc qc::split_pair {string delimiter} {
     #| split a string into 2 parts at the first occurence of the delimiter
     set list {}
@@ -344,8 +305,6 @@ proc qc::split_pair {string delimiter} {
     }
     return $list
 }
-
-
 
 proc qc::min_nz {args} {
     # TODO Unused
@@ -363,8 +322,6 @@ proc qc::min_nz {args} {
     }
 }
 
-
-
 proc qc::max_nz {args} {
     #| Return the maximum supplied value which is non zero 
     set list {}
@@ -380,15 +337,11 @@ proc qc::max_nz {args} {
     }
 }
 
-
-
 package require md5
 proc qc::md5 {string} {
     #| Returns the md5 hash of supplied string.
     return [string tolower [::md5::md5 -hex $string]]
 }
-
-
 
 package require sha1
 proc qc::sha1 {string} {
@@ -501,8 +454,6 @@ proc qc::debug {message} {
     log Debug [qc::format_cc_masked_string $message]
 }
 
-
-
 proc qc::log {args} {
     #| If running in naviserver then write message to nsd log using App: prefix. 
     #| Otherwise write message to stout or stderr.
@@ -545,8 +496,6 @@ proc qc::log {args} {
     }   
 }
 
-
-
 proc qc::exec_proxy {args} {
     #| Execute the given command.
     #| If running on aolserver will use ns_proxy, otherwise the command is executed directly.
@@ -571,8 +520,6 @@ proc qc::exec_proxy {args} {
 	exec {*}$args
     }
 }
-
-
 
 proc qc::info_proc { proc_name } {
     #| Return the Tcl source code definition of a Tcl proc.
@@ -608,14 +555,11 @@ proc qc::which {command} {
     return $which
 }
 
-
-
 proc qc::string2hex {string} {
     #| Convert string to hex
     binary scan [encoding convertto utf-8 $string] H* hex
     return [regsub -all (..) $hex {\\x\1}]    
 }
-
 
 proc qc::not_null {var} {
     #| Test if this variable exists and is not the empty string

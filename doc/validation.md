@@ -1,4 +1,5 @@
-# Checking User Input
+Checking User Input
+======================
 
 All user input should be checked to see that
 * It can be cast into a string literal of the required type.

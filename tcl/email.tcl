@@ -1,13 +1,9 @@
-
-package require doc
 namespace eval qc {
     namespace export email_* smtp_send smtp_recv sendmail email2multimap mime_type_guess qp_encode
 }
 package require mime
 package require base64 
 package require uuid
-
-
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
@@ -125,8 +121,6 @@ proc qc::email_send {args} {
     qc::sendmail $mail_from $rcpts $mime_body {*}$headers
 }
 
-
-
 proc qc::email_file2attachment {filename} {
     #| Return an attachment dict for this file
     set fhandle [open $filename r]
@@ -142,8 +136,6 @@ proc qc::email_address {text} {
     return [lindex [qc::email_addresses $text] 0]
 }
 
-
-
 proc qc::email_addresses {text} {
     #| Return a list of email addresses in the text
     set list [list]
@@ -152,8 +144,6 @@ proc qc::email_addresses {text} {
     }
     return $list
 }
-
-
 
 proc qc::email_mime_html_alternative {html boundary} {
     #| Helper to return mime part for html part with plain text alternative
@@ -301,8 +291,6 @@ proc qc::sendmail {mail_from rcpts body args} {
     close $sock
 }
 
-
-
 proc qc::email2multimap {text} {
     # Convert an email message into a multimap data structure
     # Header values are mapped as key value pairs
@@ -365,7 +353,6 @@ proc qc::email2multimap {text} {
     }
     return $email
 }
-
 
     % qc::email2multimap $email
 MIME-Version 1.0 Received {by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)} Date {Fri, 17 Aug 2012 12:51:36 +0100} Delivered-To bernhard@qcode.co.uk Message-ID <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com> Subject Memo From {Bernhard van Woerden <bernhard@qcode.co.uk>} To {Bernhard van Woerden <bernhard@qcode.co.uk>} Content-Type {multipart/mixed; boundary=0016e6d9a38e403c6904c774c888} bodies {{Content-Type {multipart/alternative; boundary=0016e6d9a38e403c6004c774c886} bodies {{Content-Type {text/plain; charset=ISO-8859-1} body {Please see the attached.
@@ -1046,8 +1033,6 @@ proc qc::mime_type_guess { filename } {
         }
     }
 }
-
-
 
 proc qc::mime_file_extension { mime_type } {
     #| Lookup a file extension based on mime_type

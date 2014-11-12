@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export file_temp file_write file_upload
 }
@@ -14,8 +12,6 @@ proc qc::file_temp {text {mode 0600}} {
     close $out
     return $filename
 }
-
-
 
 proc qc::file_write {filename contents {perms ""}} {
     # Return true if file has changed by writing to it.

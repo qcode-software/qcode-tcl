@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export lshift lunshift lintersect lexclude lexclude2 lunion ldelete lmove lunique lequal lsort_using in lpage ltotitle list2csv lconcat lsum laverage lreplace_values lapply
 }
@@ -12,8 +10,6 @@ proc qc::lshift { stack } {
     return $value 
 }
 
-
-
 proc qc::lunshift { stack value } {
     #| Adds $value as leftmost item in the list
     upvar 1 $stack list
@@ -22,8 +18,6 @@ proc qc::lunshift { stack value } {
     }
     set list [linsert $list 0 $value]
 }
-
-
 
 global tcl_version
 if { $tcl_version<8.5 } {
@@ -49,8 +43,6 @@ proc qc::lintersect { a b } {
     return $result
 }
 
-
-
 proc qc::lexclude { list args } {
     #| Return $list with and values listed in $args excluded
     set result {}
@@ -61,8 +53,6 @@ proc qc::lexclude { list args } {
     }
     return $result
 }
-
-
 
 proc qc::lexclude2 { list args } { 
     #| Alternative implementation of qc::lexclude
@@ -80,8 +70,6 @@ proc qc::lunion { a b } {
     return [lsort -unique $result]
 }
 
-
-
 proc qc::ldelete {listVar index} {
     #| Deletes item at $index of list
     upvar 1 $listVar list
@@ -89,14 +77,10 @@ proc qc::ldelete {listVar index} {
     set list [lreplace [K $list [set list {}]] $index $index]
 }
 
-
-
 proc qc::lmove {list from to} {
     #| Move an element in a list from one place to another
     return [linsert [lreplace $list $from $from] $to [lindex $list $from]]
 }
-
-
 
 proc qc::lunique {list} {
     #| Returns a list of distinct list values
@@ -109,8 +93,6 @@ proc qc::lunique {list} {
     }
     return $result
 }
-
-
 
 proc qc::lequal {a b} {
     #| Compare 2 list 
@@ -131,8 +113,6 @@ proc qc::lsort_using { list order } {
     return $list
 }
 
-
-
 # ::tcl::mathop::in has different argument sequence
 #namespace import ::tcl::mathop::in
 #namespace import ::tcl::mathop::ni
@@ -147,8 +127,6 @@ proc qc::in { list item } {
     }
 }
 
-
-
 proc qc::lpage { list page_length } {
     #| Split list into sublists of length $page_length
     set lpage {}
@@ -160,8 +138,6 @@ proc qc::lpage { list page_length } {
     }
     return $lpage
 }
-
-
 
 proc qc::ltotitle {list} {
     #| Make each word totitle excepting some industry specific acronyms
@@ -181,8 +157,6 @@ proc qc::ltotitle {list} {
     }
 }
 
-
-
 proc qc::list2csv {list {comma ,}} {
     #| Convert list to CSV (use of comma can be overridden)
     set out ""
@@ -201,15 +175,11 @@ proc qc::list2csv {list {comma ,}} {
     return $out
 }
 
-
-
 proc qc::lconcat {listVar list} {
     #| Concatenate list onto supplied listVar
     upvar $listVar var
     set var [concat $var $list]
 }
-
-
 
 proc qc::lsum {list} {
     #| Return sum of all list items
@@ -220,14 +190,10 @@ proc qc::lsum {list} {
     return $total
 }
 
-
-
 proc qc::laverage {list} {
     #| Returns average of all list elements
     return [expr {double([lsum $list])/[llength $list]}]
 }
-
-
 
 proc qc::lreplace_values {list find replace} {
     #| Replace any occurrence of $find in $list with $replace
@@ -239,8 +205,6 @@ proc qc::lreplace_values {list find replace} {
     return $list
 }
 
-
-
 proc qc::lapply { func list } {
     #| Apply the named procedure to all elements in the list and return a list of the results
     set result {}
@@ -249,5 +213,4 @@ proc qc::lapply { func list } {
     }
     return $result
 }
-
 

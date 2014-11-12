@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export check checks
-}
-
-doc validate {
-    Title "Checking User Input"
-    Url {/qc/wiki/ValidationPage}
 }
 
 proc qc::check {args} {
@@ -168,8 +161,6 @@ proc qc::check {args} {
     return true
 }
 
-
-
 proc qc::checks { body } {
     # Call check foreach line of checks in the format
     # varName type ?type? ?type? ?errorMessage?
@@ -190,5 +181,4 @@ proc qc::checks { body } {
 	error [html_list $errors] {} USER
     }
 }
-
 

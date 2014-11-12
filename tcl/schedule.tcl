@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export schedule schedule_id schedule_exists schedule_running schedule_stop schedule_start
 }
@@ -57,8 +55,6 @@ proc qc::schedule {args} {
 	schedule_start $proc_name
     }
 }
-
-
 
 proc qc::schedule_id {proc_name} {
     #| Return id for schedule proc_name.    

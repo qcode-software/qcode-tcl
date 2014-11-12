@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export widget widget_*
 }
@@ -15,8 +13,6 @@ proc qc::widget {args} {
     } 
     error "No widget proc defined for $type"
 }
-
-
 
 proc qc::widget_label { args } {
     #| Return an HTML form label element.
@@ -37,8 +33,6 @@ proc qc::widget_label { args } {
 
     return [html label $html {*}$attributes]
 }
-
-
 
 proc qc::widget_text { args } {
     #| Return an HTML form text input widget.
@@ -73,8 +67,6 @@ proc qc::widget_text { args } {
     return $html
 }
 
-
-
 proc qc::widget_compare { args } {
     #| Return an HTML form widget with an operator drop down and input box.
     args_check_required $args name value 
@@ -93,8 +85,6 @@ proc qc::widget_compare { args } {
     return $html
 }
 
-
-
 proc qc::widget_combo { args } {
     #| Return an DHTML form widget with text input and dropdown for completion.
     array set this $args
@@ -108,8 +98,6 @@ proc qc::widget_combo { args } {
     }
     return $html
 }
-
-
 
 proc qc::widget_htmlarea { args } {
     #| 	Return an HTML form htmlarea widget made from an editable div tag.
@@ -138,8 +126,6 @@ proc qc::widget_htmlarea { args } {
     return [html div $this(value) {*}[qc::dict_exclude [array get this] label required units width height tooltip]]
 }
 
-
-
 proc qc::widget_textarea { args } {
     #| Return an HTML form textarea element.
     array set this $args
@@ -163,8 +149,6 @@ proc qc::widget_textarea { args } {
     }
     set html [html textarea $this(value) {*}[qc::dict_exclude [array get this] type value label required units width height tooltip]]
 }
-
-
 
 proc qc::widget_select { args } {
     #| 	Return an HTML form dropdown list.
@@ -210,8 +194,6 @@ proc qc::widget_select { args } {
     return $html
 }
 
-
-
 proc qc::widget_span { args } {
     #| Return a span element showing the value of the widget.
     args_check_required $args name value 
@@ -232,8 +214,6 @@ proc qc::widget_span { args } {
     }
     return [html span $this(value) {*}[qc::dict_exclude [array get this] label type value width height tooltip]] 
 }
-
-
 
 proc qc::widget_password { args } {
     #| Return an HTML form, password input widget.
@@ -258,8 +238,6 @@ proc qc::widget_password { args } {
     }
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
-
-
 
 proc qc::widget_bool { args } {
     args_check_required $args name value
@@ -286,8 +264,6 @@ proc qc::widget_bool { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
-
-
 proc qc::widget_checkbox { args } {
     array set this $args
     if { [info exists this(name)] } { 
@@ -299,8 +275,6 @@ proc qc::widget_checkbox { args } {
     }
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
-
-
 
 proc qc::widget_button { args } {
     #| Return an HTML form, button
@@ -316,8 +290,6 @@ proc qc::widget_button { args } {
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
 
-
-
 proc qc::widget_submit { args } {
     #| Return an HTML form, submit button
     args_check_required $args name value
@@ -331,8 +303,6 @@ proc qc::widget_submit { args } {
     }
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]] 
 }
-
-
 
 proc qc::widget_radio { args } {
     #| Return an HTML form, radio button
@@ -348,8 +318,6 @@ proc qc::widget_radio { args } {
     }
     return [html_tag input {*}[qc::dict_exclude [array get this] label width height units tooltip]]
 }
-
-
 
 proc qc::widget_radiogroup { args } {
     args_check_required $args name value options
@@ -375,8 +343,6 @@ proc qc::widget_radiogroup { args } {
     }
     return [html div [join $buttons "&nbsp; &nbsp;"] class "radio-group" name $group_name id $group_name]
 }
-
-
 
 proc qc::widget_image_combo { args } {
     #| A widget continaing an image and a combo-input for filenames

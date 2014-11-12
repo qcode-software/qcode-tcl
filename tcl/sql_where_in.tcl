@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export sql_where_in sql_where_in_not
 }
@@ -21,8 +19,6 @@ proc qc::sql_where_in {args } {
     }
 }
 
-
-
 proc qc::sql_where_in_not { args } {
     #| Construct part of a SQL WHERE clause using the NOT IN construct.
     # SQL will test column against list of values.
@@ -39,5 +35,4 @@ proc qc::sql_where_in_not { args } {
 	return "$column not in ([join $lquoted ,])"
     }
 }
-
 

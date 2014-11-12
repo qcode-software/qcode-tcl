@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export html_table_doc
 }
@@ -20,5 +18,4 @@ proc qc::html_table_doc {args} {
     lappend varNames cols tbody
     return [qc::html_table [dict_from {*}$varNames]]
 }
-
 

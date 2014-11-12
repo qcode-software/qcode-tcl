@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export schema_update
 }
@@ -17,5 +15,4 @@ proc qc::schema_update {version code} {
 	}
     }
 }
-
 

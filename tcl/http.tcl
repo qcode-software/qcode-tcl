@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export http_* IANAEncoding2TclEncoding
 }
@@ -144,8 +142,6 @@ proc qc::http_post {args} {
     }
 }
 
-
-
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
     args $args -timeout 60 -sslversion sslv3 -headers {} -noproxy -- url
@@ -177,8 +173,6 @@ proc qc::http_get {args} {
     }
 }
 
-
-
 proc qc::http_header {name value} {
     #| Return http header. 
     #| Raise an error if the value of the http header contains newline characters.
@@ -187,8 +181,6 @@ proc qc::http_header {name value} {
     }
     return "$name: $value"
 }
-
-
 
 proc qc::http_put {args} {
     # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
@@ -366,7 +358,6 @@ proc qc::http_head {args} {
 
     dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
 
-
     switch $curlErrorNumber {
 	0 {
 	    switch $responsecode {
@@ -388,8 +379,6 @@ proc qc::http_head {args} {
     }
 }
 
-
-
 proc qc::http_exists {args} {
     #| Test if an URL returns a valid response
     # usage http_head ?-timeout timeout? ?-useragent useragent? url
@@ -404,8 +393,6 @@ proc qc::http_exists {args} {
 	return false
     }
 }
-
-
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.

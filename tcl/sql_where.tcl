@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
 }
@@ -33,8 +31,6 @@ proc qc::sql_where { args } {
     }
 }
 
-
-
 proc qc::sql_where_like { args } {
     #| Construct part of SQL WHERE clause using varNames
     #| in a pass-by-name list or a dict.
@@ -54,8 +50,6 @@ proc qc::sql_where_like { args } {
 	return [join $list " and "]
     }
 }
-
-
 
 proc qc::sql_where_cols_start { args } {
     #| Construct part of SQL WHERE clause using varNames
@@ -81,8 +75,6 @@ proc qc::sql_where_cols_start { args } {
 	return [join $list " and "]
     }
 }
-
-
 
 proc qc::sql_where_col_starts { args } {
     #| Construct part of SQL WHERE clause with a regexp matching 
@@ -112,8 +104,6 @@ proc qc::sql_where_col_starts { args } {
 	return ([join $list " $logic "])
     }
 }
-
-
 
 proc qc::sql_where_combo { col_name value } {
     if { [ne $value ""] } {
@@ -225,8 +215,6 @@ proc qc::sql_where_words_in { name phrase } {
     } 
 }
 
-
-
 proc qc::sql_where_phrases_in { args } {
     #| Where clause to evaluate to true if $phrase occurrs in sql expression $name
     qc::args $args -all -- name args
@@ -248,5 +236,4 @@ proc qc::sql_where_phrases_in { args } {
         return true
     }
 }
-
 

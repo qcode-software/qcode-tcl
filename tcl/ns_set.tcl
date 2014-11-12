@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export ns_set_*
 }
@@ -15,23 +13,17 @@ proc qc::ns_set_to_vars { set_id {level 0}} {
     }
 }
 
-
-
 proc qc::ns_set_to_dict { set_id } {
     #| Take an ns_set with id $set_id from caller 
     #| return a dict
     return [ns_set array $set_id]
 }
 
-
-
 proc qc::ns_set_to_multimap { set_id } {
     #| Take an ns_set with id $set_id from caller 
     #| return a multimap of key values pairs
     return [ns_set array $set_id]
 }
-
-
 
 proc qc::ns_set_getall { set_id key } {
     #| Take an ns_set with id $set_id from caller 
@@ -48,8 +40,6 @@ proc qc::ns_set_getall { set_id key } {
     return $values
 }
 
-
-
 proc qc::ns_set_keys { set_id } {
     #| Take an ns_set with id $set_id from caller 
     #| return all keys
@@ -63,8 +53,6 @@ proc qc::ns_set_keys { set_id } {
     return $keys
 }
 
-
-
 proc qc::ns_set_values { set_id } {
     #| Take an ns_set with id $set_id from caller 
     #| return all values
@@ -77,5 +65,4 @@ proc qc::ns_set_values { set_id } {
     }
     return $values
 }
-
 

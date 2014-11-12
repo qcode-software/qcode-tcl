@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export my
 }
@@ -46,5 +44,4 @@ proc qc::my {args} {
         }
     }
 }
-
 

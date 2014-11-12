@@ -1,32 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export table_foreach table2ldict table2array table_sum
-}
-
-doc table {
-    Title {Table Data Structure}
-    Description {
-	A table data structure is a list of lists. Every list has the same number of elements.<br>
-	The first list contains the names used to identify each column.
-	<p>
-	The structure is similar to CSV files with column names on the first row.
-	<p>
-	The structure is used internally by the <proc>db</proc> and query results can be returned as a table using <proc>db_select_table</proc>.<br>
-	The proc <proc>table_foreach</proc> provides a convenient way to loop through the table.
-    }
-    Examples {
-	% set table {
-	    {firstname surname telephone}
-	    {Jimmy Tarbuck 999}
-	    {Des O'Conner 123}
-	    {Bob Monkhouse 321}
-	}
-	%
-	% set table2
-	{user_id firstname surname} {83214205 Angus MacDonald} {83214206 Iain MacDonald} {83214208 Donald MacDonald}
-    }
-    
 }
 
 proc qc::table_foreach { table code } {
@@ -41,9 +14,6 @@ proc qc::table_foreach { table code } {
 	uplevel 1 $code
     }
 }
-
-
-
 
 proc qc::table2ldict { table } {
     #| Convert a table to an ldict (list of dicts)

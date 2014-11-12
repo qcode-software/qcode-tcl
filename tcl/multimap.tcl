@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export multimap_*
 }
@@ -22,8 +20,6 @@ proc qc::multimap_get_first {args} {
     }
 }
 
-
-
 proc qc::multimap_set_first {args} {
     #| Set the value of the first matching key
     args $args -nocase -glob -regexp -- multimapVariable key value
@@ -42,8 +38,6 @@ proc qc::multimap_set_first {args} {
 	lappend multimap $key $value
     }
 }
-
-
 
 proc qc::multimap_unset_first { multimapVariable key args } {
     #| Delete the first matching key/value pair from the multimap
@@ -74,8 +68,6 @@ proc qc::multimap_unset_first { multimapVariable key args } {
     }
 }
 
-
-
 proc qc::multimap_exists { multimap key } {
     #| Check if a value exists for this key
     if { [lsearch [multimap_keys $multimap] $key] > -1 } {
@@ -85,8 +77,6 @@ proc qc::multimap_exists { multimap key } {
     }
 }
 
-
-
 proc qc::multimap_keys {multimap} {
     #| Return a list of keys in the multimap
     set keys {}
@@ -95,8 +85,6 @@ proc qc::multimap_keys {multimap} {
     }
     return $keys
 }
-
-
 
 proc qc::multimap_get_all { multimap key } {
     #| Return all value for this key
@@ -108,5 +96,4 @@ proc qc::multimap_get_all { multimap key } {
     }
     return $list
 }
-
 
