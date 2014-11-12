@@ -50,13 +50,13 @@ Qcode Tcl Lib Documentation
 
 * * *
 
-[1]: db.html
-[2]: cast.html
-[3]: auth.html
-[4]: cooke.html
-[5]: args.html
-[6]: validation.html
-[7]: date.html
-[8]: email.html
-[9]: error.html
-[10]: form-vars.html
+[1]: db.md
+[2]: cast.md
+[3]: auth.md
+[4]: cooke.md
+[5]: args.md
+[6]: validation.md
+[7]: date.md
+[8]: email.md
+[9]: error.md
+[10]: form-vars.md

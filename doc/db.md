@@ -4,7 +4,7 @@ CSS: default.css
 Qcode Database API
 ======================
 
-part of [Qcode Documentation](../index.md)
+part of [Qcode Documentation](index.md)
 
 * * *
 
