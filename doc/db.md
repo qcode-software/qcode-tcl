@@ -73,7 +73,7 @@ jimmy@foo.com
 </pre>
 
 ### Bind Variables
-Bind Variables are designed to prevent ["SQL Injection Attacks"](SqlInjection) and escape strings ready for the database.
+Bind Variables are designed to prevent ["SQL Injection Attacks"](sqlinjection.md) and escape strings ready for the database.
 
 Bind Variables are denoted by a colon followed by the name of the variable to be substituted e.g. `:foo or :bar`.The syntax is similar to ACS and http://www.openacs.org. Postgresql's psql program also uses this notation for substitution but without escaping values.
 
