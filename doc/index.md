@@ -53,7 +53,7 @@ Qcode Tcl Lib Documentation
 [1]: db.md
 [2]: cast.md
 [3]: auth.md
-[4]: cooke.md
+[4]: cookie.md
 [5]: args.md
 [6]: validation.md
 [7]: date.md

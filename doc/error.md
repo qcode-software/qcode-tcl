@@ -32,7 +32,7 @@ scheduled tasks
 --------------------------
 
 
-Each scheduled task needs to be wrapped in a [try](/qc/proc/qc::try) clause with custom [error reporting](procs/error_report_no_conn.md).eg.
+Each scheduled task needs to be wrapped in a [try](procs/try.md) clause with custom [error reporting](procs/error_report_no_conn.md).eg.
 	
 	   try {
 		a_scheduled_task
