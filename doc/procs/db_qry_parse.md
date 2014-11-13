@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Escape and substitute bind variables in a SQL query. Bind variables are marked with a colon followed by the variable name e.g. :varname The parser will use values of corresponding TCL variables in this namespace or go up the number of levels defined. Values are escaped using db_quote e.g O'Conner becomes O''Conner. Variables that contain an empty string will be treated as NULL (see example below).
+Escape and substitute bind variables in a SQL query. Bind variables are marked with a colon followed by the variable name e.g. `:varname` The parser will use values of corresponding TCL variables in this namespace or go up the number of levels defined. Values are escaped using [db_quote](db_quote.md) e.g `O'Conner` becomes `O''Conner`. Variables that contain an empty string will be treated as NULL (see example below).
 
 Examples
 --------
