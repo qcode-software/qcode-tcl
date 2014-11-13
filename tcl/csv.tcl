@@ -60,7 +60,3 @@ proc qc::csv2ll {csv } {
     }
     return $result
 }
-
- 9}
-    }
-}

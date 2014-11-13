@@ -3,7 +3,8 @@ package require sha1
 package require md5
 package require base64
 package require tdom
-package require fileutilnamespace eval qc {
+package require fileutil
+namespace eval qc {
     namespace export s3 s3_* aws_*
 }
 

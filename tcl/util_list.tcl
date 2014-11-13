@@ -29,7 +29,13 @@ if { $tcl_version<8.5 } {
 	}
 	return $rlist
     }
-    
+    proc lassign {list args} {
+        #| List assign for Tcl <8.5 
+	foreach value $list variableName $args {
+	    upset 1 $variableName $value
+	}
+    }
+}
 
 proc qc::lintersect { a b } {
     #| Returns the intersection of 2 lists

@@ -362,13 +362,6 @@ proc qc::email2multimap {text} {
     return $email
 }
 
-    % qc::email2multimap $email
-MIME-Version 1.0 Received {by 10.216.2.9 with HTTP; Fri, 17 Aug 2012 04:51:36 -0700 (PDT)} Date {Fri, 17 Aug 2012 12:51:36 +0100} Delivered-To bernhard@qcode.co.uk Message-ID <CAJF-9+0b5zv9TeOzm0jrnqPiMo4mfn1F5wkwcsbZ0Aj2Wjq1AA@mail.gmail.com> Subject Memo From {Bernhard van Woerden <bernhard@qcode.co.uk>} To {Bernhard van Woerden <bernhard@qcode.co.uk>} Content-Type {multipart/mixed; boundary=0016e6d9a38e403c6904c774c888} bodies {{Content-Type {multipart/alternative; boundary=0016e6d9a38e403c6004c774c886} bodies {{Content-Type {text/plain; charset=ISO-8859-1} body {Please see the attached.
-
-- Bernhard}} {Content-Type {text/html; charset=ISO-8859-1} body {Please see the attached.<div><br></div><div>- Bernhard</div>}}}} {Content-Type {text/plain; charset=US-ASCII; name="Memo.txt"} Content-Disposition {attachment; filename="Memo.txt"} Content-Transfer-Encoding base64 X-Attachment-Id f_h5z7vyc30 body {Would the last person to leave please turn the lights off.}}}    
-    }
-}
-
 proc qc::email_header_value_decode {value} {
     #| Decode an encoded header value as per rfc-2047
     # eg. =?UTF-8?B?UWNvZGUgUm9ja3M=?=
@@ -427,16 +420,6 @@ proc qc::email_header_fold {string} {
     }
     lappend result $line
     return [string map {\n "\r\n "} [join $result \r\n]]
-}
-
-doc qc::email_header_fold {
-    Examples {
-	% qc::email_header_fold "This is a long line over the 78 characters allowed before folding at a word boundary where possible"
-This is a long line over the 78 characters allowed before folding at a word
- boundary where possible
-	% qc::email_header_fold "Non ASCII is treated like this pound sign £"
-Non ASCII is treated like this pound sign =?UTF-8?Q?=C2=A3?=
-    }
 }
 
 proc qc::email_token2dict {token} {

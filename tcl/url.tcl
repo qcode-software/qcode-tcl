@@ -114,21 +114,6 @@ proc qc::url_encode {string {charset utf-8}} {
     return [string map $url_encode_map [encoding convertto $charset $string]]
 }
 
-doc qc::url_encode {
-    Description {
-        Return url-encoded string with option to specify charset
-    }
-    Usage {
-        qc::url_encode string ?charset? 
-    }
-    Examples {
-        > qc::url_encode "someplace.html?order_number=911&title=ca sáu"
-        someplace.html%3forder_number%3d911%26title%3dca+s%c3%a1u
-        > qc::url_encode "someplace.html?order_number=911&title=ca sáu" iso8859-1
-        someplace.html%3forder_number%3d911%26title%3dca+s%e1u
-    }
-}
-
 proc qc::url_decode {string {charset utf-8}} { 
     #| Return url-decoded string with option to specify charset
     # Conforms to RFC 3986
@@ -139,21 +124,6 @@ proc qc::url_decode {string {charset utf-8}} {
     return [encoding convertfrom $charset [string map -nocase $url_decode_map $string]]
 }
 
-doc qc::url_decode {
-    Description {
-        Return url-decoded string with option to specify charset
-    }
-    Usage {
-        qc::url_decode string ?charset? 
-    }
-    Examples {
-        > qc::url_decode "someplace.html%3forder_number%3d911%26title%3dca+s%c3%a1u"
-        someplace.html?order_number=911&title=ca sáu
-        > qc::url_decode "someplace.html%3forder_number%3d911%26title%3dca+s%e1u" iso8859-1
-        someplace.html?order_number=911&title=ca sáu
-    }
-}
-
 proc qc::url_path {url} {
     # Return just the url path
     if { [regexp {^https?://[a-z0-9_]+(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
@@ -162,19 +132,6 @@ proc qc::url_path {url} {
 	return $path 
     } else {
 	return ""
-    }
-}
-
-doc qc::url_path {
-    Description {
-        Return just the url path 
-    }
-    Usage {
-        qc::url_path url
-    }
-    Examples {
-        % qc::url_path "/someplace.html?order_number=911&title=casáu"
-        /someplace.html
     }
 }
 
