@@ -11,6 +11,16 @@ Description
 -----------
 Returns the date of the start of the week in which $date falls
 
+Examples
+-----------
+```
+% date_iso_week_start 2007-05-06
+% 2007-04-30
+%
+% date_iso_week_start "today"
+% 2012-08-06
+```
+
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
