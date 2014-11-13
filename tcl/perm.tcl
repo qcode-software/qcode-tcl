@@ -96,3 +96,61 @@ proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
 	uplevel 1 $else_code
     }
 }
+
+proc qc::perm_category_add {category} {
+    #| Helper proc to create new permission category
+    db_trans {
+        set perm_category_id [db_seq perm_category_id_seq]
+        db_dml {
+            insert into perm_category
+            (perm_category_id, description)
+            values
+            (:perm_category_id, :category)
+        }
+    }
+}
+
+proc qc::perm_add {perm_name description category args} {
+    #| Helper proc to create new permissions
+    db_trans {
+        db_dml {lock table perm_category in exclusive mode}
+        db_dml {lock table perm_class in exclusive mode}
+        db_dml {lock table perm in exclusive mode}
+
+        # Perm Category
+        db_1row {
+            select 
+            perm_category_id
+            from perm_category
+            where description=:category
+        }
+
+        # Perm Class
+        db_0or1row {
+            select 
+            perm_class_id
+            from perm_class 
+            where perm_name=:perm_name
+        } {
+            set perm_class_id [db_seq perm_class_id_seq]
+            db_dml {
+                insert into perm_class
+                (perm_class_id, perm_name, description, perm_category_id)
+                values
+                (:perm_class_id, :perm_name, :description, :perm_category_id)
+            }
+        }
+
+        # Perm Methods
+        foreach perm_method $args {
+            set perm_id [db_seq perm_id_seq]
+            db_dml {
+                insert into perm
+                (perm_id, perm_class_id, method)
+                values
+                (:perm_id, :perm_class_id, :perm_method::perm_method)
+            }
+        }
+
+    }    
+}

@@ -37,8 +37,8 @@ proc qc::db_file_copy {file_id} {
     set new_file_id [db_seq file_id_seq]
     db_dml {
         insert into file 
-        (file_id,employee_id,filename,data)
-	select :new_file_id,employee_id,filename,data
+        (file_id,employee_id,filename,data,mime_type)
+	select :new_file_id,employee_id,filename,data,mime_type
         from file where file_id=:file_id
     }
     return $new_file_id
@@ -225,33 +225,19 @@ proc qc::db_file_thumbnail_dimensions {file_id max_width max_height} {
 
 proc qc::db_file_thumbnail_cache_create {file_id max_width max_height} {
     #| Create a cached thumbnail of an image, return the cache_id
-    # ONLY WORKS ON JPEGS AND PNGS -
-    # TO DO - SUPPORT FOR OTHER IMAGE FORMATS
     if { ! [in [ns_cache_names] images] } {
 	ns_cache create images -size [expr 100*1024*1024] 
     }
     set key "$file_id $max_width $max_height"
 
-    set tmp_file [qc::db_file_export $file_id]
-    set thumb /tmp/[uuid::uuid generate]
-    # Call imagemagick convert 
-    exec_proxy -timeout 10000 -ignorestderr convert -quiet -thumbnail ${max_width}x${max_height} -strip -quality 75% $tmp_file $thumb
-    file delete $tmp_file
-    set id [open $thumb r]
+    dict2vars [qc::image_resize $file_id $max_width $max_height] file width height
+
+    set id [open $file r]
     fconfigure $id -translation binary
     set data [read $id]
     close $id
+    file delete $file
 
-    if { [jpeg::isJPEG $thumb] } {
-        lassign [jpeg::dimensions $thumb] width height
-    } elseif { [png::isPNG $thumb] } {
-        qc::dict2vars [png::imageInfo $thumb] width height
-    } else {
-        file delete $thumb
-        error "Unrecognised image type"
-    }
-
-    file delete $thumb
     ns_cache set images $key $data
     set base64 [base64::encode $data]
     set cache_id [db_seq image_cache_id_seq]
