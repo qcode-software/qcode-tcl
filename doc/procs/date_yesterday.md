@@ -11,6 +11,16 @@ Description
 -----------
 Return yesterday's date
 
+Examples
+-----------
+```
+% date_yesterday 2007-05-06
+% 2007-05-05
+%
+% date_yesterday "today"
+% 2012-08-09
+```
+
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
