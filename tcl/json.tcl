@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export json2tson
 }
@@ -38,7 +36,6 @@ namespace eval qc::json {
 
     # JSON token
     variable tokenRE "$singleCharTokenRE|$stringRE|$wordTokenRE|$numberRE"
-
 
     # 0..n white space characters
     set whiteSpaceRE {[[:space:]]*}

@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export auth auth_check auth_hba auth_hba_check auth_session
-}
-
-doc authentication {
-    Title Authentication
-    Url {/qc/wiki/AuthPage}
 }
 
 proc qc::auth {} {
@@ -33,14 +26,6 @@ proc qc::auth {} {
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
-doc qc::auth {
-    Parent authentication
-    Examples {
-	% set employee_id [auth]
-	23
-    }
-}
-
 proc qc::auth_check {} {
     #| Check if we can authenticate the employee
     #| Return true or false
@@ -60,10 +45,6 @@ proc qc::auth_check {} {
     return false
 }
 
-doc qc::auth_check {
-    Parent authentication
-}
-
 proc qc::auth_hba {} {
     #| Try to authenticate who the current employee is
     #| based on ip address
@@ -75,10 +56,6 @@ proc qc::auth_hba {} {
     } { 
 	return $employee_id
     } 
-}
-
-doc qc::auth_hba {
-    Parent authentication
 }
 
 proc qc::auth_hba_check {} {
@@ -94,10 +71,6 @@ proc qc::auth_hba_check {} {
     } 
 }
 
-doc qc::auth_hba_check {
-    Parent authentication
-}
-
 proc qc::auth_session { session_id } {
     #| Try to authenticate an employee based on the session_id given
     #| Return the employee_id if successful
@@ -109,6 +82,3 @@ proc qc::auth_session { session_id } {
     }
 }
 
-doc qc::auth_session {
-    Parent authentication
-}

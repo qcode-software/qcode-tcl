@@ -1,33 +1,35 @@
-Title: Casting
-CSS: default.css
-
-# Casting to Data Type
-part of [Qcode Documentation](../index.html)
+Casting to Data Type
+====================
+part of [Qcode Documentation](index.md)
 
 * * *
 
 The Casting Procs format strings as Qcode Data Types.
 
-## Numbers
+Numbers
+--------------------------
 * [cast_integer] 
 * [cast_decimal]
 
-## Dates
+Dates
+--------------------------
 * [cast_date] 
 * [cast_epoch]
 
-## Boolean
+Boolean
+--------------------------
 * [cast_boolean]
 
-## Postcodes
+Postcodes
+--------------------------
 * [cast_postcode] 
 
-[cast_integer]: qc/cast_integer.html 
-[cast_decimal]: qc/cast_decimal.html
-[cast_date]: qc/cast_date.html 
-[cast_epoch]: qc/cast_epoch.html
-[cast_boolean]: qc/cast_boolean.html
-[cast_postcode]: qc/cast_postcode.html 
+[cast_integer]: procs/cast_integer.md 
+[cast_decimal]: procs/cast_decimal.md
+[cast_date]: procs/cast_date.md 
+[cast_epoch]: procs/cast_epoch.md
+[cast_boolean]: procs/cast_boolean.md
+[cast_postcode]: procs/cast_postcode.md 
 
 * * *
 

@@ -1,9 +1,10 @@
- # Sending Email
+# Sending Email
 Requires an MTA listening locally on port 25. 
 
-[email_send](//qc/proc/email_send)
+[email_send](procs/email_send.md)
 
-## Examples
+Examples
+--------------------------
 
 	
 	email_send from jane@acme.com to john@nasa.com subject Hello text "Hi Jimmy, what's up"

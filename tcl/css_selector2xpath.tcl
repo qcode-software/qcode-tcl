@@ -1,4 +1,3 @@
-package require doc
 namespace eval qc {
     namespace export css_selector2xpath
 }

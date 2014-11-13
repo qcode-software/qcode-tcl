@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export schema_update
 }
@@ -18,11 +16,3 @@ proc qc::schema_update {version code} {
     }
 }
 
-doc qc::schema_update {
-    Examples {
-	schema_update 19 {
-	    db_dml { alter table product add column ean bigint }
-	}
-	
-    }
-}

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html
 }
@@ -38,46 +36,9 @@ proc qc::html2pdf { args } {
     }
 }
 
-doc qc::html2pdf {
-    Examples {
-        % html2pdf -encoding base64 -timeout 10 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
-        JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovUHJvZHVjZXIgKHdraHRtbHRvcGRmKQov
-        Q3JlYXRpb25EYXRlIChEOjIwMTAwODIwMTIzMjI1KQo+PgplbmRvYmoKNCAwIG9iago8PAovVHlw
-        ZSAvRXh0R1N0YXRlCi9TQSB0cnVlCi9TTSAwLjAyCi9jYSAxLjAKL0NBIDEuMAovQUlTIGZhbHNl
-        Ci9TTWFzayAvTm9uZT4+CmVuZG9iago1IDAgb2JqClsvUGF0dGVybiAvRGV2aWNlUkdCXQplbmRv
-        YmoKOCAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjYgMCBv
-        ...
-        % html2pdf -encoding binary -timeout 10 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
-        1 0 obj
-        <<
-        /Title (þÿ)
-        ...
-    }
-}
-
-
 proc qc::html {tagName nodeValue args} {
     #| Generate an html node
     return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"
-}
-
-doc qc::html {
-    Examples {
-	% html span "Hello There"
-	<span>Hello There</span>
-	%
-	% html span "Hello There" class greeting
-	<span class="greeting">Hello There</span>
-	%
-	% html span "Hello There" class greeting value Escape&Me
-	<span class="greeting" value="Escape&amp;Me">Hello There</span>
-	%
-	% html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
-	<span class="greeting" value="don't &#34;quote&#34; me">Hello There</span>
-	%
-	%  html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
-	<span class="greeting" id="oSpan" value="don't &#34;quote&#34; me">Hello There</span>
-    }
 }
 
 proc qc::html_tag { tagName args } {
@@ -99,41 +60,14 @@ proc qc::html_tag { tagName args } {
     }
 }
 
-doc qc::html_tag {
-    Examples {
-	% html_tag input name firstname
-	<input name="firstname">
-	%
-	% html_tag input name firstname value "Des O'Conner"
-	<input name="firstname" value="Des O'Conner">
-	%
-	% html_tag input name firstname value "Des O'Conner" disabled yes
-	<input name="firstname" value="Des O'Conner" disabled>
-    }
-}
-
 proc qc::html_escape {html} {
     #| Convert html markup characters to HTML entities
     return [string map [list < "&lt;" > "&gt;" \" "&quot;" ' "&#39;" & "&amp;"] $html]
 }
 
-doc qc::html_escape {
-    Examples {
-	% qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}
-	Hello &lt;strong&gt;Brave&lt;/strong&gt; &amp; &quot;Wise&quot; Ones
-    }
-}
-
 proc qc::html_unescape { text } {
     #| Convert html entities back to text
     return [string map {&lt; < &gt; > &amp; & &\#39; ' &\#34; \" &quot; \"} $text]
-}
-
-doc qc::html_unescape {
-    Examples {
-	% qc::html_unescape [qc::html_escape {Hello <strong>Brave</strong> & "Wise" Ones}]
-	Hello <strong>Brave</strong> & "Wise" Ones
-    }
 }
 
 proc qc::html_hidden { args } {
@@ -145,19 +79,6 @@ proc qc::html_hidden { args } {
     return $html
 }
 
-doc qc::html_hidden {
-    Examples {
-	% set customer_key As234454g.4/2
-	% html_hidden customer_key
-	<input type="hidden" name="customer_key" value="As234454g.4/2" id="customer_key">
-	%
-	%  set order_key 66524F.kL
-	% html_hidden customer_key order_key
-	<input type="hidden" name="customer_key" value="As234454g.4/2" id="customer_key">
-	<input type="hidden" name="order_key" value="66524F.kL" id="order_key">
-    }
-}
-
 proc qc::html_hidden_set { args } {
     #| Create hidden fields from list of name value pairs.
     set html {}
@@ -165,14 +86,6 @@ proc qc::html_hidden_set { args } {
 	append html [qc::html_tag input type hidden name $name value $value id $name]\n
     }
     return $html
-}
-
-doc qc::html_hidden_set {
-    Examples {
-	% html_hidden_set customer_key As234454g.4/2 order_key 66524F.kL
-	<input type="hidden" name="customer_key" value="As234454g.4/2" id="customer_key">
-	<input type="hidden" name="order_key" value="66524F.kL" id="order_key">
-    }
 }
 
 proc qc::html_list { list args } {
@@ -185,50 +98,16 @@ proc qc::html_list { list args } {
     return $html
 }
 
-doc qc::html_list {
-    Examples {
-	% set list [list one two three four]
-	one two three four
-	% html_list $list
-	<ul>
-	<li>one</li>
-	<li>two</li>
-	<li>three</li>
-	<li>four</li>
-	</ul>
-    }
-}
-
 proc qc::html_a { link url args } {
     # Create a HTML hyperlink 
     lappend args href $url
     return [html a $link {*}$args]
 }
 
-doc qc::html_a {
-    Examples {
-	% html_a Google http://www.google.co.uk 
-	<a href="http://www.google.co.uk">Google</a>
-	%
-	% html_a Google http://www.google.co.uk title "Google Search" class highlight
-	<a title="Google Search" class="highlight" href="http://www.google.co.uk">Google</a>
-    }
-}
-
 proc qc::html_a_replace { link url args } {
     # Used to replace browser history state so browser back button will not record these urls.
     lappend args onclick "location.replace(this.href);return false;"
     return [html_a $link $url {*}$args]
-}
-
-doc qc::html_a_replace {
-    Examples {
-	% html_a_replace Google http://www.google.co.uk 
-	<a href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
-	%
-	% html_a_replace Google http://www.google.co.uk title "Google Search" class highlight
-        <a title="Google Search" class="highlight" href="http://www.google.co.uk" onclick="location.replace(this.href);return false;">Google</a>
-    }
 }
 
 proc qc::html_id { name {value UNDEF}} {
@@ -240,24 +119,9 @@ proc qc::html_id { name {value UNDEF}} {
     return [html span $value id $name]
 }
 
-doc qc::html_id {
-    Examples {
-	% html_id total 23.50
-	<span id="total">23.50</span>
-	
-    }
-}
-
 proc qc::html_menu { lmenu } {
     #| Join items to form a horizontal menu
     return [join $lmenu " &nbsp;<b>|</b>&nbsp; "]
-}
-
-doc qc::html_menu {
-    Examples {
-	% html_menu [list [html_a Sales sales.html] [html_a Purchasing sales.html] [html_a Accounts sales.html]]
-        <a href="sales.html">Sales</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Purchasing</a> &nbsp;<b>|</b>&nbsp; <a href="sales.html">Accounts</a>
-    }
 }
 
 proc qc::html_paragraph_layout {args} {
@@ -267,13 +131,6 @@ proc qc::html_paragraph_layout {args} {
 	append html "<p><b>$label</b><br>$detail</p>"
     }
     return $html
-}
-
-doc qc::html_paragraph_layout {
-    Examples {
-	% html_paragraph_layout Name "Jimmy Tarbuck" Venue "Palace Ballroom"
-	<p><b>Name</b><br>Jimmy Tarbuck</p><p><b>Venue</b><br>Palace Ballroom</p>
-    }
 }
 
 proc qc::html2text { html } {
@@ -310,52 +167,6 @@ proc qc::html_info_tables {args} {
     return [qc::html_table class "columns-container" tbody [list $row]]
 }
 
-doc qc::html_info_tables {
-    Examples {
-	% html_info_tables {Name "Jimmy Tarbuck" Venue "Palace Ballroom"} {Name "Des O'Conner" Venue "Royal Palladium"}
-	<table class="columns-container">
-	<tbody>
-	<tr>
-	<td><table class="column">
-	<colgroup>
-	<col class="bold">
-	<col>
-	</colgroup>
-	<tbody>
-	<tr>
-	<td>Name</td>
-	<td>Jimmy Tarbuck</td>
-	</tr>
-	<tr>
-	<td>Venue</td>
-	<td>Palace Ballroom</td>
-	</tr>
-	</tbody>
-	</table>
-	</td>
-	<td><table class="column">
-	<colgroup>
-	<col class="bold">
-	<col>
-	</colgroup>
-	<tbody>
-	<tr>
-	<td>Name</td>
-	<td>Des O'Conner</td>
-	</tr>
-	<tr>
-	<td>Venue</td>
-	<td>Royal Palladium</td>
-	</tr>
-	</tbody>
-	</table>
-	</td>
-	</tr>
-	</tbody>
-	</table>
-    }
-}
-
 proc qc::html_styles2inline {html} {
     #| Applies defined styles in html head as inline styles for relevant elements in body
     set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
@@ -365,48 +176,6 @@ proc qc::html_styles2inline {html} {
 	set html [qc::html_style2inline $html $style]
     }
     return $html
-}
-
-doc qc::html_styles2inline {
-    Examples {
-        % set html {
-        <html>
-        <head>
-        <style type="text/css">
-        body {
-	    font-family: Arial, Helvetica, sans-serif;
-	    font-size:84%;
-        }
-        table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
-        </style>
-        </head>
-        <body>
-            <p>Hello</p>
-            <table>
-                <tr><td>Table entry</td></tr>
-            </table>
-        </body>
-        </html>
-        }
-
-	% qc::html_styles2inline $html
-        <html>
-        <head><style type="text/css">
-        body {
-	    font-family: Arial, Helvetica, sans-serif;
-	    font-size:84%;
-        }
-        table {font-family: Arial, Helvetica, sans-serif;font-size:100%}
-        </style>
-        </head>
-        <body style="font-family:Arial, Helvetica, sans-serif;font-size:84%">
-            <p>Hello</p>
-            <table style="font-family:Arial, Helvetica, sans-serif;font-size:100%">
-                <tr><td>Table entry</td></tr>
-            </table>
-        </body>
-        </html>
-    }
 }
 
 proc qc::html_style2inline {html style} {
@@ -510,53 +279,6 @@ proc qc::html_col_styles_apply2td {html} {
     return $html
 }
 
-doc qc::html_styles_apply2td {
-    Examples {
-        % set html {
-        <html>
-        <head>
-
-        <style type="text/css">
-        col.number { 
-	    text-align:right;
-        }
-        col.bold {
-	    font-weight:bold
-        }
-        </style></head><body><table width="100%">
-        <colgroup>
-        <col class="bold"><col class="number">
-        </colgroup><thead><tr>
-        <th>Qty</th><th>Total</th>
-        </tr></thead><tbody><tr>
-        <td>100</td><td>586.98</td>
-        </tr></tbody>
-        </table></body>
-        </html>
-        }
-
-        % qc:::html_styles_apply2td $html
-        <html>
-        <head><style type="text/css">
-        col.number { 
-	    text-align:right;
-        }
-        col.bold {
-	    font-weight:bold
-        }
-        </style></head><body><table width="100%">
-        <colgroup>
-        <col class="bold"><col class="number">
-        </colgroup><thead><tr>
-        <th>Qty</th><th>Total</th>
-        </tr></thead><tbody><tr>
-        <td style="font-weight:bold">100</td><td style="text-align:right">586.98</td>
-        </tr></tbody>
-        </table></body>
-        </html>
-    }
-}
-
 proc qc::html_clean {html} {
 
     # Get rid of unnecessary tags
@@ -599,7 +321,6 @@ proc qc::html_clean {html} {
 
 	set start [expr {[lindex $match 0]+[string length $replace]}]
     }
-
 
     set start 0
     while { $start<[string length $html] && \

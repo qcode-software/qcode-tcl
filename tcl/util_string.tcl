@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
 }
@@ -9,55 +7,14 @@ proc qc::upper { string } {
     return [string toupper $string]
 }
 
-doc qc::upper {
-    Description {
-        Convert string to upper case
-    }
-    Usage {
-        qc::upper string
-    }
-    Examples {
-        % qc::upper "This will be changed to upper case."
-        THIS WILL BE CHANGED TO UPPER CASE.
-    }
-}
-
 proc qc::lower { string } {
     #| Convert string to lower case
     return [string tolower $string]
 }
 
-doc qc::lower {
-    Description {
-        Convert string to upper case
-    }
-    Usage {
-        qc::lower string
-    }
-    Examples {
-        % qc::lower "THIS WILL BE CHANGED TO LOWER"
-        this will be changed to lower
-    }
-}
-
 proc qc::trim { string } {
     #| Removes and leading or trailing white space.
     return [string trim $string]
-}
-
-doc qc::trim {
-    Description {
-        Removes and leading or trailing white space.
-    }
-    Usage {
-        qc::trim string
-    }
-    Examples {
-        % set string "       Testing          "
-            Testing          
-        % qc::trim $string
-        Testing
-    }
 }
 
 proc qc::truncate {string length} {
@@ -70,21 +27,6 @@ proc qc::truncate {string length} {
 	set position $length
     }
     return [string range $string 0 [expr {$position-1}]]
-}
-
-doc qc::truncate {
-    Description {
-        Truncate to nearest word boundary to create string of at the most of specified length
-    }
-    Usage {
-        qc::truncate string length
-    }
-    Examples {
-        % set string "This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately."
-        This is a longer string than would be allowed in varchar(50) DB columns so use trunc to truncate appropriately.
-        set string_varchar50 [qc::truncate  $string 50]
-        This is a longer string than would be allowed in 
-    }
 }
 
 # We'll begin with a box, and the plural is boxes;
@@ -167,24 +109,6 @@ proc qc::plural word {
     return ${word}s
 }
 
-doc qc::plural {
-    Description {
-        Attempts to return the plural form of a word.
-        Assumes the supplied word is not already plural.
-    }
-    Usage {
-        qc::plural word
-    }
-    Examples {
-        % qc::plural dog
-        dogs
-        % qc::plural dogs
-        dogses
-        % qc::plural formula
-        formulae
-    }
-}
-
 proc qc::singular word {
     # TODO unused
     switch -- $word {
@@ -239,23 +163,6 @@ proc qc::cmplen {string1 string2} {
 	return 0
     } else {
 	return 1
-    }
-}
-
-doc qc::cmplen {
-    Description {
-        Compare length of 2 strings
-    }
-    Usage {
-        qc::cmplen string1 string2
-    }
-    Examples {
-        % qc::cmplen "ox" "hippopotamus"
-        -1
-        % qc::cmplen "hippopotamus" "ox"
-        1
-        % qc::cmplen "ox" "ox"
-        0
     }
 }
 

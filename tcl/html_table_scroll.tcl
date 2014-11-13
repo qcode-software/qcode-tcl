@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export html_table_scroll
 }

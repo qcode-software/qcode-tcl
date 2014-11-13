@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export multimap_*
 }
@@ -22,17 +20,6 @@ proc qc::multimap_get_first {args} {
     }
 }
 
-doc qc::multimap_get_first {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_get_first $multimap from
-	John
-	% qc::multimap_get_first -nocase $multimap FROM
-	John
-    }
-}
-
 proc qc::multimap_set_first {args} {
     #| Set the value of the first matching key
     args $args -nocase -glob -regexp -- multimapVariable key value
@@ -49,17 +36,6 @@ proc qc::multimap_set_first {args} {
 	lset multimap [expr {($index*2)+1}] $value
     } else {
 	lappend multimap $key $value
-    }
-}
-
-doc qc::multimap_set_first {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_set_first multimap from Johnny
-	from Johnny from Jill from Gail to Kim subject Hi
-        % qc::multimap_set_first -nocase multimap FROM Johnny
-	from Johnny from Jill from Gail to Kim subject Hi
     }
 }
 
@@ -92,32 +68,12 @@ proc qc::multimap_unset_first { multimapVariable key args } {
     }
 }
 
-doc qc::multimap_unset_first {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_unset_first multimap from
-	from Jill from Gail to Kim subject Hi
-    }
-}
-
 proc qc::multimap_exists { multimap key } {
     #| Check if a value exists for this key
     if { [lsearch [multimap_keys $multimap] $key] > -1 } {
 	return 1
     } else {
 	return 0
-    }
-}
-
-doc qc::multimap_exists {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_exists $multimap subject
-	1
-	% qc::multimap_exists $multimap foo
-	0
     }
 }
 
@@ -128,15 +84,6 @@ proc qc::multimap_keys {multimap} {
 	lappend keys $key
     }
     return $keys
-}
-
-doc qc::multimap_keys {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_keys $multimap
-	from from from to subject
-    }
 }
 
 proc qc::multimap_get_all { multimap key } {
@@ -150,12 +97,3 @@ proc qc::multimap_get_all { multimap key } {
     return $list
 }
 
-doc qc::multimap_get_all {
-    Examples {
-	% set multimap [list from John from Jill from Gail to Kim subject Hi]
-	from John from Jill from Gail to Kim subject Hi
-	% qc::multimap_get_all $multimap from
-	John Jill Gail
-	% 
-    }
-}

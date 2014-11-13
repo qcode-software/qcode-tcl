@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export form_db form_db_plain
 }

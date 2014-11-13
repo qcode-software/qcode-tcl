@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export error_handler error_report error_report_*
 }

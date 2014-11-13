@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export format_timestamp format_timestamp_* format_timestamp2hour
 }
@@ -7,19 +5,6 @@ namespace eval qc {
 proc qc::format_timestamp_iso { string } {
     #| Format string as an ISO timestamp 
     return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
-}
-
-doc qc::format_timestamp_iso {
-    Examples {
-	% format_timestamp_iso now
-	2007-11-05 17:30:14
-	%
-	% format_timestamp_iso "23/5/2008 10:11:28"
-	2008-05-23 10:11:28
-	%
-	% format_timestamp_iso "23rd June 2008 10:11"
-	2008-06-23 10:11:00
-    }
 }
 
 proc qc::format_timestamptz { string } {
@@ -30,12 +15,6 @@ proc qc::format_timestamptz { string } {
 proc qc::format_timestamp_http { string } {
     #| Format string as http timestamp according to RFC 1123
     return [clock format [cast_epoch $string] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]
-}
-doc qc::format_timestamp_http {
-    Examples {
-	% format_timestamp_http now
-        Tue, 12 Jun 2012 10:39:47 GMT
-    }
 }
 
 proc qc::format_timestamp_rel { string } {
@@ -57,19 +36,6 @@ proc qc::format_timestamp_rel { string } {
     return [clock format $epoch -format "%Y-%m-%d"]
 }
 
-doc qc::format_timestamp_rel {
-    Examples {
-	% format_timestamp_rel now
-	17:33
-	%
-	% format_timestamp_rel yesterday
-	Sun 17:34
-	%
-	% format_timestamp_rel "next week"
-	Sep 7th
-    }
-}
-
 proc qc::format_timestamp2hour { string } {
     return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
 }
@@ -78,19 +44,6 @@ proc qc::format_timestamp { string } {
     #| Format string as datetime for user.
     #| Will be customizable in future but at present chooses the ISO format.
     return [format_timestamp_iso $string]
-}
-
-doc qc::format_timestamp {
-    Examples {
-	% format_timestamp now
-	2007-11-05 17:30:14
-	%
-	% format_timestamp "23/5/2008 10:11:28"
-	2008-05-23 10:11:28
-	%
-	% format_timestamp "23rd June 2008 10:11"
-	2008-06-23 10:11:00
-    }
 }
 
 proc qc::format_timestamp_rel_age {args} {
@@ -138,11 +91,3 @@ proc qc::format_timestamp_rel_age {args} {
     return $rel_age
 }
 
-doc qc::format_timestamp_rel_age {
-    Examples {
-        % qc::format_timestamp_rel_age "2009-10-12 12:12:12"
-        5 years
-        % qc::format_timestamp_rel_age -long "2009-10-12 12:12:12"
-        5 years ago
-    }
-}

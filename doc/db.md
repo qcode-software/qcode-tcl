@@ -1,9 +1,10 @@
 Title: Qcode Database API
 CSS: default.css
 
-# Qcode Database API
+Qcode Database API
+======================
 
-part of [Qcode Documentation](../index.html)
+part of [Qcode Documentation](index.md)
 
 * * *
 
@@ -43,7 +44,8 @@ part of [Qcode Documentation](../index.html)
 
 ---
 
-## Examples
+Examples
+--------------------------
 Lets say we have a table users
 <pre class="tcl example">
 % CREATE table users (
@@ -71,7 +73,7 @@ jimmy@foo.com
 </pre>
 
 ### Bind Variables
-Bind Variables are designed to prevent ["SQL Injection Attacks"](SqlInjection) and escape strings ready for the database.
+Bind Variables are designed to prevent ["SQL Injection Attacks"](sqlinjection.md) and escape strings ready for the database.
 
 Bind Variables are denoted by a colon followed by the name of the variable to be substituted e.g. `:foo or :bar`.The syntax is similar to ACS and http://www.openacs.org. Postgresql's psql program also uses this notation for substitution but without escaping values.
 
@@ -132,21 +134,22 @@ update users set name=:name,email=:email where user_id=3
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
-[db_1row]: qc/db_1row.html
-[db_0or1row]: qc/db_0or1row.html 
-[db_foreach]: qc/db_foreach.html
-[db_select_table]: qc/db_select_table.html
-[db_dml]: qc/db_dml.html
-[db_trans]: qc/db_trans.html 
-[db_seq]: qc/db_seq.html 
-[db_qry_parse]: qc/db_qry_parse.html 
-[db_quote]: qc/db_quote.html 
-[sql_set]: qc/sql_set.html 
-[sql_insert]: qc/sql_insert.html 
-[sql_sort]: qc/sql_sort.html 
-[sql_where]: qc/sql_where.html 
-[sql_where_cols_start]: qc/sql_where_cols_start.html 
-[sql_where_col_starts]: qc/sql_where_col_starts.html 
-[sql_where_like]: qc/sql_where_like.html 
-[sql_where_in]: qc/sql_where_in.html 
-[sql_where_in_not]: qc/sql_where_in_not.html 
+[db_1row]: procs/db_1row.md
+[db_0or1row]: procs/db_0or1row.md 
+[db_foreach]: procs/db_foreach.md
+[db_select_table]: procs/db_select_table.md
+[db_dml]: procs/db_dml.md
+[db_trans]: procs/db_trans.md 
+[db_seq]: procs/db_seq.md 
+[db_qry_parse]: procs/db_qry_parse.md 
+[db_quote]: procs/db_quote.md 
+[sql_set]: procs/sql_set.md 
+[sql_insert]: procs/sql_insert.md 
+[sql_sort]: procs/sql_sort.md 
+[sql_where]: procs/sql_where.md 
+[sql_where_cols_start]: procs/sql_where_cols_start.md 
+[sql_where_col_starts]: procs/sql_where_col_starts.md 
+[sql_where_like]: procs/sql_where_like.md 
+[sql_where_in]: procs/sql_where_in.md 
+[sql_where_in_not]: procs/sql_where_in_not.md 
+

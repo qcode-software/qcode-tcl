@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export args2dict args2vars args_check_required args_definition_split args_split args
-}
-
-doc Args {
-    Title "Argument Passing in TCL"
-    Url {/qc/wiki/ArgPassing}
 }
 
 proc qc::args2dict {callers_args} {
@@ -28,33 +21,6 @@ proc qc::args2dict {callers_args} {
 	return $dict
     } else {
 	return $callers_args
-    }
-}
-
-doc qc::args2dict {
-    Parent Args
-    Description {
-	Parse callers args. Interpret as regular dict unless first item is ~ in which case interpret as a list of variable names to pass-by-name.
-	Return dict of resulting name value pairs.
-    }
-    Usage {args2dict args}
-    Examples {
-	% set foo Jimmy
-	% set bar Bob
-	% set baz Des
-	%
-	% proc test {args} {
-	    return [args2dict $args]
-	  }
-	%
-	% test foo James bar Robert baz Desmond
-	foo James bar Robert baz Desmond
-	
-	% test [list foo James bar Robert baz Desmond]
-	foo James bar Robert baz Desmond
-
-	% test ~ foo bar baz
-	foo James bar Robert baz Desmond
     }
 }
 
@@ -84,48 +50,6 @@ proc qc::args2vars {callers_args args} {
 	}
     }
     return $varNames
-}
-
-doc qc::args2vars {
-    Parent Args
-    Description {
-	Parse callers args. Interpret as regular dict unless first item is ~ in which case interpret as a list of variable names to pass-by-name.
-	Set all variables or just those specified.
-	Ignore variable names that do not exists in the dict or do not exists in the caller's namespace.
-    }
-    Usage {args2vars args ?variableName? ?variableName? ...}
-    Examples {
-	% set foo Jimmy
-	% set bar Bob
-	% set baz Des
-	%
-	% proc test {args} {
-	    set varNames [args2vars $args]
-	    return "foo $foo bar $bar baz $baz"
-	  }
-	%
-	% test foo James bar Robert baz Desmond
-	foo James bar Robert baz Desmond
-	
-	% test {*}[list foo James bar Robert baz Desmond]
-	foo James bar Robert baz Desmond
-
-	% test ~ foo bar baz
-	foo James bar Robert baz Desmond
-	%
-	% 
-	% proc test {args} {
-	    # name foo and bar as the only variables to set
-	    set varNames [args2vars $args foo bar]
-	    return "foo $foo bar $bar"
-	  }
-	%
-	% test foo James bar Robert baz Desmond
-	foo James bar Robert
-	%
-	% test ~ foo bar baz
-	foo James bar Robert
-    }
 }
 
 proc qc::args_check_required {callers_args args} {
@@ -269,81 +193,3 @@ proc qc::args {callers_args args} {
     }
 }
 
-doc qc::args {
-    Parent Args
-    Description {
-        Specify the caller args to expect, then parse and assign them to variables appropriately.
-        Arguments can be specified as switches, options or standard Tcl procedure arguments.
-
-        For switches, a switch is specifed in the args_spec using "-switch_name".
-        If a switch is passed by the caller, args will set the variable of that name to true if the switch is present.
-        By default, if not passed, the switch variable will be undefined. (The Qcode qc::default command can be used
-        to set a default value).
-
-        For options, an option is specified in the args_spec using "-option_name default"
-        If option is passed by the caller, a default value can be specified. To indicate not default is required, 
-        use "-option_name ?". If a default is not specified, the option variable will be undefined. Otherwise the
-        variable "option_name" is assigned to the option value.
-
-        If switches and/or options are to be called, they must be provided before any standard arguments, but can
-        otherwise be called in any order regardless of the order in which they were defined. 
-        To indicate the list of options and switches is finished use --
-        e.g. "-foo -bar bar_default -baz baz_default --"
-
-        The values appearing after -- (or if no options or switches were specified) are treated as standard Tcl 
-        procedure arguments.
-    }
-    Usage {args caller_args specified_arguments}
-    Examples {
-
-	% proc options_test {args} {
-	    qc::args $args -foo ? -bar 0 --
-            # If called without any options, foo will be undefined, and bar will be 0.
-            if { [info exists foo] } {
-                return "foo $foo bar $bar"
-            } else {
-                return "foo UNDEF bar $bar"
-            }
-	  }
-	
-        % options_test
-        foo UNDEF bar 0
-
-	% options_test -foo 999 -bar 999
-        foo 999 bar 999
-
-	% proc switch_test {args} {
-	    qc::args $args -foo --
-            # If called without any options, both will be undefined unless a default is manually set as in this case.
-            qc::default foo false
-            return "foo is $foo"
-	}
-
-        % switch_test
-        foo is false
-
-        % switch_test -foo
-        foo is true
-
-        % proc test {args} {
-            qc::args $args -foo -bar bar_default -- thud grunt
-            qc::default foo false
-            return "foo $foo bar $bar thud $thud grunt $grunt"
-        }
-
-        % test -bar 999 -foo quux quuux
-        foo true bar 999 thud quux grunt quuux
-
-        % test quux quuux
-        foo false bar bar_default thud quux grunt quuux
-
-        % test quux 
-        Too few values
-
-        % test quux quuux quuuux
-        Too many values; expected 2 but got 3 in "quux quuux quuuux"
-        
-        % test quux quuux -baz 999
-        Illegal option "baz"
-    }
-}

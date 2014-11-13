@@ -1,4 +1,3 @@
-
 namespace eval qc {
     namespace export aws_metadata
 }

@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export file_temp file_write file_upload
 }
@@ -13,18 +11,6 @@ proc qc::file_temp {text {mode 0600}} {
     puts -nonewline $out $text
     close $out
     return $filename
-}
-
-doc qc::file_temp {
-    Examples {
-	% set csv {
-	    Jimmy,1
-	    Des,3
-	    Bob,6
-	}
-	% file_temp $csv
-	/tmp/ns.aCtGxR
-    }
 }
 
 proc qc::file_write {filename contents {perms ""}} {

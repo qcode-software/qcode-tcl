@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export perl_quote list2perl_array dict2perl_hash llist2perl_aarray ddict2perl_hhash
 }

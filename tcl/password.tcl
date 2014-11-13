@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export password_hash password_complexity_ok password_complexity_check
 }

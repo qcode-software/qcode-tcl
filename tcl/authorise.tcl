@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export authorise_token_create authorise_token
-}
-
-doc authorisation {
-    Title Authorisation
-    Url {/qc/wiki/AuthorisePage}
 }
 
 proc qc::authorise_token_create {args} {
@@ -32,10 +25,6 @@ proc qc::authorise_token_create {args} {
         where employee_id=:employee_id
     }
     return "$employee_id $expiration_epoch $hash"
-}
-
-doc qc::authorise_token_create {
-    Parent authorisation
 }
 
 proc qc::authorise_token {} {
@@ -78,8 +67,4 @@ proc qc::authorise_token {} {
             error "Authorisation failed. Invalid hash value." {} AUTHORISATION
         }
     }
-}
-
-doc qc::authorise_token {
-    Parent authorisation
 }

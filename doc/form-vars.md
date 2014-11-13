@@ -1,4 +1,5 @@
-# Form Variables
+Form Variables
+======================
 
 Form variables are the name value pairs sent with HTTP GET requests or POST submissions.
 
@@ -10,7 +11,8 @@ URL Encoded string of name value pairs joined by = sign.
 http://www.jmarshall.com/easy/http/#postmethod
 Data is send within the body of the POST.
 
-## Repeated Variable Names
+Repeated Variable Names
+--------------------------
 Some HTML input elements like checkboxes 
 	
 	<input type="checkbox" name="email_id" value=="1">
@@ -27,10 +29,10 @@ The Qcode library will convert this into a list of values so that
 	> qc::form_var_get email_id
 	1 2
 	
-* [qc::form_var_get](//qc/proc/qc::form_var_get)
-* [qc::form_var_exists](//qc/proc/qc::form_var_exists)
-* [qc::form2vars](//qc/proc/qc::form2vars)
-* [qc::form2dict](//qc/proc/qc::form2dict)
-* [qc::form2url](//qc/proc/qc::form2url)
-* [qc::form_proc](//qc/proc/qc::form_proc) - call a proc using corresponding form variables.
+* [qc::form_var_get](procs/form_var_get.md)
+* [qc::form_var_exists](procs/form_var_exists.md)
+* [qc::form2vars](procs/form2vars.md)
+* [qc::form2dict](procs/form2dict.md)
+* [qc::form2url](procs/form2url.md)
+* [qc::form_proc](procs/form_proc.md) - call a proc using corresponding form variables.
 

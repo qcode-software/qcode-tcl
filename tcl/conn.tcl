@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export conn_*
 }
@@ -16,13 +14,6 @@ proc qc::conn_remote_ip {} {
 	set ip [ns_conn peeraddr]
     }
     return $ip
-}
-
-doc qc::conn_remote_ip {
-    Examples {
-	% conn_remote_ip
-	12.34.56.78
-    }
 }
 
 proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
@@ -75,23 +66,6 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
         } {
             $error_handler
         }
-    }
-}
-
-doc qc::conn_marshal {
-    Examples {
-	# We can use ns_register_proc to get conn_marshal to handle .html requests with
-	% ns_register_proc GET  /*.html conn_marshal
-	% ns_register_proc POST /*.html conn_marshal
-	% ns_register_proc HEAD /*.html conn_marshal
-	
-	# If we then create a proc
-	proc /foo.html {greeting name} {
-	    return "You said $greeting $name"
-	}
-	# a request for /foo.html?greeting=Hello&name=John would result in a call to 
-	/foo.html Hello John
-	# and return "You said Hello John"
     }
 }
 

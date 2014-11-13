@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export schedule schedule_id schedule_exists schedule_running schedule_stop schedule_start
 }
@@ -55,16 +53,6 @@ proc qc::schedule {args} {
     }
     if { ![schedule_running $proc_name] } {
 	schedule_start $proc_name
-    }
-}
-
-doc qc::schedule {
-    Examples {
-	% schedule -thread "50 seconds" my_proc
-	% schedule -thread "5 minutes" my_proc foo bar
-	% schedule "1 hour" another_proc
-	% schedule "10:15" daily_tasks yellow
-	% schedule "Monday 10:15" monday_tasks
     }
 }
 

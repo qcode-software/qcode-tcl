@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export check checks
-}
-
-doc validate {
-    Title "Checking User Input"
-    Url {/qc/wiki/ValidationPage}
 }
 
 proc qc::check {args} {
@@ -168,42 +161,6 @@ proc qc::check {args} {
     return true
 }
 
-doc qc::check {
-    Parent validate
-    Usage {
-	check varName type ?type? ?type? ?errorMessage?
-    }
-    Examples {
-	% set order_date "23rd June 2007"
-	% check order_date DATE
-	2007-06-23
-	# The check passes and order_date is cast into the type DATE
-	% set order_date
-	2007-06-23
-	%
-	% set amount mistake
-	% check amount POS DECIMAL 
-	"mistake" is not a positive value for amount
-	%
-	% set qty eight
-	% check qty INT "Please enter a whole number of days."
-	Please enter a whole number of days.
-	%
-	# NULL VALUES are valid unless excluded
-	% set surname ""
-	% check surname STRING 30
-	%
-	% check surname STRING 30 NOT NULL
-	surname is empty
-	%
-	# String length for use with varchar(n) database columns
-	# can be checked with STRING n
-	% set name "James Donald Alexander MacKenzie"
-	check name STRING 30
-	"James Donald Alexander MacKenzie" is too long for name. The maximum length is 30 characters.
-    }
-}
-
 proc qc::checks { body } {
     # Call check foreach line of checks in the format
     # varName type ?type? ?type? ?errorMessage?
@@ -225,26 +182,3 @@ proc qc::checks { body } {
     }
 }
 
-doc qc::checks {
-    Description {
-	Foreach line of checks in the format <code>varName type ?type? ?type? ?errorMessage?</code>, check that the value of the local variable is of the given type or can be cast into that type. The empty string is treated as a NULL value and always treated as valid unless NOT NULL is specified in types. If the variable cannot be cast into the given type then append a message to a list of errors. Use the error message given or a default message for the given type.
-	<p>
-	After all checks are complete throw an error if any checks failed using combined error message.	
-    }
-    Examples {
-	% set order_date "never"
-	% set delivery_name "James Donald Alexander MacKenzie"
-	% set carrier ""
-	% checks {
-	    order_date DATE
-	    delivery_name STRING30 NOT NULL
-	    carrier NOT NULL "Please enter the carrier."
-	}
-	<ul>
-	<li>"never" is not a valid date for order_date</li>
-	<li>"James Donald Alexander MacKenzie" is too long for delivery_name. The maximum length is 30 characters.</li>
-	<li>Please enter the carrier.</li>
-	</ul>
-	% 
-    }
-}

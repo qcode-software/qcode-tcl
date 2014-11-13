@@ -1,4 +1,5 @@
-# Argument Passing in Tcl
+Argument Passing in Tcl
+======================
 
 Arguments to a proc are just a list and TCL allows the use of the args argument to access a variable length list of arguments to the proc.
 
@@ -131,11 +132,11 @@ which gives
 
 ### Pass by Dict ~ Tilde Shorthand
 
-Instead of writing long lists of _name value name value name value ..._ pairs we can create dict's from local variables using [dict_from](qc/dict_from.html).
+Instead of writing long lists of _name value name value name value ..._ pairs we can create dict's from local variables using [dict_from](procs/dict_from.md).
 
 
 A qcode shorthand way of writing that uses a tilde ~ to indicate that the following list items are variable names rather than name-value pairs.
-The proc can use [args2dict](qc/args2dict.html) or [args2vars](qc/args2vars.html) to parse the argument list and interpret it as a dict or a list of variable names.
+The proc can use [args2dict](procs/args2dict.md) or [args2vars](procs/args2vars.md) to parse the argument list and interpret it as a dict or a list of variable names.
 
 
 	 

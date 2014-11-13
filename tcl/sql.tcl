@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export sql_set sql_set_varchars_truncate sql_set_with sql_insert sql_insert_with sql_sort sql_select_case_month sql_in sql_array2list sql_list2array sql_where_postcode sql_insert_or_update sql_insert_or_update_with sql_limit
 }
@@ -11,49 +9,12 @@ proc qc::sql_set {args} {
     return [join $set_list ,]
 }
 
-doc qc::sql_set {
-    Parent db
-    Usage {sql_set ?varName1 varName2 varName3 ...?}
-    Description {
-	Take a list of varNames to be used to construct a SQL set statement
-    }
-    Examples {
-	% sql_set name email
-	name=:name, email=:email
-	%
-	%
-	% set user_id 1
-	% set name Jimmy
-	% set email jimmy@foo.com
-	%
-	% set qry "update users set [sql_set name email] where user_id=:user_id"
-	update users set name=:name, email=:email where user_id=:user_id
-	%
-	# UPDATE THE DATABASE
-	% db_dml $qry
-    }
-}
-
 proc qc::sql_set_varchars_truncate {table args} {
     foreach name $args {
         lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
     }
     return [join $set_list ,]
 }
-
-doc qc::sql_set_varchars_truncate {
-    Parent db
-    Usage {sql_set_varchars_truncate table_name ?varName1 varName2 varName3 ...?}
-    Description {
-	Take a list of varNames to be updated into varchar columns, and will construct a SQL set statement which will cast the values into the appropriate column's varchar size (effectively truncating the data if too long for the column).
-        Useful when the data is being supplied by a third party who's data model may not match the table's.
-    }
-    Examples {
-	% sql_set_varchars_truncate orders delivery_name delivery_address1
-	delivery_name=:delivery_name::varchar(50),delivery_address1=:delivery_address1::varchar(100)
-    }
-}
-
 
 proc qc::sql_set_with {args} {
     foreach {name value} $args {
@@ -70,28 +31,6 @@ proc qc::sql_insert { args } {
     return "( [join $cols ,] ) values ( [join $values ,] )" 
 }
 
-doc qc::sql_insert {
-    Parent db
-    Usage {sql_insert varName1 ?varName2 varName3 ...?}
-    Description {
-	Construct a SQL INSERT statement using varNames given.
-    }
-    Examples {
-	% sql_insert user_id name email password
-	(user_id,name,email,password) VALUES (:user_id,:name,:email,:password)
-	%
-	% set qry "insert into users [sql_insert user_id name email password]"
-	insert into users (user_id,name,email,password) VALUES (:user_id,:name,:email,:password)
-	%
-	% set user_id 3
-	% set name Bob
-	% set email bob@monkhouse.com
-	% set password joke
-	% 
-	% db_dml $qry
-    }
-}
-
 proc qc::sql_insert_with { args } {
     #| Construct a SQL INSERT statement using the name value pairs given
     foreach {name value} $args {
@@ -99,13 +38,6 @@ proc qc::sql_insert_with { args } {
 	lappend values [db_quote $value]
     }
     return "( [join $cols ,] ) values ( [join $values ,] )" 
-}
-
-doc qc::sql_insert_with {
-    Examples {
-	% qc::sql_insert_with user_id 1 name "Joe D'Amato" email joe@example.com password munroe
-	( "user_id","name","email","password" ) values ( 1,'Joe D''Amato','joe@example.com','munroe' )
-    }
 }
 
 proc qc::sql_sort { args } {
@@ -203,20 +135,6 @@ proc qc::sql_sort { args } {
     }
 }
 
-doc qc::sql_sort {
-    Parent db
-    Usage {sql_sort colName1 ?colName2 colName3 ...?}
-    Examples {
-	% sql_sort name email
-	name,email
-	%
-	% sql_sort name DESC,email ASC
-	name DESC,email
-	% sql_sort -paging name,email
-	name,email limit 100 offset 0
-    }
-}
-
 proc qc::sql_select_case_month { date_col value_col {alt_value 0} {col_names {jan feb mar apr may jun jul aug sep oct nov dec}}} {
     #| SQL case for crosstab style queries
     set alt_value [db_quote $alt_value]
@@ -239,30 +157,10 @@ proc qc::sql_in {list {type ""}} {
     }
 }
 
-doc qc::sql_in {
-    Examples {
-	% qc::sql_in [list blue yellow orange]
-	('blue','yellow','orange')
-	
-	% set qry "select * from users where surname in [qc::sql_in [list Campbell Graham Fraser]]"
-	select * from users where surname in ('Campbell','Graham','Fraser')
-    }
-}
-
 proc qc::sql_array2list {array} {
     # Convert Postgresql 1-dimensional Array to a Tcl list
     set list [csv2list [string map [list \{ "" \} "" \\\" \"\"] $array]]
     return [lreplace_values $list NULL ""]
-}
-
-doc qc::sql_array2list {
-    Examples {
-	% db_1row {select array['John West','George East','Harry'] as list}
-	% set list
-	{"John West","George East",Harry}
-	%  qc::sql_array2list {"John West","George East",Harry}
-	{John West} {George East} Harry
-    }
 }
 
 proc qc::sql_list2array { args } {
@@ -280,17 +178,6 @@ proc qc::sql_list2array { args } {
 	return array\[\]$sql_cast
     } else {
 	return array\[[join $lquoted ,]\]$sql_cast
-    }
-}
-
-doc qc::sql_list2array {
-    Examples {
-	% qc::sql_list2array [list "John West" "George East" Harry]
-	array['John West','George East','Harry']
-	% qc::sql_list2array [list 1 2 3 4]
-	array['1','2','3','4']
-	% qc::sql_list2array -type int [list 1 2 3 4]
-	array[1::int,2::int,3::int,4::int]::int[]
     }
 }
 
@@ -331,19 +218,6 @@ proc qc::sql_where_postcode {column postcode} {
     append regexp {$}
     
     return [db_qry_parse "$column ~ :regexp"]
-}
-
-doc qc::sql_where_postcode {
-    Examples {
-        % qc::sql_where_postcode "delivery_postcode" "IV2 5DZ"
-        delivery_postcode ~ E'^IV2\\s5DZ$'
-        % qc::sql_where_postcode "delivery_postcode" "IV"
-        delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
-        % qc::sql_where_postcode "delivery_postcode" "I"
-        delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
-        % qc::sql_where_postcode "delivery_postcode" ""
-        delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'
-    }   
 }
 
 proc qc::sql_insert_or_update_with {table primary_key_cols dict} {

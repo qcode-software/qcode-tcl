@@ -1,12 +1,5 @@
-
-package require doc
 namespace eval qc {
     namespace export cast_*
-}
-
-doc cast {
-    Title "Casting Procs"
-    Url {/qc/wiki/CastPage}
 }
 
 proc qc::cast_integer {string} {
@@ -31,20 +24,6 @@ proc qc::cast_integer {string} {
     }
 }
 
-doc qc::cast_integer {
-    Parent cast
-    Examples {
-	% cast_integer 2,305
-	% 2305
-	% 
-	% cast_integer 2.366%
-	% 2
-	%
-	% cast_integer 43e2
-	4300
-    }
-}
-
 proc qc::cast_int {string} {
     return [qc::cast_integer $string]
 }
@@ -64,61 +43,14 @@ proc qc::cast_decimal {string {precision ""}} {
     }
 }
 
-doc qc::cast_decimal {
-    Parent cast
-    Examples {
-	% cast_decimal 2,305.25
-	% 2305.25
-	% 
-	% cast_decimal 2.366%
-	% 2.366
-	%
-	% cast_decimal 3.689 2
-	3.69
-    }
-}
-
 proc qc::cast_date {string} {
     #| Try to convert the given string into an ISO date.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d"]
 }
 
-doc qc::cast_date {
-    Parent cast
-    Examples {
-	% cast_date 12/5/07
-	2007-05-12
-	# At present dates in this format are assumed to be European DD/MM/YY
-	%
-	% cast_date yesterday
-	2007-05-11
-	%
-	% cast_date "June 23rd"
-	2007-06-23
-	%
-	% cast_date 16
-	% 2007-10-16
-	%
-	% cast_date "23rd 2008 June"
-	2008-06-23
-    }
-}
-
 proc qc::cast_timestamp {string} {
     #| Try to convert the given string into an ISO datetime.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
-}
-
-doc qc::cast_timestamp {
-    Parent cast
-    Examples {
-        % qc::cast_timestamp today
-        2012-08-16 17:04:47
-        % qc::cast_timestamp 12/5/12
-        2012-05-12 00:00:00
-        % qc::cast_timestamp 12:33:33 
-        2012-08-12 12:33:33
-    }
 }
 
 proc qc::cast_timestamptz {string} {
@@ -241,28 +173,6 @@ proc qc::cast_epoch { string } {
     return [clock scan $string]
 }
 
-doc qc::cast_epoch {
-    Parent cast    
-    Examples {
-	% cast_epoch 12/5/07
-	1178924400
-	# At present dates in this format are assumed to be European DD/MM/YY
-	%
-	% cast_epoch yesterday
-	1192569505
-	%
-	% cast_epoch 2007-10-16
-	1192489200
-	% 
-	# times can be hh:mm or hh:mm:ss
-	% cast_epoch "2007-10-16 10:12:36"
-	1192525956
-        # With ISO offset timezone in formats -hh, -hhmm or -hh:mm
-        % cast_epoch "2007-10-16 12:14:34.15445 +05"
-        1192518874
-    }
-}
-
 proc qc::cast_boolean { string {true t} {false f} } {
     #| Cast a string as a boolean
     # strip html
@@ -274,20 +184,6 @@ proc qc::cast_boolean { string {true t} {false f} } {
 	return $false
     } else {
 	error "Can't cast \"$string\" to boolean data type"
-    }
-}
-
-doc qc::cast_boolean {
-    Parent cast    
-    Examples {
-	% cast_boolean YES
-	t
-	%
-	% cast_boolean 0
-	f
-	%
-	% cast_boolean true Y N
-	Y
     }
 }
 
@@ -321,38 +217,12 @@ proc qc::cast_postcode { postcode } {
     }
 }
 
-doc qc::cast_postcode {
-    Parent cast    
-    Examples {
-	% cast_postcode AB12CD
-	AB1 2CD
-	%
-	% cast_postcode AB123CD
-	AB12 3CD
-	%
-	# Yzero should be YO
-	% cast_postcode Y023 3CD
-	YO23 3CD
-
-    }
-}
-
 proc qc::cast_creditcard { no } {
     regsub -all {[^0-9]} $no "" no
     if { [is_creditcard $no] } {
 	return $no
     } else {
 	error "$no is not a valid credit card number"
-    }
-}
-
-doc qc::cast_creditcard {
-    Examples {
-	% cast_creditcard "4111 1111 1111 1111"
-	4111111111111111
-	%
-	% cast_creditcard "4213 3222 1121 1112"
-	4213322211211112 is not a valid credit card number
     }
 }
 
@@ -418,37 +288,6 @@ proc qc::cast_period {string} {
     }
     
     return [list $from_date $to_date]
-}
-
-doc qc::cast_period {
-    Examples {
-        % cast_period "2014-01-01"
-        2014-01-01 2014-01-01
-        %
-        % cast_period "Jan 1st 2014"
-        2014-01-01
-        %
-        % cast_period "2014"
-        2014-01-01 2014-12-31
-        %
-        % cast_period "Jan"
-        2014-01-01 2014-01-31
-        %
-        % cast_period "January"
-        2014-01-01 2014-01-31
-        %
-        % cast_period "Jan 2013"
-        2013-01-01 2013-01-31
-        %
-        % cast_period "January 2013"
-        2013-01-01 2013-01-31
-        %
-        % cast_period "January 2013 to March 2013"
-        2013-01-01 2013-03-31
-        %
-        % cast_period "1st Jan 2013 to 14th Jan 2013"
-        2013-01-01 2013-01-14
-    }
 }
 
 proc qc::is_period {string} {
@@ -535,39 +374,3 @@ proc qc::is_period {string} {
     }
 }
 
-doc qc::is_period {
-    Examples {
-        % is_period "2014-01-01"
-        true
-        %
-        % is_period "Jan 1st 2014"
-        true
-        %
-        % is_period "2014"
-        true
-        %
-        % is_period "Jan"
-        true
-        %
-        % is_period "January"
-        true
-        %
-        % is_period "Jan 2013"
-        true
-        %
-        % is_period "January 2013"
-        true
-        %
-        % is_period "January 2013 to March 2013"
-        true
-        %
-        & is_period "Jan2013"
-        false
-        %
-        % is_period "January 2013 March 2013"
-        false        
-        %
-        % is_period "1st Jan 2013 to 14th Jan 2013"
-        true
-    }
-}

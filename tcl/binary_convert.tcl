@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {}
 
 proc qc::binary_convert_unit_prefix2mult {prefix} {
@@ -80,27 +78,6 @@ proc qc::binary_convert_unit_prefix2mult {prefix} {
     return [expr {pow(1024,$power)}]
 }
 
-doc qc::binary_convert_unit_prefix2mult {
-    Examples {
-	% qc::binary_convert_unit_prefix2mult K
-	1024.0
-	% qc::binary_convert_unit_prefix2mult kilo
-	1024.0
-	% qc::binary_convert_unit_prefix2mult Kilo
-	1024.0
-	% qc::binary_convert_unit_prefix2mult Ki
-	1024.0
-	% qc::binary_convert_unit_prefix2mult kibi
-	1024.0
-	% qc::binary_convert_unit_prefix2mult Kibi
-	1024.0
-        % qc::binary_convert_unit_prefix2mult M
-	1048576.0
-	% qc::binary_convert_unit_prefix2mult G
-	1073741824.0
-    }
-}
-
 proc qc::binary_convert {args} {
     #| Convert binary file size units.
     #| Usage: qc::binary_convert size from_unit to_unit
@@ -141,19 +118,6 @@ proc qc::binary_convert {args} {
     } 
 
     return $size
-}
-
-doc qc::binary_convert {
-    Examples {
-	% qc::binary_convert 2048 KB MB
-	2.0
-	% qc::binary_convert "3072MB" GB
-	3.0
-	% qc::binary_convert "3 GB" kilobyte
-	3145728.0
-        % qc::binary_convert "3 GibiByte" KibiB
-	3145728.0
-    }
 }
 
 proc qc::binary_format {args} {
@@ -221,28 +185,5 @@ proc qc::binary_format {args} {
 
     # Convert to desired unit prefix, round to sigfigs and append units to the string
     return "[qc::sigfigs [qc::binary_convert $size $units ${unit_prefix}${units}] $sigfigs] ${unit_prefix}${units}"
-}
-
-doc qc::binary_format {
-    Examples {
-	% qc::binary_format 44444 MB 
-	43.4 GB
-	% qc::binary_format 44444 MBytes
-	43.4 GB
-	% qc::binary_format 44444 megabytes 
-	43.4 GB
-        % qc::binary_format 44444 megabyte
-	43.4 GB
-	% qc::binary_format "44444Mb"
-	43.4 Gb
-        % qc::binary_format "44444Mbit"
-	43.4 Gb
-        % qc::binary_format "44444 megabit"
-	43.4 Gb
-        % qc::binary_format "44444 megabit"
-	43.4 Gb
-	% qc::binary_format -sigfigs 5 44444 Mb
-	43.402 Gb
-    }
 }
 

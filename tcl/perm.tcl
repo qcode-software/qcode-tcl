@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export perm_set perm_test_employee perm_test perm perms perm_if
 }

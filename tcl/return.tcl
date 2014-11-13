@@ -1,5 +1,3 @@
-
-package require doc
 namespace eval qc {
     namespace export return2client return_*
 }
