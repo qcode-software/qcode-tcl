@@ -37,19 +37,6 @@ proc qc::xml_decode_char_NNN {string} {
     return [subst $string]
 }
 
-doc qc::xml_decode_char_NNN {
-    Description {
-        Convert entity decimal format to ascii character
-    }
-    Usage {
-        qc::xml_decode_char_NNN string
-    }
-    Examples {
-       % qc::xml_decode_char_NNN "&#167; and &#166; are special characters."
-        § and ¦ are special characters.
-    }
-}
-
 proc qc::xml_from { args } {
     #| Return xml structure from the specified local variable names and values
     set list {}

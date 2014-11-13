@@ -54,31 +54,9 @@ proc qc::date_iso_week_start {date} {
     }
 }
 
-doc qc:::date_iso_week_start {
-    Parent date
-    Examples {
-	% date_iso_week_start 2007-05-06
-	% 2007-04-30
-	%
-	% date_iso_week_start "today"
-	% 2012-08-06
-    }
-}
-
 proc qc::date_iso_week_end {date} {   
     #| Returns the date of the end of the week in which $date falls
     return [cast_date [clock scan "sunday" -base [cast_epoch $date]]]
-}
-
-doc qc:::date_iso_week_end {
-    Parent date
-    Examples {
-	% date_iso_week_end 2007-05-06
-	% 2007-05-06
-	%
-	% date_iso_week_end "today"
-	% 2012-08-12
-    }
 }
 
 proc qc::date_iso_week { date } {
@@ -86,47 +64,14 @@ proc qc::date_iso_week { date } {
     return [qc::cast_integer [clock format [cast_epoch $date] -format "%V"]]
 }
 
-doc qc:::date_iso_week {
-    Parent date
-    Examples {
-	% date_iso_week 2007-05-06
-	% 18
-	%
-	% date_iso_week "today"
-	% 32
-    }
-}
-
 proc qc::date_yesterday { date } {
     #| Return yesterday's date
     return [cast_date "$date -1day"]
 }
 
-doc qc:::date_yesterday {
-    Parent date
-    Examples {
-	% date_yesterday 2007-05-06
-	% 2007-05-05
-	%
-	% date_yesterday "today"
-	% 2012-08-09
-    }
-}
-
 proc qc::date_tomorrow { date } {
     #| Return tomorrow's date
     return [cast_date "$date +1day"]
-}
-
-doc qc:::date_tomorrow {
-    Parent date
-    Examples {
-	% date_tomorrow 2007-05-06
-	% 2007-05-07
-	%
-	% date_tomorrow "today"
-	% 2012-08-11
-    }
 }
 
 proc qc::date_month { date } {

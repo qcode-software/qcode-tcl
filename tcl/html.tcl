@@ -36,23 +36,6 @@ proc qc::html2pdf { args } {
     }
 }
 
-doc qc::html2pdf {
-    Examples {
-        % html2pdf -encoding base64 -timeout 10 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
-        JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovUHJvZHVjZXIgKHdraHRtbHRvcGRmKQov
-        Q3JlYXRpb25EYXRlIChEOjIwMTAwODIwMTIzMjI1KQo+PgplbmRvYmoKNCAwIG9iago8PAovVHlw
-        ZSAvRXh0R1N0YXRlCi9TQSB0cnVlCi9TTSAwLjAyCi9jYSAxLjAKL0NBIDEuMAovQUlTIGZhbHNl
-        Ci9TTWFzayAvTm9uZT4+CmVuZG9iago1IDAgb2JqClsvUGF0dGVybiAvRGV2aWNlUkdCXQplbmRv
-        YmoKOCAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjYgMCBv
-        ...
-        % html2pdf -encoding binary -timeout 10 "<html><p>This is an HTML file to be converted to a PDF</p></html>"
-        1 0 obj
-        <<
-        /Title (þÿ)
-        ...
-    }
-}
-
 proc qc::html {tagName nodeValue args} {
     #| Generate an html node
     return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"

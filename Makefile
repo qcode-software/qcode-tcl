@@ -18,7 +18,7 @@ package: check-version
 	./package.tcl tcl package ${NAME} ${VERSION}
 	./pkg_mkIndex package
 	# checkinstall
-	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,qcode-doc,html2text,curl,tclcurl" --replaces none --conflicts none make local-install
+	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make local-install
 
 tcl-package : check-version
 	rm -rf package
