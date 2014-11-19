@@ -149,14 +149,14 @@ proc qc::image_cache_create {cache_dir file_id max_width max_height} {
     return [dict create width $width height $height file $cache_file]
 }
 
-proc qc::image_data {file_id max_width max_height} {
+proc qc::image_data {cache_dir file_id max_width max_height} {
     #| Return dict of width, height & url of image constrained to max_width & max_height.
     #| Generates image cache if it doesn't already exist to improve performance.
-    if { ! [qc::image_cache_exists $file_id $max_width $max_height] } {
+    if { ! [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
         log Debug "Image Data - Create canonical image cache"
-        qc::image_cache_create $file_id $max_width $max_height
+        qc::image_cache_create $cache_dir $file_id $max_width $max_height
     }
-    return [qc::image_cache_data $file_id $max_width $max_height]
+    return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
 }
 
 proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
