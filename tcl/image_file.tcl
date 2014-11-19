@@ -99,7 +99,7 @@ proc qc::gif_dimensions {name} {
 }
 
 proc qc::image_cache_exists {cache_dir file_id max_width max_height} {
-    #| Return true if this image constrained to max_width & max_height has been cached on disk.
+    #| Return true if this image (constrained to max_width & max_height) has been cached on disk.
     if { [llength [qc::image_cache_data $cache_dir $file_id $max_width $max_height]] > 0 } {
         return true
     } else {
@@ -111,13 +111,13 @@ proc qc::image_cache_data {cache_dir file_id max_width max_height} {
     #| Return dict of width, height & url of cached image constrained to max_width & max_height.
     #| Return {} if cached image does not exist.
 
-    # check nsv
+    # Check nsv
     set nsv_key "$file_id $max_width $max_height"
     if { [nsv_exists image_cache_data $nsv_key] } {
         return [nsv_get image_cache_data $nsv_key]
     }
     
-    # check disk cache for canonical URL
+    # Check disk cache for canonical URL (/image/${file_id}-${max_width}x${max_height}/${file_id}${extension})
     set data {}
     set options [list -nocomplain -types f -directory $cache_dir]
     foreach file [lunique [glob {*}$options "${file_id}-${max_width}x*/${file_id}.*" "${file_id}-*x${max_height}/${file_id}.*"]] {
@@ -151,7 +151,7 @@ proc qc::image_cache_create {cache_dir file_id max_width max_height} {
 
 proc qc::image_data {cache_dir file_id max_width max_height} {
     #| Return dict of width, height & url of image constrained to max_width & max_height.
-    #| Generates image cache if it doesn't already exist to improve performance.
+    #| Generates image cache if it doesn't already exist.
     if { ! [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
         log Debug "Image Data - Create canonical image cache"
         qc::image_cache_create $cache_dir $file_id $max_width $max_height
@@ -160,8 +160,10 @@ proc qc::image_data {cache_dir file_id max_width max_height} {
 }
 
 proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
-    #| Handle any image requests that aren't already registered to a fastpath handler
-    # Redirects to correct aspect ratio, creates a file if needed, and registers new fastpath handlers for future requests
+    #| URL handler to serve images that can not be served by fastpath.
+    # Create image cache for canonical URL if it doesn't already exist.
+    # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
+    # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
     log Debug "Hit Image Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
     
@@ -212,6 +214,8 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
 }
 
 proc qc::image_redirect_handler {cache_dir}  {
+    #| Default redirect handler for qc::image_handler.
+    # Redirect client to correct image dimesions or the canonical URL.
     log Debug "Hit Image Redirect Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
 
