@@ -144,7 +144,7 @@ proc qc::image_cache_create {cache_dir file_id max_width max_height} {
         file mkdir [file dirname $cache_file]
     }
     file rename -force $file $cache_file
-    log Debug "Created new cache $cache_file [dict_from max_width max_height width height]"
+    #log Debug "Created new cache $cache_file [dict_from max_width max_height width height]"
 
     return [dict create width $width height $height file $cache_file]
 }
@@ -153,7 +153,7 @@ proc qc::image_data {cache_dir file_id max_width max_height} {
     #| Return dict of width, height & url of image constrained to max_width & max_height.
     #| Generates image cache if it doesn't already exist.
     if { ! [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
-        log Debug "Image Data - Create canonical image cache"
+        #log Debug "Image Data - Create canonical image cache"
         qc::image_cache_create $cache_dir $file_id $max_width $max_height
     }
     return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
@@ -164,12 +164,12 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
     # Create image cache for canonical URL if it doesn't already exist.
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
     # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
-    log Debug "Hit Image Handler: [qc::conn_path]"
+    #log Debug "Hit Image Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
     
     if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
         # Invalid image url
-        log Debug "Image Handler - Invalid image url"
+        #log Debug "Image Handler - Invalid image url"
         return [ns_returnnotfound]
     }
 
@@ -181,16 +181,17 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
         set canonical_file [ns_pagepath]$canonical_url
     } else {
         # Create cache for canonical url
-        log Debug "Image Handler - Create canonical image cache"
+        #log Debug "Image Handler - Create canonical image cache"
 
         # Check file exists
         db_0or1row {
             select 
             file_id
             from file
+            join image using (file_id)
             where file_id=:file_id
         } {
-            log Debug "Image Handler - File not found"
+            #log Debug "Image Handler - File not found"
             return [ns_returnnotfound]
         } 
 
@@ -200,7 +201,7 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
     } 
     if { $request_path eq $canonical_url } {
         # Canonical URL was requested - return file
-        log Debug "Image Handler - Return file for canonical_url"
+        #log Debug "Image Handler - Return file for canonical_url"
         ns_register_fastpath GET $canonical_url
         ns_register_fastpath HEAD $canonical_url
         return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
@@ -216,7 +217,7 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
 proc qc::image_redirect_handler {cache_dir}  {
     #| Default redirect handler for qc::image_handler.
     # Redirect client to correct image dimesions or the canonical URL.
-    log Debug "Hit Image Redirect Handler: [qc::conn_path]"
+    #log Debug "Hit Image Redirect Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
 
     regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename
@@ -227,11 +228,11 @@ proc qc::image_redirect_handler {cache_dir}  {
     # Check requested image dimensions
     if { $width != $max_width || $height != $max_height } {            
         # Redirect to url with correct image dimensions 
-        log Debug "Image Handler - Wrong image dimesions requested - redirect to url with correct image dimensions"   
+        #log Debug "Image Handler - Wrong image dimesions requested - redirect to url with correct image dimensions"   
         return [ns_returnredirect "[conn_location][file dirname $canonical_url]/$filename"]
     }
     
     # Catch All - redirect to Canonical URL
-    log Debug "Image Handler - Catch all redirect to canonical_url"
+    #log Debug "Image Handler - Catch all redirect to canonical_url"
     return [ns_returnredirect $canonical_url]      
 }
