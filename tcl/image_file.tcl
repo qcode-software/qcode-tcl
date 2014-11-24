@@ -159,18 +159,26 @@ proc qc::image_data {cache_dir file_id max_width max_height} {
     return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
 }
 
-proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
+proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560}} {
     #| URL handler to serve images that can not be served by fastpath.
     # Create image cache for canonical URL if it doesn't already exist.
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
     # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
+    # By default enforce a max width and height of 2560x2560
     #log Debug "Hit Image Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
+    setif image_redirect_handler "" "qc::image_redirect_handler"
     
     if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
         # Invalid image url
         #log Debug "Image Handler - Invalid image url"
         return [ns_returnnotfound]
+    }
+    
+    # Check requested max width and height does not exceed allowed max width and height
+    if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
+        #log Debug "Image Handler - The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."
+        return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
     }
 
     # Canonical URL
@@ -207,11 +215,8 @@ proc qc::image_handler {cache_dir {image_redirect_handler UNDEF}} {
         return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
     } 
 
-    if { $image_redirect_handler eq "UNDEF" } {
-        return [qc::image_redirect_handler $cache_dir]
-    } else {
-        return [$image_redirect_handler $cache_dir]
-    }
+    # Redirect handler
+    return [$image_redirect_handler $cache_dir]
 }
 
 proc qc::image_redirect_handler {cache_dir}  {
