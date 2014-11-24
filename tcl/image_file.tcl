@@ -176,7 +176,7 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
     
     # Check requested max width and height does not exceed allowed max width and height
     if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
-        log Debug "Image Handler - requested ${max_width}x${max_height} image exceeds max width and height permitted ${allowed_max_width}x${allowed_max_height}"
+        #log Debug "Image Handler - requested ${max_width}x${max_height} image exceeds max width and height permitted ${allowed_max_width}x${allowed_max_height}"
         return [ns_returnnotfound]
     }
 
