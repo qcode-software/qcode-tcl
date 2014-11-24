@@ -167,6 +167,7 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
     # By default enforce a max width and height of 2560x2560
     #log Debug "Hit Image Handler: [qc::conn_path]"
     set request_path [qc::conn_path]
+    setif image_redirect_handler "" "qc::image_redirect_handler"
     
     if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
         # Invalid image url
@@ -176,8 +177,8 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
     
     # Check requested max width and height does not exceed allowed max width and height
     if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
-        #log Debug "Image Handler - requested ${max_width}x${max_height} image exceeds max width and height permitted ${allowed_max_width}x${allowed_max_height}"
-        return [ns_returnnotfound]
+        #log Debug "Image Handler - The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."
+        return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
     }
 
     # Canonical URL
@@ -214,11 +215,8 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
         return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
     } 
 
-    if { $image_redirect_handler ne "" } {
-        return [$image_redirect_handler $cache_dir]
-    } else {
-        return [ns_returnnotfound]
-    }
+    # Redirect handler
+    return [$image_redirect_handler $cache_dir]
 }
 
 proc qc::image_redirect_handler {cache_dir}  {
