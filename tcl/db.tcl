@@ -628,3 +628,18 @@ proc qc::db_connect {args} {
         error "Could not connect to database. $errorMessage" $errorInfo
     }
 }
+
+proc qc::db_table_exists {table} {
+    #| Checks if the given column name exists in the database.
+    set qry {
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_name=:table
+    }
+    set tables [qc::db_select_ldict $qry]
+    if {[llength $tables] > 0} {
+        return true
+    } else {
+        return false
+    }
+}

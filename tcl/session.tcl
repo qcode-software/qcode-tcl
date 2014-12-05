@@ -54,6 +54,12 @@ proc qc::session_exists {session_id} {
     }
 }
 
+proc qc::session_user_id {session_id} {
+    #| Return the employee_id owner of this session
+    qc::db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
+    return $user_id
+}
+
 proc qc::session_employee_id {session_id} {
     #| Return the employee_id owner of this session
     db_1row {select coalesce(effective_employee_id,employee_id) as employee_id from session where session_id=:session_id}
