@@ -15,19 +15,19 @@ proc qc::session_new { user_id } {
     set session_id [qc::sha1 "$uuid $entropy1"]
     set authenticity_token [qc::sha1 $entropy2]
     set ip [qc::conn_remote_ip]
-    qc::db_dml "insert into session [sql_insert session_id ip user_id authenticity_token]"    
+    db_dml "insert into session [sql_insert session_id ip user_id authenticity_token]"    
     return $session_id
 }
 
 proc qc::session_authenticity_token {session_id} {
     #| Return the authenticity token
-    qc::db_1row {select authenticity_token from session where session_id=:session_id}
+    db_1row {select authenticity_token from session where session_id=:session_id}
     return $authenticity_token
 }
 
 proc qc::session_update { session_id } {
     #| Update a session
-    qc::db_0or1row {select hit_count from session where session_id=:session_id} {
+    db_0or1row {select hit_count from session where session_id=:session_id} {
 	return -code error -errorcode USER "Invalid Session $session_id"
     } {
 	incr hit_count
@@ -83,7 +83,7 @@ proc qc::session_valid {args} {
 
 proc qc::session_user_id {session_id} {
     #| Return the user_id owner of this session
-    qc::db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
+    db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
     return $user_id
 }
 
