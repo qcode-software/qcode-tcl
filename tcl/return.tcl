@@ -3,39 +3,6 @@ namespace eval qc {
 }
 
 proc qc::return2client { args } {
-    #| Return data to http client
-    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
-    set arg_names [qc::args2vars $args]
-    if { [info exists html] } {
-	default content-type "text/html; charset=utf-8"
-	set var html
-    } elseif { [info exists xml] } {
-	default content-type "text/xml; charset=utf-8"
-	set var xml
-    } elseif { [info exists text] } {
-	default content-type "text/plain; charset=utf-8"
-	set var text
-    } elseif { [info exists json] } {
-	default content-type "application/json; charset=utf-8"
-	set var json
-    } else {
-	error "No payload given in html or xml or text or json" 
-    }
-    default code 200
-    default filter_cc no
-    if { $filter_cc } {
-	# mask credit card numbers
-	set $var [qc::format_cc_masked_string [set $var]] 
-    }
-    # Other headers
-    foreach name [lexclude $arg_names html xml text json code content-type] {
-    	set headers [ns_conn outputheaders]
-	ns_set update $headers $name [set $name]
-    }
-    ns_return $code ${content-type} [set $var]
-}
-
-proc qc::return2client2 { args } {
     #| Return data to http client if a connection exists otherwise just output the given content.
     # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
     set arg_names [qc::args2vars $args]
@@ -54,7 +21,7 @@ proc qc::return2client2 { args } {
     } else {
 	error "No payload given in html or xml or text or json" 
     }
-    if {[expr 0x1 & [ns_conn flags]]} {
+    if { ![ns_conn isconnected] } {
         # no connection
         return [lindex $args end]
     } else {
@@ -187,5 +154,5 @@ proc ns_returnmoved {url} {
 
 proc qc::return_result {} {
     #| Returns the result gathered from validation and/or POST to the client.
-    qc::return2client2 json [data2json]
+    qc::return2client json [data2json]
 }
