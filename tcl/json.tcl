@@ -295,7 +295,7 @@ proc qc::data2json {} {
             switch $key {
                 record {
                     foreach {name values} $value {
-                        lappend record_objects $name [list object valid [dict get $values valid] value [dict get $values value] message [dict get $values message]]
+                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [dict get $values message]]
                     }
                 }
                 message {
@@ -310,9 +310,9 @@ proc qc::data2json {} {
                 }
             }
         }
-    set result [list object record $record_objects message $message_objects action $action_objects]
-    return [qc::tson2json $result]
+        set result [list object record $record_objects message $message_objects action $action_objects]
+        return [qc::tson2json $result]
     } on error [list error_message options] {
-        return -code error "Malformed data: $error_message \n[dict get $options -errorinfo]"
+        return -code error "Malformed data: $error_message"
     }
 }

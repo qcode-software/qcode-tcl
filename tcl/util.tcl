@@ -153,7 +153,7 @@ proc qc::call_with {proc_name args} {
     #| Calls the given proc with the arguments specified.
     #| Returns the result of the execution of the proc.
     if { [llength $args]%2 != 0 } {
-        return -code error "usage qc::execute_proc proc_name ?name value?"
+        return -code error "usage qc::call_with proc_name ?name value?"
     }
     
     set proc_args [info args $proc_name]
