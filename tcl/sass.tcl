@@ -23,7 +23,7 @@ proc qc::sass_recompile {src dest} {
             set md5s($file) $md5
         }
     } else {
-        # Not running in Naviserver. always recompile sass
+        # Not running in Naviserver. Always recompile sass
         set reload true
     }
     
