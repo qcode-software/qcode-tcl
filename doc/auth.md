@@ -28,7 +28,6 @@ Password Based Authentication
 --------------------------
 
 Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, user code or email address. In this implementation it is a user code.
-The proc [auth_password_check] can be used to test if the pair of values is valid and [auth_password] can be used to return the `user_id` associated with this pair of values from the user table.
 
 
 General
@@ -48,9 +47,6 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [auth_hba]: procs/auth_hba.md
 [auth_hba_check]: procs/auth_hba_check.md
-
-[auth_password]: procs/auth_password.md
-[auth_password_check]: procs/auth_password_check.md
 
 [auth_check]: procs/auth_check.md
 [auth]: procs/auth.md
