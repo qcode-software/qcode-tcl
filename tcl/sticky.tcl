@@ -31,19 +31,19 @@ proc qc::sticky_save {args} {
 
 proc qc::sticky_get {args} {
     #| Get the saved sticky value for this name
-    args $args -url ? -employee_id ? name
-    default employee_id [auth]
+    args $args -url ? -user_id ? name
+    default user_id [auth]
     default url [url_path [qc::conn_url]]
-    db_1row {select value from sticky where employee_id=:employee_id and url=:url and name=:name}
+    db_1row {select value from sticky where user_id=:user_id and url=:url and name=:name}
     return $value
 }
 
 proc qc::sticky_exists {args} {
     #| Test if a sticky value has been saved for this name
-    args $args -url ? -employee_id ? name
-    default employee_id [auth]
+    args $args -url ? -user_id ? name
+    default user_id [auth]
     default url [url_path [qc::conn_url]]
-    db_0or1row {select value from sticky where employee_id=:employee_id and url=:url and name=:name} {
+    db_0or1row {select value from sticky where user_id=:user_id and url=:url and name=:name} {
 	return 0
     } {
 	return 1
@@ -53,16 +53,16 @@ proc qc::sticky_exists {args} {
 proc qc::sticky_set {args} {
     #| Insert or Update the sticky record
     # trim whitespace
-    args $args -url ? -employee_id ? name value
-    default employee_id [auth]
+    args $args -url ? -user_id ? name value
+    default user_id [auth]
     default url [url_path [qc::conn_url]]
     set value [string trim $value]
     db_trans {
-        db_1row {select employee_id from employee where employee_id=:employee_id for update}
-        db_0or1row {select value as old_value from sticky where employee_id=:employee_id and url=:url and name=:name} {
-            db_dml "insert into sticky [sql_insert employee_id url name value]"
+        db_1row {select user_id from users where user_id=:user_id for update}
+        db_0or1row {select value as old_value from sticky where user_id=:user_id and url=:url and name=:name} {
+            db_dml "insert into sticky [sql_insert user_id url name value]"
         } {
-            db_dml "update sticky set value=:value where employee_id=:employee_id and url=:url and name=:name"
+            db_dml "update sticky set value=:value where user_id=:user_id and url=:url and name=:name"
         }
     }
     return $value

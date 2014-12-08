@@ -4,39 +4,38 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-These procs try to authenticate who the current employee/user is.
+These procs try to authenticate who the current user is.
 
 Session
 -------
 
 Each session has a unique reference called the `session_id` that is very hard to guess. The user holds onto the session_id by way of a cookie which is passed to the server with each request.
-The proc [`session_exists`] can be used to test if the session is valid and [auth_session] can be used to return the `employee_id` of the session owner.
+The proc [`session_exists`] can be used to test if the session is valid and [auth_session] can be used to return the `user_id` of the session owner.
 
 
 Host Based Authentication
 --------------------------
 
-Host based Authentication or HBA for short associates an employee with an IP address. If the remote user is using a particular IP address then we return the `employee_id` associated with that unique address. 
+Host based Authentication or HBA for short associates a user with an IP address. If the remote user is using a particular IP address then we return the `user_id` associated with that unique address. 
 
 HBA is not suitable for hosts behind NAT unless you want to grant the same priviledges to all hosts behind the NAT router.Normally the server only sees the IP address of the NAT router.
 
-The mapping of IP address to employee_id is stored in the employee table.
-The proc [auth_hba_check] can be used to test if the user can be established based on IP address. The proc [auth_hba] can be used to return the `employee_id` associated with the IP address of the [current connection][conn_remote_ip] based on the employee table.
+The mapping of IP address to user_id is stored in the user table.
+The proc [auth_hba_check] can be used to test if the user can be established based on IP address. The proc [auth_hba] can be used to return the `user_id` associated with the IP address of the [current connection][conn_remote_ip] based on the user table.
 
 
 Password Based Authentication
 --------------------------
 
-Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, employee code or email address. In this implementation it is an employee code.
-The proc [auth_password_check] can be used to test if the pair of values is valid and [auth_password] can be used to return the `employee_id` associated with this pair of values from the employee table.
+Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, user code or email address. In this implementation it is a user code.
 
 
 General
 -------
 
-The proc [auth_check] tries to establish if we can authenticate who the current user/employee is by checking session based authentication first and then host based authentication.
+The proc [auth_check] tries to establish if we can authenticate who the current user is by checking session based authentication first and then host based authentication.
  
-The proc [auth] returns the `employee_id` of the current user by checking session based authentication first and then host based authentication. 
+The proc [auth] returns the `user_id` of the current user by checking session based authentication first and then host based authentication. 
 
 * * *
 
@@ -48,9 +47,6 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [auth_hba]: procs/auth_hba.md
 [auth_hba_check]: procs/auth_hba_check.md
-
-[auth_password]: procs/auth_password.md
-[auth_password_check]: procs/auth_password_check.md
 
 [auth_check]: procs/auth_check.md
 [auth]: procs/auth.md

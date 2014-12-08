@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new employee_id`
+`qc::session_new user_id`
 
 Description
 -----------

@@ -3,31 +3,33 @@ namespace eval qc {
 }
 
 proc qc::auth {} {
-    #| Try to authenticate the current employee/user
+    #| Try to authenticate the current user
     #| If successful cache the result in global
     #| On failure throw AUTH error
-    global current_employee_id
-    if { [info exists current_employee_id] } {
-	return $current_employee_id
+    global current_user_id
+    if { [info exists current_user_id] } {
+        return $current_user_id
     }
+    
     # Try session based auth
     if { [qc::cookie_exists session_id] } {
-	set session_id [cookie_get session_id]
-	if { [qc::session_exists $session_id] } {
-	    qc::session_update $session_id
-	    return [set current_employee_id [qc::auth_session $session_id]]
-	}
+        set session_id [cookie_get session_id]
+        if { [qc::session_exists $session_id] } {
+            qc::session_update $session_id
+            return [set current_user_id [qc::auth_session $session_id]]
+        }
     }
+    
     # HBA
     if { [qc::auth_hba_check] } {
-	return [set current_employee_id [qc::auth_hba]]
+        return [set current_user_id [qc::auth_hba]]
     }
     
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
 proc qc::auth_check {} {
-    #| Check if we can authenticate the employee
+    #| Check if we can authenticate the user
     #| Return true or false
     # session based auth
     if { [qc::cookie_exists session_id]} {
@@ -46,15 +48,15 @@ proc qc::auth_check {} {
 }
 
 proc qc::auth_hba {} {
-    #| Try to authenticate who the current employee is
+    #| Try to authenticate who the current user is
     #| based on ip address
     #| On failure throw AUTH error
     set ip [qc::conn_remote_ip]
-    set qry "select employee_id from employee where ip=:ip"
+    set qry "select user_id as user_id from users where ip=:ip"
     db_cache_0or1row $qry { 
 	error "Cannot authenticate user on ip $ip" {} AUTH
     } { 
-	return $employee_id
+	return $user_id
     } 
 }
 
@@ -62,8 +64,7 @@ proc qc::auth_hba_check {} {
     #| Check if the current user can be authenticated
     #| based on ip address
     set ip [qc::conn_remote_ip]
-
-    set qry "select employee_id from employee where ip=:ip"
+    set qry "select user_id from users where ip=:ip"
     db_cache_0or1row $qry { 
 	return false
     } { 
@@ -72,11 +73,11 @@ proc qc::auth_hba_check {} {
 }
 
 proc qc::auth_session { session_id } {
-    #| Try to authenticate an employee based on the session_id given
-    #| Return the employee_id if successful
+    #| Try to authenticate user based on the session_id given
+    #| Return the user_id if successful
     #| On failure throw AUTH error
     if { [session_exists $session_id] } {
-	return [session_employee_id $session_id]
+        return [session_user_id $session_id]
     } else {
 	error "Session authentication failed to identify you." {} AUTH
     }

@@ -2,21 +2,29 @@ namespace eval qc {
     namespace export error_handler error_report error_report_*
 }
 
-proc qc::error_handler { } {
-    #| Return custom error responses depending value of errorCode.
+proc qc::error_handler {{error_message "NULL"} {error_info "NULL"} {error_code "NULL"}} {
+    #| Return custom error responses depending value of error_code.
+    # Pass in error message, info and code if available
+    # Otherwise will take a copy of the global error* variables for backward compatiblity
+    foreach {local_var global_var} [list error_message errorMessage error_info errorInfo error_code errorCode ] {
+        if { [set $local_var] eq "NULL" } {
+            global $global_var
+            set $local_var [set $global_var]
+        }
+    }
+    
     set suffix [file extension [ns_conn url]]
-    global errorMessage errorList errorInfo errorCode
-    switch -glob -- $errorCode {
+    switch -glob -- $error_code {
 	USER* {
 	    if { [eq $suffix .xml] } {
-		return2client xml [qc::xml error $errorMessage] filter_cc yes
+		return2client xml [qc::xml error $error_message] filter_cc yes
 	    } elseif { [eq $suffix .json] } {
-		return2client code 409 json $errorMessage
+		return2client code 409 json $error_message
 	    } else {
 		set html {
 		    <h2>Missing or Invalid Data</h2>
 		    <hr>
-		    $errorMessage
+		    $error_message
 		    <p>
 		    Please back up and try again.
 		    <hr>
@@ -26,55 +34,57 @@ proc qc::error_handler { } {
 	}
         PERM* {
 	    if { [eq $suffix .xml] } {
-		return2client xml [qc::xml error "Not authorized:$errorMessage"]
+		return2client xml [qc::xml error "Not authorized:$error_message"]
 	    } else {
-		return2client code 401 html "Not Authorized:$errorMessage"
+		return2client code 401 html "Not Authorized:$error_message"
 	    }
         }
         AUTH* {
 	    if { [eq $suffix .xml] } {
-		return2client xml  [qc::xml error "Authentication Failed:$errorMessage"]
+		return2client xml  [qc::xml error "Authentication Failed:$error_message"]
 	    } else {
-		return2client code 401 html "Authentication Failed:$errorMessage"
+		return2client code 401 html "Authentication Failed:$error_message"
 	    }
         }
         NOT_FOUND* {
-            return2client code 404 html "Not Found:$errorMessage"
+            return2client code 404 html "Not Found:$error_message"
         }
         BAD_REQUEST* {
-            return2client code 400 html "Bad Request:$errorMessage"
+            return2client code 400 html "Bad Request:$error_message"
         }
 	default {
-	    log Error $errorInfo
+	    log Error $error_info
             if {  [eq $suffix .xml] && [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-                return2client xml [qc::xml error "Software Bug - [string range $errorMessage 0 75]"] filter_cc yes
+                return2client xml [qc::xml error "Software Bug - [string range $error_message 0 75]"] filter_cc yes
             } elseif { [eq $suffix .xml] } {
                 # LIVE
                 return2client xml [qc::xml error "Internal Server Error. An email report has been sent to our engineers"] filter_cc yes
 	    } elseif { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-                return2client code 500 html [qc::error_report] filter_cc yes
+                return2client code 500 html [qc::error_report2 $error_message $options] filter_cc yes
             } else {
 	        # LIVE
                 return2client code 500 html [html h2 "Internal Server Error"][html p "An email report has been sent to our engineers."] filter_cc yes
             }
 	    
 	    if { [qc::param_exists email_support] } {
-		set subject "[string toupper [ns_info server]] Bug - [string range $errorMessage 0 75]"
-		qc::email_support subject $subject html [qc::error_report] 
+		set subject "[string toupper [ns_info server]] Bug - [string range $error_message 0 75]"
+		qc::email_support subject $subject html [qc::error_report2 $error_message $options] 
 	    }
 	}
     }
 }
 
-proc qc::error_report {} {
+proc qc::error_report {{error_message "NULL"} {error_info "NULL"} {error_code "NULL"}} {
     #| Return html error report. If there was a http connection when error occurred report any 
     #| relevant information about http request.
-    
-    global errorMessage errorInfo errorCode
-    # Copy error globals in case they are clobbered before we report them
-    set error_message $errorMessage
-    set error_info $errorInfo
-    set error_code $errorCode
+    # Pass in error message, info and code if available
+    # Otherwise will take a copy of the global error* variables for backward compatiblity
+    foreach {local_var global_var} [list error_message errorMessage error_info errorInfo error_code errorCode ] {
+        if { [set $local_var] eq "NULL" } {
+            global $global_var
+            set $local_var [set $global_var]
+        }
+    }
     if { [ns_conn isconnected] } {
 	sset html {
 	    <html>

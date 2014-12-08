@@ -3,7 +3,7 @@ namespace eval qc {
 }
 
 proc qc::return2client { args } {
-    #| Return data to http client
+    #| Return data to http client if a connection exists otherwise just output the given content.
     # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
     set arg_names [qc::args2vars $args]
     if { [info exists html] } {
@@ -21,18 +21,23 @@ proc qc::return2client { args } {
     } else {
 	error "No payload given in html or xml or text or json" 
     }
-    default code 200
-    default filter_cc no
-    if { $filter_cc } {
-	# mask credit card numbers
-	set $var [qc::format_cc_masked_string [set $var]] 
+    if { [expr 0x1 & [ns_conn flags]] } {
+        # no open connection
+        return [lindex $args end]
+    } else {
+        default code 200
+        default filter_cc no
+        if { $filter_cc } {
+            # mask credit card numbers
+            set $var [qc::format_cc_masked_string [set $var]] 
+        }
+        # Other headers
+        foreach name [lexclude $arg_names html xml text json code content-type] {
+            set headers [ns_conn outputheaders]
+            ns_set update $headers $name [set $name]
+        }
+        ns_return $code ${content-type} [set $var]
     }
-    # Other headers
-    foreach name [lexclude $arg_names html xml text json code content-type] {
-    	set headers [ns_conn outputheaders]
-	ns_set update $headers $name [set $name]
-    }
-    ns_return $code ${content-type} [set $var]
 }
 
 proc qc::return_html { html } { 
@@ -145,4 +150,9 @@ proc ns_returnmoved {url} {
   <A HREF="$url">The requested URL has moved here.</A>
   <P ALIGN=RIGHT><SMALL><I>[ns_info name]/[ns_info patchlevel] on [ns_conn location]</I></SMALL></P>
   </BODY></HTML>}]
+}
+
+proc qc::return_result {} {
+    #| Returns the result gathered from validation and/or POST to the client.
+    qc::return2client json [data2json]
 }
