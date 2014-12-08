@@ -60,7 +60,7 @@ proc qc::error_handler {{error_message "NULL"} {error_info "NULL"} {error_code "
                 # LIVE
                 return2client xml [qc::xml error "Internal Server Error. An email report has been sent to our engineers"] filter_cc yes
 	    } elseif { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-                return2client code 500 html [qc::error_report2 $error_message $options] filter_cc yes
+                return2client code 500 html [qc::error_report $error_message $error_info $error_code] filter_cc yes
             } else {
 	        # LIVE
                 return2client code 500 html [html h2 "Internal Server Error"][html p "An email report has been sent to our engineers."] filter_cc yes
@@ -68,7 +68,7 @@ proc qc::error_handler {{error_message "NULL"} {error_info "NULL"} {error_code "
 	    
 	    if { [qc::param_exists email_support] } {
 		set subject "[string toupper [ns_info server]] Bug - [string range $error_message 0 75]"
-		qc::email_support subject $subject html [qc::error_report2 $error_message $options] 
+		qc::email_support subject $subject html [qc::error_report $error_message $error_info $error_code] 
 	    }
 	}
     }
