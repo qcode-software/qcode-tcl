@@ -27,7 +27,7 @@ The proc [auth_hba_check] can be used to test if the user can be established bas
 Password Based Authentication
 --------------------------
 
-Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, user code or email address. In this implementation it is an user code.
+Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, user code or email address. In this implementation it is a user code.
 The proc [auth_password_check] can be used to test if the pair of values is valid and [auth_password] can be used to return the `user_id` associated with this pair of values from the user table.
 
 

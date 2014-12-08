@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Try to authenticate an user based on the session_id given<br/>Return the user_id if successful<br/>On failure throw AUTH error
+Try to authenticate user based on the session_id given<br/>Return the user_id if successful<br/>On failure throw AUTH error
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
