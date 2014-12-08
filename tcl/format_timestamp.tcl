@@ -49,9 +49,9 @@ proc qc::format_timestamp_rel { string } {
 proc qc::format_timestamp2hour { args } {
     qc::args $args -text -html -- string
     if { [info exists text] } {
-        return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
-    } else {
         return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]
+    } else {
+        return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
     }
 }
 

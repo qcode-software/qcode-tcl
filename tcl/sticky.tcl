@@ -58,7 +58,7 @@ proc qc::sticky_set {args} {
     default url [url_path [qc::conn_url]]
     set value [string trim $value]
     db_trans {
-        db_1row {select user_id from user where user_id=:user_id for update}
+        db_1row {select user_id from users where user_id=:user_id for update}
         db_0or1row {select value as old_value from sticky where user_id=:user_id and url=:url and name=:name} {
             db_dml "insert into sticky [sql_insert user_id url name value]"
         } {

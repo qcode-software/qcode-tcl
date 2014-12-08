@@ -21,7 +21,7 @@ proc qc::authorise_token_create {args} {
     db_1row {
         select 
         sha1(concat(authorisation_key,:target,:referrer,:expiration_epoch)) as hash
-        from user
+        from users
         where user_id=:user_id
     }
     return "$user_id $expiration_epoch $hash"    
@@ -56,7 +56,7 @@ proc qc::authorise_token {} {
     set qry {
         select 
         sha1(concat(authorisation_key,:target,:referrer,:expiration_epoch)) as check_hash
-        from user
+        from users
         where user_id=:user_id
     }
     db_0or1row $qry {

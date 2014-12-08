@@ -629,21 +629,6 @@ proc qc::db_connect {args} {
     }
 }
 
-proc qc::db_table_exists {table} {
-    #| Checks if the given column name exists in the database.
-    set qry {
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_name=:table
-    }
-    set tables [qc::db_select_ldict $qry]
-    if {[llength $tables] > 0} {
-        return true
-    } else {
-        return false
-    }
-}
-
 proc qc::db_column_exists {column} {
     #| Checks if the given column name exists in the database.
     set qry {

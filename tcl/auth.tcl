@@ -52,7 +52,7 @@ proc qc::auth_hba {} {
     #| based on ip address
     #| On failure throw AUTH error
     set ip [qc::conn_remote_ip]
-    set qry "select user_id as user_id from user where ip=:ip"
+    set qry "select user_id as user_id from users where ip=:ip"
     db_cache_0or1row $qry { 
 	error "Cannot authenticate user on ip $ip" {} AUTH
     } { 
@@ -64,7 +64,7 @@ proc qc::auth_hba_check {} {
     #| Check if the current user can be authenticated
     #| based on ip address
     set ip [qc::conn_remote_ip]
-    set qry "select user_id from user where ip=:ip"
+    set qry "select user_id from users where ip=:ip"
     db_cache_0or1row $qry { 
 	return false
     } { 
