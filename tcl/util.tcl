@@ -149,6 +149,35 @@ proc qc::call { proc_name args } {
     }
 }
 
+proc qc::call_with {proc_name args} {
+    #| Calls the given proc with the arguments specified.
+    #| Returns the result of the execution of the proc.
+    if { [llength $args]%2 != 0 } {
+        return -code error "usage qc::execute_proc proc_name ?name value?"
+    }
+    
+    set proc_args [info args $proc_name]
+    set largs {}
+    foreach arg $proc_args {
+	if { [dict exists $args $arg] } {
+            set value [dict get $args $arg]
+            if {$arg eq "args"} {
+                lappend largs {*}$value
+            } else {
+                lappend largs $value
+            }
+	} else {
+	    if { [info default $proc_name $arg default_value] } {
+		lappend largs $default_value
+	    } else {
+		return -code error "Missing argument: \"$arg\"."
+	    }
+	}
+    }
+
+    return [uplevel 0 $proc_name $largs]    
+}
+
 proc qc::margin { cost price {dec_places 1} } {
     #| Calculates the gross margin on supplied cost and revenue
     if { $price==0 } {

@@ -1,15 +1,15 @@
-qc::session_employee_id
+qc::session_user_id
 =======================
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_employee_id session_id`
+`qc::session_user_id session_id`
 
 Description
 -----------
-Return the employee_id owner of this session
+Return the user_id owner of this session
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

@@ -125,3 +125,12 @@ proc qc::dict_default {dictVar args} {
     }
     return $dict
 }
+
+proc qc::dict_zipper {keys values} {
+    #| Creates a dictionary by pairing up each key and value from the provided lists.
+    set zipped ""
+    foreach key $keys value $values {
+        dict set zipped $key $value
+    }
+    return $zipped
+}

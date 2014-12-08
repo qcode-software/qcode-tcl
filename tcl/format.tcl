@@ -198,3 +198,16 @@ proc qc::format_if_number {args} {
     return $value
 }
 
+proc qc::format_safe_html {safe_html} {
+    #| Formats the given text by removing <root> node if present and converting back to HTML from XML.
+    if {[qc::is safe_html $safe_html]} {
+        set doc [dom parse $safe_html]
+        set html [$doc asHTML -escapeNonASCII -htmlEntities]
+        # remove root node if it was present
+        regexp {^<root>(.+)</root>$} $html -> html
+        $doc delete
+        return $html
+    } else {
+        return -code error  "Cannot format \"[qc::trunc $html 50]...\" as it is not safe HTML."
+    }
+}

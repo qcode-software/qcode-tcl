@@ -5,11 +5,11 @@ namespace eval qc {
 proc qc::authorise_token_create {args} {
     #| Create an authorisation token for this url
     # TODO change referrer to source
-    qc::args2vars $args expires employee_id referrer target 
+    qc::args2vars $args expires user_id referrer target 
     default expires "24 hours"
     default referrer [qc::conn_url]
-    if { ! [info exist employee_id] } {
-        set employee_id [auth]
+    if { ! [info exist user_id] } {
+        set user_id [auth]
     }
     if { ![regexp {^https?://} $referrer] } {
         set referrer [url_root "[qc::conn_location]/[string trimleft $referrer /]"]
@@ -21,21 +21,22 @@ proc qc::authorise_token_create {args} {
     db_1row {
         select 
         sha1(concat(authorisation_key,:target,:referrer,:expiration_epoch)) as hash
-        from employee
-        where employee_id=:employee_id
+        from user
+        where user_id=:user_id
     }
-    return "$employee_id $expiration_epoch $hash"
+    return "$user_id $expiration_epoch $hash"    
 }
 
 proc qc::authorise_token {} {
     #| Check the authorisation token of the current request
-    #| and return the employee_id if authorised
+    #| and return the user_id if authorised
     if { ![form_var_exists authorisation_token] } {
         error "Authorisation token missing" {} AUTHORISATION
     }
     set token [form_var_get authorisation_token]
-    lassign $token employee_id expiration_epoch hash
-    check employee_id INT
+
+    lassign $token user_id expiration_epoch hash
+    check user_id INT
     check expiration_epoch INT
 
     if { $expiration_epoch < [clock seconds] } {
@@ -51,18 +52,18 @@ proc qc::authorise_token {} {
     }
 
     set target [qc::conn_url]
-   
+    
     set qry {
         select 
         sha1(concat(authorisation_key,:target,:referrer,:expiration_epoch)) as check_hash
-        from employee
-        where employee_id=:employee_id
+        from user
+        where user_id=:user_id
     }
     db_0or1row $qry {
-        error "Authorisation failed. No such employee_id \"$employee_id\"" {} AUTHORISATION
+        error "Authorisation failed. No such user_id \"$user_id\"" {} AUTHORISATION
     } {
         if { $hash eq $check_hash } {
-            return $employee_id
+            return $user_id
         } else {
             error "Authorisation failed. Invalid hash value." {} AUTHORISATION
         }

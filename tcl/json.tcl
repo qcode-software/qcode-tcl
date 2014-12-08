@@ -283,3 +283,36 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
         }
     }
 }
+
+proc qc::data2json {} {
+    #| Convert the global data structure into JSON.
+    global data
+    set record_objects [list object]
+    set action_objects [list object]
+    set message_objects [list object]
+    ::try {
+        dict for {key value} $data {
+            switch $key {
+                record {
+                    foreach {name values} $value {
+                        lappend record_objects $name [list object valid [dict get $values valid] value [dict get $values value] message [dict get $values message]]
+                    }
+                }
+                message {
+                    foreach {type val} $value {
+                        lappend message_objects $type [list object value [dict get $val value]]
+                    }
+                }
+                action {
+                    foreach {type val} $value {
+                        lappend action_objects $type [list object value [dict get $val value]]
+                    }
+                }
+            }
+        }
+    set result [list object record $record_objects message $message_objects action $action_objects]
+    return [qc::tson2json $result]
+    } on error [list error_message options] {
+        return -code error "Malformed data: $error_message \n[dict get $options -errorinfo]"
+    }
+}

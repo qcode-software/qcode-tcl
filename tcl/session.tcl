@@ -3,24 +3,32 @@ namespace eval qc {
 }
 
 package require uuid
-proc qc::session_new { employee_id } {
+proc qc::session_new { user_id } {
     #| Create a new session
     # Grap some random entropy
     set file [open /dev/urandom]
     fconfigure $file -translation binary
-    set entropy [read $file 50]
+    set entropy1 [read $file 50]
+    set entropy2 [read $file 50]
     close $file
     set uuid [uuid::uuid generate]
-    set session_id [qc::sha1 "$uuid $entropy"]
+    set session_id [qc::sha1 "$uuid $entropy1"]
+    set authenticity_token [qc::sha1 $entropy2]
     set ip [qc::conn_remote_ip]
-    db_dml "insert into session [sql_insert session_id ip employee_id]"
+    qc::db_dml "insert into session [sql_insert session_id ip user_id authenticity_token]"    
     return $session_id
+}
+
+proc qc::session_authenticity_token {session_id} {
+    #| Return the authenticity token
+    qc::db_1row {select authenticity_token from session where session_id=:session_id}
+    return $authenticity_token
 }
 
 proc qc::session_update { session_id } {
     #| Update a session
-    db_0or1row {select hit_count from session where session_id=:session_id} {
-	error "Invalid Session $session_id"
+    qc::db_0or1row {select hit_count from session where session_id=:session_id} {
+	return -code error -errorcode USER "Invalid Session $session_id"
     } {
 	incr hit_count
 	set ip [qc::conn_remote_ip]
@@ -32,10 +40,10 @@ proc qc::session_update { session_id } {
 
 proc qc::session_sudo_logout {session_id} {
     #| Go back to using own id
-    db_dml {update session set effective_employee_id=NULL where session_id=:session_id}
-    global current_employee_id
-    if { [info exists current_employee_id] } {
-	unset current_employee_id
+    db_dml {update session set effective_user_id=NULL where session_id=:session_id}
+    global current_user_id
+    if { [info exists current_user_id] } {
+        unset current_user_id
     }
 }
 
@@ -54,23 +62,36 @@ proc qc::session_exists {session_id} {
     }
 }
 
+proc qc::session_valid {args} {
+    #| Check session exists and has not expired.
+    qc::args $args -age_limit "12 hours" -idle_timeout "1 hour" -- session_id
+    set qry {
+	select
+	user_id
+	from session
+	where
+	session_id=:session_id
+	and (current_timestamp-time_modified) <=:idle_timeout::interval
+        and (current_timestamp-time_created) <=:age_limit::interval
+    }
+    db_0or1row $qry {
+	return false
+    } {
+	return true
+    }
+}
+
 proc qc::session_user_id {session_id} {
-    #| Return the employee_id owner of this session
+    #| Return the user_id owner of this session
     qc::db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
     return $user_id
 }
 
-proc qc::session_employee_id {session_id} {
-    #| Return the employee_id owner of this session
-    db_1row {select coalesce(effective_employee_id,employee_id) as employee_id from session where session_id=:session_id}
-    return $employee_id
-}
-
-proc qc::session_sudo {session_id effective_employee_id} {
+proc qc::session_sudo {session_id effective_user_id} {
     #| Sudo enables a user to use the priviliges of another user.
-    db_dml {update session set effective_employee_id=:effective_employee_id where session_id=:session_id}
-    global current_employee_id
-    set current_employee_id $effective_employee_id
+    db_dml {update session set effective_user_id=:effective_user_id where session_id=:session_id}
+    global current_user_id
+    set current_user_id $effective_user_id
 }
 
 proc qc::session_purge { {timeout_secs 0 } } {
