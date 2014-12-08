@@ -9,7 +9,7 @@ proc qc::sass_recompile {src dest} {
     array set md5s {}
     
     if { [info commands nsv_exists] ne "" } {
-        # Have there been any changes.
+        # Running in Naviserver. Check if there been any changes before recompiling sass.
         foreach file $files {
             set fh [open $file r]
             set md5 [qc::md5 [read $fh]]
@@ -22,6 +22,9 @@ proc qc::sass_recompile {src dest} {
             # Make a note of md5 for this file
             set md5s($file) $md5
         }
+    } else {
+        # Not running in Naviserver. Always recompile sass
+        set reload true
     }
     
     if { $reload } {
