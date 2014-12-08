@@ -1,3 +1,6 @@
+namespace eval qc {
+}
+
 proc qc::sass_recompile {src dest} {
     #| Recompiles sass files if they have changed.
     set reload false
@@ -5,7 +8,7 @@ proc qc::sass_recompile {src dest} {
     set files [glob -nocomplain $src/*.scss $src/*/*.scss]
     array set md5s {}
     
-    if { [info commands nsv_exists] } {
+    if { [info commands nsv_exists] ne "" } {
         # Have there been any changes.
         foreach file $files {
             set fh [open $file r]
@@ -25,7 +28,7 @@ proc qc::sass_recompile {src dest} {
         if { [catch {exec $sass -l --update --style expanded --stop-on-error $src:$dest} errorMessage options] } {
             return -code error -options $options $errorMessage
         } else {
-            if { [info commands nsv_exists] } {
+            if { [info commands nsv_exists] ne "" } {
                 # Update md5 records
                 foreach file $files {
                     nsv_set sass_file_md5 $file $md5s($file)
