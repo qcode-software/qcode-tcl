@@ -64,7 +64,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
         qc::try {
             error "Page not found." {} NOT_FOUND
         } {
-            $error_handler
+            $error_handler 
         }
     }
 }
