@@ -21,8 +21,8 @@ proc qc::return2client { args } {
     } else {
 	error "No payload given in html or xml or text or json" 
     }
-    if { ![ns_conn isconnected] } {
-        # no connection
+    if { [expr 0x1 & [ns_conn flags]] } {
+        # no open connection
         return [lindex $args end]
     } else {
         default code 200
