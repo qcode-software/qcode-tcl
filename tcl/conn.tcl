@@ -198,3 +198,8 @@ proc qc::conn_if_modified_since {} {
         return ""
     }
 }
+
+proc qc::conn_open {} {
+    #| Check if the client connection is open
+    return [expr {[ns_conn isconnected] && !(0x1 & [ns_conn flags])}]
+}
