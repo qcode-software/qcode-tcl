@@ -5,7 +5,7 @@ namespace eval qc {
 package require uuid
 proc qc::session_new { user_id } {
     #| Create a new session
-    # Grap some random entropy
+    # Grab some random entropy
     set file [open /dev/urandom]
     fconfigure $file -translation binary
     set entropy1 [read $file 50]
@@ -99,3 +99,16 @@ proc qc::session_purge { {timeout_secs 0 } } {
     log Notice "session purge older than $timeout_secs secs"
     db_dml "delete from session where extract(seconds from current_timestamp-time_modified)>:timeout_secs"
 }
+
+proc qc::session_id {} {
+    #| Return the current user's session_id
+    global session_id
+    if { [info exists session_id] } {
+        return $session_id
+    }
+    if { [cookie_exists session_id] } {
+        return [set session_id [cookie_get session_id]]
+    }
+    return -code error "No known session_id"
+}
+
