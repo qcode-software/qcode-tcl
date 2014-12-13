@@ -14,7 +14,11 @@ proc qc::session_new { user_id } {
     set uuid [uuid::uuid generate]
     set session_id [qc::sha1 "$uuid $entropy1"]
     set authenticity_token [qc::sha1 $entropy2]
-    set ip [qc::conn_remote_ip]
+    if { [qc::conn_open]} {
+        set ip [qc::conn_remote_ip]
+    } else {
+        set ip ""
+    }
     db_dml "insert into session [sql_insert session_id ip user_id authenticity_token]"    
     return $session_id
 }
