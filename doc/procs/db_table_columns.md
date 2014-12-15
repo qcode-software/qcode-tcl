@@ -1,22 +1,22 @@
-qc::db_column_exists
+qc::db_table_columns
 ===========
 
 part of [Database API](../db.md)
 
 Usage
 -----
-`db_column_exists column`
+`db_table_columns table`
 
 Description
 -----------
-Check if the given column name exists in the database.
+Returns a list of columns for the given table.
 
 Examples
 --------
 ```tcl
 
-% db_column_exists firstname
-true
+% db_table_columns users
+user_id firstname surname email password_hash user_state user_image_url ip
 
 ```
 
