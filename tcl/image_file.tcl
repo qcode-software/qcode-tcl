@@ -9,7 +9,7 @@ proc qc::image_resize {file_id max_width max_height} {
     set file /tmp/[uuid::uuid generate]
     # Call imagemagick convert
     set exec_proxy_flags {
-        -timeout 10000
+        -timeout 30000
     }
     set exec_flags {
         -ignorestderr
