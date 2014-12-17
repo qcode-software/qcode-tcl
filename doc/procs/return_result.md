@@ -1,15 +1,15 @@
-qc::session_new
-===============
+qc::return_result
+===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new user_id`
+`return_result`
 
 Description
 -----------
-Create a new session with an authenticiy token.
+Returns the result gathered from validation and/or POST to the client.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

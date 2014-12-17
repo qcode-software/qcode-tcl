@@ -15,8 +15,14 @@ Examples
 --------
 ```tcl
 
-% html_santitize foo
+% html_santitize "<p>foo<p>"
+<p>foo<p>
 
+% html_sanitize "<p><script>alert('Foo');</script></p>"
+<p></p>
+
+% html_sanitize "<p foo=\"bar\">Foo</p>"
+<p>Foo</p>
 
 ```
 

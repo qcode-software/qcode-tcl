@@ -5,7 +5,7 @@ part of [Database API](../db.md)
 
 Usage
 -----
-`db_canonical_type udt_name {character_maximum_length ""} {numeric_precision ""} {numeric_scale ""}`
+`db_canonical_type udt_name ?character_maximum_length? ?numeric_precision? ?numeric_scale?`
 
 Description
 -----------

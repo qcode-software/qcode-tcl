@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::format_timestamptz args`
+`qc::format_timestamptz ?-text? ?-html? string`
 
 Description
 -----------

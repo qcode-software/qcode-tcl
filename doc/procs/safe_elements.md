@@ -1,15 +1,15 @@
-qc::session_new
-===============
+qc::safe_elements
+===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new user_id`
+`safe_elements`
 
 Description
 -----------
-Create a new session with an authenticiy token.
+Returns a list of safe html elements.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

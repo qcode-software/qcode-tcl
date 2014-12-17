@@ -1,15 +1,15 @@
-qc::session_new
-===============
+qc::sass_recompile
+===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new user_id`
+`sass_recompile source destination`
 
 Description
 -----------
-Create a new session with an authenticiy token.
+Recompiles sass files if they have changed.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
