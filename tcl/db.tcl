@@ -719,9 +719,9 @@ proc qc::db_column_table_primary {column} {
     #| Returns a table that the given column is a primary key in.
     set qry {
         SELECT tc.table_name
-        FROM information_schema.columns cols
-        JOIN information_schema.table_constraints tc
-        ON cols.table_name=tc.table_name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.constraint_column_usage ccu
+        USING (table_name, constraint_name)
         WHERE column_name=:column
         AND constraint_type='PRIMARY KEY'
         LIMIT 1;
