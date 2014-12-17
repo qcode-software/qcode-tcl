@@ -721,7 +721,7 @@ proc qc::db_column_table_primary {column} {
         SELECT tc.table_name
         FROM information_schema.table_constraints tc
         JOIN information_schema.constraint_column_usage ccu
-        ON ccu.constraint_name=tc.constraint_name
+        USING (table_name, constraint_name)
         WHERE column_name=:column
         AND constraint_type='PRIMARY KEY'
         LIMIT 1;
