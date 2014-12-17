@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::error_handler `
+`qc::error_handler {error_message "NULL"} {error_info "NULL"} {error_code "NULL"}`
 
 Description
 -----------
