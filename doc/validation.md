@@ -9,15 +9,28 @@ The [check](procs/check.md) and [checks](procs/checks.md) procs provide a way of
 
 Data is checked against a list of TYPEs.The empty string is always valid unless the type NOT NULL is specified.
 
-	
-	proc user_create {name email password dob} {
-	    checks {
-	        name STRING50 NOT NULL "Please enter your name in 50 characters or fewer"
-	        email STRING100 EMAIL NOT NULL
-	        password STRING20 NOT NULL
-	        dob DATE
-	    }
-	    # name, email and password are all mandatory but dob is option and may be the empty string.
-	...
-	...
-	}
+```tcl
+
+proc user_create {name email password dob} {
+    checks {
+        name STRING50 NOT NULL "Please enter your name in 50 characters or fewer"
+        email STRING100 EMAIL NOT NULL
+        password STRING20 NOT NULL
+        dob DATE
+    }
+    # name, email and password are all mandatory but dob is option and may be the empty string.
+...
+...
+}
+
+```
+
+Against the data model
+----------------------
+
+User input can be checked against the data model using proc [validate](procs/validate.md) and the global data structure will be set up with the results of validation. Additionally, `validate` will return true if everything validated otherwise false.
+
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: http://www.qcode.co.uk "Qcode Software"
