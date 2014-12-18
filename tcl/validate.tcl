@@ -1,7 +1,7 @@
 namespace eval qc {
 }
 
-proc qc::validate {dict} {
+proc qc::validate2model {dict} {
     #| Validates dictionary against the data model and sets up the record in the global data structure.
     #| Returns true if all the data is valid otherwise false.
     set all_valid true
