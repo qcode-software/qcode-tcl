@@ -206,9 +206,8 @@ proc qc::conn_open {} {
 
 proc qc::conn_method {} {
     #| Return the method of the current connection.
-    set form_dict [qc::form2dict]
-    if {[dict exists $form_dict _method]} {
-        set method [dict get $form_dict _method]
+    if {[form_var_exists _method]} {
+        set method [form_var_get _method]
     } else {
         set method [ns_conn method]
     }
