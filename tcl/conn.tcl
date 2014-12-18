@@ -203,3 +203,13 @@ proc qc::conn_open {} {
     #| Check if the client connection is open
     return [expr {[ns_conn isconnected] && !(0x1 & [ns_conn flags])}]
 }
+
+proc qc::conn_method {} {
+    #| Return the method of the current connection.
+    if {[qc::form_var_exists _method]} {
+        set method [qc::form_var_get _method]
+    } else {
+        set method [ns_conn method]
+    }
+    return $method
+}
