@@ -206,8 +206,8 @@ proc qc::conn_open {} {
 
 proc qc::conn_method {} {
     #| Return the method of the current connection.
-    if {[form_var_exists _method]} {
-        set method [form_var_get _method]
+    if {[qc::form_var_exists _method]} {
+        set method [qc::form_var_get _method]
     } else {
         set method [ns_conn method]
     }
