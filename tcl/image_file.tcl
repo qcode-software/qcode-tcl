@@ -163,14 +163,19 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
     # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
     # By default enforce a max width and height of 2560x2560
-    set request_path [qc::conn_path]
-    setif image_redirect_handler "" "qc::image_redirect_handler"
-    
-    if { [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
-        # Valid image url
+    # Uses default qc::error_handler
+    ::try {
+        set request_path [qc::conn_path]
+        setif image_redirect_handler "" "qc::image_redirect_handler"
+        
+        if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
+            # Invalid image url
+            return [ns_returnnotfound]
+        }
         
         # Check requested max width and height does not exceed allowed max width and height
         if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
+            #log Debug "Image Handler - The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."
             return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
         }
 
@@ -182,7 +187,7 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
             set canonical_file [ns_pagepath]$canonical_url
         } else {
             # Create cache for canonical url
-
+            
             # Check file exists
             db_0or1row {
                 select 
@@ -204,22 +209,20 @@ proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_ha
             ns_register_fastpath HEAD $canonical_url
             return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
         } 
-    }
 
-    # Redirect handler
-    return [$image_redirect_handler $cache_dir]
+        # Redirect handler
+        return [$image_redirect_handler $cache_dir]
+    } on error {error_message options} {
+        # Error handler
+        return [$error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]]
+    }
 }
 
 proc qc::image_redirect_handler {cache_dir}  {
-    #| Default redirect handler for qc::image_handler.
-    #| If image url is invalid return not found response
-    #| Otherwise redirect client to correct image dimesions or the canonical URL.
+    #| Redirect client to correct image dimesions or the canonical URL.
     set request_path [qc::conn_path]
 
-    if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
-        # Invalid image url
-        return [ns_returnnotfound]
-    }
+    regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename
 
     dict2vars [qc::image_cache_data $cache_dir $file_id $max_width $max_height] width height url
     set canonical_url $url
