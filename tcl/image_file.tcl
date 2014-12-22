@@ -176,7 +176,6 @@ proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_red
         
         # Check requested max width and height does not exceed allowed max width and height
         if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
-            #log Debug "Image Handler - The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."
             return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
         }
 
