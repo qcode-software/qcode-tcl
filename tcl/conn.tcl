@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export conn_* is_*
+    namespace export conn_* 
 }
 
 proc qc::conn_remote_ip {} {
