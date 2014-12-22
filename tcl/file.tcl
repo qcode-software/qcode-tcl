@@ -157,7 +157,7 @@ proc qc::file_cache_create {cache_dir file_id} {
 }
 
 proc qc::file_cache_data {cache_dir file_id} {
-    #| Return url of cached file.
+    #| Return dict containing canonical url of cached file.
     #| Return {} if cached file does not exist.
 
     # Check nsv
