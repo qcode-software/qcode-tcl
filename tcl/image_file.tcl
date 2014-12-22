@@ -157,13 +157,14 @@ proc qc::image_data {cache_dir file_id max_width max_height} {
     return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
 }
 
-proc qc::image_handler {cache_dir {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560}} {
+proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560}} {
     #| URL handler to serve images that can not be served by fastpath.
     # Create image cache for canonical URL if it doesn't already exist.
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
     # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
     # By default enforce a max width and height of 2560x2560
     # Uses default qc::error_handler
+    setif error_handler "" "qc::error_handler"
     ::try {
         set request_path [qc::conn_path]
         setif image_redirect_handler "" "qc::image_redirect_handler"
