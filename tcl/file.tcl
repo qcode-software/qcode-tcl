@@ -100,38 +100,39 @@ proc qc::file_handler {cache_dir {error_handler "qc::error_handler"}} {
     ::try {
         set request_path [qc::conn_path]
         
-        if { [regexp {^/file/([0-9]+)(?:/.*|$)} $request_path -> file_id] } {
-            # Valid file url
-            
-            if { [qc::file_cache_exists $cache_dir $file_id] } {
-                # Cache already exists for canonical url
-                dict2vars [qc::file_cache_data $cache_dir $file_id] url
-                set canonical_url $url
-                set canonical_file [ns_pagepath]$canonical_url
-            } else {
-                # Create cache for canonical url
-
-                # Check file exists
-                db_0or1row {
-                    select 
-                    file_id
-                    from file
-                    where file_id=:file_id
-                } {
-                    return [ns_returnnotfound]
-                } 
-
-                set canonical_file [qc::file_cache_create $cache_dir $file_id]
-                set canonical_url [qc::file2url $canonical_file]
-            } 
-            if { $request_path eq $canonical_url } {
-                # Canonical URL was requested - return file
-                ns_register_fastpath GET $canonical_url
-                ns_register_fastpath HEAD $canonical_url
-                return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
-            } 
+        if { ! [regexp {^/file/([0-9]+)(?:/.*|$)} $request_path -> file_id] } {
+            # Invalid file url
+            return [ns_returnnotfound]
         }
+        
+        if { [qc::file_cache_exists $cache_dir $file_id] } {
+            # Cache already exists for canonical url
+            dict2vars [qc::file_cache_data $cache_dir $file_id] url
+            set canonical_url $url
+            set canonical_file [ns_pagepath]$canonical_url
+        } else {
+            # Create cache for canonical url
 
+            # Check file exists
+            db_0or1row {
+                select 
+                file_id
+                from file
+                where file_id=:file_id
+            } {
+                return [ns_returnnotfound]
+            } 
+
+            set canonical_file [qc::file_cache_create $cache_dir $file_id]
+            set canonical_url [qc::file2url $canonical_file]
+        } 
+        if { $request_path eq $canonical_url } {
+            # Canonical URL was requested - return file
+            ns_register_fastpath GET $canonical_url
+            ns_register_fastpath HEAD $canonical_url
+            return [ns_returnfile 200 [mime_type_guess $canonical_file] $canonical_file]
+        } 
+        
         # Catch All - redirect to Canonical URL
         return [ns_returnredirect $canonical_url]      
     } on error {error_message options} {
