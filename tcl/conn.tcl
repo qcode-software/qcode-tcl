@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export conn_*
+    namespace export conn_* 
 }
 
 proc qc::conn_remote_ip {} {
@@ -142,12 +142,8 @@ proc qc::conn_ie {} {
 
 proc qc::conn_path {} {
     #| Return the path of the current connection
-    set request [ns_conn request]
-    if { ! [conn_request_is_valid $request] } {
-        error "\"$request\" is not a valid request." {} BAD_REQUEST
-    } else {
-        return [qc::url_request_path $request]
-    }
+    # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
+    return [ns_conn url]
 }
 
 proc qc::conn_request_is_valid {request} {

@@ -2806,7 +2806,106 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     } -body {
         is_cidrnetv4  192.168.1.0/24
     } -result true
+    
+    test is_uri-1.0 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid http://test.com
+    } -result 1
 
+    test is_uri-1.1 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid https://test.com:8443
+    } -result 1
+
+    test is_uri-1.2 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid http://test.com/test.pdf
+    } -result 1
+
+    test is_uri-1.3 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid https://test.com:8443/test.pdf
+    } -result 1
+
+    test is_uri-1.4 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid http://test.com/test.pdf?a=1&b=2
+    } -result 1
+
+    test is_uri-1.5 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid https://test.com:8443/test.pdf?a=1&b=2
+    } -result 1
+
+    test is_uri-1.6 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid http://test.com/test.pdf#anchor1?a=1&b=2
+    } -result 1
+
+    test is_uri-1.7 {is_uri absolute} -setup {} -body {
+        qc::is_uri_valid https://test.com:8443/test.pdf#anchor1?a=1&b=2
+    } -result 1
+
+    test is_uri-1.8 {is_uri relative} -setup {} -body {
+        qc::is_uri_valid test.pdf
+    } -result 1
+
+    test is_uri-1.9 {is_uri relative} -setup {} -body {
+        qc::is_uri_valid test.pdf#anchor1?a=1&b=2
+    } -result 1
+
+    test is_uri-1.10 {is_uri root relative} -setup {} -body {
+        qc::is_uri_valid /test.pdf#anchor1?a=1&b=2
+    } -result 1
+
+    test is_uri-1.11 {is_uri page relative} -setup {} -body {
+        qc::is_uri_valid #anchor1?a=1&b=2
+    } -result 1
+
+    test is_uri-1.12 {is_uri page relative} -setup {} -body {
+        qc::is_uri_valid #anchor1
+    } -result 1
+
+    test is_uri-1.13 {is_uri relative} -setup {} -body {
+        qc::is_uri_valid  "./../../test.pdf#anchor1?a=1&b=2"
+    } -result 1
+
+    test is_uri-1.14 {is_uri scheme relative} -setup {} -body {
+        qc::is_uri_valid "//test.com/test/test.pdf#anchor1?a=1&b=2"
+    } -result 1
+
+    test is_uri-1.15 {is_uri ipv6} -setup {} -body {
+        qc::is_uri_valid {http://[FE80:0000:0000:0000:0202:B3FF:FE1E:8329]}
+    } -result 1
+
+    test is_uri-1.16 {is_uri collapsed ipv6} -setup {} -body {
+        qc::is_uri_valid {http://[::2001:db8:0:1]:80}
+    } -result 1
+
+    test is_uri-1.17 {is_uri} -setup {} -body {
+        qc::is_uri_valid "urn:mpeg:mpeg7:schema:2001urn:isbn:0451450523"
+    } -result 1
+
+    test is_uri-1.18 {is_uri} -setup {} -body {
+        qc::is_uri_valid "sip:gateway.com;user=phone"
+    } -result 1
+
+    test is_uri-1.19 {is_uri} -setup {} -body {
+        qc::is_uri_valid "tel:+1-816-555-1212"
+    } -result 1
+
+    test is_uri-1.20 {is_uri} -setup {} -body {
+        qc::is_uri_valid "mailto:John.Doe@example.com"
+    } -result 1
+
+    test is_uri1.21 {is_uri invalid} -setup {} -body {
+        qc::is_uri_valid "htt$%://test.com"
+    } -result 0
+
+    test is_uri1.22 {is_uri invalid} -setup {} -body {
+        qc::is_uri_valid "http://test.co$%^&m"
+    } -result 0
+
+    test is_uri1.23 {is_uri invalid} -setup {} -body {
+        qc::is_uri_valid "http://test.com/$%^&m.pdf"
+    } -result 0
+
+    test is_uri1.23 {is_uri invalid} -setup {} -body {
+        qc::is_uri_valid "///$%^&m.pdf"
+    } -result 0
 
     cleanupTests
 }
