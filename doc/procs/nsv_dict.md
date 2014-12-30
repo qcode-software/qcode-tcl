@@ -24,12 +24,12 @@ Examples
 % nsv_array get shopping_list
 produce {carrots 5 potatoes 10} butchers {steak 2}
 %
-% nsv_dict exists shopping_list carrots
+% nsv_dict exists shopping_list produce carrots
 true
 % 
-% nsv_dict exists shopping_list onions
+% nsv_dict exists shopping_list produce onions
 false
-% nsv_dict exists shopping_list carrots 2
+% nsv_dict exists shopping_list produce carrots 2
 missing value to go with key
 ```
 
