@@ -7,7 +7,7 @@ namespace eval qc::nsv_dict {
     namespace ensemble create
 
     proc exists {variable key args} {
-        #| Returns boolean indicating whether the given key (or path of keys through a set of nested dictionaries) exists in the given nsv array. 
+        #| Returns Boolean indicating whether the given key (or path of keys through a set of nested dictionaries) exists in the given nsv array. 
         ::set keys [list $key {*}$args]
         if { ! [nsv_array exists $variable] } {
             # nsv array does not exist
@@ -25,7 +25,7 @@ namespace eval qc::nsv_dict {
     }
 
     proc set {args} {
-        #| Sets/updates dictionary value correspoding to a given key in a nsv_array.
+        #| Sets/updates dictionary value corresponding to a given key in a nsv_array.
         #| When multiple keys are present, this operation creates or updates a chain of nested dictionaries.
         if { [llength $args] < 3 } {
             error "wrong # args: should be \"nsv_dict set variable key ... value\""
@@ -69,7 +69,7 @@ namespace eval qc::nsv_dict {
     }
 
     proc get {variable key args} {
-        #| Retrieve the value corresponding to a dictioney key stored in a nsv_array
+        #| Retrieve the value corresponding to a dictionary key stored in a nsv_array.
         ::set keys [list $key {*}$args]
         if { ! [nsv_dict exists $variable {*}$keys] } {
             error "Key \"$keys\" not known in dictionary"
