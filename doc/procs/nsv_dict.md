@@ -1,7 +1,10 @@
 qc::nsv_dict
 ==============
 
-[qc::nsv_dict exists variable key ?key ...?] (#qcnsv_dict-exists)
+ * [qc::nsv_dict exists variable key ?key ...?] (#qcnsv_dict-exists)
+ * [qc::nsv_dict set variable key ?key ...? value] (#qcnsv_dict-set)
+ * [qc::nsv_dict unset variable key ?key ...?] (#qcnsv_dict-unset)
+ * [qc::nsv_dict get variable key ?key ...?] (#qcnsv_dict-get)
 
 qc::nsv_dict exists
 -------------------
