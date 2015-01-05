@@ -42,7 +42,7 @@ part of [Qcode Documentation](index.md)
 * [sql_where_in]
 * [sql_where_in_not]
 
-### Database inspection
+### Database Introspection
 
 * [db_column_exists]
 * [db_table_columns]
