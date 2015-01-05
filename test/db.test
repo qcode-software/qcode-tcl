@@ -269,7 +269,7 @@ namespace eval ::qcode::test {
                 return $name
             }
         } -result "John Smith"
-        
+
         # ========================================
         # End of testing - now do cleanup
         # ========================================
