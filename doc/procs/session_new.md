@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Create a new session with an authenticiy token.
+Create a new session with an authenticity token.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

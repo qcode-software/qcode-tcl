@@ -11,7 +11,7 @@ Qcode Tcl Lib Documentation
 * Sequences
 * Bind variables, quoting and SQL injection
 * SQL helpers
-* Database inspection
+* Database Introspection
 
 [Casting to Data Type][2]
 ----------------------
