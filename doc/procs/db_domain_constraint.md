@@ -11,6 +11,8 @@ Description
 -----------
 Returns a dict of the constraint name with the check clause for the given domain in the database.
 
+See the [PostgreSQL documentation](http://www.postgresql.org/docs/9.3/static/sql-createdomain.html) for information about domains.
+
 Examples
 --------
 ```tcl

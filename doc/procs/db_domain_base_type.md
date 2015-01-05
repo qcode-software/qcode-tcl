@@ -11,6 +11,8 @@ Description
 -----------
 Returns the base type of the given domain.
 
+See the [PostgreSQL documentation](http://www.postgresql.org/docs/9.3/static/sql-createdomain.html) for information about domains.
+
 Examples
 --------
 ```tcl

@@ -1,15 +1,15 @@
-qc::validate
+qc::validate2model
 ===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`validate dict`
+`validate2model dict`
 
 Description
 -----------
-Validates a given dictionary against the data model and sets up the record in the global data structure.
+Validates a given dictionary against the data model and sets up the record in the global json payload.
 Returns true if all the data is valid otherwise false.
 
 Examples
@@ -19,7 +19,7 @@ Examples
 % dict set example firstname Foo
 % dict set example surname Bar
 
-% validate $example
+% validate2model $example
 true
 
 $ set data

@@ -28,7 +28,7 @@ proc user_create {name email password dob} {
 Against the data model
 ----------------------
 
-User input can be checked against the data model using proc [validate](procs/validate.md) and the global data structure will be set up with the results of validation. Additionally, `validate` will return true if everything validated otherwise false.
+User input can be checked against the data model using proc [validate2model](procs/validate2model.md) and the global json-payload will be set up with the results of validation. Additionally, `validate2model` will return true if everything validated otherwise false.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
