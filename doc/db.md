@@ -42,6 +42,30 @@ part of [Qcode Documentation](index.md)
 * [sql_where_in]
 * [sql_where_in_not]
 
+### Database Introspection
+
+* [db_column_exists]
+* [db_table_columns]
+* [db_table_column_exists]
+* [db_column_table]
+* [db_qualified_table_column]
+* [db_column_table_primary_exists]
+* [db_column_table_primary]
+* [db_column_type]
+* [db_table_column_types]
+* [db_column_nullable]
+* [db_enum_values]
+* [db_enum_exists]
+* [db_domain_exists]
+* [db_domain_constraint]
+* [db_column_constraints]
+* [db_eval_constraint]
+* [db_eval_domain_constraint]
+* [db_eval_column_constraints]
+* [db_domain_base_type]
+* [db_canonical_type]
+* [db_validation_message]
+
 ---
 
 Examples
@@ -152,4 +176,24 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [sql_where_like]: procs/sql_where_like.md 
 [sql_where_in]: procs/sql_where_in.md 
 [sql_where_in_not]: procs/sql_where_in_not.md 
-
+[db_column_exists]: procs/db_column_exists.md
+[db_table_columns]: procs/db_table_columns.md
+[db_table_column_exists]: procs/db_table_column_exists.md
+[db_column_table]: procs/db_column_table.md
+[db_qualified_table_column]: procs/db_qualified_table_column.md
+[db_column_table_primary_exists]: procs/db_column_table_primary_exists.md
+[db_column_table_primary]: procs/db_column_table_primary.md
+[db_column_type]: procs/db_column_type.md
+[db_table_column_types]: procs/db_table_column_types.md
+[db_column_nullable]: procs/db_column_nullable.md
+[db_enum_values]: procs/db_enum_values.md
+[db_enum_exists]: procs/db_enum_exists.md
+[db_domain_exists]: procs/db_domain_exists.md
+[db_domain_constraint]: procs/db_domain_constraint.md
+[db_column_constraints]: procs/db_column_constraints.md
+[db_eval_constraint]: procs/db_eval_constraint.md
+[db_eval_domain_constraint]: procs/db_eval_domain_constraint.md
+[db_eval_column_constraints]: procs/db_eval_column_constraints.md
+[db_domain_base_type]: procs/db_domain_base_type.md
+[db_canonical_type]: procs/db_canonical_type.md
+[db_validation_message]: procs/db_validation_message.md

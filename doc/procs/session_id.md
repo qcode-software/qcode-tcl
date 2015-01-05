@@ -1,15 +1,24 @@
-qc::session_new
-===============
+qc::session_id
+===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new user_id`
+`session_id`
 
 Description
 -----------
-Create a new session with an authenticity token.
+Return the current user's session_id.
+
+Examples
+--------
+```tcl
+
+% session_id
+27ade63f1ac52f82c3dc854b7e25a34389cc72fd
+
+```
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
