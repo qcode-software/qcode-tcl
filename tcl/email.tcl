@@ -884,6 +884,9 @@ proc qc::mime_type_guess { filename } {
         ".stw" {
             return "application/vnd.sun.xml.writer.template"
         }
+        ".svg" {
+            return "image/svg+xml"
+        }
         ".swf" {
             return "application/x-shockwave-flash"
         }
@@ -1156,6 +1159,7 @@ proc qc::mime_file_extension { mime_type } {
         "application/vnd.sun.xml.impress.template" ".sti"
         "application/x-navistyle" ".stl"
         "application/vnd.sun.xml.writer.template" ".stw"
+        "image/svg+xml" ".svg"
         "application/x-shockwave-flash" ".swf"
         "application/vnd.sun.xml.calc" ".sxc"
         "application/vnd.sun.xml.draw" ".sxd"
