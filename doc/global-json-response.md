@@ -47,7 +47,7 @@ Usage
 -----
 
 ### [qc::validate2model]
-This procedure validates input agains the data model and modifies the `record` object of the response accordingly.
+This procedure validates input against the data model and modifies the `record` object of the response accordingly.
 
 ### Custom Validation Handlers
 Custom validation handlers are used to manually validate input. As such, any manual validation should also set up the `record` object of the response with the result of validation.
