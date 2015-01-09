@@ -1,6 +1,6 @@
 namespace eval qc::message {
 
-    namespace export notify alert warning error
+    namespace export notify alert error
     namespace ensemble create
 
     proc notify {message} {
@@ -10,20 +10,14 @@ namespace eval qc::message {
     }
 
     proc alert {message} {
-        #| Sets the notify property with the given message.
+        #| Sets the alert property with the given message.
         global data
         dict set data message alert value $message
     }
 
     proc error {message} {
-        #| Sets the notify property with the given message.
+        #| Sets the error property with the given message.
         global data
         dict set data message error value $message
-    }
-
-    proc warning {message} {
-        #| Sets the notify property with the given message.
-        global data
-        dict set data message warning value $message
     }
 }

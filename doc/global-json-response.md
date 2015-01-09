@@ -46,7 +46,7 @@ Details on setting up the response can be found in the [API].
 Usage
 -----
 
-### []qc::validate2model]
+### [qc::validate2model]
 This procedure validates input agains the data model and modifies the `record` portion of the response accordingly.
 
 ### Custom Validation Handlers
@@ -62,4 +62,4 @@ There may also be a need to feed back some information to the user about the req
 Qcode Software Limited <http://www.qcode.co.uk>
 
 [API]: response_api.md
-[qc::validate2model] procs/validate2model.md
+[qc::validate2model]: procs/validate2model.md
