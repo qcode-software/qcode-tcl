@@ -49,6 +49,9 @@ Qcode Tcl Lib Documentation
 
 * [Form Variables][10]
 
+[Global JSON Response][11]
+--------------------------
+
 * * *
 
 [1]: db.md
@@ -61,3 +64,4 @@ Qcode Tcl Lib Documentation
 [8]: email.md
 [9]: error.md
 [10]: form-vars.md
+[11]: global-json-response.md
