@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Adds or modifies a valid element of the record object of the [global JSON response].
+Adds or modifies a valid element in the record object of the [global JSON response].
 
 The name argument is the name of the element.
 The value argument is the value of the element.
