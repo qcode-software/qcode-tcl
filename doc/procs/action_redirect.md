@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::actions redirect url'
+`qc::actions redirect url`
 
 Description
 -----------

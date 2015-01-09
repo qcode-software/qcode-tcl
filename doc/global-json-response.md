@@ -47,15 +47,47 @@ Usage
 -----
 
 ### [qc::validate2model]
-This procedure validates input agains the data model and modifies the `record` portion of the response accordingly.
+This procedure validates input agains the data model and modifies the `record` object of the response accordingly.
 
 ### Custom Validation Handlers
-Custom validation handlers are used to manually validate input. As such, any manual validation should also set up the `record` portion of the response with the result of validation.
+Custom validation handlers are used to manually validate input. As such, any manual validation should also set up the `record` object of the response with the result of validation.
 
 ### Request Handlers
-Request handlers will often want to redirect the client to another URL after handling the request and therefore should set up the `action` portion of the response.
+Request handlers will often want to redirect the client to another URL after handling the request and therefore should set up the `action` object of the response.
 
-There may also be a need to feed back some information to the user about the request so the `message` protion of the response should be used.
+There may also be a need to feedback some information to the user about the request so the `message` object of the response should be used.
+
+Examples
+-------
+
+Below is an example of a JSON response for an invalid login attempt.
+
+```JSON
+
+{
+    "record": {
+        "email": {
+            "valid": true,
+            "value": "foo@bar.co.uk",
+            "message": ""
+        },
+        "password": {
+            "valid": true,
+            "value": "password",
+            "message": ""
+        }
+    },
+    "message": {
+        "alert": {
+            "value": "Sorry, that email or password is not recognised."
+        }
+    },
+    "action": {
+        
+    }
+}
+
+```
 
 * * *
 

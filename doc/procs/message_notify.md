@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::message notify message'
+`qc::message notify message`
 
 Description
 -----------
