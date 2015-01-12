@@ -1,5 +1,7 @@
 namespace eval qc {
-    namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html
+    package require try
+    package require tdom
+    namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html html_sanitize element_sanitize attribute sanitize safe_elements_check safe_attributes_check html_error_report elements_error_report attributes_error_report safe_elements safe_attributes
 }
 
 proc qc::html2pdf { args } {
@@ -534,6 +536,123 @@ proc qc::safe_attributes_check {node} {
         }
     }
     return true
+}
+
+
+proc qc::html_error_report {text} {
+    #| Reports the first occurence of unsafe html in the given text.
+    ::try {
+        # wrap the text up in <root> to preserve text outwith the html
+        set text [qc::h root $text]
+        set doc [dom parse -html $text]
+        set root [$doc documentElement]
+        
+        if {$root eq ""} {
+            $doc delete
+            return {}
+        } else {
+            set unsafe_elements [qc::elements_error_report $root]
+            set unsafe_attributes [qc::attributes_error_report $root]
+            $doc delete
+            set unsafe {}
+            foreach unsafe_attribute $unsafe_attributes {
+                foreach unsafe_element $unsafe_elements {
+                    if { [dict get $unsafe_element node_value] eq [dict get $unsafe_attribute node_value] } {
+                        set found true
+                        break
+                    }
+                }
+            }
+            return $unsafe
+        }
+    } on error [list error_message options] {
+        return -code error "$error_message"
+    }
+}
+
+proc qc::elements_error_report {node} {
+    #| Checks the node and all of it's children for unsafe html elements.
+    #| Returns a list of dictionaries that specify unsafe elements.
+    set unsafe {}
+    if {[$node nodeType] eq "ELEMENT_NODE"} {
+        set element [$node nodeName]
+        set table_elements [list thead tbody tfoot tr td th]
+        if {$element ni [qc::safe_elements]} {
+            dict lappend unsafe $element [dict create node [$node asHTML -escapeNonASCII] reason "Unsafe element: $element"]
+        } elseif {$element eq "li"} {
+            # top-level <li> elements are considered unsafe because they can break out of containing markup
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "ul" || [$ancestor nodeName] eq "ol"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "List element without \"<ul>\" or \"<ol>\" ancestor"]
+            }
+            
+        } elseif {$element in $table_elements} {
+            # check for any table elements that are not contained in a table
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "table"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "Table element without \"<table>\" ancestor"]
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        foreach item [qc::elements_error_report $child] {
+            lappend unsafe $item
+        }
+    }
+    return $unsafe
+}
+
+proc qc::attributes_error_report {node} {
+    #| Checks the node and all of it's children for unsafe attributes and values.
+    #| Returns a list of dictionaries that specify unsafe items.
+    set safe_attributes [dict get [qc::safe_attributes] all]
+    set element [$node nodeName]
+    # add specific element attributes to the whitelist if the node is one of them
+    if {[dict exists [qc::safe_attributes] $element]} {
+        lappend safe_attributes {*}[dict get [qc::safe_attributes] $element]
+    }
+    set attributes [$node attributes]
+    set unsafe {}
+    foreach attribute $attributes {
+        if {$attribute ni $safe_attributes} {
+            lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute reason "Unsafe attribute: $attribute"]
+        } elseif {$attribute eq "href"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https|mailto):\/\/" $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        } elseif {$attribute eq "src"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https):\/\/" $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        } elseif {$attribute eq "class"} {
+            set value [$node getAttribute $attribute]
+            if {! [regexp {^language-} $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        foreach item [qc::attributes_error_report $child] {
+            lappend unsafe $item
+        }
+    }
+    return $unsafe
 }
 
 proc qc::safe_elements {} {
