@@ -610,6 +610,7 @@ proc qc::safe_attributes {} {
     lappend list charset
     lappend list checked
     lappend list cite
+    lappend list class
     lappend list clear
     lappend list cols
     lappend list colspan
