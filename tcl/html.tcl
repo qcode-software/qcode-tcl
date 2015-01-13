@@ -557,7 +557,7 @@ proc qc::html_error_report {text} {
             return [lappend unsafe_elements {*}$unsafe_attributes]
         }
     } on error [list error_message options] {
-        return -code error "$error_message"
+        return [list [dict create node_value $text reason "Content could not be parsed. Check for unbalanced tags or quotations."]]
     }
 }
 
