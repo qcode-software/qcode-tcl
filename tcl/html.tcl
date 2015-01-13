@@ -554,16 +554,7 @@ proc qc::html_error_report {text} {
             set unsafe_elements [qc::elements_error_report $root]
             set unsafe_attributes [qc::attributes_error_report $root]
             $doc delete
-            set unsafe {}
-            foreach unsafe_attribute $unsafe_attributes {
-                foreach unsafe_element $unsafe_elements {
-                    if { [dict get $unsafe_element node_value] eq [dict get $unsafe_attribute node_value] } {
-                        set found true
-                        break
-                    }
-                }
-            }
-            return $unsafe
+            return [lappend unsafe_elements {*}$unsafe_attributes]
         }
     } on error [list error_message options] {
         return -code error "$error_message"
@@ -578,7 +569,7 @@ proc qc::elements_error_report {node} {
         set element [$node nodeName]
         set table_elements [list thead tbody tfoot tr td th]
         if {$element ni [qc::safe_elements]} {
-            dict lappend unsafe $element [dict create node [$node asHTML -escapeNonASCII] reason "Unsafe element: $element"]
+            lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "Unsafe element: $element"]
         } elseif {$element eq "li"} {
             # top-level <li> elements are considered unsafe because they can break out of containing markup
             set ancestors [$node ancestor all]
