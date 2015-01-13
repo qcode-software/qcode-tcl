@@ -540,7 +540,7 @@ proc qc::safe_attributes_check {node} {
 
 
 proc qc::html_error_report {text} {
-    #| Reports the first occurence of unsafe html in the given text.
+    #| Reports all occurrences of unsafe html in the given text.
     ::try {
         # wrap the text up in <root> to preserve text outwith the html
         set text [qc::h root $text]
