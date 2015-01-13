@@ -52,6 +52,12 @@ Qcode Tcl Lib Documentation
 [Global JSON Response][11]
 --------------------------
 
+[Request Handler Registration][12]
+----------------------------------
+
+[Filters][13]
+-------------
+
 * * *
 
 [1]: db.md
@@ -65,3 +71,5 @@ Qcode Tcl Lib Documentation
 [9]: error.md
 [10]: form-vars.md
 [11]: global-json-response.md
+[12]: registration.md
+[13]: filters.md
