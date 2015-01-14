@@ -4,7 +4,7 @@ namespace eval qc {
 
 proc qc::error_handler { } {
     #| Return custom error responses depending value of errorCode.
-    set suffix [file extension [qc::conn_url]]
+    set suffix [file extension [qc::conn_path]]
     global errorMessage errorList errorInfo errorCode
     switch -glob -- $errorCode {
 	USER* {
@@ -82,7 +82,7 @@ proc qc::error_report {} {
 	    An error has occurred while processing your request.
 	    <p>
 	    <b>hostname:</b>[ns_info hostname]<br>
-	    <b>url:</b>[html_escape [qc::ns_conn_url]]<br>
+	    <b>url:</b>[html_escape [qc::ns_conn_path]]<br>
 	    <b>request:</b>[html_escape [ns_conn request]]<br>
 	    <b>remoteip:</b>[qc::conn_remote_ip]<br>
 	    <b>time:</b>[qc::format_timestamp now]<br>
