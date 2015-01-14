@@ -2,7 +2,7 @@ namespace eval qc {
     namespace export register validate
 }
 
-proc register {method path proc_args proc_body} {
+proc qc::register {method path proc_args proc_body} {
     #| Register a URL handler.
     set method [string toupper $method]
     namespace eval ::${method} {}
@@ -44,7 +44,7 @@ proc register {method path proc_args proc_body} {
     }
 }
 
-proc validate {method path proc_args proc_body} {
+proc qc::validate {method path proc_args proc_body} {
     #| Register a URL handler for extra validation.
     set method [string toupper $method]
     set proc_name "::${method}::VALIDATE::$path"
