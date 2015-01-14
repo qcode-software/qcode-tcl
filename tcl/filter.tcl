@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export filter_validate filter_authenticate filter_http_request_validate filter_file_alias_path
+    namespace export filter_validate filter_authenticate filter_http_request_validate filter_file_alias_path file_alias_path_exists file_alias_path_new file_alias_path2file_id file_alias_path_update file_alias_path_delete filter_handler_exists
 }
 
 proc qc::filter_validate {event {error_handler qc::error_handler}} {
