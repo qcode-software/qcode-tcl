@@ -1,34 +1,33 @@
-qc::html
+qc::h
 ========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::html tagName nodeValue args`
+`qc::h tag_name args`
 
 Description
 -----------
-Deprecated - use [qc::h] instead.
-Generate an html node
+Generate an html node.
 
 Examples
 --------
 ```tcl
 
-% html span "Hello There"
+% h span "Hello There"
 <span>Hello There</span>
 %
-% html span "Hello There" class greeting
+% h span class greeting "Hello There"
 <span class="greeting">Hello There</span>
 %
-% html span "Hello There" class greeting value Escape&Me
+% h span class greeting value Escape&Me "Hello There"
 <span class="greeting" value="Escape&amp;Me">Hello There</span>
 %
-% html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
+% h span class greeting id oSpan value "don't \"quote\" me" "Hello There"
 <span class="greeting" value="don't &#34;quote&#34; me">Hello There</span>
 %
-%  html span "Hello There" class greeting id oSpan value "don't \"quote\" me"
+% h span class greeting id oSpan value "don't \"quote\" me" "Hello There"
 <span class="greeting" id="oSpan" value="don't &#34;quote&#34; me">Hello There</span>
 
 ```
@@ -37,4 +36,3 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[qc::h]: h.md

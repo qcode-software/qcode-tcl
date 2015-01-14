@@ -54,7 +54,7 @@ namespace eval qc::nsv_dict {
         #| Unsets a given key in dictionary stored in a nsv_array.
         #| Where multiple keys are present, this describes a path through nested dictionaries to the mapping to remove.
         ::set keys [list $key {*}$args]
-        if { ! [nsv_dict exists $variable {*}$keys] } {
+        if { ! [exists $variable {*}$keys] } {
             error "Key \"$keys\" not known in dictionary"
         } elseif { [llength $keys] == 1 } {
             # 1 key - unset the key in an nsv array.
@@ -71,7 +71,7 @@ namespace eval qc::nsv_dict {
     proc get {variable key args} {
         #| Retrieve the value corresponding to a dictionary key stored in a nsv_array.
         ::set keys [list $key {*}$args]
-        if { ! [nsv_dict exists $variable {*}$keys] } {
+        if { ! [exists $variable {*}$keys] } {
             error "Key \"$keys\" not known in dictionary"
         } elseif { [llength $keys] == 1 } {
             # 1 key - get value of the key in the nsv_array

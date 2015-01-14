@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export conn_* 
+    namespace export conn_* handler_restful handler_files handler_db_files
 }
 
 proc qc::conn_remote_ip {} {
@@ -28,15 +28,15 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     if { $error_handler eq "" } {
 	set error_handler qc::error_handler
     }
-    set url [ns_conn url]
-    set file [ns_url2file [ns_conn url]]
+    set url_path [qc::conn_path]
+    set file [ns_url2file $url_path]
     
-    if { [llength [info procs "${namespace}::${url}"]] } {
+    if { [llength [info procs "${namespace}::${url_path}"]] } {
 	qc::try {
-	    set result [form_proc "${namespace}::${url}"]
+	    set result [form_proc "${namespace}::${url_path}"]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
 		# If conn is still open
-		set content-type "[mime_type_guess [file tail $url]]; charset=utf-8"
+		set content-type "[mime_type_guess [file tail $url_path]]; charset=utf-8"
 		ns_return 200 ${content-type} $result
 	    }
 	} {
@@ -69,9 +69,32 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     }
 }
 
-proc qc::conn_url {} {
+proc qc::conn_url {args} {
     #| Try to construct the full url of this request.
-    return "[qc::conn_location][ns_conn url]"
+    # Return the encoded version of the path by default unless the -decoded flag is present
+    args $args -decoded -- args
+    if { [info exist decoded] } {
+        return [qc::conn_location][qc::conn_path -decoded]
+    } else {
+        return [qc::conn_location][qc::conn_path]
+    }
+}
+
+proc qc::conn_path {args} {
+    #| Return the path of the current connection
+    #| Return the encoded version of the path by default unless the -decoded flag is present
+    # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
+    args $args -decoded -- args
+    if { [info exist decoded] } {
+        return [ns_conn url]
+    } else {
+        # re-ns_urlencode path since Naviserver decodes it by default
+        set temp {}
+        foreach url_part [split [ns_conn url] /] {
+            lappend temp [ns_urlencode -part path $url_part]
+        }
+        return [join $temp /]
+    }
 }
 
 proc qc::conn_location {} {
@@ -140,12 +163,6 @@ proc qc::conn_ie {} {
     }
 }
 
-proc qc::conn_path {} {
-    #| Return the path of the current connection
-    # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
-    return [ns_conn url]
-}
-
 proc qc::conn_request_is_valid {request} {
     #| Test if the given request string is valid
     set pchar {
@@ -208,4 +225,45 @@ proc qc::conn_method {} {
         set method [ns_conn method]
     }
     return $method
+}
+
+proc qc::handler_restful {} {
+    #| Handler for registered restful URL handlers.
+    set url_path [qc::conn_path]
+    set method [qc::conn_method]
+    
+    if {[qc::handlers exists $url_path $method]} {
+        set result [qc::handlers call $url_path $method]
+        # If conn is still open
+        if {[qc::conn_open]} {
+            # If a non-GET method then return the global data structure otherwise return the result as text/html.
+            if {$method ne "GET"} {
+                return [qc::return_result]
+            } else {
+                return [ns_return 200 text/html $result]
+            }
+        }
+    }
+}
+
+proc qc::handler_files {} {
+    #| Handler for file requests that haven't been resolved by fastpath.
+    set url_path [qc::conn_path]
+    if { [file exists [ns_pagepath]$url_path] } {
+        # static file
+        ns_register_fastpath GET $url_path
+        ns_register_fastpath HEAD $url_path
+        ns_returnfile 200 [ns_guesstype [ns_pagepath]$url_path] [ns_pagepath]$url_path
+    }
+}
+
+proc qc::handler_db_files {} {
+    #| Handle requests for files stored in the database that have yet to be cached on disk
+    set url_path [qc::conn_path]
+    if { [regexp {^/image/} $url_path] } {
+        # images
+        qc::image_handler [ns_pagepath]/image
+    } elseif { [regexp {^/file/} $url_path] } {
+        qc::file_handler [ns_pagepath]/file
+    }
 }

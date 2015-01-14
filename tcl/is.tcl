@@ -464,3 +464,140 @@ proc qc::is_uri_valid {uri} {
     
     return [regexp -expanded $re $uri]
 }
+
+namespace eval qc::is {
+    
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown
+    namespace ensemble create -unknown {
+        data_type_parser
+    }
+    
+    proc integer {int} {
+        #| Checks if the given number is a 32-bit signed integer.
+        if {[string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc smallint {int} {
+        #| Checks if the given number is an 8-bit signed integer.
+        if {[string is integer -strict $int] && $int >= -32768 && $int <= 32767} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc bigint {int} {
+        #| Checks if the given number is a 64-bit signed integer.
+        if {[string is wideinteger -strict $int] && $int >= -9223372036854775808 && $int <= 9223372036854775807} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc boolean {bool} {
+        #| Checks if the given number is a boolean.
+        return [expr {[string toupper $bool] in {Y N YES NO TRUE FALSE T F 0 1}}]
+    }
+
+    proc decimal {number} {
+        #| Checks if the given number is a decimal.
+        if {[string is double -strict $number]} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc timestamp { date } {
+        #| Checks if the given date is a timestamp (in iso format).
+        return [regexp {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$} $date]   
+    }
+
+    proc timestamptz {date} {
+        #| Checks if the given date is a timestamp with a time zone (in iso format).
+        return [regexp {^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\+|-)([0-9][0-9])$} $date] 
+    }
+
+    proc char {length string} {
+        #| Checks if string would fit exactly into a character string of the given length.
+        if { [string length $string] == $length } {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc varchar {length string} {
+        #| Checks if string would fit in a varchar of the given length.
+        if { $length eq "" } {
+            # PostgreSQL specification - missing length means any size
+            return 1
+        } elseif { [string length $string] <= $length } {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc enumeration {enum_name value} {
+        #| Checks if the given value is a value in enumeration enum_name.
+        if {[qc::db_enum_exists $enum_name] && $value in [qc::db_enum_values $enum_name]} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    proc text {string} {
+        #| Check if the given string is text
+        return 1
+    }
+
+    proc domain {domain_name value} {
+        #| Checks if the given value falls under the domain domain_name.
+        if {[qc::db_domain_exists $domain_name]} {
+            set base_type [qc::db_domain_base_type $domain_name]
+            if {[qc::is $base_type $value] && [qc::db_eval_domain_constraint $domain_name $value]} {
+                return 1
+            }
+        }
+        return 0
+    }
+
+    proc safe_html {text} {
+        #| Checks if the given text contains only safe html.
+        try {
+            # wrap the text up in <root> to preserve text outwith the html
+            set text [qc::h root $text]
+            set doc [dom parse -html $text]
+            set root [$doc documentElement]
+            
+            if {$root eq ""} {
+                $doc delete
+                return 1
+            } else {
+                set safe [expr {[qc::safe_elements_check $root] && [qc::safe_attributes_check $root]}]
+                $doc delete
+                return $safe
+            }
+        } on error [list error_message options] {
+            return 0
+        }
+    }
+
+    proc safe_markdown {markdown} {
+        #| Checks if the given markdown text contains HTML elements that are deemed safe.
+        try {
+            qc::commonmark2html $markdown
+            return 1
+        } on error [list error_message options] {
+            return 0
+        }
+    }
+}
+
