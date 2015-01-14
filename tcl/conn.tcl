@@ -70,8 +70,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
 }
 
 proc qc::conn_url {args} {
-    #| Try to construct the full url of this request.
-    # Return the encoded version of the path by default unless the -decoded flag is present
+    #| Try to construct the full url of this request (uses the encoded version of the path unless the -decoded flag is present).
     args $args -decoded -- args
     if { [info exist decoded] } {
         return [qc::conn_location][qc::conn_path -decoded]
@@ -81,8 +80,7 @@ proc qc::conn_url {args} {
 }
 
 proc qc::conn_path {args} {
-    #| Return the path of the current connection
-    #| Return the encoded version of the path by default unless the -decoded flag is present
+    #| Return the encoded version of the path of the current connection unless the -decoded flag is present.
     # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
     args $args -decoded -- args
     if { [info exist decoded] } {
