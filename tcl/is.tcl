@@ -466,11 +466,11 @@ proc qc::is_uri_valid {uri} {
 }
 
 namespace eval qc::is {
-
+    
     namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown
     namespace ensemble create -unknown {
         data_type_parser
-    } -map
+    }
     
     proc integer {int} {
         #| Checks if the given number is a 32-bit signed integer.
@@ -571,9 +571,9 @@ namespace eval qc::is {
 
     proc safe_html {text} {
         #| Checks if the given text contains only safe html.
-        ::try {
+        try {
             # wrap the text up in <root> to preserve text outwith the html
-            set text [h root $text]
+            set text [qc::h root $text]
             set doc [dom parse -html $text]
             set root [$doc documentElement]
             

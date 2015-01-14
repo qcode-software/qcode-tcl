@@ -672,7 +672,7 @@ namespace eval qc::cast {
         set safe_html [qc::html_sanitize $text]
         if {! [regexp {^<root>(.+)</root>$} $text]} {
             # Wrap the text with a root node so that it can be stored in the database as XML.
-            set safe_html [h root $safe_html]
+            set safe_html [qc::h root $safe_html]
         }
         set doc [dom parse -html $safe_html]
         set xml [$doc asXML -escapeNonASCII]
