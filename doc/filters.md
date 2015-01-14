@@ -30,14 +30,14 @@ Pre-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* filter_validate
+    ns_register_filter preauth $http_method /* qc::filter_validate
 }
 ```
 Post-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter postauth $http_method /* filter_validate
+    ns_register_filter postauth $http_method /* qc::filter_validate
 }
 ```
 
@@ -67,14 +67,14 @@ Pre-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* filter_authenticate
+    ns_register_filter preauth $http_method /* qc::filter_authenticate
 }
 ```
 Post-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter postauth $http_method /* filter_authenticate
+    ns_register_filter postauth $http_method /* qc::filter_authenticate
 }
 ```
 
@@ -94,7 +94,7 @@ Pre-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* filter_http_request_validate
+    ns_register_filter preauth $http_method /* qc::filter_http_request_validate
 }
 ```
 
@@ -113,7 +113,7 @@ Pre-authorization.
 
 ```tcl
 foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* filter_file_alias_paths $http_method
+    ns_register_filter preauth $http_method /* qc::filter_file_alias_paths $http_method
 ```
 
 * * *
