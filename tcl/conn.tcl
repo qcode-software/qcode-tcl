@@ -28,8 +28,8 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     if { $error_handler eq "" } {
 	set error_handler qc::error_handler
     }
-    set url [ns_conn url]
-    set file [ns_url2file [ns_conn url]]
+    set url [qc::conn_url]
+    set file [ns_url2file $url]
     
     if { [llength [info procs "${namespace}::${url}"]] } {
 	qc::try {
@@ -69,9 +69,32 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     }
 }
 
-proc qc::conn_url {} {
+proc qc::conn_url {args} {
     #| Try to construct the full url of this request.
-    return "[qc::conn_location][ns_conn url]"
+    # Return the encoded version of the path by default unless the -decoded flag is present
+    args $args -decoded -- args
+    if { [info exist decoded] } {
+        return [qc::conn_location][qc::conn_path -decoded]
+    } else {
+        return [qc::conn_location][qc::conn_path]
+    }
+}
+
+proc qc::conn_path {args} {
+    #| Return the path of the current connection
+    #| Return the encoded version of the path by default unless the -decoded flag is present
+    # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
+    args $args -decoded -- args
+    if { [info exist decoded] } {
+        return [ns_conn url]
+    } else {
+        # re-ns_urlencode path since Naviserver decodes it by default
+        set temp {}
+        foreach url_part [split [ns_conn url] /] {
+            lappend temp [ns_urlencode -part path $url_part]
+        }
+        return [join $temp /]
+    }
 }
 
 proc qc::conn_location {} {
@@ -137,16 +160,6 @@ proc qc::conn_ie {} {
         return true
     } else {
         return false
-    }
-}
-
-proc qc::conn_path {} {
-    #| Return the path of the current connection
-    set request [ns_conn request]
-    if { ! [conn_request_is_valid $request] } {
-        error "\"$request\" is not a valid request." {} BAD_REQUEST
-    } else {
-        return [qc::url_request_path $request]
     }
 }
 
