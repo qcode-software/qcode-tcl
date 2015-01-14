@@ -529,3 +529,163 @@ proc qc::data_type_error_check {data_type value} {
     }
     return
 }
+
+
+namespace eval qc::cast {
+    
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown
+    namespace ensemble create -unknown {
+        data_type_parser
+    }
+
+    proc integer {string} {
+        #| Try to cast given string into an integer
+        set result [integer_convert $string]
+        if { [qc::is integer $result] } {
+            return $result
+        } else {
+            return -code error -errorcode CAST "Could not cast $string to integer."
+        }
+    }
+
+    proc bigint {string} {
+        #| Try to cast the given string into an integer checking if it falls into big int range.
+        set result [integer_convert $string]
+        if { [qc::is bigint $result] } {
+            return $result
+        } else {
+            return -code error -errorcode CAST "Could not cast $string to bigint."
+        }
+    }
+
+    proc smallint {string} {
+        #| Try to cast the given string into an integer checking if it falls into small int range.
+        set result [integer_convert $string]
+        if { [qc::is smallint $result] } {
+            return $result
+        } else {
+            return -code error -errorcode CAST "Could not cast $string to smallint."
+        }
+    }
+
+    proc integer_convert {string} {
+        #| Tries to form an integer from the given string.
+        set original $string
+        # Convert e notation
+        if { [string first e $string]!=-1 || [string first E $string]!=-1 } {
+            set string [exp2string $string]
+        }
+        set string [string map {, {} % {}} $string]
+        # Strip leading zeros if followed by digit
+        # This copes with 0 and 00
+        regexp {^0+([0-9]+)$} $string -> string
+        # Convert decimals
+        if { [string first . $string]!=-1 } {
+            set string [qc::round $string 0]
+        }
+        return $string
+    }
+
+    proc decimal {string {precision ""}} {
+        #| Try to cast given string into a decimal value
+        set original $string
+        set string [string map {, {} % {}} $string]
+        if { [string is double -strict $string] } {
+            if { [string is integer -strict $precision] } {
+                return [qc::round $string $precision]
+            } else {
+                return $string
+            }
+        } else {
+            return -code error -errorcode CAST "Could not cast $original to decimal."
+        }
+    }
+
+    proc boolean { string {true t} {false f} } {
+        #| Cast a string as a boolean.
+        if { [string toupper $string] in {Y YES TRUE T 1} } {
+            return $true
+        } elseif {[string toupper $string] in {N NO FALSE F 0} } {
+            return $false
+        } else {
+            return -code error -errorcode CAST "Can't cast \"$string\" to boolean data type."
+        }
+    }
+
+    proc timestamp {string} {
+        #| Try to convert the given string into an ISO datetime.
+        return [clock format [qc::cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
+    }
+
+    proc timestamptz {string} {
+        #| Try to convert the given string into an ISO datetime with timezone.
+        return [clock format [qc::cast_epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]
+    }
+
+    proc char {length string} {
+        #| Cast to char.
+        if { [string length $string] == $length } {
+            return $string
+        } else {
+            return -code error -errorcode CAST "Can't cast \"$string\" to char($length) data type."
+        }
+    }
+
+    proc varchar {length string} {
+        #| Cast to varchar.
+        if { [string length $string] <= $length } {
+            return $string
+        } else {
+            return -code error -errorcode CAST "Can't cast \"$string\" to varchar($length). String is too long."
+        }
+    }
+
+    proc text {string} {
+        #| Cast to text.
+        return $string
+    }
+    
+    proc enumeration {name value} {
+        #| Cast $value to enumeration of $name.
+        set value [string toupper $value]
+        if {$value in [qc::db_enum_values $name]} {
+            return $value
+        } else {
+            return -code error -errorcode CAST "Can't cast \"$value\": not a valid value for enumeration \"$name\"."
+        }
+    }
+
+    proc domain {domain_name value} {
+        #| Cast value to the domain $domain_name.
+        set base_type [qc::db_domain_base_type $domain_name]
+        if { ![qc::is $base_type $value] } {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for base type \"$base_type\" while checking \"$domain_name\" type."
+        } elseif { [qc::is $domain_name $value] } {
+            return $value
+        } else {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 0 100]...\": not a valid value for \"$domain_name\"."
+        }
+    }
+
+    proc safe_html {text} {
+        #| Cast text to safe html.
+        set safe_html [qc::html_sanitize $text]
+        if {! [regexp {^<root>(.+)</root>$} $text]} {
+            # Wrap the text with a root node so that it can be stored in the database as XML.
+            set safe_html [qc::h root $safe_html]
+        }
+        set doc [dom parse -html $safe_html]
+        set xml [$doc asXML -escapeNonASCII]
+        $doc delete
+        return $xml
+    }
+
+    proc safe_markdown {text} {
+        #| Cast text to safe markdown.
+        if {[qc::is safe_markdown $text]} {
+            return $text
+        } else {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $text 100]...\": not safe markdown."
+        }
+    }
+}
