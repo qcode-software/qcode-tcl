@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export form_var_* form2* form_proc
+    namespace export form_var_* form2* form_proc form form_authenticity_token
 }
 
 proc qc::form_var_names {} {
@@ -105,5 +105,36 @@ proc qc::form_proc { proc_name } {
 	lappend largs [qc::form2dict {*}[lexclude [ns_set_keys [ns_getform]] {*}[info args $proc_name]]]
     }
     return [uplevel 0 $proc_name $largs]
+}
+
+proc qc::form {args} {
+    #| Helper proc to create html form with authenticity tokens and method overload.
+    set html [lindex $args end]
+    set args [lrange $args 0 end-1]
+    
+    if { [llength $args]%2!=0 } {
+        error "Uneven number of name/value pairs in \"$args\""
+    }
+    if { [dict exists $args method] } {
+        set method [dict get $args method]
+    } else {
+        set method GET
+    }
+    if { $method ne "GET"} {
+        # Form will be altering something on submission so require an authenticity token
+        append html [qc::form_authenticity_token]
+    }
+    if { $method ne "POST" } {
+        # Not a POST so overload the method.
+        append html [h input type hidden value $method name _method]
+        dict set args method POST
+    }
+    return [h form {*}$args $html]
+}
+
+proc qc::form_authenticity_token {} {
+    #| Generate the hidden input for authenticity token
+    set authenticity_token [qc::session_authenticity_token [qc::session_id]]
+    return [h input type hidden name _authenticity_token value $authenticity_token]
 }
 
