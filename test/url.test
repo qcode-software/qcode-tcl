@@ -11,17 +11,17 @@ namespace eval ::qcode::test {
     # url_path
     test url_path-1.0 {url_path } -setup {
     } -body {
-        url_path "/someplace.html?order_number=911&title=casáu"
+        url_path "/someplace.html?order_number=911&title=someTitle"
     } -cleanup {} -result {/someplace.html}
 
     test url_path-1.1 {url_path full url} -setup {
     } -body {
-        url_path "http://www.domain-name99.co.uk/someplace.html?order_number=911&title=casáu"
+        url_path "http://www.domain-name99.co.uk/someplace.html?order_number=911&title=someTitle"
     } -cleanup {} -result {/someplace.html}
 
     test url_path-1.2 {url_path full url port number} -setup {
     } -body {		
-        url_path "https://www.domain-name99.co.uk:8443/someplace.html?order_number=911&title=casáu"
+        url_path "https://www.domain-name99.co.uk:8443/someplace.html?order_number=911&title=someTitle"
     } -cleanup {} -result {/someplace.html}
 
     test url_path-1.3 {url_path root only} -setup {
