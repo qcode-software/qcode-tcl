@@ -3,6 +3,7 @@ namespace eval qc {
 }
 
 proc qc::cast_integer {string} {
+    #| Deprecated - see qc::cast integer
     #| Try to cast given string into an integer
     set original $string
     # Convert e notation
@@ -25,10 +26,12 @@ proc qc::cast_integer {string} {
 }
 
 proc qc::cast_int {string} {
+    #| Deprecated - see qc::cast integer
     return [qc::cast_integer $string]
 }
 
 proc qc::cast_decimal {string {precision ""}} {
+    #| Deprecated - see qc::cast decimal
     #| Try to cast given string into a decimal value
     set original $string
     set string [string map {, {} % {}} $string]
@@ -49,11 +52,13 @@ proc qc::cast_date {string} {
 }
 
 proc qc::cast_timestamp {string} {
+    #| Deprecated - see qc::cast timestamp
     #| Try to convert the given string into an ISO datetime.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]
 }
 
 proc qc::cast_timestamptz {string} {
+    #| Deprecated - see qc::cast timestamptz
     #| Try to convert the given string into an ISO datetime with timezone.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]
 }
@@ -174,6 +179,7 @@ proc qc::cast_epoch { string } {
 }
 
 proc qc::cast_boolean { string {true t} {false f} } {
+    #| Deprecated - see qc::cast boolean
     #| Cast a string as a boolean
     # strip html
     # TODO Aolserver only
@@ -188,6 +194,7 @@ proc qc::cast_boolean { string {true t} {false f} } {
 }
 
 proc qc::cast_bool { string {true t} {false f} } {
+    #| Deprecated - see qc::cast boolean
     return [qc::cast_boolean $string $true $false]
 }
 
