@@ -5,6 +5,7 @@ part of [Casting Procs](../cast.md)
 
 Usage
 -----
+Deprecated - see [qc::cast decimal][1]
 `qc::cast_decimal string ?precision?`
 
 Description
@@ -30,3 +31,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[1]: cast-decimal.md

@@ -1,36 +1,32 @@
-Casting to Data Type
+Data Types: is, cast, castable
 ====================
 part of [Qcode Documentation](index.md)
 
 * * *
 
-The Casting Procs format strings as Qcode Data Types.
+The library provides many useful procedures for determining if a string is a certain data type, whether it can be cast to a certain data type, and for actually casting to that data type.
 
-Numbers
---------------------------
-* [cast_integer] 
-* [cast_decimal]
+There are 3 ensembles provided that cover many data types:
 
-Dates
---------------------------
-* [cast_date] 
-* [cast_epoch]
+* [qc::is]
+* [qc::cast]
+* [qc::castable]
 
-Boolean
---------------------------
-* [cast_boolean]
+These ensembles are also able to handle aliases akin to some [PostgreSQL data types]. The list of aliases and the command they map to:
 
-Postcodes
---------------------------
-* [cast_postcode] 
+* varchar(x) -> varchar x
+* char(x)    -> char x
+* decimal(x,y) -> decimal x y
+* decimal(x) -> decimal 
+* numeric(x, y) -> decimal x y
+* 
 
-[cast_integer]: procs/cast_integer.md 
-[cast_decimal]: procs/cast_decimal.md
-[cast_date]: procs/cast_date.md 
-[cast_epoch]: procs/cast_epoch.md
-[cast_boolean]: procs/cast_boolean.md
-[cast_postcode]: procs/cast_postcode.md 
 
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
+
+[qc::is]: 
+[qc::cast]: 
+[qc::castable]:
+[PostgreSQL data types]: http://www.postgresql.org/docs/9.4/static/datatype.html#DATATYPE-TABLE

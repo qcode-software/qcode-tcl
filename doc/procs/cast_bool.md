@@ -9,9 +9,10 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::cast boolean][1]
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[1]: cast-boolean.md

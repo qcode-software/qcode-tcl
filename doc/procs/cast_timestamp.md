@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::cast timestamp][1]
 Try to convert the given string into an ISO datetime.
 
 Examples
@@ -27,3 +28,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[1]: cast-timestamp.md

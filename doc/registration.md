@@ -50,7 +50,7 @@ register POST /post {post_title, post_content} {
 Validate
 --------
 
-`validate` is used to register a custom vlidation handler.
+`validate` is used to register a custom validation handler.
 
 These handlers are used to set up custom validation for a request. They come in useful when validation against the data model perhaps isn't possible or when a developer might want to validate some input differently.
 

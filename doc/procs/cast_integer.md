@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::cast integer][1]
 Try to cast given string into an integer
 
 Examples
@@ -30,3 +31,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[1]: cast-integer.md

@@ -55,7 +55,7 @@ If the session is invalid or not present then the user is logged in as the [anon
 
 This filter also updates the anonymous session if it is more than an hour old.
 
-See [Authentication](/doc/auth.md) or more information on sessions and the authentication process.
+See [Authentication](/doc/auth.md) for more information on sessions and the authentication process.
 
 ### Usage
 
