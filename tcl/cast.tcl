@@ -586,15 +586,48 @@ namespace eval qc::cast {
         return $string
     }
 
-    proc decimal {string {precision ""}} {
-        #| Try to cast given string into a decimal value
+    proc decimal {args} {
+        #| Try to cast given string into a decimal value with the given precision and/or scale if present.
+        qc::args $args -precision ? -scale ? -- string
         set original $string
         set string [string map {, {} % {}} $string]
         if { [string is double -strict $string] } {
-            if { [string is integer -strict $precision] } {
-                return [qc::round $string $precision]
-            } else {
+            if { ! [info exists scale] && ! [info exists precision] } {
+                # Scale and precision not given.
                 return $string
+            } elseif { [info exists scale] && ! [info exists precision] } {
+                # Scale given but not precision.
+                if { [string is integer -strict $scale] && $scale >= 0} {
+                    return [qc::round $string $scale]
+                } else {
+                    return -code error -errorcode CAST "The scale must be a non-negative integer."
+                }
+            } elseif { ! [info exists scale] && [info exists precision] } {
+                # Precision given but not scale.
+                if { [string is integer -strict $precision] && $precision > 0 } {
+                    set decimal [string first . $string]
+                    if { $decimal >= 0 } {
+                        set left_digit_count [string length [string range $string 0 $decimal-1]]
+                    } else {
+                        set left_digit_count [string length $string]
+                    }
+                    set scale [expr {$precision - $left_digit_count}]
+                } else {
+                    return -code error -errorcode CAST "Precision must be a positive integer."
+                }
+            }
+            # Both scale and precision now exist.
+            if { [string is integer -strict $scale] && $scale >= 0 && [string is integer -strict $precision] && $precision > 0 } {
+                set left_digits_max [expr {$precision - $scale}]
+                set rounded [qc::round $string $scale]
+                set left_digit_count [string length [string range $rounded 0 [string first . $rounded]-1]]
+                if { $left_digit_count <= $left_digits_max } {
+                    return $rounded
+                } else {
+                    return -code error -errorcode CAST "The resulting number ($rounded) is too large for the given precision ($precision) and scale ($scale)."
+                }
+            } else {
+                return -code error -errorcode CAST "Scale must be a non-negative integer and precision must be a positive integer."  
             }
         } else {
             return -code error -errorcode CAST "Could not cast $original to decimal."
