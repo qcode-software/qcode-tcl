@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::castable timestamp]
 Can string be cast into timestamp format?
 
 Examples
@@ -27,3 +28,4 @@ false
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::castable timestamp]: castable-timestamp.md

@@ -1,24 +1,28 @@
-qc::is_non_zero_decimal
-=======================
+qc::is boolean
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_non_zero_decimal number`
+`qc::is boolean string`
 
 Description
 -----------
-Deprecated
+Checks if the given string is a boolean.
 
 Examples
 --------
 ```tcl
 
-% qc::is_non_zero_decimal -9.99999
+% qc::is boolean 1
 1
-%  qc::is_non_zero_decimal 0
+% qc::is boolean foo
 0
+% qc::is boolean true
+1
+% qc::is boolean no
+1
 ```
 
 ----------------------------------

@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated
 
 Examples
 --------

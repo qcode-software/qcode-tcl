@@ -1,23 +1,27 @@
-qc::is_non_zero_decimal
-=======================
+qc::is integer
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_non_zero_decimal number`
+`qc::is integer int`
 
 Description
 -----------
-Deprecated
+Checks if the given string is an integer.
 
 Examples
 --------
 ```tcl
 
-% qc::is_non_zero_decimal -9.99999
+% qc::is integer 999
 1
-%  qc::is_non_zero_decimal 0
+% qc::is integer 0.1
+0
+% qc::is integer 0
+1
+% qc::is integer true
 0
 ```
 

@@ -1,23 +1,23 @@
-qc::is_non_zero_decimal
-=======================
+qc::is char
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_non_zero_decimal number`
+`qc::is char length string`
 
 Description
 -----------
-Deprecated
+Checks if the given string would fit exactly into a character string of the given length.
 
 Examples
 --------
 ```tcl
 
-% qc::is_non_zero_decimal -9.99999
+% qc::is char 11 "Hello World"
 1
-%  qc::is_non_zero_decimal 0
+% qc::is char 10 "Hello World"
 0
 ```
 

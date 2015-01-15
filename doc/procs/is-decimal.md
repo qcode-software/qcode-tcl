@@ -1,24 +1,26 @@
-qc::is_non_zero_decimal
-=======================
+qc::is decimal
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_non_zero_decimal number`
+`qc::is decimal int`
 
 Description
 -----------
-Deprecated
+Checks if the given string is a decimal number.
 
 Examples
 --------
 ```tcl
 
-% qc::is_non_zero_decimal -9.99999
+% qc::is decimal 1234
 1
-%  qc::is_non_zero_decimal 0
+% qc::is decimal foo
 0
+% qc::is decimal 1.234
+1
 ```
 
 ----------------------------------

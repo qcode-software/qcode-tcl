@@ -1,26 +1,26 @@
-qc::is_pnz_int
+qc::is varchar
 ==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_pnz_int int`
+`qc::is varchar length string`
 
 Description
 -----------
-Deprecated
+Checks if the given string fits the given length. 
 
 Examples
 --------
 ```tcl
 
-% qc::is_pnz_int 10
+% qc::is varchar 10 hello
 1
-% qc::is_pnz_int 10.5
+% qc::is varchar 2 foo
 0
-% qc::is_pnz_int 0
-0
+% qc::is varchar "" "Empty length specified means any length is allowed."
+1
 ```
 
 ----------------------------------

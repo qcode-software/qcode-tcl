@@ -1,23 +1,25 @@
-qc::is_non_zero_decimal
-=======================
+qc::is timestamp
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_non_zero_decimal number`
+`qc::is timestamp string`
 
 Description
 -----------
-Deprecated
+Checks if the given string is a timestamp (in ISO format).
 
 Examples
 --------
 ```tcl
 
-% qc::is_non_zero_decimal -9.99999
+% qc::is timestamp "2015-01-15 17:15:33"
 1
-%  qc::is_non_zero_decimal 0
+% qc::is timestamp "2015-01-15"
+0
+% qc::is timestamp foo
 0
 ```
 
