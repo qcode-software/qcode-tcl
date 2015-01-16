@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Deperecated - see [qc::cast postcode]
+Deprecated - see [qc::cast postcode]
 Try to cast a string into UK Postcode form
 
 Examples
