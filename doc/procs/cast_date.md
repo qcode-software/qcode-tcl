@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Deperecated - see [qc::cast date]
+Deprecated - see [qc::cast date]
 Try to convert the given string into an ISO date.
 
 Examples

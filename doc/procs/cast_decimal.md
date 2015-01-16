@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Deperecated - see [qc::cast decimal]
+Deprecated - see [qc::cast decimal]
 Try to cast given string into a decimal value
 
 Examples
