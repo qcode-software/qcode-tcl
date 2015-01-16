@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::castable decimal]
 
 Examples
 --------
@@ -27,3 +27,4 @@ false
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::castable decimal]: castable-decimal.md

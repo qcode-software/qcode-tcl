@@ -636,7 +636,7 @@ namespace eval qc::is {
     }
 
     proc timestamp_http {date} {
-        #| Returns true if date is an acceptable HTTP timestamp. Note although all three should be accepted,
+        #| Checks if the given date is an acceptable HTTP timestamp. Note although all three should be accepted,
         #| only RFC 1123 format should be generated.
         # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
         if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)][,]\s\d{2}\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {

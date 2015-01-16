@@ -1,25 +1,25 @@
-qc::is_date
-===========
+qc::is postcode
+===============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_date date`
+`qc::is postcode postcode`
 
 Description
 -----------
-Deprecated - see [qc::is date]
+Checks if the given string is a UK postcode.
 
 Examples
 --------
 ```tcl
 
-% qc::is_date 12/12/12
+% qc::is postcode EH3
 0
-% qc::is_date 12:38:00
-0
-% qc::is_date 2012-08-12
+% qc::is postcode "BFPO 61"
+1
+% qc::is postcode "EH3 9EE"
 1
 ```
 
@@ -27,4 +27,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[qc::is date]: is-date.md
+[qc::is postcode]: is-postcode.md

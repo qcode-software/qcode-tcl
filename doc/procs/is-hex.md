@@ -1,25 +1,27 @@
-qc::is_date
-===========
+qc::is hex
+==========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_date date`
+`qc::is hex string`
 
 Description
 -----------
-Deprecated - see [qc::is date]
+Checks if the given string is a hex number.
 
 Examples
 --------
 ```tcl
 
-% qc::is_date 12/12/12
+%  qc::is hex 9F
+1
+%  qc::is hex 1a
+1
+%  qc::is hex 9G
 0
-% qc::is_date 12:38:00
-0
-% qc::is_date 2012-08-12
+% qc::is hex 9FFFFFF
 1
 ```
 
@@ -27,4 +29,3 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[qc::is date]: is-date.md

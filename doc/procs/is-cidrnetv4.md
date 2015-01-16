@@ -1,25 +1,23 @@
-qc::is_date
-===========
+qc::is cidrnetv4
+================
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::is_date date`
+`qc::is cidrnetv4 string`
 
 Description
------------
-Deprecated - see [qc::is date]
+----------
+Checks if the given string follows the CIDR NETv4 format.
 
 Examples
 --------
 ```tcl
 
-% qc::is_date 12/12/12
+% qc::is cidrnetv4 192.168.1.1
 0
-% qc::is_date 12:38:00
-0
-% qc::is_date 2012-08-12
+% qc::is cidrnetv4 192.168.1.0/24
 1
 ```
 
@@ -27,4 +25,3 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[qc::is date]: is-date.md
