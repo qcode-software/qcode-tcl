@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deperecated - see [qc::cast postcode]
 Try to cast a string into UK Postcode form
 
 Examples
@@ -32,3 +33,4 @@ YO23 3CD
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::cast postcode]: cast-postcode.md

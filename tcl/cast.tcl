@@ -640,7 +640,7 @@ namespace eval qc::cast {
         } elseif { [qc::is $domain_name $value] } {
             return $value
         } else {
-            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 0 100]...\": not a valid value for \"$domain_name\"."
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for \"$domain_name\"."
         }
     }
 
