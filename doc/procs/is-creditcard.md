@@ -15,13 +15,13 @@ Checks number of digits are >13 & <19, all characters are integers, luhn 10 chec
 Examples
 --------
 ```tcl
-% qc::is_creditcard 4111111111111111
+% qc::is creditcard 4111111111111111
 1
-% qc::is_creditcard 4111111111111112
+% qc::is creditcard 4111111111111112
 0
-% qc::is_creditcard 41
+% qc::is creditcard 41
 0
-% qc::is_creditcard 41111111i1111111
+% qc::is creditcard 41111111i1111111
 0
 ```
 
