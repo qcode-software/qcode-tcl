@@ -6,7 +6,7 @@ proc qc::url { url args } {
     #| Take an url with or without url encoded vars and insert or replace vars based on 
     #| the supplied pairs of var & value.
     # TODO Aolserver only
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }    
     # Are there existing encoded vars path?var1=name1...
@@ -34,7 +34,7 @@ proc qc::url { url args } {
 
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
@@ -62,7 +62,7 @@ proc qc::url_unset { url var_name } {
 
 proc qc::url_to_html_hidden { url } {
     #| Convert a url with form vars into html hidden input tags
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     set html ""
@@ -81,7 +81,7 @@ proc qc::url_back { url args } {
     #| Creates a link to url with a formvar next_url which links back to the current page.
     #| Preserve vars passed in via GET or POST
     # TODO Aolserver only
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     foreach name $args {
@@ -137,7 +137,7 @@ proc qc::url_decode {string {charset utf-8}} {
 
 proc qc::url_path {url} {
     # Return just the url path
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     if { [regexp {^https?://[a-z0-9_]+(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
@@ -151,7 +151,7 @@ proc qc::url_path {url} {
 
 proc qc::url_root {url} {
     # Return the root of an url without GET string or anchor
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     if { [regexp {^https?://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?\#]*)?} $url root] } {
@@ -200,7 +200,7 @@ proc qc::url_match {canonical_url test_url} {
 proc qc::url_parts {url} {
     #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
     # and path of url
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
     set pchar {[a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]}
