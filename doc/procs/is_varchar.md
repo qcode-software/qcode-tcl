@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::is varchar]
 Checks string would fit in a varchar of length $length
 
 Examples
@@ -25,3 +26,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is varchar]: is-varchar.md

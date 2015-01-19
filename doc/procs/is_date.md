@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::is date]
 
 Examples
 --------
@@ -27,3 +27,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is date]: is-date.md

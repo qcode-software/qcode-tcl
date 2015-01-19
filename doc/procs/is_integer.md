@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::is integer]
 
 Examples
 --------
@@ -29,3 +29,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is integer]: is-integer.md
