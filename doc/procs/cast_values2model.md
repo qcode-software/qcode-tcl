@@ -1,11 +1,11 @@
-qc::cast values2model
+qc::cast_values2model
 ==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::cast values2model args`
+`qc::cast_values2model args`
 
 Description
 -----------
@@ -19,10 +19,10 @@ Examples
 --------
 ```tcl
 
-% qc::cast values2model post_title "Hello World"
+% qc::cast_values2model post_title "Hello World"
 post_title {Hello World}
 
-% qc::cast values2model post_title {<h1>Title</h1>}
+% qc::cast_values2model post_title {<h1>Title</h1>}
 <ul>
     <li>&quot;&lt;h1&gt;Title&lt;/h1&gt;...&quot; failed to meet the constraint plain_string_check.</li>
 </ul>
