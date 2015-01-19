@@ -5,7 +5,7 @@ part of [Sending Email](../email.md)
 
 Usage
 -----
-`email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?attachment? ?attachments? ?filename? ?filenames?`
+`email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?bounces-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?`
 
 *arguments passed in as dict*
 
