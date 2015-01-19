@@ -67,9 +67,9 @@ proc qc::check {args} {
 		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
 		incr index [expr {$n-1}]
 	    }
-	} elseif {[info commands is_$type] ne ""} {
+	} elseif {[info commands "::qc::is::$type"] ne ""} {
 	    lappend TYPES $TYPE
-	    set n [llength [info args is_$type]]
+	    set n [llength [info args "::qc::is::$type"]]
 	    if {$n>1} {
 		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
 		incr index [expr {$n-1}]
@@ -106,7 +106,7 @@ proc qc::check {args} {
     foreach TYPE $TYPES {
 	set type [lower $TYPE]
 	# Try to cast to the type specified if a proc exists
-	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
+	if { [in {POS NZ} $TYPE] && ![qc::is decimal $varValue] } {
 	    # Implied cast
 	    qc::try {set varValue [qc::cast_decimal $varValue]}
 	} elseif { [info commands "::qc::cast_$type"] ne "" } {
