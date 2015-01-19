@@ -809,12 +809,12 @@ namespace eval qc::is {
         return [regexp -nocase {^[0-9a-f]*$} $string]
     }
 
-    proc url {string} {
+    proc url {args} {
         #| Checks if the given string is a URL.
         #| This is a more restrictive subset of all legal uri's defined by RFC 3986
         #| Relax as needed
-        args $args -relative -- url
-        default relative false
+        qc::args $args -relative -- url
+        qc::default relative false
         if { $relative } {
             return [regexp -expanded {
                 # path
