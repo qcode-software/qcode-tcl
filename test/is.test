@@ -2642,27 +2642,27 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is-mobile_number-1.0 {is mobile_number valid} -setup {
     } -body {
         is mobile_number 07768777777
-    } -result true
+    } -result 1
 
     test is-mobile_number-1.1 {is mobile_number exta chars} -setup {
     } -body {
         is mobile_number "07768 - 777-777 "
-    } -result true
+    } -result 1
 
     test is-mobile_number-1.2 {is mobile_number invalid} -setup {
     } -body {
         is mobile_number 09768777777
-    } -result false
+    } -result 0
 
     test is-mobile_number-1.3 {is mobile_number too short} -setup {
     } -body {
         is mobile_number 0751111111
-    } -result false
+    } -result 0
 
     test is-mobile_number-1.4 {is mobile_number empty} -setup {
     } -body {
         is mobile_number {}
-    } -result false
+    } -result 0
 
     test contains_creditcard-1.0 {contains_creditcard cc no only} -setup {
     } -body {
@@ -2780,32 +2780,32 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is-ipv4-1.0 {is ipv4 ip6} -setup {
     } -body {
         is ipv4 2001:0db8:85a3:0042:0000:8a2e:0370:7334
-    } -result false
+    } -result 0
 
     test is-ipv4-1.1 {is ipv4 partial} -setup {
     } -body {
         is ipv4 192.168.1
-    } -result false
+    } -result 0
 
     test is-ipv4-1.2 {is ipv4 invalid but still true} -setup {
     } -body {
         is ipv4 192.168.1.354
-    } -result true
+    } -result 1
 
     test is-ipv4-1.3 {is ipv4 valid} -setup {
     } -body {
         is ipv4 192.168.1.1
-    } -result true
+    } -result 1
 
     test is-cidrnetv4-1.0 {is cidrnetv4 ip only} -setup {
     } -body {
         is cidrnetv4  192.168.1.20
-    } -result false
+    } -result 0
 
     test is-cidrnetv4-1.1 {is cidrnetv4 valid cidr} -setup {
     } -body {
         is cidrnetv4  192.168.1.0/24
-    } -result true
+    } -result 1
     
     test is-uri-1.0 {is uri absolute} -setup {} -body {
         qc::is uri http://test.com
