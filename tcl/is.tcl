@@ -266,10 +266,22 @@ namespace eval qc::is {
         return [expr {[string toupper $bool] in {Y N YES NO TRUE FALSE T F 0 1}}]
     }
 
-    proc decimal {number} {
+    proc decimal {args} {
         #| Checks if the given number is a decimal.
+        qc::args $args -precision ? -scale ? -- number
         if {[string is double -strict $number]} {
-            return 1
+            if { ! [info exists precision] && ! [info exists scale] } {
+                return 1
+            } elseif { ! [info exists precision] && [info exists scale] } {
+                set count [string length [lindex [split $number .] 1]]
+                return [expr {$count > $scale}]
+            } elseif { [info exists precision] && ! [info exists scale] } {
+                set parts [split $number .]
+                set left_count [string length [lindex $parts 0]]
+                
+            } else {
+                # scale and precision given
+            }
         } else {
             return 0
         }
