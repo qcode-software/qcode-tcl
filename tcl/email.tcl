@@ -16,13 +16,21 @@ proc qc::email_send {args} {
     #| cid can be used to reference an attachment within the email's html.
     #| eg. embed an image (<img src="cid:1312967973006309"/>).
 
-    # Sender
+    # Return-Path
     # The MTA will set the Return-Path based on the $mail_from value
-    if { [info exists sender] } {
-        lappend headers Sender $sender
+    log $argnames
+    log [info exists return-path]
+    if { [info exists return-path] } {
+        set mail_from [qc::email_address ${return-path}]
+    } elseif { [info exists sender] } {
         set mail_from [qc::email_address $sender]
     } else {
         set mail_from [qc::email_address $from]
+    }
+
+    # Sender
+    if { [info exists sender] } {
+        lappend headers Sender $sender
     }
 
     # From
