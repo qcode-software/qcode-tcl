@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::cast date]
 Try to convert the given string into an ISO date.
 
 Examples
@@ -37,3 +38,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::cast date]: cast-date.md

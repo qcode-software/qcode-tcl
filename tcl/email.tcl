@@ -7,7 +7,7 @@ package require uuid
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
-    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
+    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?-bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
 
     #| attachments is a list of dicts
     #| dict keys are encoding data filename ?cid?
@@ -16,13 +16,19 @@ proc qc::email_send {args} {
     #| cid can be used to reference an attachment within the email's html.
     #| eg. embed an image (<img src="cid:1312967973006309"/>).
 
-    # Sender
+    # Return-Path
     # The MTA will set the Return-Path based on the $mail_from value
-    if { [info exists sender] } {
-        lappend headers Sender $sender
+    if { [info exists bounce-to] } {
+        set mail_from [qc::email_address ${bounce-to}]
+    } elseif { [info exists sender] } {
         set mail_from [qc::email_address $sender]
     } else {
         set mail_from [qc::email_address $from]
+    }
+
+    # Sender
+    if { [info exists sender] } {
+        lappend headers Sender $sender
     }
 
     # From
@@ -380,7 +386,7 @@ proc qc::email_header_values {key value} {
     # to dict
     # $key multipart/report report-type delivery-status boundary =_ventus
     set dict {}
-    set list [split $value ";"]
+    set list [split [string trimright $value ";"] ";"]
     lappend dict $key [lindex $list 0]
     foreach part [lrange $list 1 end] {
 	lassign [split_pair $part =] key value

@@ -697,7 +697,7 @@ namespace eval qc::cast {
         } elseif { [qc::is $domain_name $value] } {
             return $value
         } else {
-            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 0 100]...\": not a valid value for \"$domain_name\"."
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for \"$domain_name\"."
         }
     }
 
@@ -847,7 +847,7 @@ namespace eval qc::cast {
         set saved $string
         set postcode [string toupper $string]
         # BFPO 
-        if { [eq [string range $postcode 0 3] BFPO] } {
+        if { [string range $postcode 0 3] eq "BFPO" } {
             return $postcode
         }
         # convert AB12CD -> AB1 2CD or AB123CD -> AB12 3CD
