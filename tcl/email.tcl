@@ -18,8 +18,6 @@ proc qc::email_send {args} {
 
     # Return-Path
     # The MTA will set the Return-Path based on the $mail_from value
-    log $argnames
-    log [info exists return-path]
     if { [info exists return-path] } {
         set mail_from [qc::email_address ${return-path}]
     } elseif { [info exists sender] } {
