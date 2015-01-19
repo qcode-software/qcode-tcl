@@ -85,15 +85,15 @@ namespace eval ::qcode::test {
     test cast_period-1.9 {qc::cast_period "1st February 2014"} {qc::cast_period "1st February 2014"} [list 2014-02-01 2014-02-01]
 
 
-    test is_period-1.0 {qc::is_period ""} {qc::is_period ""} "false"
-    test is_period-1.1 {qc::is_period "Jan"} {qc::is_period "Jan"} "true"
-    test is_period-1.2 {qc::is_period "January"} {qc::is_period "January"} "true"
-    test is_period-1.3 {qc::is_period "2014"} {qc::is_period "2014"} "true"
-    test is_period-1.4 {qc::is_period "Jan 2014"} {qc::is_period "Jan 2013"} "true"
-    test is_period-1.5 {qc::is_period "January 2014"} {qc::is_period "January 2014"} "true"
-    test is_period-1.6 {qc::is_period "Jan 2014 to March 2014"} {qc::is_period "Jan 2014 to March 2014"} "true"
-    test is_period-1.7 {qc::is_period "Febuary 2014"} {qc::is_period "Febuary 2014"} "false"
-    test is_period-1.8 {qc::is_period "1st February 2014 to 14th February 2014"} {qc::is_period "1st February 2014 to 14th February 2014"} "true"
+    test is-period-1.0 {qc::is period ""} {qc::is period ""} "false"
+    test is-period-1.1 {qc::is period "Jan"} {qc::is period "Jan"} "true"
+    test is-period-1.2 {qc::is period "January"} {qc::is period "January"} "true"
+    test is-period-1.3 {qc::is period "2014"} {qc::is period "2014"} "true"
+    test is-period-1.4 {qc::is period "Jan 2014"} {qc::is period "Jan 2013"} "true"
+    test is-period-1.5 {qc::is period "January 2014"} {qc::is period "January 2014"} "true"
+    test is-period-1.6 {qc::is period "Jan 2014 to March 2014"} {qc::is period "Jan 2014 to March 2014"} "true"
+    test is-period-1.7 {qc::is period "Febuary 2014"} {qc::is period "Febuary 2014"} "false"
+    test is-period-1.8 {qc::is period "1st February 2014 to 14th February 2014"} {qc::is period "1st February 2014 to 14th February 2014"} "true"
 
     cleanupTests
 }
