@@ -60,9 +60,9 @@ proc qc::check {args} {
 	    lappend TYPES CREDITCARD
 	    set allow_creditcards yes
 	    continue
-	} elseif {[info commands "::qc::is_$type"] ne ""} {
+	} elseif {[info commands "::qc::is::$type"] ne ""} {
 	    lappend TYPES $TYPE
-	    set n [llength [info args "::qc::is_$type"]]
+	    set n [llength [info args "::qc::is::$type"]]
 	    if {$n>1} {
 		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
 		incr index [expr {$n-1}]
@@ -127,13 +127,13 @@ proc qc::check {args} {
 	    }
 	}
 	# Check
-	if {!([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue {*}$type_args($TYPE)])
+	if {!([info exists type_args($TYPE)] && [info commands "::qc::is::$type"] ne "" && [qc::is $type $varValue {*}$type_args($TYPE)])
 	    && 
-	    !(![info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue])
+	    !(![info exists type_args($TYPE)] && [info commands "::qc::is::$type"] ne "" && [qc::is $type $varValue])
             &&
-            !([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] eq "" && [is_$type $varValue {*}$type_args($TYPE)])
+            !([info exists type_args($TYPE)] && [info commands "::qc::is::$type"] eq "" && [qc::is $type $varValue {*}$type_args($TYPE)])
 	    && 
-	    !(![info exists type_args($TYPE)] && [info commands "::qc::is_$type"] eq "" && [is_$type $varValue])} {
+	    !(![info exists type_args($TYPE)] && [info commands "::qc::is::$type"] eq "" && [qc::is $type $varValue])} {
 	    # Failed
 	    if { [info commands not_$type] ne "" } { 
 		if { [info exists type_args($TYPE)] } {
