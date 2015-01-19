@@ -855,13 +855,13 @@ namespace eval qc::cast {
             set cut [expr {[string length $postcode]-3-1}]
             set postcode "[string range $postcode 0 $cut] [string range $postcode [expr {$cut+1}] end]"
         }
-        if { [is_postcode $postcode] } {
+        if { [qc::is postcode $postcode] } {
             return $postcode
         }
         # Convert zero -> CAPITAL O e.g. "Y023 3CD" -> "YO23 3CD"
         regsub {^([A-Z])0([0-9]{1,2}) (.+)$} $postcode {\1O\2 \3} postcode
 
-        if { [is_postcode $postcode] } {
+        if { [qc::is postcode $postcode] } {
             return $postcode
         } else {
             return -code error -errorcode CAST "Could not cast $saved to postcode."
