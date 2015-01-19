@@ -375,6 +375,63 @@ proc qc::is_period {string} {
     }
 }
 
+proc qc::cast_values2model {args} {
+    #| Check the data types of the values against the definitions for these names.
+    #| Returns a new list of values after casting to appropriate type.
+    #| Throws an error if type-checking fails.
+    if { [llength $args]%2 != 0 } {
+        return -code error "usage cast_values2model name value ?name value?"
+    }
+    set casted_dict {}
+    set errors {}
+    
+    dict for {name value} $args {
+        set table ""
+        # Check if name is fully qualified
+        if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+            lassign [qc::db_qualified_table_column $name] table column
+        }
+        
+        set data_type [qc::db_column_type $table $column]
+        set nullable [qc::db_column_nullable $table $column]
+
+        # Check if nullable
+        if {! $nullable && $value eq ""} {
+            lappend errors "$column cannot be empty."
+            continue
+        } elseif {$nullable && $value eq ""} {
+            lappend casted_dict $name $value
+            continue
+        }
+
+        # Check value against data type
+        if {[qc::castable $data_type $value]} {
+            lappend casted_dict $name [qc::cast $data_type $value]
+        } else {           
+            lappend errors [qc::html_escape [qc::data_type_error_check $data_type $value]]
+        }
+
+        # Check constraints
+        set results [qc::db_eval_column_constraints $table $column $args]
+        if { [llength $results]>0 && ! [expr [join [dict values $results] " && "]] } {
+            set failed_constraints {}
+            dict for {constraint passed} $results {
+                if {!$passed} {
+                    lappend failed_constraints $constraint
+                }
+            }
+            set error_message [qc::html_escape "Value \"$value\" for column \"$column\" failed the following constraint(s) [join $failed_constraints ", "]"]
+            lappend errors $error_message
+        }
+    }
+    
+    if {[llength $errors] > 0} {
+        return -code error -errorcode USER [qc::html_list $errors]
+    } else {
+        return $casted_dict
+    }
+}
+
 proc qc::data_type_error_check {data_type value} {
     #| Checks the given value against the data type and reports any error.
     switch -regexp -matchvar matches -- $data_type {
@@ -477,7 +534,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown values2model date postcode creditcard period
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -663,63 +720,6 @@ namespace eval qc::cast {
             return $text
         } else {
             return -code error -errorcode CAST "Can't cast \"[qc::trunc $text 100]...\": not safe markdown."
-        }
-    }
-
-    proc values2model {args} {
-        #| Check the data types of the values against the definitions for these names.
-        #| Returns a new list of values after casting to appropriate type.
-        #| Throws an error if type-checking fails.
-        if { [llength $args]%2 != 0 } {
-            return -code error "usage cast_values2model name value ?name value?"
-        }
-        set casted_dict {}
-        set errors {}
-        
-        dict for {name value} $args {
-            set table ""
-            # Check if name is fully qualified
-            if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-                lassign [qc::db_qualified_table_column $name] table column
-            }
-            
-            set data_type [qc::db_column_type $table $column]
-            set nullable [qc::db_column_nullable $table $column]
-
-            # Check if nullable
-            if {! $nullable && $value eq ""} {
-                lappend errors "$column cannot be empty."
-                continue
-            } elseif {$nullable && $value eq ""} {
-                lappend casted_dict $name $value
-                continue
-            }
-
-            # Check value against data type
-            if {[qc::castable $data_type $value]} {
-                lappend casted_dict $name [qc::cast $data_type $value]
-            } else {           
-                lappend errors [qc::html_escape [qc::data_type_error_check $data_type $value]]
-            }
-
-            # Check constraints
-            set results [qc::db_eval_column_constraints $table $column $args]
-            if { [llength $results]>0 && ! [expr [join [dict values $results] " && "]] } {
-                set failed_constraints {}
-                dict for {constraint passed} $results {
-                    if {!$passed} {
-                        lappend failed_constraints $constraint
-                    }
-                }
-                set error_message [qc::html_escape "Value \"$value\" for column \"$column\" failed the following constraint(s) [join $failed_constraints ", "]"]
-                lappend errors $error_message
-            }
-        }
-        
-        if {[llength $errors] > 0} {
-            return -code error -errorcode USER [qc::html_list $errors]
-        } else {
-            return $casted_dict
         }
     }
 

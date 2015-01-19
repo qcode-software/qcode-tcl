@@ -707,13 +707,13 @@ namespace eval qc::is {
 
         if { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
             # Period defined by two periods eg "Jan 2011 to March 2011"
-            if { [qc::is_period $period1] && [qc::is_period $period2] } {
+            if { [qc::is period $period1] && [qc::is period $period2] } {
                 return 1
             } else {
                 return 0
             }
 
-        } elseif { [qc::is_date $string] } {
+        } elseif { [qc::is date $string] } {
             # String is an iso date eg "2014-01-01"
             return 1
 
@@ -752,13 +752,13 @@ namespace eval qc::is {
 
         if { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
             # Period defined by two periods eg "Jan 2011 to March 2011"
-            if { [qc::is_period $period1] && [qc::is_period $period2] } {
+            if { [qc::is period $period1] && [qc::is period $period2] } {
                 return 1
             } else {
                 return 0
             }
 
-        } elseif { [qc::is_date $string] } {
+        } elseif { [qc::is date $string] } {
             # String is an iso date eg "2014-01-01"
             return 1
 

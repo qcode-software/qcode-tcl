@@ -74,7 +74,7 @@ namespace eval qc::handlers {
         }
         set pattern [lindex $command 0]
         set args_dict [qc::dict_zipper [args $pattern $method] [lrange $command 1 end]]
-        return [[proc_name $pattern $method] {*}[dict values [qc::cast values2model {*}$args_dict]]]
+        return [[proc_name $pattern $method] {*}[dict values [qc::cast_values2model {*}$args_dict]]]
     }
 
     proc exists {path method} {
