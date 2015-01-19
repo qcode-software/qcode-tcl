@@ -7,7 +7,7 @@ package require uuid
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
-    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?-bounces-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
+    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?-bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
 
     #| attachments is a list of dicts
     #| dict keys are encoding data filename ?cid?
@@ -18,8 +18,8 @@ proc qc::email_send {args} {
 
     # Return-Path
     # The MTA will set the Return-Path based on the $mail_from value
-    if { [info exists bounces-to] } {
-        set mail_from [qc::email_address ${bounces-to}]
+    if { [info exists bounce-to] } {
+        set mail_from [qc::email_address ${bounce-to}]
     } elseif { [info exists sender] } {
         set mail_from [qc::email_address $sender]
     } else {
