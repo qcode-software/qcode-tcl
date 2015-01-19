@@ -697,7 +697,7 @@ namespace eval qc::cast {
         } elseif { [qc::is $domain_name $value] } {
             return $value
         } else {
-            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 0 100]...\": not a valid value for \"$domain_name\"."
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for \"$domain_name\"."
         }
     }
 
@@ -847,7 +847,7 @@ namespace eval qc::cast {
         set saved $string
         set postcode [string toupper $string]
         # BFPO 
-        if { [eq [string range $postcode 0 3] BFPO] } {
+        if { [string range $postcode 0 3] eq "BFPO" } {
             return $postcode
         }
         # convert AB12CD -> AB1 2CD or AB123CD -> AB12 3CD
@@ -855,13 +855,13 @@ namespace eval qc::cast {
             set cut [expr {[string length $postcode]-3-1}]
             set postcode "[string range $postcode 0 $cut] [string range $postcode [expr {$cut+1}] end]"
         }
-        if { [is_postcode $postcode] } {
+        if { [qc::is postcode $postcode] } {
             return $postcode
         }
         # Convert zero -> CAPITAL O e.g. "Y023 3CD" -> "YO23 3CD"
         regsub {^([A-Z])0([0-9]{1,2}) (.+)$} $postcode {\1O\2 \3} postcode
 
-        if { [is_postcode $postcode] } {
+        if { [qc::is postcode $postcode] } {
             return $postcode
         } else {
             return -code error -errorcode CAST "Could not cast $saved to postcode."

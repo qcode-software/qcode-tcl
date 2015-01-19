@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::cast period]
 Return a pair of dates defining the period.
 
 Examples
@@ -47,3 +48,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::cast period]: cast-period.md
