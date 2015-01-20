@@ -204,7 +204,7 @@ proc qc::is_int_castable {string} {
     #| Deprecated - see qc::castable integer
     #| Can input be cast to an integer?
     qc::try {
-	cast_integer $string
+	cast integer $string
 	return true
     } {
 	return false
@@ -214,7 +214,7 @@ proc qc::is_int_castable {string} {
 proc qc::is_decimal_castable {string} {
     #| Deprecated - see qc::castable decimal
     qc::try {
-	qc::cast_decimal $string
+	qc::cast decimal $string
 	return true
     } {
 	return false
@@ -225,7 +225,7 @@ proc qc::is_date_castable {string} {
     #| Deprecated - see qc::castable date
     #| Can string be cast into date format?
     qc::try {
-	cast_date $string
+	cast date $string
 	return true
     } {
 	return false
@@ -236,7 +236,7 @@ proc qc::is_timestamp_castable {string} {
     #| Deprecated - see qc::castable timestamp
     #| Can string be cast into timestamp format?
     qc::try {
-	cast_timestamp $string
+	cast timestamp $string
 	return true
     } {
 	return false

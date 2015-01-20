@@ -436,7 +436,7 @@ proc qc::.. {from to {step 1} {limit ""}} {
 	    # default step 1 day
 	    set sign +;set scaler 1; set unit day
 	}
-	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast_date "$i $sign $scaler $unit"]} {
+	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast date "$i $sign $scaler $unit"]} {
 	    lappend result $i
 	}
 	return $result
