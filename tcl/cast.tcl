@@ -17,7 +17,7 @@ proc qc::cast_decimal {string {precision ""}} {
     #| Deprecated - see qc::cast decimal
     #| Try to cast given string into a decimal value
     if { $precision ne "" } {
-        return [qc::cast decimal -scale $precision $string]
+        return [qc::cast decimal -precision [string length $string] -scale $precision $string]
     } else {
         return [qc:cast decimal $string]
     }
@@ -285,7 +285,7 @@ namespace eval qc::cast {
         set string [string map {, {} % {}} $string]
         # Strip leading zeros if followed by digit
         # This copes with 0 and 00
-        regexp {^0+([0-9]+)$} $string -> string
+        regsub {^(-?)0+([0-9]+)$} $string {\1\2} string
         # Convert decimals
         if { [string first . $string]!=-1 } {
             set string [qc::round $string 0]
