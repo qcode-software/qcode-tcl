@@ -139,16 +139,46 @@ namespace eval ::qcode::test {
         is_pnz_int -10
     } -result {0}
 
-    test is-decimal-1.0 {is_decimal 1A} -setup {
+    test is-decimal-1.0 {is decimal 1A} -setup {
     } -body {
-        is_decimal 1A
+        is decimal 1A
     } -result {0}
 
-    test is-decimal-1.1 {is_decimal 9.99999} -setup {
+    test is-decimal-1.1 {is decimal 9.99999} -setup {
     } -body {
-        is_decimal 9.99999
+        is decimal 9.99999
     } -result {1}
 
+    test is-decimal-1.2 {is decimal -precision 5 1.2345} -setup {
+    } -body {
+        is decimal -precision 5 1.2345
+    } -result {1}
+
+    test is-decimal-1.3 {is decimal -precision 3 123.45} -setup {
+    } -body {
+        is decimal -precision 123.45
+    } -result {0}
+
+    test is-decimal-1.4 {is decimal -scale 3 123.45} -setup {
+    } -body {
+        is decimal -scale 3 123.45
+    } -result {1}
+
+    test is-decimal-1.5 {is decimal -scale 1 123.45} -setup {
+    } -body {
+        is decimal -scale 1 123.45
+    } -result {0}
+
+    test is-decimal-1.6 {is decimal -precision 4 -scale 1 123.4} -setup {
+    } -body {
+        is decimal -precision 4 -scale 1 123.4
+    } -result {1}
+
+    test is-decimal-1.7 {is decimal -precision 4 -scale 3 123.4} -setup {
+    } -body {
+        is decimal -precision 4 -scale 3 123.4
+    } -result {0}
+    
     test is_positive_decimal-1.0 {is_positive_decimal -99.9999} -setup {
     } -body {
         is_positive_decimal -99.9999
@@ -2907,6 +2937,42 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
         qc::is uri "///$%^&m.pdf"
     } -result 0
 
+    test is-period-1.0 {qc::is period ""} {
+        qc::is period ""
+    } "false"
+    
+    test is-period-1.1 {qc::is period "Jan"} {
+        qc::is period "Jan"
+    } -result 1
+    
+    test is-period-1.2 {qc::is period "January"} {
+        qc::is period "January"
+    } -result 1
+    
+    test is-period-1.3 {qc::is period "2014"} {
+        qc::is period "2014"}
+    -result 1
+    
+    test is-period-1.4 {qc::is period "Jan 2014"} {
+        qc::is period "Jan 2013"
+    } -result 1
+    
+    test is-period-1.5 {qc::is period "January 2014"} {
+        qc::is period "January 2014"
+    } -result 1
+    
+    test is-period-1.6 {qc::is period "Jan 2014 to March 2014"} {
+        qc::is period "Jan 2014 to March 2014"
+    } -result 1
+    
+    test is-period-1.7 {qc::is period "Febuary 2014"} {
+        qc::is period "Febuary 2014"
+    } -result 0
+    
+    test is-period-1.8 {qc::is period "1st February 2014 to 14th February 2014"} {
+        qc::is period "1st February 2014 to 14th February 2014"
+    } -result 1
+    
     cleanupTests
 }
 namespace delete ::qcode::test
