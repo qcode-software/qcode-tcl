@@ -305,6 +305,11 @@ namespace eval qc::is {
                 if { $scale < 0 || ! [qc::is integer $scale]} {
                     return -code error "Scale must be a non-negative integer."
                 }
+
+                set left_digit_max [expr {$precision - $scale}]
+                if { $left_count > $left_digit_max } {
+                    return 0
+                }
                 
                 if { $right_count > $scale } {
                     return 0
