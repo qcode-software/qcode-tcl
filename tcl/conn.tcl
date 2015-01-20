@@ -54,7 +54,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
         ns_set put $outputheaders "Last-Modified" $last_modified
     
         set if_modified_since [qc::conn_if_modified_since]
-        if { [qc::is_timestamp_http $if_modified_since]
+        if { [qc::is timestamp_http $if_modified_since]
              && $file_mtime <= [clock scan $if_modified_since] } {
             ns_return 304 {} {}
         } else {

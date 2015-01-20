@@ -181,7 +181,7 @@ proc qc::html_table_colgroup { cols } {
     foreach col $cols {
 	if { [dict exists $col width] } {
 	    set width [dict get $col width]
-	    if [is_integer $width] {
+	    if [qc::is integer $width] {
 		append width "px"
 	    }
 	    if { [dict exists $col style] } {
@@ -286,9 +286,9 @@ proc qc::html_table_cols_from_table { tableVar cols } {
     set index 0
     foreach value [lindex $table 1] col $newcols {
 	if { ![dict exists $col class] } {
-	    if { [is_integer $value] } {
+	    if { [qc::is integer $value] } {
 		dict set col class number
-	    } elseif { [is_decimal $value] } {
+	    } elseif { [qc::is decimal $value] } {
 		dict set col class money
 	    }
 	}
@@ -419,7 +419,7 @@ proc qc::html_table_format_cell_if_number {html dp sigfigs zeros commify percent
 	regsub -all {[][$\\]} $html {\\&} html
 	regsub -all {(<[^>]+>)([^<]+)(<[^>]+>)} $html "\\1\[qc::html_table_format_if_number {\\2} {$dp} {$sigfigs} {$zeros} {$commify} {$percentage}]\\3" html
 	return [subst $html]
-    } elseif { [is_decimal $html] } {
+    } elseif { [qc::is decimal $html] } {
 	return [qc::html_table_format_if_number $html $dp $sigfigs $zeros $commify $percentage]
     } else {
 	return $html
@@ -428,14 +428,14 @@ proc qc::html_table_format_cell_if_number {html dp sigfigs zeros commify percent
 
 proc qc::html_table_format_if_number {value dp sigfigs zeros commify percentage} {
     #| If value is a number then commify
-    if { [is_decimal $value] } {
+    if { [qc::is decimal $value] } {
 	if { [true $percentage] } {
 	    set value [expr {$value*100}]
 	}
-	if { [info exists sigfigs] && [is_integer $sigfigs]} {
+	if { [info exists sigfigs] && [qc::is integer $sigfigs]} {
 	    set value [qc::sigfigs $value $sigfigs]
 	}
-	if { [info exists dp] && [is_integer $dp] } {
+	if { [info exists dp] && [qc::is integer $dp] } {
 	    set value [qc::round $value $dp]
 	}
 	if { !$zeros && $value==0 } {

@@ -112,13 +112,13 @@ proc qc::return_next { next_url } {
             } 
 
             # check for malicious mal-formed url
-            if { ![is_url $next_url] } {
+            if { ![qc::is url $next_url] } {
                 error "\"[html_escape $next_url]\" is not a valid url."
             }
          
         } else {
             # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
-            if { ! [is_url -relative $next_url] } {
+            if { ! [qc::is url -relative $next_url] } {
                 error "\"[html_escape $next_url]\" is not a valid url."
             }
         }
@@ -130,7 +130,7 @@ proc qc::return_next { next_url } {
             error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
         }
         # check for malicious mal-formed url
-        if { ![is_url $next_url] } {
+        if { ![qc::is url $next_url] } {
             error "\"[html_escape $next_url]\" is not a valid url."
         }
     }
