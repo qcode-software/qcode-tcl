@@ -474,10 +474,10 @@ namespace eval qc::is {
 
     proc creditcard_masked {string} {
         #| Check the credit card number is masked to PCI requirements.
-        regsub -all {[^0-9\*]} $number "" number
+        regsub -all {[^0-9\*]} $string "" number
 
         # 13-19 chars masked with < 6 prefix and < 4 suffix digits
-        return [expr [regexp {[0-9\*]{13,19}} $no] && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]]
+        return [expr [regexp {[0-9\*]{13,19}} $number] && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]]
     }
 
     proc period {string} {

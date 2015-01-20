@@ -574,7 +574,7 @@ namespace eval qc::cast {
         set original $string
         # Convert e notation
         if { [string first e $string]!=-1 || [string first E $string]!=-1 } {
-            set string [exp2string $string]
+            set string [qc::exp2string $string]
         }
         set string [string map {, {} % {}} $string]
         # Strip leading zeros if followed by digit
