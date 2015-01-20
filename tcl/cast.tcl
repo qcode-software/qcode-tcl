@@ -301,40 +301,46 @@ namespace eval qc::cast {
         if { [string is double -strict $string] } {
             if { ! [info exists scale] && ! [info exists precision] } {
                 # Scale and precision not given.
-                return $string
+                return [qc::exp2string $string]
             } elseif { [info exists scale] && ! [info exists precision] } {
                 # Scale given but not precision.
-                if { [string is integer -strict $scale] && $scale >= 0} {
-                    return [qc::round $string $scale]
-                } else {
-                    return -code error -errorcode CAST "The scale must be a non-negative integer."
-                }
-            } elseif { ! [info exists scale] && [info exists precision] } {
-                # Precision given but not scale.
-                if { [string is integer -strict $precision] && $precision > 0 } {
-                    set decimal [string first . $string]
-                    if { $decimal >= 0 } {
-                        set left_digit_count [string length [string range $string 0 $decimal-1]]
-                    } else {
-                        set left_digit_count [string length $string]
-                    }
-                    set scale [expr {$precision - $left_digit_count}]
-                } else {
+                return -code error -errorcode CAST "Precision must be provided with scale."
+            } elseif { [info exists precision] } {
+                # Precision given.
+                if { $precision <= 0 || ! [qc::is integer $precision] } {
                     return -code error -errorcode CAST "Precision must be a positive integer."
                 }
-            }
-            # Both scale and precision now exist.
-            if { [string is integer -strict $scale] && $scale >= 0 && [string is integer -strict $precision] && $precision > 0 } {
-                set left_digits_max [expr {$precision - $scale}]
-                set rounded [qc::round $string $scale]
-                set left_digit_count [string length [string range $rounded 0 [string first . $rounded]-1]]
-                if { $left_digit_count <= $left_digits_max } {
-                    return $rounded
-                } else {
-                    return -code error -errorcode CAST "The resulting number ($rounded) is too large for the given precision ($precision) and scale ($scale)."
+                # Count the number of digits before and after the decimal point.
+                set number [qc::exp2string $string]
+                set parts [split $number .]
+                set left_count [string length [lindex $parts 0]]
+                set right_count [string length [lindex $parts 1]]
+                if { $left_count == 0 } {
+                    # The leading zero wasn't given.
+                    return -code error -errorcode CAST "Incomplete numeric string."
                 }
-            } else {
-                return -code error -errorcode CAST "Scale must be a non-negative integer and precision must be a positive integer."  
+
+                set total_count [expr {$left_count + $right_count}]
+                if { $precision < $total_count } {
+                    # Precision is less than the total number of digits in the given decimal.
+                    return -code error -errorcode CAST "Precision is too small for the given number \"$original\"."
+                }
+
+                if { ! [info exists scale] } {
+                    # Scale wasn't given so set it to 0.
+                    set scale 0
+                }
+
+                if { $scale < 0 || ! [qc::is integer $scale]} {
+                    return -code error "Scale must be a non-negative integer."
+                }
+                set rounded [qc::round $number $scale]
+                set left_digit_max [expr {$precision - $scale}]
+                if { $left_count > $left_digit_max || $right_count > $scale} {
+                    return -code error -errorcode CAST "The resulting number ($rounded) is too large for the given precision ($precision) and scale ($scale)."
+                } else {
+                    return $rounded
+                }
             }
         } else {
             return -code error -errorcode CAST "Could not cast $original to decimal."

@@ -431,7 +431,7 @@ proc qc::.. {from to {step 1} {limit ""}} {
 	}
     }
     # Dates
-    if { [is_date $from] && [is_date $to] } {
+    if { [qc::is date $from] && [qc::is date $to] } {
 	if {![regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit] } {
 	    # default step 1 day
 	    set sign +;set scaler 1; set unit day
@@ -444,7 +444,7 @@ proc qc::.. {from to {step 1} {limit ""}} {
     # Expression
     set from [eval expr $from]
     set to [eval expr $to]
-    if { [is_decimal $from] && [is_decimal $to] && [is_decimal $step]} {
+    if { [qc::is decimal $from] && [qc::is decimal $to] && [qc::is decimal $step]} {
 	for {set i $from} {($step>0 && $i<=$to) || ($step<0 && $i>=$to)} {set i [expr {$i+$step}]} {
 	    lappend result $i
 	}
