@@ -13,9 +13,13 @@ package: check-version
 	# Copy files to pristine temporary directory
 	rm -rf package
 	mkdir package
+	rm -rf v$(VERSION)
+	mkdir v$(VERSION)
 	curl --fail -K ~/.curlrc_github -L -o v$(VERSION).tar.gz https://api.github.com/repos/qcode-software/qcode-tcl/tarball/v$(VERSION)
-	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl --exclude test --exclude test_all.tcl -xzvf v$(VERSION).tar.gz -C package
-	./package.tcl tcl package ${NAME} ${VERSION}
+	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl --exclude test --exclude test_all.tcl -xzvf v$(VERSION).tar.gz -C v$(VERSION)
+	rm -f v$(VERSION).tar.gz
+	./package.tcl v$(VERSION)/tcl package ${NAME} ${VERSION}
+	rm -rf v$(VERSION)
 	./pkg_mkIndex package
 	# checkinstall
 	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make local-install
@@ -45,7 +49,6 @@ upload: check-version
 
 clean: check-version
 	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
-	rm -f v$(VERSION).tar.gz
 
 check-version:
 ifndef VERSION
