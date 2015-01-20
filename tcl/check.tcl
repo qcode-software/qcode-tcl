@@ -129,7 +129,7 @@ proc qc::check {args} {
 	# Check
 	if {!([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue {*}$type_args($TYPE)])
 	    && 
-	    !(![info exists type_args($TYPE)] && [info commands "::qc::is::$type"] ne "" && [qc::is $type $varValue])
+	    !(![info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue])
             &&
             !([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] eq "" && [is_$type $varValue {*}$type_args($TYPE)])
 	    && 
