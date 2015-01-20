@@ -24,8 +24,13 @@ namespace eval ::qcode::test {
 
     test cast-decimal-1.0 {cast decimal commas} {qc::cast decimal "2,305.25"} 2305.25
     test cast-decimal-1.1 {cast decimal percentages} {qc::cast decimal "100%"} 100
-    test cast-decimal-1.2 {cast decimal precision} {qc::cast decimal 3.689 2} 3.69
-    test cast-decimal-1.3 {cast decimal precision} {qc::cast decimal 3 4} 3.0000
+    test cast-decimal-1.2 {cast decimal scale} {qc::cast decimal -scale 2 3.689} 3.69
+    test cast-decimal-1.3 {cast decimal scale} {qc::cast decimal -scale 4 3} 3.0000
+    test cast-decimal-1.4 {cast decimal precision} {qc::cast decimal -precision 4 3} 3.000 
+    test cast-decimal-1.5 {cast decimal precision} {qc::cast decimal -precision 1 3} 3 
+    test cast-decimal-1.6 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 4 3} -result "The resulting number (3.0000) is too large for the given precision (4) and scale (4)." -returnCodes error
+    test cast-decimal-1.7 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3} 3.00
+    test cast-decimal-1.8 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3.6534} 3.65
 
     test cast-date-1.0 {cast date forward slashes} {qc::cast date 12/5/07} 2007-05-12
     test cast-date-1.1 {cast date relative time} -body {
