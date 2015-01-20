@@ -13,10 +13,10 @@ namespace eval ::qcode::test {
     test cast-integer-1.2 {cast integer percentages} {qc::cast integer "10%"} 10
     test cast-integer-1.3 {cast integer e notation} {qc::cast integer "43e2"} 4300
     test cast-integer-1.4 {cast integer upper limit} {qc::cast integer "2147483647"} 2147483647
-    test cast-integer-1.5 {cast integer outside integer range} -body {qc::cast integer "2147483648"} -result "Could not cast 2147483648 to integer" -returnCodes error 
-    test cast-integer-1.6 {cast integer outside integer range} -body {qc::cast integer "2e100"} -result "Could not cast 2e100 to integer" -returnCodes error 
+    test cast-integer-1.5 {cast integer outside integer range} -body {qc::cast integer "2147483648"} -result "Could not cast 2147483648 to integer." -returnCodes error 
+    test cast-integer-1.6 {cast integer outside integer range} -body {qc::cast integer "2e100"} -result "Could not cast 2e100 to integer." -returnCodes error 
     test cast-integer-1.7 {cast integer lower limit} {qc::cast integer "-2147483648"} -2147483648
-    test cast-integer-1.8 {cast integer outside integer range} -body {qc::cast integer "-2147483649"} -result "Could not cast -2147483649 to integer" -returnCodes error 
+    test cast-integer-1.8 {cast integer outside integer range} -body {qc::cast integer "-2147483649"} -result "Could not cast -2147483649 to integer." -returnCodes error 
     test cast-integer-1.9 {cast integer leading zeros} {qc::cast integer "-08"} -8
     test cast-integer-1.10 {cast integer leading zeros} {qc::cast integer "-1.008"} -1
     test cast-integer-1.10 {cast integer leading zeros} {qc::cast integer "0008"} 8
@@ -28,7 +28,7 @@ namespace eval ::qcode::test {
     test cast-decimal-1.3 {cast decimal scale} {qc::cast decimal -scale 4 3} 3.0000
     test cast-decimal-1.4 {cast decimal precision} {qc::cast decimal -precision 4 3} 3.000 
     test cast-decimal-1.5 {cast decimal precision} {qc::cast decimal -precision 1 3} 3 
-    test cast-decimal-1.6 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 4 3} -result "The resulting number (3.0000) is too large for the given precision (4) and scale (4)." -returnCodes error
+    test cast-decimal-1.6 {cast decimal precision scale} -body {qc::cast decimal -precision 4 -scale 4 3} -result "The resulting number (3.0000) is too large for the given precision (4) and scale (4)." -returnCodes error
     test cast-decimal-1.7 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3} 3.00
     test cast-decimal-1.8 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3.6534} 3.65
 
