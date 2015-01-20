@@ -60,16 +60,16 @@ proc qc::check {args} {
 	    lappend TYPES CREDITCARD
 	    set allow_creditcards yes
 	    continue
-	} elseif {[info commands "::qc::is::$type"] ne ""} {
+	} elseif {[info commands "::qc::is_$type"] ne ""} {
 	    lappend TYPES $TYPE
-	    set n [llength [info args "::qc::is::$type"]]
+	    set n [llength [info args "::qc::is_$type"]]
 	    if {$n>1} {
 		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
 		incr index [expr {$n-1}]
 	    }
-	} elseif {[info commands "::qc::is::$type"] ne ""} {
+	} elseif {[info commands is_$type] ne ""} {
 	    lappend TYPES $TYPE
-	    set n [llength [info args "::qc::is::$type"]]
+	    set n [llength [info args is_$type]]
 	    if {$n>1} {
 		set type_args($TYPE) [lrange $args [expr {$index+1}] [expr {$index+$n-1}]]
 		incr index [expr {$n-1}]
@@ -106,7 +106,7 @@ proc qc::check {args} {
     foreach TYPE $TYPES {
 	set type [lower $TYPE]
 	# Try to cast to the type specified if a proc exists
-	if { [in {POS NZ} $TYPE] && ![qc::is decimal $varValue] } {
+	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
 	    # Implied cast
 	    qc::try {set varValue [qc::cast_decimal $varValue]}
 	} elseif { [info commands "::qc::cast_$type"] ne "" } {
@@ -127,13 +127,13 @@ proc qc::check {args} {
 	    }
 	}
 	# Check
-	if {!([info exists type_args($TYPE)] && [info commands "::qc::is::$type"] ne "" && [qc::is $type $varValue {*}$type_args($TYPE)])
+	if {!([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue {*}$type_args($TYPE)])
 	    && 
 	    !(![info exists type_args($TYPE)] && [info commands "::qc::is::$type"] ne "" && [qc::is $type $varValue])
             &&
-            !([info exists type_args($TYPE)] && [info commands "::qc::is::$type"] eq "" && [qc::is $type $varValue {*}$type_args($TYPE)])
+            !([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] eq "" && [is_$type $varValue {*}$type_args($TYPE)])
 	    && 
-	    !(![info exists type_args($TYPE)] && [info commands "::qc::is::$type"] eq "" && [qc::is $type $varValue])} {
+	    !(![info exists type_args($TYPE)] && [info commands "::qc::is_$type"] eq "" && [is_$type $varValue])} {
 	    # Failed
 	    if { [info commands not_$type] ne "" } { 
 		if { [info exists type_args($TYPE)] } {
