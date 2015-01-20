@@ -17,7 +17,11 @@ proc qc::cast_decimal {string {precision ""}} {
     #| Deprecated - see qc::cast decimal
     #| Try to cast given string into a decimal value
     if { $precision ne "" } {
-        return [qc::cast decimal -precision [string length $string] -scale $precision $string]
+        set p [string length $string]
+        if { $precision >= $p } {
+            set p [expr {$p + $precision}]
+        }
+        return [qc::cast decimal -precision $p -scale $precision $string]
     } else {
         return [qc:cast decimal $string]
     }
@@ -310,21 +314,6 @@ namespace eval qc::cast {
                 if { $precision <= 0 || ! [qc::is integer $precision] } {
                     return -code error -errorcode CAST "Precision must be a positive integer."
                 }
-                # Count the number of digits before and after the decimal point.
-                set number [qc::exp2string $string]
-                set parts [split $number .]
-                set left_count [string length [lindex $parts 0]]
-                set right_count [string length [lindex $parts 1]]
-                if { $left_count == 0 } {
-                    # The leading zero wasn't given.
-                    return -code error -errorcode CAST "Incomplete numeric string."
-                }
-
-                set total_count [expr {$left_count + $right_count}]
-                if { $precision < $total_count } {
-                    # Precision is less than the total number of digits in the given decimal.
-                    return -code error -errorcode CAST "Precision is too small for the given number \"$original\"."
-                }
 
                 if { ! [info exists scale] } {
                     # Scale wasn't given so set it to 0.
@@ -334,7 +323,17 @@ namespace eval qc::cast {
                 if { $scale < 0 || ! [qc::is integer $scale]} {
                     return -code error "Scale must be a non-negative integer."
                 }
-                set rounded [qc::round $number $scale]
+                
+                # Expand the number and round it to the scale and check the result.
+                set rounded [qc::round [qc::exp2string $string] $scale]
+                set parts [split $rounded .]
+                set left_count [string length [lindex $parts 0]]
+                set right_count [string length [lindex $parts 1]]
+                if { $left_count == 0 } {
+                    # The leading zero wasn't given.
+                    return -code error -errorcode CAST "Incomplete numeric string."
+                }
+                
                 set left_digit_max [expr {$precision - $scale}]
                 if { $left_count > $left_digit_max || $right_count > $scale} {
                     return -code error -errorcode CAST "The resulting number ($rounded) is too large for the given precision ($precision) and scale ($scale)."
@@ -607,20 +606,20 @@ namespace eval qc::cast {
 
         } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
             # Exact match for year eg "2006"
-            set from_date [date_year_start $year-01-01]
-            set to_date [date_year_end $year-01-01]
+            set from_date [qc::date_year_start $year-01-01]
+            set to_date [qc::date_year_end $year-01-01]
 
         } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)\s+([12]\d{3})$}] $string -> month_name year] } {
             # Exact match in format "Jan 2006"
             set epoch [clock scan "01 $month_name $year"]
-            set from_date [date_month_start $epoch]
-            set to_date [date_month_end $epoch]
+            set from_date [qc::date_month_start $epoch]
+            set to_date [qc::date_month_end $epoch]
 
         } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)$}] $string -> month_name] } {
             # Exact match in format "Jan" (assume current year)
-            set epoch [clock scan "01 $month_name [date_year now]"]
-            set from_date [date_month_start $epoch]
-            set to_date [date_month_end $epoch]
+            set epoch [clock scan "01 $month_name [qc::date_year now]"]
+            set from_date [qc::date_month_start $epoch]
+            set to_date [qc::date_month_end $epoch]
 
         } elseif { [regexp -nocase -- [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)\s+([12]\d{3})$}] $string -> dom month_name year] } {
             # Exact match for castable date in format "1st Jan 2014"
@@ -630,7 +629,7 @@ namespace eval qc::cast {
 
         } elseif { [regexp -nocase -- [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)$}] $string -> dom month_name] } {
             # Exact match for castable date in format "1st Jan" (assume current year)
-            set epoch [clock scan "$dom $month_name [date_year now]"]
+            set epoch [clock scan "$dom $month_name [qc::date_year now]"]
             set from_date [date $epoch]
             set to_date $from_date
 
@@ -642,7 +641,7 @@ namespace eval qc::cast {
 
         } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?$}] $string -> month_name dom] } {
             # Exact match for castable date in format "Jan 1st" (assume current year)
-            set epoch [clock scan "$dom $month_name [date_year now]"]
+            set epoch [clock scan "$dom $month_name [qc::date_year now]"]
             set from_date [date $epoch]
             set to_date $from_date
 
