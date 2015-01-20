@@ -11,7 +11,9 @@ Description
 -----------
 Checks if the given string is a decimal number.
 
-If precision and/or scale are given then checks if the decimal number fits the precision and/or scale.
+If precision and scale are given then checks if the decimal number fits the precision and scale.
+
+If just the precision is given the scale is set to 0.
 
 Examples
 --------
@@ -24,13 +26,9 @@ Examples
 % qc::is decimal 1.234
 1
 % qc::is decimal -precision 5 1.2345
-1
-% qc::is decimal -precision 3 123.45
 0
-% qc::is decimal -scale 3 123.45
+% qc::is decimal -precision 5 123
 1
-% qc::is decimal -scale 1 123.45
-0
 % qc::is decimal -precision 4 -scale 1 123.4
 1
 % qc::is decimal -precision 4 -scale 3 123.4

@@ -268,38 +268,39 @@ namespace eval qc::is {
 
     proc decimal {args} {
         #| Checks if the given number is a decimal.
-        qc::args $args -precision ? -scale ? -- number
-        if {[string is double -strict $number]} {
+        qc::args $args -precision ? -scale ? -- string
+        set string [string map {, {}} $string]
+        if {[string is double -strict $string]} {
             if { ! [info exists precision] && ! [info exists scale] } {
+                # Scale and precision not given.
                 return 1
             } elseif { ! [info exists precision] && [info exists scale] } {
-                set count [string length [lindex [split $number .] 1]]
-                if { $scale >= 0 && [qc::is integer $scale]} {
-                    return [expr {$scale >= $count}]
-                } else {
-                    return -code error "Scale must be a non-negative integer."
-                }
+                # Scale given but not precision.
+                return -code error "Precision must be provided with scale."
             } elseif { [info exists precision] } {
+                # Precision given.
                 if { $precision <= 0 || ! [qc::is integer $precision]} {
                     return -code error "Precision must be a positive integer."
                 }
-                
+                # Count the number of digits before and after the decimal point.
+                set number [qc::exp2string $string]
                 set parts [split $number .]
                 set left_count [string length [lindex $parts 0]]
                 set right_count [string length [lindex $parts 1]]
                 if { $left_count == 0 } {
                     # The leading zero wasn't given.
-                    set left_count 1
+                    return -code error "Incomplete numeric string."
                 }
 
                 set total_count [expr {$left_count + $right_count}]
                 if { $precision < $total_count } {
+                    # Precision is less than the total number of digits in the given decimal.
                     return 0
                 }
                 
                 if { ! [info exists scale] } {
-                    # Scale wasn't given so calculate it.
-                    set scale [expr {$precision - $left_count}]
+                    # Scale wasn't given so set it to 0.
+                    set scale 0
                 }
 
                 if { $scale < 0 || ! [qc::is integer $scale]} {
@@ -307,11 +308,7 @@ namespace eval qc::is {
                 }
 
                 set left_digit_max [expr {$precision - $scale}]
-                if { $left_count > $left_digit_max } {
-                    return 0
-                }
-                
-                if { $right_count > $scale } {
+                if { $left_count > $left_digit_max || $right_count > $scale } {
                     return 0
                 } else {
                     return 1
