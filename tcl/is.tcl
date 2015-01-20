@@ -274,13 +274,44 @@ namespace eval qc::is {
                 return 1
             } elseif { ! [info exists precision] && [info exists scale] } {
                 set count [string length [lindex [split $number .] 1]]
-                return [expr {$count > $scale}]
-            } elseif { [info exists precision] && ! [info exists scale] } {
+                if { $scale >= 0 && [qc::is integer $scale]} {
+                    return [expr {$scale >= $count}]
+                } else {
+                    return -code error "Scale must be a non-negative integer."
+                }
+            } elseif { [info exists precision] } {
+                if { $precision <= 0 || ! [qc::is integer $precision]} {
+                    return -code error "Precision must be a positive integer."
+                }
+                
                 set parts [split $number .]
                 set left_count [string length [lindex $parts 0]]
+                set right_count [string length [lindex $parts 1]]
+                if { $left_count == 0 } {
+                    # The leading zero wasn't given.
+                    set left_count 1
+                }
+
+                set total_count [expr {$left_count + $right_count}]
+                if { $precision < $total_count } {
+                    return 0
+                }
                 
-            } else {
-                # scale and precision given
+                if { ! [info exists scale] } {
+                    # Scale wasn't given so calculate it.
+                    set scale [expr {$precision - $left_count}]
+                }
+
+                if { $scale < 0 || ! [qc::is integer $scale]} {
+                    return -code error "Scale must be a non-negative integer."
+                }
+                
+                if { $right_count > $scale } {
+                    return 0
+                } else {
+                    return 1
+                }
+                
             }
         } else {
             return 0
