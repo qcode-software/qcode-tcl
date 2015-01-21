@@ -54,7 +54,7 @@ Qcode Tcl Lib Documentation
 
 [Global JSON Response][11]
 --------------------------
-* [API](doc/response_api.md)
+* [API](response_api.md)
 
 [Request Handler Registration][12]
 ----------------------------------
