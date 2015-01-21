@@ -403,12 +403,10 @@ namespace eval qc::cast {
     proc domain {domain_name value} {
         #| Cast value to the domain $domain_name.
         set base_type [qc::db_domain_base_type $domain_name]
-        if { ![qc::is $base_type $value] } {
-            if { [qc::castable $base_type $value] } {
-                set value [qc::cast $base_type $value]
-            } else {
-                return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for base type \"$base_type\" while checking \"$domain_name\" type."
-            }
+        if { [qc::castable $base_type $value] } {
+            set value [qc::cast $base_type $value]
+        } else {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $value 100]...\": not a valid value for base type \"$base_type\" while checking \"$domain_name\" type."
         }
 
         if { [qc::is $domain_name $value] } {
