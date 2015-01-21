@@ -14,18 +14,20 @@ There are 3 ensembles provided that cover many data types:
 
 These ensembles are also able to handle aliases akin to some [PostgreSQL data types]. The list of aliases and the command they map to:
 
-* varchar(x) string   > varchar x string
-* char(x) string      > char x string
-* decimal(x,y) string > decimal -precision x -scale y string
-* decimal(x) string   > decimal -precision x string
-* numeric(x,y) string > decimal -precision x -scale y string
-* numeric(x) string   > decimal -prevision x string
-* numeric string      > decimal string
-* 
-* 
-* 
-* 
-* 
+```
+varchar(x) arg   > varchar x arg
+char(x) arg      > char x arg
+decimal(x,y) arg > decimal -precision x -scale y arg
+decimal(x) arg   > decimal -precision x arg
+numeric(x,y) arg > decimal -precision x -scale y arg
+numeric(x) arg   > decimal -prevision x arg
+numeric arg      > decimal arg
+bool arg         > boolean arg
+int arg          > integer arg
+int4 arg         > integer arg
+int2 arg         > smallint arg
+int8 arg         > bigint arg
+```
 
 
 * * *
