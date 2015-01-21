@@ -12,7 +12,6 @@ Description
 Call proc_name using corresponding form variables
     if the last variable name is called args then it is filled with a dict containing name value
     pairs for the remaining form data.
-    See <proc>conn_marshal</proc> for a way of using this.
 
 Examples
 --------
