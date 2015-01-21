@@ -1,20 +1,20 @@
 Error Handling
 ======================
 
-qc::conn_marshal
+[qc::error_handler](doc/procs/error_handler.md)
 --------------------------
 
-If ns_register_proc is used to register the [qc::conn_marshal](procs/conn_marshal.md) to deal with incoming requests, errors are by default passed to [qc::error_handler](procs/error_handler.md).
+Errors are classified by the errorCode returned and [qc::error_handler](doc/procs/error_handler.md) will return a suitable message and code to the client based upon the error code.
 
-Errors are classified by the global errorCode.
-
-Currently used are:
+Currently supported are the following codes:
 * USER
 * PERM
 * AUTH
+* NOT_FOUND
+* BAD_REQUEST
 
 ### USER Errors
-The global errorMessage will be returned to the customer normally as the result of invalid input.
+The error message will be returned to the customer normally as the result of invalid input.
 
 ### PERM Errors
 The user does not have permision on the resource.
@@ -22,6 +22,12 @@ An indication of the missing permission is given.
 
 ### AUTH Errors
 Could not authenticate who the user is.
+
+### NOT_FOUND Errors
+The requested resource could not be found.
+
+### BAD_REQUEST
+The request from the client wasn't well formed.
 
 ### Bugs
 If the errorCode does not classify the error as one of the above then it is a bug or other unexpected runtime error.
