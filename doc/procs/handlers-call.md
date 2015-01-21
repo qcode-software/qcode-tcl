@@ -1,0 +1,30 @@
+qc::handlers call
+==============
+
+part of [Docs](../index.md)
+
+Usage
+-----
+`qc::handlers call path method`
+
+Description
+-----------
+Call the registered handler that matches the given path and method.
+
+See [Registration](../registration.md) for more information regarding request handlers.
+
+Examples
+--------
+```tcl
+
+% qc::call /home GET
+
+% qc::call / GET
+
+% qc::call /post POST
+```
+
+----------------------------------
+*[Qcode Software Limited] [qcode]*
+
+[qcode]: http://www.qcode.co.uk "Qcode Software"
