@@ -13,7 +13,7 @@ Qcode Tcl Lib Documentation
 * SQL helpers
 * Database Introspection
 
-[Casting to Data Type][2]
+[Data Types: is, cast, castable][2]
 ----------------------
 
 [Authentication][3]
@@ -61,7 +61,7 @@ Qcode Tcl Lib Documentation
 * * *
 
 [1]: db.md
-[2]: cast.md
+[2]: data-types.md
 [3]: auth.md
 [4]: cookie.md
 [5]: args.md

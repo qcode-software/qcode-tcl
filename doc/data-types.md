@@ -14,11 +14,17 @@ There are 3 ensembles provided that cover many data types:
 
 These ensembles are also able to handle aliases akin to some [PostgreSQL data types]. The list of aliases and the command they map to:
 
-* varchar(x) -> varchar x
-* char(x)    -> char x
-* decimal(x,y) -> decimal x y
-* decimal(x) -> decimal 
-* numeric(x, y) -> decimal x y
+* varchar(x) string   > varchar x string
+* char(x) string      > char x string
+* decimal(x,y) string > decimal -precision x -scale y string
+* decimal(x) string   > decimal -precision x string
+* numeric(x,y) string > decimal -precision x -scale y string
+* numeric(x) string   > decimal -prevision x string
+* numeric string      > decimal string
+* 
+* 
+* 
+* 
 * 
 
 
@@ -26,7 +32,7 @@ These ensembles are also able to handle aliases akin to some [PostgreSQL data ty
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
-[qc::is]: 
-[qc::cast]: 
-[qc::castable]:
+[qc::is]: is.md
+[qc::cast]: cast.md
+[qc::castable]:castable.md
 [PostgreSQL data types]: http://www.postgresql.org/docs/9.4/static/datatype.html#DATATYPE-TABLE
