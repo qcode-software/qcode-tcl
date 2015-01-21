@@ -17,11 +17,11 @@ Examples
 --------
 ```tcl
 
-% qc::call /home GET
+% qc::handlers call /home GET
 
-% qc::call / GET
+% qc::handlers call / GET
 
-% qc::call /post POST
+% qc::handlers call /post POST
 ```
 
 ----------------------------------

@@ -17,13 +17,13 @@ Examples
 --------
 ```tcl
 
-% qc::exists /home GET
+% qc::handlers exists /home GET
 true
 
-% qc::exists / GET
+% qc::handlers exists / GET
 true
 
-% qc::exists /foo POST
+% qc::handlers exists /foo POST
 false
 ```
 
