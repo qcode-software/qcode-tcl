@@ -66,7 +66,7 @@ namespace eval qc::castable {
     }
 
     proc timestamptz {string} {
-        #| Test if the given string can be cast to an timestamp with timezone.
+        #| Test if the given string can be cast to a timestamp with timezone.
         try {
             qc::cast timestamptz $string
             return true

@@ -203,44 +203,24 @@ proc qc::is_base64 {string} {
 proc qc::is_int_castable {string} {
     #| Deprecated - see qc::castable integer
     #| Can input be cast to an integer?
-    qc::try {
-	cast_integer $string
-	return true
-    } {
-	return false
-    }
+    return [qc::castable timestamp $string]
 }
 
 proc qc::is_decimal_castable {string} {
     #| Deprecated - see qc::castable decimal
-    qc::try {
-	qc::cast_decimal $string
-	return true
-    } {
-	return false
-    }
+    return [qc::castable timestamp $string]
 }
 
 proc qc::is_date_castable {string} {
     #| Deprecated - see qc::castable date
     #| Can string be cast into date format?
-    qc::try {
-	cast_date $string
-	return true
-    } {
-	return false
-    }
+    return [qc::castable timestamp $string]
 }
 
 proc qc::is_timestamp_castable {string} {
     #| Deprecated - see qc::castable timestamp
     #| Can string be cast into timestamp format?
-    qc::try {
-	cast_timestamp $string
-	return true
-    } {
-	return false
-    }
+    return [qc::castable timestamp $string]
 }
 
 proc qc::is_mobile_number {string} {
