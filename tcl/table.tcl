@@ -53,7 +53,7 @@ proc qc::table_sum { table col_name } {
     set col_index [lsearch [lindex $table 0] $col_name]
     foreach row_index [.. 1 [expr {[llength $table]-1}]] {
 	set value [lindex $table $row_index $col_index]
-	if { [is_decimal $value] } {
+	if { [qc::is decimal $value] } {
 	    incr0 sum $value
 	}
     }

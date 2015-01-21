@@ -101,7 +101,7 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
             ns_returnbadrequest "\"$request\" is not a valid request."
             return filter_return
         }
-        if { ![qc::is_uri_valid $url] } {
+        if { ![qc::is uri $url] } {
             return [ns_returnbadrequest "\"$url\" is not a valid URL."]
             return filter_return
         }

@@ -105,7 +105,7 @@ proc qc::cookie_set {name value args} {
     }
 
     if { [info exists option(expires)] } {
-        append cookie "; expires=[ns_httptime [cast_epoch $option(expires)]]"
+        append cookie "; expires=[ns_httptime [cast epoch $option(expires)]]"
     }
 
     if { [info exists option(domain)] } {
