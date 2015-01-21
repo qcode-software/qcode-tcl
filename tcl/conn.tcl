@@ -16,59 +16,6 @@ proc qc::conn_remote_ip {} {
     return $ip
 }
 
-proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
-    #| Look for a proc with a leading slash like /foo.html that matches the incoming request url. 
-    #| If found call the proc with values from form variables that match the proc's argument names.
-    #| The request suffix is used to decide which error handler to use.
-    #| If no matching proc exists then try to return a file or a 404 not found.
-
-    if { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-	qc::reload
-    }
-    if { $error_handler eq "" } {
-	set error_handler qc::error_handler
-    }
-    set url_path [qc::conn_path]
-    set file [ns_url2file $url_path]
-    
-    if { [llength [info procs "${namespace}::${url_path}"]] } {
-	qc::try {
-	    set result [form_proc "${namespace}::${url_path}"]
-	    if { ![expr 0x1 & [ns_conn flags]] } {
-		# If conn is still open
-		set content-type "[mime_type_guess [file tail $url_path]]; charset=utf-8"
-		ns_return 200 ${content-type} $result
-	    }
-	} {
-	    $error_handler 
-	}
-    } elseif { [file exists $file] } {
-        set outputheaders [ns_conn outputheaders]
-        set file_mtime [file mtime $file]
-        if { $file_mtime > [qc::cast epoch now] } {
-            # Last-Modified should never be in the future
-            set last_modified [qc::format_timestamp_http [qc::cast epoch now]]
-        } else {
-            set last_modified [qc::format_timestamp_http $file_mtime]
-        }
-        ns_set put $outputheaders "Last-Modified" $last_modified
-    
-        set if_modified_since [qc::conn_if_modified_since]
-        if { [qc::is timestamp_http $if_modified_since]
-             && $file_mtime <= [clock scan $if_modified_since] } {
-            ns_return 304 {} {}
-        } else {
-	    ns_returnfile 200 [ns_guesstype $file] $file
-        }
-    } else {
-        qc::try {
-            error "Page not found." {} NOT_FOUND
-        } {
-            $error_handler 
-        }
-    }
-}
-
 proc qc::conn_url {args} {
     #| Try to construct the full url of this request.
     # Return the encoded version of the path by default unless the -decoded flag is present
