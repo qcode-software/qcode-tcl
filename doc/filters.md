@@ -78,44 +78,6 @@ foreach http_method [list GET HEAD POST] {
 }
 ```
 
-
-filter_http_request_validate
-----------------------------
-
-The task of this filter is to ...
-
-### Usage
-
-This filter is intended to be used prior to the request being handled so that ...
-
-### Examples
-
-Pre-authorization.
-
-```tcl
-foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* qc::filter_http_request_validate
-}
-```
-
-
-filter_file_alias_paths
------------------------
-
-The task of this filter is to ...
-
-### Usage
-
-This filter is intended to be used prior to the request being handled so that ...
-
-### Examples
-Pre-authorization.
-
-```tcl
-foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* qc::filter_file_alias_paths $http_method
-```
-
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
