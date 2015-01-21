@@ -14,7 +14,10 @@ Qcode Tcl Lib Documentation
 * Database Introspection
 
 [Data Types: is, cast, castable][2]
-----------------------
+-----------------------------------
+* [Is API](is.md)
+* [Cast API](cast.md)
+* [Castable API](castable.md)
 
 [Authentication][3]
 -------------------
@@ -51,6 +54,7 @@ Qcode Tcl Lib Documentation
 
 [Global JSON Response][11]
 --------------------------
+* [API](doc/response_api.md)
 
 [Request Handler Registration][12]
 ----------------------------------
