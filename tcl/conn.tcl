@@ -45,16 +45,16 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     } elseif { [file exists $file] } {
         set outputheaders [ns_conn outputheaders]
         set file_mtime [file mtime $file]
-        if { $file_mtime > [qc::cast_epoch now] } {
+        if { $file_mtime > [qc::cast epoch now] } {
             # Last-Modified should never be in the future
-            set last_modified [qc::format_timestamp_http [qc::cast_epoch now]]
+            set last_modified [qc::format_timestamp_http [qc::cast epoch now]]
         } else {
             set last_modified [qc::format_timestamp_http $file_mtime]
         }
         ns_set put $outputheaders "Last-Modified" $last_modified
     
         set if_modified_since [qc::conn_if_modified_since]
-        if { [qc::is_timestamp_http $if_modified_since]
+        if { [qc::is timestamp_http $if_modified_since]
              && $file_mtime <= [clock scan $if_modified_since] } {
             ns_return 304 {} {}
         } else {

@@ -1,6 +1,6 @@
 namespace eval qc::castable {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -35,10 +35,10 @@ namespace eval qc::castable {
         }
     }
 
-    proc decimal {string {precision ""}} {
-        #| Test if the given string can be cast to a decimal.
+    proc decimal {args} {
+        #| Test if the given value can be cast to a decimal.
         try {
-            qc::cast decimal $string
+            qc::cast decimal {*}$args
             return true
         } on error [list error_message options] {
             return false
@@ -66,7 +66,7 @@ namespace eval qc::castable {
     }
 
     proc timestamptz {string} {
-        #| Test if the given string can be cast to an timestamp with timezone.
+        #| Test if the given string can be cast to a timestamp with timezone.
         try {
             qc::cast timestamptz $string
             return true
@@ -131,7 +131,47 @@ namespace eval qc::castable {
     }
 
     proc safe_markdown {text} {
-        #| Test if the given text can be case to safe markdown.
+        #| Test if the given text can be cast to safe markdown.
         return [qc::is safe_markdown $text]
+    }
+
+    proc date {string} {
+        #| Test if the given string can be cast to a date.
+        try {
+            qc::cast date $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
+    }
+
+    proc postcode {string} {
+        #| Test if the given string can be cast to a UK postcode.
+        try {
+            qc::cast postcode $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
+    }
+
+    proc creditcard {string} {
+        #| Test if the given string can be cast to a credit card number.
+        try {
+            qc::cast creditcard $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
+    }
+
+    proc period {string} {
+        #| Test if the given string can be cast to a period.
+        try {
+            qc::cast period $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
     }
 }

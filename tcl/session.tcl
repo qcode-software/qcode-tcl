@@ -36,7 +36,7 @@ proc qc::session_update { session_id } {
     } {
 	incr hit_count
 	set ip [qc::conn_remote_ip]
-	set time_modified [cast_timestamp now]
+	set time_modified [cast timestamp now]
 	db_dml "update session set [sql_set hit_count ip time_modified] where session_id=:session_id"
 	return $session_id
     }

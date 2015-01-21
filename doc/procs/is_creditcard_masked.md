@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::is creditcard_masked]
 Check the credit card number is masked to PCI requirements
 
 Examples
@@ -29,3 +30,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is creditcard_masked]: is-creditcard_masked.md

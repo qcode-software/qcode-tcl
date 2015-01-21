@@ -11,10 +11,11 @@ proc data_type_parser {args} {
             return [list $namespace char [lindex $numbers 1]]
         }
         {^(decimal|numeric)\(([0-9]+,[0-9]+)\)$} {
-            return [list $namespace decimal]
+            set values [split [lindex $numbers 2] ,]
+            return [list $namespace decimal -precision [lindex $values 0] -scale [lindex $values 1]]
         }
         {^(decimal|numeric)\(([0-9]+)\)$} {
-            return [list $namespace decimal]
+            return [list $namespace decimal -precision [lindex $numbers 2]]
         }
         ^numeric$ {
             return [list $namespace decimal]

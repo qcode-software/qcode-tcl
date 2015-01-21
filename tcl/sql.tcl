@@ -106,7 +106,7 @@ proc qc::sql_sort { args } {
     # Paging
     if { [info exists limit] || [info exists paging] } {
         # We are paging
-        if { [form_var_exists limit] && [is_integer [form_var_get limit]] } {
+        if { [form_var_exists limit] && [qc::is integer [form_var_get limit]] } {
             #formvar trumps everything
             set limit [form_var_get limit]
         } elseif { [info exists limit] } {
@@ -122,7 +122,7 @@ proc qc::sql_sort { args } {
         # make sure it's set in caller's namespace
         upset 1 limit $limit
 
-        if { [form_var_exists offset] && [is_integer [form_var_get offset]]} {
+        if { [form_var_exists offset] && [qc::is integer [form_var_get offset]]} {
             set offset [form_var_get offset]
         } else {
             set offset 0
