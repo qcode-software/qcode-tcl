@@ -1,5 +1,22 @@
-Checking User Input
-======================
+Validating User Input
+=====================
+
+part of [Qcode Documentation](index.md)
+
+* * *
+
+Against The Data Model
+----------------------
+
+User input can be validated against the data model with very little setup using [filters] and [registration].
+
+
+
+
+Legacy
+------
+
+** NOTE: This method of validation is deprecated and the above method for validation should be used. **
 
 All user input should be checked to see that
 * It can be cast into a string literal of the required type.
@@ -25,12 +42,9 @@ proc user_create {name email password dob} {
 
 ```
 
-Against the data model
-----------------------
+* * *
 
-User input can be checked against the data model using proc [validate2model](procs/validate2model.md) and the global json-payload will be set up with the results of validation. Additionally, `validate2model` will return true if everything validated otherwise false.
+Qcode Software Limited <http://www.qcode.co.uk>
 
-----------------------------------
-*[Qcode Software Limited] [qcode]*
-
-[qcode]: http://www.qcode.co.uk "Qcode Software"
+[filters]: filters.md
+[registration]: registration.md

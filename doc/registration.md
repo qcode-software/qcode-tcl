@@ -56,6 +56,8 @@ These handlers are used to set up custom validation for a request. They come in 
 
 Validation handlers are not set up to authenticate and will only be called if a request handler matching this request is also registered.
 
+For more information regarding validation see [Validating User Input].
+
 ### Record Modification
 
 When setting up a custom validation handler it is important to modify the record portion of the [JSON response] with the results of custom validation. If the record is not used appropriately then the client will not get the correct feedback. See the [JSON response API] for help.
@@ -92,3 +94,4 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [JSON response]: global-json-response.md
 [JSON response API]: response_api.md
+[Validating User Input]: validation.md

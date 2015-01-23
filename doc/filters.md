@@ -9,7 +9,7 @@ Filters, registered on Naviserver with `ns_register_filter`, allow for certain t
 The qcode-tcl library provides a few useful filters.
 
 
-filter_validate
+qc::filter_validate
 ---------------
 
 The task of this filter is to validate input from the client before the request is handled by a request handler.
@@ -22,7 +22,7 @@ If anything failed validation then the [JSON response] is returned to the client
 
 ### Usage
 
-This filter is intended to be used prior to the request being handled so that invalid data isn't passed through to the request handler. This means that `filter_validate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
+This filter is intended to be used prior to the request being handled so that invalid data isn't passed through to the request handler. This means that `qc::filter_validate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
 
 ### Examples
 
@@ -42,7 +42,7 @@ foreach http_method [list GET HEAD POST] {
 ```
 
 
-filter_authenticate
+qc::filter_authenticate
 -------------------
 
 The task of this filter is to check if the session and authentication tokens are present and valid and act accordingly.
@@ -59,7 +59,7 @@ See [Authentication] for more information on sessions and the authentication pro
 
 ### Usage
 
-This filter is intended to be used prior to the request being handled so that only authenticated users have their requests handled. This means that `filter_authenticate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
+This filter is intended to be used prior to the request being handled so that only authenticated users have their requests handled. This means that `qc::filter_authenticate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
 
 ### Examples
 
