@@ -10,19 +10,28 @@ proc qc::register {args} {
 
     set method [string toupper [lindex $args 0]]
     set path [lindex $args 1]
-    qc::nsv_dict set registered $method $path
+    # Add to registered nsv array
+    if { [qc::nsv_dict exists registered $method] } {
+        set patterns [qc::nsv_dict get registered $method]
+        if { [lsearch -exact $patterns $path] < 0 } {
+            # doesn't already exist so add it
+            qc::nsv_dict lappend registered $method $path
+        }
+    } else {
+        qc::nsv_dict set registered $method $path
+    }
 
     if { [llength $args] >= 3 } {
-        set proc_args [lindex $args 2]
+        set p_args [lindex $args 2]
         # Separate arg names and default values
-        set args {}
+        set proc_args {}
         set defaults {}
-        foreach arg $proc_args {
+        foreach arg $p_args {
             if {[llength $arg] == 2} {
-                lappend args [lindex $arg 0]
+                lappend proc_args [lindex $arg 0]
                 dict set defaults [lindex $arg 0] [lindex $arg 1]
             } else {
-                lappend args $arg
+                lappend proc_args $arg
             }
         }
     }
@@ -31,11 +40,11 @@ proc qc::register {args} {
         set proc_body [lindex $args 3]
         namespace eval ::${method} {}
         set proc_name "::${method}::$path"
-        {*}[list proc $proc_name $proc_args $proc_body]
+        {*}[list proc $proc_name $p_args $proc_body]
 
         # Update the handlers nsv array.
         qc::nsv_dict set handlers $method $path proc_name $proc_name
-        qc::nsv_dict set handlers $method $path args $args
+        qc::nsv_dict set handlers $method $path args $proc_args
         qc::nsv_dict set handlers $method $path body $proc_body
         qc::nsv_dict set handlers $method $path defaults $defaults  
     }
@@ -75,11 +84,10 @@ proc qc::registered {method url_path} {
         set http_method $method
     }
     if { [qc::nsv_dict exists registered $http_method] } {
-        dict for {item_path handler} [qc::nsv_dict get registered $http_method] {
-            
-        }
+        return [qc::pattern_matches $url_path [qc::nsv_dict get registered $http_method]]
+    } else {
+        return false
     }
-    return false
 }
 
 proc qc::pattern_matches {url_path patterns} {

@@ -63,15 +63,15 @@ namespace eval qc::handlers {
                         # There is currently a colon variable command in the dictionary...
                         if { $colon_count < [dict get $pattern_dict variable colon_count] } {
                             # Prefer the command with the lower number of colon variables
-                            dict set pattern_dict variable command $command colon_count $colon_count
+                            dict set pattern_dict variable [list command $command colon_count $colon_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable command $command colon_count $colon_count
+                        dict set pattern_dict variable [list command $command colon_count $colon_count]
                     }                    
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact command $command
+                    dict set pattern_dict exact [list command $command]
                     break
                 }
             }
@@ -166,6 +166,7 @@ namespace eval qc::handlers {
             set args {}
             set url_pattern_parts {}
             set colon_vars false
+            set colon_count 0
             # check that each part of the pattern  matches the corresponding url_path part 
             foreach part $parts url_part $url_parts {
                 if {[qc::url_decode $url_part] eq $part} {
@@ -176,6 +177,7 @@ namespace eval qc::handlers {
                     lappend args [string range $part 1 end] [qc::url_decode $url_part]
                     lappend url_pattern_parts $part
                     set colon_vars true
+                    incr colon_count
                 }
             }
 
@@ -191,15 +193,15 @@ namespace eval qc::handlers {
                         # There is currently a colon variable command in the dictionary...
                         if { $colon_count < [dict get $pattern_dict variable colon_count] } {
                             # Prefer the command with the lower number of colon variables.
-                            dict set pattern_dict variable command $command colon_count $colon_count
+                            dict set pattern_dict variable [list command $command colon_count $colon_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable command $command colon_count $colon_count
+                        dict set pattern_dict variable [list command $command colon_count $colon_count]
                     }
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact command $command
+                    dict set pattern_dict exact [list command $command]
                     break
                 }
             }
@@ -327,6 +329,7 @@ namespace eval qc::handlers {
                 set args {}
                 set url_pattern_parts {}
                 set colon_vars false
+                set colon_count 0
                 # check that each part of the handler matches the corresponding url_path part 
                 foreach part $parts url_part $url_parts {
                     if {[qc::url_decode $url_part] eq $part} {
@@ -337,6 +340,7 @@ namespace eval qc::handlers {
                         lappend args [string range $part 1 end] [qc::url_decode $url_part]
                         lappend url_pattern_parts $part
                         set colon_vars true
+                        incr colon_count
                     }
                 }
 
@@ -352,15 +356,15 @@ namespace eval qc::handlers {
                             # There is currently a colon variable command in the dictionary...
                             if { $colon_count < [dict get $pattern_dict variable colon_count] } {
                                 # Prefer the command with the lower number of colon variables.
-                                dict set pattern_dict variable command $command colon_count $colon_count
+                                dict set pattern_dict variable [list command $command colon_count $colon_count]
                             }
                         } else {
                             # No colon variable command currently stored.
-                            dict set pattern_dict variable command $command colon_count $colon_count
+                            dict set pattern_dict variable [list command $command colon_count $colon_count]
                         }
                     } else {
                         # The pattern was an exact match
-                        dict set pattern_dict exact command $command
+                        dict set pattern_dict exact [list command $command]
                         break
                     }
                 }
