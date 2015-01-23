@@ -13,7 +13,7 @@ proc qc::register {args} {
     qc::nsv_dict set registered $method $path
 
     if { [llength $args] >= 3 } {
-        set $proc_args [lindex $args 2]
+        set proc_args [lindex $args 2]
         # Separate arg names and default values
         set args {}
         set defaults {}
