@@ -3,7 +3,7 @@ namespace eval qc::handlers {
     namespace export call exists validate2model validation
     namespace ensemble create
 
-    proc call {path method} {
+    proc call {method path} {
         #| Call the registered handler that matches the given path and method.
         set url_parts [split $path /]
         set method [string toupper $method]
@@ -36,6 +36,7 @@ namespace eval qc::handlers {
             set args {}
             set url_pattern_parts {}
             set colon_vars false
+            set colon_count 0
             # check that each part of the pattern matches the corresponding url_path part 
             foreach part $parts url_part $url_parts {
                 if {[qc::url_decode $url_part] eq $part} {
@@ -46,6 +47,7 @@ namespace eval qc::handlers {
                     lappend args [string range $part 1 end] [qc::url_decode $url_part]
                     lappend url_pattern_parts $part
                     set colon_vars true
+                    incr colon_count
                 }
             }
 
@@ -57,10 +59,19 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_vars} {
                     # The proc contains colon variables
-                    dict set pattern_dict variable $command
+                    if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                        # There is currently a colon variable command in the dictionary...
+                        if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                            # Prefer the command with the lower number of colon variables
+                            dict set pattern_dict variable command $command colon_count $colon_count
+                        }
+                    } else {
+                        # No colon variable command currently stored.
+                        dict set pattern_dict variable command $command colon_count $colon_count
+                    }                    
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact $command
+                    dict set pattern_dict exact command $command
                     break
                 }
             }
@@ -68,16 +79,16 @@ namespace eval qc::handlers {
         
         # Call the proc and return the result. Prefer the exact match.
         if {[dict exists $pattern_dict exact]} {
-            set command [dict get $pattern_dict exact]
+            set command [dict get $pattern_dict exact command]
         } elseif [dict exists $pattern_dict variable] {
-            set command [dict get $pattern_dict variable]
+            set command [dict get $pattern_dict variable command]
         }
         set pattern [lindex $command 0]
         set args_dict [qc::dict_zipper [args $pattern $method] [lrange $command 1 end]]
         return [[proc_name $pattern $method] {*}[dict values [qc::cast_values2model {*}$args_dict]]]
     }
 
-    proc exists {path method} {
+    proc exists {method path} {
         #| Check if a handler exists for the given path and method.
         set url_parts [split $path /]
         set method [string toupper $method]
@@ -122,7 +133,7 @@ namespace eval qc::handlers {
         return false
     }
 
-    proc validate2model {path method} {
+    proc validate2model {method path} {
         #| Validates the args of the handler registered for the given path and method.
         set url_parts [split $path /]
         set method [string toupper $method]
@@ -176,10 +187,19 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_vars} {
                     # The proc contains colon variables
-                    dict set pattern_dict variable $command
+                    if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                        # There is currently a colon variable command in the dictionary...
+                        if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                            # Prefer the command with the lower number of colon variables.
+                            dict set pattern_dict variable command $command colon_count $colon_count
+                        }
+                    } else {
+                        # No colon variable command currently stored.
+                        dict set pattern_dict variable command $command colon_count $colon_count
+                    }
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact $command
+                    dict set pattern_dict exact command $command
                     break
                 }
             }
@@ -187,9 +207,9 @@ namespace eval qc::handlers {
 
         # Return the arg dict. Prefer the exact match.
         if {[dict exists $pattern_dict exact]} {
-            set command [dict get $pattern_dict exact]
+            set command [dict get $pattern_dict exact command]
         } elseif [dict exists $pattern_dict variable] {
-            set command [dict get $pattern_dict variable]
+            set command [dict get $pattern_dict variable command]
         }
         
         return [qc::validate2model [qc::dict_zipper [args [lindex $command 0] $method] [lrange $command 1 end]]]
@@ -274,7 +294,7 @@ namespace eval qc::handlers {
         namespace export call exists
         namespace ensemble create
 
-        proc call {path method} {
+        proc call {method path} {
             #| Calls the registered handler that matches the given method and path.
             set url_parts [split $path /]
             set method [string toupper $method]
@@ -328,10 +348,19 @@ namespace eval qc::handlers {
                     set command [list [proc_name $pattern $method] {*}$args]
                     if {$colon_vars} {
                         # The proc contains colon variables
-                        dict set pattern_dict variable $command
+                        if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                            # There is currently a colon variable command in the dictionary...
+                            if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                                # Prefer the command with the lower number of colon variables.
+                                dict set pattern_dict variable command $command colon_count $colon_count
+                            }
+                        } else {
+                            # No colon variable command currently stored.
+                            dict set pattern_dict variable command $command colon_count $colon_count
+                        }
                     } else {
                         # The pattern was an exact match
-                        dict set pattern_dict exact $command
+                        dict set pattern_dict exact command $command
                         break
                     }
                 }
@@ -339,13 +368,13 @@ namespace eval qc::handlers {
 
             # Call the handler. Prefer the exact match.
             if {[dict exists $pattern_dict exact]} {
-                return [{*}[dict get $pattern_dict exact]]
+                return [{*}[dict get $pattern_dict exact command]]
             } elseif [dict exists $pattern_dict variable] {
-                return [{*}[dict get $pattern_dict variable]]
+                return [{*}[dict get $pattern_dict variable command]]
             }
         }
 
-        proc exists {path method} {
+        proc exists {method path} {
             #| Checks if a validation handler exists for the given path and method.
             set url_parts [split $path /]
             set method [string toupper $method]

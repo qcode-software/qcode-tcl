@@ -12,18 +12,21 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
         set url_path [qc::conn_path]
         set method [string toupper [qc::conn_method]]
         # Check if this request is registered for this filter and a handler exists to validate against.
-        if { [qc::filter_handler_exists filter_validate $url_path $method] && [qc::handlers exists $url_path $method] } {
+        if { [qc::registered $method $url_path] && [qc::handlers exists $method $url_path] } {
             # Validate to data model
-            qc::handlers validate2model $url_path $method
+            qc::handlers validate2model $method $url_path
             # Custom validation
-            if {[qc::handlers validation exists $url_path $method]} {
-                qc::handlers validation call $url_path $method
+            if {[qc::handlers validation exists $method $url_path]} {
+                qc::handlers validation call $method $url_path
             }
             
             # Let the client know if there's a problem
             if {[qc::conn_open] && $method ne "GET" && ! [qc::record all_valid]} {
                 qc::return_result
                 return "filter_return"
+            } elseif { [qc::conn_open] && ! [qc::record all_valid] } {
+                # GET request failed validation
+                error "Couldn't validate the path \"$url_path\"" {} BAD_REQUEST                
             }
         }
 
@@ -45,7 +48,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
     set method [string toupper [qc::conn_method]]
     ::try {
         # Check if this request is registered for this filter
-        if { [qc::filter_handler_exists filter_authenticate $url_path $method] } {
+        if { [qc::registered $method $url_path] } {
             if {[qc::cookie_exists session_id] && [qc::session_valid [qc::session_id]]} {
                 qc::session_update [qc::session_id]
             } elseif {$method ni [list "GET" "HEAD"] && [qc::cookie_exists session_id] && ! [qc::session_valid [qc::session_id]]} {
@@ -257,41 +260,3 @@ proc qc::file_alias_path_delete {url_path} {
     }
 }
 
-proc qc::filter_handler_exists {filter url_path method} {
-    #| Checks if the given method url_path is registered for the given filter.
-    if { $method ni [list GET HEAD POST] } {
-        set http_method POST
-    } else {
-        set http_method $method
-    }
-    if { [qc::nsv_dict exists filters $filter $http_method] } {
-        dict for {item_path handler} [qc::nsv_dict get filters $filter $http_method] {
-            set path_parts [split $url_path /]
-            set item_parts [split $item_path /]
-            # check number of parts in each path are equal
-            if { [llength $path_parts] == [llength $item_parts] } {
-                # check that each part matches
-                set parts_equal true
-                foreach path_part $path_parts item_part $item_parts {
-                    # if the item part is a colon variable
-                    if {[string index $item_part 0] eq ":"} {
-                        # get the type of the colon variable and check against the url part
-                        lassign [qc::db_qualified_table_column [string range $item_part 1 end]] table column
-                        set type [qc::db_column_type $table $column]
-                        if {! [qc::is $type $path_part]} {
-                            set parts_equal false
-                            break
-                        }
-                    } elseif {$path_part ne $item_part} {
-                        set parts_equal false
-                        break
-                    }
-                }
-                if {$parts_equal} {
-                    return true
-                }
-            }
-        }
-    }
-    return false
-}
