@@ -28,7 +28,7 @@ proc qc::register {args} {
     }
 
     if { [llength $args] == 4 } {
-        set $proc_body [lindex $args 3]
+        set proc_body [lindex $args 3]
         namespace eval ::${method} {}
         set proc_name "::${method}::$path"
         {*}[list proc $proc_name $proc_args $proc_body]
