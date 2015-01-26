@@ -52,7 +52,7 @@ proc qc::register {args} {
 }
 
 proc qc::validate {method path proc_args proc_body} {
-    #| Register a URL handler for extra validation.
+    #| Register a URL handler for custom validation.
     set method [string toupper $method]
     set proc_name "::${method}::VALIDATE::$path"
     namespace eval ::${method}::VALIDATE {}
@@ -78,7 +78,7 @@ proc qc::validate {method path proc_args proc_body} {
 }
 
 proc qc::registered {method url_path} {
-    #| Checks if the given method url_path is registered for the given filter.
+    #| Checks if the given method url_path is registered.
     set method [string toupper $method]
     if { [qc::nsv_dict exists registered $method] } {
         return [qc::path_matches $url_path [qc::nsv_dict get registered $method]]
