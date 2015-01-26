@@ -11,7 +11,7 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
     ::try {
         set url_path [qc::conn_path]
         set method [string toupper [qc::conn_method]]
-        # Check if this request is registered for this filter and a handler exists to validate against.
+        # Check if this request is registered and a handler exists to validate against.
         if { [qc::registered $method $url_path] && [qc::handlers exists $method $url_path] } {
             # Validate to data model
             qc::handlers validate2model $method $url_path
@@ -47,7 +47,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
     set url_path [qc::conn_path]
     set method [string toupper [qc::conn_method]]
     ::try {
-        # Check if this request is registered for this filter
+        # Check if this request is registered.
         if { [qc::registered $method $url_path] } {
             if {[qc::cookie_exists session_id] && [qc::session_valid [qc::session_id]]} {
                 qc::session_update [qc::session_id]

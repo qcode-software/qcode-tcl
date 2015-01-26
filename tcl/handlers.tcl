@@ -35,8 +35,7 @@ namespace eval qc::handlers {
 
             set args {}
             set url_pattern_parts {}
-            set colon_vars false
-            set colon_count 0
+            set colon_variable_count 0
             # check that each part of the pattern matches the corresponding url_path part 
             foreach part $parts url_part $url_parts {
                 if {[qc::url_decode $url_part] eq $part} {
@@ -46,8 +45,7 @@ namespace eval qc::handlers {
                     # so update the args with the url_part
                     lappend args [string range $part 1 end] [qc::url_decode $url_part]
                     lappend url_pattern_parts $part
-                    set colon_vars true
-                    incr colon_count
+                    incr colon_variable_count
                 }
             }
 
@@ -57,17 +55,17 @@ namespace eval qc::handlers {
                 set form_dict [dict merge $form_dict $args]
                 set args [args_from_dict $form_dict $pattern $method]
                 set command [list $pattern {*}$args]
-                if {$colon_vars} {
+                if {$colon_variable_count > 0} {
                     # The proc contains colon variables
                     if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
-                        if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                        if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables
-                            dict set pattern_dict variable [list command $command colon_count $colon_count]
+                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable [list command $command colon_count $colon_count]
+                        dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                     }                    
                 } else {
                     # The pattern was an exact match
@@ -165,8 +163,7 @@ namespace eval qc::handlers {
 
             set args {}
             set url_pattern_parts {}
-            set colon_vars false
-            set colon_count 0
+            set colon_variable_count 0
             # check that each part of the pattern  matches the corresponding url_path part 
             foreach part $parts url_part $url_parts {
                 if {[qc::url_decode $url_part] eq $part} {
@@ -176,8 +173,7 @@ namespace eval qc::handlers {
                     # so update the args with the url_part
                     lappend args [string range $part 1 end] [qc::url_decode $url_part]
                     lappend url_pattern_parts $part
-                    set colon_vars true
-                    incr colon_count
+                    incr colon_variable_count
                 }
             }
 
@@ -187,17 +183,17 @@ namespace eval qc::handlers {
                 set form_dict [dict merge $form_dict $args]
                 set args [args_from_dict $form_dict $pattern $method]
                 set command [list $pattern {*}$args]
-                if {$colon_vars} {
+                if {$colon_variable_count > 0} {
                     # The proc contains colon variables
                     if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
-                        if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                        if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables.
-                            dict set pattern_dict variable [list command $command colon_count $colon_count]
+                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable [list command $command colon_count $colon_count]
+                        dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                     }
                 } else {
                     # The pattern was an exact match
@@ -328,8 +324,7 @@ namespace eval qc::handlers {
 
                 set args {}
                 set url_pattern_parts {}
-                set colon_vars false
-                set colon_count 0
+                set colon_variable_count 0
                 # check that each part of the handler matches the corresponding url_path part 
                 foreach part $parts url_part $url_parts {
                     if {[qc::url_decode $url_part] eq $part} {
@@ -339,8 +334,7 @@ namespace eval qc::handlers {
                         # so update the args with the url_part
                         lappend args [string range $part 1 end] [qc::url_decode $url_part]
                         lappend url_pattern_parts $part
-                        set colon_vars true
-                        incr colon_count
+                        incr colon_variable_count
                     }
                 }
 
@@ -350,17 +344,17 @@ namespace eval qc::handlers {
                     set form_dict [dict merge $form_dict $args]
                     set args [args_from_dict $form_dict $pattern $method]
                     set command [list [proc_name $pattern $method] {*}$args]
-                    if {$colon_vars} {
+                    if {$colon_variable_count > 0} {
                         # The proc contains colon variables
                         if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
                             # There is currently a colon variable command in the dictionary...
-                            if { $colon_count < [dict get $pattern_dict variable colon_count] } {
+                            if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
                                 # Prefer the command with the lower number of colon variables.
-                                dict set pattern_dict variable [list command $command colon_count $colon_count]
+                                dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                             }
                         } else {
                             # No colon variable command currently stored.
-                            dict set pattern_dict variable [list command $command colon_count $colon_count]
+                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # The pattern was an exact match

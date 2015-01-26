@@ -14,7 +14,7 @@ proc qc::register {args} {
     if { [qc::nsv_dict exists registered $method] } {
         set patterns [qc::nsv_dict get registered $method]
         if { [lsearch -exact $patterns $path] < 0 } {
-            # doesn't already exist so add it
+            # path hasn't been registered already
             qc::nsv_dict lappend registered $method $path
         }
     } else {
@@ -22,29 +22,30 @@ proc qc::register {args} {
     }
 
     if { [llength $args] >= 3 } {
-        set p_args [lindex $args 2]
+        set proc_args [lindex $args 2]
         # Separate arg names and default values
-        set proc_args {}
+        set arg_names {}
         set defaults {}
-        foreach arg $p_args {
+        foreach arg $proc_args {
             if {[llength $arg] == 2} {
-                lappend proc_args [lindex $arg 0]
+                lappend arg_names [lindex $arg 0]
                 dict set defaults [lindex $arg 0] [lindex $arg 1]
             } else {
-                lappend proc_args $arg
+                lappend arg_names $arg
             }
         }
     }
 
     if { [llength $args] == 4 } {
         set proc_body [lindex $args 3]
+        # Create the proc
         namespace eval ::${method} {}
         set proc_name "::${method}::$path"
-        {*}[list proc $proc_name $p_args $proc_body]
+        {*}[list proc $proc_name $proc_args $proc_body]
 
         # Update the handlers nsv array.
         qc::nsv_dict set handlers $method $path proc_name $proc_name
-        qc::nsv_dict set handlers $method $path args $proc_args
+        qc::nsv_dict set handlers $method $path args $arg_names
         qc::nsv_dict set handlers $method $path body $proc_body
         qc::nsv_dict set handlers $method $path defaults $defaults  
     }
@@ -80,13 +81,13 @@ proc qc::registered {method url_path} {
     #| Checks if the given method url_path is registered for the given filter.
     set method [string toupper $method]
     if { [qc::nsv_dict exists registered $method] } {
-        return [qc::pattern_matches $url_path [qc::nsv_dict get registered $method]]
+        return [qc::path_matches $url_path [qc::nsv_dict get registered $method]]
     } else {
         return false
     }
 }
 
-proc qc::pattern_matches {url_path patterns} {
+proc qc::path_matches {url_path patterns} {
     #| Checks if the given url_path matches any of the given patterns.
     foreach pattern $patterns {
         set path_parts [split $url_path /]
@@ -96,8 +97,8 @@ proc qc::pattern_matches {url_path patterns} {
             # check that each part matches
             set parts_equal true
             foreach path_part $path_parts pattern_part $pattern_parts {
-                # if the item part is a colon variable
                 if {[string index $pattern_part 0] eq ":"} {
+                    # if the item part is a colon variable
                     continue
                 } elseif {$path_part ne $pattern_part} {
                     set parts_equal false
