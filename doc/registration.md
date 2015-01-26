@@ -15,15 +15,20 @@ There are two types of registration available:
 Register
 --------
 
-`register` is used to register a request handler.
+`register` is used to register a request handler or a path. The process of registration adds all paths (including those specified by a request handler) to a database and adds request handlers to a different database.
 
-As well as registering the handler, `register` will add the request to the databases for validation and authentication. This means that the given request will go through both validation and authentication. There currently is not a way provided to opt out of either validation or authentication when using `register`.
+### Introspection
+
+There are two databases in place that offer introspection for determining if a path or handler has been registered.
+
+To determine if a path has been registered [`qc::registered`] should be used.
+
+To check if a request handler exists for a path [`qc::handlers exists`] should be used. This is part of the [Handlers API].
 
 ### Usage
 
 ```tcl
-register method path {args} {
-    body
+register method path ?args? ?body?
 }
 ```
 
@@ -45,6 +50,11 @@ register POST /post {post_title, post_content} {
     set post_id [post_new $post_title $post_content]
     qc::actions redirect [url "/post/$post_id"]
 }
+```
+Register just a path. Ideal for static pages served from a database.
+
+```tcl
+register GET /home
 ```
 
 Validate
@@ -95,3 +105,5 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [JSON response]: global-json-response.md
 [JSON response API]: response_api.md
 [Validating User Input]: validation.md
+[`qc::registered`]: procs/registered.md
+[Handlers API]: handlers-api.md
