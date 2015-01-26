@@ -10,7 +10,7 @@ namespace eval qc::handlers {
         set patterns [get $method]
         set form_dict [qc::form2dict]
         set proc_dict {}
-        set pattern_dict {}
+        set command_dict {}
         
         foreach pattern $patterns {
             set parts [split $pattern /]
@@ -57,29 +57,29 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_variable_count > 0} {
                     # The proc contains colon variables
-                    if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                    if { [info exists command_dict] && [dict exists $command_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
-                        if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
+                        if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables
-                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                        dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                     }                    
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact [list command $command]
+                    dict set command_dict exact [list command $command]
                     break
                 }
             }
         }
         
         # Call the proc and return the result. Prefer the exact match.
-        if {[dict exists $pattern_dict exact]} {
-            set command [dict get $pattern_dict exact command]
-        } elseif [dict exists $pattern_dict variable] {
-            set command [dict get $pattern_dict variable command]
+        if {[dict exists $command_dict exact]} {
+            set command [dict get $command_dict exact command]
+        } elseif [dict exists $command_dict variable] {
+            set command [dict get $command_dict variable command]
         }
         set pattern [lindex $command 0]
         set args_dict [qc::dict_zipper [args $pattern $method] [lrange $command 1 end]]
@@ -138,7 +138,7 @@ namespace eval qc::handlers {
         set patterns [get $method]
         set form_dict [qc::form2dict]
         set proc_dict {}
-        set pattern_dict {}
+        set command_dict {}
         
         foreach pattern $patterns {
             set parts [split $pattern /]
@@ -185,29 +185,29 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_variable_count > 0} {
                     # The proc contains colon variables
-                    if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                    if { [info exists command_dict] && [dict exists $command_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
-                        if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
+                        if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables.
-                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # No colon variable command currently stored.
-                        dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                        dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                     }
                 } else {
                     # The pattern was an exact match
-                    dict set pattern_dict exact [list command $command]
+                    dict set command_dict exact [list command $command]
                     break
                 }
             }
         }
 
         # Return the arg dict. Prefer the exact match.
-        if {[dict exists $pattern_dict exact]} {
-            set command [dict get $pattern_dict exact command]
-        } elseif [dict exists $pattern_dict variable] {
-            set command [dict get $pattern_dict variable command]
+        if {[dict exists $command_dict exact]} {
+            set command [dict get $command_dict exact command]
+        } elseif [dict exists $command_dict variable] {
+            set command [dict get $command_dict variable command]
         }
         
         return [qc::validate2model [qc::dict_zipper [args [lindex $command 0] $method] [lrange $command 1 end]]]
@@ -299,7 +299,7 @@ namespace eval qc::handlers {
             set patterns [get $method]
             set form_dict [qc::form2dict]
             set proc_dict {}
-            set pattern_dict {}
+            set command_dict {}
             
             foreach pattern $patterns {
                 set parts [split $pattern /]
@@ -346,29 +346,29 @@ namespace eval qc::handlers {
                     set command [list [proc_name $pattern $method] {*}$args]
                     if {$colon_variable_count > 0} {
                         # The proc contains colon variables
-                        if { [info exists pattern_dict] && [dict exists $pattern_dict variable]} {
+                        if { [info exists command_dict] && [dict exists $command_dict variable]} {
                             # There is currently a colon variable command in the dictionary...
-                            if { $colon_variable_count < [dict get $pattern_dict variable colon_variable_count] } {
+                            if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                                 # Prefer the command with the lower number of colon variables.
-                                dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                                dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                             }
                         } else {
                             # No colon variable command currently stored.
-                            dict set pattern_dict variable [list command $command colon_variable_count $colon_variable_count]
+                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
                         }
                     } else {
                         # The pattern was an exact match
-                        dict set pattern_dict exact [list command $command]
+                        dict set command_dict exact [list command $command]
                         break
                     }
                 }
             }
 
             # Call the handler. Prefer the exact match.
-            if {[dict exists $pattern_dict exact]} {
-                return [{*}[dict get $pattern_dict exact command]]
-            } elseif [dict exists $pattern_dict variable] {
-                return [{*}[dict get $pattern_dict variable command]]
+            if {[dict exists $command_dict exact]} {
+                return [{*}[dict get $command_dict exact command]]
+            } elseif [dict exists $command_dict variable] {
+                return [{*}[dict get $command_dict variable command]]
             }
         }
 
