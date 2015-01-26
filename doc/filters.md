@@ -18,7 +18,7 @@ When a request comes in and this filter is called it will check if the request h
 
 If both of these conditions are met then the relevant data for the request is validated against the data model. If a [custom validation handler] exists for the request then that is called.
 
-If anything failed validation then the [JSON response] is returned to the client otherwise the server continues normal execution.
+If anything failed validation then the [JSON response] is returned to the client otherwise the server continues normal execution and eventually the registered request handler will be called with all of its arguments having been validated.
 
 ### Usage
 
