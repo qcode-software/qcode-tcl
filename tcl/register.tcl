@@ -11,14 +11,8 @@ proc qc::register {args} {
     set method [string toupper [lindex $args 0]]
     set path [lindex $args 1]
     # Add to registered nsv array
-    if { [qc::nsv_dict exists registered $method] } {
-        set patterns [qc::nsv_dict get registered $method]
-        if { [lsearch -exact $patterns $path] < 0 } {
-            # path hasn't been registered already
-            qc::nsv_dict lappend registered $method $path
-        }
-    } else {
-        qc::nsv_dict set registered $method $path
+    if { ! [qc::registered $method $path] } {
+        qc::nsv_dict lappend registered $method $path
     }
 
     if { [llength $args] >= 3 } {

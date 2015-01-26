@@ -57,7 +57,7 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_variable_count > 0} {
                     # The proc contains colon variables
-                    if { [info exists command_dict] && [dict exists $command_dict variable]} {
+                    if {[dict exists $command_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
                         if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables
@@ -69,7 +69,7 @@ namespace eval qc::handlers {
                     }                    
                 } else {
                     # The pattern was an exact match
-                    dict set command_dict exact [list command $command]
+                    dict set command_dict exact command $command
                     break
                 }
             }
@@ -185,7 +185,7 @@ namespace eval qc::handlers {
                 set command [list $pattern {*}$args]
                 if {$colon_variable_count > 0} {
                     # The proc contains colon variables
-                    if { [info exists command_dict] && [dict exists $command_dict variable]} {
+                    if {[dict exists $command_dict variable]} {
                         # There is currently a colon variable command in the dictionary...
                         if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                             # Prefer the command with the lower number of colon variables.
@@ -197,7 +197,7 @@ namespace eval qc::handlers {
                     }
                 } else {
                     # The pattern was an exact match
-                    dict set command_dict exact [list command $command]
+                    dict set command_dict exact command $command
                     break
                 }
             }
@@ -346,7 +346,7 @@ namespace eval qc::handlers {
                     set command [list [proc_name $pattern $method] {*}$args]
                     if {$colon_variable_count > 0} {
                         # The proc contains colon variables
-                        if { [info exists command_dict] && [dict exists $command_dict variable]} {
+                        if {[dict exists $command_dict variable]} {
                             # There is currently a colon variable command in the dictionary...
                             if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
                                 # Prefer the command with the lower number of colon variables.
@@ -358,7 +358,7 @@ namespace eval qc::handlers {
                         }
                     } else {
                         # The pattern was an exact match
-                        dict set command_dict exact [list command $command]
+                        dict set command_dict exact command $command
                         break
                     }
                 }

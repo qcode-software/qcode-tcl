@@ -84,7 +84,7 @@ namespace eval qc::nsv_dict {
     }
 
     proc lappend {variable key values} {
-        #| Append the values to the key in an nsv_array
+        #| Append values to the list corresponding to the dictionary key stored in a nsv_array
         nsv_lappend $variable $key {*}$values
     }
 }
