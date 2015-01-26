@@ -143,12 +143,14 @@ proc qc::path_best_match {path patterns} {
         dict lappend matches $colon_variable_count $pattern
     }
     
+    # Get the lowest count of colon variables in a matched pattern.
     foreach count [dict keys $matches] {
         if { ! [info exists best_match_count] || $count < $best_match_count} {
             set best_match_count $count
         }
     }
-
+    
+    # If there were matches found then return one with the least amount of colon variables.
     if { [dict size $matches] > 0 } {
         return [lindex [dict get $matches $best_match_count] 0]
     } else {
@@ -157,15 +159,15 @@ proc qc::path_best_match {path patterns} {
 }
 
 proc qc::path_variables {path pattern} {
-    #| Parses variables from the path that corresponds to colon variables in the pattern.
+    #| Gets variables from the path that corresponds to colon variables in the pattern.
     set path_parts [split $path /]
     set pattern_parts [split $pattern /]
     set variables {}
     foreach path_part $path_parts pattern_part $pattern_parts {
         if { [string first : $pattern_part ] == 0 } {
-            # The pattern part is a colon variable
+            # The pattern part is a colon variable - store the path_part
             dict set variables [string range $pattern_part 1 end] $path_part
         }
-    }    
+    }
     return $variables
 }
