@@ -78,13 +78,9 @@ proc qc::validate {method path proc_args proc_body} {
 
 proc qc::registered {method url_path} {
     #| Checks if the given method url_path is registered for the given filter.
-    if { $method ni [list GET HEAD POST] } {
-        set http_method POST
-    } else {
-        set http_method $method
-    }
-    if { [qc::nsv_dict exists registered $http_method] } {
-        return [qc::pattern_matches $url_path [qc::nsv_dict get registered $http_method]]
+    set method [string toupper $method]
+    if { [qc::nsv_dict exists registered $method] } {
+        return [qc::pattern_matches $url_path [qc::nsv_dict get registered $method]]
     } else {
         return false
     }
