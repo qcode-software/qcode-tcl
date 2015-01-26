@@ -5,212 +5,25 @@ namespace eval qc::handlers {
 
     proc call {method path} {
         #| Call the registered handler that matches the given path and method.
-        set url_parts [split $path /]
         set method [string toupper $method]
-        set patterns [get $method]
-        set form_dict [qc::form2dict]
-        set proc_dict {}
-        set command_dict {}
-        
-        foreach pattern $patterns {
-            set parts [split $pattern /]
-            set arg_names [args $pattern $method]
-            # make sure that all colon variables appear in the handler args
-            set move_on false
-            foreach part $parts {
-                if {[string first : $part] == 0 && [lsearch -exact $arg_names [string range $part 1 end]] == -1} {
-                    set move_on true
-                    break
-                }
-            }
-            if {$move_on} { continue }
-            
-            # count the number of colon variables in the pattern
-            set no_vars [regexp -all {[^:]:[^:]+(?=/|$)} $pattern]
-            # Check length of parts matches and that the number of arguments for the handler is
-            # not less than the number of colon variables in the pattern.
-            if { [llength $parts] != [llength $url_parts] || [llength $arg_names] < $no_vars } {
-                continue
-            }
-
-            set args {}
-            set url_pattern_parts {}
-            set colon_variable_count 0
-            # check that each part of the pattern matches the corresponding url_path part 
-            foreach part $parts url_part $url_parts {
-                if {[qc::url_decode $url_part] eq $part} {
-                    lappend url_pattern_parts $part
-                } elseif {[string first : $part] == 0 } {
-                    # the first character of the pattern part was ':'
-                    # so update the args with the url_part
-                    lappend args [string range $part 1 end] [qc::url_decode $url_part]
-                    lappend url_pattern_parts $part
-                    incr colon_variable_count
-                }
-            }
-
-            # check if the built url_pattern_parts is the same as the pattern
-            if {[join $url_pattern_parts /] eq $pattern} {
-                # Get the relevant args for the handler from the form variables.
-                set form_dict [dict merge $form_dict $args]
-                set args [args_from_dict $form_dict $pattern $method]
-                set command [list $pattern {*}$args]
-                if {$colon_variable_count > 0} {
-                    # The proc contains colon variables
-                    if {[dict exists $command_dict variable]} {
-                        # There is currently a colon variable command in the dictionary...
-                        if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
-                            # Prefer the command with the lower number of colon variables
-                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                        }
-                    } else {
-                        # No colon variable command currently stored.
-                        dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                    }                    
-                } else {
-                    # The pattern was an exact match
-                    dict set command_dict exact command $command
-                    break
-                }
-            }
-        }
-        
-        # Call the proc and return the result. Prefer the exact match.
-        if {[dict exists $command_dict exact]} {
-            set command [dict get $command_dict exact command]
-        } elseif [dict exists $command_dict variable] {
-            set command [dict get $command_dict variable command]
-        }
-        set pattern [lindex $command 0]
-        set args_dict [qc::dict_zipper [args $pattern $method] [lrange $command 1 end]]
-        return [[proc_name $pattern $method] {*}[dict values [qc::cast_values2model {*}$args_dict]]]
+        set pattern [qc::path_best_match $path [get $method]]
+        set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        set args_dict [qc::dict_zipper [args $method $pattern] [args_from_dict $form_dict $method $pattern]]
+        return [[proc_name $method $pattern] {*}[dict values [qc::cast_values2model {*}$args_dict]]]
     }
 
     proc exists {method path} {
         #| Check if a handler exists for the given path and method.
-        set url_parts [split $path /]
-        set method [string toupper $method]
-        set patterns [get $method]
-        foreach pattern $patterns {
-            set parts [split $pattern /]
-            set arg_names [args $pattern $method]
-            # make sure that all colon variables appear in the handler args
-            set move_on false
-            foreach part $parts {
-                if {[string first : $part] == 0 && [lsearch -exact $arg_names [string range $part 1 end]] == -1} {
-                    set move_on true
-                    break
-                }
-            }
-            if {$move_on} { continue }
-            
-            # count the number of colon variables in the pattern
-            set no_vars [regexp -all {[^:]:[^:]+(?=/|$)} $pattern]
-            # Check length of parts matches and that the number of arguments for the handler is
-            # not less than the number of colon variables in the pattern.
-            if { [llength $parts] != [llength $url_parts] || [llength $arg_names] < $no_vars } {
-                continue
-            }
-
-            set url_pattern_parts {}
-            # check that each part of the pattern matches the corresponding path part 
-            foreach part $parts url_part $url_parts {
-                if {[qc::url_decode $url_part] eq $part} {
-                    lappend url_pattern_parts $part
-                } elseif {[string first : $part] == 0 } {
-                    # the first character of the pattern part was ':'
-                    lappend url_pattern_parts $part
-                }
-            }
-
-            # check if the built url_pattern_parts is the same as the handler
-            if {[join $url_pattern_parts /] eq $pattern} {
-                return true
-            }        
-        }
-        return false
+        return [qc::path_matches $path [get [string toupper $method]]]
     }
 
     proc validate2model {method path} {
         #| Validates the args of the handler registered for the given path and method.
-        set url_parts [split $path /]
         set method [string toupper $method]
-        set patterns [get $method]
-        set form_dict [qc::form2dict]
-        set proc_dict {}
-        set command_dict {}
-        
-        foreach pattern $patterns {
-            set parts [split $pattern /]
-            set arg_names [args $pattern $method]
-            # make sure that all colon variables appear in the handler args
-            set move_on false
-            foreach part $parts {
-                if {[string first : $part] == 0 && [lsearch -exact $arg_names [string range $part 1 end]] == -1} {
-                    set move_on true
-                    break
-                }
-            }
-            if {$move_on} { continue }
-            
-            # count the number of colon variables in the pattern
-            set no_vars [regexp -all {[^:]:[^:]+(?=/|$)} $pattern]
-            # Check length of parts matches and that the number of arguments for the handler is
-            # not less than the number of colon variables in the pattern.
-            if { [llength $parts] != [llength $url_parts] || [llength $arg_names] < $no_vars } {
-                continue
-            }
-
-            set args {}
-            set url_pattern_parts {}
-            set colon_variable_count 0
-            # check that each part of the pattern  matches the corresponding url_path part 
-            foreach part $parts url_part $url_parts {
-                if {[qc::url_decode $url_part] eq $part} {
-                    lappend url_pattern_parts $part
-                } elseif {[string first : $part] == 0 } {
-                    # the first character of the handler part was ':'
-                    # so update the args with the url_part
-                    lappend args [string range $part 1 end] [qc::url_decode $url_part]
-                    lappend url_pattern_parts $part
-                    incr colon_variable_count
-                }
-            }
-
-            # check if the built url_pattern_parts is the same as the pattern
-            if {[join $url_pattern_parts /] eq $pattern} {
-                # Get the relevant args for the handler from the form variables.
-                set form_dict [dict merge $form_dict $args]
-                set args [args_from_dict $form_dict $pattern $method]
-                set command [list $pattern {*}$args]
-                if {$colon_variable_count > 0} {
-                    # The proc contains colon variables
-                    if {[dict exists $command_dict variable]} {
-                        # There is currently a colon variable command in the dictionary...
-                        if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
-                            # Prefer the command with the lower number of colon variables.
-                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                        }
-                    } else {
-                        # No colon variable command currently stored.
-                        dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                    }
-                } else {
-                    # The pattern was an exact match
-                    dict set command_dict exact command $command
-                    break
-                }
-            }
-        }
-
-        # Return the arg dict. Prefer the exact match.
-        if {[dict exists $command_dict exact]} {
-            set command [dict get $command_dict exact command]
-        } elseif [dict exists $command_dict variable] {
-            set command [dict get $command_dict variable command]
-        }
-        
-        return [qc::validate2model [qc::dict_zipper [args [lindex $command 0] $method] [lrange $command 1 end]]]
+        set pattern [qc::path_best_match $path [get $method]]
+        set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        set arg_values [args_from_dict $form_dict $method $pattern]        
+        return [qc::validate2model [qc::dict_zipper [args $method $pattern] $arg_values]]
     }
 
     ##################################################
@@ -233,33 +46,33 @@ namespace eval qc::handlers {
         return $temp
     }
     
-    proc proc_name {pattern method} {
+    proc proc_name {method pattern} {
         #| Get the proc name for the handler named "$method $pattern".
         return [qc::nsv_dict get handlers $method $pattern proc_name]
     }
 
-    proc args {pattern method} {
+    proc args {method pattern} {
         #| Get all arguments for the given handler named "$method $pattern".
         return [qc::nsv_dict get handlers $method $pattern args]
     }
 
-    proc default {pattern method arg} {
+    proc default {method pattern arg} {
         #| Get the default value of the given arg for the handler named "$method $pattern".
         return [qc::nsv_dict get handlers $method $pattern defaults $arg]
     }
 
-    proc default_exists {pattern method arg} {
+    proc default_exists {method pattern arg} {
         #| Check if a default argument exists for the given argument for handler named "$method $pattern".
         return [qc::nsv_dict exists handlers $method $pattern defaults $arg]
     }
 
-    proc args_from_dict {dict pattern method} {
+    proc args_from_dict {dict method pattern} {
         #| Returns a list of args for the handler named "$method $pattern" that correspond to any form variables in the given dictionary.
         set method [string toupper $method]
-        set args [args $pattern $method]
+        set args [args $method $pattern]
         set handler_args {}
         foreach arg $args {
-            if {[default_exists $pattern $method $arg]} {
+            if {[default_exists $method $pattern $arg]} {
                 # the argument was an optional one 
                 if {[dict exists $dict $arg]} {
                     lappend handler_args [dict get $dict $arg]
@@ -268,7 +81,7 @@ namespace eval qc::handlers {
                     # eg. Use form var firstname for arg users.firstname
                     lappend handler_args [dict get $dict $column]
                 } else {
-                    lappend handler_args [default $pattern $method $arg]
+                    lappend handler_args [default $method $pattern $arg]
                 }
             } elseif {[dict exists $dict $arg]} {
                 lappend handler_args [dict get $dict $arg]
@@ -294,127 +107,15 @@ namespace eval qc::handlers {
 
         proc call {method path} {
             #| Calls the registered handler that matches the given method and path.
-            set url_parts [split $path /]
             set method [string toupper $method]
-            set patterns [get $method]
-            set form_dict [qc::form2dict]
-            set proc_dict {}
-            set command_dict {}
-            
-            foreach pattern $patterns {
-                set parts [split $pattern /]
-                set arg_names [args $pattern $method]
-                # make sure that all colon variables appear in the handler args
-                set move_on false
-                foreach part $parts {
-                    if {[string first : $part] == 0 && [lsearch -exact $arg_names [string range $part 1 end]] == -1} {
-                        set move_on true
-                        break
-                    }
-                }
-                if {$move_on} { continue }
-                
-                # count the number of colon variables in the pattern
-                set no_vars [regexp -all {[^:]:[^:]+(?=/|$)} $pattern]
-                # Check length of parts matches and that the number of arguments for the handler is
-                # not less than the number of colon variables in the pattern.
-                if { [llength $parts] != [llength $url_parts] || [llength $arg_names] < $no_vars } {
-                    continue
-                }
-
-                set args {}
-                set url_pattern_parts {}
-                set colon_variable_count 0
-                # check that each part of the handler matches the corresponding url_path part 
-                foreach part $parts url_part $url_parts {
-                    if {[qc::url_decode $url_part] eq $part} {
-                        lappend url_pattern_parts $part
-                    } elseif {[string first : $part] == 0 } {
-                        # the first character of the handler part was ':'
-                        # so update the args with the url_part
-                        lappend args [string range $part 1 end] [qc::url_decode $url_part]
-                        lappend url_pattern_parts $part
-                        incr colon_variable_count
-                    }
-                }
-
-                # check if the built url_pattern_parts is the same as the pattern
-                if {[join $url_pattern_parts /] eq $pattern} {
-                    # Get the relevant args for the handler from the form variables.
-                    set form_dict [dict merge $form_dict $args]
-                    set args [args_from_dict $form_dict $pattern $method]
-                    set command [list [proc_name $pattern $method] {*}$args]
-                    if {$colon_variable_count > 0} {
-                        # The proc contains colon variables
-                        if {[dict exists $command_dict variable]} {
-                            # There is currently a colon variable command in the dictionary...
-                            if { $colon_variable_count < [dict get $command_dict variable colon_variable_count] } {
-                                # Prefer the command with the lower number of colon variables.
-                                dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                            }
-                        } else {
-                            # No colon variable command currently stored.
-                            dict set command_dict variable [list command $command colon_variable_count $colon_variable_count]
-                        }
-                    } else {
-                        # The pattern was an exact match
-                        dict set command_dict exact command $command
-                        break
-                    }
-                }
-            }
-
-            # Call the handler. Prefer the exact match.
-            if {[dict exists $command_dict exact]} {
-                return [{*}[dict get $command_dict exact command]]
-            } elseif [dict exists $command_dict variable] {
-                return [{*}[dict get $command_dict variable command]]
-            }
+            set pattern [qc::path_best_match $path [get $method]]
+            set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+            return [[proc_name $method $pattern] {*}[args_from_dict $form_dict $method $pattern]]
         }
 
         proc exists {method path} {
             #| Checks if a validation handler exists for the given path and method.
-            set url_parts [split $path /]
-            set method [string toupper $method]
-            set handlers [get $method]
-            foreach handler $handlers {
-                set parts [split $handler /]
-                set arg_names [args $handler $method]
-                # make sure that all colon variables appear in the handler args
-                set move_on false
-                foreach part $parts {
-                    if {[string first : $part] == 0 && [lsearch -exact $arg_names [string range $part 1 end]] == -1} {
-                        set move_on true
-                        break
-                    }
-                }
-                if {$move_on} { continue }
-                
-                # count the number of colon variables in the pattern
-                set no_vars [regexp -all {[^:]:[^:]+(?=/|$)} $handler]
-                # Check length of parts matches and that the number of arguments for the handler is
-                # not less than the number of colon variables in the pattern.
-                if { [llength $parts] != [llength $url_parts] || [llength $arg_names] < $no_vars } {
-                    continue
-                }
-
-                set url_pattern_parts {}
-                # check that each part of the pattern matches the corresponding path part 
-                foreach part $parts url_part $url_parts {
-                    if {[qc::url_decode $url_part] eq $part} {
-                        lappend url_pattern_parts $part
-                    } elseif {[string first : $part] == 0 } {
-                        # the first character of the pattern part was ':'
-                        lappend url_pattern_parts $part
-                    }
-                }
-
-                # check if the built url_pattern_parts is the same as the handler
-                if {[join $url_pattern_parts /] eq $handler} {
-                    return true
-                }        
-            }
-            return false
+            return [qc::path_matches $path [get [string toupper $method]]]
         }
 
         ##################################################
@@ -438,33 +139,33 @@ namespace eval qc::handlers {
             return $temp
         }
         
-        proc proc_name {pattern method} {
+        proc proc_name {method pattern} {
             #| Get the validation proc_name for the handler named "$method $pattern".
             return [qc::nsv_dict get handlers VALIDATE $method $pattern proc_name]
         }
 
-        proc args {pattern method} {
+        proc args {method pattern} {
             #| Get all arguments for the handler named "$method $pattern".
             return [qc::nsv_dict get handlers VALIDATE $method $pattern args]
         }
 
-        proc default {pattern method arg} {
+        proc default {method pattern arg} {
             #| Get the default value of the given arg for the handler named "$method $pattern".
             return [qc::nsv_dict get handlers VALIDATE $method $pattern defaults $arg]
         }
 
-        proc default_exists {pattern method arg} {
+        proc default_exists {method pattern arg} {
             #| Check if a default argument exists for the given argument for handler named "$method $pattern".
             return [qc::nsv_dict exists handlers VALIDATE $method $pattern defaults $arg]
         }
 
-        proc args_from_dict {dict pattern method} {
+        proc args_from_dict {dict method pattern} {
             #| Returns a list of args for the handler named "$method $pattern" that correspond to any form variables in the given dictionary
             set method [string toupper $method]
-            set args [args $pattern $method]
+            set args [args $method $pattern]
             set handler_args {}
             foreach arg $args {
-                if {[default_exists $pattern $method $arg]} {
+                if {[default_exists $method $pattern $arg]} {
                     # the argument was an optional one 
                     if {[dict exists $dict $arg]} {
                         lappend handler_args [dict get $dict $arg]
@@ -473,7 +174,7 @@ namespace eval qc::handlers {
                         # eg. Use form var firstname for arg users.firstname
                         lappend handler_args [dict get $dict $column]
                     } else {
-                        lappend handler_args [default $pattern $method $arg]
+                        lappend handler_args [default $method $pattern $arg]
                     }
                 } elseif {[dict exists $dict $arg]} {
                     lappend handler_args [dict get $dict $arg]
