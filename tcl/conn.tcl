@@ -185,7 +185,7 @@ proc qc::handler_restful {} {
         if {[qc::conn_open]} {
             # If a non-GET method then return the global data structure otherwise return the result as text/html.
             if {$method ne "GET"} {
-                return [qc::return_result]
+                return [qc::return_response]
             } else {
                 return [ns_return 200 text/html $result]
             }
