@@ -14,7 +14,7 @@ qc::filter_validate
 
 The task of this filter is to validate input from the client before the request is handled by a request handler.
 
-When a request comes in and this filter is called it will check if the request has been [registered for validation] and if a [request handler] exists to handle the request.
+When a request comes in and this filter is called it will check if the request has been [registered] and if a [request handler] exists to handle the request.
 
 If both of these conditions are met then the relevant data for the request is validated against the data model. If a [custom validation handler] exists for the request then that is called.
 
@@ -47,7 +47,7 @@ qc::filter_authenticate
 
 The task of this filter is to check if the session and authentication tokens are present and valid and act accordingly.
 
-When this filter is called it will check if the request has been [registered for authentication]. If so then a check is done to determine if the session is valid.
+When this filter is called it will check if the request has been [registered]. If so then a check is done to determine if the session is valid.
 
 If the session is valid then the request method is checked. If it's not a GET or HEAD request the authenticity token must be checked for validity. If the token is invalid then an error is returned to the client. Otherwise  the server continues normal execution.
 

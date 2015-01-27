@@ -15,7 +15,7 @@ There are two types of registration available:
 Register
 --------
 
-`register` is used to register a request handler or a path.
+`register` is used to register a request handler or a path. Registering will allow validation and authentication to occur through use of the filters `qc::filter_validate` and `qc::filter_authenticate` as these filters will only operate for registered paths.
 
 ### Introspection
 
@@ -29,7 +29,6 @@ The [Handlers API] offers introspection on request handlers as well as validatio
 
 ```tcl
 register method path ?args? ?body?
-}
 ```
 
 ### Examples
