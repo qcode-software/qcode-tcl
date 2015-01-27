@@ -56,7 +56,7 @@ Qcode Tcl Lib Documentation
 --------------------------
 * [API](response_api.md)
 
-[Request Handler Registration][12]
+[Handler and Path Registration][12]
 ----------------------------------
 
 [Filters][13]

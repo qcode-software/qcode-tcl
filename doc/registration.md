@@ -1,4 +1,4 @@
-Request Handler Registration
+Handler and Path Registration
 ============================
 
 part of [Qcode Documentation](index.md)
@@ -15,7 +15,9 @@ There are two types of registration available:
 Register
 --------
 
-`register` is used to register a request handler or a path. Registering will allow validation and authentication to occur through use of the filters `qc::filter_validate` and `qc::filter_authenticate` as these filters will only operate for registered paths.
+`register` is used to register a request handler or a path.
+
+Registering will allow validation and authentication to occur through use of the filters [`qc::filter_validate`] and [`qc::filter_authenticate`] as these filters will only operate for registered paths.
 
 ### Introspection
 
@@ -105,4 +107,6 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [JSON response API]: response_api.md
 [Validating User Input]: validation.md
 [`qc::registered`]: procs/registered.md
+[`qc::filter_validate`]: filters.md
+[`qc::filter_authenticate`] filters.md
 [Handlers API]: handlers-api.md

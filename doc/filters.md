@@ -22,17 +22,10 @@ If anything failed validation then the [JSON response] is returned to the client
 
 ### Usage
 
-This filter is intended to be used prior to the request being handled so that invalid data isn't passed through to the request handler. This means that `qc::filter_validate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
+This filter is intended to be used prior to the request being handled so that invalid data isn't passed through to the request handler. This means that `qc::filter_validate` should be registered with Naviserver during `postauth` but never for `trace`.
 
 ### Examples
 
-Pre-authorization.
-
-```tcl
-foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* qc::filter_validate
-}
-```
 Post-authorization.
 
 ```tcl
@@ -59,16 +52,10 @@ See [Authentication] for more information on sessions and the authentication pro
 
 ### Usage
 
-This filter is intended to be used prior to the request being handled so that only authenticated users have their requests handled. This means that `qc::filter_authenticate` should be registered with Naviserver during `preauth` or `postauth` but never for `trace`.
+This filter is intended to be used prior to the request being handled so that only authenticated users have their requests handled. This means that `qc::filter_authenticate` should be registered with Naviserver during `postauth` but never for `trace`.
 
 ### Examples
 
-Pre-authorization.
-
-```tcl
-foreach http_method [list GET HEAD POST] {
-    ns_register_filter preauth $http_method /* qc::filter_authenticate
-}
 ```
 Post-authorization.
 

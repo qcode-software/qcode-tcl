@@ -24,8 +24,6 @@ There are occurrences where it may not be possible to validate some information 
 
 
 
-
-
 Legacy
 ------
 
