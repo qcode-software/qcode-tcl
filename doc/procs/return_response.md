@@ -1,15 +1,15 @@
-qc::return_result
+qc::return_response
 ===========
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`return_result`
+`return_response`
 
 Description
 -----------
-Returns the result gathered from validation and/or POST to the client.
+Returns the [global JSON response](../global-json-response.md) to the client.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*
