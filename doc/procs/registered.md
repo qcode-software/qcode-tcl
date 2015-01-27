@@ -1,23 +1,23 @@
-qc::call_with
-===========
+qc::registered
+==============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`call_with proc_name args`
+`qc::registered method path`
 
 Description
 -----------
-Calls proc_name by mapping name value pairs to named args.
+Checks if the given method path is registered.
 
 Examples
 --------
 ```tcl
-
-% call_with qc::escapeHTML html "<p>Foo</p>"
-&lt;p&gt;Foo&lt;/p&gt;
-
+% qc::registered GET /home
+true
+% qc::registered FOO /bar
+false
 ```
 
 ----------------------------------
