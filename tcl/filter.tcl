@@ -21,7 +21,7 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             }
             
             # Let the client know if there's a problem
-            if {[qc::conn_open] && $method ne "GET" && $method ne "HEAD" && ! [qc::record all_valid]} {
+            if {[qc::conn_open] && $method ni [list GET HEAD] && ! [qc::record all_valid]} {
                 qc::return_result
                 return "filter_return"
             } elseif { [qc::conn_open] && ! [qc::record all_valid] } {
