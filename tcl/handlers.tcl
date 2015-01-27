@@ -7,9 +7,12 @@ namespace eval qc::handlers {
         #| Call the registered handler that matches the given path and method.
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
-        set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
-        set args_dict [qc::dict_zipper [args $method $pattern] [args_from_dict $form_dict $method $pattern]]
-        return [[proc_name $method $pattern] {*}[dict values [qc::cast_values2model {*}$args_dict]]]
+        # Add in path variables to form data.
+        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        # Cast to model
+        set dict [qc::cast_values2model {*}[data $form $method $pattern]]
+        # Call handler
+        return [qc::call_with [proc_name $method $pattern] {*}$dict]
     }
 
     proc exists {method path} {
@@ -21,9 +24,10 @@ namespace eval qc::handlers {
         #| Validates the args of the handler registered for the given path and method.
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
-        set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
-        set arg_values [args_from_dict $form_dict $method $pattern]        
-        return [qc::validate2model [qc::dict_zipper [args $method $pattern] $arg_values]]
+        # Add in path variables to form data.
+        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        # Validate the data.
+        return [qc::validate2model [data $form $method $pattern]]
     }
 
     ##################################################
@@ -47,50 +51,44 @@ namespace eval qc::handlers {
     }
     
     proc proc_name {method pattern} {
-        #| Get the proc name for the handler named "$method $pattern".
+        #| Get the proc name for the handler identified by $method $pattern.
         return [qc::nsv_dict get handlers $method $pattern proc_name]
     }
 
     proc args {method pattern} {
-        #| Get all arguments for the given handler named "$method $pattern".
+        #| Get all arguments for the given handler identified by $method $pattern.
         return [qc::nsv_dict get handlers $method $pattern args]
     }
 
     proc default {method pattern arg} {
-        #| Get the default value of the given arg for the handler named "$method $pattern".
+        #| Get the default value of the given arg for the handler identified by $method $pattern.
         return [qc::nsv_dict get handlers $method $pattern defaults $arg]
     }
 
     proc default_exists {method pattern arg} {
-        #| Check if a default argument exists for the given argument for handler named "$method $pattern".
+        #| Check if a default argument exists for the given argument for handler identified by $method $pattern.
         return [qc::nsv_dict exists handlers $method $pattern defaults $arg]
     }
 
-    proc args_from_dict {dict method pattern} {
-        #| Returns a list of args for the handler named "$method $pattern" that correspond to any form variables in the given dictionary.
+    proc data {form method pattern} {
+        #| Returns a dictionary of data for the handler identified by $method $pattern.
         set method [string toupper $method]
         set args [args $method $pattern]
-        set handler_args {}
+        set result {}
         foreach arg $args {
-            if {[default_exists $method $pattern $arg]} {
-                # the argument was an optional one 
-                if {[dict exists $dict $arg]} {
-                    lappend handler_args [dict get $dict $arg]
-                } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
-                    # Return the first form value matching a fully qualified handler arg
-                    # eg. Use form var firstname for arg users.firstname
-                    lappend handler_args [dict get $dict $column]
-                } else {
-                    lappend handler_args [default $method $pattern $arg]
-                }
-            } elseif {[dict exists $dict $arg]} {
-                lappend handler_args [dict get $dict $arg]
+            if { [dict exists $form $arg] } {
+                lappend result $arg [dict get $form $arg]
+            } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
+                # e.g. use form variable "firstname" for arg "users.firstname"
+                lappend result $arg [dict get $form $column]
+            } elseif { [default_exists $method $pattern $arg] } {
+                lappend result $arg [default $method $pattern $arg]
             } else {
-                # arg wasn't optional and didn't appear in form_dict 
-                return -code error "No matching arg value for \"$arg\" in handler \"$method $pattern\"" 
+                # arg wasn't optional and didn't appear in form
+                return -code error "No matching arg value for \"$arg\" in form."
             }
         }
-        return $handler_args
+        return $result
     }
 
 
@@ -109,8 +107,12 @@ namespace eval qc::handlers {
             #| Calls the registered handler that matches the given method and path.
             set method [string toupper $method]
             set pattern [qc::path_best_match $path [get $method]]
-            set form_dict [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
-            return [[proc_name $method $pattern] {*}[args_from_dict $form_dict $method $pattern]]
+            # Add in path variables to form data.
+            set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+            # Grab relevant arg data from form.
+            set dict [data $form $method $pattern]
+            # Call the validation handler.
+            return [qc::call_with [proc_name $method $pattern] {*}$dict]
         }
 
         proc exists {method path} {
@@ -140,50 +142,44 @@ namespace eval qc::handlers {
         }
         
         proc proc_name {method pattern} {
-            #| Get the validation proc_name for the handler named "$method $pattern".
+            #| Get the validation proc_name for the handler identified by $method $pattern.
             return [qc::nsv_dict get handlers VALIDATE $method $pattern proc_name]
         }
 
         proc args {method pattern} {
-            #| Get all arguments for the handler named "$method $pattern".
+            #| Get all arguments for the handler identified by $method $pattern.
             return [qc::nsv_dict get handlers VALIDATE $method $pattern args]
         }
 
         proc default {method pattern arg} {
-            #| Get the default value of the given arg for the handler named "$method $pattern".
+            #| Get the default value of the given arg for the handler identified by $method $pattern.
             return [qc::nsv_dict get handlers VALIDATE $method $pattern defaults $arg]
         }
 
         proc default_exists {method pattern arg} {
-            #| Check if a default argument exists for the given argument for handler named "$method $pattern".
+            #| Check if a default argument exists for the given argument for handler identified by $method $pattern.
             return [qc::nsv_dict exists handlers VALIDATE $method $pattern defaults $arg]
         }
 
-        proc args_from_dict {dict method pattern} {
-            #| Returns a list of args for the handler named "$method $pattern" that correspond to any form variables in the given dictionary
+        proc data {form method pattern} {
+            #| Returns a dictionary of args for the handler identified by $method $pattern.
             set method [string toupper $method]
             set args [args $method $pattern]
-            set handler_args {}
+            set result {}
             foreach arg $args {
-                if {[default_exists $method $pattern $arg]} {
-                    # the argument was an optional one 
-                    if {[dict exists $dict $arg]} {
-                        lappend handler_args [dict get $dict $arg]
-                    } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
-                        # Return the first form value matching a fully qualified handler arg
-                        # eg. Use form var firstname for arg users.firstname
-                        lappend handler_args [dict get $dict $column]
-                    } else {
-                        lappend handler_args [default $method $pattern $arg]
-                    }
-                } elseif {[dict exists $dict $arg]} {
-                    lappend handler_args [dict get $dict $arg]
+                if { [dict exists $form $arg] } {
+                    lappend result $arg [dict get $form $arg]
+                } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
+                    # e.g. use form variable "firstname" for arg "users.firstname"
+                    lappend result $arg [dict get $form $column]
+                } elseif { [default_exists $method $pattern $arg] } {
+                    lappend result $arg [default $method $pattern $arg]
                 } else {
-                    # arg wasn't optional and didn't appear in form_dict 
-                    return -code error "No matching arg value for \"$arg\" in handler \"$method $pattern\"" 
+                    # arg wasn't optional and didn't appear in form
+                    return -code error "No matching arg value for \"$arg\" in form." 
                 }
             }
-            return $handler_args
+            return $result
         }
     }
 }
