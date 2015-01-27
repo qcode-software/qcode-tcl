@@ -78,7 +78,7 @@ namespace eval qc::handlers {
         foreach arg $args {
             if { [dict exists $form $arg] } {
                 lappend result $arg [dict get $form $arg]
-            } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
+            } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
                 # e.g. use form variable "firstname" for arg "users.firstname"
                 lappend result $arg [dict get $form $column]
             } elseif { [default_exists $method $pattern $arg] } {
@@ -169,7 +169,7 @@ namespace eval qc::handlers {
             foreach arg $args {
                 if { [dict exists $form $arg] } {
                     lappend result $arg [dict get $form $arg]
-                } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $dict $column] } {
+                } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
                     # e.g. use form variable "firstname" for arg "users.firstname"
                     lappend result $arg [dict get $form $column]
                 } elseif { [default_exists $method $pattern $arg] } {
