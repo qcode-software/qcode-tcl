@@ -15,7 +15,7 @@ There are two types of registration available:
 Register
 --------
 
-`register` is used to register a request handler or a path. The process of registration adds all paths (including those specified by a request handler) to a database and adds request handlers to a different database.
+`register` is used to register a request handler or a path.
 
 ### Introspection
 
@@ -23,7 +23,7 @@ There are two databases in place that offer introspection for determining if a p
 
 To determine if a path has been registered [`qc::registered`] should be used.
 
-To check if a request handler exists for a path [`qc::handlers exists`] should be used. This is part of the [Handlers API].
+The [Handlers API] offers introspection on request handlers as well as validation handlers.
 
 ### Usage
 
@@ -51,7 +51,7 @@ register POST /post {post_title, post_content} {
     qc::actions redirect [url "/post/$post_id"]
 }
 ```
-Register just a path. Ideal for static pages served from a database.
+Register just a path.
 
 ```tcl
 register GET /home
