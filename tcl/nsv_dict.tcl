@@ -3,7 +3,7 @@ namespace eval qc {
 }
 
 namespace eval qc::nsv_dict {
-    namespace export exists set unset get
+    namespace export exists set unset get lappend
     namespace ensemble create
 
     proc exists {variable key args} {
@@ -81,5 +81,10 @@ namespace eval qc::nsv_dict {
             ::set temp [nsv_get $variable [lindex $keys 0]]
             return [dict get $temp {*}[lrange $keys 1 end]]
         }        
+    }
+
+    proc lappend {variable key values} {
+        #| Append values to the list corresponding to the dictionary key stored in a nsv_array
+        nsv_lappend $variable $key {*}$values
     }
 }

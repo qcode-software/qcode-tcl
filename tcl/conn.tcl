@@ -179,13 +179,13 @@ proc qc::handler_restful {} {
     set url_path [qc::conn_path]
     set method [qc::conn_method]
     
-    if {[qc::handlers exists $url_path $method]} {
-        set result [qc::handlers call $url_path $method]
+    if {[qc::handlers exists $method $url_path]} {
+        set result [qc::handlers call $method $url_path]
         # If conn is still open
         if {[qc::conn_open]} {
             # If a non-GET method then return the global data structure otherwise return the result as text/html.
             if {$method ne "GET"} {
-                return [qc::return_result]
+                return [qc::return_response]
             } else {
                 return [ns_return 200 text/html $result]
             }

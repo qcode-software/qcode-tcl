@@ -150,8 +150,7 @@ proc qc::call { proc_name args } {
 }
 
 proc qc::call_with {proc_name args} {
-    #| Calls the given proc with the arguments specified.
-    #| Returns the result of the execution of the proc.
+    #| Calls proc_name by mapping name value pairs to named args.
     if { [llength $args]%2 != 0 } {
         return -code error "usage qc::call_with proc_name ?name value?"
     }

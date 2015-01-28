@@ -152,7 +152,7 @@ proc ns_returnmoved {url} {
   </BODY></HTML>}]
 }
 
-proc qc::return_result {} {
+proc qc::return_response {} {
     #| Returns the result gathered from validation and/or POST to the client.
     qc::return2client json [data2json]
 }

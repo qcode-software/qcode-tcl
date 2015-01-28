@@ -1,35 +1,35 @@
-Casting to Data Type
-====================
+Cast API
+=======
 part of [Qcode Documentation](index.md)
 
 * * *
 
-The Casting Procs format strings as Qcode Data Types.
+The `cast` API provides a way to cast to a certain data type - returning the casted item if it is castable otherwise an error.
 
-Numbers
---------------------------
-* [cast_integer] 
-* [cast_decimal]
+To test for castability see [castable](castable.md).
 
-Dates
---------------------------
-* [cast_date] 
-* [cast_epoch]
+For further detail see [Data Types: is, cast, castable](data-types.md).
 
-Boolean
---------------------------
-* [cast_boolean]
+* [qc::cast integer](procs/cast-integer.md)
+* [qc::cast smallint](procs/cast-smallint.md)
+* [qc::cast bigint](procs/cast-bigint.md)
+* [qc::cast boolean](procs/cast-boolean.md)
+* [qc::cast decimal](procs/cast-decimal.md)
+* [qc::cast timestamp](procs/cast-timestamp.md)
+* [qc::cast timestamtz](procs/cast-timestamptz.md)
+* [qc::cast char](procs/cast-char.md)
+* [qc::cast varchar](procs/cast-varchar.md)
+* [qc::cast text](procs/cast-text.md)
+* [qc::cast enumeration](procs/cast-enumeration.md)
+* [qc::cast domain](procs/cast-domain.md)
+* [qc::cast safe_html](procs/cast-safe_html.md)
+* [qc::cast safe_markdown](procs/cast-safe_markdown.md)
+* [qc::cast date](procs/cast-date.md)
+* [qc::cast epoch](procs/cast-epoch.md)
+* [qc::cast postcode](procs/cast-postcode.md)
+* [qc::cast creditcard](procs/cast-creditcard.md)
+* [qc::cast period](procs/cast-period.md)
 
-Postcodes
---------------------------
-* [cast_postcode] 
-
-[cast_integer]: procs/cast_integer.md 
-[cast_decimal]: procs/cast_decimal.md
-[cast_date]: procs/cast_date.md 
-[cast_epoch]: procs/cast_epoch.md
-[cast_boolean]: procs/cast_boolean.md
-[cast_postcode]: procs/cast_postcode.md 
 
 * * *
 
