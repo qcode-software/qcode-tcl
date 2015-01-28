@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export session_*
+    namespace export session_* anonymous_session_id anonymous_user_id
 }
 
 package require uuid
@@ -138,7 +138,7 @@ proc qc::anonymous_session_id {} {
 }
 
 proc qc::anonymous_user_id {} {
-    #| Return the anonymous session ID.
+    #| Return the anonymous user ID.
     return -1
 }
 
