@@ -5,7 +5,7 @@ part of the [Handlers API](../handlers-api.md)
 
 Usage
 -----
-`qc::handlers validation exists path method`
+`qc::handlers validation exists method path`
 
 Description
 -----------
@@ -17,7 +17,7 @@ Examples
 --------
 ```tcl
 
-% qc::handlers validation exists /post POST
+% qc::handlers validation exists POST /post
 true
 ```
 

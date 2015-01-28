@@ -5,7 +5,7 @@ part of the [Handlers API](../handlers-api.md)
 
 Usage
 -----
-`qc::handlers exists path method`
+`qc::handlers exists method path`
 
 Description
 -----------
@@ -17,13 +17,13 @@ Examples
 --------
 ```tcl
 
-% qc::handlers exists /home GET
+% qc::handlers exists GET /home
 true
 
-% qc::handlers exists / GET
+% qc::handlers exists GET /
 true
 
-% qc::handlers exists /foo POST
+% qc::handlers exists POST /foo
 false
 ```
 

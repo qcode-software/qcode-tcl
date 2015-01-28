@@ -5,11 +5,11 @@ part of the [Handlers API](../handlers-api.md)
 
 Usage
 -----
-`qc::handlers validate2model path method`
+`qc::handlers validate2model method path`
 
 Description
 -----------
-Validates the args of the handler registered for the given path and method. Returns true if all the data for the handler successfully validate otherwise false.
+Validates the args of the handler registered that is identified by the given method and path. Returns true if all the data for the handler successfully validate otherwise false.
 
 This will also set up the [JSON response](../global-json-response.md) with the outcome of validation.
 
@@ -19,7 +19,7 @@ Examples
 --------
 ```tcl
 
-% qc::handlers validate2model /post POST
+% qc::handlers validate2model POST /post
 true
 ```
 
