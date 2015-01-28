@@ -1,7 +1,7 @@
 qc::castable boolean
 ==============
 
-part of [Docs](../index.md)
+part of [Castable API](../castable.md)
 
 Usage
 -----
