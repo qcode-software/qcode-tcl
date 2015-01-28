@@ -1,7 +1,7 @@
 qc::is ipv4
 ===========
 
-part of [Docs](../index.md)
+part of [Is API](../is.md)
 
 Usage
 -----
