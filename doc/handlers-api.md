@@ -5,7 +5,7 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-This API defines procedures for using request and validation handlers.
+This API defines procedures for inspecting and using request and validation handlers.
 
 * [qc::handlers exists](procs/handlers-exists.md)
 * [qc::handlers call](procs/handlers-call.md)

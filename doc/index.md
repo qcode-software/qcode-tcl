@@ -58,6 +58,7 @@ Qcode Tcl Lib Documentation
 
 [Handler and Path Registration][12]
 ----------------------------------
+* [Handlers API](handlers-api.md)
 
 [Filters][13]
 -------------
