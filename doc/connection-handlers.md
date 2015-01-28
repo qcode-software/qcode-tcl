@@ -8,21 +8,21 @@ Connection handlers are used to deal with requests. The qcode-tcl library provid
 
 ### [handler_restful]
 
-This handler will deal with requests where there is a request handler registered for the requested path and method. It makes use of the [Handlers API] to determine if a request handler hass been registered for the request path and method. If there has been a request handler registered then that handler will be called and the result will be returned to the client which will close the connection.
+This handler will deal with requests where there is a request handler registered for the requested path and method. It makes use of the [Handlers API] to determine if a request handler has been registered for the requested path. If there has been a request handler registered then that handler will be called and the result will be returned to the client which will close the connection.
 
 There are two possible return types to the client dependent upon the method of the request:
 
 * POST - the [Global JSON Response] will be retured to the client.
 * GET  - HTML resulting from the call to the request handler will be returned to the client.
 
-If there is no request handler registered for the requested path and method then handler_restful will not return to the client and the connection will remain open.
+If there is no request handler registered for the requested path then `handler_restful` will not return to the client and the connection will remain open.
 
-For more information regarding request handlers see [Request Handler Registration].
+For more information regarding request handlers see [Handler and Path Registration].
 
 
 ### [handler_files]
 
-This handler deals with files requests that haven't been resolved by fastpath. It will check for the existence of the requested file. If found then the file is added to the fastpath and the file is returned to the client which will close the connection.
+This handler deals with file requests that haven't been resolved by fastpath. It will check for the existence of the requested file. If found then the file is added to the fastpath and the file is returned to the client which will close the connection.
 
 If the requested file is not found then the handler will not return to the client and the connection will remain open.
 
@@ -62,8 +62,9 @@ proc conn_marshal {} {
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
-[Request Handler Registration]: registration.md
+[Handler and Path Registration]: registration.md
 [Handlers API]: handlers-api.md
 [handler_restful]: procs/handler_restful.md
 [handler_files]: procs/handler_files.md
 [handler_db_files]: procs/handler_db_files.md
+[Global JSON Response]: global-json-response.md

@@ -1,7 +1,7 @@
 qc::handler_db_files
 ==============
 
-part of [Docs](../index.md)
+part of [Connection Handlers](../connection-handlers.md)
 
 Usage
 -----

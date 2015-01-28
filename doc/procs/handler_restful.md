@@ -1,7 +1,7 @@
 qc::handler_restful
 ==============
 
-part of [Docs](../index.md)
+part of [Connection Handlers](../connection-handlers.md)
 
 Usage
 -----
