@@ -85,7 +85,7 @@ validate method path {args} {
 
 
 ```tcl
-validate POST /post {post_title, post_content} {
+validate POST /post {post_title post_content} {
     #| Custom validation for POST /post.
     # Data model cannot validate if the content is 'safe' markdown so manually validate the content.
     set content_valid [qc::is safe_markdown $post_content]
