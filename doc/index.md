@@ -63,6 +63,9 @@ Qcode Tcl Lib Documentation
 [Filters][13]
 -------------
 
+[Connection Handlers][14]
+-------------------------
+
 * * *
 
 [1]: db.md
@@ -78,3 +81,4 @@ Qcode Tcl Lib Documentation
 [11]: global-json-response.md
 [12]: registration.md
 [13]: filters.md
+[14]: connection-handlers.md

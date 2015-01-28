@@ -47,14 +47,19 @@ proc conn_marshal {} {
     }
     
     if { [qc::conn_open] } {
+        # The connection is still open so the request wasn't handled by handler_restful.
         qc::handler_db_files
     }
 
     if { [qc::conn_open] } {
+        # The request wasn't handled by the previous handlers.
         qc::handler_files
     }
-    
-    qc::return2client code 404 html "Not Found"
+
+    if { [qc::conn_open] } {
+        # None of the handlers were able to handle the request.
+        qc::return2client code 404 html "Not Found"
+    }
 }
 ```
 
