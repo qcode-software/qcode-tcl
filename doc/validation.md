@@ -11,7 +11,7 @@ If [`qc::filter_validate`] is set up on Naviserver and request handlers are regi
 
 In order to validate arguments for a request handler they must be present as the name of a column in the data model because the data type of the column is used to validate against. For example, if a request handler had an argument `post_id` then validation would look to the data model to obtain the data type of a column with the name `post_id`. If no such column exists then an error is thrown.
 
-Once the data type is obtained from the data model it is checked using [`qc:is`] and [`qc::castable`]. See [Data Types: is, cast, castable] for more information on these ensembles.
+Once the data type is obtained from the data model it is checked using [`qc::is`] and [`qc::castable`]. See [Data Types: is, cast, castable] for more information on these ensembles.
 
 As items are validated the record object of the [global JSON response] is set up with the results of validation for each item.
 

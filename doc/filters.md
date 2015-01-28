@@ -70,9 +70,8 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [Naviserver register docs]: http://naviserver.sourceforge.net/n/naviserver/files/ns_register.html#3
 [JSON response]: global-json-response.md
-[registered for validation]: registration.md
+[registered]: registration.md
 [request handler]: registration.md
 [custom validation handler]: registration.md
-[registered for authentication]: registration.md
 [anonymous user]: auth.md
 [Authentication]: auth.md
