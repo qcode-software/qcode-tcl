@@ -20,10 +20,8 @@ Examples
 2305.25
 % qc::cast decimal 2.366%
 2.366
-% qc::cast decimal -scale 2 3.689
-3.69
 % qc::cast decimal -precision 4 3.6899 
-3.690
+3
 % qc::cast decimal -precision 4 -scale 2 32.4556
 32.46
 ```
