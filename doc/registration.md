@@ -108,5 +108,5 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [Validating User Input]: validation.md
 [`qc::registered`]: procs/registered.md
 [`qc::filter_validate`]: filters.md
-[`qc::filter_authenticate`] filters.md
+[`qc::filter_authenticate`]: filters.md
 [Handlers API]: handlers-api.md

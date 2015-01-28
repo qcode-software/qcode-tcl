@@ -56,7 +56,6 @@ This filter is intended to be used prior to the request being handled so that on
 
 ### Examples
 
-```
 Post-authorization.
 
 ```tcl
