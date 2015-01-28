@@ -116,3 +116,29 @@ proc qc::session_id {} {
     return -code error "No known session_id"
 }
 
+proc qc::anonymous_session_id {} {
+    #| Return the anonymous session ID.
+    set user_id [qc::anonymous_user_id]
+    qc::db_0or1row {
+        SELECT session_id,(current_timestamp-time_created)>'1 hour'::interval as old 
+        FROM session
+        WHERE user_id=:user_id
+        order by time_created DESC LIMIT 1
+    } {
+        # No session found
+        return [qc::session_new $user_id] 
+    } {
+        # Session found
+        if { $old } {
+            return [qc::session_new $user_id] 
+        } else {
+            return $session_id
+        }
+    }
+}
+
+proc qc::anonymous_user_id {} {
+    #| Return the anonymous session ID.
+    return -1
+}
+
