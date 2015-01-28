@@ -17,15 +17,13 @@ Register
 
 `register` is used to register a request handler or a path.
 
-Registering will allow validation and authentication to occur through use of the filters [`qc::filter_validate`] and [`qc::filter_authenticate`] as these filters will only operate for registered paths.
-
 ### Introspection
 
 There are two databases in place that offer introspection for determining if a path or handler has been registered.
 
 To determine if a path has been registered [`qc::registered`] should be used.
 
-The [Handlers API] offers introspection on request handlers as well as validation handlers.
+The [Handlers API] offers a way to check for the existence of a request handler, to call the handler, and to validate the data for a request handler against the data model.
 
 ### Usage
 
@@ -47,7 +45,7 @@ register GET / {} {
 Example of a POST request handler. Makes use of the [JSON response] to return a redirect action to the client.
 
 ```tcl
-register POST /post {post_title, post_content} {
+register POST /post {post_title post_content} {
     set post_id [post_new $post_title $post_content]
     qc::actions redirect [url "/post/$post_id"]
 }
@@ -65,9 +63,11 @@ Validate
 
 These handlers are used to set up custom validation for a request. They come in useful when validation against the data model perhaps isn't possible or when a developer might want to validate some input differently.
 
-Validation handlers are not set up to authenticate and will only be called if a request handler matching this request is also registered.
-
 For more information regarding validation see [Validating User Input].
+
+### Introspection
+
+The [Handlers API] can be used to check for the existence of a validation handler and also to call a validation handler.
 
 ### Record Modification
 
@@ -98,6 +98,33 @@ validate POST /post {post_title post_content} {
     return $content_valid
 }
 ```
+
+Paths With Variable Elements
+----------------------------
+
+Paths may include variable aspects especially if following the RESTful approach to URLs. For example, in a blog project the URL to a specific post might be `/post/73` where the `73` is an integer that uniquely identifies that post. Other posts are uniquely identified by different IDs meaning that the last part of the URL may vary.
+
+To handle such cases colon variables may be used when registering a handler. This means that any part of a path specified for a handler that begins with a colon `:` will be treated as a variable. If a request comes in and the best match for that request is a handler that makes use of colon variables then the variable part will be parsed from the request and passed in to the handler. This means that any variables in a path must then appear in the arguments for the handler.
+
+### Examples
+
+This example shows a path that has a variable element `post_id`. This handler will handle requests like in the blog example mentioned. A request for `GET /post/73` will result in this handler being called with the argument `73`.
+
+```tcl
+register GET /post/:post_id {post_id} {
+    qc::return2client html [posts_get $post_id]
+}
+```
+
+A handler may contain more than one colon variable:
+
+```tcl
+register GET /post/:post_id/comment/:comment_id {post_id comment_id} {
+    qc::return2client html [comments_get $post_id $comment_id]
+}
+```
+
+The above handler will handle requests like `GET /post/73/comment/5` with `73` and `5` being passed in as arguments.
 
 * * *
 
