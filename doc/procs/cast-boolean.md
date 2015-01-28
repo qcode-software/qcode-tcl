@@ -1,7 +1,7 @@
 qc::cast boolean
 ================
 
-part of [Casting Procs](../cast.md)
+part of [Cast API](../cast.md)
 
 Usage
 -----

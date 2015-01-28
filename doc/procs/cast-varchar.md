@@ -1,7 +1,7 @@
 qc::cast varchar
 ==============
 
-part of [Docs](../index.md)
+part of [Cast API](../cast.md)
 
 Usage
 -----

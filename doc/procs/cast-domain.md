@@ -1,7 +1,7 @@
 qc::cast domain
 ==============
 
-part of [Docs](../index.md)
+part of [Cast API](../cast.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::is timestamp_http
 =====================
 
-part of [Docs](../index.md)
+part of [Is API](../is.md)
 
 Usage
 -----

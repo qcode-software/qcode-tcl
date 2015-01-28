@@ -1,7 +1,7 @@
 qc::castable safe_html
 ==============
 
-part of [Docs](../index.md)
+part of [Castable API](../castable.md)
 
 Usage
 -----

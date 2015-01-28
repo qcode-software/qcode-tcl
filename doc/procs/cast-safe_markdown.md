@@ -1,7 +1,7 @@
 qc::cast safe_markdown
 ==============
 
-part of [Docs](../index.md)
+part of [Cast API](../cast.md)
 
 Usage
 -----
