@@ -1,7 +1,7 @@
 qc::handlers validation exists
 ==============
 
-part of [Docs](../index.md)
+part of the [Handlers API](../handlers-api.md)
 
 Usage
 -----

@@ -1,7 +1,7 @@
 qc::handlers validate2model
 ==============
 
-part of [Docs](../index.md)
+part of the [Handlers API](../handlers-api.md)
 
 Usage
 -----
