@@ -13,8 +13,11 @@ Qcode Tcl Lib Documentation
 * SQL helpers
 * Database Introspection
 
-[Casting to Data Type][2]
-----------------------
+[Data Types: is, cast, castable][2]
+-----------------------------------
+* [Is API](is.md)
+* [Cast API](cast.md)
+* [Castable API](castable.md)
 
 [Authentication][3]
 -------------------
@@ -51,11 +54,18 @@ Qcode Tcl Lib Documentation
 
 [Global JSON Response][11]
 --------------------------
+* [API](response_api.md)
+
+[Handler and Path Registration][12]
+----------------------------------
+
+[Filters][13]
+-------------
 
 * * *
 
 [1]: db.md
-[2]: cast.md
+[2]: data-types.md
 [3]: auth.md
 [4]: cookie.md
 [5]: args.md
@@ -65,3 +75,5 @@ Qcode Tcl Lib Documentation
 [9]: error.md
 [10]: form-vars.md
 [11]: global-json-response.md
+[12]: registration.md
+[13]: filters.md

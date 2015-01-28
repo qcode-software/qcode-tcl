@@ -19,8 +19,6 @@ Examples
 true
 % qc::castable decimal -precision 4 -scale 3 1.234
 true
-% qc::castable decimal -scale 2 1.234
-true
 % qc::castable decimal -precision 4 1.234
 true
 % qc::castable decimal -precision 2 123.4
