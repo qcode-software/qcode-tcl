@@ -1,7 +1,7 @@
 qc::record all_valid
 ===========
 
-part of [Docs](../index.md)
+part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----

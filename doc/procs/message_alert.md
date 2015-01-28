@@ -1,7 +1,7 @@
 qc::message alert
 ===========
 
-part of [Docs](../index.md)
+part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
