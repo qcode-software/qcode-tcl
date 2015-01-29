@@ -37,12 +37,6 @@ The mapping of IP address to user_id is stored in the user table.
 The proc [`auth_hba_check`] can be used to test if the user can be established based on IP address. The proc [`auth_hba`] can be used to return the `user_id` associated with the IP address of the [current connection][conn_remote_ip] based on the user table.
 
 
-Password Based Authentication
---------------------------
-
-Password based authentication checks a unique user identifier with a password. The unique identifier could be a username, user code or email address. In this implementation it is a user code.
-
-
 General
 -------
 
