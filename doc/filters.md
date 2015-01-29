@@ -86,7 +86,7 @@ qc::filter_file_alias_paths
 
 The task of this filter is to deal with requests that are an alias for a file. For example, a request for `/foo` might be an alias and the actual file path might be `/file/foo.png`.
 
-If the request URL is an alias for a file then the actual file path is found and a symbiotic link created if it doesn't exist before finally registering the alias on fastpath. If anything goes wrong the error is returned to the client.
+If the request URL is an alias for a file a symbolic link to the canonical file location is created (if it doesn't already exist) and the URL is registered for fastpath. If anything goes wrong the error is returned to the client.
 
 ### Usage
 
