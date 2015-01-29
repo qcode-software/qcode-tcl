@@ -1,7 +1,7 @@
 qc::element_sanitize
 ===========
 
-part of [Docs](../index.md)
+part of [Safe HTML](../safe-html-markdown.md)
 
 Usage
 -----

@@ -66,6 +66,9 @@ Qcode Tcl Lib Documentation
 [Connection Handlers][14]
 -------------------------
 
+[Safe HTML & Markdown][15]
+--------------------------
+
 * * *
 
 [1]: db.md
@@ -82,3 +85,4 @@ Qcode Tcl Lib Documentation
 [12]: registration.md
 [13]: filters.md
 [14]: connection-handlers.md
+[15]: safe-html-markdown.md

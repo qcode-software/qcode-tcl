@@ -1,11 +1,11 @@
-qc::html_santitize
+qc::html_sanitize
 ===========
 
-part of [Docs](../index.md)
+part of [Safe HTML](../safe-html-markdown.md)
 
 Usage
 -----
-`html_santitize text`
+`html_sanitize text`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% html_santitize "<p>foo<p>"
+% html_sanitize "<p>foo<p>"
 <p>foo<p>
 
 % html_sanitize "<p><script>alert('Foo');</script></p>"
