@@ -47,12 +47,12 @@ For further details on Cross Site Scripting and prevention see the OWASP documen
 Cross Site Request Forgery (CSRF)
 ---------------------------------
 
-For each user session created a token is generated referred to as the `authenticity token` and each authenticity token is unique to each session. This token should be used in all forms as a hidden input. Whenever a form is submitted that will alter data in some way the authenticity token should be present and checked against the token stored for that users current session.
+For each user session created a token is generated referred to as the `authenticity token` and each authenticity token is unique to each session. This token should be used in all forms as a hidden input. Whenever a form is submitted that will alter data in some way the authenticity token should be present and checked against the token stored for the user's current session.
 
-To obtain the authenticity token for the users current session use [`qc::session_authenticity_token`]. For adding the hidden input on a form [`qc::form_authenticity_token`] can be used to generate the hidden input element with the authenticity token. If using the form template procedure [`qc::form`] the authenticity token will automatically be added to the form for any method that is not `GET`.
+To obtain the authenticity token for the user's current session use [`qc::session_authenticity_token`]. For adding the hidden input on a form [`qc::form_authenticity_token`] can be used to generate the hidden input element with the authenticity token. If using the form template procedure [`qc::form`] the authenticity token will automatically be added to the form for any method that is not `GET`.
 
 
-For further details on Cross Site Scripting and prevention see the OWASP documentation for [CSRF] and [CSRF Prevention].
+For further details on Cross Site Request Forgery and prevention see the OWASP documentation for [CSRF] and [CSRF Prevention].
 
 * * *
 

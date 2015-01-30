@@ -11,7 +11,7 @@ Description
 -----------
 Returns a salted password hash using blowfish with an iteration count of $strength.
 
-If `strenth` isn't specified a default value of `7` is used.
+If `strength` isn't specified a default value of `7` is used.
 
 Examples
 --------
