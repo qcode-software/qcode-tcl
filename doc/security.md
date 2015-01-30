@@ -23,7 +23,7 @@ SQL Injection
 
 The qcode-tcl library provides a number of helper procedures to construct and execute SQL statements. Using these helper procedures will substantially reduce chances of suffering from an SQL injection attack. The [Database API] documentation explains how to interact with a database and how to use the helper procedures. The section on [Bind Variables] details how user input for queries is handled.
 
-For further details on SQL Injection and prevention see the OWASP documentation for [SQLInjection] and [SQL Injection Prevention].
+For further details on SQL Injection and prevention see the OWASP documentation for [SQL Injection] and [SQL Injection Prevention].
 
 
 Cross Site Scripting (XSS)
