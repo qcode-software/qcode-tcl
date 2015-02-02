@@ -418,15 +418,11 @@ namespace eval qc::cast {
 
     proc safe_html {text} {
         #| Cast text to safe html.
-        set safe_html [qc::html_sanitize $text]
-        if {! [regexp {^<root>(.+)</root>$} $text]} {
-            # Wrap the text with a root node so that it can be stored in the database as XML.
-            set safe_html [qc::h root $safe_html]
+        if { [qc::is safe_html $text] } {
+            return $text
+        } else {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $text 100]...\": not safe html."
         }
-        set doc [dom parse -html $safe_html]
-        set xml [$doc asXML -escapeNonASCII]
-        $doc delete
-        return $xml
     }
 
     proc safe_markdown {text} {
