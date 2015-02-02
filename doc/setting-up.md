@@ -6,6 +6,7 @@ part of [Qcode Documentation](index.md)
 
 This document will guide through pulling together features from the qcode-tcl library to set up request handling for Naviserver that will include validation of user input and authenticating users. 
 
+### Naviserver Initialization
 Firstly, we'll need to register filters and procs as well as creating an anonymous session but only when the server starts up. There are a few filters provided by the library and here we will use three of them:
 
 * `qc::filter_http_request_validate` - to validate the HTTP request.
@@ -45,8 +46,8 @@ if {![nsv_exists . init]} {
 
 ```
 
-
-Next we want to create a connection marshal that will actually deal with the requests if they make it through validation and authentication. The following example is a very simple connection marshal that makes use of a connection handler provided by the library. Note that we registered this connection marshal above.
+### Connection Marshal
+Next we want to create a connection marshal that will actually deal with the requests if they make it through validation and authentication. The following example is a very simple connection marshal that makes use of the connection handler [`qc::handler_restful`] provided by the library. Note that we registered this connection marshal above.
 
 For more information see [Connection Handlers].
 
@@ -71,10 +72,10 @@ proc conn_marshal {} {
 
 ```
 
+### Request Handlers
+Lastly, we need to register a request handler that will determine what happens to specific requests. Below is a handler for the request `GET /` that simply returns the string Hello World. [`qc::handler_restful`] makes use of the [Handlers API] to resolve requests to these request handlers and will also return the information to the client if the the request handler does not.
 
-Lastly, we need to register a request handler that will determine what happens to specific requests. Below is a handler for the request `GET /` that simply returns the string Hello World. `qc::handler_restful` makes use of the [Handlers API] to resolve requests to these request handlers and will also return the information to the client if the the request handler does not.
-
-For more information on `register` and request handlers see [Handler and Path Registration].
+For more information on request handlers see [Handler and Path Registration].
 
 ```tcl
 
@@ -101,5 +102,6 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [Filters]: filters.md
 [Connection Handlers]: connection-handlers.md
+[`qc::handler_restful`]: connection-handlers.md#handler_restful.md
 [Handlers API]: handlers-api.md
 [Handler and Path Registration]: registration.md
