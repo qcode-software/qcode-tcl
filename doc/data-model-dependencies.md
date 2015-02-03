@@ -6,6 +6,8 @@ part of [Qcode Documentation](index.md)
 
 Certain parts of the qcode-tcl library are dependent upon a data model being in place and other parts depend upon specific tables existing. Below are the procs and their dependents along with the SQL statements to add the data model dependency.
 
+**Note:** `?` wrapped around table names means that there's only a partial dependency and may not be necessary depending on input.
+
 
 Procs & Data Model Dependencies
 -------------------------------
@@ -16,7 +18,9 @@ Proc | Table(s) | Other
 | `qc::handlers validate2model` | [validation_messages] | 
 | `qc::filter_validate` | [validation_messages] |
 | `qc::filter_authenticate` | [session], [users] | [Anonymous User]
-| `qc::filter_file_alias_path` | [file], [file_alias_path] | 
+| `qc::filter_file_alias_path` | [file], [file_alias_path] |
+| `qc::handler_db_files` | [file], [image] | 
+| `qc::password_hash` |  | [pgcrypto]
 | `qc::session_new` | [session], [users] | [pgcrypto]
 | `qc::session_authenticity_token` | [session], [users] | 
 | `qc::session_update` |  [session], [users] | 
@@ -28,13 +32,61 @@ Proc | Table(s) | Other
 | `qc::session_sudo` | [session], [users] | 
 | `qc::session_purge` | [session], [users] | 
 | `qc::anonymous_session_id` | [session], [users] | [Anonymous User]
+| `qc::auth` | [session], [users] |
+| `qc::auth_check` | [session], [users] |
+| `qc::auth_hba` | [users] |
+| `qc::auth_hba_check | [users] |
+| `qc::auth_session` | [session], [users] |
+| `qc::db_file_insert` | [file], [session], [users] |
+| `qc::db_file_copy` | [file] |
+| `qc::db_file_export` | [file] |
+| `qc::db_file_upload` | [file], [image], [session], [users] |
+| `qc::plupload.html` | [file], [image] |
+| `qc::file_upload` | [session], [users] |
+| `qc::file_handler` | [file] |
+| `qc::file_cache_create` | [file] |
+| `qc::file_data` | [file] |
+| `qc::image_resize` | [file] |
+| `qc::image_cache_create` | [file] |
+| `qc::image_data` | [file] |
+| `qc::image_handler` | [file] |
 | `qc::schema_update` | [schema] | 
-| `qc::sticky_set` | [sticky], [users] | 
-| `qc::sticky_save` | [sticky], [users] | 
-| `qc::sticky_get` | [sticky], [users] | 
-| `qc::sticky_exists` | [sticky], [users] |
-| `qc::sticky2vars` | [sticky], [users] |
-| `qc::sticky_default` | [sticky], [users] | 
+| `qc::sticky_set` | [sticky], [session], [users] | 
+| `qc::sticky_save` | [sticky], [session], [users] | 
+| `qc::sticky_get` | [sticky], [session], [users] | 
+| `qc::sticky_exists` | [sticky], [session], [users] |
+| `qc::sticky2vars` | [sticky], [session], [users] |
+| `qc::sticky_default` | [sticky], [session], [users] |
+| `qc::widget` | ?[sticky], [session], [users]? |
+| `qc::widget_text` | ?[sticky], [session], [users]? |
+| `qc::widget_compare` | ?[sticky], [session], [users]? |
+| `qc::widget_combo` | ?[sticky], [session], [users]? |
+| `qc::widget_htmlarea` | ?[sticky], [session], [users]? |
+| `qc::widget_textarea` | ?[sticky], [session], [users]? |
+| `qc::widget_select` | ?[sticky], [session], [users]? |
+| `qc::widget_password` | ?[sticky], [session], [users]? |
+| `qc::widget_bool` | ?[sticky], [session], [users]? |
+| `qc::widget_radiogroup` | ?[sticky], [session], [users]? |
+| `qc::widget_image_combo` | ?[sticky], [session], [users]? |
+| `qc::columns_show_hide_toolbar` | ?[sticky], [session], [users]? |
+| `qc::form_layout_table` | ?[sticky], [session], [users]? |
+| `qc::form_layout_tables` | ?[sticky], [session], [users]? |
+| `qc::form_layout_tbody` | ?[sticky], [session], [users]? |
+| `qc::form_layout_list` | ?[sticky], [session], [users]? | 
+| `qc::param_get` | [param] | 
+| `qc::param_set` | [param] | 
+| `qc::param_exists` | [param] |
+| `qc::db_validation_message` | [validation_messages] |
+| `qc::form` | [session], [users] | Tables not required for `GET` method forms.
+| `qc::form_authenticity_token` | [session], [users] |
+| `qc::perm_set` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perm_test_user` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perm_test` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perm` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perms` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perm_if` | [perm], [perm_category], [perm_class], [user_perm], [users] |
+| `qc::perm_category_add` | [perm_category] |
+| `qc::perm_add` | [perm], [perm_category], [perm_class] |
 
 ### pgcrypto
 
@@ -93,7 +145,8 @@ CREATE TABLE users (
     surname varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     password_hash varchar(60) NOT NULL,
-    user_state user_state NOT NULL DEFAULT 'ACTIVE'
+    user_state user_state NOT NULL DEFAULT 'ACTIVE',
+    ip varchar(15)
 );
 ```
 
@@ -102,11 +155,11 @@ CREATE TABLE users (
 ```SQL
 CREATE TABLE session (
    session_id text PRIMARY KEY,
-   time_created timestamp(0) without time zone DEFAULT now() NOT NULL,
-   time_modified timestamp(0) without time zone DEFAULT now() NOT NULL,
+   time_created timestamp(0) WITHOUT time zone DEFAULT now() NOT NULL,
+   time_modified timestamp(0) WITHOUT time zone DEFAULT now() NOT NULL,
    hit_count integer DEFAULT 0 NOT NULL,
-   ip character varying(15),
-   user_id integer NOT NULL references users,
+   ip varchar(15),
+   user_id integer NOT NULL REFERENCES users,
    effective_user_id integer,
    authenticity_token varchar(100)
 );
@@ -145,7 +198,7 @@ CREATE TABLE perm_class (
 );
 ```
 
-#### perm
+### perm
 
 ```SQL
 CREATE SEQUENCE perm_id_seq;
@@ -218,6 +271,16 @@ CREATE TABLE file_alias_path (
 );
 ```
 
+### image
+
+```SQL
+CREATE TABLE image (
+    file_id int PRIMARY KEY REFERENCES file ON DELETE CASCADE,
+    width int,
+    height int
+);
+```
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
@@ -240,3 +303,4 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [user_perm]: #user_perm
 [file]: #file
 [file_alias_path]: #file_alias_path
+[image]: #image
