@@ -19,9 +19,14 @@ Proc | Table(s) | Other
 | `qc::filter_validate` | [validation_messages] |
 | `qc::filter_authenticate` | [session], [users] | [Anonymous User]
 | `qc::filter_file_alias_path` | [file], [file_alias_path] |
+| `qc::file_alias_path_exists` | [file], [file_alias_path] |
+| `qc::file_alias_path2file_id` | [file], [file_alias_path] |
+| `qc::file_alias_path_new` | [file], [file_alias_path] |
+| `qc::file_alias_path_update` | [file], [file_alias_path]
+| `qc::file_alias_path_delete` | [file], [file_alias_path] |
 | `qc::handler_db_files` | [file], [image] | 
 | `qc::password_hash` |  | [pgcrypto]
-| `qc::session_new` | [session], [users] | [pgcrypto]
+| `qc::session_new` | [session], [users] |
 | `qc::session_authenticity_token` | [session], [users] | 
 | `qc::session_update` |  [session], [users] | 
 | `qc::session_sudo_logout` | [session], [users] | 
