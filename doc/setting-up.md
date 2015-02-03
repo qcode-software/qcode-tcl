@@ -98,7 +98,7 @@ register GET / {} {
 
 ### Data Model Dependencies
 
-Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate`, `qc::filter_authenticate` within the [Data Model Dependencies] documentation for setting this up.
+Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate` and `qc::filter_authenticate` within the [Data Model Dependencies] documentation to set up the data model for this guide.
 
 * * *
 
