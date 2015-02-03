@@ -542,3 +542,37 @@ proc qc::not_null {var} {
     upvar $var value
     return [expr {[info exists value] && $value ne "" }]
 }
+
+proc qc::glob_recursive {args} {
+    #| Return names of files that match patterns, including files in sub-directories
+    # Usage: same as glob (see http://www.tcl.tk/man/tcl8.5/TclCmd/glob.htm),
+    # with additional max_depth switch
+    qc::args $args -join -nocomplain -tails -path ? -directory ? -types ? -max_depth 10 -- args
+
+    # Use a single glob call, but extend each pattern passed in with */ prefixes
+    # (eg. *.html becomes *.html */*.html */*/*.html etc.)
+    set patterns $args
+    foreach depth [.. 1 $max_depth] {
+        foreach pattern $args {
+            lappend patterns [join [list {*}[lrepeat $depth *] $pattern] /]
+        }        
+    }
+
+    # Options to be passed on to glob
+    set glob_options [list]
+    # flags
+    foreach var {join nocomplain tails} {
+        if { [info exists $var] } {
+            lappend glob_options -${var}
+        }
+    }
+    # options
+    foreach var {path directory types} {
+        if { [info exists $var] } {
+            lappend glob_options -${var} [set $var]
+        }
+    }
+
+    # Call glob and return the results
+    return [glob {*}$glob_options -- {*}$patterns]
+}
