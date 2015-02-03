@@ -79,6 +79,9 @@ Qcode Tcl Lib Documentation
 [Data Model Dependencies][17]
 -----------------------------
 
+[Setting Up][18]
+----------------
+
 * * *
 
 [1]: db.md
@@ -98,3 +101,4 @@ Qcode Tcl Lib Documentation
 [15]: safe-html-markdown.md
 [16]: security.md
 [17]: data-model-dependencies.md
+[18]: setting-up.md
