@@ -10,27 +10,46 @@ Certain parts of the qcode-tcl library are dependent upon a data model being in 
 Procs & Data Model Dependencies
 -------------------------------
 
-Proc | Table(s)
------|---------
-| `qc::validate2model` | [validation_messages]
-| `qc::handlers validate2model` | [validation_messages]
-| `qc::filter_validate` | [validation_messages]
-| `qc::session_new` | session
-| `qc::session_authenticity_token` | session
-| `qc::session_update` |  session
-| `qc::session_sudo_logout` | session
-| `qc::session_kill` | session
-| `qc::session_exists` | session
-| `qc::session_valid` | session
-| `qc::session_user_id` | session
-| `qc::session_sudo` | session
-| `qc::session_purge` | session
-| `qc::anonymous_session_id` | session
-| `qc::schema_update` | schema
-| `qc::sticky_set` | sticky
-| `qc::sticky_save` | sticky
-| `qc::sticky_get` | sticky
-| `qc::sticky_exists` | sticky
+Proc | Table(s) | Other
+-----|----------|------
+| `qc::validate2model` | [validation_messages] | 
+| `qc::handlers validate2model` | [validation_messages] | 
+| `qc::filter_validate` | [validation_messages] |
+| `qc::filter_authenticate` | [session], [users] | [Anonymous User]
+| `qc::filter_file_alias_path` | [file], [file_alias_path] | 
+| `qc::session_new` | [session], [users] | [pgcrypto]
+| `qc::session_authenticity_token` | [session], [users] | 
+| `qc::session_update` |  [session], [users] | 
+| `qc::session_sudo_logout` | [session], [users] | 
+| `qc::session_kill` | [session], [users] | 
+| `qc::session_exists` | [session], [users] | 
+| `qc::session_valid` | [session], [users] | 
+| `qc::session_user_id` | [session], [users] | 
+| `qc::session_sudo` | [session], [users] | 
+| `qc::session_purge` | [session], [users] | 
+| `qc::anonymous_session_id` | [session], [users] | [Anonymous User]
+| `qc::schema_update` | [schema] | 
+| `qc::sticky_set` | [sticky], [users] | 
+| `qc::sticky_save` | [sticky], [users] | 
+| `qc::sticky_get` | [sticky], [users] | 
+| `qc::sticky_exists` | [sticky], [users] |
+| `qc::sticky2vars` | [sticky], [users] |
+| `qc::sticky_default` | [sticky], [users] | 
+
+### pgcrypto
+
+The [pgcrypto module] for PostgreSQL provides cryptographic functions - some of which are used by procs in the library. In order to install the pgcrypto extension the [postgresql-contrib] package will need to be installed first.
+
+
+```SQL
+CREATE EXTENSION pgcrypto;
+
+CREATE OR REPLACE FUNCTION sha1(bytea) returns text AS $$
+    SELECT encode(digest($1, 'sha1'), 'hex')
+$$ LANGUAGE SQL STRICT IMMUTABLE;
+```
+
+### Anonymous User
 
 The anonymous session depends upon a user with the ID -1 being present in the `users` table. This is a special ID chosen for the anonymous user and should be reserved for it.
 
@@ -70,9 +89,9 @@ CREATE SEQUENCE user_id_seq;
 
 CREATE TABLE users (
     user_id int PRIMARY KEY,
-    firstname plain_string NOT NULL,
-    surname plain_string NOT NULL,
-    email plain_string NOT NULL,
+    firstname varchar(255) NOT NULL,
+    surname varchar(255) NOT NULL,
+    email varchar(255) NOT NULL,
     password_hash varchar(60) NOT NULL,
     user_state user_state NOT NULL DEFAULT 'ACTIVE'
 );
@@ -101,9 +120,7 @@ CREATE TABLE schema_update {
 }
 ```
 
-### Permissons
-
-#### perm_category
+### perm_category
 
 ```SQL
 
@@ -115,7 +132,7 @@ CREATE TABLE perm_category (
 );
 ```
 
-#### perm_class
+### perm_class
 
 ```SQL
 CREATE SEQUENCE perm_class_id_seq;
@@ -143,7 +160,7 @@ CREATE TABLE perm (
 );
 ```
 
-#### user_perm
+### user_perm
 
 ```SQL
 CREATE TABLE user_perm (
@@ -159,6 +176,20 @@ CREATE TABLE user_perm (
 CREATE TABLE param (
     param_name text NOT NULL,
     param_value text
+);
+```
+
+### sticky
+
+**TO CHECK**
+
+```SQL
+
+CREATE TABLE sticky (
+    user_id integer NOT NULL REFERENCES users,
+    name varchar(255) NOT NULL,
+    value varchar(255) NOT NULL,
+    url varchar(255) NOT NULL
 );
 ```
 
@@ -178,9 +209,34 @@ CREATE TABLE file (
 
 ```
 
+### file_alias_path
+
+```SQL
+CREATE TABLE file_alias_path (
+    url_path text PRIMARY KEY,
+    file_id int REFERENCES file(file_id) NOT NULL
+);
+```
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
 [PostgreSQL docs on domains]: http://www.postgresql.org/docs/9.4/static/sql-createdomain.html
+[pgcrypto module]: http://www.postgresql.org/docs/9.4/static/pgcrypto.html
+[postgresql-contrib]: http://www.postgresql.org/docs/9.4/static/contrib.html
+
+[pgcrypto]: #pgcrypto
+[Anonymous User]: #anonymous-user
+
 [validation_messages]: #validation_messages
+[session]: #session
+[schema]: #schema
+[sticky]: #sticky
+[users]: #users
+[perm_category]: #perm_category
+[perm_class]: #perm_class
+[perm]: #perm
+[user_perm]: #user_perm
+[file]: #file
+[file_alias_path]: #file_alias_path
