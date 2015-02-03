@@ -35,7 +35,7 @@ Proc | Table(s) | Other
 | `qc::auth` | [session], [users] |
 | `qc::auth_check` | [session], [users] |
 | `qc::auth_hba` | [users] |
-| `qc::auth_hba_check | [users] |
+| `qc::auth_hba_check` | [users] |
 | `qc::auth_session` | [session], [users] |
 | `qc::db_file_insert` | [file], [session], [users] |
 | `qc::db_file_copy` | [file] |
@@ -77,7 +77,7 @@ Proc | Table(s) | Other
 | `qc::param_set` | [param] | 
 | `qc::param_exists` | [param] |
 | `qc::db_validation_message` | [validation_messages] |
-| `qc::form` | [session], [users] | Tables not required for `GET` method forms.
+| `qc::form` | ?[session], [users]? | Tables not required for `GET` method forms.
 | `qc::form_authenticity_token` | [session], [users] |
 | `qc::perm_set` | [perm], [perm_category], [perm_class], [user_perm], [users] |
 | `qc::perm_test_user` | [perm], [perm_category], [perm_class], [user_perm], [users] |
@@ -88,7 +88,7 @@ Proc | Table(s) | Other
 | `qc::perm_category_add` | [perm_category] |
 | `qc::perm_add` | [perm], [perm_category], [perm_class] |
 
-### pgcrypto
+#### pgcrypto
 
 The [pgcrypto module] for PostgreSQL provides cryptographic functions - some of which are used by procs in the library. In order to install the pgcrypto extension the [postgresql-contrib] package will need to be installed first.
 
@@ -101,7 +101,7 @@ CREATE OR REPLACE FUNCTION sha1(bytea) returns text AS $$
 $$ LANGUAGE SQL STRICT IMMUTABLE;
 ```
 
-### Anonymous User
+#### Anonymous User
 
 The anonymous session depends upon a user with the ID -1 being present in the `users` table. This is a special ID chosen for the anonymous user and should be reserved for it.
 
@@ -122,7 +122,7 @@ db_dml {
 Tables
 ------
 
-### validation_messages
+#### validation_messages
 
 ```SQL
 CREATE TABLE validation_messages (
@@ -132,7 +132,7 @@ CREATE TABLE validation_messages (
 );
 ```
 
-### users
+#### users
 
 ```SQL
 CREATE TYPE user_state AS ENUM ('ACTIVE', 'DISABLED');
@@ -150,7 +150,7 @@ CREATE TABLE users (
 );
 ```
 
-### session
+#### session
 
 ```SQL
 CREATE TABLE session (
@@ -165,7 +165,7 @@ CREATE TABLE session (
 );
 ```
 
-### schema
+#### schema
 
 ```SQL
 CREATE TABLE schema_update {
@@ -173,7 +173,7 @@ CREATE TABLE schema_update {
 }
 ```
 
-### perm_category
+#### perm_category
 
 ```SQL
 
@@ -185,7 +185,7 @@ CREATE TABLE perm_category (
 );
 ```
 
-### perm_class
+#### perm_class
 
 ```SQL
 CREATE SEQUENCE perm_class_id_seq;
@@ -198,7 +198,7 @@ CREATE TABLE perm_class (
 );
 ```
 
-### perm
+#### perm
 
 ```SQL
 CREATE SEQUENCE perm_id_seq;
@@ -213,7 +213,7 @@ CREATE TABLE perm (
 );
 ```
 
-### user_perm
+#### user_perm
 
 ```SQL
 CREATE TABLE user_perm (
@@ -223,7 +223,7 @@ CREATE TABLE user_perm (
 );
 ```
 
-### param
+#### param
 
 ```SQL
 CREATE TABLE param (
@@ -232,7 +232,7 @@ CREATE TABLE param (
 );
 ```
 
-### sticky
+#### sticky
 
 **TO CHECK**
 
@@ -246,7 +246,7 @@ CREATE TABLE sticky (
 );
 ```
 
-### file
+#### file
 
 ```SQL
 CREATE SEQUENCE file_id_seq;
@@ -262,7 +262,7 @@ CREATE TABLE file (
 
 ```
 
-### file_alias_path
+#### file_alias_path
 
 ```SQL
 CREATE TABLE file_alias_path (
@@ -271,7 +271,7 @@ CREATE TABLE file_alias_path (
 );
 ```
 
-### image
+#### image
 
 ```SQL
 CREATE TABLE image (
@@ -297,6 +297,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [schema]: #schema
 [sticky]: #sticky
 [users]: #users
+[param]: #param
 [perm_category]: #perm_category
 [perm_class]: #perm_class
 [perm]: #perm
