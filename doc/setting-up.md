@@ -7,7 +7,7 @@ part of [Qcode Documentation](index.md)
 This guide will demonstrate how to use the qcode-tcl library with Naviserver to handle incoming requests, perform validation of user input, and perform user authentication.
 
 ### Naviserver Initialization
-Firstly, we'll need to register filters and procs andensure that the anonymous session has been created. There are a few filters provided by the library and here we will use three of them:
+Firstly, we'll need to register filters and procs and ensure that the anonymous session has been created. There are a few filters provided by the library and here we will use three of them:
 
 * `qc::filter_http_request_validate` - to validate the HTTP request.
 * `qc::filter_validate` - to validate user input.
