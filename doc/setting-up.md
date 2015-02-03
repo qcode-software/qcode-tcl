@@ -96,6 +96,10 @@ register GET / {} {
 }
 ```
 
+### Data Model Dependencies
+
+Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate`, `qc::filter_authenticate` within the [Data Model Dependencies] documentation for setting this up.
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
@@ -105,3 +109,4 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [`qc::handler_restful`]: connection-handlers.md#handler_restful.md
 [Handlers API]: handlers-api.md
 [Handler and Path Registration]: registration.md
+[Data Model Dependencies]: data-model-dependencies.md
