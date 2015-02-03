@@ -17,16 +17,12 @@ Examples
 --------
 ```tcl
 
-% qc::cast safe_html "Hello World"
-<root>Hello World</root>
+% qc::cast safe_html {<a href="http://www.qcode.co.uk">Hello World</a>}
+<a href="http://www.qcode.co.uk">Hello World</a>
 
 % qc::cast safe_html {<div id="foo">Bar</div>}
-<root>
-    <div>Bar</div>
-</root>
+Can't cast "<div id="foo">Bar</div>...": not safe html.
 
-% qc::cast safe_html {Foo <script>alert('Hello World');</script>}
-<root>Foo </root>
 ```
 
 ----------------------------------
