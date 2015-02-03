@@ -6,7 +6,7 @@ part of [Qcode Documentation](index.md)
 
 Certain parts of the qcode-tcl library are dependent upon a data model being in place and other parts depend upon specific tables existing. Below are the procs and their dependents along with the SQL statements to add the data model dependency.
 
-**Note:** `?` wrapped around table names means that there's only a partial dependency and may not be necessary depending on input.
+**Note:** `?` wrapped around table names means that there's only a partial dependency and may not be necessary depending on input or other circumstances.
 
 
 Procs & Data Model Dependencies
@@ -37,11 +37,11 @@ Proc | Table(s) | Other
 | `qc::auth_hba` | [users] |
 | `qc::auth_hba_check` | [users] |
 | `qc::auth_session` | [session], [users] |
-| `qc::db_file_insert` | [file], [session], [users] |
+| `qc::db_file_insert` | [file], ?[session], [users]? |
 | `qc::db_file_copy` | [file] |
 | `qc::db_file_export` | [file] |
-| `qc::db_file_upload` | [file], [image], [session], [users] |
-| `qc::plupload.html` | [file], [image] |
+| `qc::db_file_upload` | [file], ?[image]?, ?[session], [users]? |
+| `qc::plupload.html` | [file], ?[image]? |
 | `qc::file_upload` | [session], [users] |
 | `qc::file_handler` | [file] |
 | `qc::file_cache_create` | [file] |
@@ -77,7 +77,7 @@ Proc | Table(s) | Other
 | `qc::param_set` | [param] | 
 | `qc::param_exists` | [param] |
 | `qc::db_validation_message` | [validation_messages] |
-| `qc::form` | ?[session], [users]? | Tables not required for `GET` method forms.
+| `qc::form` | ?[session], [users]? | 
 | `qc::form_authenticity_token` | [session], [users] |
 | `qc::perm_set` | [perm], [perm_category], [perm_class], [user_perm], [users] |
 | `qc::perm_test_user` | [perm], [perm_category], [perm_class], [user_perm], [users] |
