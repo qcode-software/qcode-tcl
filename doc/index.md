@@ -76,6 +76,9 @@ Qcode Tcl Lib Documentation
 * Cross Site Scripting
 * Cross Site Request Forgery
 
+[Data Model Dependencies][17]
+-----------------------------
+
 * * *
 
 [1]: db.md
@@ -94,3 +97,4 @@ Qcode Tcl Lib Documentation
 [14]: connection-handlers.md
 [15]: safe-html-markdown.md
 [16]: security.md
+[17]: data-model-dependencies.md
