@@ -232,22 +232,19 @@ CREATE TABLE user_perm (
 
 ```SQL
 CREATE TABLE param (
-    param_name text NOT NULL,
+    param_name varchar(50) PRIMARY KEY,
     param_value text
 );
 ```
 
 #### sticky
 
-**TO CHECK**
-
 ```SQL
-
 CREATE TABLE sticky (
-    user_id integer NOT NULL REFERENCES users,
-    name varchar(255) NOT NULL,
-    value varchar(255) NOT NULL,
-    url varchar(255) NOT NULL
+    user_id integer NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    name varchar(255),
+    value varchar(255) ,
+    url varchar(255)
 );
 ```
 
