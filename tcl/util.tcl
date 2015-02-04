@@ -551,9 +551,14 @@ proc qc::glob_recursive {args} {
 
     # Use a single glob call, but extend each pattern passed in with */ prefixes
     # (eg. *.html becomes *.html */*.html */*/*.html etc.)
-    set patterns $args
+    if { [info exists join] } {
+        set base_patterns [list [join $args /]]
+    } else {
+        set base_patterns $args
+    }
+    set patterns $base_patterns
     foreach depth [.. 1 $max_depth] {
-        foreach pattern $args {
+        foreach pattern $base_patterns {
             lappend patterns [join [list {*}[lrepeat $depth *] $pattern] /]
         }        
     }
@@ -561,7 +566,7 @@ proc qc::glob_recursive {args} {
     # Options to be passed on to glob
     set glob_options [list]
     # flags
-    foreach var {join nocomplain tails} {
+    foreach var {nocomplain tails} {
         if { [info exists $var] } {
             lappend glob_options -${var}
         }
