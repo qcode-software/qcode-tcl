@@ -547,7 +547,7 @@ proc qc::glob_recursive {args} {
     #| Return names of files that match patterns, including files in sub-directories
     # Usage: same as glob (see http://www.tcl.tk/man/tcl8.5/TclCmd/glob.htm),
     # with additional max_depth switch
-    qc::args $args -join -nocomplain -tails -path ? -directory ? -type ? -max_depth 10 -- args
+    qc::args $args -join -nocomplain -tails -path ? -directory ? -types ? -max_depth 10 -- args
 
     # Use a single glob call, but extend each pattern passed in with */ prefixes
     # (eg. *.html becomes *.html */*.html */*/*.html etc.)
@@ -572,7 +572,7 @@ proc qc::glob_recursive {args} {
         }
     }
     # options
-    foreach var {path directory type} {
+    foreach var {path directory types} {
         if { [info exists $var] } {
             lappend glob_options -${var} [set $var]
         }
