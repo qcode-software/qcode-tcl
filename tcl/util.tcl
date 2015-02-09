@@ -563,21 +563,22 @@ proc qc::glob_recursive {args} {
         }        
     }
 
-    # Options to be passed on to glob
-    set glob_options [list]
-    # flags
+    # Switches and options to be passed on to glob
+    # switches
+    set switches [list]
     foreach var {nocomplain tails} {
         if { [info exists $var] } {
-            lappend glob_options -${var}
+            lappend switches -${var}
         }
     }
     # options
+    set options [list]
     foreach var {path directory types} {
         if { [info exists $var] } {
-            lappend glob_options -${var} [set $var]
+            lappend options -${var} [set $var]
         }
     }
 
     # Call glob and return the results
-    return [glob {*}$glob_options -- {*}$patterns]
+    return [glob {*}$switches {*}$options -- {*}$patterns]
 }
