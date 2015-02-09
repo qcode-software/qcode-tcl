@@ -3,7 +3,8 @@ namespace eval qc {
 }
 
 proc qc::excel_file_create {args} {
-    #| Creates an xls file using the information provided
+    #| Creates an xls or xlsx file using the information provided
+    # type: "xls" or "xlsx", defaults to "xls"
     # data: a list of lists containing a grid of cell values
     # formats: a dict of class definitions
     # class definitions: a dict of name-value pairs
