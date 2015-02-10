@@ -995,6 +995,9 @@ proc qc::mime_type_guess { filename } {
         ".xls" {
             return "application/vnd.ms-excel"
         }
+        ".xlsx" {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
         ".xlw" {
             return "application/vnd.ms-excel"
         }
@@ -1194,6 +1197,7 @@ proc qc::mime_file_extension { mime_type } {
         "model/vrml" ".wrl"
         "image/x-xbitmap" ".xbm"
         "application/vnd.ms-excel" ".xls"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ".xlsx"
         "application/vnd.ms-excel" ".xlw"
         "image/x-xpixmap" ".xpm"
         "application/xhtml+xml" ".xht"
