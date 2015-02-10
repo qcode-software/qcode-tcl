@@ -18,7 +18,7 @@ proc qc::excel_file_create {args} {
     default row_meta {}
     default cell_meta {}
     default timeout 1000
-    default type "xls"
+    default type "xlsx"
     switch $type {
         "xls" {
             set writer "Spreadsheet::WriteExcel"
