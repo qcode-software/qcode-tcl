@@ -15,6 +15,10 @@ proc qc::return2client { args } {
         default content-type [qc::mime_type_guess $filename]
         default content-disposition "attachment; $filename"
         set headers [qc::lunion $headers [list "content-disposition"]]
+        set f [open $file rb]
+        set content [read $f]
+        close f
+        set var content
 
     } elseif { [info exists html] } {
 	default content-type "text/html; charset=utf-8"
@@ -36,7 +40,7 @@ proc qc::return2client { args } {
 	error "No payload given in html or xml or text or json" 
     }
 
-    if { [info exists var] && $filter_cc } {
+    if { $filter_cc } {
 	# mask credit card numbers
 	set $var [qc::format_cc_masked_string [set $var]] 
     }
@@ -46,11 +50,7 @@ proc qc::return2client { args } {
 	ns_set update $conn_headers $name [set $name]
     }
 
-    if { [info exists var] } {
-        ns_return $code ${content-type} [set $var]
-    } else {
-        ns_returnfile $code ${content-type} $file
-    }
+    ns_return $code ${content-type} [set $var]
 }
 
 proc qc::return_html { html } { 
