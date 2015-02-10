@@ -17,7 +17,7 @@ proc qc::return2client { args } {
         set headers [qc::lunion $headers [list "content-disposition"]]
         set f [open $file rb]
         set content [read $f]
-        close f
+        close $f
         set var content
 
     } elseif { [info exists html] } {
