@@ -64,24 +64,17 @@ proc qc::return2client { args } {
         set $var [qc::format_cc_masked_string [set $var]] 
     }
     
-    if { [expr 0x1 & [ns_conn flags]] } {
-        # no open connection - just return payload
-        return [set $var]
+    # Update headers
+    foreach name $headers {
+        set conn_headers [ns_conn outputheaders]
+        ns_set update $conn_headers $name [set $name]
+    }
+    
+    # Return payload to client
+    if { $var eq "file" } {
+        ns_returnfile $code ${content-type} [set $var]
     } else {
-        # Client is still connected        
-        
-        # Update headers
-        foreach name $headers {
-            set conn_headers [ns_conn outputheaders]
-            ns_set update $conn_headers $name [set $name]
-        }
-
-        # Return payload to client
-        if { $var eq "file" } {
-            ns_returnfile $code ${content-type} [set $var]
-        } else {
-            ns_return $code ${content-type} [set $var]
-        }
+        ns_return $code ${content-type} [set $var]
     }
 }
 
