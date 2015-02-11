@@ -6,14 +6,16 @@ proc qc::return2client { args } {
     #| Return data to http client if a connection is open otherwise just output the given content.
     # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?csv csv? ?file file? ?filename filename? ?download boolean? ?filter_cc boolean? ?header header? .. 
     set arg_names [qc::args2vars $args]
-    set headers [lexclude $arg_names file filename html xml text json csv file filename download code content-type content-disposition filter_cc]
+    set headers [lexclude $arg_names file filename html xml text json csv file filename download code content-type filter_cc]
     default code 200
     default filter_cc no
+    default filename [string trimleft [qc::url_path [ns_conn url]] /]
 
     # Determine type of payload and configure defaults
     if { [info exists file] } {
         # File
         default download yes
+        default content-type [qc::mime_type_guess $filename]
         set var file
     } elseif { [info exists html] } {
         # HTML payload
@@ -45,8 +47,20 @@ proc qc::return2client { args } {
 	error "No payload given in html or xml or text or json or file" 
     }
 
+    # Content-Disposition
+    if { $download } {
+        # Download payload as an attachment
+        default content-disposition "attachment; filename=$filename"
+    } else {
+        # Display payload inline
+        default content-disposition "inline; filename=$filename"
+    }
+    if { "content-disposition" ni $headers } {
+        lappend headers content-disposition       
+    }    
+
+    # Mask plain text credit card numbers in payload
     if { $filter_cc && $var ne "file" } {
-        # Mask plain text credit card numbers in payload
         set $var [qc::format_cc_masked_string [set $var]] 
     }
     
@@ -54,19 +68,8 @@ proc qc::return2client { args } {
         # no open connection - just return payload
         return [set $var]
     } else {
-        # Client is still connected
-        default filename [string trimleft [qc::url_path [ns_conn url]] /]
+        # Client is still connected        
         
-        # Content-Disposition
-        if { $download } {
-            # Download payload as an attachment
-            default content-disposition "attachment; filename=$filename"
-        } else {
-            # Display payload inline
-            set content-disposition "inline; filename=$filename"
-        }
-        lappend headers content-disposition       
-
         # Update headers
         foreach name $headers {
             set conn_headers [ns_conn outputheaders]
@@ -75,7 +78,6 @@ proc qc::return2client { args } {
 
         # Return payload to client
         if { $var eq "file" } {
-            default content-type [qc::mime_type_guess $filename]
             ns_returnfile $code ${content-type} [set $var]
         } else {
             ns_return $code ${content-type} [set $var]
