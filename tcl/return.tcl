@@ -6,7 +6,7 @@ proc qc::return2client { args } {
     #| Return data to http client if a connection is open otherwise just output the given content.
     # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?csv csv? ?file file? ?filename filename? ?download boolean? ?filter_cc boolean? ?header header? .. 
     set arg_names [qc::args2vars $args]
-    set headers [lexclude $arg_names file filename html xml text json csv file filename download code content-type filter_cc]
+    set headers [lexclude $arg_names html xml text json csv file filename download code content-type filter_cc]
     default code 200
     default filter_cc no
     default filename [string trimleft [qc::url_path [ns_conn url]] /]
