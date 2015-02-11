@@ -3,39 +3,77 @@ namespace eval qc {
 }
 
 proc qc::return2client { args } {
-    #| Return data to http client if a connection exists otherwise just output the given content.
-    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?filter_cc boolean? ?header header? .. 
+    #| Return data to http client.
+    # Usage return2client ?code code? ?content-type mime-type? ?html html? ?text text? ?xml xml? ?json json? ?csv csv? ?file file? ?filename filename? ?download boolean? ?filter_cc boolean? ?header header? .. 
     set arg_names [qc::args2vars $args]
-    if { [info exists html] } {
+    set headers [lexclude $arg_names html xml text json csv file filename download code content-type filter_cc]
+    default code 200
+    default filter_cc no
+    default filename [string trimleft [qc::url_path [ns_conn url]] /]
+
+    # Determine type of payload and configure defaults
+    if { [info exists file] } {
+        # File
+        default download yes
+        default content-type [qc::mime_type_guess $filename]
+        set var file
+    } elseif { [info exists html] } {
+        # HTML payload
+        default download no
 	default content-type "text/html; charset=utf-8"
 	set var html
     } elseif { [info exists xml] } {
+        # XML payload
+        default download no
 	default content-type "text/xml; charset=utf-8"
 	set var xml
     } elseif { [info exists text] } {
+        # Text payload
+        default download no
 	default content-type "text/plain; charset=utf-8"
 	set var text
+    } elseif { [info exists csv] } {
+        # CSV payload
+        default download yes
+	default content-type "text/csv; charset=utf-8"
+	set var csv
     } elseif { [info exists json] } {
+        # JSON payload
+        default download no
 	default content-type "application/json; charset=utf-8"
 	set var json
     } else {
-	error "No payload given in html or xml or text or json" 
+        # Unknown payload
+	error "No payload given in html or xml or text or json or file" 
     }
-    if { [expr 0x1 & [ns_conn flags]] } {
-        # no open connection
-        return [lindex $args end]
+
+    # Content-Disposition
+    if { $download } {
+        # Download payload as an attachment
+        default content-disposition "attachment; filename=$filename"
     } else {
-        default code 200
-        default filter_cc no
-        if { $filter_cc } {
-            # mask credit card numbers
-            set $var [qc::format_cc_masked_string [set $var]] 
-        }
-        # Other headers
-        foreach name [lexclude $arg_names html xml text json code content-type] {
-            set headers [ns_conn outputheaders]
-            ns_set update $headers $name [set $name]
-        }
+        # Display payload inline
+        default content-disposition "inline; filename=$filename"
+    }
+    if { "content-disposition" ni $headers } {
+        lappend headers content-disposition       
+    }    
+
+    # Mask plain text credit card numbers in payload
+    if { $filter_cc && $var ne "file" } {
+        set $var [qc::format_cc_masked_string [set $var]] 
+    }
+    
+    # Update headers
+    foreach name $headers {
+        set conn_headers [ns_conn outputheaders]
+        ns_set update $conn_headers $name [set $name]
+    }
+    
+    # Return payload to client
+    if { $var eq "file" } {
+        ns_returnfile $code ${content-type} [set $var]
+    } else {
         ns_return $code ${content-type} [set $var]
     }
 }
