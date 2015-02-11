@@ -3,20 +3,33 @@ namespace eval qc {
 }
 
 proc qc::excel_file_create {args} {
-    #| Creates an xls file using the information provided
+    #| Creates an xls or xlsx file using the information provided
+    # type: "xls" or "xlsx", defaults to "xlsx"
     # data: a list of lists containing a grid of cell values
     # formats: a dict of class definitions
     # class definitions: a dict of name-value pairs
     # column_meta: nested dict, eg. {1 {class "foo" width 20} 5 {width 50}}
     # row_meta: nested dict, eg. {0 {class "bar" height 20} 3 {class "foo"}}
     # cell_meta: nested dict, eg. {{5 2} {class "baz" type "string|number|formula|url"} {1 1} {class "bar"}}
-    qc::args2vars $args data formats column_meta row_meta cell_meta timeout
+    qc::args2vars $args data formats column_meta row_meta cell_meta timeout type
     default data {}
     default formats {}
     default column_meta {}
     default row_meta {}
     default cell_meta {}
     default timeout 1000
+    default type "xlsx"
+    switch $type {
+        "xls" {
+            set writer "Spreadsheet::WriteExcel"
+        }
+        "xlsx" {
+            set writer "Excel::Writer::XLSX"
+        }
+        default {
+            error "Unsupported excel type"
+        }
+    }
 
     set filename [qc::file_temp ""]
     ########################################
@@ -24,14 +37,14 @@ proc qc::excel_file_create {args} {
     ########################################
     set template {#!/usr/bin/perl -w
         use strict;
-        use Spreadsheet::WriteExcel;
+        use <writer>;
 
         ####################
         # Data
         ####################
 
         # Insert filename here
-        my $workbook = Spreadsheet::WriteExcel->new('<filename>');
+        my $workbook = <writer>->new('<filename>');
         my $worksheet = $workbook->add_worksheet();
 
         # Cell data, eg.
@@ -177,7 +190,7 @@ proc qc::excel_file_create {args} {
     ########################################
     # Variable substitution
     ########################################
-    set token_vars {filename cell_data formats column_meta row_meta cell_meta}
+    set token_vars {writer filename cell_data formats column_meta row_meta cell_meta}
     set map {}
     foreach token $token_vars {
         lappend map <$token> [set $token]
