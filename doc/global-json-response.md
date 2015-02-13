@@ -60,7 +60,7 @@ Usage
 This procedure validates input against the data model and modifies the `record` object of the response accordingly.
 
 ### Custom Validation Handlers
-Custom validation handlers are used to manually validate input. As such, any manual validation should also set up the `record` object of the response with the result of validation.
+Custom validation handlers are used to manually validate input. As such, any manual validation should also set up the `record` object of the response with the result of validation as well as setting the status appropriately.
 
 ### Request Handlers
 Request handlers will often want to redirect the client to another URL after handling the request and therefore should set up the `action` object of the response.
