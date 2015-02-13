@@ -39,5 +39,10 @@ proc qc::validate2model {dict} {
             qc::record valid $name [qc::cast $data_type $value] ""
         }
     }
+
+    if { ! $all_valid } {
+        qc::status invalid
+    }
+    
     return $all_valid
 }
