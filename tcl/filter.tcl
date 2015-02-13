@@ -21,10 +21,10 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             }
             
             # Let the client know if there's a problem
-            if {[qc::conn_open] && $method ni [list GET HEAD] && ! [qc::record all_valid]} {
+            if {[qc::conn_open] && $method ni [list GET HEAD] && [qc::status get] eq "invalid"} {
                 qc::return_response
                 return "filter_return"
-            } elseif { [qc::conn_open] && ! [qc::record all_valid] } {
+            } elseif { [qc::conn_open] && [qc::status get] eq "invalid" } {
                 # GET request failed validation
                 error "Couldn't validate the path \"$url_path\"" {} BAD_REQUEST                
             }

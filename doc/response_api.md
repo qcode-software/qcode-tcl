@@ -10,6 +10,7 @@ This describes the API is for modifying the [global JSON response].
 
 * [valid](procs/status_valid.md)
 * [invalid](procs/status_invalid.md)
+* [get](procs/status_get.md)
 
 ### Record
 

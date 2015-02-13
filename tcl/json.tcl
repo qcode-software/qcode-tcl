@@ -324,7 +324,7 @@ proc qc::data2json {} {
 
 namespace eval qc::status {
 
-    namespace export invalid valid
+    namespace export invalid valid get
     namespace ensemble create
     
     proc invalid {} {
@@ -337,5 +337,11 @@ namespace eval qc::status {
         #| Set the status as "valid" for the JSON Response.
         global data
         dict set data status "valid"
+    }
+
+    proc get {} {
+        #| Gets the current status for the JSON Response.
+        global data
+        return [dict get $data status]
     }
 }
