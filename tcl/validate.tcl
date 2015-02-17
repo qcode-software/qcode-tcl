@@ -41,7 +41,7 @@ proc qc::validate2model {dict} {
     }
 
     if { ! $all_valid } {
-        qc::status invalid
+        qc::response status invalid
     }
     
     return $all_valid
