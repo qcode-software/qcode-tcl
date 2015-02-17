@@ -266,7 +266,7 @@ proc qc::filter_fastpath_gzip {filter_when file_extensions} {
     set file_path [ns_pagepath]$conn_path
     set gzipped_file_path [ns_pagepath]${conn_path}.gz
     
-    if { [ns_conn zipaccepted] && [file readable $file_path] && [file extension $file_path] in $file_extensions && [file type $file_path] in [list "link" "file"] && ![file readable $gzipped_file_path]} {
+    if { [ns_conn zipaccepted] && ![file readable $gzipped_file_path] && [file readable $file_path] && [file extension $file_path] in $file_extensions && [file type $file_path] in [list "link" "file"] } {
         ns_gzipfile $file_path $gzipped_file_path
     }
     return "filter_ok"
