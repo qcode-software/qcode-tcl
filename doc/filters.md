@@ -102,6 +102,42 @@ foreach http_method [list GET POST HEAD] {
 
 Note that `qc::filter_file_alias_path` takes the HTTP method as an argument. This is so that it can register the alias on fastpath for the requested method.
 
+qc::filter_fastpath_gzip
+---------------------------
+
+The task of this filter is to seed .gz versions of static files that can be used by NaviServer to delivered gzip encoded if the client accepts such responses.
+
+See [NaviServer: Serve Gzip Encoded Static Files & Dynamic Content](http://www.qcode.co.uk/post/121) for more information.
+
+### Usage
+
+As the intention of this filter is to seed .gz versions of static files on demand it should be done prior to the request being handled by fastpath. Therefore `qc::filter_fastpath_gzip` should be set up during pre-authorization or post-authorization.
+
+### Examples
+
+```tcl
+foreach http_method [list GET HEAD] {
+    ns_register_filter postauth $http_method /* qc::filter_fastpath_gzip [list .js .css]
+}
+```
+
+qc::filter_set_expires
+---------------------------
+
+The task of this filter is to set cache control headers of the response: Expires, & Cache-Control. If "cache_response_directive" is specified the function adds the "max-age" header field to the response "Cache-Control" header. cache_response_directive: public, private, no-cache, no-store, no-transform, must-revalidate, or proxy-revalidate.
+
+### Usage
+
+`qc::filter_set_expires` should be set up during pre-authorization or post-authorization.
+
+### Examples
+
+```tcl
+foreach http_method [list GET HEAD] {
+    ns_register_filter postauth $http_method /* qc::filter_set_expires [expr 24*60*60]
+}
+```
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
