@@ -1,11 +1,11 @@
-qc::status get
+qc::reponse status get
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::status get`
+`qc::reponse status get`
 
 Description
 -----------
@@ -15,16 +15,16 @@ Examples
 --------
 ```tcl
 
-% qc::status valid
+% qc::reponse status valid
 status valid
 
-% qc::status get
+% qc::reponse status get
 valid
 
-%qc::status invalid
+% qc::reponse status invalid
 status invalid
 
-%qc::status get
+% qc::reponse status get
 invalid
 
 ```

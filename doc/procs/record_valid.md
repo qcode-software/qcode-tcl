@@ -1,11 +1,11 @@
-qc::record valid
+qc::response record valid
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::record valid name value message`
+`qc::response record valid name value message`
 
 Description
 -----------
@@ -19,13 +19,13 @@ Examples
 --------
 ```tcl
 
-% qc::record valid post_title "Hello World" ""
+% qc::response record valid post_title "Hello World" ""
 record {post_title {valid true value {Hello World} message {}}}
 
-% qc::record valid post_title "Foo Bar" ""
+% qc::response record valid post_title "Foo Bar" ""
 record {post_title {valid true value {Foo Bar} message {}}}
 
-% qc::record valid post_title "Foo Bar" "The title was converted to proper case."
+% qc::response record valid post_title "Foo Bar" "The title was converted to proper case."
 record {post_title {valid true value {Foo Bar} message {The title was converted to proper case.}}}
 
 ```

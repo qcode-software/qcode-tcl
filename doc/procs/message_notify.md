@@ -1,11 +1,11 @@
-qc::message notify
+qc::response message notify
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::message notify message`
+`qc::response message notify message`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::message notify "An update is available."
+% qc::response message notify "An update is available."
 message {notify {value {An update is available.}}}
 
 ```

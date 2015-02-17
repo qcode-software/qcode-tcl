@@ -1,11 +1,11 @@
-qc::actions redirect
+qc::response action redirect
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::actions redirect url`
+`qc::response action redirect url`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::actions redirect "/post/74"
+% qc::response action redirect "/post/74"
 action {redirect {value {/post/74}}}
 
 ```

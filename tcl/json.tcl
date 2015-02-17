@@ -321,27 +321,3 @@ proc qc::data2json {} {
         return -code error "Malformed data: $error_message"
     }
 }
-
-namespace eval qc::status {
-
-    namespace export invalid valid get
-    namespace ensemble create
-    
-    proc invalid {} {
-        #| Set the status as "invalid" for the JSON Response.
-        global data
-        dict set data status "invalid"
-    }
-
-    proc valid {} {
-        #| Set the status as "valid" for the JSON Response.
-        global data
-        dict set data status "valid"
-    }
-
-    proc get {} {
-        #| Gets the current status for the JSON Response.
-        global data
-        return [dict get $data status]
-    }
-}

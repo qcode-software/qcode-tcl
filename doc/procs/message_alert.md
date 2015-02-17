@@ -1,11 +1,11 @@
-qc::message alert
+qc::response message alert
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::message alert message`
+`qc::response message alert message`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::message alert "Incorrect username or password."
+% qc::response message alert "Incorrect username or password."
 message {alert {value {Incorrect username or password.}}}
 
 ```

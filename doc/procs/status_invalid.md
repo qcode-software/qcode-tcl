@@ -1,11 +1,11 @@
-qc::status invalid
+qc::reponse status invalid
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::status invalid`
+`qc::reponse status invalid`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::status invalid
+% qc::reponse status invalid
 status invalid
 
 ```

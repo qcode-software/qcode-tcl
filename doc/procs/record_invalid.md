@@ -1,11 +1,11 @@
-qc::record invalid
+qc::response record invalid
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::record invalid name value message`
+`qc::response record invalid name value message`
 
 Description
 -----------
@@ -19,10 +19,10 @@ Examples
 --------
 ```tcl
 
-% qc::record invalid post_title "" "The title cannot be empty."
+% qc::response record invalid post_title "" "The title cannot be empty."
 record {post_title {valid false value {} message {The title cannot be empty.}}}
 
-% qc::record invalid post_title "All Good Things Comes To Those Who Wait" "The title is too long. It should be a maximum of 30 characters."
+% qc::response record invalid post_title "All Good Things Comes To Those Who Wait" "The title is too long. It should be a maximum of 30 characters."
 record {post_title {valid false value {All Good Things Comes To Those Who Wait} message {The title is too long. It should be a maximum of 30 characters.}}}
 
 ```
