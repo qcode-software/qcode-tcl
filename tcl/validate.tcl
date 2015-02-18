@@ -16,11 +16,11 @@ proc qc::validate2model {dict} {
         
         # Check if nullable
         if {! $nullable && $value eq ""} {
-            qc::record invalid $name $value $message
+            qc::response record invalid $name $value $message
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            qc::record valid $name $value ""
+            qc::response record valid $name $value ""
             continue
         }
         # Check value against data type
@@ -33,11 +33,18 @@ proc qc::validate2model {dict} {
         # Check constraints
         set constraint_results [qc::db_eval_column_constraints $table $column $dict]
         if {! $type_check || ([llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]]) } {
-            qc::record invalid $name $value $message
+            qc::response record invalid $name $value $message
             set all_valid false
         } elseif {$type_check} {
-            qc::record valid $name [qc::cast $data_type $value] ""
+            qc::response record valid $name [qc::cast $data_type $value] ""
         }
     }
+
+    if { ! $all_valid } {
+        qc::response status invalid
+    } else {
+        qc::response status valid
+    }
+    
     return $all_valid
 }

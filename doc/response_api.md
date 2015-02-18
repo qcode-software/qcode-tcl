@@ -6,6 +6,12 @@ part of [Qcode Documentation](index.md)
 
 This describes the API is for modifying the [global JSON response].
 
+### Status
+
+* [valid](procs/status_valid.md)
+* [invalid](procs/status_invalid.md)
+* [get](procs/status_get.md)
+
 ### Record
 
 * [valid]

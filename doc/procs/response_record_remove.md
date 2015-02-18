@@ -1,11 +1,11 @@
-qc::record remove
+qc::response record remove
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::record remove name`
+`qc::response record remove name`
 
 Description
 -----------
@@ -15,10 +15,10 @@ Examples
 --------
 ```tcl
 
-% qc::record valid post_title "Hello World" ""
+% qc::response record valid post_title "Hello World" ""
 record {post_title {valid true value {Hello World} message {}}}
 
-% qc::record remove post_title
+% qc::response record remove post_title
 record {}
 
 ```

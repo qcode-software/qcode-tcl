@@ -21,10 +21,10 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             }
             
             # Let the client know if there's a problem
-            if {[qc::conn_open] && $method ni [list GET HEAD] && ! [qc::record all_valid]} {
+            if {[qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid"} {
                 qc::return_response
                 return "filter_return"
-            } elseif { [qc::conn_open] && ! [qc::record all_valid] } {
+            } elseif { [qc::conn_open] && [qc::response status get] eq "invalid" } {
                 # GET request failed validation
                 error "Couldn't validate the path \"$url_path\"" {} BAD_REQUEST                
             }
@@ -55,7 +55,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                 # User is trying to POST with an invalid session
                 if {[qc::session_exists [qc::session_id]] && [qc::session_user_id [qc::session_id]] != -1} {
                     # Normal user - redirect to login page.
-                    qc::actions redirect "/user/login"
+                    qc::response action redirect "/user/login"
                     qc::return_response
                     return "filter_return"
                 } else {

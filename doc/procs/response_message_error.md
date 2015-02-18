@@ -1,11 +1,11 @@
-qc::message error
+qc::response message error
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::message error message`
+`qc::response message error message`
 
 Description
 -----------
@@ -15,7 +15,7 @@ Examples
 --------
 ```tcl
 
-% qc::message error "There was a problem processing part of your request. Please try again in a few moments."
+% qc::response message error "There was a problem processing part of your request. Please try again in a few moments."
 message {error {value {There was a problem processing part of your request. Please try again in a few moments.}}}
 
 ```

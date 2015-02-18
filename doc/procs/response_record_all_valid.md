@@ -1,11 +1,11 @@
-qc::record all_valid
+qc::response record all_valid
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::record all_valid'
+`qc::response record all_valid'
 
 Description
 -----------
@@ -15,16 +15,16 @@ Examples
 --------
 ```tcl
 
-% qc::record invalid post_title "" "The title cannot be empty."
+% qc::response record invalid post_title "" "The title cannot be empty."
 record {post_title {valid false value {} message {The title cannot be empty.}}}
 
-% qc::record all_valid
+% qc::response record all_valid
 false
 
-% qc::record valid post_title "Hello World" ""
+% qc::response record valid post_title "Hello World" ""
 record {post_title {valid true value {Hello World} message {}}}
 
-% qc::record all_valid
+% qc::response record all_valid
 true
 
 ```

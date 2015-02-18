@@ -1,22 +1,22 @@
-qc::actions redirect
+qc::response message alert
 ===========
 
 part of [Global JSON Response API](../response_api.md)
 
 Usage
 -----
-`qc::actions redirect url`
+`qc::response message alert message`
 
 Description
 -----------
-Sets the redirect element of the action object in the [global JSON response] with the given URL.
+Sets the alert element of the message object in the [global JSON response] with the given message.
 
 Examples
 --------
 ```tcl
 
-% qc::actions redirect "/post/74"
-action {redirect {value {/post/74}}}
+% qc::response message alert "Incorrect username or password."
+message {alert {value {Incorrect username or password.}}}
 
 ```
 
