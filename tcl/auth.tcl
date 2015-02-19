@@ -14,7 +14,7 @@ proc qc::auth {} {
     # Try session based auth
     if { [qc::cookie_exists session_id] } {
         set session_id [cookie_get session_id]
-        if { [qc::session_valid $session_id] } {
+        if { [qc::session_exists $session_id] } {
             qc::session_update $session_id
             return [set current_user_id [qc::auth_session $session_id]]
         }
@@ -34,7 +34,7 @@ proc qc::auth_check {} {
     # session based auth
     if { [qc::cookie_exists session_id]} {
 	set session_id [cookie_get session_id]
-	if { [qc::session_valid $session_id] } {
+	if { [qc::session_exists $session_id] } {
 	    return true
 	}
     }
@@ -76,7 +76,7 @@ proc qc::auth_session { session_id } {
     #| Try to authenticate user based on the session_id given
     #| Return the user_id if successful
     #| On failure throw AUTH error
-    if { [session_exists $session_id] } {
+    if { [session_valid $session_id] } {
         return [session_user_id $session_id]
     } else {
 	error "Session authentication failed to identify you." {} AUTH
