@@ -50,13 +50,10 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
         # Check if this request is registered.
         if { [qc::registered $method $url_path] } {
             if {[qc::cookie_exists session_id] && [qc::session_valid [qc::session_id]]} {
-                global session_id current_user_id
-                qc::session_update $session_id
-                set current_user_id [qc::session_user_id $session_id]
+                qc::session_update [qc::session_id]
             } elseif {$method ni [list "GET" "HEAD"] && [qc::cookie_exists session_id] && ! [qc::session_valid [qc::session_id]]} {
-                global session_id
                 # User is trying to POST with an invalid session
-                if {[qc::session_exists $session_id] && [qc::session_user_id $session_id] != -1} {
+                if {[qc::session_exists [qc::session_id]] && [qc::session_user_id [qc::session_id]] != [qc::anonymous_user_id]} {
                     # Normal user - redirect to login page.
                     qc::response action redirect "/user/login"
                     qc::return_response
@@ -66,8 +63,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                 }
             } else {
                 # Implicitly log in as anonymous user.
-                global current_user_id session_id
-                set current_user_id [qc::anonymous_user_id]
+                global session_id
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
             }
