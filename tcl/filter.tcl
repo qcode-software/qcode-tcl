@@ -87,6 +87,8 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
             
             # Roll the anonymous session after 1 hour.
             if {[qc::auth] == [qc::anonymous_user_id]} {
+                global session_id
+                set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
             }
         }
