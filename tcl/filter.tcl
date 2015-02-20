@@ -53,7 +53,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                 qc::session_update [qc::session_id]
             } elseif {$method ni [list "GET" "HEAD"] && [qc::cookie_exists session_id] && ! [qc::session_valid [qc::session_id]]} {
                 # User is trying to POST with an invalid session
-                if {[qc::session_exists [qc::session_id]] && [qc::session_user_id [qc::session_id]] != -1} {
+                if {[qc::session_exists [qc::session_id]] && [qc::session_user_id [qc::session_id]] != [qc::anonymous_user_id]} {
                     # Normal user - redirect to login page.
                     qc::response action redirect "/user/login"
                     qc::return_response
@@ -63,8 +63,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                 }
             } else {
                 # Implicitly log in as anonymous user.
-                global current_user_id session_id
-                set current_user_id [qc::anonymous_user_id]
+                global session_id
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
             }
@@ -83,8 +82,10 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
             }
             
             # Roll the anonymous session after 1 hour.
-            if {[qc::auth] == [qc::anonymous_user_id]} {
-                qc::cookie_set session_id [qc::anonymous_session_id]
+            if {[qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id]} {
+                global session_id
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
             }
         }
     } on error [list error_message options] {
