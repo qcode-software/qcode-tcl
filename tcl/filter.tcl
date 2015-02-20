@@ -63,7 +63,8 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                 }
             } else {
                 # Implicitly log in as anonymous user.
-                global session_id
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
             }
@@ -82,7 +83,7 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
             }
             
             # Roll the anonymous session after 1 hour.
-            if {[qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id]} {
+            if {[qc::auth] == [qc::anonymous_user_id]} {
                 global session_id
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
