@@ -385,12 +385,14 @@ proc qc::email_header_values {key value} {
     # Content-Type: multipart/report; report-type=delivery-status; boundary="=_ventus"
     # to dict
     # $key multipart/report report-type delivery-status boundary =_ventus
+    # lower case parameter attribute names to allow case insensitive matching
     set dict {}
     set list [split [string trimright $value ";"] ";"]
     lappend dict $key [lindex $list 0]
+    # parameters
     foreach part [lrange $list 1 end] {
 	lassign [split_pair $part =] key value
-	lappend dict $key [string trim $value \"']
+	lappend dict [string tolower $key] [string trim $value \"']
     }
     return $dict
 }
