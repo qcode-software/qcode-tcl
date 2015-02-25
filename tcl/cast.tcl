@@ -23,7 +23,7 @@ proc qc::cast_decimal {string {precision ""}} {
         }
         return [qc::cast decimal -precision $p -scale $precision $string]
     } else {
-        return [qc:cast decimal $string]
+        return [qc::cast decimal $string]
     }
 }
 
