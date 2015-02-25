@@ -7,6 +7,11 @@ proc qc::is_boolean {bool} {
 }
 
 proc qc::is_integer {int} {
+    #| Deprecated - see qc::is integer
+    return [qc::is integer $int]
+}
+
+proc qc::is_integer_old {int} {
     if { [string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647 } {
 	return 1
     } else {
@@ -463,4 +468,18 @@ proc qc::is_uri_valid {uri} {
     }]
     
     return [regexp -expanded $re $uri]
+}
+
+namespace eval qc::is {
+    namespace export integer
+    namespace ensemble create
+    
+    proc integer {int} {
+        #| Checks if the given number is a 32-bit signed integer.
+        if {[string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647} {
+            return 1
+        } else {
+            return 0
+        }
+    }
 }
