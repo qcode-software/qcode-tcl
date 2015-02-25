@@ -42,21 +42,6 @@ proc qc::cast_decimal {string {precision ""}} {
     }
 }
 
-proc qc::cast_decimal_old {string {precision ""}} {
-    #| Try to cast given string into a decimal value
-    set original $string
-    set string [string map {, {} % {}} $string]
-    if { [string is double -strict $string] } {
-	if { [string is integer -strict $precision] } {
-	    return [qc::round $string $precision]
-	} else {
-	    return $string
-	}
-    } else {
-	error "Could not cast $original to decimal" {} CAST
-    }
-}
-
 proc qc::cast_date {string} {
     #| Try to convert the given string into an ISO date.
     return [clock format [cast_epoch $string] -format "%Y-%m-%d"]

@@ -11,14 +11,6 @@ proc qc::is_integer {int} {
     return [qc::is integer $int]
 }
 
-proc qc::is_integer_old {int} {
-    if { [string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647 } {
-	return 1
-    } else {
-	return 0
-    }
-}
-
 proc qc::is_pos {number} {
     if { [is_decimal $number] && $number>=0 } {
 	return 1
