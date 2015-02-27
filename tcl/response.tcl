@@ -113,7 +113,7 @@ namespace eval qc::response {
     # Response Action
     #
     ##################################################
-    namespace eval actions {
+    namespace eval action {
         
         namespace export redirect login
         namespace ensemble create

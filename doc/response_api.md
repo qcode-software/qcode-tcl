@@ -8,9 +8,9 @@ This describes the API is for modifying the [global JSON response].
 
 ### Status
 
-* [valid](procs/status_valid.md)
-* [invalid](procs/status_invalid.md)
-* [get](procs/status_get.md)
+* [valid](procs/response_status_valid.md)
+* [invalid](procs/response_status_invalid.md)
+* [get](procs/response_status_get.md)
 
 ### Record
 
@@ -33,13 +33,13 @@ This describes the API is for modifying the [global JSON response].
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
-[valid]: procs/record_valid.md
-[invalid]: procs/record_invalid.md
-[remove]: procs/record_remove.md
-[all_valid]: procs/record_all_valid.md
-[notify]: procs/message_notify.md
-[alert]: procs/message_alert.md
-[error]: procs/message_error.md
-[redirect]: procs/action_redirect.md
+[valid]: procs/response_record_valid.md
+[invalid]: procs/response_record_invalid.md
+[remove]: procs/response_record_remove.md
+[all_valid]: procs/response_record_all_valid.md
+[notify]: procs/response_message_notify.md
+[alert]: procs/response_message_alert.md
+[error]: procs/response_message_error.md
+[redirect]: procs/response_action_redirect.md
 
 [global JSON response]: global-json-response.md
