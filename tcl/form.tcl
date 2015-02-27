@@ -116,16 +116,19 @@ proc qc::form {args} {
         error "Uneven number of name/value pairs in \"$args\""
     }
     if { [dict exists $args method] } {
-        set method [dict get $args method]
+        # Make the method is uppercase
+        dict set args method [string toupper [dict get $args method]]
     } else {
-        set method GET
+        # Default method
+        dict set args method POST
     }
+    set method [dict get $args method]
     if { $method ne "GET"} {
-        # Form will be altering something on submission so require an authenticity token
+        # Add an authenticity token
         append html [qc::form_authenticity_token]
     }
-    if { $method ne "POST" } {
-        # Not a POST so overload the method.
+    if { $method ni [list "POST" "GET"] } {
+        # Overload the method.
         append html [h input type hidden value $method name _method]
         dict set args method POST
     }
