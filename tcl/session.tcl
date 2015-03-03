@@ -68,6 +68,7 @@ proc qc::session_exists {session_id} {
 
 proc qc::session_valid {args} {
     #| Check session exists and has not expired.
+    # Anonomous user sessions never expire
     qc::args $args -age_limit ? -idle_timeout "1 hour" -- session_id
     
     # Check config parameters for session age limit and idle timeout.
@@ -84,17 +85,30 @@ proc qc::session_valid {args} {
     
     set qry {
 	select
-	user_id
+	user_id,
+        CASE 
+        WHEN (current_timestamp-time_modified) >:idle_timeout::interval
+        THEN true ELSE false
+        END as idle_timeout_exceeded,
+        CASE
+        WHEN (current_timestamp-time_created) >:age_limit::interval
+        THEN true ELSE false
+        END as age_limit_exceeded
 	from session
 	where
 	session_id=:session_id
-	and (current_timestamp-time_modified) <=:idle_timeout::interval
-        and (current_timestamp-time_created) <=:age_limit::interval
     }
     db_0or1row $qry {
 	return false
     } {
-	return true
+        if { $user_id == [qc::anonymous_user_id] } {
+            # Anonomous sessions never expire
+            return true
+        } elseif { $age_limit_exceeded || $idle_timeout_exceeded } {
+            return false
+        } else {
+            return true
+        }
     }
 }
 
