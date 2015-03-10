@@ -72,8 +72,7 @@ proc qc::h_tag { tag_name args } {
    
     foreach {name value} [qc::dict_exclude $args {*}$minimized] {
         if { $name eq "classes" } {
-            set class [join $value]
-            lappend attributes "class=\"[string map {< &lt; > &gt; & &amp; \" &#34;} $class]\""
+            lappend attributes "class=\"[string map {< &lt; > &gt; & &amp; \" &#34;} [join $value]]\""
         } else {
             lappend attributes "$name=\"[string map {< &lt; > &gt; & &amp; \" &#34;} $value]\""
         }
