@@ -274,6 +274,57 @@ namespace eval ::qcode::test {
         url_to_html_hidden http://somedomain.com/somewhere.html?a=1&b=2#somefragment
     } -result "<input type=\"hidden\" name=\"a\" value=\"1\" id=\"a\">\n<input type=\"hidden\" name=\"b\" value=\"2\" id=\"b\">\n"
     
+    # url_make
+    test url_make-1.0 {url_make} -body {
+        url_make {
+            protocol "https"
+            domain "qcode.co.uk"
+            port 80
+            segments {
+                "post"
+                123
+            }
+            params {
+                tags "tcl"
+                tags "psql"
+                author "peter"
+            }
+            hash "comments"
+        }
+    } -result "https://qcode.co.uk::80/post/123?tags=tcl&tags=psql&author=peter#comments"
+
+    test url_make-1.1 {url_make hash only} -body {
+        url_make {
+            hash "comments"
+        }
+    } -result "#comments"
+
+    test url_make-1.2 {url_make query only} -body {
+        url_make {
+            params {
+                tags "tcl"
+                tags "psql"
+                author "peter"
+            }
+        }
+    } -result "?tags=tcl&tags=psql&author=peter"
+
+    test url_make-1.3 {url_make path only} -body {
+        url_make {
+            segments {
+                "post"
+                123
+            }
+        }
+    } -result "/post/123"
+
+    test url_make-1.4 {url_make root only} -body {
+        url_make {
+            protocol "https"
+            domain "qcode.co.uk"
+            port 80
+        }
+    } -result "https://qcode.co.uk::80"
 
     cleanupTests
 }
