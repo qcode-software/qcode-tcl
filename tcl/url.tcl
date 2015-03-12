@@ -225,7 +225,8 @@ proc qc::url_parts {url} {
         $}]
     if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
         set params [split $query &=]
-        return [qc::dict_from base params hash protocol domain port path]
+        set segments [split [string trimleft $path "/"] "/"]
+        return [qc::dict_from base params hash protocol domain port path segments]
     }
 
     set pattern [subst -nocommands -nobackslashes {^
@@ -242,7 +243,8 @@ proc qc::url_parts {url} {
         lassign [list "" "" ""] protocol domain port
         set base $path
         set params [split $query &=]
-        return [qc::dict_from base params hash protocol domain port path]
+        set segments [split [string trimleft $path "/"] "/"]
+        return [qc::dict_from base params hash protocol domain port path segments]
     }
 
     error "Unable to parse url $url"
@@ -264,4 +266,95 @@ proc qc::url_request_path {request} {
     }
     set parts [qc::url_parts $request_uri]
     return [dict get $parts path]
+}
+
+proc qc::url_make {dict} {
+    #| Construct an url from a dict of parts
+    # eg.
+    # url_make {
+    #     protocol https
+    #     domain qcode.co.uk
+    #     port 80
+    #     segments {posts 123 "hello world"}
+    #     params {tags tcl tags psql author peter}
+    #     hash comments
+    # }
+    # => https://qcode.co.uk::80/posts/123/hello+world?tags=tcl&tags=psql&author=peter#comments
+    # all keys are optional, but if protocol, domain, and/or port are specified,
+    #   protocol and domain must be specified)
+    # "segments" is a list
+    # "params" is a multimap
+    # If segments is specified (even as an empty list), the url path will be absolute
+    dict2vars $dict protocol domain port segments params hash
+
+    # Construct url root (eg. http://qcode.co.uk::80).
+    if {
+        [info exists protocol]
+        || [info exists domain]
+        || [info exists port]
+    } {
+        if { ! [info exists protocol] } {
+            error "Invalid url dict - domain or port without protocol"
+        }
+        if { ! [info exists domain] } {
+            error "Invalid url dict - protocol or port without domain"
+        }
+        if { ! [regexp {https?} $protocol] } {
+            error "Invalid url protocol $protocol"
+        }
+        if { ! [regexp {[a-z0-9\-\.]+} $domain] } {
+            error "Invalid url domain $domain"
+        }
+        if { [info exists port] } {
+            if { ! [regexp {[0-9]+} $port] } {
+                error "Invalid url port $port"
+            }
+            set root "${protocol}://${domain}::${port}"
+        } else {
+            set root "${protocol}://${domain}"
+        }
+    }
+
+    # Construct url path (eg. /posts/123/hello-world).
+    if { [info exists segments] } {
+        set segments_escaped [list]
+        foreach segment $segments {
+            lappend segments_escaped [url_encode $segment]
+        }
+        set path "/[join $segments_escaped "/"]"
+    }
+
+    # Construct url query (eg. tags=tcl&tags=psql&author=peter).
+    if { [info exists params] } {
+        if { [llength $params] % 2 != 0 } {
+            error "Invalid params multimap $params"
+        }
+        set pairs [list]
+        foreach {name value} $params {
+            lappend pairs "[url_encode $name]=[url_encode $value]"
+        }
+        set query "[join $pairs "&"]"
+    }
+
+    # Encode hash into url "fragment"
+    if { [info exists hash] } {
+        set fragment [url_encode $hash]
+    }
+
+    # Bring the parts together into an url
+    set url ""
+    if { [info exists root] } {
+        append url $root
+    }
+    if { [info exists path] } {
+        append url $path
+    }
+    if { [info exists query] } {
+        append url "?$query"
+    }
+    if { [info exists fragment] } {
+        append url "#$fragment"
+    }
+
+    return $url
 }
