@@ -289,14 +289,14 @@ proc qc::url_make {dict} {
 
     # Construct url root (eg. http://qcode.co.uk::80).
     if {
-        [info exists protocol]
-        || [info exists domain]
-        || [info exists port]
+        ([info exists protocol] && $protocol ne "")
+        || ([info exists domain] && $domain ne "")
+        || ([info exists port] && $port ne "")
     } {
-        if { ! [info exists protocol] } {
+        if { ! ([info exists protocol] && $protocol ne "") } {
             error "Invalid url dict - domain or port without protocol"
         }
-        if { ! [info exists domain] } {
+        if { ! ([info exists domain] && $domain ne "") } {
             error "Invalid url dict - protocol or port without domain"
         }
         if { ! [regexp {https?} $protocol] } {
@@ -305,7 +305,7 @@ proc qc::url_make {dict} {
         if { ! [regexp {[a-z0-9\-\.]+} $domain] } {
             error "Invalid url domain $domain"
         }
-        if { [info exists port] } {
+        if { ([info exists port] && $port ne "") } {
             if { ! [regexp {[0-9]+} $port] } {
                 error "Invalid url port $port"
             }
@@ -325,7 +325,7 @@ proc qc::url_make {dict} {
     }
 
     # Construct url query (eg. tags=tcl&tags=psql&author=peter).
-    if { [info exists params] } {
+    if { [info exists params] && [llength $params] > 0 } {
         if { [llength $params] % 2 != 0 } {
             error "Invalid params multimap $params"
         }
@@ -337,7 +337,7 @@ proc qc::url_make {dict} {
     }
 
     # Encode hash into url "fragment"
-    if { [info exists hash] } {
+    if { [info exists hash] && $hash ne "" } {
         set fragment [url_encode $hash]
     }
 
@@ -357,4 +357,77 @@ proc qc::url_make {dict} {
     }
 
     return $url
+}
+
+proc qc::url_maker {args} {
+    #| Construct or modifiy an url
+    set usage_error {Usage: url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
+    set url_dict [dict create]
+    set section "base"
+    set sections [list "base" "port" "segments" "params" "hash"]
+    set delimiters {
+        "::" "port"
+        "/" "segments"
+        "?" "params"
+        "#" "hash"
+    }
+    set end_of_section false
+    foreach arg $args {
+        if { [dict exists $delimiters $arg] } {
+            set new_section [dict get $delimiters $arg]
+            set old_index [lsearch $sections $section]
+            set new_index [lsearch $sections $new_section]
+            if { $new_index <= $old_index } {
+                error $usage_error
+            }
+            set section $new_section
+            switch $section {
+                "port" {
+                    dict set url_dict port ""
+                }
+                "segments" {
+                    dict set url_dict segments [list]
+                }
+                "params" {
+                    dict set url_dict params [list]
+                }
+                "hash" {
+                    dict set url ""
+                }
+            }
+            set end_of_section false
+        } else {
+            if { $end_of_section } {
+                error $usage_error
+            }
+            if { [string index $arg 0] eq ":" } {
+                set value [uplevel set [string range $arg 1 end]]
+            } else {
+                set value $arg
+            }
+            switch $section {
+                "base" {
+                    if { $value ne "" } {
+                        set url_dict [qc::url_parts $value]
+                    }
+                    set end_of_section true
+                }
+                "port" {
+                    dict set url_dict port $value
+                    set end_of_section true
+                }
+                "segments" {
+                    dict lappend url_dict segments $value
+                }
+                "params" {
+                    dict lappend url_dict params $value
+                }
+                "hash" {
+                    dict set url_dict hash $value
+                    set end_of_section true
+                }
+            }
+        }
+    }
+    return [qc::url_make $url_dict]
 }
