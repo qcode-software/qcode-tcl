@@ -58,7 +58,7 @@ proc qc::filter_authenticate {event args} {
             }
 
             if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
-                # GET/HEAD request for anonomous session - roll session after 1 hour
+                # GET/HEAD request for anonymous session - roll session after 1 hour
                 global session_id current_user_id
                 set current_user_id [qc::anonymous_user_id]
                 set session_id [qc::anonymous_session_id]
