@@ -361,6 +361,7 @@ proc qc::url_make {dict} {
 
 proc qc::url_maker {args} {
     #| Construct or modifiy an url
+    # Usage url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
     set usage_error {Usage: url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
     set url_dict [dict create]
     set section "base"
@@ -386,13 +387,13 @@ proc qc::url_maker {args} {
                     dict set url_dict port ""
                 }
                 "segments" {
-                    dict set url_dict segments [list]
+                    dict_default url_dict segments [list]
                 }
                 "params" {
-                    dict set url_dict params [list]
+                    dict_default url_dict params [list]
                 }
                 "hash" {
-                    dict set url ""
+                    dict set url_dict hash ""
                 }
             }
             set end_of_section false
