@@ -38,38 +38,71 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
     }    
 }
 
-proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
+proc qc::filter_authenticate {event args} {
     #| Checks if session and authentication token are valid.
     # Default to qc::error_handler
-    if {$error_handler eq ""} {
-        set error_handler qc::error_handler
-    }
+    args $args -login_url "/user/login" -relogin_url "/user/session-expired" -reauth_expired_session -error_handler qc::error_handler -- 
+
     set url_path [qc::conn_path]
     set method [string toupper [qc::conn_method]]
     ::try {
+      
         # Check if this request is registered.
         if { [qc::registered $method $url_path] } {
-            if {[qc::cookie_exists session_id] && [qc::session_valid [qc::session_id]]} {
-                qc::session_update [qc::session_id]
-            } elseif {$method ni [list "GET" "HEAD"] && [qc::cookie_exists session_id] && ! [qc::session_valid [qc::session_id]]} {
-                # User is trying to POST with an invalid session
-                if {[qc::session_exists [qc::session_id]] && [qc::session_user_id [qc::session_id]] != [qc::anonymous_user_id]} {
-                    # Normal user - redirect to login page.
-                    qc::response action redirect "/user/login"
-                    qc::return_response
-                    return "filter_return"
-                } else {
-                    error "Session invalid. Please refresh the page." {} "SESSION INVALID"
-                }
-            } else {
-                # Implicitly log in as anonymous user.
+            if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
+                # No session cookie or session doesn't exist - implicitly log in as anonymous user.
                 global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]
+                set current_user_id [qc::anonymous_user_id]          
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
             }
 
-            # Any non-GET/HEAD methods require authentication to prevent cross site request forgery.
+            if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
+                # GET/HEAD request for anonymous session - roll session after 1 hour
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
+            } 
+           
+            if { [qc::session_valid [qc::session_id]] } {
+                # Valid session - refresh session
+                qc::session_update [qc::session_id]
+            } else {
+                # Expired session (normal user) - implicitly log in as anonymous user and optionally redirect to login forms
+                set expired_user_id [qc::session_user_id [qc::session_id]]
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
+                qc::session_update [qc::session_id]
+
+                if { [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
+                    db_1row {
+                        select 
+                        email 
+                        from users
+                        where user_id=:expired_user_id
+                    }
+                    set relogin_url [url $relogin_url login_code $email]
+                    if { $method in [list "GET" "HEAD"] } {
+                        # Redirect GET/HEAD requests back to this url after login
+                        return_next [url $relogin_url next_url [url_here]]
+                    } else {
+                        # POST requests 
+                        qc::response action redirect $relogin_url
+                        qc::return_response
+                    }
+                    return "filter_return"    
+                } elseif { $method ni [list "GET" "HEAD"]  && $expired_user_id != [qc::anonymous_user_id] } {
+                    # POST request (normal user) - redirect to login page.
+                    qc::response action redirect $login_url
+                    qc::return_response
+                    return "filter_return"
+                }
+            }
+
+            # Any non-GET/HEAD methods require an authenticity token to prevent cross site request forgery.
             if {$method ni [list "GET" "HEAD"]} {
                 set form_dict [qc::form2dict]
                 if {[dict exists $form_dict _authenticity_token]} {
@@ -81,13 +114,8 @@ proc qc::filter_authenticate {event {error_handler qc::error_handler}} {
                     error "Authenticity token was not found." {} AUTH
                 }
             }
-            
-            # Roll the anonymous session after 1 hour.
-            if {[qc::auth] == [qc::anonymous_user_id]} {
-                global session_id
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
-            }
+
+
         }
     } on error [list error_message options] {
         $error_handler $error_message $options
