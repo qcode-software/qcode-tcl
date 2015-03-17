@@ -5,6 +5,7 @@ namespace eval qc {
     namespace import ::tcl::mathfunc::max
     namespace import ::tcl::mathfunc::min
 }
+package require math::decimal
 
 proc qc::round { value dec_places } {
     #| Perform rounding of $value to $dec_places places.
@@ -106,26 +107,33 @@ proc qc::intplaces { number } {
 }
 
 proc qc::add { n1 n2 } {
-    #| Adds 2 numbers with check for overflow
-    return [expr {$n1 + $n2}]
+    #| Adds 2 numbers using decimal arithmetic (::math::decimal).
+    set n1 [::math::decimal::fromstr $n1]
+    set n2 [::math::decimal::fromstr $n2]
+    return [::math::decimal::tostr [::math::decimal::add $n1 $n2]]
 }
 
 proc qc::sum { sum args } {
-    #| Returns the sum of list of number.
+    #| Returns the sum of list of number using decimal arithmetic (::math::decimal).
+    set sum [::math::decimal::fromstr $sum]
     foreach arg $args {
-	set sum [add $sum $arg]
+	set sum [::math::decimal::add $sum [::math::decimal::fromstr $arg]]
     }
-    return $sum
+    return [::math::decimal::tostr $sum]
 }
 
 proc qc::subtr { n1 n2 } {
-    #| Subtracts with check for overflow
-    return [expr {$n1 - $n2}]
+    #| Subtracts 2 numbers using decimal arithmetic (::math::decimal).
+    set n1 [::math::decimal::fromstr $n1]
+    set n2 [::math::decimal::fromstr $n2]
+    return [::math::decimal::tostr [::math::decimal::subtract $n1 $n2]]
 }
 
 proc qc::mult { n1 n2 } {
-    #| Multiplies 2 numbers with check for overflow
-    return [expr {$n1*$n2}]
+    #| Multiplies 2 numbers using decimal arithmetic (::math::decimal).
+    set n1 [::math::decimal::fromstr $n1]
+    set n2 [::math::decimal::fromstr $n2]
+    return [::math::decimal::tostr [::math::decimal::multiply $n1 $n2]]
 }
 
 proc qc::exp2string { number } {
