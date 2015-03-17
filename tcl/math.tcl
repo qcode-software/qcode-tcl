@@ -5,7 +5,7 @@ namespace eval qc {
     namespace import ::tcl::mathfunc::max
     namespace import ::tcl::mathfunc::min
 }
-package require math::decmial
+package require math::decimal
 
 proc qc::round { value dec_places } {
     #| Perform rounding of $value to $dec_places places.
