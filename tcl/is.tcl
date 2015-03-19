@@ -595,11 +595,11 @@ namespace eval qc::is {
         if { $relative } {
             return [regexp -expanded {
                 # path
-                ^([a-zA-Z0-9_\-\.~+/%]+)?
+                ^([a-zA-Z0-9_\-\.~+/%]*)?
                 # query
-                (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+                (\?[a-zA-Z0-9_\-\.~+/%=&]*)?
                 # anchor
-                (\#[a-zA-Z0-9_\-\.~+/%]+)?
+                (\#[a-zA-Z0-9_\-\.~+/%]*)?
                 $
             } $url]
         } else {
@@ -611,11 +611,11 @@ namespace eval qc::is {
                 # port
                 (:[0-9]+)?
                 # path
-                ([a-zA-Z0-9_\-\.~+/%]+)?
+                ([a-zA-Z0-9_\-\.~+/%]*)?
                 # query
-                (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
+                (\?[a-zA-Z0-9_\-\.~+/%=&]*)?
                 # anchor
-                (\#[a-zA-Z0-9_\-\.~+/%]+)?
+                (\#[a-zA-Z0-9_\-\.~+/%]*)?
                 $
             } $url]
         }
