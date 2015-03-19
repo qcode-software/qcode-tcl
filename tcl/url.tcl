@@ -218,10 +218,10 @@ proc qc::url_parts {url} {
          )
         
         # query (optional)
-        (?:\?(${query_char}+))?
+        (?:\?(${query_char}*))?
         
         # hash (optional)
-        (?:\#(${hash_char}+))?
+        (?:\#(${hash_char}*))?
         $}]
     if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
         set params [split $query &=]
@@ -231,13 +231,13 @@ proc qc::url_parts {url} {
 
     set pattern [subst -nocommands -nobackslashes {^
         # base with path (abs or rel) only
-        (${path_char}+)
+        (${path_char}*)
         
         # query (optional)
-        (?:\?(${query_char}+))?
+        (?:\?(${query_char}*))?
         
         # hash (optional)
-        (?:\#(${hash_char}+))?
+        (?:\#(${hash_char}*))?
         $}]
     if { [regexp -expanded $pattern $url -> path query hash] } {
         lassign [list "" "" ""] protocol domain port

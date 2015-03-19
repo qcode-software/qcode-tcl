@@ -772,8 +772,8 @@ namespace eval qc::is {
         set relative_uri [subst -nocommands -nobackslashes {
             (?:
              (?://${authority}${path_abempty}|${path_absolute}|${path_noscheme}|${path_empty})
-             (?:\?${query_char}+)?
-             (\#${fragment_char}+)?
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
              )
         }]
 
@@ -781,8 +781,8 @@ namespace eval qc::is {
             (?:
              ${scheme}:
              (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
-             (?:\?${query_char}+)?
-             (?:\#${fragment_char}+)?
+             (?:\?${query_char}*)?
+             (?:\#${fragment_char}*)?
              )
         }]
 
