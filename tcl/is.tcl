@@ -595,11 +595,11 @@ namespace eval qc::is {
         if { $relative } {
             return [regexp -expanded {
                 # path
-                ^([a-zA-Z0-9_\-\.~+/%]*)?
+                ^([a-zA-Z0-9_\-\.~+/%]+)?
                 # query
-                (\?[a-zA-Z0-9_\-\.~+/%=&]*)?
+                (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
                 # anchor
-                (\#[a-zA-Z0-9_\-\.~+/%]*)?
+                (\#[a-zA-Z0-9_\-\.~+/%]+)?
                 $
             } $url]
         } else {
@@ -611,11 +611,11 @@ namespace eval qc::is {
                 # port
                 (:[0-9]+)?
                 # path
-                ([a-zA-Z0-9_\-\.~+/%]*)?
+                ([a-zA-Z0-9_\-\.~+/%]+)?
                 # query
-                (\?[a-zA-Z0-9_\-\.~+/%=&]*)?
+                (\?[a-zA-Z0-9_\-\.~+/%=&]+)?
                 # anchor
-                (\#[a-zA-Z0-9_\-\.~+/%]*)?
+                (\#[a-zA-Z0-9_\-\.~+/%]+)?
                 $
             } $url]
         }
@@ -772,8 +772,8 @@ namespace eval qc::is {
         set relative_uri [subst -nocommands -nobackslashes {
             (?:
              (?://${authority}${path_abempty}|${path_absolute}|${path_noscheme}|${path_empty})
-             (?:\?${query_char}+)?
-             (\#${fragment_char}+)?
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
              )
         }]
 
@@ -781,8 +781,8 @@ namespace eval qc::is {
             (?:
              ${scheme}:
              (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
-             (?:\?${query_char}+)?
-             (?:\#${fragment_char}+)?
+             (?:\?${query_char}*)?
+             (?:\#${fragment_char}*)?
              )
         }]
 

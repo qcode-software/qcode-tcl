@@ -233,11 +233,11 @@ namespace eval ::qcode::test {
     
     test url_parts-1.13 {url parts with base, path, non-empty params and hash} -body {
         url_parts "http://www.qcode.test.co.uk/foo/bar?baz=quo#"
-    } -result {base {http://www.qcode.test.co.uk} params {baz quo} hash {} protocol http domain www.qcode.test.co.uk port {} path {} segments {foo bar}}
+    } -result {base http://www.qcode.test.co.uk/foo/bar params {baz quo} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo/bar segments {foo bar}}
     
     test url_parts-1.14 {url parts with base, path, empty params and non-empty hash} -body {
         url_parts "http://www.qcode.test.co.uk/foo/bar?#foo"
-    } -result {base {http://www.qcode.test.co.uk} params {} hash foo protocol http domain www.qcode.test.co.uk port {} path {} segments {foo bar}}
+    } -result {base http://www.qcode.test.co.uk/foo/bar params {} hash foo protocol http domain www.qcode.test.co.uk port {} path /foo/bar segments {foo bar}}
 
     # url_request_path
     test url_request_path-1.0 {url_request_path basic usage} -body {
