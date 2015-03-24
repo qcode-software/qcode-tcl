@@ -396,14 +396,14 @@ proc qc::http_exists {args} {
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    args $args -timeout 60 -headers {} -- url file
+    args $args -timeout 60 -headers {} -sslversion tlsv1 -sslverifypeer 0 -sslverifyhost 0 -- url file
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer $sslverifypeer -sslverifyhost $sslverifyhost -sslversion $sslversion] responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }
