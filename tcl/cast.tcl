@@ -29,17 +29,16 @@ proc qc::cast_int {string} {
 }
 
 proc qc::cast_decimal {string {precision ""}} {
+    #| Deprecated - see qc::cast decimal
     #| Try to cast given string into a decimal value
-    set original $string
-    set string [string map {, {} % {}} $string]
-    if { [string is double -strict $string] } {
-	if { [string is integer -strict $precision] } {
-	    return [qc::round $string $precision]
-	} else {
-	    return $string
-	}
+    if { $precision ne "" } {
+        set p [string length $string]
+        if { $precision >= $p } {
+            set p [expr {$p + $precision}]
+        }
+        return [qc::cast decimal -precision $p -scale $precision $string]
     } else {
-	error "Could not cast $original to decimal" {} CAST
+        return [qc::cast decimal $string]
     }
 }
 
@@ -374,3 +373,59 @@ proc qc::is_period {string} {
     }
 }
 
+namespace eval qc::cast {
+    namespace export decimal
+    namespace ensemble create 
+
+    proc decimal {args} {
+        #| Try to cast given string into a decimal value with the given precision and/or scale if present.
+        qc::args $args -precision ? -scale ? -- string
+        set original $string
+        # Strip leading zeros if followed by digit
+        # This copes with 0 and 00
+        regsub {^(-?)0+([0-9]+)$} $string {\1\2} string
+        set string [string map {, {} % {}} $string]
+        if { [string is double -strict $string] } {
+            if { ! [info exists scale] && ! [info exists precision] } {
+                # Scale and precision not given.
+                return [qc::exp2string $string]
+            } elseif { [info exists scale] && ! [info exists precision] } {
+                # Scale given but not precision.
+                return -code error -errorcode CAST "Precision must be provided with scale."
+            } elseif { [info exists precision] } {
+                # Precision given.
+                if { $precision <= 0 || ! [qc::is integer $precision] } {
+                    return -code error -errorcode CAST "Precision must be a positive integer."
+                }
+
+                if { ! [info exists scale] } {
+                    # Scale wasn't given so set it to 0.
+                    set scale 0
+                }
+
+                if { $scale < 0 || ! [qc::is integer $scale]} {
+                    return -code error "Scale must be a non-negative integer."
+                }
+                
+                # Expand the number and round it to the scale and check the result.
+                set rounded [qc::round [qc::exp2string $string] $scale]
+                set parts [split $rounded .]
+                set left_count [string length [lindex $parts 0]]
+                set right_count [string length [lindex $parts 1]]
+                if { $left_count == 0 } {
+                    # The leading zero wasn't given.
+                    return -code error -errorcode CAST "Incomplete numeric string."
+                }
+                
+                set left_digit_max [expr {$precision - $scale}]
+                if { $left_count > $left_digit_max || $right_count > $scale} {
+                    return -code error -errorcode CAST "The resulting number ($rounded) is too large for the given precision ($precision) and scale ($scale)."
+                } else {
+                    return $rounded
+                }
+            }
+        } else {
+            return -code error -errorcode CAST "Could not cast $original to decimal."
+        }
+    }
+}
