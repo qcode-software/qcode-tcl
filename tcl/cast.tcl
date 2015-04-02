@@ -383,7 +383,7 @@ namespace eval qc::cast {
         set original $string
         # Strip leading zeros if followed by digit
         # This copes with 0 and 00
-        regsub {^(-?)0+([0-9].*)$} 00 {\1\2}
+        regsub {^(-?)0+([0-9].*)$} $string {\1\2} string
         set string [string map {, {} % {}} $string]
         if { [string is double -strict $string] } {
             if { ! [info exists scale] && ! [info exists precision] } {
