@@ -52,10 +52,12 @@ namespace eval qc::response {
 
         proc invalid {name value message} {
             #| Adds the given field to the record as invalid. If the field already exists then updates it.
+            #| Also sets the status of the response to invalid.
             global data
             dict set data record $name valid false
             dict set data record $name value $value
             dict set data record $name message $message
+            qc::response status invalid
         }
 
         proc remove {name} {
