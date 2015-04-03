@@ -1,3 +1,6 @@
+namespace eval qc {
+    namespace export db_*
+}
 proc qc::db_col_varchar_length { table_name col_name } {
     #| Returns the varchar length of a db table column
     set qry "
