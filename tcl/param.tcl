@@ -5,7 +5,7 @@ namespace eval qc::param {}
 
 proc qc::param_get { args} {
     #| Return param value.
-    qc::args $args -db_cache on -- param_name args
+    qc::args $args -no_cache -- param_name args
     
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
@@ -14,16 +14,16 @@ proc qc::param_get { args} {
 	    # Naviserver
             # DB param
             set qry {select param_value from param where param_name=:param_name}
-            if { $db_cache } {
-                # Use db cache
-                db_cache_0or1row -ttl 86400 $qry {
+            if { $no_cache } {
+                 # Don't use db cache
+                db_0or1row $qry {
                     # Not found in DB
                 } {
                     return $param_value
                 } 
             } else {
-                # Don't use db cache
-                db_0or1row $qry {
+                # Use db cache
+                db_cache_0or1row -ttl 86400 $qry {
                     # Not found in DB
                 } {
                     return $param_value
@@ -50,7 +50,7 @@ proc qc::param_get { args} {
 
 proc qc::param_exists { args } {
     #| Check for param existence.
-    qc::args $args -db_cache on -- param_name args
+    qc::args $args -no_cache -- param_name args
 
     if { [llength $args] > 0 } {
         if { [qc::param_exists $param_name] } {
@@ -64,16 +64,16 @@ proc qc::param_exists { args } {
 	    # Naviserver env
             # DB param
             set qry {select param_value from param where param_name=:param_name}
-            if { $db_cache } {
-                # Use db cache
-                db_cache_0or1row -ttl 86400 $qry {
+            if { $no_cache } {
+                # Don't use db cache
+                db_0or1row $qry {
                     # Not found in DB
                 } {
                     return true
-                }
+                } 
             } else {
-                # Don't use db cache
-                db_0or1row $qry {
+                # Use db cache
+                db_cache_0or1row -ttl 86400 $qry {
                     # Not found in DB
                 } {
                     return true
