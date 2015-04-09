@@ -141,7 +141,24 @@ proc qc::db_cache_select_table { args } {
         # Use ns_cache
         # Create the cache if it doesn't exist yet
         if { ! [in [ns_cache_names] db] } {
-	    ns_cache create db -size [expr 1024*1024] 
+            # DB cache size
+            set param_name db_cache_size
+            db_0or1row {select param_value from params where param_name=:param_name} {
+                # DB param does not exist
+                if { [set param_value [ns_config ns/server/[ns_info server] $param_name]] ne "" } {
+                    # naviserver config param exists
+                    set db_cache_size $param_value
+                } else {
+                    # use default of 10 MB
+                    set db_cache_size [expr 1024*1024]
+                }
+            } {
+                # DB param exists 
+                set db_cache_size as param_value
+            }
+
+            # Initialise db cache
+	    ns_cache create db -size $db_cache_size 
 	}
 
         if { [ns_cache names db $hash] ne "" \
