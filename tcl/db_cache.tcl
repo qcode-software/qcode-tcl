@@ -141,7 +141,12 @@ proc qc::db_cache_select_table { args } {
         # Use ns_cache
         # Create the cache if it doesn't exist yet
         if { ! [in [ns_cache_names] db] } {
-	    ns_cache create db -size [expr 1024*1024] 
+            if { [qc::param_exists -db_cache off -- db_cache_size] } {
+                set db_cache_size [qc::param_get -db_cache off -- db_cache_size]
+            } else {
+                set db_cache_size [expr 1024*1024]
+            }
+	    ns_cache create db -size $db_cache_size 
 	}
 
         if { [ns_cache names db $hash] ne "" \
