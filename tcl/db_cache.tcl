@@ -143,7 +143,7 @@ proc qc::db_cache_select_table { args } {
         if { ! [in [ns_cache_names] db] } {
             # DB cache size
             set param_name db_cache_size
-            db_0or1row {select param_value from params where param_name=:param_name} {
+            db_0or1row {select param_value from param where param_name=:param_name} {
                 # DB param does not exist
                 if { [set param_value [ns_config ns/server/[ns_info server] $param_name]] ne "" } {
                     # naviserver config param exists
@@ -154,7 +154,7 @@ proc qc::db_cache_select_table { args } {
                 }
             } {
                 # DB param exists 
-                set db_cache_size as param_value
+                set db_cache_size $param_value
             }
 
             # Initialise db cache
