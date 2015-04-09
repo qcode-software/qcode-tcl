@@ -3,9 +3,8 @@ namespace eval qc {
 }
 namespace eval qc::param {}
 
-proc qc::param_get { args} {
+proc qc::param_get { param_name args } {
     #| Return param value.
-    qc::args $args -db_cache on -- param_name args
     
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
@@ -14,21 +13,11 @@ proc qc::param_get { args} {
 	    # Naviserver
             # DB param
             set qry {select param_value from param where param_name=:param_name}
-            if { $db_cache } {
-                # Use db cache
-                db_cache_0or1row -ttl 86400 $qry {
-                    # Not found in DB
-                } {
-                    return $param_value
-                } 
-            } else {
-                # Don't use db cache
-                db_0or1row $qry {
-                    # Not found in DB
-                } {
-                    return $param_value
-                } 
-            }
+            db_cache_0or1row -ttl 86400 $qry {
+                # Not found in DB
+            } {
+                return $param_value
+            } 
 
 	    # Check for naviserver params
 	    if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
@@ -48,10 +37,8 @@ proc qc::param_get { args} {
     }
 }
 
-proc qc::param_exists { args } {
+proc qc::param_exists { param_name args } {
     #| Check for param existence.
-    qc::args $args -db_cache on -- param_name args
-
     if { [llength $args] > 0 } {
         if { [qc::param_exists $param_name] } {
             return [dict exists [qc::param_get $param_name] {*}$args]
@@ -64,20 +51,10 @@ proc qc::param_exists { args } {
 	    # Naviserver env
             # DB param
             set qry {select param_value from param where param_name=:param_name}
-            if { $db_cache } {
-                # Use db cache
-                db_cache_0or1row -ttl 86400 $qry {
-                    # Not found in DB
-                } {
-                    return true
-                }
-            } else {
-                # Don't use db cache
-                db_0or1row $qry {
-                    # Not found in DB
-                } {
-                    return true
-                }
+            db_cache_0or1row -ttl 86400 $qry {
+                # Not found in DB
+            } {
+                return true
             }
 	    
 	    if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
