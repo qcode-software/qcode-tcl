@@ -269,7 +269,6 @@ namespace eval qc::is {
     proc decimal {args} {
         #| Checks if the given number is a decimal.
         qc::args $args -precision ? -scale ? -- string
-        set string [string map {, {}} $string]
         if {[string is double -strict $string]} {
             if { ! [info exists precision] && ! [info exists scale] } {
                 # Scale and precision not given.
