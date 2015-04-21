@@ -69,7 +69,7 @@ proc qc::session_exists {session_id} {
 proc qc::session_valid {args} {
     #| Check session exists and has not expired.
     # Anonomous user sessions never expire
-    qc::args $args -age_limit ? -idle_timeout "1 hour" -- session_id
+    qc::args $args -age_limit ? -idle_timeout ? -- session_id
     
     # Check config parameters for session age limit and idle timeout.
     if { [qc::param_exists session_age_limit] } {
