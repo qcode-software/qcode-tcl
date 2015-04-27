@@ -4,15 +4,26 @@ namespace eval qc {
 
 proc qc::register {args} {
     #| Register a URL handler.
-    if { [llength $args] < 2 || [llength $args] > 4 } {
-        return -code error "Usage: qc::register method path ?args? ?body?"
+    if { [llength $args] < 2 || [llength $args] > 5 } {
+        return -code error "Usage: qc::register ?-no-auth? method path ?args? ?body?"
     }
+    qc::args $args -no-auth -- args
 
     set method [string toupper [lindex $args 0]]
     set path [lindex $args 1]
-    # Add to registered nsv array
+    # Add to registered nsv dict if not already registered
     if { ! [qc::registered $method $path] } {
         qc::nsv_dict lappend registered $method $path
+    }
+
+    # Check authentication exemption
+    if { ! [info exists no-auth] && ! [qc::registered authenticate $method $path]} {
+        qc::nsv_dict lappend authenticate $method $path
+    } elseif { [info exists no-auth] && [qc::registered authenticate $method $path] } {
+        # Previously registered but now exempt from authentication - remove from nsv dict
+        set paths [qc::nsv_dict get authenticate $method]
+        set paths [qc::lexclude $paths $path]
+        qc::nsv_dict set authenticate $method $paths
     }
 
     if { [llength $args] >= 3 } {
@@ -45,7 +56,7 @@ proc qc::register {args} {
         set proc_name "::${method}::$path"
         {*}[list proc $proc_name $proc_args $proc_body]
 
-        # Update the handlers nsv array.
+        # Update the handlers nsv dict
         qc::nsv_dict set handlers $method $path proc_name $proc_name
         qc::nsv_dict set handlers $method $path args $arg_names
         qc::nsv_dict set handlers $method $path body $proc_body
@@ -79,11 +90,24 @@ proc qc::validate {method path proc_args proc_body} {
     qc::nsv_dict set handlers VALIDATE $method $path defaults $defaults
 }
 
-proc qc::registered {method url_path} {
+proc qc::registered {args} {
     #| Checks if the given method url_path is registered.
-    set method [string toupper $method]
-    if { [qc::nsv_dict exists registered $method] } {
-        return [qc::path_matches $url_path [qc::nsv_dict get registered $method]]
+    if { [llength $args] < 2 || [llength $args] > 3 } {
+        return -code error "Usage: qc::registered ?service? method path"
+    }
+    
+    if { [llength $args] == 3 } {
+        set service [lindex $args 0]
+        set method [string toupper [lindex $args 1]]
+        set path [lindex $args 2]
+    } else {
+        set service registered
+        set method [string toupper [lindex $args 0]]
+        set path [lindex $args 1]
+    }
+    
+    if { [qc::nsv_dict exists $service $method] } {
+        return [qc::path_matches $path [qc::nsv_dict get $service $method]]
     } else {
         return false
     }
