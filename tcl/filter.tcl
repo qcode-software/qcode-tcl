@@ -47,8 +47,8 @@ proc qc::filter_authenticate {event args} {
     set method [string toupper [qc::conn_method]]
     ::try {
       
-        # Check if this request is registered.
-        if { [qc::registered $method $url_path] } {
+        # Check if this request is registered for authentication
+        if { [qc::registered authenticate $method $url_path] } {
             if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
                 # No session cookie or session doesn't exist - implicitly log in as anonymous user.
                 global session_id current_user_id
