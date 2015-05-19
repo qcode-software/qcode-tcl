@@ -95,12 +95,12 @@ proc qc::param_set { param_name args } {
 
     if { [info commands ns_db] eq "ns_db" } {
         # Check the DB table
+        db_cache_clear [db_qry_parse "select param_value from param where param_name=:param_name"]
         db_0or1row { select param_value as existing_value from param where param_name=:param_name } {
             # new db param
             db_dml {insert into param values(:param_name,:param_value)}
         } {
             # updating an existing db param
-            db_cache_clear [db_qry_parse "select param_value from param where param_name=:param_name"]
             db_dml { update param set param_value=:param_value where param_name=:param_name }
         }
     } else {
