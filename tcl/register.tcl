@@ -31,6 +31,52 @@ proc qc::register {args} {
         # Separate arg names and default values
         set arg_names {}
         set defaults {}
+
+        #####
+        # Qualified arg names
+        #
+        #   register POST test {foo.bar} {}
+        #
+        # set up proc with arg as "bar" but keep info on fully qualified arg "foo.bar"
+        #
+        #   proc ::POST::test {bar} {}
+        #
+        # arg_map
+        #   - foo.bar -> bar
+        #
+        #
+        #
+        # Account for cases where two fully qualified args might be the same when unqualified...
+        #
+        #   register POST test {foo.bar baz.bar} {}
+        #
+        #   proc ::POST::test {foo.bar baz.bar} {}
+        #
+        # arg_map
+        #   {empty}
+        # 
+        #####
+        foreach arg $proc_args {
+            # Check if arg has default value
+            if {[llength $arg] == 2} {
+                # Check if arg is fully qualified
+                if { ![regexp {^([^\.]+)\.([^\.]+)$} [lindex $arg 0] -> table column] } {
+                    set column [lindex $arg 0]
+                }
+            } else {
+                set column $arg
+            }
+            lappend arg_names $column
+        }
+
+        # Check for duplicate args
+        if { [llength $arg_names] > [llength [lsort -unique $arg_names]] } {
+            
+        }
+
+
+
+        
         foreach arg $proc_args {
             if {[llength $arg] == 2} {
                 lappend arg_names [lindex $arg 0]
