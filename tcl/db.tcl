@@ -389,7 +389,7 @@ proc qc::db_trans {args} {
 	    }
             
             if { $return_code == 2 } {
-                dict_set options -code return
+                dict set options -code return
             }
 	    return -options $options $result
 	}
@@ -423,7 +423,7 @@ proc qc::db_0or1row {args} {
 	# no rows
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
         if { $return_code == 2 } {
-            dict_set options -code return
+            dict set options -code return
         }
         return -options $options $result
     } elseif { $db_nrows==1 } { 
@@ -431,7 +431,7 @@ proc qc::db_0or1row {args} {
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
 	set return_code [ catch { uplevel 1 $one_row_code } result options ]
         if { $return_code == 2 } {
-            dict_set options -code return
+            dict set options -code return
         }
         return -options $options $result
     } else {
@@ -467,7 +467,7 @@ proc qc::db_foreach {args} {
 	    }
 	    default {
                 if { $return_code == 2 } {
-                    dict_set options -code return
+                    dict set options -code return
                 }
                 return -options $options $result
             }
@@ -487,7 +487,7 @@ proc qc::db_foreach {args} {
 		}
 		default {
                     if { $return_code == 2 } {
-                        dict_set options -code return
+                        dict set options -code return
                     }
                     return -options $options $result
                 }

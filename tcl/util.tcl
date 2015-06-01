@@ -17,14 +17,14 @@ proc qc::try { try_code { catch_code ""} } {
             # Error
             set return_code [ catch { uplevel 1 $catch_code } catch_result options]
             if { $return_code == 2 } {
-                dict_set options -code return
+                dict set options -code return
             }
             return -options $options $catch_result
 	}
         default {
             # ok, return, break, continue
             if { $return_code == 2 } {
-                dict_set options -code return
+                dict set options -code return
             }
             return -options $options $result
         }
