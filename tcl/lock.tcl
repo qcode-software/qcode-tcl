@@ -16,7 +16,7 @@ proc qc::lock {lock_id timeout code} {
     }
     set return_code [ catch { uplevel 1 $code } result options ]
     nsv_unset lock $lock_id
-    if { $return_code == 2 } {
+    if { $return_code == 2 && [dict get $options -code] == 0 } {
         dict set options -code return
     }
     return -options $options $result

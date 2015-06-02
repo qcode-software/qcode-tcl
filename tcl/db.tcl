@@ -388,7 +388,7 @@ proc qc::db_trans {args} {
 		incr db_trans_level($db) -1
 	    }
             
-            if { $return_code == 2 } {
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             }
 	    return -options $options $result
@@ -422,7 +422,7 @@ proc qc::db_0or1row {args} {
     if {$db_nrows==0} {
 	# no rows
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
-        if { $return_code == 2 } {
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
         }
         return -options $options $result
@@ -430,7 +430,7 @@ proc qc::db_0or1row {args} {
 	# 1 row
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
 	set return_code [ catch { uplevel 1 $one_row_code } result options ]
-        if { $return_code == 2 } {
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
         }
         return -options $options $result
@@ -466,7 +466,7 @@ proc qc::db_foreach {args} {
 		# normal
 	    }
 	    default {
-                if { $return_code == 2 } {
+                if { $return_code == 2 && [dict get $options -code] == 0 } {
                     dict set options -code return
                 }
                 return -options $options $result
@@ -481,18 +481,12 @@ proc qc::db_foreach {args} {
 		upset 1 $key $value
 	    }
 	    set return_code [ catch { uplevel 1 $foreach_code } result options ]
-	    switch $return_code {
-		0 {
-		    # Normal
-		}
-		default {
-                    if { $return_code == 2 } {
-                        dict set options -code return
-                    }
-                    return -options $options $result
-                }
-	    }
-	}
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            }
+            return -options $options $result
+            
+        }
     }
     # restore saved variables
     if { [info exists saved_db_nrows] } {
