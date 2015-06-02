@@ -453,7 +453,6 @@ proc qc::db_foreach {args} {
     #| indicate the number of rows returned and the current row.
     #| Nested foreach statements clean up special variables so they apply to the current scope.
     args $args -db DEFAULT -- qry foreach_code { no_rows_code ""}
-    global errorCode errorInfo
 
      # save special db variables
     qc::upcopy 1 db_nrows      saved_db_nrows
@@ -482,12 +481,20 @@ proc qc::db_foreach {args} {
 		upset 1 $key $value
 	    }
 	    set return_code [ catch { uplevel 1 $foreach_code } result options ]
-            if { $return_code == 2 && [dict get $options -code] == 0 } {
-                dict set options -code return
-            } else {
-                dict incr options -level
+            switch $return_code {
+                0 {
+                    # ok
+                }
+                default {
+                    # error, return, break, continue
+                    if { $return_code == 2 && [dict get $options -code] == 0 } {
+                        dict set options -code return
+                    } else {
+                        dict incr options -level
+                    }
+                    return -options $options $result
+                }
             }
-            return -options $options $result
         }
     }
     # restore saved variables
