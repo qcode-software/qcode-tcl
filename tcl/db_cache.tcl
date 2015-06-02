@@ -34,6 +34,8 @@ proc qc::db_cache_0or1row { args } {
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
 	if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            dict incr options -level
         }
         return -options $options $result
     } elseif { $db_nrows==1 } { 
@@ -42,6 +44,8 @@ proc qc::db_cache_0or1row { args } {
 	set return_code [ catch { uplevel 1 $one_row_code } result options ]
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -72,6 +76,8 @@ proc qc::db_cache_foreach { args } {
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -85,6 +91,8 @@ proc qc::db_cache_foreach { args } {
             set return_code [ catch { uplevel 1 $foreach_code } result options ]
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
+            } else {
+                dict incr options -level
             }
             return -options $options $result
 	}

@@ -390,6 +390,8 @@ proc qc::db_trans {args} {
             
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
+            } else {
+                dict incr options -level
             }
 	    return -options $options $result
 	}
@@ -424,6 +426,8 @@ proc qc::db_0or1row {args} {
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            dict incr options -level
         }
         return -options $options $result
     } elseif { $db_nrows==1 } { 
@@ -432,6 +436,8 @@ proc qc::db_0or1row {args} {
 	set return_code [ catch { uplevel 1 $one_row_code } result options ]
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -461,17 +467,12 @@ proc qc::db_foreach {args} {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
-	switch $return_code {
-	    0 {
-		# normal
-	    }
-	    default {
-                if { $return_code == 2 && [dict get $options -code] == 0 } {
-                    dict set options -code return
-                }
-                return -options $options $result
-            }
-	}
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            dict incr options -level
+        }
+        return -options $options $result
     } else {
 	set masterkey [lindex $table 0]
 	foreach list [lrange $table 1 end] {
@@ -483,9 +484,10 @@ proc qc::db_foreach {args} {
 	    set return_code [ catch { uplevel 1 $foreach_code } result options ]
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
+            } else {
+                dict incr options -level
             }
             return -options $options $result
-            
         }
     }
     # restore saved variables

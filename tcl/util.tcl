@@ -18,6 +18,8 @@ proc qc::try { try_code { catch_code ""} } {
             set return_code [ catch { uplevel 1 $catch_code } catch_result options]
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
+            } else {
+                dict incr options -level
             }
             return -options $options $catch_result
 	}
@@ -25,6 +27,8 @@ proc qc::try { try_code { catch_code ""} } {
             # ok, return, break, continue
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
+            } else {
+                dict incr options -level
             }
             return -options $options $result
         }
