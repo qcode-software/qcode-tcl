@@ -387,7 +387,7 @@ proc qc::db_trans {args} {
 	    } else {
 		incr db_trans_level($db) -1
 	    }
-            
+            # Preserve TCL_RETURN
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
@@ -424,20 +424,18 @@ proc qc::db_0or1row {args} {
     if {$db_nrows==0} {
 	# no rows
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        # Preserve TCL_RETURN
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
-        } else {
-            dict incr options -level
         }
         return -options $options $result
     } elseif { $db_nrows==1 } { 
 	# 1 row
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
 	set return_code [ catch { uplevel 1 $one_row_code } result options ]
+        # Preserve TCL_RETURN
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
-        } else {
-            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -466,10 +464,9 @@ proc qc::db_foreach {args} {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        # Preserve TCL_RETURN
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
-        } else {
-            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -487,10 +484,10 @@ proc qc::db_foreach {args} {
                 }
                 default {
                     # error, return, break, continue
+                    
+                    # Preserve TCL_RETURN
                     if { $return_code == 2 && [dict get $options -code] == 0 } {
                         dict set options -code return
-                    } else {
-                        dict incr options -level
                     }
                     return -options $options $result
                 }

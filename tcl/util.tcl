@@ -16,6 +16,7 @@ proc qc::try { try_code { catch_code ""} } {
         1 {
             # Error
             set return_code [ catch { uplevel 1 $catch_code } catch_result options]
+            # Preserve TCL_RETURN
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
@@ -25,6 +26,8 @@ proc qc::try { try_code { catch_code ""} } {
 	}
         default {
             # ok, return, break, continue
+
+            # Preserve TCL_RETURN
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
