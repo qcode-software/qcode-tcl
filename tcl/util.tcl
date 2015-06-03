@@ -165,12 +165,18 @@ proc qc::call_with {proc_name args} {
             } else {
                 lappend largs $value
             }
-	} else {
-	    if { [info default $proc_name $arg default_value] } {
-		lappend largs $default_value
-	    } else {
-		return -code error "Missing argument: \"$arg\"."
-	    }
+	} elseif { [info default $proc_name $arg default_value] } {
+            lappend largs $default_value
+        } else {
+            # might be fully qualified i.e. table.column
+            set matches [dict filter $args key "?*.$arg"]
+            if { [dict size $matches] == 1 } {
+                lappend largs [lindex $matches 1]
+            } elseif { [dict size $matches] > 1 } {
+                return -code error "More than one match found while searching for value for \"$arg\"."
+            } else {
+                return -code error "Missing argument: \"$arg\"."
+            }
 	}
     }
 

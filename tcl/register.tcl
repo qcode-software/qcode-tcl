@@ -27,9 +27,10 @@ proc qc::register {args} {
     }
 
     if { [llength $args] >= 3 } {
-        set proc_args [lindex $args 2]
+        set register_args [lindex $args 2]
         # Separate arg names and default values
-        set arg_names {}
+        set proc_args {}
+        set qualified_args {}
         set defaults {}
 
         #####
@@ -41,49 +42,45 @@ proc qc::register {args} {
         #
         #   proc ::POST::test {bar} {}
         #
-        # arg_map
-        #   - foo.bar -> bar
-        #
-        #
-        #
         # Account for cases where two fully qualified args might be the same when unqualified...
         #
         #   register POST test {foo.bar baz.bar} {}
         #
         #   proc ::POST::test {foo.bar baz.bar} {}
-        #
-        # arg_map
-        #   {empty}
         # 
         #####
-        foreach arg $proc_args {
+        foreach arg $register_args {
             # Check if arg has default value
             if {[llength $arg] == 2} {
-                # Check if arg is fully qualified
-                if { ![regexp {^([^\.]+)\.([^\.]+)$} [lindex $arg 0] -> table column] } {
-                    set column [lindex $arg 0]
-                }
+                set name [lindex $arg 0]
+                dict set defaults $name [lindex $arg 1]
             } else {
-                set column $arg
+                set name $arg
             }
-            lappend arg_names $column
-        }
-
-        # Check for duplicate args
-        if { [llength $arg_names] > [llength [lsort -unique $arg_names]] } {
             
-        }
+            lappend qualified_args $name
 
+            # Check if arg is fully qualified
+            if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+                # check if $column appears in $register_args
+                set matches 0
+                foreach temp $register_args {
+                    if { [llength $arg] == 2 } {
+                        set temp2 [lindex $temp 0]
+                    } else {
+                        set temp2 $temp
+                    }
 
-
-        
-        foreach arg $proc_args {
-            if {[llength $arg] == 2} {
-                lappend arg_names [lindex $arg 0]
-                dict set defaults [lindex $arg 0] [lindex $arg 1]
-            } else {
-                lappend arg_names $arg
+                    if { $temp2 eq $column || [string match "?*.$column" $temp2] } {
+                        incr matches
+                    }
+                }
+                if { $matches == 1 } {
+                    set name $column
+                }
             }
+
+            lappend proc_args $name
         }
 
         # Check that colon variables in the path appear in the args
@@ -104,7 +101,7 @@ proc qc::register {args} {
 
         # Update the handlers nsv dict
         qc::nsv_dict set handlers $method $path proc_name $proc_name
-        qc::nsv_dict set handlers $method $path args $arg_names
+        qc::nsv_dict set handlers $method $path args $qualified_args
         qc::nsv_dict set handlers $method $path body $proc_body
         qc::nsv_dict set handlers $method $path defaults $defaults  
     }
