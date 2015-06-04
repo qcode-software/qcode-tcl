@@ -362,7 +362,9 @@ proc qc::url_make {dict} {
 proc qc::url_maker {args} {
     #| Construct or modifiy an url
     # Usage url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
-    set usage_error {Usage: url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
+    qc::args $args -multimap_form_vars -- args
+    default multimap_form_vars false
+    set usage_error {Usage: url_maker [$base [:: $port]] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
     set url_dict [dict create]
     set section "base"
     set sections [list "base" "port" "segments" "params" "hash"]
@@ -373,8 +375,13 @@ proc qc::url_maker {args} {
         "#" "hash"
     }
     set end_of_section false
+    set arg_is_param_value false
+    set current_param_name ""
     foreach arg $args {
         if { [dict exists $delimiters $arg] } {
+            if { $arg_is_param_value } {
+                error $usage_error
+            }
             set new_section [dict get $delimiters $arg]
             set old_index [lsearch $sections $section]
             set new_index [lsearch $sections $new_section]
@@ -390,7 +397,11 @@ proc qc::url_maker {args} {
                     dict_default url_dict segments [list]
                 }
                 "params" {
-                    dict_default url_dict params [list]
+                    if { $multimap_form_vars } {
+                        dict_default url_dict params [list]
+                    } else {
+                        dict_default url_dict params [dict create]
+                    }
                 }
                 "hash" {
                     dict set url_dict hash ""
@@ -421,7 +432,17 @@ proc qc::url_maker {args} {
                     dict lappend url_dict segments $value
                 }
                 "params" {
-                    dict lappend url_dict params $value
+                    if { $multimap_form_vars } {
+                        dict lappend url_dict params $value
+                    } else {
+                        if { $arg_is_param_value } {
+                            dict set url_dict params $current_param_name $value
+                            set arg_is_param_value false
+                        } else {
+                            set current_param_name $value
+                            set arg_is_param_value true
+                        }
+                    }
                 }
                 "hash" {
                     dict set url_dict hash $value
@@ -429,6 +450,9 @@ proc qc::url_maker {args} {
                 }
             }
         }
+    }
+    if { $arg_is_param_value } {
+        error $usage_error
     }
     return [qc::url_make $url_dict]
 }
