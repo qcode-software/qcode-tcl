@@ -479,9 +479,12 @@ proc qc::db_foreach {args} {
             }
             default {
                 # error, return
+                
+                # Preserve TCL_RETURN
                 if { $return_code == 2 && [dict get $options -code] == 0 } {
                     dict set options -code return
                 } else {
+                    # Return in parent stack frame instead of here
                     dict incr options -level
                 }
                 return -options $options $result
@@ -507,9 +510,12 @@ proc qc::db_foreach {args} {
                 }
                 default {
                     # error, return
+
+                    # Preserve TCL_RETURN
                     if { $return_code == 2 && [dict get $options -code] == 0 } {
                         dict set options -code return
                     } else {
+                        # Return in parent stack frame instead of here
                         dict incr options -level
                     }
                     return -options $options $result
