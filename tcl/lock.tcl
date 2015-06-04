@@ -19,6 +19,8 @@ proc qc::lock {lock_id timeout code} {
     # Preserve TCL_RETURN
     if { $return_code == 2 && [dict get $options -code] == 0 } {
         dict set options -code return
+    } else {
+        dict incr options -level
     }
     return -options $options $result
 }

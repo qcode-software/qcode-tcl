@@ -377,10 +377,12 @@ proc qc::db_trans {args} {
 		set db_trans_level($db) 0
 	    }
 	    uplevel 1 $error_code
+            # Return in parent stack frame instead of here
+            dict incr options -level
 	    return -options $options $result 
 	}
 	default {
-	    # normal,return,break,continue
+	    # ok, return, break, continue
 	    if { $db_trans_level($db) == 1 } {
 		db_dml "COMMIT WORK"
 		set db_trans_level($db) 0
@@ -391,6 +393,7 @@ proc qc::db_trans {args} {
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
+                # Return in parent stack frame instead of here
                 dict incr options -level
             }
 	    return -options $options $result
@@ -427,6 +430,9 @@ proc qc::db_0or1row {args} {
         # Preserve TCL_RETURN
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
         }
         return -options $options $result
     } elseif { $db_nrows==1 } { 
@@ -436,6 +442,9 @@ proc qc::db_0or1row {args} {
         # Preserve TCL_RETURN
         if { $return_code == 2 && [dict get $options -code] == 0 } {
             dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
         }
         return -options $options $result
     } else {
@@ -464,11 +473,20 @@ proc qc::db_foreach {args} {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
 	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
-        # Preserve TCL_RETURN
-        if { $return_code == 2 && [dict get $options -code] == 0 } {
-            dict set options -code return
+        switch $return_code {
+            0 {
+                # ok
+            }
+            default {
+                # error, return
+                if { $return_code == 2 && [dict get $options -code] == 0 } {
+                    dict set options -code return
+                } else {
+                    dict incr options -level
+                }
+                return -options $options $result
+            }
         }
-        return -options $options $result
     } else {
 	set masterkey [lindex $table 0]
 	foreach list [lrange $table 1 end] {
@@ -482,12 +500,17 @@ proc qc::db_foreach {args} {
                 0 {
                     # ok
                 }
+                3 -
+                4 {
+                    # break, continue
+                    return -options $options $result
+                }
                 default {
-                    # error, return, break, continue
-                    
-                    # Preserve TCL_RETURN
+                    # error, return
                     if { $return_code == 2 && [dict get $options -code] == 0 } {
                         dict set options -code return
+                    } else {
+                        dict incr options -level
                     }
                     return -options $options $result
                 }

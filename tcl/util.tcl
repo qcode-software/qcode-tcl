@@ -20,6 +20,7 @@ proc qc::try { try_code { catch_code ""} } {
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
+                # Return in parent stack frame instead of here
                 dict incr options -level
             }
             return -options $options $catch_result
@@ -31,6 +32,7 @@ proc qc::try { try_code { catch_code ""} } {
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
             } else {
+                # Return in parent stack frame instead of here
                 dict incr options -level
             }
             return -options $options $result
