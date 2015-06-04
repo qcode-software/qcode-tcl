@@ -32,23 +32,6 @@ proc qc::register {args} {
         set proc_args {}
         set handler_arg_names {}
         set defaults {}
-
-        #####
-        # Qualified arg names
-        #
-        #   register POST test {foo.bar} {}
-        #
-        # set up proc with arg as "bar" but keep info on fully qualified arg "foo.bar"
-        #
-        #   proc ::POST::test {bar} {}
-        #
-        # Account for cases where two fully qualified args might be the same when unqualified...
-        #
-        #   register POST test {foo.bar baz.bar} {}
-        #
-        #   proc ::POST::test {foo.bar baz.bar} {}
-        # 
-        #####
         foreach arg $handler_args {
             # Check if arg has default value
             if {[llength $arg] == 2} {
@@ -58,12 +41,13 @@ proc qc::register {args} {
             } else {
                 set name $arg
             }
-            
+
+            # Keep note of full qualified names for validation purposes.
             lappend handler_arg_names $name
 
             # Check if arg is fully qualified
             if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-                # check if $column or <qualifier>.$column appears anywhere else in $handler_args
+                # Check if $column or <qualifier>.$column appears anywhere else in the args
                 set matches 0
                 foreach temp $handler_args {
                     if { [llength $arg] == 2 } {
@@ -76,22 +60,18 @@ proc qc::register {args} {
                         incr matches
                     }
                 }
-                # Only 1 match is itself therefore safe to use unqualified name.
+                # Only 1 match is itself therefore it's safe to use unqualified name.
                 if { $matches == 1 } {
                     set name $column
                 }
             }
-            
+            # Add name and default value, if present, to arguments for proc definition.
             if { [llength $arg] == 2 } {
                 lappend proc_args "$name $default_value"
             } else {
                 lappend proc_args $name
             }
         }
-        log "HANDLER ARGS: $handler_args"
-        log "HANDLER ARG NAMES: $handler_arg_names"
-        log "PROC ARGS: $proc_args"
-        log "DEFAULTS: $defaults"
 
         # Check that colon variables in the path appear in the args
         set path_parts [split $path /]
