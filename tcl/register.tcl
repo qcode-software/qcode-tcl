@@ -82,13 +82,14 @@ proc qc::register {args} {
                 }
             }
             
-            if { [info exists default_value] } {
+            if { [llength $arg] == 2 } {
                 lappend proc_args "$name $default_value"
             } else {
                 lappend proc_args $name
             }
         }
         log "HANDLER ARGS: $handler_args"
+        log "HANDLER ARG NAMES: $handler_arg_names"
         log "PROC ARGS: $proc_args"
         log "DEFAULTS: $defaults"
 
