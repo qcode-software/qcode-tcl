@@ -28,10 +28,10 @@ proc qc::register {args} {
 
     if { [llength $args] >= 3 } {
         set handler_args [lindex $args 2]
-        # Separate arg names and default values
         set proc_args {}
         set handler_arg_names {}
         set defaults {}
+        # Create arg defaults dict, arg name list, and set up args to be used in proc.
         foreach arg $handler_args {
             # Check if arg has default value
             if {[llength $arg] == 2} {
@@ -97,28 +97,63 @@ proc qc::register {args} {
     }
 }
 
-proc qc::validate {method path proc_args proc_body} {
+proc qc::validate {method path handler_args proc_body} {
     #| Register a URL handler for custom validation.
+    set proc_args {}
+    set handler_arg_names {}
+    set defaults {}
+    # Create arg defaults dict, arg name list, and set up args to be used in proc.
+    foreach arg $handler_args {
+        # Check if arg has default value
+        if {[llength $arg] == 2} {
+            set name [lindex $arg 0]
+            set default_value [lindex $arg 1]
+            dict set defaults $name $default_value
+        } else {
+            set name $arg
+        }
+
+        # Keep note of full qualified names for validation purposes.
+        lappend handler_arg_names $name
+
+        # Check if arg is fully qualified
+        if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+            # Check if $column or <qualifier>.$column appears anywhere else in the args
+            set matches 0
+            foreach temp $handler_args {
+                if { [llength $arg] == 2 } {
+                    set temp2 [lindex $temp 0]
+                } else {
+                    set temp2 $temp
+                }
+
+                if { $temp2 eq $column || [string match "?*.$column" $temp2] } {
+                    incr matches
+                }
+            }
+            # Only 1 match is itself therefore it's safe to use unqualified name.
+            if { $matches == 1 } {
+                set name $column
+            }
+        }
+        # Add name and default value, if present, to arguments for proc definition.
+        if { [llength $arg] == 2 } {
+            lappend proc_args "$name $default_value"
+        } else {
+            lappend proc_args $name
+        }
+    }
+
+    # Create the proc
     set method [string toupper $method]
     set proc_name "::${method}::VALIDATE::$path"
     namespace eval ::${method}::VALIDATE {}
     {*}[list proc $proc_name $proc_args $proc_body]
 
-    # Separate arg names and default values
-    set args {}
-    set defaults {}
-    foreach arg $proc_args {
-        if {[llength $arg] == 2} {
-            lappend args [lindex $arg 0]
-            dict set defaults [lindex $arg 0] [lindex $arg 1]
-        } else {
-            lappend args $arg
-        }
-    }
     
     # Update the handlers nsv array.
     qc::nsv_dict set handlers VALIDATE $method $path proc_name $proc_name
-    qc::nsv_dict set handlers VALIDATE $method $path args $args 
+    qc::nsv_dict set handlers VALIDATE $method $path args $handler_arg_names
     qc::nsv_dict set handlers VALIDATE $method $path body $proc_body 
     qc::nsv_dict set handlers VALIDATE $method $path defaults $defaults
 }
