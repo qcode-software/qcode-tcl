@@ -90,9 +90,8 @@ namespace eval qc::handlers {
                         incr matches
                     }
                 }
-                
+                # Only matched itself therefore it's safe to use unqualified name.
                 if { $matches == 1 } {
-                    # Only matched itself therefore it's safe to use unqualified name.
                     lappend result $arg [dict get $form $column]
                     continue
                 }
