@@ -630,3 +630,31 @@ proc qc::glob_recursive {args} {
     # Call glob and return the results
     return [glob {*}$switches {*}$options -- {*}$patterns]
 }
+
+proc qc::qualified_args2unqualified {} {
+    # Creates an unqualified variable in the caller's stack frame for each qualified argument
+    # present in the caller but only if the resulting variable would be unambiguous.
+    # E.G. Caller's args: { table.foo }
+    #      -> Variable named "foo" is set in caller.
+    #      Caller's args: { table.foo other.foo }
+    #      -> No new variables set in caller because "foo" would be ambiguous.
+    set caller_args [info args [dict get [info frame -1] proc]]
+
+    foreach arg $caller_args {
+        # Check if arg is fully qualified
+        if { [regexp {^([^\.]+)\.([^\.]+)$} $arg -> table column] } {
+            # Check if $column or <qualifier>.$column appears anywhere else in the args
+            set matches 0
+            foreach temp $caller_args {
+                if { $temp eq $column || [string match "?*.$column" $temp] } {
+                    incr matches
+                }
+            }
+            # Only matched itself therefore it's safe to use unqualified name.
+            if { $matches == 1 } {
+                upvar 1 $arg value
+                qc::upset 1 $column $value
+            }
+        }
+    }
+}

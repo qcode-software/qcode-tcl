@@ -78,15 +78,33 @@ namespace eval qc::handlers {
         foreach arg $args {
             if { [dict exists $form $arg] } {
                 lappend result $arg [dict get $form $arg]
-            } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
-                # e.g. use form variable "firstname" for arg "users.firstname"
-                lappend result $arg [dict get $form $column]
-            } elseif { [default_exists $method $pattern $arg] } {
-                lappend result $arg [default $method $pattern $arg]
-            } else {
-                # arg wasn't optional and didn't appear in form
-                return -code error "No matching arg value for \"$arg\" in form."
+                continue
             }
+            
+            if { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
+                # e.g. use form variable "firstname" for arg "users.firstname" but only if unambiguous
+                # Check if $column or <qualifier>.$column appears anywhere else in the args
+                set matches 0
+                foreach temp $args {
+                    if { $temp eq $column || [string match "?*.$column" $temp] } {
+                        incr matches
+                    }
+                }
+                
+                if { $matches == 1 } {
+                    # Only matched itself therefore it's safe to use unqualified name.
+                    lappend result $arg [dict get $form $column]
+                    continue
+                }
+            }
+            
+            if { [default_exists $method $pattern $arg] } {
+                lappend result $arg [default $method $pattern $arg]
+                continue
+            }
+            
+            # arg wasn't optional and didn't appear in form
+            return -code error "No matching arg value for \"$arg\" in form."
         }
         return $result
     }
