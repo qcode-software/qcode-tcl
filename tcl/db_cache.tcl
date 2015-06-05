@@ -145,7 +145,7 @@ proc qc::db_cache_select_table { args } {
     set hash [qc::md5 [db_qry_parse $qry $level]]
 
     # Use global array or ns_cache with ttl?
-    if { [info exists ttl] && [info proc ns_cache] ne "" } {
+    if { [info exists ttl] && [info procs ns_cache] ne "" } {
         # Use ns_cache
         # Create the cache if it doesn't exist yet
         if { ! [in [ns_cache_names] db] } {
