@@ -220,3 +220,11 @@ proc qc::lapply { func list } {
     return $result
 }
 
+proc qc::map {lambda list} {
+    #| Applies a function to each item in the list.
+    set result {}
+    foreach item $list {
+        lappend result [apply $lambda $item]
+    }
+    return $result
+}

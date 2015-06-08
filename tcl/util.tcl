@@ -151,14 +151,13 @@ proc qc::call_with {proc_name args} {
                 lappend largs $value
             }
 	} else {
-	    if { [info default $proc_name $arg default_value] } {
-		lappend largs $default_value
-	    } else {
-		return -code error "Missing argument: \"$arg\"."
-	    }
-	}
+            if { [info default $proc_name $arg default_value] } {
+                lappend largs $default_value
+            } else {
+                return -code error "Missing argument: \"$arg\"."
+            }
+        }
     }
-
     return [uplevel 0 $proc_name $largs]    
 }
 
@@ -608,4 +607,41 @@ proc qc::glob_recursive {args} {
 
     # Call glob and return the results
     return [glob {*}$switches {*}$options -- {*}$patterns]
+}
+
+proc qc::args_qualified2unqualified {} {
+    #| Creates an unqualified variable in the caller's stack frame for each qualified argument
+    #| present in the caller but only if the resulting variable would be unambiguous.
+    #| E.G. Caller's args: { table.foo }
+    #|      -> Variable named "foo" is set in caller.
+    #|      Caller's args: { table.foo other.foo }
+    #|      -> No new variables set in caller because "foo" would be ambiguous.
+    set caller_args [info args [dict get [info frame -1] proc]]
+    foreach item [qc::args_unambiguous {*}$caller_args] {
+        upvar 1 $item value
+        qc::upset 1 [qc::arg_shortname $item] $value
+    }
+}
+
+proc qc::arg_shortname {name} {
+    #| Returns the shortname of a name if it is qualified otherwise returns the name.
+    if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+        return $column
+    } else {
+        return $name
+    }
+}
+
+proc qc::args_unambiguous {args} {
+    #| Returns items from the given list that would be unambiguous if shortnened by unqualifying them.
+    #| E.G. unamibguous table.foo table.bar table.baz other.baz
+    #|      -> table.foo table.bar
+    set unambiguous {}
+    set shortnames [map {x {qc::arg_shortname $x}} $args]
+    foreach shortname $shortnames arg $args { 
+        if { [llength [lsearch -all $shortnames $shortname]]==1 } {
+            lappend unambiguous $arg
+        }
+    }
+    return $unambiguous
 }
