@@ -74,7 +74,7 @@ namespace eval qc::handlers {
         #| Returns a dictionary of data for the handler identified by $method $pattern.
         set method [string toupper $method]
         set args [args $method $pattern]
-        set unambiguous [qc::unambiguous {*}$args]
+        set unambiguous [qc::args_unambiguous {*}$args]
         set result {}
         foreach arg $args {
             # Check if a form variable exists for $arg
@@ -84,7 +84,7 @@ namespace eval qc::handlers {
             }
 
             # Check if shortname of $arg is unambiguous and exists as a form variable
-            set shortname [qc::shortname $arg]
+            set shortname [qc::arg_shortname $arg]
             if { [llength [lsearch -all $unambiguous $arg]] && [dict exists $form $shortname] } {
                 lappend result $arg [dict get $form $shortname]
                 continue

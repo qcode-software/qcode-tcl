@@ -51,7 +51,7 @@ proc qc::register {args} {
 
     if { [llength $args] == 4 } {
         # Prepend call to arg simplifier to the procedure body
-        set proc_body "qc::qualified_args2unqualified; [lindex $args 3]"
+        set proc_body "qc::args_qualified2unqualified; [lindex $args 3]"
         # Create the proc
         namespace eval ::${method} {}
         set proc_name "::${method}::$path"
@@ -70,7 +70,7 @@ proc qc::validate {method path proc_args proc_body} {
     set method [string toupper $method]
     set proc_name "::${method}::VALIDATE::$path"
     namespace eval ::${method}::VALIDATE {}
-    {*}[list proc $proc_name $proc_args "qc::qualified_args2unqualified; $proc_body"]
+    {*}[list proc $proc_name $proc_args "qc::args_qualified2unqualified; $proc_body"]
 
     # Separate arg names and default values
     set arg_names {}
