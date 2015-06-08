@@ -74,35 +74,29 @@ namespace eval qc::handlers {
         #| Returns a dictionary of data for the handler identified by $method $pattern.
         set method [string toupper $method]
         set args [args $method $pattern]
+        set unambiguous [qc::unambiguous {*}$args]
         set result {}
         foreach arg $args {
+            # Check if a form variable exists for $arg
             if { [dict exists $form $arg] } {
                 lappend result $arg [dict get $form $arg]
                 continue
             }
-            
-            if { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
-                # e.g. use form variable "firstname" for arg "users.firstname" but only if unambiguous
-                # Check if $column or <qualifier>.$column appears anywhere else in the args
-                set matches 0
-                foreach temp $args {
-                    if { $temp eq $column || [string match "?*.$column" $temp] } {
-                        incr matches
-                    }
-                }
-                # Only matched itself therefore it's safe to use unqualified name.
-                if { $matches == 1 } {
-                    lappend result $arg [dict get $form $column]
-                    continue
-                }
+
+            # Check if shortname of $arg is unambiguous and exists as a form variable
+            set shortname [qc::shortname $arg]
+            if { [llength [lsearch -all $unambiguous $arg]] && [dict exists $form $shortname] } {
+                lappend result $arg [dict get $form $shortname]
+                continue
             }
-            
+
+            # Check if default value exists for $arg
             if { [default_exists $method $pattern $arg] } {
                 lappend result $arg [default $method $pattern $arg]
                 continue
             }
             
-            # arg wasn't optional and didn't appear in form
+            # $arg wasn't optional and didn't appear in form
             return -code error "No matching arg value for \"$arg\" in form."
         }
         return $result

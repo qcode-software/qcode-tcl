@@ -625,29 +625,38 @@ proc qc::glob_recursive {args} {
 }
 
 proc qc::qualified_args2unqualified {} {
-    # Creates an unqualified variable in the caller's stack frame for each qualified argument
-    # present in the caller but only if the resulting variable would be unambiguous.
-    # E.G. Caller's args: { table.foo }
-    #      -> Variable named "foo" is set in caller.
-    #      Caller's args: { table.foo other.foo }
-    #      -> No new variables set in caller because "foo" would be ambiguous.
+    #| Creates an unqualified variable in the caller's stack frame for each qualified argument
+    #| present in the caller but only if the resulting variable would be unambiguous.
+    #| E.G. Caller's args: { table.foo }
+    #|      -> Variable named "foo" is set in caller.
+    #|      Caller's args: { table.foo other.foo }
+    #|      -> No new variables set in caller because "foo" would be ambiguous.
     set caller_args [info args [dict get [info frame -1] proc]]
+    foreach item [qc::unambiguous {*}$caller_args] {
+        upvar 1 $item value
+        qc::upset 1 [qc::shortname $item] $value
+    }
+}
 
-    foreach arg $caller_args {
-        # Check if arg is fully qualified
-        if { [regexp {^([^\.]+)\.([^\.]+)$} $arg -> table column] } {
-            # Check if $column or <qualifier>.$column appears anywhere else in the args
-            set matches 0
-            foreach temp $caller_args {
-                if { $temp eq $column || [string match "?*.$column" $temp] } {
-                    incr matches
-                }
-            }
-            # Only matched itself therefore it's safe to use unqualified name.
-            if { $matches == 1 } {
-                upvar 1 $arg value
-                qc::upset 1 $column $value
-            }
+proc qc::shortname {name} {
+    #| Returns the shortname of a name if it is qualified otherwise returns the name.
+    if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+        return $column
+    } else {
+        return $name
+    }
+}
+
+proc qc::unambiguous {args} {
+    #| Returns items from the given list that would be unambiguous if shortnened by unqualifying them.
+    #| E.G. unamibguous table.foo table.bar table.baz other.baz
+    #|      -> table.foo table.bar
+    set unambiguous {}
+    set shortnames [map {x {qc::shortname $x}} $args]
+    foreach shortname $shortnames arg $args { 
+        if { [llength [lsearch -all $shortnames $shortname]]==1 } {
+            lappend unambiguous $arg
         }
     }
+    return $unambiguous
 }
