@@ -178,17 +178,27 @@ namespace eval qc::handlers {
             set args [args $method $pattern]
             set result {}
             foreach arg $args {
+                # Check if a form variable exists for $arg
                 if { [dict exists $form $arg] } {
                     lappend result $arg [dict get $form $arg]
-                } elseif { [regexp {^[^.]+\.([^.]+)$} $arg -> column] && [dict exists $form $column] } {
-                    # e.g. use form variable "firstname" for arg "users.firstname"
-                    lappend result $arg [dict get $form $column]
-                } elseif { [default_exists $method $pattern $arg] } {
-                    lappend result $arg [default $method $pattern $arg]
-                } else {
-                    # arg wasn't optional and didn't appear in form
-                    return -code error "No matching arg value for \"$arg\" in form." 
+                    continue
                 }
+
+                # Check if shortname of $arg is unambiguous and exists as a form variable
+                set shortname [qc::arg_shortname $arg]
+                if { [llength [lsearch -all $unambiguous $arg]] && [dict exists $form $shortname] } {
+                    lappend result $arg [dict get $form $shortname]
+                    continue
+                }
+
+                # Check if default value exists for $arg
+                if { [default_exists $method $pattern $arg] } {
+                    lappend result $arg [default $method $pattern $arg]
+                    continue
+                }
+                
+                # arg wasn't optional and didn't appear in form
+                return -code error "No matching arg value for \"$arg\" in form." 
             }
             return $result
         }
