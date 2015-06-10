@@ -176,6 +176,7 @@ namespace eval qc::handlers {
             #| Returns a dictionary of args for the handler identified by $method $pattern.
             set method [string toupper $method]
             set args [args $method $pattern]
+            set unambiguous [qc::args_unambiguous {*}$args]
             set result {}
             foreach arg $args {
                 # Check if a form variable exists for $arg
