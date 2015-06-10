@@ -20,7 +20,7 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            qc::response record valid $column $value ""
+            qc::response record valid $column $value
             continue
         }
         # Check value against data type
@@ -36,7 +36,7 @@ proc qc::validate2model {dict} {
             qc::response record invalid $column $value $message
             set all_valid false
         } elseif {$type_check} {
-            qc::response record valid $column [qc::cast $data_type $value] ""
+            qc::response record valid $column [qc::cast $data_type $value]
         }
     }
 
