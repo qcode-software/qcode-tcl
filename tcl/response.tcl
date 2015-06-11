@@ -42,7 +42,7 @@ namespace eval qc::response {
         namespace export invalid valid remove all_valid
         namespace ensemble create
 
-        proc valid {name value message} {
+        proc valid {name value {message ""}} {
             #| Adds the given field to the record as valid. If the field already exists then updates it.
             global data
             dict set data record $name valid true

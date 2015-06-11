@@ -357,7 +357,7 @@ proc qc::db_trans {args} {
     #| ensure code is executed in a transaction by
     #| maintaining a global db_trans_level
     args $args -db DEFAULT -- code {error_code ""}
-    global db_trans_level errorInfo errorCode
+    global db_trans_level
     if { ![info exists db_trans_level] } {
 	set db_trans_level($db) 0
     }
@@ -368,8 +368,8 @@ proc qc::db_trans {args} {
     } else {
 	incr db_trans_level($db)
     }
-    set code [ catch { uplevel 1 $code } result ]
-    switch $code {
+    set return_code [ catch { uplevel 1 $code } result options ]
+    switch $return_code {
 	1 {
 	    # Error
 	    if { $db_trans_level($db) >= 1 } {
@@ -377,17 +377,26 @@ proc qc::db_trans {args} {
 		set db_trans_level($db) 0
 	    }
 	    uplevel 1 $error_code
-	    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
+            # Return in parent stack frame instead of here
+            dict incr options -level
+	    return -options $options $result 
 	}
 	default {
-	    # normal,return,break,continue
+	    # ok, return, break, continue
 	    if { $db_trans_level($db) == 1 } {
 		db_dml "COMMIT WORK"
 		set db_trans_level($db) 0
 	    } else {
 		incr db_trans_level($db) -1
 	    }
-	    return -code $code $result
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+	    return -options $options $result
 	}
     }
 }
@@ -417,29 +426,27 @@ proc qc::db_0or1row {args} {
 
     if {$db_nrows==0} {
 	# no rows
-	set code [ catch { uplevel 1 $no_rows_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        # Preserve TCL_RETURN
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } elseif { $db_nrows==1 } { 
 	# 1 row
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
-	set code [ catch { uplevel 1 $one_row_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $one_row_code } result options ]
+        # Preserve TCL_RETURN
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } else {
 	# more than 1 row
 	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
@@ -453,7 +460,6 @@ proc qc::db_foreach {args} {
     #| indicate the number of rows returned and the current row.
     #| Nested foreach statements clean up special variables so they apply to the current scope.
     args $args -db DEFAULT -- qry foreach_code { no_rows_code ""}
-    global errorCode errorInfo
 
      # save special db variables
     qc::upcopy 1 db_nrows      saved_db_nrows
@@ -466,18 +472,24 @@ proc qc::db_foreach {args} {
     if { $db_nrows == 0 } {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
-	set returnCode [ catch { uplevel 1 $no_rows_code } result ]
-	switch $returnCode {
-	    0 {
-		# normal
-	    }
-	    1 { 
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $returnCode $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        switch $return_code {
+            0 {
+                # ok
+            }
+            default {
+                # error, return
+                
+                # Preserve TCL_RETURN
+                if { $return_code == 2 && [dict get $options -code] == 0 } {
+                    dict set options -code return
+                } else {
+                    # Return in parent stack frame instead of here
+                    dict incr options -level
+                }
+                return -options $options $result
+            }
+        }
     } else {
 	set masterkey [lindex $table 0]
 	foreach list [lrange $table 1 end] {
@@ -486,25 +498,30 @@ proc qc::db_foreach {args} {
 	    foreach key $masterkey value $list {
 		upset 1 $key $value
 	    }
-	    set returnCode [ catch { uplevel 1 $foreach_code } result ]
-	    switch $returnCode {
-		0 {
-		    # Normal
-		}
-		1 { 
-		    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-		}
-		2 {
-		    return -code return $result
-		}
-		3 {
-		    break
-		}
-		4 {
-		    continue
-		}
-	    }
-	}
+	    set return_code [ catch { uplevel 1 $foreach_code } result options ]
+            switch $return_code {
+                0 {
+                    # ok
+                }
+                3 -
+                4 {
+                    # break, continue
+                    return -options $options $result
+                }
+                default {
+                    # error, return
+
+                    # Preserve TCL_RETURN
+                    if { $return_code == 2 && [dict get $options -code] == 0 } {
+                        dict set options -code return
+                    } else {
+                        # Return in parent stack frame instead of here
+                        dict incr options -level
+                    }
+                    return -options $options $result
+                }
+            }
+        }
     }
     # restore saved variables
     if { [info exists saved_db_nrows] } {

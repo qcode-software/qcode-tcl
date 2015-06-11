@@ -50,7 +50,8 @@ proc qc::register {args} {
     }
 
     if { [llength $args] == 4 } {
-        set proc_body [lindex $args 3]
+        # Prepend call to arg simplifier to the procedure body
+        set proc_body "qc::args_qualified2unqualified; [lindex $args 3]"
         # Create the proc
         namespace eval ::${method} {}
         set proc_name "::${method}::$path"
@@ -69,23 +70,23 @@ proc qc::validate {method path proc_args proc_body} {
     set method [string toupper $method]
     set proc_name "::${method}::VALIDATE::$path"
     namespace eval ::${method}::VALIDATE {}
-    {*}[list proc $proc_name $proc_args $proc_body]
+    {*}[list proc $proc_name $proc_args "qc::args_qualified2unqualified; $proc_body"]
 
     # Separate arg names and default values
-    set args {}
+    set arg_names {}
     set defaults {}
     foreach arg $proc_args {
         if {[llength $arg] == 2} {
-            lappend args [lindex $arg 0]
+            lappend arg_names [lindex $arg 0]
             dict set defaults [lindex $arg 0] [lindex $arg 1]
         } else {
-            lappend args $arg
+            lappend arg_names $arg
         }
     }
     
     # Update the handlers nsv array.
     qc::nsv_dict set handlers VALIDATE $method $path proc_name $proc_name
-    qc::nsv_dict set handlers VALIDATE $method $path args $args 
+    qc::nsv_dict set handlers VALIDATE $method $path args $arg_names
     qc::nsv_dict set handlers VALIDATE $method $path body $proc_body 
     qc::nsv_dict set handlers VALIDATE $method $path defaults $defaults
 }
