@@ -338,6 +338,52 @@ namespace eval ::qcode::test {
         }
     } -result "https://qcode.co.uk::80"
 
+    # url_maker
+    test url_maker-1.0 {url_maker base only} -body {
+        url_maker "https://qcode.co.uk"
+    } -result "https://qcode.co.uk/"
+
+    test url_maker-1.1 {url_maker base and port} -body {
+        url_maker "https://qcode.co.uk" :: "80"
+    } -result "https://qcode.co.uk::80/"
+
+    test url_maker-1.2 {url_maker slash only} -body {
+        url_maker /
+    } -result "/"
+
+    test url_maker-1.3 {url_maker segments only} -body {
+        url_maker / foo bar
+    } -result "/foo/bar"
+
+    test url_maker-1.4 {url_maker bind segment} -body {
+        set bar "baz?hello world/123#test"
+        url_maker / foo :bar
+    } -result "/foo/baz%3fhello%20world%2f123%23test"
+
+    test url_maker-1.5 {url_maker params} -body {
+        set test hello
+        url_maker "/foo" ? bar baz quo :test
+    } -result "/foo?bar=baz&quo=hello"
+
+    test url_maker-1.6 {url_maker repeated params} -body {
+        url_maker "/foo?page=1" ? page 2 page 3
+    } -result "/foo?page=3"
+
+    test url_maker-1.7 {url_maker multimap} -body {
+        url_maker -multimap_form_vars "/foo?page=1" ? page 2 page 3
+    } -result "/foo?page=1&page=2&page=3"
+
+    test url_maker-1.8 {url_maker multimap with bind vars} -body {
+        set a 2
+        set b page
+        set c 3
+        url_maker -multimap_form_vars "/foo?page=1" ? page :a :b :c
+    } -result "/foo?page=1&page=2&page=3"
+
+    test url_maker-1.9 {url_maker hash} -body {
+        url_maker "/foo" # bar
+    } -result "/foo#bar"
+
     cleanupTests
 }
 namespace delete ::qcode::test
