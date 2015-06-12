@@ -475,3 +475,78 @@ proc qc::http_url_resolve {args} {
 	}
     }    
 }
+
+proc qc::http_header_accept_parse {} {
+    #| Returns a list of the accepted media types ordered by preference.
+    set headers_set_id [ns_conn headers]
+    if { [ns_set find $headers_set_id "Accept"] == -1 } {
+        # No Accept header means client should accept all types.
+        return [list "*/*"]
+    } else {
+        # Get all Accept headers as they may be specified more than once.
+        set accept_headers {}
+        for {set i 0} {$i < [ns_set size $headers_set_id]} {incr i} {
+            if { [ns_set key $headers_set_id $i] eq "Accept" } {
+                lappend accept_headers [ns_set value $headers_set_id $i]
+            }
+        }
+        
+        # Combine all Accept items into one list
+        set accept_items {}
+        foreach item $accept_headers {
+            lappend accept_items {*}[qc::map {x {string trim $x}} [split $item ,]]
+        }
+        
+        set accept_dict [dict create]
+        foreach item $accept_items {
+            set type_params [qc::map {x {string trim $x}} [split $item ;]]
+            set type [lindex $type_params 0]
+            set params [lrange $type_params 1 end]
+            dict set accept_dict $type $value
+        }
+        
+    }
+}
+
+proc qc::http_header_get {header} {
+    #| Returns the value for the given header.
+    set headers_set_id [ns_conn headers]
+    if { [ns_set ifind $headers_set_id $header] == -1 } {
+        return ""
+    } else {
+        # Header may appear more than once so get all values for the header.
+        set header_values {}
+        for {set i 0} {$i < [ns_set size $headers_set_id]} {incr i} {
+            if { [string equal -nocase [ns_set key $headers_set_id $i] $header] } {
+                lappend header_values [ns_set value $headers_set_id $i]
+            }
+        }
+        
+        return [join $header_values ","]
+    }
+}
+
+proc qc::http_header_parse {header_value} {
+    #| Parses the given header value into a list of dicts.
+    #| E.G. http_header_parse "application/json;q=0.9,text/xml,text/plain;q=0.8"
+    #|      -> {token application/json q 0.9} {token text/xml} {token text/plain q 0.8}
+    # TODO: User-Agent header can contain ',' and ';' so this parsing technique won't work.
+    #       There might be other headers that also include such characters in their values.
+    # TODO: If the header is a type that deals with q values (i.e. Accept, Accept-Language etc)
+    #       then set q = 1 in dict.
+    # TODO: Handling of quoted strings in param values.
+    # TODO: Validation of tokens and params.
+    set result {}
+    set items [qc::map {x {string trim $x}} [split $header_value ","]]
+    foreach item $items {
+        set item_parts [qc::map {x {string trim $x}} [split $item ";"]]
+        set dict [dict create token [lindex $item_parts 0]]
+        foreach param [lrange $item_parts 1 end] {
+            set parts [split $param =]
+            dict set dict [lindex $parts 0] [lindex $parts 1]
+        }
+        lappend result $dict
+    }
+
+    return $result
+}
