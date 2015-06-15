@@ -563,8 +563,8 @@ proc qc::http_header_elements_parse {header_name header_value} {
     if { [string tolower $header_name] in [qc::http_headers_with_value_as_list] } {
         set result [qc::map {x {string trim $x}} [split $header_value ","]]
     } else {
-        # TODO: Handler other delimiters for other headers.
-        set result $header_value
+        # TODO: Handle other delimiters for other headers.
+        set result [list $header_value]
     }
     return $result
 }
@@ -612,4 +612,54 @@ proc qc::http_headers_with_value_as_list {} {
     lappend headers www-authenticate
     lappend headers x-forwarded-for
     return $headers
+}
+
+proc qc::http_header_sort_values_by_weight {values} {
+    #| Sorts the header values by weight.
+    set sorted [list [lindex $values 0]]
+    foreach value [lrange $values 1 end] {
+        if { [dict exists $value params q] } {
+            set weight [dict get $value params q]
+        } else {
+            set weight 1
+        }
+        set inserted false
+        for { set i 0 } { $i < [llength $sorted] } { incr i } {
+            set dict [lindex $sorted $i]
+            if { [dict exists $dict params q] } {
+                set sorted_weight [dict get $dict params q]
+            } else {
+                set sorted_weight 1
+            }
+            if { $weight > $sorted_weight } {
+                set sorted [linsert $sorted $i $value]
+                set inserted true
+                break
+            }
+        }
+        
+        if { ! $inserted } {
+            set sorted [linsert $sorted end $value]
+        }
+    }
+    return $sorted
+}
+
+proc qc::http_header_sort_values_by_mime_type_specificty {values} {
+    #| Sorts the header values by speicificty of MIME types.
+    # TODO
+}
+
+proc qc::http_header_best_mime_type {values available} {
+    #| Returns a type from the available list that best matches the preferences in values.
+    set sorted [qc::http_header_sort_values_by_weight $values]
+    set sorted [qc::http_header_sort_values_by_mime_type_specificty $sorted]
+    
+    foreach dict $sorted {
+        lassign [split [dict get $dict token] "/"] type subtype
+        if { $subtype in $available } {
+            return $subtype
+        }
+    }
+    return ""
 }
