@@ -508,16 +508,16 @@ proc qc::http_header_accept_parse {} {
     }
 }
 
-proc qc::http_header_get {header} {
+proc qc::http_header_get {header_name} {
     #| Returns the value for the given header.
     set headers_set_id [ns_conn headers]
-    if { [ns_set ifind $headers_set_id $header] == -1 } {
+    if { [ns_set ifind $headers_set_id $header_name] == -1 } {
         return ""
     } else {
         # Header may appear more than once so get all values for the header.
         set header_values {}
         for {set i 0} {$i < [ns_set size $headers_set_id]} {incr i} {
-            if { [string equal -nocase [ns_set key $headers_set_id $i] $header] } {
+            if { [string equal -nocase [ns_set key $headers_set_id $i] $header_name] } {
                 lappend header_values [ns_set value $headers_set_id $i]
             }
         }
@@ -526,27 +526,90 @@ proc qc::http_header_get {header} {
     }
 }
 
-proc qc::http_header_parse {header_value} {
+proc qc::http_header_parse {header_name header_value} {
     #| Parses the given header value into a list of dicts.
     #| E.G. http_header_parse "application/json;q=0.9,text/xml,text/plain;q=0.8"
-    #|      -> {token application/json q 0.9} {token text/xml} {token text/plain q 0.8}
-    # TODO: User-Agent header can contain ',' and ';' so this parsing technique won't work.
-    #       There might be other headers that also include such characters in their values.
-    # TODO: If the header is a type that deals with q values (i.e. Accept, Accept-Language etc)
-    #       then set q = 1 in dict.
-    # TODO: Handling of quoted strings in param values.
+    #|      -> {token application/json params { q 0.9 }} {token text/xml params {}} {token text/plain params { q 0.8 }}
+    # TODO: Handle comments.
+    # TODO: Handling of quoted strings.
     # TODO: Validation of tokens and params.
     set result {}
-    set items [qc::map {x {string trim $x}} [split $header_value ","]]
-    foreach item $items {
-        set item_parts [qc::map {x {string trim $x}} [split $item ";"]]
-        set dict [dict create token [lindex $item_parts 0]]
-        foreach param [lrange $item_parts 1 end] {
-            set parts [split $param =]
-            dict set dict [lindex $parts 0] [lindex $parts 1]
+    set elements [qc::http_header_elements_parse $header_name $header_value]
+    foreach element $elements {
+        set element_dict [dict create]
+        set params [qc::http_header_params_parse $element]
+        # Most elements begin with a token but there are special cases where the element only consists of params.
+        if { [string tolower $header_name] in [list "cookie" "set-cookie" "strict-transport-security"] } {
+            set token ""
+        } else {
+            set token [lindex $params 0]
+            set params [lrange $params 1 end]
         }
-        lappend result $dict
+        set param_dict [dict create]
+        foreach param $params {
+            qc::dict2vars [qc::http_header_name_value_parse $param] name value
+            dict set param_dict $name $value
+        }
+        dict set element_dict token $token
+        dict set element_dict params $param_dict
+        lappend result $element_dict
     }
 
     return $result
+}
+
+proc qc::http_header_elements_parse {header_name header_value} {
+    #| Returns the elements of a header value.  
+    if { [string tolower $header_name] in [qc::http_headers_with_value_as_list] } {
+        set result [qc::map {x {string trim $x}} [split $header_value ","]]
+    } else {
+        # TODO: Handler other delimiters for other headers.
+        set result $header_value
+    }
+    return $result
+}
+
+proc qc::http_header_params_parse {header_element} {
+    #| Returns the params for the given header element
+    return [qc::map {x {string trim $x}} [split $header_element ";"]]
+}
+
+proc qc::http_header_name_value_parse {name_value} {
+    #| Returns a dict of the name and value in name_value.
+    set list [qc::map {x {string trim $x}} [split $name_value "="]]
+    set name [lindex $list 0]
+    if { [llength $list]  > 1 } {
+        set value [lindex $list 1]
+    } else {
+        set value ""
+    }
+    return [dict create name $name value $value]
+}
+
+proc qc::http_headers_with_value_as_list {} {
+    set headers {}
+    lappend headers accept
+    lappend headers accept-charset
+    lappend headers accept-encoding
+    lappend headers accept-language
+    lappend headers accept-ranges
+    lappend headers allow
+    lappend headers cache-control
+    lappend headers connection
+    lappend headers content-encoding
+    lappend headers content-language
+    lappend headers expect
+    lappend headers if-match
+    lappend headers if-none-match
+    lappend headers pragma
+    lappend headers proxy-authenticate
+    lappend headers te
+    lappend headers trailer
+    lappend headers upgrade
+    lappend headers vary
+    lappend headers via
+    lappend headers warning
+    lappend headers www-authenticate
+    lappend headers x-forwarded-for
+    return $headers
 }
