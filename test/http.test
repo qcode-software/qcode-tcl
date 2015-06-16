@@ -131,6 +131,15 @@ namespace eval ::qcode::test {
         return true
     } -result true
 
+    test http_header_parse-1.0 {http_header_parse OK} -setup {} -body {
+        return [qc::http_header_parse "Accept" "application/json;indent=4, text/xml;q=0.7,text/html;level=1;q=0.9,   */*;q=0.01"]
+    } -result {{token application/json params {indent 4}} {token text/xml params {q 0.7}} {token text/html params {level 1 q 0.9}} {token */* params {q 0.01}}}
+
+    test http_header_sort_by_weight-1.0 {http_header_sort_values_by_weight OK} -setup {} -body {
+        set accept_header [qc::http_header_parse "Accept" "application/json;indent=4,text/xml;q=0.7,text/html;level=1;q=0.9,*/*;q=0.01"]
+        return [qc::http_header_sort_values_by_weight $accept_header]
+    } -result {{token application/json params {indent 4}} {token text/html params {level 1 q 0.9}} {token text/xml params {q 0.7}} {token */* params {q 0.01}}}
+
     cleanupTests
 }
 namespace delete ::qcode::test
