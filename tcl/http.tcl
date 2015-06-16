@@ -547,7 +547,7 @@ proc qc::http_header_parse {header_name header_value} {
 }
 
 proc qc::http_headers_with_value_as_list {} {
-    #| A list of headers which allow for a list of comma separated values.
+    #| A list of headers whose values are defined as a comma separated list.
     set headers {}
     lappend headers accept
     lappend headers accept-charset
