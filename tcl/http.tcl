@@ -475,3 +475,157 @@ proc qc::http_url_resolve {args} {
 	}
     }    
 }
+
+proc qc::http_header_get {header_name} {
+    #| Returns the value for the given header.
+    set headers_set_id [ns_conn headers]
+    if { [ns_set ifind $headers_set_id $header_name] == -1 } {
+        return ""
+    } elseif { [string tolower $header_name] in [qc::http_headers_with_value_as_list] } {
+        # Header may appear more than once so get all values for the header.
+        set header_values {}
+        for {set i 0} {$i < [ns_set size $headers_set_id]} {incr i} {
+            if { [string equal -nocase [ns_set key $headers_set_id $i] $header_name] } {
+                lappend header_values [ns_set value $headers_set_id $i]
+            }
+        }
+        
+        return [join $header_values ","]
+    } else {
+        return [ns_set iget $headers_set_id $header_name]
+    }
+}
+
+proc qc::http_header_parse {header_name header_value} {
+    #| Parses the given header value string into a Tcl structure that is a list of dicts.
+    #| E.G. qc::http_header_parse "application/json;q=0.9,text/xml,text/plain;q=0.8"
+    #|      -> {token application/json params {q 0.9}} {token text/xml params {}} {token text/plain params {q 0.8}}
+    
+    # TODO: Header comments.
+    # TODO: Quoted strings.
+    # TODO: Validation of tokens and params?
+
+    # Get the elements of the header value
+    if { [string tolower $header_name] in [qc::http_headers_with_value_as_list] } {
+        set elements [qc::map {x {string trim $x}} [split $header_value ","]]
+    } else {
+        # TODO: Handle other delimiters for other headers.
+        set elements [list $header_value]
+    }
+    
+    set result {}
+    foreach element $elements {
+        set element_dict [dict create]
+        # Parse all params for this element
+        set params [qc::map {x {string trim $x}} [split $element ";"]]
+        # Most elements begin with a token but there are special cases where the element only consists of params.
+        if { [string tolower $header_name] in [list "cookie" "set-cookie" "strict-transport-security"] } {
+            set token ""
+        } else {
+            set token [lindex $params 0]
+            set params [lrange $params 1 end]
+        }
+
+        # Parse param names and their values
+        set param_dict [dict create]
+        foreach param $params {
+            set list [qc::map {x {string trim $x}} [split $param "="]]
+            set name [lindex $list 0]
+            if { [llength $list]  > 1 } {
+                set value [lindex $list 1]
+            } else {
+                set value ""
+            }
+            dict set param_dict $name $value
+        }
+        dict set element_dict token $token
+        dict set element_dict params $param_dict
+        lappend result $element_dict
+    }
+
+    return $result
+}
+
+proc qc::http_headers_with_value_as_list {} {
+    #| A list of headers whose values are defined as a comma separated list.
+    set headers {}
+    lappend headers accept
+    lappend headers accept-charset
+    lappend headers accept-encoding
+    lappend headers accept-language
+    lappend headers accept-ranges
+    lappend headers allow
+    lappend headers cache-control
+    lappend headers connection
+    lappend headers content-encoding
+    lappend headers content-language
+    lappend headers expect
+    lappend headers if-match
+    lappend headers if-none-match
+    lappend headers pragma
+    lappend headers proxy-authenticate
+    lappend headers te
+    lappend headers trailer
+    lappend headers upgrade
+    lappend headers vary
+    lappend headers via
+    lappend headers warning
+    lappend headers www-authenticate
+    lappend headers x-forwarded-for
+    return $headers
+}
+
+proc qc::http_header_sort_values_by_weight {values} {
+    #| Sorts the header values by weight.
+    set sorted [list [lindex $values 0]]
+    foreach value [lrange $values 1 end] {
+        if { [dict exists $value params q] } {
+            set weight [dict get $value params q]
+        } else {
+            set weight 1
+        }
+        set inserted false
+        for { set i 0 } { $i < [llength $sorted] } { incr i } {
+            set dict [lindex $sorted $i]
+            if { [dict exists $dict params q] } {
+                set sorted_weight [dict get $dict params q]
+            } else {
+                set sorted_weight 1
+            }
+            if { $weight > $sorted_weight } {
+                set sorted [linsert $sorted $i $value]
+                set inserted true
+                break
+            }
+        }
+        
+        if { ! $inserted } {
+            set sorted [linsert $sorted end $value]
+        }
+    }
+    return $sorted
+}
+
+proc qc::http_accept_header_best_mime_type {available_media} {
+    #| Returns a mime type from the available media list that is the best match
+    #| for the preferences of the Accept header.
+    #| If any mime type will suffice then "*/*" is returned.
+    #| Returns the empty string if no sufficient match is found.
+    
+    # TODO sort by specificity before weight
+    set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse Accept [qc::http_header_get Accept]]]   
+    foreach dict $sorted {
+        lassign [split [dict get $dict token] "/"] type subtype
+        # If best mime type is "*/*" then let caller know so that they can choose the most suitable type.
+        if { $type eq "*" && $subtype eq "*" } {
+            return "$type/$subtype"
+        }
+        foreach item $available_media {
+            lassign [split $item "/"] available_type available_subtype
+            if { [string match -nocase $type $available_type] && [string match -nocase $subtype $available_subtype] } {
+                return $item
+            }
+        }
+    }
+    return ""
+}
