@@ -606,18 +606,14 @@ proc qc::http_header_sort_values_by_weight {values} {
     return $sorted
 }
 
-proc qc::http_header_best_mime_type {header_name available_media} {
+proc qc::http_accept_header_best_mime_type {available_media} {
     #| Returns a mime type from the available media list that is the best match
-    #| for the preferences of the header.
+    #| for the preferences of the Accept header.
     #| If any mime type will suffice then "*/*" is returned.
     #| Returns the empty string if no sufficient match is found.
     
     # TODO sort by specificity before weight
-    set header_value [qc::http_header_get $header_name]
-    if { $header_value eq "" } {
-        return -code error "Header \"$header_name\" doesn't exist."
-    }
-    set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse $header_name $header_value]]   
+    set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse Accept [qc::http_header_get Accept]]]   
     foreach dict $sorted {
         lassign [split [dict get $dict token] "/"] type subtype
         # If best mime type is "*/*" then let caller know so that they can choose the most suitable type.
