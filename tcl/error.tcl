@@ -12,6 +12,8 @@ proc qc::error_handler {{error_message "NULL"} args} {
     } elseif { [llength $args] == 1 } {
         set error_info [dict get [lindex $args 0] -errorinfo]
         set error_code [dict get [lindex $args 0] -errorcode]
+    } else {
+        return -code error "Usage: qc::error_handler ?error_message? ?(error_info error_code | options)?"
     }
     
     default error_info "NULL" error_code "NULL"
@@ -40,7 +42,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 }
                 json {
                     qc::response status invalid
-                    qc::response message alert $error_message
+                    qc::response message error $error_message
                     set body [data2json]
                 }
                 html {
@@ -60,7 +62,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 }
                 json {
                     qc::response status invalid
-                    qc::response message alert "Not Authorised: $error_message"
+                    qc::response message error "Not Authorised: $error_message"
                     set body [data2json]
                 }
                 html {
@@ -76,7 +78,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 }
                 json {
                     qc::response status invalid
-                    qc::response message alert "Authentication Failed: $error_message"
+                    qc::response message error "Authentication Failed: $error_message"
                     set body [data2json]
                 }
                 html {
@@ -92,7 +94,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 }
                 json {
                     qc::response status invalid
-                    qc::response message alert "Not Found: $error_message"
+                    qc::response message error "Not Found: $error_message"
                     set body [data2json]
                 }
                 html {
