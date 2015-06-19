@@ -17,7 +17,6 @@ proc qc::error_handler {{error_message "NULL"} args} {
     }
     
     default error_info "NULL" error_code "NULL"
-    
     foreach {local_var global_var} [list error_message errorMessage error_info errorInfo error_code errorCode ] {
         if { [set $local_var] eq "NULL" } {
             global $global_var
@@ -25,13 +24,11 @@ proc qc::error_handler {{error_message "NULL"} args} {
         }
     }
 
-    # Set the return media type according to what the client will accept if possible.
-    set media_type [lindex [split [qc::http_accept_header_best_mime_type [list "text/html" "application/json" "application/xml" "text/xml"]] "/"] 1]
-    if { $media_type eq "*" || $media_type eq ""} {
-        set media_type [file extension [qc::conn_path]]
-        if { $media_type eq "" } {
-            ns_return 406 "" ""
-        }
+    set mime_type [qc::http_content_negotiate [list "text/html" "application/json" "application/xml" "text/xml"]]
+    set media_type [lindex [split $mime_type "/"] 1]
+    if { $media_type eq "" } {
+        # Couldn't negotiate an acceptable response type.
+        return [ns_return 406 "" ""]
     }
     
     switch -glob -- $error_code {
@@ -43,9 +40,10 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error $error_message
-                    set body [data2json]
-                }
+                    set body [data2json]                }
+                * -
                 html {
+                    set media_type html
                     set body [h h2 "Missing or Invalid Data"]
                     append body [h hr]
                     append body $error_message
@@ -53,7 +51,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     append body [h hr]
                 }
             }
-            return2client code 422 $media_type $body filter_cc yes
+            return [return2client code 400 $media_type $body filter_cc yes]
         }
         PERM* {
             switch $media_type {
@@ -65,11 +63,13 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     qc::response message error "Not Authorised: $error_message"
                     set body [data2json]
                 }
+                * -
                 html {
+                    set media_type html
                     set body [h p "Not Authorised: $error_message"]
                 }
             }
-            return2client code 401 $media_type $body
+            return [return2client code 401 $media_type $body]
         }
         AUTH* {
             switch $media_type {
@@ -81,11 +81,13 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     qc::response message error "Authentication Failed: $error_message"
                     set body [data2json]
                 }
+                * -
                 html {
+                    set media_type html
                     set body [h p "Authentication Failed: $error_message"]
                 }
             }
-            return2client code 401 $media_type $body
+            return [return2client code 401 $media_type $body]
         }
         NOT_FOUND* {
             switch $media_type {
@@ -97,11 +99,13 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     qc::response message error "Not Found: $error_message"
                     set body [data2json]
                 }
+                * -
                 html {
+                    set media_type html
                     set body [h p "Not Found: $error_message"]
                 }
             }
-            return2client code 404 $media_type $body
+            return [return2client code 404 $media_type $body]
         }
         BAD_REQUEST* {
             switch $media_type {
@@ -113,11 +117,13 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     qc::response message error "Bad Request: $error_message"
                     set body [data2json]
                 }
+                * -
                 html {
+                    set media_type html
                     set body [h p "Bad Request: $error_message"]
                 }
             }
-            return2client code 400 $media_type $body
+            return [return2client code 400 $media_type $body]
         }
 	default {
 	    log Error $error_info
@@ -131,7 +137,9 @@ proc qc::error_handler {{error_message "NULL"} args} {
                         qc::response message error "Software Bug - [string range $error_message 0 75]"
                         set body [data2json]
                     }
+                    * -
                     html {
+                        set media_type html
                         set body [qc::error_report $error_message $error_info $error_code]
                     }
                 }
@@ -146,9 +154,11 @@ proc qc::error_handler {{error_message "NULL"} args} {
                         qc::response message error "Internal Server Error. An email report has been sent to our engineers"
                         set body [data2json]
                     }
+                    * -
                     html {
+                        set media_type html
                         set body [h h2 "Internal Server Error"]
-                        append html [h p "An email report has been sent to our engineers."]
+                        append body [h p "An email report has been sent to our engineers."]
                     }
                 }
             }

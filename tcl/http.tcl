@@ -612,7 +612,7 @@ proc qc::http_accept_header_best_mime_type {available_media} {
     #| If any mime type will suffice then "*/*" is returned.
     #| Returns the empty string if no sufficient match is found.
     
-    # TODO sort by specificity before weight
+    # TODO specificity.
     set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse Accept [qc::http_header_get Accept]]]   
     foreach dict $sorted {
         lassign [split [dict get $dict token] "/"] type subtype
@@ -628,4 +628,28 @@ proc qc::http_accept_header_best_mime_type {available_media} {
         }
     }
     return ""
+}
+
+proc qc::http_content_negotiate {available_mime_types} {
+    #| Try to find an acceptable mime type to respond to the client with.
+    #| Returns a mime type if an acceptable one was found otherwise the empty string.
+    set result "" 
+    set suffix [string range [file extension [qc::conn_path]] 1 end]
+    # Prioritise suffix type because it is a direct request for a resource of that type.
+    if { $suffix ne "" } {
+        # Check if the suffix type is available and that the client accepts it.
+        foreach mime_type $available_mime_types {
+            lassign [split $mime_type "/"] type subtype
+            if { [string match -nocase $subtype $suffix] && [qc::http_accept_header_best_mime_type [list $mime_type]] ne "" } {
+                set result $mime_type
+                break
+            }
+        }
+    }
+
+    if { $result eq "" } {
+        set result [qc::http_accept_header_best_mime_type $available_mime_types]
+    }
+
+    return $result
 }
