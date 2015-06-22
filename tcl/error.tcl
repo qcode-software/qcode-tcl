@@ -2,70 +2,169 @@ namespace eval qc {
     namespace export error_handler error_report error_report_*
 }
 
-proc qc::error_handler {{error_message "NULL"} {error_info "NULL"} {error_code "NULL"}} {
+proc qc::error_handler {{error_message "NULL"} args} {
     #| Return custom error responses depending value of error_code.
     # Pass in error message, info and code if available
     # Otherwise will take a copy of the global error* variables for backward compatiblity
+    if { [llength $args] == 2 } {
+        set error_info [lindex $args 0]
+        set error_code [lindex $args 1]
+    } elseif { [llength $args] == 1 } {
+        set error_info [dict get [lindex $args 0] -errorinfo]
+        set error_code [dict get [lindex $args 0] -errorcode]
+    } else {
+        return -code error "Usage: qc::error_handler ?error_message? ?(error_info error_code | options)?"
+    }
+    
+    default error_info "NULL" error_code "NULL"
     foreach {local_var global_var} [list error_message errorMessage error_info errorInfo error_code errorCode ] {
         if { [set $local_var] eq "NULL" } {
             global $global_var
             set $local_var [set $global_var]
         }
     }
+
+    set mime_type [qc::http_content_negotiate [list "text/html" "application/json" "application/xml" "text/xml"]]
+    set media_type [lindex [split $mime_type "/"] 1]
+    if { $media_type eq "" } {
+        # Couldn't negotiate an acceptable response type.
+        return [ns_return 406 "" ""]
+    }
     
-    set suffix [file extension [qc::conn_path]]
     switch -glob -- $error_code {
 	USER* {
-	    if { [eq $suffix .xml] } {
-		return2client xml [qc::xml error $error_message] filter_cc yes
-	    } elseif { [eq $suffix .json] } {
-		return2client code 409 json $error_message
-	    } else {
-		set html {
-		    <h2>Missing or Invalid Data</h2>
-		    <hr>
-		    $error_message
-		    <p>
-		    Please back up and try again.
-		    <hr>
-		}
-		return2client html [subst $html] filter_cc yes
-	    }
-	}
+	    switch $media_type {
+                xml {
+                    set body [qc::xml error $error_message]
+                }
+                json {
+                    qc::response status invalid
+                    qc::response message error $error_message
+                    set body [data2json]                }
+                * -
+                html {
+                    set media_type html
+                    set body [h h2 "Missing or Invalid Data"]
+                    append body [h hr]
+                    append body $error_message
+                    append body [h p "Please back up and try again."]
+                    append body [h hr]
+                }
+            }
+            return [return2client code 400 $media_type $body filter_cc yes]
+        }
         PERM* {
-	    if { [eq $suffix .xml] } {
-		return2client xml [qc::xml error "Not authorized:$error_message"]
-	    } else {
-		return2client code 401 html "Not Authorized:$error_message"
-	    }
+            switch $media_type {
+                xml {
+                    set body [qc::xml error "Not Authorised: $error_message"]
+                }
+                json {
+                    qc::response status invalid
+                    qc::response message error "Not Authorised: $error_message"
+                    set body [data2json]
+                }
+                * -
+                html {
+                    set media_type html
+                    set body [h p "Not Authorised: $error_message"]
+                }
+            }
+            return [return2client code 401 $media_type $body]
         }
         AUTH* {
-	    if { [eq $suffix .xml] } {
-		return2client xml  [qc::xml error "Authentication Failed:$error_message"]
-	    } else {
-		return2client code 401 html "Authentication Failed:$error_message"
-	    }
+            switch $media_type {
+                xml {
+                    set body [qc::xml error "Authentication Failed: $error_message"]
+                }
+                json {
+                    qc::response status invalid
+                    qc::response message error "Authentication Failed: $error_message"
+                    set body [data2json]
+                }
+                * -
+                html {
+                    set media_type html
+                    set body [h p "Authentication Failed: $error_message"]
+                }
+            }
+            return [return2client code 401 $media_type $body]
         }
         NOT_FOUND* {
-            return2client code 404 html "Not Found:$error_message"
+            switch $media_type {
+                xml {
+                    set body [qc::xml error "Not Found: $error_message"]
+                }
+                json {
+                    qc::response status invalid
+                    qc::response message error "Not Found: $error_message"
+                    set body [data2json]
+                }
+                * -
+                html {
+                    set media_type html
+                    set body [h p "Not Found: $error_message"]
+                }
+            }
+            return [return2client code 404 $media_type $body]
         }
         BAD_REQUEST* {
-            return2client code 400 html "Bad Request:$error_message"
+            switch $media_type {
+                xml {
+                    set body [qc::xml error "Bad Request: $error_message"]
+                }
+                json {
+                    qc::response status invalid
+                    qc::response message error "Bad Request: $error_message"
+                    set body [data2json]
+                }
+                * -
+                html {
+                    set media_type html
+                    set body [h p "Bad Request: $error_message"]
+                }
+            }
+            return [return2client code 400 $media_type $body]
         }
 	default {
 	    log Error $error_info
-            if {  [eq $suffix .xml] && [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-                return2client xml [qc::xml error "Software Bug - [string range $error_message 0 75]"] filter_cc yes
-            } elseif { [eq $suffix .xml] } {
-                # LIVE
-                return2client xml [qc::xml error "Internal Server Error. An email report has been sent to our engineers"] filter_cc yes
-	    } elseif { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
-                return2client code 500 html [qc::error_report $error_message $error_info $error_code] filter_cc yes
+            if {  [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
+                switch $media_type {
+                    xml {
+                        set body [qc::xml error "Software Bug - [string range $error_message 0 75]"]
+                    }
+                    json {
+                        qc::response status invalid
+                        qc::response message error "Software Bug - [string range $error_message 0 75]"
+                        set body [data2json]
+                    }
+                    * -
+                    html {
+                        set media_type html
+                        set body [qc::error_report $error_message $error_info $error_code]
+                    }
+                }
             } else {
 	        # LIVE
-                return2client code 500 html [html h2 "Internal Server Error"][html p "An email report has been sent to our engineers."] filter_cc yes
+                switch $media_type {
+                    xml {
+                        set body [qc::xml error "Internal Server Error. An email report has been sent to our engineers"]
+                    }
+                    json {
+                        qc::response status invalid
+                        qc::response message error "Internal Server Error. An email report has been sent to our engineers"
+                        set body [data2json]
+                    }
+                    * -
+                    html {
+                        set media_type html
+                        set body [h h2 "Internal Server Error"]
+                        append body [h p "An email report has been sent to our engineers."]
+                    }
+                }
             }
-	    
+
+            return2client code 500 $media_type $body filter_cc yes
+            
 	    if { [qc::param_exists email_support] } {
 		set subject "[string toupper [ns_info server]] Bug - [string range $error_message 0 75]"
 		qc::email_support subject $subject html [qc::error_report $error_message $error_info $error_code] 
