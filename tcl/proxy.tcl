@@ -31,9 +31,12 @@ proc qc::proxy_upstream { event args } {
     ns_set update $query_headers X-Forwarded-For [ns_conn peeraddr]
     ns_set update $query_headers X-Forwarded-Host [ns_set iget $query_headers Host]
     ns_set update $query_headers Port $port
+    #ns_set delkey $query_headers Host
 
     #
     # Build query for the upstream server
+    # This requires a Naviserver build later than 4.99.8-1 to allow
+    # keep_host_header
     #
     set cmd $http_cmd
     lappend cmd queue \
