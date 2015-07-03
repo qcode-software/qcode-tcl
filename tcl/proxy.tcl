@@ -2,7 +2,7 @@ namespace eval qc {
     namespace export proxy_upstream
 }
 
-proc qc::proxy_upstream { event args } {
+proc qc::proxy_upstream { args } {
     #| Proxy a request to an upstream server
     qc::args $args -log_headers -timeout 60:0 -spoolsize 10000 -- target
 
