@@ -297,17 +297,17 @@ proc qc::data2json {} {
             switch $key {
                 record {
                     foreach {name values} $value {
-                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [dict get $values message]]
+                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [list string [dict get $values message]]]
                     }
                 }
                 message {
                     foreach {type val} $value {
-                        lappend message_objects $type [list object value [dict get $val value]]
+                        lappend message_objects $type [list object value [list string [dict get $val value]]]
                     }
                 }
                 action {
                     foreach {type val} $value {
-                        lappend action_objects $type [list object value [dict get $val value]]
+                        lappend action_objects $type [list object value [list string [dict get $val value]]]
                     }
                 }
                 status {
