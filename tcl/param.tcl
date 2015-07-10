@@ -9,29 +9,34 @@ proc qc::param_get { param_name args } {
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
     } else {
-        if { [info commands ns_db] eq "ns_db" } {
-	    # Naviserver
-            # DB param
-            set qry {select param_value from param where param_name=:param_name}
-            db_cache_0or1row -ttl 86400 $qry {
-                # Not found in DB
-            } {
-                return $param_value
-            } 
+
+        if { [info commands ns_config] eq "ns_config" } {
+            # Naviserver
+            if { [info commands ns_db] eq "ns_db" } {
+                # Check DB param first
+                set qry {select param_value from param where param_name=:param_name}
+                db_cache_0or1row -ttl 86400 $qry {
+                    # Not found in DB
+                } {
+                    return $param_value
+                }
+            }
 
 	    # Check for naviserver params
-	    if { [info commands ns_config] eq "ns_config" && [ne [set param_value [ns_config ns/server/[ns_info server] $param_name]] ""] } {
-		# Naviserver param
-		return $param_value
-	    } 
+	    if { [set param_value [ns_config ns/server/[ns_info server] $param_name]] ne "" } {
+	        # Naviserver param
+	        return $param_value
+	    }
+
         } else {
-	    # Non-Naviserver env
+
+            # Non-Naviserver env
 	    qc::param_datastore_load
 	    # Check the datastore
 	    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-		return $::qc::param::db($param_name)
+	        return $::qc::param::db($param_name)
 	    }
-	}
+        }
         # I give up
         error "I don't know how to find param $param_name"
     }
@@ -47,29 +52,34 @@ proc qc::param_exists { param_name args } {
         }
     } else {
 
-        if { [info commands ns_db] eq "ns_db" } {
-	    # Naviserver env
-            # DB param
-            set qry {select param_value from param where param_name=:param_name}
-            db_cache_0or1row -ttl 86400 $qry {
-                # Not found in DB
-            } {
-                return true
+        if { [info commands ns_config] eq "ns_config" } {
+            # Naviserver
+            if { [info commands ns_db] eq "ns_db" } {
+                # DB param
+                set qry {select param_value from param where param_name=:param_name}
+                db_cache_0or1row -ttl 86400 $qry {
+                    # Not found in DB
+                } {
+                    return true
+                }
             }
-	    
-	    if { [info commands ns_config] eq "ns_config" && [ne [ns_config ns/server/[ns_info server] $param_name] ""] } {
-		# Naviserver param
-		return true
+
+	    # Check for naviserver params
+	    if { [ns_config ns/server/[ns_info server] $param_name] ne "" } {
+	        # Naviserver param
+	        return true
 	    }
+
         } else {
-	    # Non-naviserver
+
+            # Non-naviserver
 	    qc::param_datastore_load
 	    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {
-		return true
+	        return true
 	    }
-	}
-        return false
+        }
     }
+    return false
 }
 
 proc qc::param_set { param_name args } {
