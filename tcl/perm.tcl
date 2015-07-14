@@ -90,10 +90,26 @@ proc qc::perms { body } {
 
 proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
     #| Evaluate if_code if current user has permission else else_code
+    set code ""
     if { [perm_test $perm_name $method] } {
-	uplevel 1 $if_code
-    } elseif {[ne $else_code ""]} {
-	uplevel 1 $else_code
+	set code $if_code
+    } elseif { $else_code ne "" } {
+	set code $else_code
+    }
+
+    if { $code ne "" } {
+        set return_code [catch {uplevel 1 $code} result options]
+        if { $return_code != 0 } {
+            # error, return, break, continue or custom
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $result
+        }
     }
 }
 
