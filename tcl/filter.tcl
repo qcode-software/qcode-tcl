@@ -46,25 +46,24 @@ proc qc::filter_authenticate {event args} {
     set url_path [qc::conn_path]
     set method [string toupper [qc::conn_method]]
     ::try {
-      
-        # Check if this request is registered for authentication
-        if { [qc::registered authenticate $method $url_path] } {
-            if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
-                # No session cookie or session doesn't exist - implicitly log in as anonymous user.
-                global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]          
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
-            }
+        if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
+            # No session cookie or session doesn't exist - implicitly log in as anonymous user.
+            global session_id current_user_id
+            set current_user_id [qc::anonymous_user_id]          
+            set session_id [qc::anonymous_session_id]
+            qc::cookie_set session_id $session_id
+        }
 
-            if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
-                # GET/HEAD request for anonymous session - roll session after 1 hour
-                global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
-            } 
-           
+        if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
+            # GET/HEAD request for anonymous session - roll session after 1 hour
+            global session_id current_user_id
+            set current_user_id [qc::anonymous_user_id]
+            set session_id [qc::anonymous_session_id]
+            qc::cookie_set session_id $session_id
+        }
+        
+        # Check if this request is registered for authentication
+        if { [qc::registered authenticate $method $url_path] } {       
             if { [qc::session_valid [qc::session_id]] } {
                 # Valid session - refresh session
                 qc::session_update [qc::session_id]
@@ -114,8 +113,6 @@ proc qc::filter_authenticate {event args} {
                     error "Authenticity token was not found." {} AUTH
                 }
             }
-
-
         }
     } on error [list error_message options] {
         $error_handler $error_message $options
