@@ -77,7 +77,7 @@ proc qc::filter_authenticate {event args} {
                 qc::session_update [qc::session_id]
                 
                 if { [qc::registered authenticate $method $url_path] && [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
-                    # Registered for authentication redirect to login form
+                    # Request (normal user) registered for authentication redirect to reauthentication page
                     db_1row {
                         select 
                         email 
@@ -95,7 +95,7 @@ proc qc::filter_authenticate {event args} {
                     }
                     return "filter_return"    
                 } elseif { [qc::registered authenticate $method $url_path] && $method ni [list "GET" "HEAD"]  && $expired_user_id != [qc::anonymous_user_id] } {
-                    # POST request (normal user) - redirect to login page.
+                    # POST request (normal user) registered for authentication - redirect to login page.
                     qc::response action redirect $login_url
                     qc::return_response
                     return "filter_return"
@@ -103,7 +103,7 @@ proc qc::filter_authenticate {event args} {
             }
 
             if { [qc::registered authenticate $method $url_path] && $method ni [list "GET" "HEAD"] } {
-                # Registered for authentication - check authenticity token
+                # POST request registered for authentication - check authenticity token
                 set form_dict [qc::form2dict]
                 if {[dict exists $form_dict _authenticity_token]} {
                     set authenticity_token [dict get $form_dict _authenticity_token]
