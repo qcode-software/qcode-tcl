@@ -46,9 +46,8 @@ proc qc::filter_authenticate {event args} {
     set url_path [qc::conn_path]
     set method [string toupper [qc::conn_method]]
     ::try {
-      
-        # Check if this request is registered for authentication
-        if { [qc::registered authenticate $method $url_path] } {
+        if { [qc::registered $method $url_path] } {
+            # The method url_path has been registered
             if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
                 # No session cookie or session doesn't exist - implicitly log in as anonymous user.
                 global session_id current_user_id
@@ -63,8 +62,8 @@ proc qc::filter_authenticate {event args} {
                 set current_user_id [qc::anonymous_user_id]
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
-            } 
-           
+            }
+
             if { [qc::session_valid [qc::session_id]] } {
                 # Valid session - refresh session
                 qc::session_update [qc::session_id]
@@ -76,8 +75,9 @@ proc qc::filter_authenticate {event args} {
                 set session_id [qc::anonymous_session_id]
                 qc::cookie_set session_id $session_id
                 qc::session_update [qc::session_id]
-
-                if { [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
+                
+                if { [qc::registered authenticate $method $url_path] && [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
+                    # Request (normal user) registered for authentication redirect to reauthentication page
                     db_1row {
                         select 
                         email 
@@ -94,16 +94,16 @@ proc qc::filter_authenticate {event args} {
                         qc::return_response
                     }
                     return "filter_return"    
-                } elseif { $method ni [list "GET" "HEAD"]  && $expired_user_id != [qc::anonymous_user_id] } {
-                    # POST request (normal user) - redirect to login page.
+                } elseif { [qc::registered authenticate $method $url_path] && $method ni [list "GET" "HEAD"]  && $expired_user_id != [qc::anonymous_user_id] } {
+                    # POST request (normal user) registered for authentication - redirect to login page.
                     qc::response action redirect $login_url
                     qc::return_response
                     return "filter_return"
                 }
             }
 
-            # Any non-GET/HEAD methods require an authenticity token to prevent cross site request forgery.
-            if {$method ni [list "GET" "HEAD"]} {
+            if { [qc::registered authenticate $method $url_path] && $method ni [list "GET" "HEAD"] } {
+                # POST request registered for authentication - check authenticity token
                 set form_dict [qc::form2dict]
                 if {[dict exists $form_dict _authenticity_token]} {
                     set authenticity_token [dict get $form_dict _authenticity_token]
@@ -113,9 +113,7 @@ proc qc::filter_authenticate {event args} {
                 } else {
                     error "Authenticity token was not found." {} AUTH
                 }
-            }
-
-
+            }            
         }
     } on error [list error_message options] {
         $error_handler $error_message $options
