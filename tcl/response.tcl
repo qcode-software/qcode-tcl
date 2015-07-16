@@ -1,6 +1,6 @@
 namespace eval qc::response {
 
-    namespace export status record message action
+    namespace export status record message action calculated html
     namespace ensemble create
 
     ##################################################
