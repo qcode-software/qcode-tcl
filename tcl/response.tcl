@@ -150,7 +150,7 @@ namespace eval qc::response {
     ##################################################
     namespace eval calculated {
 
-        namespace export field
+        namespace export property
         namespace ensemble create
 
         proc property {name value} {
@@ -167,7 +167,7 @@ namespace eval qc::response {
     ##################################################
     namespace eval html {
 
-        namespace export item
+        namespace export property
         namespace ensemble create
 
         proc property {name value} {
