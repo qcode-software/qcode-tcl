@@ -314,12 +314,12 @@ proc qc::data2json {} {
                 }
                 calculated {
                     foreach {name val} $value {
-                        lappend calculated $name [list number $val]
+                        lappend calculated_object $name [list number $val]
                     }
                 }
                 html {
                     foreach {name val} $value {
-                        lappend html $name [list string $val]
+                        lappend html_object $name [list string $val]
                     }
                 }
                 status {
