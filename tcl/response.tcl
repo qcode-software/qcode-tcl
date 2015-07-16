@@ -142,4 +142,38 @@ namespace eval qc::response {
             }
         }
     }
+
+    ##################################################
+    #
+    # Response Calculated
+    #
+    ##################################################
+    namespace eval calculated {
+
+        namespace export field
+        namespace ensemble create
+
+        proc property {name value} {
+            #| Sets a property for the calculated object with the given name and value.
+            global data
+            dict set data calculated $name $value
+        }
+    }
+
+    ##################################################
+    #
+    # Response HTML
+    #
+    ##################################################
+    namespace eval html {
+
+        namespace export item
+        namespace ensemble create
+
+        proc property {name value} {
+            #| Sets an property for the html object with the given name and value
+            global data
+            dict set data html $name $value
+        }
+    }
 }
