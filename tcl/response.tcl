@@ -1,7 +1,20 @@
 namespace eval qc::response {
 
-    namespace export status record message action calculated html
-    namespace ensemble create
+    namespace export status record message action extend
+    namespace ensemble create -unknown {
+        response_subcommand_map
+    }
+
+    proc extend {name args} {
+        #| Extends the JSON response with an object named $name with properties defined in $args.
+        if { [llength $args] % 2 != 0 } {
+            return -code error "Usage: qc::response $name key value ?key value ...?"
+        }
+        global data
+        dict for {key value} $args {
+            dict set data $name $key $value
+        }
+    }
 
     ##################################################
     #
@@ -140,40 +153,6 @@ namespace eval qc::response {
             if {[info exists data] && [dict exists $data action]} {
                 dict unset data action
             }
-        }
-    }
-
-    ##################################################
-    #
-    # Response Calculated
-    #
-    ##################################################
-    namespace eval calculated {
-
-        namespace export property
-        namespace ensemble create
-
-        proc property {name value} {
-            #| Sets a property for the calculated object with the given name and value.
-            global data
-            dict set data calculated $name $value
-        }
-    }
-
-    ##################################################
-    #
-    # Response HTML
-    #
-    ##################################################
-    namespace eval html {
-
-        namespace export property
-        namespace ensemble create
-
-        proc property {name value} {
-            #| Sets an property for the html object with the given name and value
-            global data
-            dict set data html $name $value
         }
     }
 }

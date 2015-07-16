@@ -290,8 +290,7 @@ proc qc::data2json {} {
     set record_objects [list object]
     set action_objects [list object]
     set message_objects [list object]
-    set calculated_object [list object]
-    set html_object [list object]
+    set extensions [list]
     # Default status is "valid"
     set status "valid"
     ::try {
@@ -312,22 +311,15 @@ proc qc::data2json {} {
                         lappend action_objects $type [list object value [list string [dict get $val value]]]
                     }
                 }
-                calculated {
-                    foreach {name val} $value {
-                        lappend calculated_object $name [list number $val]
-                    }
-                }
-                html {
-                    foreach {name val} $value {
-                        lappend html_object $name [list string $val]
-                    }
-                }
                 status {
                     set status $value
                 }
+                default {
+                    lappend extensions $key [qc::tson_object {*}$value]
+                }
             }
         }
-        set result [list object status $status record $record_objects message $message_objects action $action_objects calculated $calculated_object html $html_object]
+        set result [list object status $status record $record_objects message $message_objects action $action_objects {*}$extensions]
         return [qc::tson2json $result]
     } on error [list error_message options] {
         return -code error "Malformed data: $error_message"
