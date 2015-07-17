@@ -1,7 +1,20 @@
 namespace eval qc::response {
 
-    namespace export status record message action
-    namespace ensemble create
+    namespace export status record message action extend
+    namespace ensemble create -unknown {
+        response_subcommand_map
+    }
+
+    proc extend {name args} {
+        #| Extends the JSON response with an object named $name with properties defined in $args.
+        if { [llength $args] % 2 != 0 } {
+            return -code error "Usage: qc::response $name key value ?key value ...?"
+        }
+        global data
+        dict for {key value} $args {
+            dict set data $name $key $value
+        }
+    }
 
     ##################################################
     #

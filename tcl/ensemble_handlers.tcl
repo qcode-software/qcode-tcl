@@ -1,3 +1,8 @@
+##################################################
+#
+# qc::is, qc::cast, qc::castable ensemble handler
+#
+###################################################
 proc data_type_parser {args} {
     #| Try to map args to data type
     set namespace [lindex $args 0]
@@ -40,4 +45,14 @@ proc data_type_parser {args} {
             }
         }
     }
+}
+
+##################################################
+#
+# qc::response ensemble handler
+#
+##################################################
+proc response_subcommand_map {ensemble subcommand args} {
+    #| Map unknown subcommands to response extend
+    return [list $ensemble extend $subcommand]
 }

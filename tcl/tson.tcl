@@ -119,4 +119,3 @@ proc qc::tson2xml { tson } {
 	}
     }
 }
-

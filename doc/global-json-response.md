@@ -53,6 +53,12 @@ Setting Up The Response
 
 Details on setting up the response can be found in the [API].
 
+
+Extending The Response
+----------------------
+
+The response can be extended to include more objects alongside the four standard ones. See the [API] for more information.
+
 Usage
 -----
 
