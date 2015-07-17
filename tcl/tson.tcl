@@ -119,25 +119,3 @@ proc qc::tson2xml { tson } {
 	}
     }
 }
-
-proc qc::dict2tson { dict } {
-    #| Converts the given dictionary to TSON
-    set object [list object]
-    dict for {name value} $dict {
-        if { [llength $value] < 1 } {
-            if { [string is double $value] } {
-                set type number
-            } else if { [string is boolean $value] } {
-                set type boolean
-                set value [qc::cast boolean $value true false]
-            } else {
-                set type string
-            }
-            lappend object $name [list $type $value]
-        } else {
-            # Value is a dict
-            lappend $name [qc::dict2tson $value]
-        }
-    }
-    return $object
-}
