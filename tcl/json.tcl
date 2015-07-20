@@ -315,7 +315,11 @@ proc qc::data2json {} {
                     set status $value
                 }
                 default {
-                    lappend extensions $key [qc::tson_object {*}$value]
+                    set object [list object]
+                    foreach {name val} $value {
+                        lappend object $name [list string $val]
+                    }
+                    lappend extensions $key $object
                 }
             }
         }
