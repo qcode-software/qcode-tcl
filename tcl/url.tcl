@@ -32,6 +32,21 @@ proc qc::url { url args } {
     }
 }
 
+proc qc::url2 { url args } {
+    #| Take an url with or without url encoded vars and insert or replace vars based on 
+    #| the supplied pairs of var & value.
+    if { ![qc::is uri $url] } {
+        error "\"$url\" is not a valid URI."
+    }
+
+    # base, params, hash, protocol, domain, port, path, segments
+    qc::dict2vars [qc::url_parts $url]
+
+    # hash, segments, params
+    
+    
+}
+
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
     if { ![qc::is uri $url] } {
