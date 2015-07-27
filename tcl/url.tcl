@@ -39,12 +39,50 @@ proc qc::url2 { url args } {
         error "\"$url\" is not a valid URI."
     }
 
+    set dict [qc::args2dict] $args
+
     # base, params, hash, protocol, domain, port, path, segments
     qc::dict2vars [qc::url_parts $url]
 
-    # hash, segments, params
-    
-    
+    # look for colon vars in the URL path segments and substitute the matching value given in the args
+    set substituted_segments [list]
+    foreach segment $segments {
+        if { [string index $segment 0] eq ":" } {
+            # remove the colon
+            set segment [string range $segment 1 end]
+            # check if caller has provided a substitution for the segment
+            if { [dict exists $dict $segment] } {
+                lappend substituted_segments [dict get $dict $segment]
+                # remove the dict entry so that it isn't reused
+                set dict [dict remove $dict $segment]
+            } else {
+                error "No matching matching key for \"$segment\" found in args"
+            }
+        } else {
+            lappend substituted_segments $segment
+        }
+    }
+
+    # check if the fragment identifier requires substitution
+    if { [string index $hash 0] eq ":" } {
+        # remove the colon
+        set temp [string range $hash 1 end]
+        if { [dict exists $dict $temp] } {
+            set hash [dict get $dict $temp]
+            # remove the dict entry so that it isn't reused
+            set dict [dict remove $dict $segment]
+        } else {
+            error "No matching key for \"$hash\" found in args"
+        }
+    }
+
+    # rest of args are form vars
+    dict for {key value} $dict {
+        # overwrite any existing form vars
+        dict set params $key $value
+    }
+
+    return [qc::url_make [dict create protocol $protocol domain $domain port $port segments $substituted_segments params $params hash $hash]]
 }
 
 proc qc::url_unset { url var_name } {
