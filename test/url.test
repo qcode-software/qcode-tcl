@@ -303,7 +303,7 @@ namespace eval ::qcode::test {
             }
             hash "comments"
         }
-    } -result "https://qcode.co.uk::80/post/123?tags=tcl&tags=psql&author=peter#comments"
+    } -result "https://qcode.co.uk:80/post/123?tags=tcl&tags=psql&author=peter#comments"
 
     test url_make-1.1 {url_make hash only} -body {
         url_make {
@@ -336,7 +336,7 @@ namespace eval ::qcode::test {
             domain "qcode.co.uk"
             port 80
         }
-    } -result "https://qcode.co.uk::80"
+    } -result "https://qcode.co.uk:80"
 
     # url_maker
     test url_maker-1.0 {url_maker base only} -body {
@@ -344,8 +344,8 @@ namespace eval ::qcode::test {
     } -result "https://qcode.co.uk/"
 
     test url_maker-1.1 {url_maker base and port} -body {
-        url_maker "https://qcode.co.uk" :: "80"
-    } -result "https://qcode.co.uk::80/"
+        url_maker "https://qcode.co.uk" : "80"
+    } -result "https://qcode.co.uk:80/"
 
     test url_maker-1.2 {url_maker slash only} -body {
         url_maker /
