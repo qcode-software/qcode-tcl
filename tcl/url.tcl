@@ -3,43 +3,8 @@ namespace eval qc {
 }
 
 proc qc::url { url args } {
-    #| Take an url with or without url encoded vars and insert or replace vars based on 
-    #| the supplied pairs of var & value.
-    # TODO Aolserver only
-    if { ![qc::is uri $url] } {
-        error "\"$url\" is not a valid URI."
-    }    
-    # Are there existing encoded vars path?var1=name1...
-    set dict [args2dict $args]
-    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
-	foreach {name value} [split $query_string &=] {
-	    set this([qc::url_decode $name]) [qc::url_decode $value]
-	}
-    } else {
-	error "\"$url\" is not a valid URL."
-    }
-    # Reset required values overwriting old values
-    array set this $dict
-    # Recontruct the query string
-    set pairs {}
-    foreach {name value} [array get this] {
-	lappend pairs "[url_encode $name]=[url_encode $value]"
-    }
-    if { [llength $pairs] != 0 } {
-	return "$path?[join $pairs &]$fragment"
-    } else {
-	return ${path}${fragment}
-    }
-}
-
-proc qc::url2 { url args } {
-    #| Take an url with or without url encoded vars and insert or replace vars based on 
-    #| the supplied pairs of var & value.
-    if { ![qc::is uri $url] } {
-        error "\"$url\" is not a valid URI."
-    }
-
-    set dict [qc::args2dict] $args
+    #| Builds a full URL from a given base and form variables substituting any colon variables from the name value pairs into the path.
+    set dict [qc::args2dict $args]
 
     # base, params, hash, protocol, domain, port, path, segments
     qc::dict2vars [qc::url_parts $url]
@@ -56,7 +21,7 @@ proc qc::url2 { url args } {
                 # remove the dict entry so that it isn't reused
                 set dict [dict remove $dict $segment]
             } else {
-                error "No matching matching key for \"$segment\" found in args"
+                error "Missing value to go with key \"$segment\" in args"
             }
         } else {
             lappend substituted_segments $segment
@@ -72,7 +37,7 @@ proc qc::url2 { url args } {
             # remove the dict entry so that it isn't reused
             set dict [dict remove $dict $segment]
         } else {
-            error "No matching key for \"$hash\" found in args"
+            error "Missing value to go with key \"$hash\" in args"
         }
     }
 
