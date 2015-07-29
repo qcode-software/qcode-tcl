@@ -3,33 +3,54 @@ namespace eval qc {
 }
 
 proc qc::url { url args } {
-    #| Take an url with or without url encoded vars and insert or replace vars based on 
-    #| the supplied pairs of var & value.
-    # TODO Aolserver only
-    if { ![qc::is uri $url] } {
-        error "\"$url\" is not a valid URI."
-    }    
-    # Are there existing encoded vars path?var1=name1...
-    set dict [args2dict $args]
-    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
-	foreach {name value} [split $query_string &=] {
-	    set this([qc::url_decode $name]) [qc::url_decode $value]
-	}
-    } else {
-	error "\"$url\" is not a valid URL."
+    #| Builds a URL from a given base and name value pairs.
+    #| Substitutes and encodes any colon variables from the name value pairs into the path and fragment
+    #| with any remaining name value pairs treated as parameters for the query string.
+    #| NOTE: Only supports root-relative URLs.
+    set dict [qc::args2dict $args]
+
+    # base, params, hash, protocol, domain, port, path, segments
+    qc::dict2vars [qc::url_parts $url]
+
+    # look for colon vars in the URL path segments and substitute the matching value given in the args
+    set substituted_segments [list]
+    foreach segment $segments {
+        if { [string index $segment 0] eq ":" } {
+            # remove the colon
+            set segment [string range $segment 1 end]
+            # check if caller has provided a substitution for the segment
+            if { [dict exists $dict $segment] } {
+                lappend substituted_segments [dict get $dict $segment]
+                # remove the dict entry so that it isn't reused
+                set dict [dict remove $dict $segment]
+            } else {
+                error "Missing value to go with key \"$segment\" in args"
+            }
+        } else {
+            lappend substituted_segments $segment
+        }
     }
-    # Reset required values overwriting old values
-    array set this $dict
-    # Recontruct the query string
-    set pairs {}
-    foreach {name value} [array get this] {
-	lappend pairs "[url_encode $name]=[url_encode $value]"
+
+    # check if the fragment identifier requires substitution
+    if { [string index $hash 0] eq ":" } {
+        # remove the colon
+        set temp [string range $hash 1 end]
+        if { [dict exists $dict $temp] } {
+            set hash [dict get $dict $temp]
+            # remove the dict entry so that it isn't reused
+            set dict [dict remove $dict $temp]
+        } else {
+            error "Missing value to go with key \"$hash\" in args"
+        }
     }
-    if { [llength $pairs] != 0 } {
-	return "$path?[join $pairs &]$fragment"
-    } else {
-	return ${path}${fragment}
+
+    # rest of args are form vars
+    dict for {key value} $dict {
+        # overwrite any existing form vars
+        dict set params $key $value
     }
+
+    return [qc::url_make [dict create protocol $protocol domain $domain port $port segments $substituted_segments params $params hash $hash]]
 }
 
 proc qc::url_unset { url var_name } {
