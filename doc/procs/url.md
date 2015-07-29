@@ -10,7 +10,9 @@ Usage
 Description
 -----------
  Builds a URL from a given base and name value pairs.
+ 
  Substitutes and encodes any colon variables from the name value pairs into the path and fragment with any remaining name value pairs treated as parameters for the query string.
+
  NOTE: Only supports root-relative URLs.
 
 Examples
