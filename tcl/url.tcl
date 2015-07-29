@@ -4,7 +4,7 @@ namespace eval qc {
 
 proc qc::url { url args } {
     #| Builds a URL from a given base and name value pairs.
-    #| Substitutes any colon variables from the name value pairs into the path and fragment
+    #| Substitutes and encodes any colon variables from the name value pairs into the path and fragment
     #| with any remaining name value pairs treated as parameters for the query string.
     #| NOTE: Only supports root-relative URLs.
     set dict [qc::args2dict $args]
