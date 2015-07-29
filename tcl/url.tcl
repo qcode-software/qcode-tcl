@@ -3,7 +3,10 @@ namespace eval qc {
 }
 
 proc qc::url { url args } {
-    #| Builds a full URL from a given base and form variables substituting any colon variables from the name value pairs into the path.
+    #| Builds a URL from a given base and name value pairs.
+    #| Substitutes any colon variables from the name value pairs into the path and fragment
+    #| with any remaining name value pairs treated as parameters for the query string.
+    #| NOTE: Only supports root-relative URLs.
     set dict [qc::args2dict $args]
 
     # base, params, hash, protocol, domain, port, path, segments
@@ -35,7 +38,7 @@ proc qc::url { url args } {
         if { [dict exists $dict $temp] } {
             set hash [dict get $dict $temp]
             # remove the dict entry so that it isn't reused
-            set dict [dict remove $dict $segment]
+            set dict [dict remove $dict $temp]
         } else {
             error "Missing value to go with key \"$hash\" in args"
         }
