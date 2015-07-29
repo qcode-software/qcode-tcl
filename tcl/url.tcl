@@ -297,7 +297,7 @@ proc qc::url_make {dict} {
     #     params {tags tcl tags psql author peter}
     #     hash comments
     # }
-    # => https://qcode.co.uk::80/posts/123/hello+world?tags=tcl&tags=psql&author=peter#comments
+    # => https://qcode.co.uk:80/posts/123/hello+world?tags=tcl&tags=psql&author=peter#comments
     # all keys are optional, but if protocol, domain, and/or port are specified,
     #   protocol and domain must be specified)
     # "segments" is a list
@@ -305,7 +305,7 @@ proc qc::url_make {dict} {
     # If segments is specified (even as an empty list), the url path will be absolute
     dict2vars $dict protocol domain port segments params hash
 
-    # Construct url root (eg. http://qcode.co.uk::80).
+    # Construct url root (eg. http://qcode.co.uk:80).
     if {
         ([info exists protocol] && $protocol ne "")
         || ([info exists domain] && $domain ne "")
@@ -327,7 +327,7 @@ proc qc::url_make {dict} {
             if { ! [regexp {[0-9]+} $port] } {
                 error "Invalid url port $port"
             }
-            set root "${protocol}://${domain}::${port}"
+            set root "${protocol}://${domain}:${port}"
         } else {
             set root "${protocol}://${domain}"
         }
@@ -379,15 +379,15 @@ proc qc::url_make {dict} {
 
 proc qc::url_maker {args} {
     #| Construct or modifiy an url
-    # Usage url_maker [$base] [:: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
+    # Usage url_maker [$base] [: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
     qc::args $args -multimap_form_vars -- args
     default multimap_form_vars false
-    set usage_error {Usage: url_maker [$base [:: $port]] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
+    set usage_error {Usage: url_maker [$base [: $port]] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
     set url_dict [dict create]
     set section "base"
     set sections [list "base" "port" "segments" "params" "hash"]
     set delimiters {
-        "::" "port"
+        ":" "port"
         "/" "segments"
         "?" "params"
         "#" "hash"

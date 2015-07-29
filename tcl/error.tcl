@@ -51,7 +51,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     append body [h hr]
                 }
             }
-            return [return2client code 400 $media_type $body filter_cc yes]
+            return [return2client code 200 $media_type $body filter_cc yes]
         }
         PERM* {
             switch $media_type {

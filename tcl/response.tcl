@@ -8,7 +8,7 @@ namespace eval qc::response {
     proc extend {name args} {
         #| Extends the JSON response with an object named $name with properties defined in $args.
         if { [llength $args] % 2 != 0 } {
-            return -code error "Usage: qc::response $name key value ?key value ...?"
+            return -code error "Usage: qc::response extend name key value ?key value ...?"
         }
         global data
         dict for {key value} $args {
