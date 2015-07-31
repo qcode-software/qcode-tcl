@@ -150,7 +150,7 @@ namespace eval ::qcode::test {
 
     test url-1.12 {url colon segment no var} -body {
         url /:path foo 123 bar 456
-    } -cleanup {} -result {/%3apath?foo=789&bar=456}
+    } -cleanup {} -result {/%3apath?foo=123&bar=456}
     
     # url_match
     test url_match-1.0 {url_match identical urls} -body {
