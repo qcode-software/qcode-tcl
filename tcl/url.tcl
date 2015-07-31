@@ -11,9 +11,9 @@ proc qc::url { url args } {
 
     qc::dict2vars [qc::url_parts $url] params hash protocol domain port segments
 
-    # decode params, segements, and hash
-    set params [qc::map url_decode $params]
-    set segments [qc::map url_decode $segments]
+    # decode params, segments, and hash
+    set params [qc::lapply url_decode $params]
+    set segments [qc::lapply url_decode $segments]
     set hash [url_decode $hash]
 
     # look for colon vars in the URL path segments and substitute the matching value given in the args

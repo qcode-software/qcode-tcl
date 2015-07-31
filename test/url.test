@@ -134,9 +134,23 @@ namespace eval ::qcode::test {
         url /:path1/:path2 ~ path1 path2 query1 query2
     } -cleanup {} -result {/123/456?query1=abc&query2=def}
 
-    test url-1.8 {url query override} -body {
+    test url-1.9 {url query override} -body {
         url /path?foo=hello&bar=world foo 123 bar 456
     } -cleanup {} -result {/path?foo=123&bar=456}
+
+    test url-1.10 {url already encoded url} -body {
+        set url [url /path?foo=hello&bar=world foo 123 bar 456]
+        url $url baz 789
+    } -cleanup {} -result {/path?foo=123&bar=456&baz=789}
+
+    test url-1.11 {url already encoded url overwrite param} -body {
+        set url [url /path?foo=hello&bar=world foo 123 bar 456]
+        url $url foo 789
+    } -cleanup {} -result {/path?foo=789&bar=456}
+
+    test url-1.12 {url colon segment no var} -body {
+        url /:path foo 123 bar 456
+    } -cleanup {} -result {/%3apath?foo=789&bar=456}
     
     # url_match
     test url_match-1.0 {url_match identical urls} -body {
