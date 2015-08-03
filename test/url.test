@@ -150,7 +150,19 @@ namespace eval ::qcode::test {
 
     test url-1.12 {url colon segment no var} -body {
         url /:path foo 123 bar 456
-    } -cleanup {} -result {/%3apath?foo=123&bar=456}
+    } -cleanup {} -returnCodes {error} -result {Key "path" not found in args.}
+
+    test url-1.13 {url colon fragment no var} -body {
+        url "https://www.qcode.co.uk/path#:hash" foo 123 bar 456
+    } -cleanup {} -returnCodes {error} -result {Key "hash" not found in args.}
+
+    test url-1.14 {url colon var segment begins with colon} -body {
+        url /:path path :123
+    } -cleanup {} -returnCodes {error} -result {The substitute value ":123" for colon variable "path" begins with a colon.}
+
+    test url-1.15 {url colon var fragment begins with colon} -body {
+        url /path#:hash hash :abc
+    } -cleanup {} -returnCodes {error} -result {The substitute value ":abc" for colon variable "hash" begins with a colon.}
     
     # url_match
     test url_match-1.0 {url_match identical urls} -body {
