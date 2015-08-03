@@ -9,8 +9,12 @@ proc qc::url { url args } {
     #| NOTE: Only supports root-relative URLs.
     set dict [qc::args2dict $args]
 
-    # base, params, hash, protocol, domain, port, path, segments
-    qc::dict2vars [qc::url_parts $url]
+    qc::dict2vars [qc::url_parts $url] params hash protocol domain port segments
+
+    # decode params, segments, and hash
+    set params [qc::lapply url_decode $params]
+    set segments [qc::lapply url_decode $segments]
+    set hash [url_decode $hash]
 
     # look for colon vars in the URL path segments and substitute the matching value given in the args
     set substituted_segments [list]
@@ -24,7 +28,7 @@ proc qc::url { url args } {
                 # remove the dict entry so that it isn't reused
                 set dict [dict remove $dict $segment]
             } else {
-                error "Missing value to go with key \"$segment\" in args"
+                lappend substituted_segments ":$segment"
             }
         } else {
             lappend substituted_segments $segment
@@ -39,8 +43,6 @@ proc qc::url { url args } {
             set hash [dict get $dict $temp]
             # remove the dict entry so that it isn't reused
             set dict [dict remove $dict $temp]
-        } else {
-            error "Missing value to go with key \"$hash\" in args"
         }
     }
 
@@ -49,7 +51,7 @@ proc qc::url { url args } {
         # overwrite any existing form vars
         dict set params $key $value
     }
-
+    
     return [qc::url_make [dict create protocol $protocol domain $domain port $port segments $substituted_segments params $params hash $hash]]
 }
 
@@ -220,7 +222,8 @@ proc qc::url_match {canonical_url test_url} {
 
 proc qc::url_parts {url} {
     #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
-    # and path of url
+    #| and path of url.
+    #| qc::url_parts is not responsible for decoding any url part.
     if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
