@@ -25,11 +25,11 @@ proc qc::url { url args } {
             set segment [string range $segment 1 end]
             # check if caller has provided a substitution for the segment
             if { [dict exists $dict $segment] } {
-                set sub [dict get $dict $segment]
-                if { [string index $sub 0] eq ":" } {
-                    return -code error "The substitute value \"$sub\" for colon variable \"$segment\" begins with a colon."
+                set value [dict get $dict $segment]
+                if { [string index $value 0] eq ":" } {
+                    return -code error "The substitute value \"$value\" for colon variable \"$segment\" begins with a colon."
                 }
-                lappend substituted_segments $sub
+                lappend substituted_segments $value
                 # remove the dict entry so that it isn't reused
                 set dict [dict remove $dict $segment]
             } else {
@@ -45,11 +45,11 @@ proc qc::url { url args } {
         # remove the colon
         set temp [string range $hash 1 end]
         if { [dict exists $dict $temp] } {
-            set sub [dict get $dict $temp]
-            if { [string index $sub 0] eq ":" } {
-                return -code error "The substitute value \"$sub\" for colon variable \"$temp\" begins with a colon."
+            set value [dict get $dict $temp]
+            if { [string index $value 0] eq ":" } {
+                return -code error "The substitute value \"$value\" for colon variable \"$temp\" begins with a colon."
             }
-            set hash $sub
+            set hash $value
             # remove the dict entry so that it isn't reused
             set dict [dict remove $dict $temp]
         } else {
