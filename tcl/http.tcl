@@ -577,6 +577,9 @@ proc qc::http_headers_with_value_as_list {} {
 
 proc qc::http_header_sort_values_by_weight {values} {
     #| Sorts the header values by weight.
+    if { [llength $values] == 0 } {
+        return [list]
+    }
     set sorted [list [lindex $values 0]]
     foreach value [lrange $values 1 end] {
         if { [dict exists $value params q] } {
