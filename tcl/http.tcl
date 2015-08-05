@@ -577,6 +577,9 @@ proc qc::http_headers_with_value_as_list {} {
 
 proc qc::http_header_sort_values_by_weight {values} {
     #| Sorts the header values by weight.
+    if { [llength $values] == 0 } {
+        return [list]
+    }
     set sorted [list [lindex $values 0]]
     foreach value [lrange $values 1 end] {
         if { [dict exists $value params q] } {
@@ -613,7 +616,10 @@ proc qc::http_accept_header_best_mime_type {available_media} {
     #| Returns the empty string if no sufficient match is found.
     
     # TODO specificity.
-    set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse Accept [qc::http_header_get Accept]]]   
+    set sorted [qc::http_header_sort_values_by_weight [qc::http_header_parse Accept [qc::http_header_get Accept]]]
+    if { [llength $sorted] == 0 } {
+        return "*/*"
+    }
     foreach dict $sorted {
         lassign [split [dict get $dict token] "/"] type subtype
         # If best mime type is "*/*" then let caller know so that they can choose the most suitable type.
