@@ -290,6 +290,38 @@ namespace eval ::qcode::test {
         url_parts "http://www.qcode.test.co.uk/foo/bar?#foo"
     } -result {base http://www.qcode.test.co.uk/foo/bar params {} hash foo protocol http domain www.qcode.test.co.uk port {} path /foo/bar segments {foo bar}}
 
+    test url_parts-1.15 {url_parts with valueless param} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.16 {url_parts with empty string param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?=bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {{} bar} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.17 {url_parts with empty string param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar="
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.17 {url_parts with / as param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?/=bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {/ bar} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.18 {url_parts with / as param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar=/"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar /} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.19 {url_parts with ? as param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo??=foo"
+    } -result {base http://www.qcode.test.co.uk/foo params {? foo} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.20 {url_parts with ? as param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?foo=?"
+    } -result {base http://www.qcode.test.co.uk/foo params {foo ?} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.21 {url_parts with two valueless params} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar&baz"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {} baz {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
     # url_request_path
     test url_request_path-1.0 {url_request_path basic usage} -body {
         url_request_path "GET /homepage?foo=bar HTTP/1.1"
@@ -434,6 +466,22 @@ namespace eval ::qcode::test {
     test url_maker-1.9 {url_maker hash} -body {
         url_maker "/foo" # bar
     } -result "/foo#bar"
+
+    test url_maker-1.10 {url_maker / as query param name} -body {
+        url_maker / foo bar ? / baz
+    } -result "/foo/bar?%2f=baz"
+
+    test url_maker-1.11 {url_maker / as query param value} -body {
+        url_maker / foo bar ? baz /
+    } -result "/foo/bar?baz=%2f"
+
+    test url_maker-1.12 {url_maker ? as query param name} -body {
+        url_maker / foo bar ? ? ""
+    } -result "/foo/bar?%3f="
+
+    test url_maker-1.13 {url_maker ? as query param value} -body {
+        url_maker / foo bar ? "" ?
+    } -result "/foo/bar?=%3f"
 
     cleanupTests
 }
