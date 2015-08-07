@@ -259,7 +259,12 @@ proc qc::url_parts {url} {
         (?:\#(${hash_char}*))?
         $}]
     if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
-        set params [split $query &=]
+        set pairs [split $query &]
+        set params [list]
+        foreach pair $pairs {
+            set list [split $pair =]
+            lappend params [lindex $list 0] [lindex $list 1]
+        }
         set segments [split [string trimleft $path "/"] "/"]
         return [qc::dict_from base params hash protocol domain port path segments]
     }
@@ -277,7 +282,12 @@ proc qc::url_parts {url} {
     if { [regexp -expanded $pattern $url -> path query hash] } {
         lassign [list "" "" ""] protocol domain port
         set base $path
-        set params [split $query &=]
+        set pairs [split $query &]
+        set params [list]
+        foreach pair $pairs {
+            set list [split $pair =]
+            lappend params [lindex $list 0] [lindex $list 1]
+        }
         set segments [split [string trimleft $path "/"] "/"]
         return [qc::dict_from base params hash protocol domain port path segments]
     }
@@ -417,19 +427,22 @@ proc qc::url_maker {args} {
             if { $arg_is_param_value } {
                 error $usage_error
             }
-            set new_section [dict get $delimiters $arg]
-            set old_index [lsearch $sections $section]
-            set new_index [lsearch $sections $new_section]
-            if { $new_index <= $old_index } {
-                error $usage_error
-            }
-            set section $new_section
+            set section [dict get $delimiters $arg]
             switch $section {
                 "port" {
                     dict set url_dict port ""
+                    set delimiters {
+                        "/" "segments"
+                        "?" "params"
+                        "#" "hash"
+                    }
                 }
                 "segments" {
                     dict_default url_dict segments [list]
+                    set delimiters {
+                        "?" "params"
+                        "#" "hash"
+                    }
                 }
                 "params" {
                     if { $multimap_form_vars } {
@@ -437,9 +450,13 @@ proc qc::url_maker {args} {
                     } else {
                         dict_default url_dict params [dict create]
                     }
+                    set delimiters {
+                        "#" "hash"
+                    }
                 }
                 "hash" {
                     dict set url_dict hash ""
+                    set delimiters {}
                 }
             }
             set end_of_section false
