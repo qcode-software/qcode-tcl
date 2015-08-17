@@ -31,7 +31,7 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
     set url_path [qc::conn_path]
     set file [ns_url2file $url_path]
     
-    if { [llength [info procs "${namespace}::${url_path}"]] } {
+    if { [info procs "${namespace}::${url_path}"] eq "${namespace}::${url_path}" } {
 	qc::try {
 	    set result [form_proc "${namespace}::${url_path}"]
 	    if { ![expr 0x1 & [ns_conn flags]] } {
