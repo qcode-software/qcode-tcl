@@ -80,10 +80,14 @@ proc qc::cast_period {string} {
 }
 
 proc qc::cast_url {string} {
+    #| Deprecated - see qc::cast url
+    #| (See also qc::is url)
     return [qc::cast url $string]
 }
 
 proc qc::cast_relative_url {string} {
+    #| Deprecated - see qc::cast url
+    #| (See also qc::is url)
     return [qc::cast relative_url $string]
 }
 
@@ -666,6 +670,7 @@ namespace eval qc::cast {
 
     proc url {string} {
         #| Cast the given string to an url
+        #| (See also qc::is url)
         set lower [string tolower $string]
         if { [qc::is url $lower] } {
             return $lower
@@ -678,6 +683,7 @@ namespace eval qc::cast {
 
     proc relative_url {string} {
         #| Cast the given string to a relative url
+        #| (See also qc::is url)
         set lower [string tolower $string]
         if { [qc::is url -relative $lower] } {
             return $lower

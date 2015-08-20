@@ -177,6 +177,7 @@ namespace eval qc::castable {
 
     proc url {string} {
         #| Test if the given string can be cast to an url.
+        #| (See qc::is url)
         try {
             qc::cast url $string
             return true
@@ -187,6 +188,7 @@ namespace eval qc::castable {
 
     proc relative_url {string} {
         #| Test if the given string can be cast to a relative url.
+        #| (See qc::is url)
         try {
             qc::cast relative_url $string
             return true
