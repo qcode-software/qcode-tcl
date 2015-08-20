@@ -687,6 +687,7 @@ namespace eval qc::cast {
         set lower [string tolower $string]
         if { [qc::is url -relative $lower] } {
             return $lower
-        }        
+        }  
+        return -code error -errorcode CAST "Could not cast $string to an url."      
     }
 }
