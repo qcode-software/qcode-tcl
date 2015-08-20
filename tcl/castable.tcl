@@ -1,6 +1,6 @@
 namespace eval qc::castable {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -169,6 +169,26 @@ namespace eval qc::castable {
         #| Test if the given string can be cast to a period.
         try {
             qc::cast period $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
+    }
+
+    proc url {string} {
+        #| Test if the given string can be cast to an url.
+        try {
+            qc::cast url $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
+    }
+
+    proc relative_url {string} {
+        #| Test if the given string can be cast to a relative url.
+        try {
+            qc::cast relative_url $string
             return true
         } on error [list error_message options] {
             return false
