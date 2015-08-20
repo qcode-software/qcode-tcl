@@ -79,6 +79,18 @@ proc qc::cast_period {string} {
     return [qc::cast period $string]
 }
 
+proc qc::cast_url {string} {
+    #| Deprecated - see qc::cast url
+    #| (See also qc::is url)
+    return [qc::cast url $string]
+}
+
+proc qc::cast_relative_url {string} {
+    #| Deprecated - see qc::cast url
+    #| (See also qc::is url)
+    return [qc::cast relative_url $string]
+}
+
 proc qc::is_period {string} {
     #| Deprecated - see qc::is period
     #| Test if string can be casted to a pair of dates defining a period.
@@ -244,7 +256,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -654,5 +666,28 @@ namespace eval qc::cast {
         }
         
         return [list $from_date $to_date]
+    }
+
+    proc url {string} {
+        #| Cast the given string to an url
+        #| (See also qc::is url)
+        set lower [string tolower $string]
+        if { [qc::is url $lower] } {
+            return $lower
+        }
+        if { [qc::is url "http://${lower}"] } {
+            return "http://${lower}"
+        }
+        return -code error -errorcode CAST "Could not cast $string to an url."
+    }
+
+    proc relative_url {string} {
+        #| Cast the given string to a relative url
+        #| (See also qc::is url)
+        set lower [string tolower $string]
+        if { [qc::is url -relative $lower] } {
+            return $lower
+        }  
+        return -code error -errorcode CAST "Could not cast $string to an url."      
     }
 }
