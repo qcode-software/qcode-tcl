@@ -35,7 +35,7 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
     } on error [list error_message options] {
         $error_handler $error_message $options
         return "filter_return"
-    }    
+    }
 }
 
 proc qc::filter_authenticate {event args} {
@@ -50,18 +50,22 @@ proc qc::filter_authenticate {event args} {
             # The method url_path has been registered
             if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
                 # No session cookie or session doesn't exist - implicitly log in as anonymous user.
-                global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]          
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
+                # global session_id current_user_id
+                # set current_user_id [qc::anonymous_user_id]          
+                # set session_id [qc::anonymous_session_id]
+                # qc::cookie_set session_id $session_id
+                # qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
+                qc::login [qc::anonymous_user_id]
             }
 
             if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
                 # GET/HEAD request for anonymous session - roll session after 1 hour
-                global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
+                # global session_id current_user_id
+                # set current_user_id [qc::anonymous_user_id]
+                # set session_id [qc::anonymous_session_id]
+                # qc::cookie_set session_id $session_id
+                # qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
+                qc::login [qc::anonymous_user_id]
             }
 
             if { [qc::session_valid [qc::session_id]] } {
@@ -70,10 +74,12 @@ proc qc::filter_authenticate {event args} {
             } else {
                 # Expired session (normal user) - implicitly log in as anonymous user and optionally redirect to login forms
                 set expired_user_id [qc::session_user_id [qc::session_id]]
-                global session_id current_user_id
-                set current_user_id [qc::anonymous_user_id]
-                set session_id [qc::anonymous_session_id]
-                qc::cookie_set session_id $session_id
+                # global session_id current_user_id
+                # set current_user_id [qc::anonymous_user_id]
+                # set session_id [qc::anonymous_session_id]
+                # qc::cookie_set session_id $session_id
+                # qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
+                qc::login [qc::anonymous_user_id]
                 qc::session_update [qc::session_id]
                 
                 if { [qc::registered authenticate $method $url_path] && [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
@@ -104,14 +110,23 @@ proc qc::filter_authenticate {event args} {
 
             if { [qc::registered authenticate $method $url_path] && $method ni [list "GET" "HEAD"] } {
                 # POST request registered for authentication - check authenticity token
-                set form_dict [qc::form2dict]
-                if {[dict exists $form_dict _authenticity_token]} {
-                    set authenticity_token [dict get $form_dict _authenticity_token]
-                    if {[qc::session_authenticity_token [qc::session_id]] ne $authenticity_token} {
-                        error "Authenticity token was invalid." {} AUTH
-                    }
-                } else {
+                set header_authenticity_token [qc::http_header_get X-Authenticity-Token]
+                set form_authenticity_token ""
+                set authenticity_token [qc::session_authenticity_token [qc::session_id]]
+                if { [dict exists [qc::form2dict] _authenticity_token] } {
+                    # form variable for authenticity token was given
+                    set form_authenticity_token [dict get $form_dict _authenticity_token]
+                }
+                
+                if { $header_authenticity_token eq $authenticity_token || $form_authenticity_token eq $authenticity_token } {
+                    # authenticity token is valid
+                    return "filter_ok"
+                } elseif { $header_authenticity_token eq "" && $form_authenticity_token eq "" } {
+                    # authenticity token wasn't given
                     error "Authenticity token was not found." {} AUTH
+                } else {
+                    # authenticity token is invalid
+                    error "Authenticity token was invalid." {} AUTH
                 }
             }            
         }

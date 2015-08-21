@@ -169,3 +169,26 @@ proc qc::anonymous_user_id {} {
     return -1
 }
 
+proc qc::login {user_id} {
+    #| Logs the given user into the system.
+    global session_id current_user_id
+    set current_user_id $user_id
+
+    if { $user_id == [qc::anonymous_user_id] } {
+        # anonymous user - use anonymous session
+        set session_id [qc::anonymous_session_id]
+    } else {
+        # delete old session and create a new one
+        if { [qc::cookie_exists session_id] } {
+            set old_session_id [qc::cookie_get session_id]
+            if { [qc::session_exists $old_session_id] } {
+                qc::session_kill $old_session_id
+            }
+        }
+        set session_id [qc::session_new $user_id]
+    }
+
+    # Set cookies for user
+    qc::cookie_set session_id $session_id
+    qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
+}
