@@ -113,7 +113,8 @@ proc qc::filter_authenticate {event args} {
                 set header_authenticity_token [qc::http_header_get X-Authenticity-Token]
                 set form_authenticity_token ""
                 set authenticity_token [qc::session_authenticity_token [qc::session_id]]
-                if { [dict exists [qc::form2dict] _authenticity_token] } {
+                set form_dict [qc::form2dict]
+                if { [dict exists $form_dict _authenticity_token] } {
                     # form variable for authenticity token was given
                     set form_authenticity_token [dict get $form_dict _authenticity_token]
                 }
