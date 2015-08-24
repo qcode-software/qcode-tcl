@@ -26,14 +26,74 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                 return "filter_return"
             } elseif { [qc::conn_open] && [qc::response status get] eq "invalid" } {
                 # GET request failed validation
-                error "Couldn't validate the path \"$url_path\"" {} BAD_REQUEST                
+                # content negotiation to determine client's preferred content type
+                set types [list "text/html" "application/json"]
+                set mime_type [qc::http_content_negotiate $types]
+                set media_type [lindex [split $mime_type "/"] 1]
+                if { $media_type eq "" } {
+                    # Couldn't negotiate an acceptable response type.
+                    error "Couldn't respond with an acceptable content type. Available content types: [join $types ", "]" {} NOT_ACCEPTABLE
+                }
+                
+                switch $media_type {
+                    json {
+                        qc::return_response
+                    }
+                    * -
+                    html {
+                        # Convert the global data structure into HTML.
+                        global data
+                        set records ""
+                        set messages ""
+                        dict for {key value} $data {
+                            switch $key {
+                                record {
+                                    foreach {name values} $value {
+                                        if { ![dict get $values valid] } {
+                                            # only include the invalid items
+                                            append record_ul [h li "$name - [dict get $values message]"]
+                                        }
+                                    }
+                                }
+                                message {
+                                    foreach {type val} $value {
+                                        append messages [h p "[h strong $type] - $val"]
+                                    }
+                                }
+                            }
+                        }
+
+                        set title "Missing Or Invalid Data"
+                        set contents [h h1 $title]
+                        append contents [h hr]
+                        if { [llength $messages] != 0 } {
+                            append contents [h h2 Messages]
+                            append contents $messages
+                        }
+                        append contents [h h2 "Please fix the following errors and try again:"]
+                        append contents [h ul $records]
+                        append contents [h hr]
+                        append contents [h p "ML Accessories"]
+                        set body [h body $contents]
+                        set head [h head [h title $title]]
+                        
+                        qc::return2client html [h html ${head}${body}] filter_cc yes
+                    }
+                }           
+            } elseif { [qc::conn_open] } {
+                # GET request passed validation
+                
             }
         }
 
         # Validation successful
         return "filter_ok"
     } on error [list error_message options] {
-        $error_handler $error_message $options
+        if { [dict get $options -errorcode] eq "NOT_ACCEPTABLE" } {
+            ns_return 406 text/plain $error_message
+        } else {
+            $error_handler $error_message $options
+        }
         return "filter_return"
     }
 }
