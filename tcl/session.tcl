@@ -175,7 +175,7 @@ proc qc::login {user_id} {
     set current_user_id $user_id
 
     if { $user_id == [qc::anonymous_user_id] } {
-        # anonymous user - use anonymous session
+        # use anonymous session
         set session_id [qc::anonymous_session_id]
     } else {
         # delete old session and create a new one
