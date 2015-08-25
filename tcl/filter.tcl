@@ -50,12 +50,20 @@ proc qc::filter_authenticate {event args} {
             # The method url_path has been registered
             if { ![qc::cookie_exists session_id] || ![qc::session_exists [qc::session_id]] } {
                 # No session cookie or session doesn't exist - implicitly log in as anonymous user.
-                qc::login [qc::anonymous_user_id]
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
+                qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
             }
 
             if { $method in [list "GET" "HEAD"] && [qc::session_user_id [qc::session_id]] == [qc::anonymous_user_id] && [qc::session_id] != [qc::anonymous_session_id] } {
                 # GET/HEAD request for anonymous session - roll session after 1 hour
-                qc::login [qc::anonymous_user_id]
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
+                qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
             }
 
             if { [qc::session_valid [qc::session_id]] } {
@@ -64,7 +72,11 @@ proc qc::filter_authenticate {event args} {
             } else {
                 # Expired session (normal user) - implicitly log in as anonymous user and optionally redirect to login forms
                 set expired_user_id [qc::session_user_id [qc::session_id]]
-                qc::login [qc::anonymous_user_id]
+                global session_id current_user_id
+                set current_user_id [qc::anonymous_user_id]
+                set session_id [qc::anonymous_session_id]
+                qc::cookie_set session_id $session_id
+                qc::cookie_set authenticity_token [qc::session_authenticity_token $session_id] http_only false
                 qc::session_update [qc::session_id]
                 
                 if { [qc::registered authenticate $method $url_path] && [info exists reauth_expired_session] && $expired_user_id != [qc::anonymous_user_id] } {
