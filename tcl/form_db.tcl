@@ -21,7 +21,6 @@ proc qc::form_db { content args } {
     append html "</div>\n"
     append html "<div class=\"db-form-status\">\n"
     append html "</div>\n"
-    append html [qc::form_authenticity_token]
     append html "</form>"
 
     return $html
