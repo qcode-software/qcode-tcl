@@ -21,84 +21,74 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             }
             
             # Let the client know if there's a problem
-            if {[qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid"} {
+            if { [qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid" } {
                 # Non GET/HEAD request failed validation
                 qc::return_response
                 return "filter_return"
-            } elseif { [qc::conn_open] && [qc::response status get] eq "invalid" } {
-                # GET/HEAD request failed validation
-                # content negotiation to determine client's preferred content type
-                set types [list "text/html" "application/json"]
-                set mime_type [qc::http_content_negotiate $types]
-                set media_type [lindex [split $mime_type "/"] 1]
-                if { $media_type eq "" } {
-                    # Couldn't negotiate an acceptable response type.
-                    error "Couldn't respond with an acceptable content type. Available content types: [join $types ", "]" {} NOT_ACCEPTABLE
-                }
-                
-                switch $media_type {
-                    json {
-                        qc::return_response
+            } elseif { [qc::conn_open] && $method in [list GET HEAD] } {
+                # GET/HEAD request
+                if { [qc::http_header_get "X-Requested-With"] eq "XMLHttpRequest" } {
+                    # XHR request
+                    if { [qc::response status get] eq "valid" } {
+                        qc::response action redirect [qc::form2url $url_path]
                     }
-                    * -
-                    html {
-                        # Convert the global data structure into HTML.
-                        global data
-                        set records ""
-                        set messages ""
-                        dict for {key value} $data {
-                            switch $key {
-                                record {
-                                    foreach {name values} $value {
-                                        if { ![dict get $values valid] } {
-                                            # only include the invalid items
-                                            append records [h li [dict get $values message]]
+
+                    qc::return_response
+                    return "filter_return"
+                } elseif { [qc::response status get] eq "invalid" } {
+                    # normal request failed validation
+                    # Convert messages and invalid record items in global data structure into HTML
+                    global data
+                    set records ""
+                    set messages ""
+                    dict for {key value} $data {
+                        switch $key {
+                            record {
+                                foreach {name values} $value {
+                                    if { ![dict get $values valid] } {
+                                        # only include the invalid items
+                                        if { [dict get $values value] eq "" } {
+                                            set li "$name must not be empty."
+                                        } else { 
+                                            set li [dict get $values message]
                                         }
-                                    }
-                                }
-                                message {
-                                    foreach {type val} $value {
-                                        append messages [h p "[h strong $type] - $val"]
+                                        append records [h li $li]
                                     }
                                 }
                             }
+                            message {
+                                foreach {type val} $value {
+                                    append messages [h p "[h strong $type] - $val"]
+                                }
+                            }
                         }
-
-                        set title "Missing Or Invalid Data"
-                        set contents [h h1 $title]
-                        append contents [h hr]
-                        if { [llength $messages] != 0 } {
-                            append contents [h h2 Messages]
-                            append contents $messages
-                        }
-                        append contents [h h2 "Please fix the following errors and try again:"]
-                        append contents [h ul $records]
-                        append contents [h hr]
-                        append contents [h p "ML Accessories"]
-                        set body [h body $contents]
-                        set head [h head [h title $title]]
-                        
-                        qc::return2client html [h html ${head}${body}] filter_cc yes
                     }
-                }
 
-                return "filter_return"
-            } elseif { [qc::conn_open] && $method in [list GET HEAD] && [qc::http_header_get "X-Requested-With"] eq "XMLHttpRequest" } {
-                # GET/HEAD request passed validation and is an XHR/ajax request
-                qc::response action redirect [qc::form2url $url_path]
-                qc::return_response
-                return "filter_return"
+                    # Construct the page
+                    set title "Missing Or Invalid Data"
+                    set contents [h h1 $title]
+                    append contents [h hr]
+                    if { [llength $messages] != 0 } {
+                        append contents [h h2 Messages]
+                        append contents $messages
+                    }
+                    append contents [h h2 "Please fix the following errors and try again:"]
+                    append contents [h ul $records]
+                    append contents [h hr]
+                    append contents [h p "ML Accessories"]
+                    set body [h body $contents]
+                    set head [h head [h title $title]]
+                    
+                    qc::return2client html [h html ${head}${body}] filter_cc yes
+                    return "filter_return"
+                }
             }
         }
         
         # Validation successful
         return "filter_ok"
     } on error [list error_message options] {
-        if { [dict get $options -errorcode] eq "NOT_ACCEPTABLE" } {
-            ns_return 406 text/plain $error_message
-        } else {
-            $error_handler $error_message $options
-        }
+        $error_handler $error_message $options
         return "filter_return"
     }
 }

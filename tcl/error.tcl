@@ -24,11 +24,13 @@ proc qc::error_handler {{error_message "NULL"} args} {
         }
     }
 
-    set mime_type [qc::http_content_negotiate [list "text/html" "application/json" "application/xml" "text/xml"]]
+    set mime_types [list "text/html" "application/json" "application/xml" "text/xml"]
+    set mime_type [qc::http_content_negotiate $mime_types]
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
         # Couldn't negotiate an acceptable response type.
-        return [ns_return 406 "" ""]
+        set error_code NOT_ACCEPTABLE
+        set error_message "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"
     }
     
     switch -glob -- $error_code {
@@ -124,6 +126,9 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 }
             }
             return [return2client code 400 $media_type $body]
+        }
+        NOT_ACCEPTABLE* {
+            return [return2client code 406 text/plain $error_message]
         }
 	default {
 	    log Error $error_info
