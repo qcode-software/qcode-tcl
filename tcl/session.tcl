@@ -168,4 +168,3 @@ proc qc::anonymous_user_id {} {
     #| Return the anonymous user ID.
     return -1
 }
-
