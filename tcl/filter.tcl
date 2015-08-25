@@ -22,10 +22,11 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             
             # Let the client know if there's a problem
             if {[qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid"} {
+                # Non GET/HEAD request failed validation
                 qc::return_response
                 return "filter_return"
             } elseif { [qc::conn_open] && [qc::response status get] eq "invalid" } {
-                # GET request failed validation
+                # GET/HEAD request failed validation
                 # content negotiation to determine client's preferred content type
                 set types [list "text/html" "application/json"]
                 set mime_type [qc::http_content_negotiate $types]
@@ -51,7 +52,7 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                                     foreach {name values} $value {
                                         if { ![dict get $values valid] } {
                                             # only include the invalid items
-                                            append record_ul [h li "$name - [dict get $values message]"]
+                                            append records [h li [dict get $values message]]
                                         }
                                     }
                                 }
@@ -79,13 +80,17 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                         
                         qc::return2client html [h html ${head}${body}] filter_cc yes
                     }
-                }           
-            } elseif { [qc::conn_open] } {
-                # GET request passed validation
-                
+                }
+
+                return "filter_return"
+            } elseif { [qc::conn_open] && $method in [list GET HEAD] && [qc::http_header_get "X-Requested-With"] eq "XMLHttpRequest" } {
+                # GET/HEAD request passed validation and is an XHR/ajax request
+                qc::response action redirect [qc::form2url $url_path]
+                qc::return_response
+                return "filter_return"
             }
         }
-
+        
         # Validation successful
         return "filter_ok"
     } on error [list error_message options] {
