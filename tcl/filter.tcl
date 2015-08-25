@@ -64,23 +64,14 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                         }
                     }
 
-                    # Construct the page
-                    set title "Missing Or Invalid Data"
-                    set contents [h h1 $title]
-                    append contents [h hr]
+                    # Construct the error message
+                    set error_message [h ul $records]
                     if { [llength $messages] != 0 } {
-                        append contents [h h2 Messages]
-                        append contents $messages
+                        append error_message [h h3 Messages]
+                        append error_message $messages
                     }
-                    append contents [h h2 "Please fix the following errors and try again:"]
-                    append contents [h ul $records]
-                    append contents [h hr]
-                    append contents [h p "ML Accessories"]
-                    set body [h body $contents]
-                    set head [h head [h title $title]]
                     
-                    qc::return2client html [h html ${head}${body}] filter_cc yes
-                    return "filter_return"
+                    error $error_message {} USER
                 }
             }
         }

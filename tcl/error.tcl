@@ -42,15 +42,19 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error $error_message
-                    set body [data2json]                }
+                    set body [data2json]
+                }
                 * -
                 html {
                     set media_type html
-                    set body [h h2 "Missing or Invalid Data"]
-                    append body [h hr]
-                    append body $error_message
-                    append body [h p "Please back up and try again."]
-                    append body [h hr]
+                    set title "Missing or Invalid Data"
+                    set head [h head [h title $title]]
+                    set contents [h h2 $title]
+                    append contents [h hr]
+                    append contents [h h3 "Please fix the following errors and try again:"]
+                    append contents $error_message
+                    append contents [h hr]
+                    set body [h html "${head}[h body $contents]"]
                 }
             }
             return [return2client code 200 $media_type $body filter_cc yes]
