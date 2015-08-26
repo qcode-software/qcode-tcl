@@ -57,13 +57,13 @@ proc qc::http_curl {args} {
 	    # default timeout 60seconds
 	    set timeout 60000
         }
-        qc::try {
+        ::try {
 	    set dict [ns_proxy eval $handle $script $timeout]
 	    ns_proxy release $handle
 	    return $dict
-        } {
+        } on error {error_message options} {
 	    ns_proxy release $handle
-	    error $::errorMessage $::errorInfo $::errorCode
+	    error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     } else {
         # no ns_proxy so evaluate directly
