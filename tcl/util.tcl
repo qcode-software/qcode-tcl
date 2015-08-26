@@ -94,7 +94,7 @@ proc qc::coalesce { varName altValue } {
     }
 }
 
-	
+
 proc qc::incr0 { varName amount } {
     #| Increment the value of varName by amount
     upvar 1 $varName var
@@ -253,7 +253,7 @@ proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
 	lappend list [string range $str 0 [expr [lindex $match 0] -1]]
 	if {[lindex $submatch 0]>=0} {
 	    lappend list [string range $str [lindex $submatch 0]\
-		    [lindex $submatch 1]] 
+                              [lindex $submatch 1]] 
 	}	
 	set str [string range $str [expr [lindex $match 1]+1] end] 
     }
@@ -495,13 +495,13 @@ proc qc::exec_proxy {args} {
     }
     if { [info commands ns_proxy] eq "ns_proxy" } {
 	set handle [ns_proxy get exec]
-	qc::try {
+	::try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
 	    return $result
-	} {
+	} on error {error_message options} {
 	    ns_proxy release $handle
-	    error $::errorMessage $::errorInfo $::errorCode
+	    error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
 	}
     } else {
 	# No ns_proxy
@@ -528,7 +528,7 @@ proc qc::info_proc { proc_name } {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }
 
-   
+
 
 proc qc::which {command} {
     #| Return path of unix command - cache result in nsv on AOLserver if present
