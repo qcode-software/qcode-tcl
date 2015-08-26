@@ -179,15 +179,15 @@ namespace eval ::qcode::test {
             db_select_table {select * from students where firsname='Adam'}
         } -result {{student_id firstname surname dob course_id}}
 
-        test db_select_table-1.2 {db_select table error} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_select_table {not a query}
-        } -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
-
         # db_dml
         test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
             db_dml {update students set course_id=1 where student_id=12345}
             db_select_table {select * from students order by surname}
         } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
+
+        test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+            db_dml {not a query}
+        } -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
 
         # db_select_csv
         test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
