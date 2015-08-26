@@ -342,7 +342,7 @@ proc qc::db_dml { args } {
         ::try {
             pg_execute $db $qry
         } on error {error_message options} {
-            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" [dict get $options -errorinfo] [dict get $options -errorcode]
+            error "Failed to execute dml <code>$qry</code>." [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     }
 }
