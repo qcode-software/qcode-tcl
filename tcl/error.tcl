@@ -29,8 +29,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
         # Couldn't negotiate an acceptable response type.
-        set error_code NOT_ACCEPTABLE
-        set error_message "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"
+        return [return2client code 406 text/plain "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"
     }
     
     switch -glob -- $error_code {
