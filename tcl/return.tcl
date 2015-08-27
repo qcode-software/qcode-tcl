@@ -193,16 +193,17 @@ proc ns_returnmoved {url} {
 proc qc::return_response {} {
     #| Returns the global data structure to the client.
     #| Content negotiates to try and find a suitable content type.
-
-    set mime_types [list "text/html" "application/json" "text/json"]
-    set mime_type [qc::http_content_negotiate $mime_types]
+    set mime_types [list "text/html" "application/json"]
+    # use http_accept_header_best_mime_type instead of http_content_negotiate because http_content_negotiate prioritises
+    # suffixes of the requested resource which aren't a concern for the global data structure response.
+    set mime_type [qc::http_accept_header_best_mime_type $mime_types]
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
         # Couldn't negotiate an acceptable response type.
         error "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]" {} NOT_ACCEPTABLE
     }
-
-    switch $media_type {
+    
+    switch -nocase -- $media_type {
         json {
             set response [qc::data2json]
         }
@@ -212,11 +213,6 @@ proc qc::return_response {} {
             set response [qc::data2html]
         }
     }
-        
+    
     qc::return2client $media_type $response
-}
-
-proc qc::data2html {} {
-    #| Converts the global data structure to HTML
-    return [h html [h body [h h1 "Placeholder"]]]
 }
