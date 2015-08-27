@@ -51,7 +51,6 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     set head [h head [h title $title]]
                     set contents [h h2 $title]
                     append contents [h hr]
-                    append contents [h h3 "The following errors occurred:"]
                     append contents $error_message
                     append contents [h p "Please back up and try again."]
                     append contents [h hr]

@@ -11,72 +11,46 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
     ::try {
         set url_path [qc::conn_path]
         set method [string toupper [qc::conn_method]]
-        # Check if this request is registered and a handler exists to validate against.
-        if { [qc::registered $method $url_path] && [qc::handlers exists $method $url_path] } {
-            # Validate to data model
+
+        if { $method eq "VALIDATE" } {
+            # Client requested only a validation service
+            
+            if { [qc::registered $method $url_path] } {
+                set validate_method $method
+            } elseif { [qc::registered GET $url_path] } {
+                set validate_method GET
+            } else {
+                error "Cannot validate \"$url_path\" because there is no registered URL handler for the path." {} NOT_FOUND
+            }
+
+            qc::handlers validate2model $validate_method $url_path
+            
+            # Custom validation
+            if {[qc::handlers validation exists $validate_method $url_path]} {
+                qc::handlers validation call $validate_method $url_path
+            }
+
+            # Return the results of validation to the client
+            qc::return_response
+            return "filter_return"
+        } elseif { [qc::registered $method $url_path] } {
+            # Validate and if invalid return the response otherwise continue as normal
+            
             qc::handlers validate2model $method $url_path
+            
             # Custom validation
             if {[qc::handlers validation exists $method $url_path]} {
                 qc::handlers validation call $method $url_path
             }
             
-            # Let the client know if there's a problem
-            if { [qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid" } {
-                # Non GET/HEAD request failed validation
+            if { [qc::conn_open] && [qc::response status get] eq "invalid" } {
+                # Inform the client that validation failed
                 qc::return_response
                 return "filter_return"
-            } elseif { [qc::conn_open] && $method in [list GET HEAD] } {
-                # GET/HEAD request
-                if { [qc::http_header_get "X-Requested-With"] eq "XMLHttpRequest" } {
-                    # XHR request
-                    if { [qc::response status get] eq "valid" } {
-                        qc::response action redirect [qc::form2url $url_path]
-                    }
-
-                    qc::return_response
-                    return "filter_return"
-                } elseif { [qc::response status get] eq "invalid" } {
-                    # normal request failed validation
-                    # Convert messages and invalid record items in global data structure into HTML
-                    global data
-                    set records ""
-                    set messages ""
-                    dict for {key value} $data {
-                        switch $key {
-                            record {
-                                foreach {name values} $value {
-                                    if { ![dict get $values valid] } {
-                                        # only include the invalid items
-                                        if { [dict get $values value] eq "" } {
-                                            set li "$name must not be empty."
-                                        } else { 
-                                            set li [dict get $values message]
-                                        }
-                                        append records [h li $li]
-                                    }
-                                }
-                            }
-                            message {
-                                foreach {type val} $value {
-                                    append messages [h p "[h strong $type] - $val"]
-                                }
-                            }
-                        }
-                    }
-
-                    # Construct the error message
-                    set error_message [h ul $records]
-                    if { [llength $messages] != 0 } {
-                        append error_message [h h3 Messages]
-                        append error_message $messages
-                    }
-                    
-                    error $error_message {} USER
-                }
             }
         }
         
-        # Validation successful
+        # Validation successful or url_path doesn't require validation.
         return "filter_ok"
     } on error [list error_message options] {
         $error_handler $error_message $options
