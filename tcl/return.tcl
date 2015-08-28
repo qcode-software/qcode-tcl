@@ -208,7 +208,7 @@ proc qc::return_response {} {
         * -
         html {
             set media_type html
-            set response [qc::global_response2html]
+            set response [qc::response2html]
         }
     }
     
