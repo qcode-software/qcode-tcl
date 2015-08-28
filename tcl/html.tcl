@@ -1,7 +1,7 @@
 namespace eval qc {
     package require try
     package require tdom
-    namespace export html2* html html_tag h h_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html html2tcl tcl_escape tdom_node2tcl html_sanitize element_sanitize attribute_sanitize safe_elements_check safe_attributes_check safe_html_error_report safe_elements_error_report safe_attributes_error_report safe_elements safe_attributes
+    namespace export html2* html html_tag h h_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html html2tcl tcl_escape tdom_node2tcl html_sanitize element_sanitize attribute_sanitize safe_elements_check safe_attributes_check safe_html_error_report safe_elements_error_report safe_attributes_error_report safe_elements safe_attributes response2html
 }
 
 proc qc::html2pdf { args } {
@@ -868,4 +868,9 @@ proc qc::safe_attributes {} {
     dict append safe_attributes all $list
 
     return $safe_attributes
+}
+
+proc qc::response2html {} {
+    #| Converts the global data structure to HTML
+    return [h html [h body [h h1 "Placeholder"]]]
 }

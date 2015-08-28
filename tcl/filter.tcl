@@ -11,26 +11,50 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
     ::try {
         set url_path [qc::conn_path]
         set method [string toupper [qc::conn_method]]
-        # Check if this request is registered and a handler exists to validate against.
-        if { [qc::registered $method $url_path] && [qc::handlers exists $method $url_path] } {
-            # Validate to data model
+
+        if { $method eq "VALIDATE" } {
+            # Client requested only a validation service
+            
+            if { [qc::registered VALIDATE $url_path] } {
+                set validate_method VALIDATE
+            } elseif { [qc::registered GET $url_path] } {
+                # Check if we can use a GET handler as a substitute
+                # TODO check for any registered handler to be used as substitute.
+                set validate_method GET
+            } elseif { [qc::registered POST $url_path] } {
+                set validate_method POST
+            } else {
+                error "Cannot validate \"$url_path\" because there is no registered service for the path." {} NOT_FOUND
+            }
+
+            qc::handlers validate2model $validate_method $url_path
+            
+            # Custom validation
+            if {[qc::handlers validation exists $validate_method $url_path]} {
+                qc::handlers validation call $validate_method $url_path
+            }
+
+            # Return the results of validation to the client
+            qc::return_response
+            return "filter_return"
+        } elseif { [qc::registered $method $url_path] } {
+            # Validate and if invalid return the response otherwise continue as normal
+            
             qc::handlers validate2model $method $url_path
+            
             # Custom validation
             if {[qc::handlers validation exists $method $url_path]} {
                 qc::handlers validation call $method $url_path
             }
             
-            # Let the client know if there's a problem
-            if {[qc::conn_open] && $method ni [list GET HEAD] && [qc::response status get] eq "invalid"} {
+            if { [qc::conn_open] && [qc::response status get] eq "invalid" } {
+                # Inform the client that validation failed
                 qc::return_response
                 return "filter_return"
-            } elseif { [qc::conn_open] && [qc::response status get] eq "invalid" } {
-                # GET request failed validation
-                error "Couldn't validate the path \"$url_path\"" {} BAD_REQUEST                
             }
         }
-
-        # Validation successful
+        
+        # Validation successful or url_path doesn't require validation.
         return "filter_ok"
     } on error [list error_message options] {
         $error_handler $error_message $options

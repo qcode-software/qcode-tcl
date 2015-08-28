@@ -285,6 +285,11 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
 }
 
 proc qc::data2json {} {
+    #| Deprecated
+    return response2json
+}
+
+proc qc::response2json {} {
     #| Convert the global data structure into JSON.
     global data
     set record_objects [list object]

@@ -191,6 +191,26 @@ proc ns_returnmoved {url} {
 }
 
 proc qc::return_response {} {
-    #| Returns the result gathered from validation and/or POST to the client.
-    qc::return2client json [data2json]
+    #| Returns the global data structure to the client.
+    #| Content negotiates to try and find a suitable content type.
+    set mime_types [list "text/html" "application/json"]
+    set mime_type [qc::http_accept_header_best_mime_type $mime_types]
+    set media_type [lindex [split $mime_type "/"] 1]
+    if { $media_type eq "" } {
+        # Couldn't negotiate an acceptable response type.
+        return [qc::return2client code 406 text "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"]
+    }
+    
+    switch -nocase -- $media_type {
+        json {
+            set response [qc::response2json]
+        }
+        * -
+        html {
+            set media_type html
+            set response [qc::response2html]
+        }
+    }
+    
+    qc::return2client $media_type $response
 }
