@@ -29,7 +29,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
         # Couldn't negotiate an acceptable response type.
-        return [return2client code 406 text/plain "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"
+        return [return2client code 406 text "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"
     }
     
     switch -glob -- $error_code {
@@ -41,7 +41,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error $error_message
-                    set body [data2json]
+                    set body [response2json]
                 }
                 * -
                 html {
@@ -66,7 +66,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error "Not Authorised: $error_message"
-                    set body [data2json]
+                    set body [response2json]
                 }
                 * -
                 html {
@@ -84,7 +84,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error "Authentication Failed: $error_message"
-                    set body [data2json]
+                    set body [response2json]
                 }
                 * -
                 html {
@@ -102,7 +102,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error "Not Found: $error_message"
-                    set body [data2json]
+                    set body [response2json]
                 }
                 * -
                 html {
@@ -120,7 +120,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                 json {
                     qc::response status invalid
                     qc::response message error "Bad Request: $error_message"
-                    set body [data2json]
+                    set body [response2json]
                 }
                 * -
                 html {
@@ -140,7 +140,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     json {
                         qc::response status invalid
                         qc::response message error "Software Bug - [string range $error_message 0 75]"
-                        set body [data2json]
+                        set body [response2json]
                     }
                     * -
                     html {
@@ -157,7 +157,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     json {
                         qc::response status invalid
                         qc::response message error "Internal Server Error. An email report has been sent to our engineers"
-                        set body [data2json]
+                        set body [response2json]
                     }
                     * -
                     html {

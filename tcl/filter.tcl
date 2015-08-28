@@ -15,12 +15,16 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
         if { $method eq "VALIDATE" } {
             # Client requested only a validation service
             
-            if { [qc::registered $method $url_path] } {
-                set validate_method $method
+            if { [qc::registered VALIDATE $url_path] } {
+                set validate_method VALIDATE
             } elseif { [qc::registered GET $url_path] } {
+                # Check if we can use a GET handler as a substitute
+                # TODO check for any registered handler to be used as substitute.
                 set validate_method GET
+            } elseif { [qc::registered POST $url_path] } {
+                set validate_method POST
             } else {
-                error "Cannot validate \"$url_path\" because there is no registered URL handler for the path." {} NOT_FOUND
+                error "Cannot validate \"$url_path\" because there is no registered service for the path." {} NOT_FOUND
             }
 
             qc::handlers validate2model $validate_method $url_path
