@@ -198,7 +198,7 @@ proc qc::return_response {} {
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
         # Couldn't negotiate an acceptable response type.
-        error "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]" {} NOT_ACCEPTABLE
+        return [qc::return2client code 406 text/plain "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"]
     }
     
     switch -nocase -- $media_type {
