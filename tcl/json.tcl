@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export json2tson
+    namespace export json2tson global_response2json
 }
 
 # Taken from tclib code by andreas_kupries
@@ -284,7 +284,7 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
     }
 }
 
-proc qc::data2json {} {
+proc qc::global_response2json {} {
     #| Convert the global data structure into JSON.
     global data
     set record_objects [list object]

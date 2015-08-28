@@ -203,7 +203,7 @@ proc qc::return_response {} {
     
     switch -nocase -- $media_type {
         json {
-            set response [qc::data2json]
+            set response [qc::global_response2json]
         }
         * -
         html {
