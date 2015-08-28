@@ -130,9 +130,6 @@ proc qc::error_handler {{error_message "NULL"} args} {
             }
             return [return2client code 400 $media_type $body]
         }
-        NOT_ACCEPTABLE* {
-            return [return2client code 406 text/plain $error_message]
-        }
 	default {
 	    log Error $error_info
             if {  [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {

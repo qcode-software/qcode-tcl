@@ -45,9 +45,6 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             
             if { [qc::conn_open] && [qc::response status get] eq "invalid" } {
                 # Inform the client that validation failed
-                if { $method in [list GET HEAD] } {
-                    error "Validation failed on the query string. Check all values and try again." {} BAD_REQUEST
-                }
                 qc::return_response
                 return "filter_return"
             }

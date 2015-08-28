@@ -194,8 +194,6 @@ proc qc::return_response {} {
     #| Returns the global data structure to the client.
     #| Content negotiates to try and find a suitable content type.
     set mime_types [list "text/html" "application/json"]
-    # use http_accept_header_best_mime_type instead of http_content_negotiate because http_content_negotiate prioritises
-    # suffixes of the requested resource which aren't a concern for the global data structure response.
     set mime_type [qc::http_accept_header_best_mime_type $mime_types]
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
@@ -210,7 +208,7 @@ proc qc::return_response {} {
         * -
         html {
             set media_type html
-            set response [qc::data2html]
+            set response [qc::global_response2html]
         }
     }
     
