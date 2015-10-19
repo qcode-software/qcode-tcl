@@ -221,8 +221,9 @@ proc qc::db_domain_exists {domain_name} {
     }
 }
 
-proc qc::db_domain_constraint {domain_name} {
+proc qc::db_domain_constraints {domain_name} {
     #| Returns a dict of the constraint name with the check clause for the given domain in the database.
+    set constraints [dict create]
     if {[qc::db_domain_exists $domain_name]} {
         set qry {
             SELECT cc.constraint_name, check_clause
@@ -231,8 +232,10 @@ proc qc::db_domain_constraint {domain_name} {
             ON dc.constraint_name=cc.constraint_name
             WHERE dc.domain_name=:domain_name;
         }
-        qc::db_cache_1row -ttl 86400 $qry
-        return [list $constraint_name $check_clause]
+        qc::db_cache_foreach -ttl 86400 $qry {
+            dict set constraints $constraint_name $check_clause
+        }
+        return $constraints
     } else {
         return -code error -errorcode DB_DOMAIN "Domain \"$domain_name\" does not exist."
     }
@@ -280,12 +283,11 @@ proc qc::db_eval_constraint {table constraint args} {
     return $result
 }
 
-proc qc::db_eval_domain_constraint {domain_name value} {
+proc qc::db_eval_domain_constraint {value base_type check_clause} {
     #| Evaluates the domain constraint against the given value.
-    lassign [qc::db_domain_constraint $domain_name] constraint_name check_clause
     set qry {
         SELECT $check_clause AS result
-        FROM (SELECT :value::$domain_name as VALUE) alias;
+        FROM (SELECT :value::$base_type as VALUE) alias;
     }
     ::try {
         qc::db_cache_1row -ttl 86400 $qry

@@ -368,9 +368,16 @@ namespace eval qc::is {
         #| Checks if the given value falls under the domain domain_name.
         if {[qc::db_domain_exists $domain_name]} {
             set base_type [qc::db_domain_base_type $domain_name]
-            if {[qc::is $base_type $value] && [qc::db_eval_domain_constraint $domain_name $value]} {
-                return 1
+            if { ! [qc::is $base_type $value] } {
+                return 0
             }
+            set constraints [qc::db_domain_constraints $domain_name]
+            dict for {constraint_name check_clause} $constraints {
+                if { ! [qc::db_eval_domain_constraint $value $base_type $check_clause] } {
+                    return 0
+                }
+            }
+            return 1
         }
         return 0
     }
