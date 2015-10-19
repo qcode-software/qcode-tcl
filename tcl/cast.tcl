@@ -235,15 +235,20 @@ proc qc::data_type_error_check {data_type value} {
                 }
             } elseif {[qc::db_domain_exists $data_type]} {
                 set base_type [qc::db_domain_base_type $data_type]
-                lassign [qc::db_domain_constraint $data_type] constraint_name check_clause
+                set constraints [qc::db_domain_constraints $data_type]
                 set is_base_type [qc::is $base_type $value]
-                set constraint_met [qc::db_eval_domain_constraint $data_type $value]
-                if {! $is_base_type && ! $constraint_met} {
-                    return "[data_type_error_check $base_type $value] and failed to meet the constraint $constraint_name."
-                } elseif {! $is_base_type} {
+                set failed_constraints [list]
+                dict for {constraint_name check_clause} $constraints {
+                    if { ! [qc::db_eval_domain_constraint $value $base_type $check_clause] } {
+                        lappend failed_contraints $contraint_name
+                    }
+                }
+                if { ! $is_base_type && [llength $failed_contraints] > 0 } {
+                    return "[data_type_error_check $base_type $value] and failed to meet the constraint(s) [join $failed_constraints ", "]"
+                } elseif { ! $is_base_type } {
                     return [qc::data_type_error_check $base_type $value]
-                } elseif {! $constraint_met} {
-                    return "\"[qc::trunc $value 100]...\" failed to meet the constraint $constraint_name."
+                } elseif { [llength $failed_contraints] > 0 } {
+                    return "\"[qc::trunc $value 100]...\" failed to meet the constraint(s) [join $failed_constraints ", "]"
                 }
             } else {
                 return -code error "Unrecognised data type \"$data_type\""
