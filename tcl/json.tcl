@@ -286,7 +286,7 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
 
 proc qc::data2json {} {
     #| Deprecated
-    return response2json
+    return [qc::response2json]
 }
 
 proc qc::response2json {} {
