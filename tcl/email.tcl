@@ -34,7 +34,7 @@ proc qc::email_send {args} {
     # From
     lappend headers From $from
     # To
-    set rcpt [list]
+    set rcpts [list]
     foreach address [qc::email_addresses $to] {
 	lappend rcpts $address
     }
