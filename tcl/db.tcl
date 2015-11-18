@@ -276,6 +276,11 @@ proc qc::db_quote { value {type ""}} {
     }
 }
 
+proc qc::db_quote_identifier {value} {
+    #| Quote a sql identifier (eg. a table or column name)
+    return "\"[string map {\" \"\"} $value]\""
+}
+
 proc qc::db_escape_regexp { string } {
     # The postgresql parser performs substitution 
     # before passing the regexp to the regexp engine
@@ -601,6 +606,22 @@ proc qc::db_select_dict { qry } {
     set dict {}
     foreach key [lindex $table 0] value [lindex $table 1] { lappend dict $key $value }
     return $dict
+}
+
+proc qc::db_row_exists {table args} {
+    #| Check for existance of 1 or more rows in $table
+    #| Matching name/value pairs in $args
+    set dict [qc::args2dict $args]
+    db_0or1row {
+        select true as exists
+        from [db_quote_identifier $table]
+        where [sql_where {*}$dict]
+        limit 1
+    } {
+        return false
+    } {
+        return true
+    }
 }
 
 proc qc::db_connect {args} {
