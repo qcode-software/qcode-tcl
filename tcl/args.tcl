@@ -20,7 +20,14 @@ proc qc::args2dict {callers_args} {
 	}
 	return $dict
     } else {
-	return $callers_args
+        if { [llength $callers_args] % 2 != 0 } {
+            error "Missing name or value in args for qc::args2dict"
+        }
+        set dict [dict create {*}$callers_args]
+        if { [llength $callers_args] ne [llength $dict] } {
+            error "Duplicate key for qc::args2dict"
+        }
+	return $dict
     }
 }
 
