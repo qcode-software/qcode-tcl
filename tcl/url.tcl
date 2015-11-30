@@ -405,7 +405,7 @@ proc qc::url_make {dict} {
 }
 
 proc qc::url_maker {args} {
-    #| Construct or modifiy an url
+    #| Deprecated - see qc::url
     # Usage url_maker [$base] [: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
     qc::args $args -multimap_form_vars -- args
     default multimap_form_vars false
