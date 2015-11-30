@@ -7,7 +7,7 @@ package require uuid
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
-    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?-bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
+    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
 
     #| attachments is a list of dicts
     #| dict keys are encoding data filename ?cid?

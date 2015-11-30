@@ -3,24 +3,22 @@ namespace eval qc {
 }
 namespace eval qc::param {}
 
-proc qc::param_get { param_name args } {
+proc qc::param_get { args } {
     #| Return param value.
+    qc::args $args -ttl [expr {60*60*24}] -- param_name args
     
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
     } else {
-
-        if { [info commands ns_config] eq "ns_config" } {
-            # Naviserver
-            if { [info commands ns_db] eq "ns_db" } {
-                # Check DB param first
-                set qry {select param_value from param where param_name=:param_name}
-                db_cache_0or1row -ttl 86400 $qry {
-                    # Not found in DB
-                } {
-                    return $param_value
-                }
-            }
+        if { [info commands ns_db] eq "ns_db" } {
+	    # Naviserver
+            # DB param
+            set qry {select param_value from param where param_name=:param_name}
+            db_cache_0or1row -ttl $ttl $qry {
+                # Not found in DB
+            } {
+                return $param_value
+            } 
 
 	    # Check for naviserver params
 	    if { [set param_value [ns_config ns/server/[ns_info server] $param_name]] ne "" } {

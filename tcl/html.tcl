@@ -6,35 +6,31 @@ namespace eval qc {
 
 proc qc::html2pdf { args } {
     # | Looks for wkhtmltopdf binary to generate PDF.
-    # | If not found, use the URL specified by param pdfserver.
-    # | Currently v0.9.9 of wkhtmltopdf is supported.
-    # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? html
-    args $args -encoding base64 -timeout 20 html
+    # | Requires wkhtmltopdf 0.12.2.1 (with patched qt)
+    # Adds pagesize and margin arguments for label printing.
+    # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? ?-nomargin boolean? ?-pagesize size? html
+    args $args -encoding base64 -pagesize A4 -timeout 20 -nomargin false -- html
     if { ![in {base64 binary} $encoding] } {
         error "HTML2PDF: Unknown encoding $encoding"
     }
-  
-    if { ! [file exists /usr/local/bin/wkhtmltopdf] } {
-        # No binary found, send job to html2pdf server
-        set url [qc::param_get pdfserver]
-        set pdf [qc::http_post -timeout $timeout -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" $url htmlblock $html outputencoding $encoding]
-        return $pdf
+    set wkhtmltopdf [qc::which wkhtmltopdf]
+    package require fileutil
+    set filename [fileutil::tempfile]
+    set fh [open $filename r]
+    fconfigure $fh -translation binary
+    if { $nomargin } {
+        set margin_switches [list --margin-bottom 0 --margin-top 0 --margin-left 0 --margin-right 0]
     } else {
-        # The binary is present so use it.
-        set wkhtmltopdf [qc::which wkhtmltopdf]
-        package require fileutil
-        set filename [fileutil::tempfile]
-        set fh [open $filename r]
-        fconfigure $fh -translation binary
-        qc::exec_proxy -timeout [expr {$timeout * 1000}] << $html $wkhtmltopdf --page-size A4 --encoding UTF-8 --print-media-type -q - $filename
-        set pdf [read $fh]
-        close $fh
-        file delete $filename
-        if { $encoding eq "base64" } {
-            return [::base64::encode $pdf]
-        } else {
-            return $pdf
-        }
+        set margin_switches {}
+    }
+    qc::exec_proxy -timeout [expr {$timeout * 1000}] << $html $wkhtmltopdf {*}$margin_switches --page-size $pagesize --encoding UTF-8 --print-media-type -q - $filename
+    set pdf [read $fh]
+    close $fh
+    file delete $filename
+    if { $encoding eq "base64" } {
+        return [::base64::encode $pdf]
+    } else {
+        return $pdf
     }
 }
 
