@@ -645,4 +645,3 @@ proc qc::args_unambiguous {args} {
     }
     return $unambiguous
 }
-

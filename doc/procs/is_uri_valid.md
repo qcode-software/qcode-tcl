@@ -33,4 +33,3 @@ Examples
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
 [qc::is uri]: is-uri.md
-
