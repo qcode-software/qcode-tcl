@@ -16,6 +16,11 @@ proc qc::html_table { args } {
 	set sortCols [form_var_get sortCols]
     }
 
+    if { [info exists classes] } {
+        set class [join $classes " "]
+        lappend argnames class
+    }
+
     if { [info exists class] && "db-grid" in $class } {
         set headers [ns_conn outputheaders]
 	ns_set update $headers Expires "Fri, 01 Jan 1990 00:00:00 GMT"
@@ -86,7 +91,7 @@ proc qc::html_table { args } {
 	}
     }
     # Write table tag
-    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable]]]
+    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable classes]]]
 
     append html \n
     # Create colgroup and col children
