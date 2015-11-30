@@ -17,19 +17,19 @@ Examples
 --------
 ```tcl
 
-% proc employee_record_hash { firstname middlename surname employee_id start_date dept branch } { 
+% proc user_record_hash { firstname middlename surname user_id start_date dept branch } { 
     package require md5
-    return [::md5::md5 -hex [list $firstname $middlename $surname $employee_id $start_date $dept $branch]]
+    return [::md5::md5 -hex [list $firstname $middlename $surname $user_id $start_date $dept $branch]]
 }
-% qc::call employee_record_hash
-Cannot use variable "firstname" to call proc qc::"employee_record_hash":no such variable "firstname"
+% qc::call user_record_hash
+Cannot use variable "firstname" to call proc qc::"user_record_hash":no such variable "firstname"
 % set firstname "Angus"
 Angus
 % set middlename "Jamison"
 Jamison
 % set surname "Mackay"
 Mackay
-% set employee_id 999
+% set user_id 999
 999
 % set start_date "2012-06-01"
 2012-06-01
@@ -37,7 +37,7 @@ Mackay
 Accounts
 % set branch "Edinburgh"
 Edinburgh
-% set employee_hash [qc::call employee_record_hash]
+% set user_hash [qc::call user_record_hash]
 51A01DE13B5C7B5863743A3E5485237D
 ```
 

@@ -27,6 +27,7 @@ proc qc::password_complexity_ok { args } {
         return false
     }
     # Check password contains minimum number of character classes: upper, lower, digit, punctuation
+    set classes 0
     if { [info exists minclasses] } {
         foreach class [list upper lower digit] {
             if { [regexp "\[\[:${class}:\]\]" $password] } {

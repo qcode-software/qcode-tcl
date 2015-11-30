@@ -29,7 +29,7 @@ proc qc::db_qry_parse {qry {level 0} } {
         # Offset the start of the next iteration by the increase in string length
 	set start [expr {[lindex $right 1]+1+$offset}]
     }
-  
+    
     ## SQL Arrays ##
     # May be multi-dimensional, indexed or slices, with numbers, $variables, :variables, or sql_functions()
     # If sliced with the upper bound being a :variable, \: must be used - eg my_array[2\::index] or my_array[:from_index\::to_index]
@@ -37,19 +37,19 @@ proc qc::db_qry_parse {qry {level 0} } {
     set start 0
     while { $start<[string length $qry] \
 		&& [regexp -indices -nocase -expanded -start $start -- {[a-z_][a-z0-9_]*(
-									       (?:\[
-										(?: '?[0-9]+'?
-										 | [:$][a-z_][a-z0-9_]*
-										 | [a-z_]+\([^\)]*\)
-										 )
-										(?:
-										 :'?[0-9]+'?
-										 | :\$[a-z_][a-z0-9_]*
-										 | \\::[a-z_][a-z0-9_]*
-										 | :[a-z_]+\([^\)]*\)
-										 )?
-										\])+
-									       )} $qry -> match] } {
+                                                                                         (?:\[
+                                                                                          (?: '?[0-9]+'?
+                                                                                           | [:$][a-z_][a-z0-9_]*
+                                                                                           | [a-z_]+\([^\)]*\)
+                                                                                           )
+                                                                                          (?:
+                                                                                           :'?[0-9]+'?
+                                                                                           | :\$[a-z_][a-z0-9_]*
+                                                                                           | \\::[a-z_][a-z0-9_]*
+                                                                                           | :[a-z_]+\([^\)]*\)
+                                                                                           )?
+                                                                                          \])+
+                                                                                         )} $qry -> match] } {
 	set qry [string replace $qry [lindex $match 0] [lindex $match 1] [string map {\[ \\[ \] \\]} [string range $qry [lindex $match 0] [lindex $match 1]]]]
 	set start [expr {[lindex $match 1]+1}]
     }
@@ -121,7 +121,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 
     # Escaped \:colon
     set qry [string map {\\: \0} $qry]
-  
+    
     # Colon variable substitution
     set type_re {
 	(::(
@@ -181,7 +181,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 	    |uuid
 	    |xml	  
 	    )(?=[^a-z0-9]|$)
-	    )?
+         )?
     }
     set re {
 	([^:\\]):
@@ -207,7 +207,7 @@ proc qc::db_quote { value {type ""}} {
     #| quotes SQL values by escaping single quotes with \'
     #| leaves integers and doubles alone
     #| Empty strings are converted to NULL
-     if { $type eq ""} {
+    if { $type eq ""} {
 	set sql_cast ""
     } else {
 	set sql_cast "::$type"
@@ -220,49 +220,49 @@ proc qc::db_quote { value {type ""}} {
     if { [in [list current_time current_timestamp] $value ] } {
 	return "${value}${sql_cast}"
     }
-     
-     
-     set re_numeric_types {
-         ^(
-         bigint
-         |int8
-         |bigserial
-         |serial8
-         |double\s+precision
-         |float8
-         |integer
-         |int
-         |int4
-         |numeric(\([^,]+,[^\)]+\))?
-         |decimal(\([^,]+,[^\)]+\))?
-         |real
-         |float4
-         |smallint
-         |int2
-         |serial
-         |serial4
-         |money
-         )$
-     }
+    
+    
+    set re_numeric_types {
+        ^(
+          bigint
+          |int8
+          |bigserial
+          |serial8
+          |double\s+precision
+          |float8
+          |integer
+          |int
+          |int4
+          |numeric(\([^,]+,[^\)]+\))?
+          |decimal(\([^,]+,[^\)]+\))?
+          |real
+          |float4
+          |smallint
+          |int2
+          |serial
+          |serial4
+          |money
+          )$
+    }
 
     if { [regexp -nocase -expanded $re_numeric_types $type] } {
         # integer no leading zeros
         # -123456
         if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
         # double greater than 1
         if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
         # decimal less than 1
         # in form .23 or 0.23
         if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
-         return "${sign}0.${tail}${sql_cast}"
+            return "${sign}0.${tail}${sql_cast}"
         }
         # scientific notation        
         if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
     } 
 
@@ -274,6 +274,11 @@ proc qc::db_quote { value {type ""}} {
     } else {
 	return "E'[string map {' '' \\ \\\\} $value]'${sql_cast}"
     }
+}
+
+proc qc::db_quote_identifier {value} {
+    #| Quote a sql identifier (eg. a table or column name)
+    return "\"[string map {\" \"\"} $value]\""
 }
 
 proc qc::db_escape_regexp { string } {
@@ -332,19 +337,17 @@ proc qc::db_dml { args } {
     set qry [db_qry_parse $qry 1]
     if { [info commands ns_db] eq "ns_db" } {
         # AOL Server
-        qc::try {
+        ::try {
             ns_db dml $db $qry
-        } {
-            global errorInfo
-            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" $errorInfo
+        } on error {error_message options} {
+            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     } else {
         # Connected with db_connect
-        qc::try {
+        ::try {
             pg_execute $db $qry
-        } {
-            global errorInfo
-            error "Failed to execute dml <code>$qry</code>.<br>" $errorInfo
+        } on error {error_message options} {
+            error "Failed to execute dml <code>$qry</code>." [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     }
 }
@@ -357,7 +360,7 @@ proc qc::db_trans {args} {
     #| ensure code is executed in a transaction by
     #| maintaining a global db_trans_level
     args $args -db DEFAULT -- code {error_code ""}
-    global db_trans_level errorInfo errorCode
+    global db_trans_level
     if { ![info exists db_trans_level] } {
 	set db_trans_level($db) 0
     }
@@ -368,8 +371,8 @@ proc qc::db_trans {args} {
     } else {
 	incr db_trans_level($db)
     }
-    set code [ catch { uplevel 1 $code } result ]
-    switch $code {
+    set return_code [ catch { uplevel 1 $code } result options ]
+    switch $return_code {
 	1 {
 	    # Error
 	    if { $db_trans_level($db) >= 1 } {
@@ -377,17 +380,26 @@ proc qc::db_trans {args} {
 		set db_trans_level($db) 0
 	    }
 	    uplevel 1 $error_code
-	    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
+            # Return in parent stack frame instead of here
+            dict incr options -level
+	    return -options $options $result 
 	}
 	default {
-	    # normal,return,break,continue
+	    # ok, return, break, continue
 	    if { $db_trans_level($db) == 1 } {
 		db_dml "COMMIT WORK"
 		set db_trans_level($db) 0
 	    } else {
 		incr db_trans_level($db) -1
 	    }
-	    return -code $code $result
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+	    return -options $options $result
 	}
     }
 }
@@ -417,29 +429,27 @@ proc qc::db_0or1row {args} {
 
     if {$db_nrows==0} {
 	# no rows
-	set code [ catch { uplevel 1 $no_rows_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        # Preserve TCL_RETURN
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } elseif { $db_nrows==1 } { 
 	# 1 row
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
-	set code [ catch { uplevel 1 $one_row_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $one_row_code } result options ]
+        # Preserve TCL_RETURN
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } else {
 	# more than 1 row
 	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
@@ -453,9 +463,8 @@ proc qc::db_foreach {args} {
     #| indicate the number of rows returned and the current row.
     #| Nested foreach statements clean up special variables so they apply to the current scope.
     args $args -db DEFAULT -- qry foreach_code { no_rows_code ""}
-    global errorCode errorInfo
 
-     # save special db variables
+    # save special db variables
     qc::upcopy 1 db_nrows      saved_db_nrows
     qc::upcopy 1 db_row_number saved_db_row_number
 
@@ -466,18 +475,24 @@ proc qc::db_foreach {args} {
     if { $db_nrows == 0 } {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
-	set returnCode [ catch { uplevel 1 $no_rows_code } result ]
-	switch $returnCode {
-	    0 {
-		# normal
-	    }
-	    1 { 
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $returnCode $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        switch $return_code {
+            0 {
+                # ok
+            }
+            default {
+                # error, return
+                
+                # Preserve TCL_RETURN
+                if { $return_code == 2 && [dict get $options -code] == 0 } {
+                    dict set options -code return
+                } else {
+                    # Return in parent stack frame instead of here
+                    dict incr options -level
+                }
+                return -options $options $result
+            }
+        }
     } else {
 	set masterkey [lindex $table 0]
 	foreach list [lrange $table 1 end] {
@@ -486,25 +501,30 @@ proc qc::db_foreach {args} {
 	    foreach key $masterkey value $list {
 		upset 1 $key $value
 	    }
-	    set returnCode [ catch { uplevel 1 $foreach_code } result ]
-	    switch $returnCode {
-		0 {
-		    # Normal
-		}
-		1 { 
-		    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-		}
-		2 {
-		    return -code return $result
-		}
-		3 {
-		    break
-		}
-		4 {
-		    continue
-		}
-	    }
-	}
+	    set return_code [ catch { uplevel 1 $foreach_code } result options ]
+            switch $return_code {
+                0 {
+                    # ok
+                }
+                3 -
+                4 {
+                    # break, continue
+                    return -options $options $result
+                }
+                default {
+                    # error, return
+
+                    # Preserve TCL_RETURN
+                    if { $return_code == 2 && [dict get $options -code] == 0 } {
+                        dict set options -code return
+                    } else {
+                        # Return in parent stack frame instead of here
+                        dict incr options -level
+                    }
+                    return -options $options $result
+                }
+            }
+        }
     }
     # restore saved variables
     if { [info exists saved_db_nrows] } {
@@ -543,15 +563,14 @@ proc qc::db_select_table {args} {
         }
     } else {
         # Connected with db_connect
-        qc::try {
+        ::try {
             set results [pg_exec $db $qry]
             lappend table [pg_result $results -attributes]
             set table [concat $table [pg_result $results -llist]]
             pg_result $results -clear
             return $table
-        } {
-            global errorInfo
-            error "Failed to execute qry <code>$qry</code><br>" $errorInfo
+        } on error {error_message options} {
+	    error "Failed to execute qry <code>$qry</code><br>" [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     }
 }
@@ -589,42 +608,29 @@ proc qc::db_select_dict { qry } {
     return $dict
 }
 
-proc qc::db_col_varchar_length { table_name col_name } {
-    #| Returns the varchar length of a db table column
-    set qry "
-        SELECT
-                a.atttypmod-4 AS lengthvar,
-                t.typname AS type
-        FROM
-                pg_attribute a,
-                pg_class c,
-                pg_type t
-        WHERE
-                c.relname = :table_name
-                and a.attnum > 0
-                and a.attrelid = c.oid
-                and a.atttypid = t.oid
-                and a.attname = :col_name
-        ORDER BY a.attnum
-    "
-    db_0or1row $qry {
-    error "No such column \"$col_name\" in table \"$table_name\""
-    } 
-    if { [eq $type varchar] } {
-        return $lengthvar
-    } else {
-    error "Col \"$col_name\" is not type varchar it is type \"$type\""
+proc qc::db_row_exists {table args} {
+    #| Check for existance of 1 or more rows in $table
+    #| Matching name/value pairs in $args
+    set dict [qc::args2dict $args]
+    db_0or1row {
+        select true as exists
+        from [db_quote_identifier $table]
+        where [sql_where {*}$dict]
+        limit 1
+    } {
+        return false
+    } {
+        return true
     }
 }
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database
     global _db
-    qc::try {
+    ::try {
         package require Pgtcl 1.5
         set _db [pg_connect -connlist $args]
-    } {
-        global errorInfo errorMessage
-        error "Could not connect to database. $errorMessage" $errorInfo
+    } on error {error_message options} {
+        error "Could not connect to database. $error_message" [dict get $options -errorinfo] [dict get $options -errorcode]
     }
 }

@@ -14,15 +14,13 @@ proc qc::lock {lock_id timeout code} {
 	    error "Timout waiting for lock on $lock_id" {} TIMEOUT
 	}
     }
-    set code [ catch { uplevel 1 $code } result ]
-    nsv_unset lock $lock_id 
-    switch $code {
-	1 { 
-	    global errorCode errorInfo
-	    return -code error -errorcode $errorCode $result 
-	}
-	default {
-	    return -code $code $result
-	}
+    set return_code [ catch { uplevel 1 $code } result options ]
+    nsv_unset lock $lock_id
+    # Preserve TCL_RETURN
+    if { $return_code == 2 && [dict get $options -code] == 0 } {
+        dict set options -code return
+    } else {
+        dict incr options -level
     }
+    return -options $options $result
 }

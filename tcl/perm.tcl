@@ -1,15 +1,15 @@
 namespace eval qc {
-    namespace export perm_set perm_test_employee perm_test perm perms perm_if
+    namespace export perm_set perm_test_user perm_test perm perms perm_if
 }
 
-proc qc::perm_set {employee_id perm_name args} {
-    #| Configure employee permissions
-    #| Usage: perm_set employee_id perm_name ?method? ?method?
+proc qc::perm_set {user_id perm_name args} {
+    #| Configure user permissions
+    #| Usage: perm_set user_id perm_name ?method? ?method?
     set methods [string toupper $args]
     db_dml {
         -- Revoke any existing permissions on perm_name
-        delete from employee_perm
-        where employee_id=:employee_id 
+        delete from user_perm
+        where user_id=:user_id 
         and perm_id in (
                         select
                         perm_id
@@ -19,8 +19,8 @@ proc qc::perm_set {employee_id perm_name args} {
                         );
         
         -- Grant the specified method permissions on perm_name
-        insert into employee_perm (employee_id, perm_id)
-        select :employee_id, perm_id
+        insert into user_perm (user_id, perm_id)
+        select :user_id, perm_id
         from perm 
         join perm_class using(perm_class_id)
         where perm_name=:perm_name
@@ -28,31 +28,31 @@ proc qc::perm_set {employee_id perm_name args} {
     }
 }
 
-proc qc::perm_test_employee { employee_id perm_name method } {
+proc qc::perm_test_user { user_id perm_name method } {
     #| Test whether the user can perform $method on $perm_name
     #| Returns boolean
     set method [upper $method]
     db_0or1row {
         select 
         perm_id
-        from employee_perm
+        from user_perm
         join perm using(perm_id)
         join perm_class using(perm_class_id)
         where 
-        employee_id=:employee_id
+        user_id=:user_id
         and perm_name=:perm_name
         and method=:method        
     } {
         return false
     } {
         return true
-    }
+    }    
 }
 
 proc qc::perm_test { perm_name method } {
     #| Test whether the current user can perform $method on $perm_name
     #| Returns boolean
-    return [qc::perm_test_employee [qc::auth] $perm_name $method]
+    return [qc::perm_test_user [qc::auth] $perm_name $method]
 }
 
 proc qc::perm { perm_name method } {
@@ -90,10 +90,26 @@ proc qc::perms { body } {
 
 proc qc::perm_if {perm_name method if_code {. else} {else_code ""} } {
     #| Evaluate if_code if current user has permission else else_code
+    set code ""
     if { [perm_test $perm_name $method] } {
-	uplevel 1 $if_code
-    } elseif {[ne $else_code ""]} {
-	uplevel 1 $else_code
+	set code $if_code
+    } elseif { $else_code ne "" } {
+	set code $else_code
+    }
+
+    if { $code ne "" } {
+        set return_code [catch {uplevel 1 $code} result options]
+        if { $return_code != 0 } {
+            # error, return, break, continue or custom
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $result
+        }
     }
 }
 

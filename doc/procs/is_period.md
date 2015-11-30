@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::is period]
 Test if string can be casted to a pair of dates defining a period.
 
 Examples
@@ -53,3 +54,4 @@ true
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is period]: is-period.md

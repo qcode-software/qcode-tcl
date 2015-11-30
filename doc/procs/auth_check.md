@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Check if we can authenticate the employee<br/>Return true or false
+Check if we can authenticate the user<br/>Return true or false
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

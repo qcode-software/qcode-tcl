@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Check the authorisation token of the current request<br/>and return the employee_id if authorised
+Check the authorisation token of the current request<br/>and return the user_id if authorised
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

@@ -201,14 +201,13 @@ proc qc::excel_file_create {args} {
     # Script execution
     ########################################
     set script_filename [qc::file_temp $script]
-    qc::try {
+    ::try {
         log Debug $script_filename
         exec_proxy -timeout $timeout perl $script_filename
         file delete $script_filename
-    } {
+    } on error {error_message options} {
         file delete $script_filename
-	global errorCode errorInfo errorMessage
-	error $errorMessage $errorInfo $errorCode
+        error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
     }
     return $filename
 }

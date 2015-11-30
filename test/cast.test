@@ -8,93 +8,86 @@ namespace eval ::qcode::test {
     namespace import ::tcltest::*
     namespace path ::qc
 
-    test cast_integer-1.0 {cast_integer commas} {qc::cast_integer 2,305} 2305
-    test cast_integer-1.1 {cast_integer leading zeros} {qc::cast_integer "001"} 1
-    test cast_integer-1.2 {cast_integer percentages} {qc::cast_integer "10%"} 10
-    test cast_integer-1.3 {cast_integer e notation} {qc::cast_integer "43e2"} 4300
-    test cast_integer-1.4 {cast_integer upper limit} {qc::cast_integer "2147483647"} 2147483647
-    test cast_integer-1.5 {cast_integer outside integer range} -body {qc::cast_integer "2147483648"} -result "Could not cast 2147483648 to integer" -returnCodes error 
-    test cast_integer-1.6 {cast_integer outside integer range} -body {qc::cast_integer "2e100"} -result "Could not cast 2e100 to integer" -returnCodes error 
-    test cast_integer-1.7 {cast_integer lower limit} {qc::cast_integer "-2147483648"} -2147483648
-    test cast_integer-1.8 {cast_integer outside integer range} -body {qc::cast_integer "-2147483649"} -result "Could not cast -2147483649 to integer" -returnCodes error 
-    test cast_integer-1.9 {cast_integer leading zeros} {qc::cast_integer "-08"} -8
-    test cast_integer-1.10 {cast_integer leading zeros} {qc::cast_integer "-1.008"} -1
-    test cast_integer-1.10 {cast_integer leading zeros} {qc::cast_integer "0008"} 8
+    test cast-integer-1.0 {cast integer commas} {qc::cast integer 2,305} 2305
+    test cast-integer-1.1 {cast integer leading zeros} {qc::cast integer "001"} 1
+    test cast-integer-1.2 {cast integer percentages} {qc::cast integer "10%"} 10
+    test cast-integer-1.3 {cast integer e notation} {qc::cast integer "43e2"} 4300
+    test cast-integer-1.4 {cast integer upper limit} {qc::cast integer "2147483647"} 2147483647
+    test cast-integer-1.5 {cast integer outside integer range} -body {qc::cast integer "2147483648"} -result "Could not cast 2147483648 to integer." -returnCodes error 
+    test cast-integer-1.6 {cast integer outside integer range} -body {qc::cast integer "2e100"} -result "Could not cast 2e100 to integer." -returnCodes error 
+    test cast-integer-1.7 {cast integer lower limit} {qc::cast integer "-2147483648"} -2147483648
+    test cast-integer-1.8 {cast integer outside integer range} -body {qc::cast integer "-2147483649"} -result "Could not cast -2147483649 to integer." -returnCodes error 
+    test cast-integer-1.9 {cast integer leading zeros} {qc::cast integer "-08"} -8
+    test cast-integer-1.10 {cast integer leading zeros} {qc::cast integer "-1.008"} -1
+    test cast-integer-1.10 {cast integer leading zeros} {qc::cast integer "0008"} 8
 
 
-    test cast_decimal-1.0 {cast_decimal commas} {qc::cast_decimal "2,305.25"} 2305.25
-    test cast_decimal-1.1 {cast_decimal percentages} {qc::cast_decimal "100%"} 100
-    test cast_decimal-1.2 {cast_decimal precision} {qc::cast_decimal 3.689 2} 3.69
-    test cast_decimal-1.3 {cast_decimal precision} {qc::cast_decimal 3 4} 3.0000
+    test cast-decimal-1.0 {cast decimal commas} {qc::cast decimal "2,305.25"} 2305.25
+    test cast-decimal-1.1 {cast decimal percentages} {qc::cast decimal "100%"} 100
+    test cast-decimal-1.2 {cast decimal exponent} {qc::cast decimal 3.689e4} 36890
+    test cast-decimal-1.3 {cast decimal exponent precision scale} {qc::cast decimal -precision 6 -scale 2 3e3} 3000.00
+    test cast-decimal-1.4 {cast decimal precision} {qc::cast decimal -precision 4 3} 3
+    test cast-decimal-1.5 {cast decimal precision} {qc::cast decimal -precision 1 3} 3 
+    test cast-decimal-1.6 {cast decimal precision scale} -body {qc::cast decimal -precision 4 -scale 4 3} -result "The resulting number (3.0000) is too large for the given precision (4) and scale (4)." -returnCodes error
+    test cast-decimal-1.7 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3} 3.00
+    test cast-decimal-1.8 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3.6534} 3.65
 
-    test cast_date-1.0 {cast_date forward slashes} {qc::cast_date 12/5/07} 2007-05-12
-    test cast_date-1.1 {cast_date relative time} -body {
-        qc::cast_date yesterday
+    test cast-date-1.0 {cast date forward slashes} {qc::cast date 12/5/07} 2007-05-12
+    test cast-date-1.1 {cast date relative time} -body {
+        qc::cast date yesterday
     } -result [clock format [clock scan yesterday] -format "%Y-%m-%d"]
-    test cast_date-1.2 {cast_date long format} {qc::cast_date "June 23rd 2010"} 2010-06-23
+    test cast-date-1.2 {cast date long format} {qc::cast date "June 23rd 2010"} 2010-06-23
 
-    test cast_timestamp-1.0 {cast_timestamp relative time} -body {
-        qc::cast_timestamp tomorrow
+    test cast-timestamp-1.0 {cast timestamp relative time} -body {
+        qc::cast timestamp tomorrow
     } -result [clock format [clock scan tomorrow] -format "%Y-%m-%d %H:%M:%S"]
 
-    test cast_epoch-1.0 {cast_epoch empty string} -body {
-        qc::cast_epoch ""
+    test cast-epoch-1.0 {cast epoch empty string} -body {
+        qc::cast epoch ""
     } -result "Can't cast an empty string to epoch" -returnCodes error 
-    test cast_epoch-1.1 {cast_epoch iso date no delimiter} {qc::cast_epoch 20100810} [clock scan "2010-08-10"]
-    test cast_epoch-1.2 {cast_epoch epoch} {qc::cast_epoch 1281394800} 1281394800
-    test cast_epoch-1.3 {cast_epoch exact iso date} {qc::cast_epoch "2012-06-12"} [clock scan "2012-06-12"]
-    test cast_epoch-1.4 {cast_epoch iso datetime} {qc::cast_epoch "2012-06-12 12:12:12"} [clock scan "2012-06-12 12:12:12"]
-    test cast_epoch-1.4a {cast_epoch iso datetime T format} {qc::cast_epoch "2012-06-12T12:12:12"} [clock scan "2012-06-12 12:12:12"]
-    test cast_epoch-1.5 {cast_epoch iso datetime with offset} {qc::cast_epoch "2012-06-12 12:12:12.777 -06:00"} [clock scan "2012-06-12 12:12:12" -timezone -06:00]
-    test cast_epoch-1.5a {cast_epoch iso datetime with offset & zulu} {qc::cast_epoch "2012-06-12 12:12:12Z"} [clock scan "2012-06-12 12:12:12" -timezone +00]
-    test cast_epoch-1.5b {cast_epoch iso datetime with offset T format & zulu} {qc::cast_epoch "2012-06-12T12:12:12Z"} [clock scan "2012-06-12 12:12:12" -timezone +00]
-    test cast_epoch-1.6 {cast_epoch iso date time no end anchor} {qc::cast_epoch "2012-06-12 12:12:12.777"} [clock scan "2012-06-12 12:12:12"]
-    test cast_epoch-1.7 {cast_epoch forward slash date format} {qc::cast_epoch "12/06/12"} [clock scan "2012-06-12"]
-    test cast_epoch-1.8 {cast_epoch forward slash date format long year} {qc::cast_epoch "12/06/2012"} [clock scan "2012-06-12"]
-    test cast_epoch-1.9 {cast_epoch relative} {qc::cast_epoch "today"} [clock scan today]
-    test cast_epoch-1.9a {cast_epoch relative2} {qc::cast_epoch "1 year ago"} [clock scan "1 year ago"]
-    test cast_epoch-1.10 {cast_epoch relaxed1} {qc::cast_epoch "12:12:12 22/06/99"} [clock scan "1999-06-22 12:12:12"]
-    test cast_epoch-1.10a {cast_epoch relaxed2} {qc::cast_epoch "12:12:12 22/06/1999"} [clock scan "1999-06-22 12:12:12"]
-    test cast_epoch-1.10b {cast_epoch relaxed3} {qc::cast_epoch "22 June 1999 12:12:12"} [clock scan "1999-06-22 12:12:12"]
-    test cast_epoch-1.10c {cast_epoch relaxed4} {qc::cast_epoch "June 22nd 1999 12:12:12"} [clock scan "1999-06-22 12:12:12"]
+    test cast-epoch-1.1 {cast epoch iso date no delimiter} {qc::cast epoch 20100810} [clock scan "2010-08-10"]
+    test cast-epoch-1.2 {cast epoch epoch} {qc::cast epoch 1281394800} 1281394800
+    test cast-epoch-1.3 {cast epoch exact iso date} {qc::cast epoch "2012-06-12"} [clock scan "2012-06-12"]
+    test cast-epoch-1.4 {cast epoch iso datetime} {qc::cast epoch "2012-06-12 12:12:12"} [clock scan "2012-06-12 12:12:12"]
+    test cast-epoch-1.4a {cast epoch iso datetime T format} {qc::cast epoch "2012-06-12T12:12:12"} [clock scan "2012-06-12 12:12:12"]
+    test cast-epoch-1.5 {cast epoch iso datetime with offset} {qc::cast epoch "2012-06-12 12:12:12.777 -06:00"} [clock scan "2012-06-12 12:12:12" -timezone -06:00]
+    test cast-epoch-1.5a {cast epoch iso datetime with offset & zulu} {qc::cast epoch "2012-06-12 12:12:12Z"} [clock scan "2012-06-12 12:12:12" -timezone +00]
+    test cast-epoch-1.5b {cast epoch iso datetime with offset T format & zulu} {qc::cast epoch "2012-06-12T12:12:12Z"} [clock scan "2012-06-12 12:12:12" -timezone +00]
+    test cast-epoch-1.6 {cast epoch iso date time no end anchor} {qc::cast epoch "2012-06-12 12:12:12.777"} [clock scan "2012-06-12 12:12:12"]
+    test cast-epoch-1.7 {cast epoch forward slash date format} {qc::cast epoch "12/06/12"} [clock scan "2012-06-12"]
+    test cast-epoch-1.8 {cast epoch forward slash date format long year} {qc::cast epoch "12/06/2012"} [clock scan "2012-06-12"]
+    test cast-epoch-1.9 {cast epoch relative} {qc::cast epoch "today"} [clock scan today]
+    test cast-epoch-1.9a {cast epoch relative2} {qc::cast epoch "1 year ago"} [clock scan "1 year ago"]
+    test cast-epoch-1.10 {cast epoch relaxed1} {qc::cast epoch "12:12:12 22/06/99"} [clock scan "1999-06-22 12:12:12"]
+    test cast-epoch-1.10a {cast epoch relaxed2} {qc::cast epoch "12:12:12 22/06/1999"} [clock scan "1999-06-22 12:12:12"]
+    test cast-epoch-1.10b {cast epoch relaxed3} {qc::cast epoch "22 June 1999 12:12:12"} [clock scan "1999-06-22 12:12:12"]
+    test cast-epoch-1.10c {cast epoch relaxed4} {qc::cast epoch "June 22nd 1999 12:12:12"} [clock scan "1999-06-22 12:12:12"]
 
 #   Aolserver dependent
-#   test cast_boolean-1.0 {cast_boolean default true} {qc::cast_boolean yes} t
-#   test cast_boolean-1.1 {cast_boolean default false} {qc::cast_boolean no} f
-#   test cast_boolean-1.2 {cast_boolean custom true} {qc::cast_boolean 1 Si No} Si
+#   test cast-boolean-1.0 {cast boolean default true} {qc::cast boolean yes} t
+#   test cast-boolean-1.1 {cast boolean default false} {qc::cast boolean no} f
+#   test cast-boolean-1.2 {cast boolean custom true} {qc::cast boolean 1 Si No} Si
 
-    test cast_postcode-1.0 {cast_postcode no space} {qc::cast_postcode EH123DE} "EH12 3DE"
-    test cast_postcode-1.1 {cast_postcode no space2} {qc::cast_postcode EH12DE} "EH1 2DE"
-    test cast_postcode-1.2 {cast_postcode extra zero} {qc::cast_postcode "Y043 3AH"} "YO43 3AH"
+    test cast-postcode-1.0 {cast postcode no space} {qc::cast postcode EH123DE} "EH12 3DE"
+    test cast-postcode-1.1 {cast postcode no space2} {qc::cast postcode EH12DE} "EH1 2DE"
+    test cast-postcode-1.2 {cast postcode extra zero} {qc::cast postcode "Y043 3AH"} "YO43 3AH"
 
-    test cast_creditcard-1.0 {cast_creditcard invalid} -body {
-        qc::cast_creditcard "4213 3222 1121 1112"
+    test cast-creditcard-1.0 {cast creditcard invalid} -body {
+        qc::cast creditcard "4213 3222 1121 1112"
     } -returnCodes error -result "4213322211211112 is not a valid credit card number"
-    test cast_creditcard-1.1 {cast_creditcard spaces} {qc::cast_creditcard "4111 1111 1111 1111"} 4111111111111111
+    test cast-creditcard-1.1 {cast creditcard spaces} {qc::cast creditcard "4111 1111 1111 1111"} 4111111111111111
 
-
-    test cast_period-1.0 {qc::cast_period ""} -body {qc::cast_period ""} -result "Could not parse string \"\" into dates that define a period." -returnCodes error 
-    test cast_period-1.1 {qc::cast_period "Jan"} {qc::cast_period "Jan"} [list [qc::date_year now]-01-01 [qc::date_year now]-01-31]
-    test cast_period-1.2 {qc::cast_period "January"} {qc::cast_period "January"} [list [qc::date_year now]-01-01 [qc::date_year now]-01-31]
-    test cast_period-1.3 {qc::cast_period "2014"} {qc::cast_period "2014"} [list 2014-01-01 2014-12-31]
-    test cast_period-1.4 {qc::cast_period "Jan 2014"} {qc::cast_period "Jan 2013"} [list 2013-01-01 2013-01-31]
-    test cast_period-1.5 {qc::cast_period "January 2014"} {qc::cast_period "January 2013"} [list 2013-01-01 2013-01-31]
-    test cast_period-1.6 {qc::cast_period "Jan 2014 to March 2014"} {qc::cast_period "Jan 2014 to March 2014"} [list 2014-01-01 2014-03-31]
-    test cast_period-1.7 {qc::cast_period "Febuary 2014"} -body {qc::cast_period "Febuary 2013"} -result "Could not parse string \"Febuary 2013\" into dates that define a period." -returnCodes error 
-    test cast_period-1.8 {qc::cast_period "1st February 2014 to 14th February 2014"} {qc::cast_period "1st February 2014 to 14th February 2014"} [list 2014-02-01 2014-02-14]
-    test cast_period-1.9 {qc::cast_period "1st February 2014"} {qc::cast_period "1st February 2014"} [list 2014-02-01 2014-02-01]
-
-
-    test is_period-1.0 {qc::is_period ""} {qc::is_period ""} "false"
-    test is_period-1.1 {qc::is_period "Jan"} {qc::is_period "Jan"} "true"
-    test is_period-1.2 {qc::is_period "January"} {qc::is_period "January"} "true"
-    test is_period-1.3 {qc::is_period "2014"} {qc::is_period "2014"} "true"
-    test is_period-1.4 {qc::is_period "Jan 2014"} {qc::is_period "Jan 2013"} "true"
-    test is_period-1.5 {qc::is_period "January 2014"} {qc::is_period "January 2014"} "true"
-    test is_period-1.6 {qc::is_period "Jan 2014 to March 2014"} {qc::is_period "Jan 2014 to March 2014"} "true"
-    test is_period-1.7 {qc::is_period "Febuary 2014"} {qc::is_period "Febuary 2014"} "false"
-    test is_period-1.8 {qc::is_period "1st February 2014 to 14th February 2014"} {qc::is_period "1st February 2014 to 14th February 2014"} "true"
-
+    test cast-period-1.0 {qc::cast period ""} -body {qc::cast period ""} -result "Could not parse string \"\" into dates that define a period." -returnCodes error 
+    test cast-period-1.1 {qc::cast period "Jan"} {qc::cast period "Jan"} [list [date_year now]-01-01 [date_year now]-01-31]
+    test cast-period-1.2 {qc::cast period "January"} {qc::cast period "January"} [list [date_year now]-01-01 [date_year now]-01-31]
+    test cast-period-1.3 {qc::cast period "2014"} {qc::cast period "2014"} [list 2014-01-01 2014-12-31]
+    test cast-period-1.4 {qc::cast period "Jan 2014"} {qc::cast period "Jan 2013"} [list 2013-01-01 2013-01-31]
+    test cast-period-1.5 {qc::cast period "January 2014"} {qc::cast period "January 2013"} [list 2013-01-01 2013-01-31]
+    test cast-period-1.6 {qc::cast period "Jan 2014 to March 2014"} {qc::cast period "Jan 2014 to March 2014"} [list 2014-01-01 2014-03-31]
+    test cast-period-1.7 {qc::cast period "Febuary 2014"} -body {qc::cast period "Febuary 2013"} -result "Could not parse string \"Febuary 2013\" into dates that define a period." -returnCodes error 
+    test cast-period-1.8 {qc::cast period "1st February 2014 to 14th February 2014"} {qc::cast period "1st February 2014 to 14th February 2014"} [list 2014-02-01 2014-02-14]
+    test cast-period-1.9 {qc::cast period "1st February 2014"} {qc::cast period "1st February 2014"} [list 2014-02-01 2014-02-01]
+    
     cleanupTests
 }
 namespace delete ::qcode::test

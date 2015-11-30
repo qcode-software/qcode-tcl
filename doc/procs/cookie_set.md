@@ -9,7 +9,14 @@ Usage
 
 Description
 -----------
-Set a cookie in outgoing headers for the current conection.<br/>Optional named args:<br/>expires datetime, max_age seconds<br/>domain url, path path ,secure boolean
+Set a cookie in outgoing headers for the current connection.
+
+Optional named args:
+* expires datetime
+* max_age seconds
+* domain url
+* path path
+* secure boolean
 
 Examples
 --------

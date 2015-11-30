@@ -283,3 +283,54 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
         }
     }
 }
+
+proc qc::data2json {} {
+    #| Deprecated
+    return [qc::response2json]
+}
+
+proc qc::response2json {} {
+    #| Convert the global data structure into JSON.
+    global data
+    set record_objects [list object]
+    set action_objects [list object]
+    set message_objects [list object]
+    set extensions [list]
+    # Default status is "valid"
+    set status "valid"
+    ::try {
+        dict for {key value} $data {
+            switch $key {
+                record {
+                    foreach {name values} $value {
+                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [list string [dict get $values message]]]
+                    }
+                }
+                message {
+                    foreach {type val} $value {
+                        lappend message_objects $type [list object value [list string [dict get $val value]]]
+                    }
+                }
+                action {
+                    foreach {type val} $value {
+                        lappend action_objects $type [list object value [list string [dict get $val value]]]
+                    }
+                }
+                status {
+                    set status $value
+                }
+                default {
+                    set object [list object]
+                    foreach {name val} $value {
+                        lappend object $name [list string $val]
+                    }
+                    lappend extensions $key $object
+                }
+            }
+        }
+        set result [list object status $status record $record_objects message $message_objects action $action_objects {*}$extensions]
+        return [qc::tson2json $result]
+    } on error [list error_message options] {
+        return -code error "Malformed data: $error_message"
+    }
+}

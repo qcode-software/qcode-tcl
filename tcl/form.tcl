@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export form_var_* form2* form_proc
+    namespace export form_var_* form2* form_proc form form_authenticity_token
 }
 
 proc qc::form_var_names {} {
@@ -31,15 +31,23 @@ proc qc::form_var_get { var_name } {
     }
     if { [ns_set find $set_id $var_name] != -1 } {
 	if { [ns_set unique $set_id $var_name] } {
-	    return [ns_set get $set_id $var_name]
+	    return [string trim [ns_set get $set_id $var_name]]
 	} else {
-	    return [qc::ns_set_getall $set_id $var_name]
+            set values [list]
+	    foreach raw_value [qc::ns_set_getall $set_id $var_name] {
+                lappend values [string trim $raw_value]
+            }
+            return $values
 	}	
     }
     # Look for PHP style repeated form variables
     set array_name "${var_name}\[\]";
     if { [ns_set find $set_id $array_name] != -1 } {
-	return [qc::ns_set_getall $set_id $array_name]
+        set values [list]
+        foreach raw_value [qc::ns_set_getall $set_id $array_name] {
+            lappend values [string trim $raw_value]
+        }
+        return $values
     }
     error "No such form variable \"$var_name\""
 }
@@ -105,5 +113,39 @@ proc qc::form_proc { proc_name } {
 	lappend largs [qc::form2dict {*}[lexclude [ns_set_keys [ns_getform]] {*}[info args $proc_name]]]
     }
     return [uplevel 0 $proc_name $largs]
+}
+
+proc qc::form {args} {
+    #| Helper proc to create html form with authenticity tokens and method overload.
+    set html [lindex $args end]
+    set args [lrange $args 0 end-1]
+    
+    if { [llength $args]%2!=0 } {
+        error "Uneven number of name/value pairs in \"$args\""
+    }
+    if { [dict exists $args method] } {
+        # Make the method is uppercase
+        dict set args method [string toupper [dict get $args method]]
+    } else {
+        # Default method
+        dict set args method POST
+    }
+    set method [dict get $args method]
+    if { $method ne "GET"} {
+        # Add an authenticity token
+        append html [qc::form_authenticity_token]
+    }
+    if { $method ni [list "POST" "GET"] } {
+        # Overload the method.
+        append html [h input type hidden value $method name _method]
+        dict set args method POST
+    }
+    return [h form {*}$args $html]
+}
+
+proc qc::form_authenticity_token {} {
+    #| Generate the hidden input for authenticity token
+    set authenticity_token [qc::session_authenticity_token [qc::session_id]]
+    return [h input type hidden name _authenticity_token value $authenticity_token]
 }
 

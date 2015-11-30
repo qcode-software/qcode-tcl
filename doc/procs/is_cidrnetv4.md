@@ -8,8 +8,8 @@ Usage
 `qc::is_cidrnetv4 string`
 
 Description
------------
-
+----------
+Deprecated - see [qc::is cidrnetv4]
 
 Examples
 --------
@@ -25,3 +25,4 @@ true
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is cidrnetv4]: is-cidrnetv4.md

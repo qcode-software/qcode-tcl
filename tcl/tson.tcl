@@ -12,7 +12,7 @@ proc qc::tson_object { args } {
     set tson [list object]
     
     foreach {name value} $args {
-	if { ([is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+	if { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
             lappend tson $name [list number $value]
         } elseif { $value in [list true false] } {
 	    lappend tson $name [list boolean $value]
@@ -119,4 +119,3 @@ proc qc::tson2xml { tson } {
 	}
     }
 }
-

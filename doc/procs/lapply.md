@@ -17,13 +17,13 @@ Examples
 --------
 ```tcl
 
-% proc employee_get { id } {
-    set employee_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
-    return [dict get $employee_dict $id]
+% proc user_get { id } {
+    set user_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
+    return [dict get $user_dict $id]
 }
-% set employee_subset [list 1 3 4]
+% set user_subset [list 1 3 4]
 1 3 4
-% qc::lapply employee_get $employee_subset
+% qc::lapply user_get $user_subset
 Kagan Bolton Scheunemann
 ```
 

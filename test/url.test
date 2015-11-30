@@ -95,23 +95,74 @@ namespace eval ::qcode::test {
     # url 
     test url-1.0 {url some safe characters} -body {
         url someplace.html session_id 23.121 title Mr first_name Test last_name Test age ~25 dob 1988-03-13
-    } -cleanup {} -result {someplace.html?last_name=Test&first_name=Test&session_id=23.121&dob=1988-03-13&age=~25&title=Mr}
+    } -cleanup {} -result {/someplace.html?session_id=23.121&title=Mr&first_name=Test&last_name=Test&age=~25&dob=1988-03-13}
     
     test url-1.1 {url some unsafe characters} -body {
         url someplace.html next_url someplace_else.html?name=Mr+Test+Test&email=test@test.com
-    } -cleanup {} -result {someplace.html?next_url=someplace_else.html%3fname%3dMr%2bTest%2bTest%26email%3dtest%40test.com}
+    } -cleanup {} -result {/someplace.html?next_url=someplace_else.html%3fname%3dMr%2bTest%2bTest%26email%3dtest%40test.com}
 
     test url-1.2 {url some safe characters} -body {
         url someplace.html#someanchor session_id 23.121 title Mr first_name Test last_name Test age ~25 dob 1988-03-13
-    } -cleanup {} -result {someplace.html?last_name=Test&first_name=Test&session_id=23.121&dob=1988-03-13&age=~25&title=Mr#someanchor}
+    } -cleanup {} -result {/someplace.html?session_id=23.121&title=Mr&first_name=Test&last_name=Test&age=~25&dob=1988-03-13#someanchor}
     
     test url-1.3 {url some safe characters} -body {
         url someplace.html?a=1#someanchor session_id 23.121 title Mr first_name Test last_name Test age ~25 dob 1988-03-13
-    } -cleanup {} -result {someplace.html?last_name=Test&first_name=Test&session_id=23.121&dob=1988-03-13&age=~25&a=1&title=Mr#someanchor}
+    } -cleanup {} -result {/someplace.html?a=1&session_id=23.121&title=Mr&first_name=Test&last_name=Test&age=~25&dob=1988-03-13#someanchor}
     
     test url-1.4 {url some unsafe characters} -body {
         url someplace.html#someanchor next_url someplace_else.html?name=Mr+Test+Test&email=test@test.com
-    } -cleanup {} -result {someplace.html?next_url=someplace_else.html%3fname%3dMr%2bTest%2bTest%26email%3dtest%40test.com#someanchor}
+    } -cleanup {} -result {/someplace.html?next_url=someplace_else.html%3fname%3dMr%2bTest%2bTest%26email%3dtest%40test.com#someanchor}
+
+    test url-1.5 {url colon vars no query} -body {
+        url https://www.qcode.co.uk/:path1/:path2#:fragment path1 123 path2 456 fragment 789
+    } -cleanup {} -result {https://www.qcode.co.uk/123/456#789}
+
+    test url-1.6 {url colon vars query} -body {
+        url /:path1/:path2#:fragment path1 123 path2 456 fragment 789 foo abc bar def
+    } -cleanup {} -result {/123/456?foo=abc&bar=def#789}
+
+    test url-1.7 {url colon vars unsafe chars} -body {
+        url /:path1/:path2 path1 1+2+3 path2 4-5?6 query1 unsafe+chars query2 chars&unsafe
+    } -cleanup {} -result {/1%2b2%2b3/4-5%3f6?query1=unsafe%2bchars&query2=chars%26unsafe}
+
+    test url-1.8 {url tilde args} -body {
+        set path1 123
+        set path2 456
+        set query1 abc
+        set query2 def
+        
+        url /:path1/:path2 ~ path1 path2 query1 query2
+    } -cleanup {} -result {/123/456?query1=abc&query2=def}
+
+    test url-1.9 {url query override} -body {
+        url /path?foo=hello&bar=world foo 123 bar 456
+    } -cleanup {} -result {/path?foo=123&bar=456}
+
+    test url-1.10 {url already encoded url} -body {
+        set url [url /path?foo=hello&bar=world foo 123 bar 456]
+        url $url baz 789
+    } -cleanup {} -result {/path?foo=123&bar=456&baz=789}
+
+    test url-1.11 {url already encoded url overwrite param} -body {
+        set url [url /path?foo=hello&bar=world foo 123 bar 456]
+        url $url foo 789
+    } -cleanup {} -result {/path?foo=789&bar=456}
+
+    test url-1.12 {url colon segment no var} -body {
+        url /:path foo 123 bar 456
+    } -cleanup {} -returnCodes {error} -result {Key "path" not found in args.}
+
+    test url-1.13 {url colon fragment no var} -body {
+        url "https://www.qcode.co.uk/path#:hash" foo 123 bar 456
+    } -cleanup {} -returnCodes {error} -result {Key "hash" not found in args.}
+
+    test url-1.14 {url colon var segment begins with colon} -body {
+        url /:path path :123
+    } -cleanup {} -returnCodes {error} -result {The substitute value ":123" for colon variable "path" begins with a colon.}
+
+    test url-1.15 {url colon var fragment begins with colon} -body {
+        url /path#:hash hash :abc
+    } -cleanup {} -returnCodes {error} -result {The substitute value ":abc" for colon variable "hash" begins with a colon.}
     
     # url_match
     test url_match-1.0 {url_match identical urls} -body {
@@ -185,47 +236,91 @@ namespace eval ::qcode::test {
     # url_parts
     test url_parts-1.0 {url parts with everything} -body {
         url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2#flowers"
-    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash flowers protocol https domain www.qcode.test.co.uk port 80 path /homepage}
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash flowers protocol https domain www.qcode.test.co.uk port 80 path /homepage segments homepage}
 
     test url_parts-1.1 {url parts with no port} -body {
         url_parts "https://www.qcode.test.co.uk/homepage?width=12&age=2#flowers"
-    } -result {base https://www.qcode.test.co.uk/homepage params {width 12 age 2} hash flowers protocol https domain www.qcode.test.co.uk port {} path /homepage}
+    } -result {base https://www.qcode.test.co.uk/homepage params {width 12 age 2} hash flowers protocol https domain www.qcode.test.co.uk port {} path /homepage segments homepage}
 
     test url_parts-1.3 {url parts with no domain} -body {
         url_parts "/homepage?width=12&age=2#flowers"
-    } -result {base /homepage params {width 12 age 2} hash flowers protocol {} domain {} port {} path /homepage}
+    } -result {base /homepage params {width 12 age 2} hash flowers protocol {} domain {} port {} path /homepage segments homepage}
 
     test url_parts-1.4 {url parts with no params} -body {
         url_parts "https://www.qcode.test.co.uk:80/homepage#flowers"
-    } -result {base https://www.qcode.test.co.uk:80/homepage params {} hash flowers protocol https domain www.qcode.test.co.uk port 80 path /homepage}
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {} hash flowers protocol https domain www.qcode.test.co.uk port 80 path /homepage segments homepage}
 
     test url_parts-1.5 {url parts with no hash} -body {
         url_parts "https://www.qcode.test.co.uk:80/homepage?width=12&age=2"
-    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash {} protocol https domain www.qcode.test.co.uk port 80 path /homepage}
+    } -result {base https://www.qcode.test.co.uk:80/homepage params {width 12 age 2} hash {} protocol https domain www.qcode.test.co.uk port 80 path /homepage segments homepage}
 
     test url_parts-1.6 {url parts with path only} -body {
         url_parts "homepage"
-    } -result {base homepage params {} hash {} protocol {} domain {} port {} path homepage}
+    } -result {base homepage params {} hash {} protocol {} domain {} port {} path homepage segments homepage}
 
     test url_parts-1.7 {url parts with no path} -body {
         url_parts "https://www.qcode.test.co.uk:80"
-    } -result {base https://www.qcode.test.co.uk:80 params {} hash {} protocol https domain www.qcode.test.co.uk port 80 path {}}
+    } -result {base https://www.qcode.test.co.uk:80 params {} hash {} protocol https domain www.qcode.test.co.uk port 80 path {} segments {}}
 
     test url_parts-1.8 {url parts with all safe chars } -body {
         url_parts {https://www.qcode.test.com/test/this,(123)+is-strange!@for%2F$url*'x'.html}
-    } -result {base {https://www.qcode.test.com/test/this,(123)+is-strange!@for%2F$url*'x'.html} params {} hash {} protocol https domain www.qcode.test.com port {} path {/test/this,(123)+is-strange!@for%2F$url*'x'.html}}
+    } -result {base {https://www.qcode.test.com/test/this,(123)+is-strange!@for%2F$url*'x'.html} params {} hash {} protocol https domain www.qcode.test.com port {} path {/test/this,(123)+is-strange!@for%2F$url*'x'.html} segments {test {this,(123)+is-strange!@for%2F$url*'x'.html}}}
 
     test url_parts-1.9 {url parts with all safe chars no domain } -body {
         url_parts {/test/this,(123)+is-strange!@for%2F$url*'x'.html}
-    } -result {base {/test/this,(123)+is-strange!@for%2F$url*'x'.html} params {} hash {} protocol {} domain {} port {} path {/test/this,(123)+is-strange!@for%2F$url*'x'.html}}
+    } -result {base {/test/this,(123)+is-strange!@for%2F$url*'x'.html} params {} hash {} protocol {} domain {} port {} path {/test/this,(123)+is-strange!@for%2F$url*'x'.html} segments {test {this,(123)+is-strange!@for%2F$url*'x'.html}}}
     
     test url_parts-1.10 {url parts with all safe chars no domain and query} -body {
         url_parts {/test/this,(123)+is-strange!for%2F$url*'x'.html?width(a)=123&width(b)=321}
-    } -result {base {/test/this,(123)+is-strange!for%2F$url*'x'.html} params {width(a) 123 width(b) 321} hash {} protocol {} domain {} port {} path {/test/this,(123)+is-strange!for%2F$url*'x'.html}}
+    } -result {base {/test/this,(123)+is-strange!for%2F$url*'x'.html} params {width(a) 123 width(b) 321} hash {} protocol {} domain {} port {} path {/test/this,(123)+is-strange!for%2F$url*'x'.html} segments {test {this,(123)+is-strange!for%2F$url*'x'.html}}}
 
     test url_parts-1.11 {url parts with all safe chars no domain and hash} -body {
         url_parts {/test/this,(123)+is-strange!for%2F$url*'x'.html#placeholder(a)}
-    } -result {base {/test/this,(123)+is-strange!for%2F$url*'x'.html} params {} hash placeholder(a) protocol {} domain {} port {} path {/test/this,(123)+is-strange!for%2F$url*'x'.html}}
+    } -result {base {/test/this,(123)+is-strange!for%2F$url*'x'.html} params {} hash placeholder(a) protocol {} domain {} port {} path {/test/this,(123)+is-strange!for%2F$url*'x'.html} segments {test {this,(123)+is-strange!for%2F$url*'x'.html}}}
+
+    test url_parts-1.12 {url parts with hash only} -body {
+        url_parts "#test"
+    } -result {base {} params {} hash test protocol {} domain {} port {} path {} segments {}}
+    
+    test url_parts-1.13 {url parts with base, path, non-empty params and hash} -body {
+        url_parts "http://www.qcode.test.co.uk/foo/bar?baz=quo#"
+    } -result {base http://www.qcode.test.co.uk/foo/bar params {baz quo} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo/bar segments {foo bar}}
+    
+    test url_parts-1.14 {url parts with base, path, empty params and non-empty hash} -body {
+        url_parts "http://www.qcode.test.co.uk/foo/bar?#foo"
+    } -result {base http://www.qcode.test.co.uk/foo/bar params {} hash foo protocol http domain www.qcode.test.co.uk port {} path /foo/bar segments {foo bar}}
+
+    test url_parts-1.15 {url_parts with valueless param} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.16 {url_parts with empty string param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?=bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {{} bar} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.17 {url_parts with empty string param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar="
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.17 {url_parts with / as param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?/=bar"
+    } -result {base http://www.qcode.test.co.uk/foo params {/ bar} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.18 {url_parts with / as param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar=/"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar /} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.19 {url_parts with ? as param name} -body {
+        url_parts "http://www.qcode.test.co.uk/foo??=foo"
+    } -result {base http://www.qcode.test.co.uk/foo params {? foo} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.20 {url_parts with ? as param value} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?foo=?"
+    } -result {base http://www.qcode.test.co.uk/foo params {foo ?} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
+
+    test url_parts-1.21 {url_parts with two valueless params} -body {
+        url_parts "http://www.qcode.test.co.uk/foo?bar&baz"
+    } -result {base http://www.qcode.test.co.uk/foo params {bar {} baz {}} hash {} protocol http domain www.qcode.test.co.uk port {} path /foo segments foo}
 
     # url_request_path
     test url_request_path-1.0 {url_request_path basic usage} -body {
@@ -274,6 +369,119 @@ namespace eval ::qcode::test {
         url_to_html_hidden http://somedomain.com/somewhere.html?a=1&b=2#somefragment
     } -result "<input type=\"hidden\" name=\"a\" value=\"1\" id=\"a\">\n<input type=\"hidden\" name=\"b\" value=\"2\" id=\"b\">\n"
     
+    # url_make
+    test url_make-1.0 {url_make} -body {
+        url_make {
+            protocol "https"
+            domain "qcode.co.uk"
+            port 80
+            segments {
+                "post"
+                123
+            }
+            params {
+                tags "tcl"
+                tags "psql"
+                author "peter"
+            }
+            hash "comments"
+        }
+    } -result "https://qcode.co.uk:80/post/123?tags=tcl&tags=psql&author=peter#comments"
+
+    test url_make-1.1 {url_make hash only} -body {
+        url_make {
+            hash "comments"
+        }
+    } -result "#comments"
+
+    test url_make-1.2 {url_make query only} -body {
+        url_make {
+            params {
+                tags "tcl"
+                tags "psql"
+                author "peter"
+            }
+        }
+    } -result "?tags=tcl&tags=psql&author=peter"
+
+    test url_make-1.3 {url_make path only} -body {
+        url_make {
+            segments {
+                "post"
+                123
+            }
+        }
+    } -result "/post/123"
+
+    test url_make-1.4 {url_make root only} -body {
+        url_make {
+            protocol "https"
+            domain "qcode.co.uk"
+            port 80
+        }
+    } -result "https://qcode.co.uk:80"
+
+    # url_maker
+    test url_maker-1.0 {url_maker base only} -body {
+        url_maker "https://qcode.co.uk"
+    } -result "https://qcode.co.uk/"
+
+    test url_maker-1.1 {url_maker base and port} -body {
+        url_maker "https://qcode.co.uk" : "80"
+    } -result "https://qcode.co.uk:80/"
+
+    test url_maker-1.2 {url_maker slash only} -body {
+        url_maker /
+    } -result "/"
+
+    test url_maker-1.3 {url_maker segments only} -body {
+        url_maker / foo bar
+    } -result "/foo/bar"
+
+    test url_maker-1.4 {url_maker bind segment} -body {
+        set bar "baz?hello world/123#test"
+        url_maker / foo :bar
+    } -result "/foo/baz%3fhello%20world%2f123%23test"
+
+    test url_maker-1.5 {url_maker params} -body {
+        set test hello
+        url_maker "/foo" ? bar baz quo :test
+    } -result "/foo?bar=baz&quo=hello"
+
+    test url_maker-1.6 {url_maker repeated params} -body {
+        url_maker "/foo?page=1" ? page 2 page 3
+    } -result "/foo?page=3"
+
+    test url_maker-1.7 {url_maker multimap} -body {
+        url_maker -multimap_form_vars "/foo?page=1" ? page 2 page 3
+    } -result "/foo?page=1&page=2&page=3"
+
+    test url_maker-1.8 {url_maker multimap with bind vars} -body {
+        set a 2
+        set b page
+        set c 3
+        url_maker -multimap_form_vars "/foo?page=1" ? page :a :b :c
+    } -result "/foo?page=1&page=2&page=3"
+
+    test url_maker-1.9 {url_maker hash} -body {
+        url_maker "/foo" # bar
+    } -result "/foo#bar"
+
+    test url_maker-1.10 {url_maker / as query param name} -body {
+        url_maker / foo bar ? / baz
+    } -result "/foo/bar?%2f=baz"
+
+    test url_maker-1.11 {url_maker / as query param value} -body {
+        url_maker / foo bar ? baz /
+    } -result "/foo/bar?baz=%2f"
+
+    test url_maker-1.12 {url_maker ? as query param name} -body {
+        url_maker / foo bar ? ? ""
+    } -result "/foo/bar?%3f="
+
+    test url_maker-1.13 {url_maker ? as query param value} -body {
+        url_maker / foo bar ? "" ?
+    } -result "/foo/bar?=%3f"
 
     cleanupTests
 }

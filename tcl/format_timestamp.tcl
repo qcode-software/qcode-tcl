@@ -2,27 +2,37 @@ namespace eval qc {
     namespace export format_timestamp format_timestamp_* format_timestamp2hour
 }
 
-proc qc::format_timestamp_iso { string } {
-    #| Format string as an ISO timestamp 
-    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
+proc qc::format_timestamp_iso { args } {
+    #| Format string as an ISO timestamp
+    qc::args $args -text -html -- string
+    if { [info exists text] } {
+        return [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M:%S"]
+    } else {
+        return [string map [list - "&#8209;"] [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M:%S"]]
+    }
 }
 
-proc qc::format_timestamptz { string } {
+proc qc::format_timestamptz { args } {
     #| Format string as an ISO timestamp with time zone
-    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]]
+    qc::args $args -text -html -- string
+    if { [info exists text] } {
+        return [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]
+    } else {
+        return [string map [list - "&#8209;"] [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M:%S %z"]]
+    }
 }
 
 proc qc::format_timestamp_http { string } {
     #| Format string as http timestamp according to RFC 1123
-    return [clock format [cast_epoch $string] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]
+    return [clock format [cast epoch $string] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]
 }
 
 proc qc::format_timestamp_rel { string } {
     #| Format relative to age with date and time
-    set epoch [cast_epoch $string]
+    set epoch [cast epoch $string]
     set epoch_now [clock seconds]
     # Today return time
-    if { [string equal [cast_date $epoch_now] [cast_date $epoch]] } {
+    if { [string equal [cast date $epoch_now] [cast date $epoch]] } {
         return [clock format $epoch -format "%H:%M"]
     }
     # Same Week
@@ -36,14 +46,19 @@ proc qc::format_timestamp_rel { string } {
     return [clock format $epoch -format "%Y-%m-%d"]
 }
 
-proc qc::format_timestamp2hour { string } {
-    return [string map [list - "&#8209;"] [clock format [cast_epoch $string] -format "%Y-%m-%d %H:%M"]]
+proc qc::format_timestamp2hour { args } {
+    qc::args $args -text -html -- string
+    if { [info exists text] } {
+        return [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M"]
+    } else {
+        return [string map [list - "&#8209;"] [clock format [cast epoch $string] -format "%Y-%m-%d %H:%M"]]
+    }
 }
 
-proc qc::format_timestamp { string } {
+proc qc::format_timestamp { args } {
     #| Format string as datetime for user.
     #| Will be customizable in future but at present chooses the ISO format.
-    return [format_timestamp_iso $string]
+    return [format_timestamp_iso {*}$args]
 }
 
 proc qc::format_timestamp_rel_age {args} {

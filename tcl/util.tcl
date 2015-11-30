@@ -3,7 +3,7 @@ namespace eval qc {
     namespace import ::tcl::mathop::eq
     namespace import ::tcl::mathop::ne
 
-    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne
+    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne commonmark2html
 }
 
 proc qc::K {a b} {set a}
@@ -11,47 +11,32 @@ proc qc::K {a b} {set a}
 proc qc::try { try_code { catch_code ""} } {
     #| Try to execute the code try_code and catch any error. 
     #| If an error occurs then run catch_code.
-    global errorMessage errorCode errorInfo
-    switch -- [ catch { uplevel 1 $try_code } result ] {
-        0 {
-	    # Normal completion 
+    set return_code [ catch { uplevel 1 $try_code } result options]
+    switch $return_code {
+        1 {
+            # Error
+            set return_code [ catch { uplevel 1 $catch_code } catch_result options]
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $catch_result
 	}
-        2 { 
-	    return -code return $result 
-	    # return from procedure 
-	}
-	3 {
-	    return -code break
-	    # break out of loop 
-	}
-	4 {
-	    return -code continue
-	    # continue loop 
-	}
-	default {
-            set errorMessage $result
-	    switch -- [ catch { uplevel 1 $catch_code } catch_result ] {
-		0 {
-		    # Normal completion 
-		}
-		2 { 
-		    return -code return $catch_result 
-		    # return from procedure 
-		}
-		3 {
-		    return -code break
-		    # break out of loop 
-		}
-		4 {
-		    return -code continue
-		    # continue loop 
-		}
-		default {
-		    # Error in catch
-		    return -code error -errorcode $errorCode $catch_result
-		}
-	    }
-	}
+        default {
+            # ok, return, break, continue
+
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $result
+        }
     }
 }
 
@@ -109,7 +94,7 @@ proc qc::coalesce { varName altValue } {
     }
 }
 
-	
+
 proc qc::incr0 { varName amount } {
     #| Increment the value of varName by amount
     upvar 1 $varName var
@@ -147,6 +132,33 @@ proc qc::call { proc_name args } {
 	}
 	return [uplevel 1 $proc_name $largs]
     }
+}
+
+proc qc::call_with {proc_name args} {
+    #| Calls proc_name by mapping name value pairs to named args.
+    if { [llength $args]%2 != 0 } {
+        return -code error "usage qc::call_with proc_name ?name value?"
+    }
+    
+    set proc_args [info args $proc_name]
+    set largs {}
+    foreach arg $proc_args {
+	if { [dict exists $args $arg] } {
+            set value [dict get $args $arg]
+            if {$arg eq "args"} {
+                lappend largs {*}$value
+            } else {
+                lappend largs $value
+            }
+	} else {
+            if { [info default $proc_name $arg default_value] } {
+                lappend largs $default_value
+            } else {
+                return -code error "Missing argument: \"$arg\"."
+            }
+        }
+    }
+    return [uplevel 0 $proc_name $largs]    
 }
 
 proc qc::margin { cost price {dec_places 1} } {
@@ -241,7 +253,7 @@ proc qc::xsplit [list str [list regexp "\[\t \r\n\]+"]] {
 	lappend list [string range $str 0 [expr [lindex $match 0] -1]]
 	if {[lindex $submatch 0]>=0} {
 	    lappend list [string range $str [lindex $submatch 0]\
-		    [lindex $submatch 1]] 
+                              [lindex $submatch 1]] 
 	}	
 	set str [string range $str [expr [lindex $match 1]+1] end] 
     }
@@ -402,12 +414,12 @@ proc qc::.. {from to {step 1} {limit ""}} {
 	}
     }
     # Dates
-    if { [is_date $from] && [is_date $to] } {
+    if { [qc::is date $from] && [qc::is date $to] } {
 	if {![regexp {(-)?([0-9]+) (day|month|year)s?} $step -> sign scaler unit] } {
 	    # default step 1 day
 	    set sign +;set scaler 1; set unit day
 	}
-	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast_date "$i $sign $scaler $unit"]} {
+	for {set i $from} {([ne $sign -] && [date_compare $i $to]<=0) || ([eq $sign -] && [date_compare $i $to]>=0)} {set i [cast date "$i $sign $scaler $unit"]} {
 	    lappend result $i
 	}
 	return $result
@@ -415,7 +427,7 @@ proc qc::.. {from to {step 1} {limit ""}} {
     # Expression
     set from [eval expr $from]
     set to [eval expr $to]
-    if { [is_decimal $from] && [is_decimal $to] && [is_decimal $step]} {
+    if { [qc::is decimal $from] && [qc::is decimal $to] && [qc::is decimal $step]} {
 	for {set i $from} {($step>0 && $i<=$to) || ($step<0 && $i>=$to)} {set i [expr {$i+$step}]} {
 	    lappend result $i
 	}
@@ -483,13 +495,13 @@ proc qc::exec_proxy {args} {
     }
     if { [info commands ns_proxy] eq "ns_proxy" } {
 	set handle [ns_proxy get exec]
-	qc::try {
+	::try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
 	    return $result
-	} {
+	} on error {error_message options} {
 	    ns_proxy release $handle
-	    error $::errorMessage $::errorInfo $::errorCode
+	    error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
 	}
     } else {
 	# No ns_proxy
@@ -516,7 +528,7 @@ proc qc::info_proc { proc_name } {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }
 
-   
+
 
 proc qc::which {command} {
     #| Return path of unix command - cache result in nsv on AOLserver if present
@@ -541,6 +553,20 @@ proc qc::not_null {var} {
     #| Test if this variable exists and is not the empty string
     upvar $var value
     return [expr {[info exists value] && $value ne "" }]
+}
+
+proc qc::commonmark2html {args} {
+    #| Converts Commonmark Markdown (http://commonmark.org) to  HTML.
+    qc::args $args -unsafe -- markdown
+    set markdown [string map {\r ""} $markdown] ;#removes ^M (alternative carriage return) characters
+    set html [exec cmark << $markdown]
+    if {[info exists unsafe]} {
+        return $html
+    } elseif { [qc::is safe_html $html] } {
+        return $html
+    } else {
+        return -code error -errorcode CAST "Markdown contains unsafe HTML."
+    }
 }
 
 proc qc::glob_recursive {args} {
@@ -582,3 +608,41 @@ proc qc::glob_recursive {args} {
     # Call glob and return the results
     return [glob {*}$switches {*}$options -- {*}$patterns]
 }
+
+proc qc::args_qualified2unqualified {} {
+    #| Creates an unqualified variable in the caller's stack frame for each qualified argument
+    #| present in the caller but only if the resulting variable would be unambiguous.
+    #| E.G. Caller's args: { table.foo }
+    #|      -> Variable named "foo" is set in caller.
+    #|      Caller's args: { table.foo other.foo }
+    #|      -> No new variables set in caller because "foo" would be ambiguous.
+    set caller_args [info args [dict get [info frame -1] proc]]
+    foreach item [qc::args_unambiguous {*}$caller_args] {
+        upvar 1 $item value
+        qc::upset 1 [qc::arg_shortname $item] $value
+    }
+}
+
+proc qc::arg_shortname {name} {
+    #| Returns the shortname of a name if it is qualified otherwise returns the name.
+    if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+        return $column
+    } else {
+        return $name
+    }
+}
+
+proc qc::args_unambiguous {args} {
+    #| Returns items from the given list that would be unambiguous if shortnened by unqualifying them.
+    #| E.G. unamibguous table.foo table.bar table.baz other.baz
+    #|      -> table.foo table.bar
+    set unambiguous {}
+    set shortnames [map {x {qc::arg_shortname $x}} $args]
+    foreach shortname $shortnames arg $args { 
+        if { [llength [lsearch -all $shortnames $shortname]]==1 } {
+            lappend unambiguous $arg
+        }
+    }
+    return $unambiguous
+}
+

@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated = see [qc::is creditcard]
 Checks if no is an allowable credit card number<br/>Checks, number of digits are >13 & <19, all characters are integers, luhn 10 check
 
 Examples
@@ -29,3 +30,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is creditcard]: is-creditcard.md
