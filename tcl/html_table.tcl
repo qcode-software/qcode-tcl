@@ -4,7 +4,7 @@ namespace eval qc {
 
 proc qc::html_table { args } {
     set argnames [qc::args2vars $args]
-    # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable
+    # Special args are:- cols thead tbody tfoot table qry rowClasses scrollHeight sortable data tfoot_data
     # Some col keys have special meaning :- label class format thClass tfoot sum
 
     if { [info exists sortCols] } {
@@ -71,6 +71,22 @@ proc qc::html_table { args } {
 	    set tfoot [qc::html_table_tfoot_sums $cols tbody]
 	}
     }
+    # tfoot data
+    if { [info exists tfoot_data] && [info exists cols] } {
+        set tfoot [list]
+        foreach dict $tfoot_data {
+            set row [list]
+            foreach col $cols {
+                set name [dict get $col name]
+                if { [dict exists $dict $name] } {
+                    lappend row [dict get $dict $name]
+                } else {
+                    lappend row ""
+                }
+            }
+            lappend tfoot $row
+        }
+    }
     # format tfoot
     if { [info exists tfoot] && [info exists cols] && [qc::html_table_wants_format $cols] } { 
 	set tfoot [qc::html_table_format $tfoot $cols]
@@ -91,7 +107,12 @@ proc qc::html_table { args } {
 	}
     }
     # Write table tag
-    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames height cols thead tbody tfoot data table rowClasses qry sortable classes]]]
+    set html [qc::html_tag table {*}[dict_from {*}[lexclude $argnames {*}{
+        table thead tbody tfoot
+        cols data tfoot_data qry
+        classes sortable rowClasses
+        height
+    }]]]
 
     append html \n
     # Create colgroup and col children

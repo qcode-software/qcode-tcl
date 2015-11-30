@@ -200,6 +200,64 @@ namespace eval ::qcode::test {
 </table>
 }
 
+    test html_table-1.5 {html_table tfoot_data} -setup {
+        set cols {
+            {name name label Name}
+            {name balance label Balance}
+        }
+        set tbody {
+            {"Jimmy Tarbuck" 23.56}
+	    {"Des O'Conner"  15.632}
+	    {"Bob Monkhouse" 56.1}
+	}
+        set tfoot_data {
+            {name Total balance 95.292}
+            {balance Debit}
+        }
+    } -body {
+        html_table ~ tbody cols tfoot_data
+    }  -cleanup {
+        unset tbody
+        unset cols
+        unset tfoot_data
+    } -result  {<table>
+<colgroup>
+<col name="name">
+<col name="balance">
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Balance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jimmy Tarbuck</td>
+<td>23.56</td>
+</tr>
+<tr>
+<td>Des O'Conner</td>
+<td>15.632</td>
+</tr>
+<tr>
+<td>Bob Monkhouse</td>
+<td>56.1</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td>Total</td>
+<td>95.292</td>
+</tr>
+<tr>
+<td></td>
+<td>Debit</td>
+</tr>
+</tfoot>
+</table>
+}
+
 
     test html_table_row-1.0 {html_table_row} -body {
         html_table_row {Western Freeway}
