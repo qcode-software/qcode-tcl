@@ -150,11 +150,11 @@ namespace eval ::qcode::test {
 
     test url-1.12 {url colon segment no var} -body {
         url /:path foo 123 bar 456
-    } -cleanup {} -returnCodes {error} -result {Key "path" not found in args.}
+    } -cleanup {} -returnCodes {error} -result {Key "path" not found in args or local vars.}
 
     test url-1.13 {url colon fragment no var} -body {
         url "https://www.qcode.co.uk/path#:hash" foo 123 bar 456
-    } -cleanup {} -returnCodes {error} -result {Key "hash" not found in args.}
+    } -cleanup {} -returnCodes {error} -result {Key "hash" not found in args or local vars.}
 
     test url-1.14 {url colon var segment begins with colon} -body {
         url /:path path :123
@@ -163,6 +163,26 @@ namespace eval ::qcode::test {
     test url-1.15 {url colon var fragment begins with colon} -body {
         url /path#:hash hash :abc
     } -cleanup {} -returnCodes {error} -result {The substitute value ":abc" for colon variable "hash" begins with a colon.}
+
+    test url-1.16 {url colon var from local} -body {
+        set id 123
+        url /product/:id
+    } -cleanup {} -result {/product/123}
+
+    test url-1.17 {url colon var with local} -body {
+        set id 123
+        url /product/:id id 456
+    } -cleanup {} -result {/product/456}
+
+    test url-1.18 {url colon hash var from local} -body {
+        set id 123
+        url /product#:id
+    } -cleanup {} -result {/product#123}
+
+    test url-1.19 {url colon hash var with local} -body {
+        set id 123
+        url /product#:id id 456
+    } -cleanup {} -result {/product#456}
     
     # url_match
     test url_match-1.0 {url_match identical urls} -body {

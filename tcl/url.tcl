@@ -26,15 +26,20 @@ proc qc::url { url args } {
             # check if caller has provided a substitution for the segment
             if { [dict exists $dict $segment] } {
                 set value [dict get $dict $segment]
-                if { [string index $value 0] eq ":" } {
-                    return -code error "The substitute value \"$value\" for colon variable \"$segment\" begins with a colon."
-                }
-                lappend substituted_segments $value
-                # remove the dict entry so that it isn't reused
-                set dict [dict remove $dict $segment]
+
+            } elseif { [uplevel info exists $segment] } {
+                set value [uplevel set $segment]
+
             } else {
-                return -code error "Key \"$segment\" not found in args."
+                return -code error "Key \"$segment\" not found in args or local vars."
             }
+            if { [string index $value 0] eq ":" } {
+                return -code error "The substitute value \"$value\" for colon variable \"$segment\" begins with a colon."
+            }
+            lappend substituted_segments $value
+            # remove the dict entry so that it isn't reused
+            set dict [dict remove $dict $segment]
+
         } else {
             lappend substituted_segments $segment
         }
@@ -46,15 +51,19 @@ proc qc::url { url args } {
         set temp [string range $hash 1 end]
         if { [dict exists $dict $temp] } {
             set value [dict get $dict $temp]
-            if { [string index $value 0] eq ":" } {
-                return -code error "The substitute value \"$value\" for colon variable \"$temp\" begins with a colon."
-            }
-            set hash $value
-            # remove the dict entry so that it isn't reused
-            set dict [dict remove $dict $temp]
+
+        } elseif { [uplevel info exists $temp] } {
+            set value [uplevel set $temp]
+
         } else {
-            return -code error "Key \"$temp\" not found in args."
+            return -code error "Key \"$temp\" not found in args or local vars."
         }
+        if { [string index $value 0] eq ":" } {
+            return -code error "The substitute value \"$value\" for colon variable \"$temp\" begins with a colon."
+        }
+        set hash $value
+        # remove the dict entry so that it isn't reused
+        set dict [dict remove $dict $temp]
     }
 
     # rest of args are form vars
