@@ -70,7 +70,7 @@ proc qc::cast_postcode { postcode } {
 
 proc qc::cast_creditcard { no } {
     #| Deprecated - see qc::cast creditcard
-    return [qc:cast creditcard $no]
+    return [qc::cast creditcard $no]
 }
 
 proc qc::cast_period {string} {
