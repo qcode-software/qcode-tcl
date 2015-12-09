@@ -4,11 +4,16 @@ namespace eval qc {
 
 proc qc::register {args} {
     #| Register a URL handler.
-    if { [llength $args] < 2 || [llength $args] > 5 } {
-        return -code error "Usage: qc::register ?-no-auth? method path ?args? ?body?"
+    #| Switch for -no-auth has been deprecated and replaced by -no-authenticate 
+    if { [llength $args] < 2 || [llength $args] > 6 } {
+        return -code error "Usage: qc::register ?-no-authenticate? ?-no-authorise? method path ?args? ?body?"
     }
-    qc::args $args -no-auth -- args
-
+    qc::args $args -no-auth -no-authenticate -no-authorise -- args
+    if { [info exists no-auth] } {
+        # Continue to support deprecated switch
+        set no-authenticate true
+    }
+    
     set method [string toupper [lindex $args 0]]
     set path [lindex $args 1]
     # Add to registered nsv dict if not already registered
@@ -17,15 +22,25 @@ proc qc::register {args} {
     }
 
     # Check authentication exemption
-    if { ! [info exists no-auth] && ! [qc::registered authenticate $method $path]} {
+    if { ! [info exists no-authenticate] && ! [qc::registered authenticate $method $path]} {
         qc::nsv_dict lappend authenticate $method $path
-    } elseif { [info exists no-auth] && [qc::registered authenticate $method $path] } {
+    } elseif { [info exists no-authenticate] && [qc::registered authenticate $method $path] } {
         # Previously registered but now exempt from authentication - remove from nsv dict
         set paths [qc::nsv_dict get authenticate $method]
         set paths [qc::lexclude $paths $path]
         qc::nsv_dict set authenticate $method $paths
     }
 
+    # Check authorisation exemption
+    if { ! [info exists no-authorise] && ! [qc::registered authorise $method $path]} {
+        qc::nsv_dict lappend authorise $method $path
+    } elseif { [info exists no-authorise] && [qc::registered authorise $method $path] } {
+        # Previously registered but now exempt from authorisation - remove from nsv dict
+        set paths [qc::nsv_dict get authorise $method]
+        set paths [qc::lexclude $paths $path]
+        qc::nsv_dict set authorise $method $paths
+    }
+    
     if { [llength $args] >= 3 } {
         set proc_args [lindex $args 2]
         # Separate arg names and default values

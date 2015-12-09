@@ -240,14 +240,14 @@ proc qc::data_type_error_check {data_type value} {
                 set failed_constraints [list]
                 dict for {constraint_name check_clause} $constraints {
                     if { ! [qc::db_eval_domain_constraint $value $base_type $check_clause] } {
-                        lappend failed_contraints $contraint_name
+                        lappend failed_constraints $constraint_name
                     }
                 }
-                if { ! $is_base_type && [llength $failed_contraints] > 0 } {
+                if { ! $is_base_type && [llength $failed_constraints] > 0 } {
                     return "[data_type_error_check $base_type $value] and failed to meet the constraint(s) [join $failed_constraints ", "]"
                 } elseif { ! $is_base_type } {
                     return [qc::data_type_error_check $base_type $value]
-                } elseif { [llength $failed_contraints] > 0 } {
+                } elseif { [llength $failed_constraints] > 0 } {
                     return "\"[qc::trunc $value 100]...\" failed to meet the constraint(s) [join $failed_constraints ", "]"
                 }
             } else {
