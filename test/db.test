@@ -266,6 +266,25 @@ namespace eval ::qcode::test {
             }
         } -result "John Smith"
 
+        test db_trans-1.1 {db_trans} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+            try {
+                db_trans {
+                    try {
+                        db_trans {
+                            db_dml {update students set surname='Smithe' where student_id=12345}
+                            error "Something went wrong"
+                        }
+                    } {
+                        db_dml {update students set firstname='Jane' where student_id=12345}
+                        error "Something else went wrong"
+                    }
+                }
+            } {
+                db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+                return $name
+            }
+        } -result "John Smith"
+
         # ========================================
         # End of testing - now do cleanup
         # ========================================

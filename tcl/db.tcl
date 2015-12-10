@@ -360,24 +360,29 @@ proc qc::db_trans {args} {
     #| ensure code is executed in a transaction by
     #| maintaining a global db_trans_level
     args $args -db DEFAULT -- code {error_code ""}
-    global db_trans_level
+    global db_trans_level db_trans_rollback
+
     if { ![info exists db_trans_level] } {
 	set db_trans_level($db) 0
+        set db_trans_rollback($db) false
     }
     
     if { $db_trans_level($db) == 0 } {
 	db_dml -db $db "BEGIN WORK"
-	incr db_trans_level($db)
-    } else {
-	incr db_trans_level($db)
     }
+    incr db_trans_level($db)
+    
     set return_code [ catch { uplevel 1 $code } result options ]
     switch $return_code {
 	1 {
 	    # Error
-	    if { $db_trans_level($db) >= 1 } {
+	    if { $db_trans_level($db) > 1 } {
+                set db_trans_rollback($db) true
+		incr db_trans_level($db) -1
+            } else {
 		db_dml "ROLLBACK WORK"
 		set db_trans_level($db) 0
+                set db_trans_rollback($db) false
 	    }
 	    uplevel 1 $error_code
             # Return in parent stack frame instead of here
@@ -386,11 +391,16 @@ proc qc::db_trans {args} {
 	}
 	default {
 	    # ok, return, break, continue
-	    if { $db_trans_level($db) == 1 } {
-		db_dml "COMMIT WORK"
-		set db_trans_level($db) 0
-	    } else {
+	    if { $db_trans_level($db) > 1 } {
 		incr db_trans_level($db) -1
+            } else {
+                if { $db_trans_rollback($db) } {
+                    db_dml "ROLLBACK WORK"                    
+                } else {
+                    db_dml "COMMIT WORK"
+                }
+		set db_trans_level($db) 0
+                set db_trans_rollback($db) false
 	    }
             # Preserve TCL_RETURN
             if { $return_code == 2 && [dict get $options -code] == 0 } {
