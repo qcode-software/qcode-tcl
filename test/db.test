@@ -274,16 +274,30 @@ namespace eval ::qcode::test {
                             db_dml {update students set surname='Smithe' where student_id=12345}
                             error "Something went wrong"
                         }
-                    } {
-                        db_dml {update students set firstname='Jane' where student_id=12345}
-                        error "Something else went wrong"
                     }
+                    db_dml {update students set firstname='Jane' where student_id=12345}
+                    error "Something else went wrong"
                 }
-            } {
-                db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-                return $name
             }
+            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+            return $name
         } -result "John Smith"
+
+        test db_trans-1.2 {db_trans} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
+            try {
+                db_trans {
+                    try {
+                        db_trans {
+                            db_dml {update students set surname='Smithe' where student_id=12345}
+                            error "Something went wrong"
+                        }
+                    }
+                    db_dml {update students set firstname='Jane' where student_id=12345}
+                }
+            }
+            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+            return $name
+        } -result "Jane Smith"
 
         # ========================================
         # End of testing - now do cleanup
