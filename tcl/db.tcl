@@ -361,37 +361,42 @@ proc qc::db_trans {args} {
     #| maintaining a global db_trans_level
     args $args -db DEFAULT -- code {error_code ""}
     global db_trans_level
+
     if { ![info exists db_trans_level] } {
 	set db_trans_level($db) 0
     }
-    
-    if { $db_trans_level($db) == 0 } {
+    incr db_trans_level($db)
+
+    set savepoint "db_trans_level_$db_trans_level($db)"
+
+    if { $db_trans_level($db) == 1 } {
 	db_dml -db $db "BEGIN WORK"
-	incr db_trans_level($db)
     } else {
-	incr db_trans_level($db)
+        db_dml -db $db "SAVEPOINT $savepoint"
     }
+    
     set return_code [ catch { uplevel 1 $code } result options ]
     switch $return_code {
 	1 {
 	    # Error
-	    if { $db_trans_level($db) >= 1 } {
-		db_dml "ROLLBACK WORK"
-		set db_trans_level($db) 0
+	    if { $db_trans_level($db) > 1 } {
+                db_dml -db $db "ROLLBACK TO SAVEPOINT $savepoint"
+            } else {
+		db_dml -db $db "ROLLBACK WORK"
 	    }
+
 	    uplevel 1 $error_code
             # Return in parent stack frame instead of here
             dict incr options -level
-	    return -options $options $result 
 	}
 	default {
 	    # ok, return, break, continue
-	    if { $db_trans_level($db) == 1 } {
-		db_dml "COMMIT WORK"
-		set db_trans_level($db) 0
-	    } else {
-		incr db_trans_level($db) -1
+	    if { $db_trans_level($db) > 1 } {
+                db_dml -db $db "RELEASE SAVEPOINT $savepoint"
+            } else {
+                db_dml "COMMIT WORK"
 	    }
+
             # Preserve TCL_RETURN
             if { $return_code == 2 && [dict get $options -code] == 0 } {
                 dict set options -code return
@@ -399,9 +404,10 @@ proc qc::db_trans {args} {
                 # Return in parent stack frame instead of here
                 dict incr options -level
             }
-	    return -options $options $result
 	}
     }
+    incr db_trans_level($db) -1
+    return -options $options $result
 }
 
 proc qc::db_1row { args } {
