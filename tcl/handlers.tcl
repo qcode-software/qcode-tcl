@@ -121,7 +121,7 @@ namespace eval qc::handlers {
             # Add in path variables to form data.
             set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
             # Grab relevant arg data from form.
-            set dict [data $form $method $pattern]
+            set dict [qc::cast_values2model {*}[data $form $method $pattern]]
             # Call the validation handler.
             return [qc::call_with [proc_name $method $pattern] {*}$dict]
         }

@@ -27,10 +27,9 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                 error "Cannot validate \"$url_path\" because there is no registered service for the path." {} NOT_FOUND
             }
 
-            qc::handlers validate2model $validate_method $url_path
-            
-            # Custom validation
-            if {[qc::handlers validation exists $validate_method $url_path]} {
+            if { [qc::handlers validate2model $validate_method $url_path]
+                 && [qc::handlers validation exists $validate_method $url_path] } {
+                # Passed data model validation check custom validation
                 qc::handlers validation call $validate_method $url_path
             }
 
@@ -39,12 +38,11 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             return "filter_return"
         } elseif { [qc::registered $method $url_path] } {
             # Validate and if invalid return the response otherwise continue as normal
-            
-            qc::handlers validate2model $method $url_path
-            
-            # Custom validation
-            if {[qc::handlers validation exists $method $url_path]} {
-                qc::handlers validation call $method $url_path
+
+            if {[qc::handlers validate2model $validate_method $url_path]
+                 && [qc::handlers validation exists $validate_method $url_path] } {
+                # Passed data model validation check custom validation
+                qc::handlers validation call $validate_method $url_path
             }
             
             if { [qc::conn_open] && [qc::response status get] eq "invalid" } {
