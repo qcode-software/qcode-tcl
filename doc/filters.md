@@ -40,7 +40,7 @@ The task of this filter is to check if the session and authentication tokens are
 
 When this filter is called it will check if the request has been [registered]. If so then a check is done to determine if the session is valid.
 
-If the session is valid then the request method is checked. If it's not a GET or HEAD request the authenticity token must be checked for validity. If the token is invalid then an error is returned to the client, they are logged in as the anonymous user and they are asked to resubmit the form.
+If the session is valid then the request method is checked. If it's not a GET or HEAD request the authenticity token must be checked for validity. If the token is invalid then an error is returned to the client.
 
 If the session is invalid or not present then the user is logged in as the [anonymous user] and given the anonymous session ID.
 
