@@ -28,6 +28,7 @@ This describes the API is for modifying the [global JSON response].
 ### Action
 
 * [redirect]
+* [resubmit]
 
 ### Extending The Response
 
