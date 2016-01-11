@@ -28,6 +28,7 @@ This describes the API is for modifying the [global JSON response].
 ### Action
 
 * [redirect]
+* [resubmit]
 
 ### Extending The Response
 
@@ -45,6 +46,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [alert]: procs/response_message_alert.md
 [error]: procs/response_message_error.md
 [redirect]: procs/response_action_redirect.md
+[resubmit]: procs/response_action_resubmit.md
 [extend]: procs/response_extend.md
 
 [global JSON response]: global-json-response.md
