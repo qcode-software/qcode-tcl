@@ -46,7 +46,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [alert]: procs/response_message_alert.md
 [error]: procs/response_message_error.md
 [redirect]: procs/response_action_redirect.md
-[redirect]: procs/response_action_resubmit.md
+[resubmit]: procs/response_action_resubmit.md
 [extend]: procs/response_extend.md
 
 [global JSON response]: global-json-response.md
