@@ -130,7 +130,7 @@ namespace eval qc::response {
     ##################################################
     namespace eval action {
         
-        namespace export redirect login
+        namespace export redirect resubmit login
         namespace ensemble create
 
         proc redirect {url} {
@@ -138,6 +138,13 @@ namespace eval qc::response {
             global data
             reset
             dict set data action redirect value [url $url]
+        }
+
+        proc resubmit {} {
+            #| Sets the resubmit action - used to resubmit the form after updating client's session/authenticity token 
+            global data
+            reset
+            dict set data action resubmit value true
         }
 
         proc login {url} {
