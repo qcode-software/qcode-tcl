@@ -43,9 +43,11 @@ Messages allow for sending the client valuable information. There are 3 types of
 
 
 ### Action
-Actions suggest what the client should do next. Each action has a single property of `value` that is a URL. There is currently just one action available:
+Actions suggest what the client should do next. Each action has a single property of `value` that is a URL.
 
 `Redirect` Go to the given URL.
+
+`Resubmit` Resubmit the form.
 
 
 Setting Up The Response
