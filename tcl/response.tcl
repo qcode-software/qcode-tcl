@@ -163,3 +163,211 @@ namespace eval qc::response {
         }
     }
 }
+
+proc qc::response2tson {} {
+    #| Convert the global data structure into TSON.
+    global data
+    set record_objects [list object]
+    set action_objects [list object]
+    set message_objects [list object]
+    set extensions [list]
+    # Default status is "valid"
+    set status "valid"
+    ::try {
+        dict for {key value} $data {
+            switch $key {
+                record {
+                    foreach {name values} $value {
+                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [list string [dict get $values message]]]
+                    }
+                }
+                message {
+                    foreach {type val} $value {
+                        lappend message_objects $type [list object value [list string [dict get $val value]]]
+                    }
+                }
+                action {
+                    foreach {type val} $value {
+                        lappend action_objects $type [list object value [list string [dict get $val value]]]
+                    }
+                }
+                status {
+                    set status $value
+                }
+                default {
+                    set object [list object]
+                    foreach {name val} $value {
+                        lappend object $name [list string $val]
+                    }
+                    lappend extensions $key $object
+                }
+            }
+        }
+        set result [list object status $status record $record_objects message $message_objects action $action_objects {*}$extensions]
+        return $result
+    } on error [list error_message options] {
+        return -code error "Malformed data: $error_message"
+    }
+}
+
+proc qc::response2json {} {
+    #| Convert the global data structure into JSON.
+    return [qc::tson2json [qc::response2tson]]
+}
+
+proc qc::response2xml {} {
+    #| Convert the global data structure into XML.
+    return [qc::tson2xml [qc::response2tson]]
+}
+
+proc qc::response2html_snippet {} {
+    #| Convert the global data structure into HTML snippet.
+    global data
+    set record_elements {}
+    set action_elements {}
+    set message_elements {}
+    set extended_elements {}
+    # Default status is "valid"
+    set status "valid"
+    ::try {
+        dict for {key value} $data {
+            switch $key {
+                record {                   
+                    foreach {name values} $value {
+                        set field_status "valid"
+                        if { ! [dict get $values valid] } {
+                            set field_status "invalid"
+                        }
+                        
+                        set temp {}
+                        # value
+                        lappend temp [h div \
+                                          class "value" \
+                                          [html_escape [dict get $values value]] \
+                                         ]
+                        # message
+                        lappend temp [h div \
+                                          class "message" \
+                                          [dict get $values message] \
+                                         ]
+                        
+                        lappend record_elements [h div \
+                                                     id $name \
+                                                     class "field $field_status" \
+                                                     [join $temp \n] \
+                                                    ]                                                 
+                    }
+                }
+                message {
+                    foreach {type val} $value {
+                        lappend message_elements [h div \
+                                                      class "$type" \
+                                                      [dict get $val value] \
+                                                     ]
+                    }
+                }
+                action {
+                    foreach {type val} $value {
+                        lappend action_elements [h div \
+                                                     class "$type" \
+                                                     [html_escape [dict get $val value]] \
+                                                    ]
+                    }
+                }
+                status {
+                    set status $value
+                }
+                default {
+                    foreach {name val} $value {
+                        lappend extended_elements [h div \
+                                                       id "$key" \
+                                                       [html_escape $val] \
+                                                      ]
+                    }
+                }
+            }
+        }
+    } on error [list error_message options] {
+        return -code error "Malformed data: $error_message"
+    }
+    
+    return [h div \
+                id "validation_response" \
+                class "validation-response" \
+                [join [list \
+                           [h div class status $status] \
+                           [h div class message [join $message_elements \n]] \
+                           [h div class record [join $record_elements \n]] \
+                           [h div class action [join $action_elements \n]] \
+                           [h div class extended [join $extended_elements \n]]
+                          ] \n] \
+               ]
+}
+
+proc qc::response2html {} {
+    #| Convert the global data structure into HTML.
+    
+    if {  [qc::response status get] eq "valid" } {
+        # data validation passed
+        set title "Data Validation Passed"
+
+        # hide all response elements
+        set css {
+            .validation-response * {
+                display: none;
+            }
+        }
+    } else {
+        # data validation failed
+        set title "Missing or Invalid Data"
+        
+        # hide response elements that do not relate to invalid user input
+        set css {
+            .validation-response > .status,
+            .validation-response > .record .field.valid,
+            .validation-response > .record .field.invalid .value,
+            .validation-response > .action,
+            .validation-response > .extended {
+                display: none;
+            }
+            
+            .validation-response > .record .field.invalid {
+                display: list-item;
+                list-style-position: inside;
+                margin-left: 0em;        
+            }
+            
+            .validation-response > .message,
+            .validation-response > .record,
+            .validation-response-advise {
+                margin-bottom: 10px;
+            }
+        }
+    }
+    
+    set content ""
+    append content [h h1 class "validation-response-page-title" $title]
+    append content [qc::response2html_snippet]
+    append content [h div class "validation-response-advice" "Please go back and try again."]
+    
+    set template {
+        <!doctype html>
+        <html>
+        <head>
+        <title>$title</title>
+        <style>
+        $css
+        </style>
+        </head>
+        <body>
+        $content
+        </body>
+        </html>        
+    }
+    
+    set map {}
+    lappend map \$title $title
+    lappend map \$css $css
+    lappend map \$content $content
+    return [string map $map $template]
+}

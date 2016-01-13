@@ -190,10 +190,12 @@ proc ns_returnmoved {url} {
   </BODY></HTML>}]
 }
 
-proc qc::return_response {} {
+proc qc::return_response {args} {
     #| Returns the global data structure to the client.
     #| Content negotiates to try and find a suitable content type.
-    set mime_types [list "text/html" "application/json"]
+    qc::args $args -response2html qc::response2html -- args
+    
+    set mime_types [list "text/html" "application/json" "application/xml" "text/xml"]
     set mime_type [qc::http_accept_header_best_mime_type $mime_types]
     set media_type [lindex [split $mime_type "/"] 1]
     if { $media_type eq "" } {
@@ -202,15 +204,18 @@ proc qc::return_response {} {
     }
     
     switch -nocase -- $media_type {
+        xml {
+            set response [qc::response2xml]
+        }
         json {
             set response [qc::response2json]
         }
         * -
         html {
             set media_type html
-            set response [qc::response2html]
+            set response [$response2html]           
         }
     }
-    
+
     qc::return2client $media_type $response
 }
