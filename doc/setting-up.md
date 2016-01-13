@@ -56,12 +56,12 @@ For more information see [Connection Handlers].
 proc conn_marshal {} {
     #| Handles requests
     try {
-        if {qc::conn_open} {
+        if {[qc::conn_open]} {
             # a simple handler that tries to handle RESTful requests
             qc::handler_restful
         }
 
-        if {qc::conn_open} {
+        if {[qc::conn_open]} {
             # If the connection is still open then the request wasn't handled by handler_restful
             qc::return2client code 404 html "Not Found"
         }
