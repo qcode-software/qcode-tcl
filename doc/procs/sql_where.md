@@ -5,11 +5,11 @@ part of [Database API](../db.md)
 
 Usage
 -----
-`sql_where varName1 ?varName2 varName3 ...?`
+`sql_where name value ?name2 value2 ...?`
 
 Description
 -----------
-Construct a SQL <i>WHERE</i> clause based on local TCL variables.<br>
+Construct a SQL <i>WHERE</i> clause based on name value arguments<br>
     Don't use the variable if it does not exist or its value is the empty string.<br>
     Return <code>true</code> if all variables are empty or non-existent.
 
@@ -18,7 +18,7 @@ Examples
 ```tcl
 
 % set email jimmy@tarbuck.com
-% sql_where email
+% sql_where email $email
 email='jimmy@tarbuck.com'
 % 
 % set name Jimmy
