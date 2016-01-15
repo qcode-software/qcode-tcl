@@ -171,6 +171,7 @@ proc qc::response2tson {} {
     set action_objects [list object]
     set message_objects [list object]
     set extensions [list]
+
     # Default status is "valid"
     set status "valid"
     ::try {
@@ -178,7 +179,26 @@ proc qc::response2tson {} {
             switch $key {
                 record {
                     foreach {name values} $value {
-                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [list string [dict get $values message]]]
+                        # Check if this is a sensitive column (should not be echo'ing back the value to the client)
+                        set sensitive_column false
+                        if { [qc::db_column_exists $name] } {
+                            set column $name
+                            set tables [qc::db_column_table $name]
+                            foreach table $tables {
+                                if { [qc::db_column_type $table $column] in [list password card_number] } {
+                                    set sensitive_column true
+                                }
+                            }
+                        }
+                        
+                        set object [list object]
+                        lappend object valid [dict get $values valid]
+                        lappend object message [list string [dict get $values message]]
+                        if { ! $sensitive_column } {
+                            lappend object value [list string [dict get $values value]]
+                        }
+                                                                   
+                        lappend record_objects $name $object
                     }
                 }
                 message {
@@ -234,17 +254,31 @@ proc qc::response2html_snippet {} {
             switch $key {
                 record {                   
                     foreach {name values} $value {
+                        # Check if this is a sensitive column (should not be echo'ing back the value to the client)
+                        set sensitive_column false
+                        if { [qc::db_column_exists $name] } {
+                            set column $name
+                            set tables [qc::db_column_table $name]
+                            foreach table $tables {
+                                if { [qc::db_column_type $table $column] in [list password card_number] } {
+                                    set sensitive_column true
+                                }
+                            }
+                        }
+                        
                         set field_status "valid"
                         if { ! [dict get $values valid] } {
                             set field_status "invalid"
                         }
                         
                         set temp {}
-                        # value
-                        lappend temp [h div \
-                                          class "value" \
-                                          [html_escape [dict get $values value]] \
-                                         ]
+                        if { ! $sensitive_column } {
+                            # value
+                            lappend temp [h div \
+                                              class "value" \
+                                              [html_escape [dict get $values value]] \
+                                             ]
+                        }
                         # message
                         lappend temp [h div \
                                           class "message" \

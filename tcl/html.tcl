@@ -866,7 +866,4 @@ proc qc::safe_attributes {} {
     return $safe_attributes
 }
 
-proc qc::response2html {} {
-    #| Converts the global data structure to HTML
-    return [h html [h body [h h1 "Placeholder"]]]
-}
+
