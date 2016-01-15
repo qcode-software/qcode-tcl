@@ -55,21 +55,23 @@ namespace eval qc::response {
         namespace export invalid valid remove all_valid
         namespace ensemble create
 
-        proc valid {name value {message ""}} {
+        proc valid {name value {message ""} {sensitive false}} {
             #| Adds the given field to the record as valid. If the field already exists then updates it.
             global data
             dict set data record $name valid true
             dict set data record $name value $value
             dict set data record $name message $message
+            dict set data record $name sensitive $sensitive
         }
 
-        proc invalid {name value message} {
+        proc invalid {name value message {sensitive false}} {
             #| Adds the given field to the record as invalid. If the field already exists then updates it.
             #| Also sets the status of the response to invalid.
             global data
             dict set data record $name valid false
             dict set data record $name value $value
-            dict set data record $name message $message
+            dict set data record $name message $message            
+            dict set data record $name sensitive $sensitive
             qc::response status invalid
         }
 
@@ -178,7 +180,14 @@ proc qc::response2tson {} {
             switch $key {
                 record {
                     foreach {name values} $value {
-                        lappend record_objects $name [list object valid [dict get $values valid] value [list string [dict get $values value]] message [list string [dict get $values message]]]
+                        set object [list object]
+                        lappend object valid [dict get $values valid]
+                        lappend object message [list string [dict get $values message]]
+                        if { ! [dict get $values sensitive] } {
+                            lappend object value [list string [dict get $values value]]
+                        }
+                                                                   
+                        lappend record_objects $name $object
                     }
                 }
                 message {
@@ -240,11 +249,13 @@ proc qc::response2html_snippet {} {
                         }
                         
                         set temp {}
-                        # value
-                        lappend temp [h div \
-                                          class "value" \
-                                          [html_escape [dict get $values value]] \
-                                         ]
+                        if { ! [dict get $values sensitive] } {
+                            # value
+                            lappend temp [h div \
+                                              class "value" \
+                                              [html_escape [dict get $values value]] \
+                                             ]
+                        }
                         # message
                         lappend temp [h div \
                                           class "message" \
