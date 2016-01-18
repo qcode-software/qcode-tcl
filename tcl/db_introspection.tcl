@@ -267,7 +267,7 @@ proc qc::db_eval_constraint {table constraint args} {
     # eg constraint_test {(col1 > col2)} col1 17 col2 16
     set column_types [qc::db_table_column_types $table]
     set columns [dict keys $column_types]
-    set fq_columns [qc::map {x {upvar 2 table table; return $table.$x}} $columns]
+    set fq_columns [qc::map [list x "return $table.\$x"] $columns]
     set column_values [qc::dict_subset $args {*}$columns {*}$fq_columns]
     set list {}
     foreach {name value} $column_values {
