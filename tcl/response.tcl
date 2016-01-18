@@ -52,26 +52,24 @@ namespace eval qc::response {
     ##################################################
     namespace eval record {
 
-        namespace export invalid valid remove all_valid
+        namespace export invalid valid remove all_valid sensitive
         namespace ensemble create
 
-        proc valid {name value {message ""} {sensitive false}} {
+        proc valid {name value {message ""}} {
             #| Adds the given field to the record as valid. If the field already exists then updates it.
             global data
             dict set data record $name valid true
             dict set data record $name value $value
             dict set data record $name message $message
-            dict set data record $name sensitive $sensitive
         }
 
-        proc invalid {name value message {sensitive false}} {
+        proc invalid {name value message} {
             #| Adds the given field to the record as invalid. If the field already exists then updates it.
             #| Also sets the status of the response to invalid.
             global data
             dict set data record $name valid false
             dict set data record $name value $value
-            dict set data record $name message $message            
-            dict set data record $name sensitive $sensitive
+            dict set data record $name message $message
             qc::response status invalid
         }
 
@@ -93,6 +91,13 @@ namespace eval qc::response {
             } else {
                 return true
             }
+        }
+
+        proc sensitive {name} {
+            #| Marks the given field as being sensitive.
+            # Values of sensitive fields will not be included in the response sent back to the client.
+            global data
+            dict set data record $name sensitive true
         }
     }
 
@@ -183,7 +188,8 @@ proc qc::response2tson {} {
                         set object [list object]
                         lappend object valid [dict get $values valid]
                         lappend object message [list string [dict get $values message]]
-                        if { ! [dict get $values sensitive] } {
+                        if { ! [dict exists $values sensitive] || [dict get $values sensitive] == false } {
+                            # Not a sensitive field so we can safely echo back the value to the client.
                             lappend object value [list string [dict get $values value]]
                         }
                                                                    
@@ -249,8 +255,9 @@ proc qc::response2html_snippet {} {
                         }
                         
                         set temp {}
-                        if { ! [dict get $values sensitive] } {
-                            # value
+                        # value
+                        if { ! [dict exists $values sensitive] || [dict get $values sensitive] == false } {
+                            # Not a sensitive field so we can safely echo back the value to the client.
                             lappend temp [h div \
                                               class "value" \
                                               [html_escape [dict get $values value]] \

@@ -16,18 +16,17 @@ proc qc::validate2model {dict} {
 
         # Check if this is a sensitive data type - values should not be echo'd back to the client
         if { $data_type in [list "password" "card_number"] } {
-            set sensitive true
-        } else {
-            set sensitive false
+            # Mark field as being sensitive in the global data structure
+            qc::response record sensitive $column
         }
         
         # Check if nullable
         if {! $nullable && $value eq ""} {
-            qc::response record invalid $column $value $message $sensitive
+            qc::response record invalid $column $value $message
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            qc::response record valid $column $value "" $sensitive
+            qc::response record valid $column $value ""
             continue
         }
         # Check value against data type
@@ -40,10 +39,10 @@ proc qc::validate2model {dict} {
         # Check constraints
         set constraint_results [qc::db_eval_column_constraints $table $column $dict]
         if {! $type_check || ([llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]]) } {
-            qc::response record invalid $column $value $message $sensitive
+            qc::response record invalid $column $value $message
             set all_valid false
         } elseif {$type_check} {
-            qc::response record valid $column [qc::cast $data_type $value] "" $sensitive
+            qc::response record valid $column [qc::cast $data_type $value]
         }
     }
 
