@@ -26,7 +26,7 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            qc::response record valid $column $value ""
+            qc::response record valid $column $value
             continue
         }
         # Check value against data type
@@ -34,7 +34,7 @@ proc qc::validate2model {dict} {
             set type_check true
         } else {
             set type_check false
-        }      
+        }
 
         # Check constraints
         set constraint_results [qc::db_eval_column_constraints $table $column $dict]
