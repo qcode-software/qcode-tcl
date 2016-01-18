@@ -267,9 +267,14 @@ proc qc::db_eval_constraint {table constraint args} {
     # eg constraint_test {(col1 > col2)} col1 17 col2 16
     set column_types [qc::db_table_column_types $table]
     set columns [dict keys $column_types]
-    set column_values [qc::dict_subset $args {*}$columns]
+    set fq_columns [qc::map [list x "return $table.\$x"] $columns]
+    set column_values [qc::dict_subset $args {*}$columns {*}$fq_columns]
     set list {}
-    foreach {column value} $column_values {
+    foreach {name value} $column_values {
+        if { ![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+            set column $name
+        }
+            
         lappend list "[qc::db_quote $value]::[dict get $column_types $column] as $column"
     }    
     set sub_select "SELECT [join $list ,]"
