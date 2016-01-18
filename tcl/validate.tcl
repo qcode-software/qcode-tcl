@@ -13,6 +13,12 @@ proc qc::validate2model {dict} {
         set message [qc::db_validation_message $table $column]
         set data_type [qc::db_column_type $table $column]
         set nullable [qc::db_column_nullable $table $column]
+
+        # Check if this is a sensitive data type - values should not be echo'd back to the client
+        if { $data_type in [list "password" "card_number"] } {
+            # Mark field as being sensitive in the global data structure
+            qc::response record sensitive $column
+        }
         
         # Check if nullable
         if {! $nullable && $value eq ""} {
