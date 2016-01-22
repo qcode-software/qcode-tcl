@@ -161,7 +161,17 @@ proc qc::conn_if_modified_since {} {
 
 proc qc::conn_open {} {
     #| Check if the client connection is open
-    return [expr {[ns_conn isconnected] && !(0x1 & [ns_conn flags])}]
+    set NS_CONN_CLOSED 0x1
+    return [expr {
+                  [ns_conn isconnected] 
+                  && ($NS_CONN_CLOSED & [ns_conn flags]) == 0 
+              }]
+}
+
+proc qc::conn_response_headers_sent {} {
+    #| Inspect ns_conn flags to determine whether response headers have been sent
+    set NS_CONN_SENT_HEADERS 0x10
+    return [expr {($NS_CONN_SENT_HEADERS & [ns_conn flags]) != 0}]
 }
 
 proc qc::conn_method {} {
@@ -182,7 +192,7 @@ proc qc::handler_restful {} {
     if {[qc::handlers exists $method $url_path]} {
         set result [qc::handlers call $method $url_path]
         # If conn is still open
-        if {[qc::conn_open]} {
+        if { [qc::conn_open] && ![qc::conn_response_headers_sent] } {
             # If a non-GET method then return the global data structure otherwise return the result as text/html.
             if {$method ne "GET"} {
                 return [qc::return_response]

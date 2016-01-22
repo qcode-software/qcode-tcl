@@ -45,9 +45,12 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
                 qc::handlers validation call $method $url_path
             }
             
-            if { [qc::conn_open] && [qc::response status get] eq "invalid" } {
-                # Inform the client that validation failed
-                qc::return_response
+            if { [qc::response status get] eq "invalid" } {
+                # Validation failed
+                if { [qc::conn_open] && ![qc::conn_response_headers_sent] } {
+                    # Inform the client
+                    qc::return_response
+                }
                 return "filter_return"
             }
         }
