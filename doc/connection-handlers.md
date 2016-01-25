@@ -72,4 +72,3 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [handler_restful]: procs/handler_restful.md
 [handler_files]: procs/handler_files.md
 [handler_db_files]: procs/handler_db_files.md
-[Global JSON Response]: global-json-response.md
