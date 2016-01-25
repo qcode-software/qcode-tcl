@@ -12,7 +12,7 @@ This handler will deal with requests where there is a request handler registered
 
 The return types to the client will depend upon the method of the request:
 
-* POST - the global response will be retured to the client as XML, JSON, or HTML depending upon the media types accepted by the client otherwise a code `406 Not Acceptable` with text description will be returned.
+* POST - the global response will be returned to the client as XML, JSON, or HTML depending upon the media types accepted by the client otherwise a code `406 Not Acceptable` with text description will be returned.
 * GET  - HTML resulting from the call to the request handler will be returned to the client.
 
 If there is no request handler registered for the requested path then `handler_restful` will not return to the client and the connection will remain open.
