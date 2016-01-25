@@ -174,6 +174,13 @@ proc qc::conn_response_headers_sent {} {
     return [expr {($NS_CONN_SENT_HEADERS & [ns_conn flags]) != 0}]
 }
 
+proc qc::conn_served {} {
+    #| Return true if a response has been served to the client (connection closed or response headers returned)
+    #| Otherwise return false
+    return [expr {![qc::conn_open] || [qc::conn_response_headers_sent]}]
+    
+}
+
 proc qc::conn_method {} {
     #| Return the method of the current connection.
     if {[qc::form_var_exists _method]} {
@@ -191,8 +198,8 @@ proc qc::handler_restful {} {
     
     if {[qc::handlers exists $method $url_path]} {
         set result [qc::handlers call $method $url_path]
-        # If conn is still open
-        if { [qc::conn_open] && ![qc::conn_response_headers_sent] } {
+        # Check if conn is still waiting to be served
+        if { ![qc::conn_served] } {
             # If a non-GET method then return the global data structure otherwise return the result as text/html.
             if {$method ne "GET"} {
                 return [qc::return_response]
