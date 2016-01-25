@@ -47,7 +47,7 @@ proc qc::filter_validate {event {error_handler qc::error_handler}} {
             
             if { [qc::response status get] eq "invalid" } {
                 # Validation failed
-                if { [qc::conn_open] && ![qc::conn_response_headers_sent] } {
+                if { ![qc::conn_served] } {
                     # Inform the client
                     qc::return_response
                 }
