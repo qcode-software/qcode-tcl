@@ -10,9 +10,9 @@ Connection handlers are used to deal with requests. The qcode-tcl library provid
 
 This handler will deal with requests where there is a request handler registered for the requested path and method. It makes use of the [Handlers API] to determine if a request handler has been registered for the requested path. If there has been a request handler registered then that handler will be called and the result will be returned to the client which will close the connection.
 
-There are two possible return types to the client dependent upon the method of the request:
+The return types to the client will depend upon the method of the request:
 
-* POST - the [Global JSON Response] will be retured to the client.
+* POST - the global response will be retured to the client as XML, JSON, or HTML depending upon the media types accepted by the client otherwise a code `406 Not Acceptable` with text description will be returned.
 * GET  - HTML resulting from the call to the request handler will be returned to the client.
 
 If there is no request handler registered for the requested path then `handler_restful` will not return to the client and the connection will remain open.
@@ -42,21 +42,21 @@ An example of a very simple connection marshal using the above connection handle
 ```tcl
 proc conn_marshal {} {
     #| Connection marshal to handle requests.
-    if { [qc::conn_open] } {
+    if { ![qc::conn_served] } {
         qc::handler_restful
     }
     
-    if { [qc::conn_open] } {
-        # The connection is still open so the request wasn't handled by handler_restful.
+    if { ![qc::conn_served] } {
+        # The connection hasn't been served so the request wasn't handled by handler_restful.
         qc::handler_db_files
     }
 
-    if { [qc::conn_open] } {
+    if { ![qc::conn_served] } {
         # The request wasn't handled by the previous handlers.
         qc::handler_files
     }
 
-    if { [qc::conn_open] } {
+    if { ![qc::conn_served] } {
         # None of the handlers were able to handle the request.
         qc::return2client code 404 html "Not Found"
     }
