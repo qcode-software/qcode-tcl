@@ -1,7 +1,7 @@
 qc::response record valid
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Adds or modifies a valid element in the record object of the [global JSON response].
+Adds or modifies a valid element in the record object of the [connection response](../connection-response.md).
 
 The name argument is the name of the element.
 The value argument is the value of the element.
@@ -34,4 +34,3 @@ record {post_title {valid true value {Foo Bar} message {The title was converted 
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

@@ -52,7 +52,7 @@ Qcode Tcl Lib Documentation
 
 * [Form Variables][10]
 
-[Global JSON Response][11]
+[Connection Response][11]
 --------------------------
 * [API](response_api.md)
 
@@ -94,7 +94,7 @@ Qcode Tcl Lib Documentation
 [8]: email.md
 [9]: error.md
 [10]: form-vars.md
-[11]: global-json-response.md
+[11]: connection-response.md
 [12]: registration.md
 [13]: filters.md
 [14]: connection-handlers.md

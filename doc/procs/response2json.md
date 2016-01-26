@@ -1,22 +1,21 @@
-qc::response status valid
+qc::reponse2json
 ===========
 
 part of [Connection Response API](../response_api.md)
 
 Usage
 -----
-`qc::reponse status valid`
+`qc::reponse2json`
 
 Description
 -----------
-Set the status as "valid" for the [connection response](../connection-response.md).
+
+ TODO
 
 Examples
 --------
 ```tcl
 
-% qc::response status valid
-status valid
 
 ```
 

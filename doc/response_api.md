@@ -1,10 +1,10 @@
-Global JSON Response API
+Connection Response API
 ===================
 part of [Qcode Documentation](index.md)
 
 * * *
 
-This describes the API is for modifying the [global JSON response].
+This describes the API is for modifying the [connection response].
 
 ### Status
 
@@ -18,6 +18,7 @@ This describes the API is for modifying the [global JSON response].
 * [invalid]
 * [remove]
 * [all_valid]
+* [sensitive]
 
 ### Message
 
@@ -34,6 +35,14 @@ This describes the API is for modifying the [global JSON response].
 
 * [extend]
 
+## Response Formats
+
+The following procs will format the response ready for returning to the client:
+
+* [response2json]
+* [response2xml]
+* [response2html]
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
@@ -42,6 +51,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [invalid]: procs/response_record_invalid.md
 [remove]: procs/response_record_remove.md
 [all_valid]: procs/response_record_all_valid.md
+[sensitive]: procs/response_record_sensitive.md
 [notify]: procs/response_message_notify.md
 [alert]: procs/response_message_alert.md
 [error]: procs/response_message_error.md
@@ -49,4 +59,8 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [resubmit]: procs/response_action_resubmit.md
 [extend]: procs/response_extend.md
 
-[global JSON response]: global-json-response.md
+[response2json]: procs/response2json.md
+[response2xml]: procs/response2xml.md
+[response2html]: procs/response2html.md
+
+[connection response]: connection-response.md

@@ -1,7 +1,7 @@
 qc::reponse extend
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Extends the response with an object named after the given name with properties as specified.
+Extends the [connection response](../connection-response.md) with an object named after the given name with properties as specified.
 
 Nested objects are not supported.
 
@@ -70,4 +70,3 @@ Resulting JSON:
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

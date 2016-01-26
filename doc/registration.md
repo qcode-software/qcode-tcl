@@ -42,7 +42,7 @@ register GET / {} {
 }
 ```
 
-Example of a POST request handler. Makes use of the [JSON response] to return a redirect action to the client.
+Example of a POST request handler. Makes use of the [connection response] to return a redirect action to the client.
 
 ```tcl
 register POST /post {post_title post_content} {
@@ -71,7 +71,7 @@ The [Handlers API] can be used to check for the existence of a validation handle
 
 ### Record Modification
 
-When setting up a custom validation handler it is important to modify the record portion of the [JSON response] with the results of custom validation. If the record is not used appropriately then the client will not get the correct feedback. See the [JSON response API] for help.
+When setting up a custom validation handler it is important to modify the record portion of the [connection response] with the results of custom validation. If the record is not used appropriately then the client will not get the correct feedback. See the [Connection Response API] for help.
 
 ### Usage
 
@@ -130,8 +130,8 @@ The above handler will handle requests like `GET /post/73/comment/5` with `73` a
 
 Qcode Software Limited <http://www.qcode.co.uk>
 
-[JSON response]: global-json-response.md
-[JSON response API]: response_api.md
+[connection response]: connection-response.md
+[Connection Response API]: response_api.md
 [Validating User Input]: validation.md
 [`qc::registered`]: procs/registered.md
 [`qc::filter_validate`]: filters.md

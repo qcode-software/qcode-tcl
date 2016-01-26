@@ -1,7 +1,7 @@
 qc::response message error
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Sets the error element of the message object in the [global JSON response] with the given message.
+Sets the error element of the message object in the [connection response](../connection-response.md) with the given message.
 
 Examples
 --------
@@ -24,4 +24,3 @@ message {error {value {There was a problem processing part of your request. Plea
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md
