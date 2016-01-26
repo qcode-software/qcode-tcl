@@ -1,15 +1,15 @@
-qc::reponse2json
+qc::reponse2xml
 ===========
 
 part of [Connection Response API](../response_api.md)
 
 Usage
 -----
-`qc::reponse2json`
+`qc::reponse2xml`
 
 Description
 -----------
-Returns the [connection response](../connection-response.md) as JSON.
+Returns the [connection response](../connection-response.md) as XML.
  
 
 Examples
@@ -30,29 +30,16 @@ record {email {valid true value foo@bar.co.uk message {}} password {valid true v
 > qc::response record sensitive password
 record {email {valid true value foo@bar.co.uk message {}} password {valid true value {} message {} sensitive true}} status invalid message {alert {value {Sorry, that email or password is not recognised.}}}
 
-> qc::response2json
-{
-"status": "invalid",
-"record": {
-"email": {
-"valid": true,
-"message": "",
-"value": "foo@bar.co.uk"
-},
-"password": {
-"valid": true,
-"message": ""
-}
-},
-"message": {
-"alert": {
-"value": "Sorry, that email or password is not recognised."
-}
-},
-"action": {
-
-}
-}
+> qc::response2xml
+<status>invalid</status>
+<record><email><valid>true</valid>
+<message></message>
+<value>foo@bar.co.uk</value></email>
+<password><valid>true</valid>
+<message></message>
+<value></value></password></record>
+<message><alert><value>Sorry, that email or password is not recognised.</value></alert></message>
+<action></action>
 ```
 
 ----------------------------------
