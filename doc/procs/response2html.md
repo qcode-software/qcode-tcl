@@ -5,7 +5,7 @@ part of [Connection Response API](../response_api.md)
 
 Usage
 -----
-`qc::reponse2html`
+`qc::response2html`
 
 Description
 -----------
