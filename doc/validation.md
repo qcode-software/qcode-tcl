@@ -16,11 +16,13 @@ The qcode-tcl library provides a method of validating user input against the dat
 
 As well as determining if the input matches the data types in the model, [`qc::validate2model`] will also check if the input meets the constraints for that column in the model e.g. not null, above/below/is a certain value etc.
 
-[`qc::validate2model`] will also set up the record object of the [global JSON response] with the results of validation for each item that was checked. As part of the record a message is grabbed from the data model to describe the problem if validation fails.
+[`qc::validate2model`] will also set up the record object of the [connection response] with the results of validation for each item that was checked. As part of the record a message is grabbed from the data model to describe the problem if validation fails.
+
+If the record type is `password` or `card_number` then it is automatically marked as sensitive and the value will not appear in the response.
 
 ### Dependencies
 
-Since [`qc::validate2model`] takes a message from the data model to add to the record object of the [global JSON response] a table named `validation_messages` with columns `table_name`, `column_name`, and `message` must exist in the model and contain a row for each column that could possibly be validated against.
+Since [`qc::validate2model`] takes a message from the data model to add to the record object of the [connection response] a table named `validation_messages` with columns `table_name`, `column_name`, and `message` must exist in the model and contain a row for each column that could possibly be validated against.
 
 ### Examples
 
@@ -49,7 +51,7 @@ If [`qc::filter_validate`] is set up on Naviserver and request handlers are regi
 
 In order to validate arguments for a request handler they must be present as the name of a column in the data model. For example, if a request handler had an argument `post_id` then validation would look to the data model for a column with the name `post_id`. If no such column exists then an error is thrown. As noted in the examples above for `qc::validate2model` the column may be fully qualified with the table name to eliminate ambiguity.
 
-Should any item turn out to be invalid then the JSON response is returned to the client to let them know what was wrong. See [`qc::filter_validate`] for more information on the validation process.
+Should any item turn out to be invalid then the connection response is returned to the client to let them know what was wrong. See [`qc::filter_validate`] for more information on the validation process.
 
 
 ### Custom & Manual Validation
@@ -65,7 +67,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [registration]: registration.md
 [validation handlers]: registration.md
 [Data Types: is, cast, castable]: data-types.md
-[global JSON response]: global-json-response.md
+[connection response]: connection-response.md
 [`qc::filter_validate`]: filters.md
 [`qc::is`]: is.md
 [`qc::castable`]: castable.md

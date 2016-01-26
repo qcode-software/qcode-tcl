@@ -18,7 +18,9 @@ When a request comes in and this filter is called it will check if the request h
 
 If both of these conditions are met then the relevant data for the request is validated against the data model. If a [custom validation handler] exists for the request then that is called.
 
-If anything failed validation then the [JSON response] is returned to the client.
+If anything failed validation then the [connection response] is returned to the client.
+
+**Important:** If validation fails before calling any manual validation then sensitive record values will be returned in the response unless they are of type `password` or `card_number`. This is because `password` and `card_number` are the only currently supported types to be automatically marked as sensitive.
 
 ### Usage
 
@@ -143,7 +145,7 @@ foreach http_method [list GET HEAD] {
 Qcode Software Limited <http://www.qcode.co.uk>
 
 [Naviserver register docs]: http://naviserver.sourceforge.net/n/naviserver/files/ns_register.html#3
-[JSON response]: global-json-response.md
+[connection response]: connection-response.md
 [registered]: registration.md
 [request handler]: registration.md
 [custom validation handler]: registration.md

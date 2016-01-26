@@ -71,7 +71,7 @@ If there are sensitive records, such as passwords, whose values should not be ec
 Returning The Response To The Client
 ------------------------------------
 
-The response can be returned to the client as JSON, XML, or HTML. [qc::return_response] can be used to automatically decide the best format to return to the client via content negotiation otherwise [qc::response2json], [qc::response2xml] or [qc::response2html] can be used to generate specific formats of the response.
+The response can be returned to the client as JSON, XML, or HTML. [`qc::return_response`] can be used to automatically decide the best format to return to the client via content negotiation otherwise [`qc::response2json`], [`qc::response2xml`] or [`qc::response2html`] can be used to generate specific formats of the response.
 
 
 Usage
@@ -211,7 +211,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [API]: response_api.md
 [qc::validate2model]: procs/validate2model.md
-[qc::response2json]: procs/response2json.md
-[qc::response2xml]: procs/response2xml.md
-[qc::response2html]: procs/response2html.md
-[qc::return_response]: procs/return_response.md
+[`qc::response2json`]: procs/response2json.md
+[`qc::response2xml`]: procs/response2xml.md
+[`qc::response2html`]: procs/response2html.md
+[`qc::return_response`]: procs/return_response.md
