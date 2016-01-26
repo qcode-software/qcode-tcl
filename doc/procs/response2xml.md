@@ -1,11 +1,11 @@
-qc::reponse2xml
+qc::response2xml
 ===========
 
 part of [Connection Response API](../response_api.md)
 
 Usage
 -----
-`qc::reponse2xml`
+`qc::response2xml`
 
 Description
 -----------
