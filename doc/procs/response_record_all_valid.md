@@ -1,7 +1,7 @@
 qc::response record all_valid
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Checks the element in the record object of the [global JSON response] and returns true if the "valid" property of each element is true otherwise false.
+Checks the element in the record object of the [connection response](../connection-response.md) and returns true if the "valid" property of each element is true otherwise false.
 
 Examples
 --------
@@ -33,4 +33,3 @@ true
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

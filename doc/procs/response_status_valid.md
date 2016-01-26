@@ -1,7 +1,7 @@
 qc::response status valid
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Set the status as "valid" for the JSON Response.
+Set the status as "valid" for the [connection response](../connection-response.md).
 
 Examples
 --------
@@ -24,4 +24,3 @@ status valid
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

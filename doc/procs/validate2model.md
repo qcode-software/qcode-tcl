@@ -9,7 +9,10 @@ Usage
 
 Description
 -----------
-Validates a given dictionary against the data model and sets up the record in the global json payload.
+Validates a given dictionary against the data model and sets up the record in the connection response.
+
+If the record type is `password` or `card_number` then it is automatically marked as sensitive and the value will not appear in the response.
+
 Returns true if all the data is valid otherwise false.
 
 Examples
@@ -22,7 +25,7 @@ Examples
 % validate2model $example
 true
 
-$ set data
+% set data
 record {firstname {valid true value Foo message {}} surname {valid true value Bar message {}}}
 
 ```

@@ -1,7 +1,7 @@
 qc::response record remove
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Removes an element from the record object of the [global JSON response] that matches the given name.
+Removes an element from the record object of the [connection response](../connection-response.md) that matches the given name.
 
 Examples
 --------
@@ -27,4 +27,3 @@ record {}
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

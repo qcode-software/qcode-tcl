@@ -1,7 +1,7 @@
 qc::response action redirect
 ===========
 
-part of [Global JSON Response API](../response_api.md)
+part of [Connection Response API](../response_api.md)
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Sets the redirect element of the action object in the [global JSON response] with the given URL.
+Sets the redirect element of the action object in the [connection response](../connection-response.md) with the given URL.
 
 Examples
 --------
@@ -24,4 +24,3 @@ action {redirect {value {/post/74}}}
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
-[global JSON response]: ../global-json-response.md

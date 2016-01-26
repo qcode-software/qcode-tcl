@@ -96,7 +96,7 @@ register GET / {} {
 }
 ```
 
-An example of using the [Global JSON Response] API:
+An example of using the [Connection Response] API:
 
 ```tcl
 
@@ -104,12 +104,12 @@ register POST /entry {entry_title entry_content} {
     #| Request handler for creating a new blog entry
     # we don't need to validate the data because by the time this request handler is called qc::filter_validate has done the validation for us
     set entry_id [entry_create $post_title $entry_content]
-    # use the Global JSON Response API to redirect the client to the new entry URL.
+    # use the Connection Response API to redirect the client to the new entry URL.
     qc::actions redirect [url "/entry/$entry_id"]
 }
 ```
 
-Sometimes the data might be too complex to be validated entirely from the data model. Using [validation handlers] allows you to manually validate data. Remember to set up the [Global JSON Response].
+Sometimes the data might be too complex to be validated entirely from the data model. Using [validation handlers] allows you to manually validate data. Remember to set up the [Connection Response].
 
 Note that the method, path, and arguments are the same as the request handler above. This is what ties this validation handler to the request handler above.
 
@@ -121,7 +121,7 @@ validate POST /entry {entry_title entry_content} {
     if { ! $valid } {
         # find out what was wrong with the content to give better feedback to the client
         set reasons [error_report $entry_content]
-        # update the JSON response
+        # update the response
         qc::record invalid entry_content $entry_content $reasons
     } else {
         qc::record valid entry_content $entry_content ""
@@ -153,7 +153,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [`qc::handler_restful`]: connection-handlers.md#handler_restful.md
 [Handlers API]: handlers-api.md
 [Handler and Path Registration]: registration.md
-[Global JSON Response]: global-json-response.md
+[Connection Response]: connection-response.md
 [colon variables]: registration.md#paths-with-variable-elements
 [validation handlers]: registration.md#validate
 [Data Model Dependencies]: data-model-dependencies.md
