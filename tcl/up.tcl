@@ -15,17 +15,23 @@ proc qc::upcopy { level upname localname } {
     }
 }
 
-proc qc::upset { level upname {upvalue UNDEF}} {
+proc qc::upset {level upname args} {
     #| Like set in level $level
     incr level
     upvar $level $upname var
-    if { [string equal $upvalue UNDEF] } {
-	if { [info exists var] } {
-	    return $var
-	} else {
-	    error "can't read \"$upname\" :no such variable" 
-	}
-    } else {
-	return [set var $upvalue]
+    switch [llength $args] {
+        1 {
+            return [set var [lindex $args 0]]
+        }
+        0 {
+            if { [info exists var] } {
+                return $var
+            } else {
+                error "can't read \"$upname\" :no such variable" 
+            }
+        }
+        default {
+            error "Usage qc::upset level upname ?upvalue?"
+        }
     }
 }
