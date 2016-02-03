@@ -364,3 +364,17 @@ proc qc::db_validation_message {table column} {
     }
     return $message
 }
+
+proc qc::db_sequence_exists {sequence_name} {
+    #| Checks if the given sequence exists in the database
+    set qry {
+	SELECT sequence_name 
+	FROM information_schema.sequences
+	WHERE sequence_name=:sequence_name;
+    }
+    qc::db_cache_0or1row -ttl 86400 $qry {
+	return false
+    } {
+	return true
+    }
+}
