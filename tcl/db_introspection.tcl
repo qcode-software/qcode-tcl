@@ -190,8 +190,9 @@ proc qc::db_enum_values {enum_name} {
     return $values
 }
 
-proc qc::db_enum_exists {enum_name} {
+proc qc::db_enum_exists {args} {
     #| Checks if the given enum exists in the database.
+    qc::args $args -no-cache -- enum_name
     set qry {
         SELECT e.enumtypid
         FROM pg_enum e
@@ -200,24 +201,35 @@ proc qc::db_enum_exists {enum_name} {
         WHERE t.typname=:enum_name
         LIMIT 1;
     }
-    qc::db_cache_0or1row -ttl 86400 $qry {
+    if { [info exists no-cache] } {
+	set ttl -1
+    } else {
+	set ttl 86400
+    }
+    qc::db_cache_0or1row -ttl $ttl $qry {
         return false
     } {
         return true
     }
 }
 
-proc qc::db_domain_exists {domain_name} {
-    #| Checks if the given domain exists in the database.
+proc qc::db_domain_exists {args} {
+    #|Checks if the given domain exists in the database
+    qc::args $args -no-cache -- domain_name
     set qry {
-        SELECT domain_name
-        FROM information_schema.domains
-        WHERE domain_name=:domain_name;
+	SELECT domain_name
+	FROM information_schema.domains
+	WHERE domain_name=:domain_name;
     }
-    qc::db_cache_0or1row -ttl 86400 $qry {
-        return false
+    if { [info exists no-cache] } {
+	set ttl -1
+    } else {
+	set ttl 86400
+    }
+    qc::db_cache_0or1row -ttl $ttl $qry {
+	return false
     } {
-        return true
+	return true
     }
 }
 
@@ -365,14 +377,20 @@ proc qc::db_validation_message {table column} {
     return $message
 }
 
-proc qc::db_sequence_exists {sequence_name} {
+proc qc::db_sequence_exists {args} {
     #| Checks if the given sequence exists in the database
+    qc::args $args -no-cache -- sequence_name
     set qry {
 	SELECT sequence_name 
 	FROM information_schema.sequences
 	WHERE sequence_name=:sequence_name;
     }
-    qc::db_cache_0or1row -ttl 86400 $qry {
+    if { [info exists no-cache] } {
+	set ttl -1
+    } else {
+	set ttl 86400
+    }
+    qc::db_cache_0or1row -ttl $ttl $qry {
 	return false
     } {
 	return true
