@@ -425,3 +425,18 @@ proc qc::db_user {{poolname DEFAULT}} {
     #| Gets the user configured to connect to database using poolname
     return [ns_db user [db_get_handle $poolname]]
 }
+
+proc qc::db_extension_exists {extension_name} {
+    #| Checks if the extension exists in database
+    set qry {
+	SELECT extname
+	FROM pg_extension
+	WHERE extname=:extension_name
+    }
+    db_0or1row $qry {
+	return false
+    } {
+	return true
+    }
+
+}
