@@ -313,13 +313,12 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
     global _db
     if { [info commands ns_db] eq "ns_db" } {
         # AOL Server
+        if { $poolname eq "DEFAULT" } {
+	    set poolname [ns_config ns/server/[ns_info server]/db defaultpool]  
+	} 
         if { ![info exists _db($poolname)] } {
-            if { [string equal $poolname DEFAULT] } {
-                set _db($poolname) [ns_db gethandle]
-            } else {
-                set _db($poolname) [ns_db gethandle $poolname]
-            }
-        }
+	    set _db($poolname) [ns_db gethandle $poolname]
+	}
         return $_db($poolname)
     } else {
         # Should be connected with db_connect

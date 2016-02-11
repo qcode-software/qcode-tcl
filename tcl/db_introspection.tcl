@@ -396,3 +396,32 @@ proc qc::db_sequence_exists {args} {
 	return true
     }
 }
+
+proc qc::db_owner {database_name} {
+    #| Gets the owner of the database
+    set qry {
+	SELECT u.usename as database_owner
+	FROM pg_database d
+	JOIN pg_user u ON (d.datdba=u.usesysid)
+	WHERE d.datname=:database_name
+    }
+    db_0or1row $qry {
+	error "Database \"$database_name\" does not exists"
+    } {
+	return $database_owner
+    }
+}
+
+proc qc::db_database_name {{poolname DEFAULT}} {
+    #| Gets the name of the database using poolname
+    set qry {
+	select current_database() as current_database
+    }
+    db_1row -db $poolname $qry
+    return $current_database
+}
+
+proc qc::db_user {{poolname DEFAULT}} {
+    #| Gets the user configured to connect to database using poolname
+    return [ns_db user [db_get_handle $poolname]]
+}
