@@ -405,8 +405,11 @@ proc qc::db_owner {database_name} {
 	JOIN pg_user u ON (d.datdba=u.usesysid)
 	WHERE d.datname=:database_name
     }
-    db_1row $qry
-    return $database_owner
+    db_0or1row $qry {
+	error "Database \"$database_name\" does not exists"
+    } {
+	return $database_owner
+    }
 }
 
 proc qc::db_database_name {{poolname DEFAULT}} {
