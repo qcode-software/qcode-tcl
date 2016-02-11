@@ -8,11 +8,13 @@ namespace eval ::qcode::test {
     namespace import ::tcltest::*
     namespace path ::qc
 
-    test html_options_simple-1.0 {html_options_simple}  -body {
-        html_options_simple SCO ENG NI WAL
-    }  -result {SCO SCO ENG ENG NI NI WAL WAL}
-    
-    
-    cleanupTests
-} 
-namespace delete ::qcode::test
+    test version-1.0 {check version} -setup {
+    } -body {
+        package present qcode
+    } -result "$::env(VERSION)"
+
+    test version-1.1 {check path} -setup {
+    } -body {
+        package ifneeded qcode [package present qcode]
+    } -match glob -result {source ./package/*}
+}

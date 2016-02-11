@@ -1,0 +1,46 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    proc upset_test {args} {
+        qc::upset {*}$args
+    }
+
+    test upset-1.0 {upset to get value} -setup {
+    } -body {
+        set foo "bar"
+        return [upset_test 1 foo]
+    } -result "bar" -cleanup {
+        unset foo
+    }
+
+    test upset-1.1 {upset to set value} -setup {
+    } -body {
+        upset_test 1 foo bar
+        return $foo
+    } -result "bar" -cleanup {
+        unset foo
+    }
+
+    test upset-1.2 {upset to set value UNDEF} -setup {
+    } -body {
+        upset_test 1 foo UNDEF
+        return $foo
+    } -result "UNDEF" -cleanup {
+        unset foo
+    }
+
+    test upset-1.3 {upset to get missing value} -setup {
+    } -body {
+        return [upset_test 1 foo]
+    } -returnCodes 1 -result {can't read "foo" :no such variable} -cleanup {}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
