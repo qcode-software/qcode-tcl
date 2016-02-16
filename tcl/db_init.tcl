@@ -135,9 +135,11 @@ proc qc::db_init {} {
 					    authenticity_token varchar(100)
 					    );
 
-	CREATE TABLE IF NOT EXISTS schema_update (
-						  version int NOT NULL
-						  );
+	CREATE TABLE IF NOT EXISTS schema (
+					   version int NOT NULL
+					   );
+
+	INSERT INTO schema VALUES(1);
 
 	
 
