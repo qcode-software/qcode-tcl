@@ -173,7 +173,7 @@ CREATE TABLE session (
 #### schema
 
 ```SQL
-CREATE TABLE schema_update {
+CREATE TABLE schema {
     version int NOT NULL
 }
 ```
