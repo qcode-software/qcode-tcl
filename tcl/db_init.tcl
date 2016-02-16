@@ -135,12 +135,17 @@ proc qc::db_init {} {
 					    authenticity_token varchar(100)
 					    );
 
-	CREATE TABLE IF NOT EXISTS schema_update (
-						  version int NOT NULL
-						  );
+	CREATE TABLE IF NOT EXISTS schema (
+					   version int NOT NULL
+					   );
+    }
 
-	
-
+    # Initialise schema version.
+    db_0or1row {select version from schema} {
+	db_dml "INSERT INTO schema VALUES(1);"
+    }
+    
+    db_dml {
 	CREATE TABLE IF NOT EXISTS perm_category (
 						  perm_category_id int PRIMARY KEY,
 						  description text
