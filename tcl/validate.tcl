@@ -36,14 +36,24 @@ proc qc::validate2model {dict} {
             set type_check false
         }
 
-        # Check constraints
-        set constraint_results [qc::db_eval_column_constraints $table $column $dict]
-        if {! $type_check || ([llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]]) } {
+        if {! $type_check } {
+            # Type checking failed - skip further checks
             qc::response record invalid $column $value $message
             set all_valid false
-        } elseif {$type_check} {
-            qc::response record valid $column [qc::cast $data_type $value]
+            continue
         }
+        
+        # Check constraints
+        set constraint_results [qc::db_eval_column_constraints $table $column $dict]
+        if {[llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]] } {
+            # Constraint checking failed - skip further checks
+            qc::response record invalid $column $value $message
+            set all_valid false
+            continue
+        }         
+        
+        # Record passed all data model validation
+        qc::response record valid $column [qc::cast $data_type $value]        
     }
 
     if { ! $all_valid } {
