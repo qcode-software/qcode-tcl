@@ -40,6 +40,11 @@ proc qc::validate2model {dict} {
         # continue to do the constraint checking
         dict for {name value} $dict {
 
+            # Check if null
+            if { $value eq ""} {
+                continue
+            }
+
             # Check if name is fully qualified
             if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
                 lassign [qc::db_qualified_table_column $name] table column
@@ -47,11 +52,6 @@ proc qc::validate2model {dict} {
             set message [qc::db_validation_message $table $column]
             set data_type [qc::db_column_type $table $column]
 
-            # Check if null
-            if { $value eq ""} {
-                continue
-            }
-        
             # Check constraints
             set constraint_results [qc::db_eval_column_constraints $table $column $dict]
             if {[llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]] } {
