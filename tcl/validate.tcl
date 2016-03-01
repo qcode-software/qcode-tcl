@@ -3,7 +3,7 @@ namespace eval qc {
 
 proc qc::validate2model {dict} {
     #| Validates dictionary against the data model and sets up the record in the global data structure.
-    #| Returns true if all the data is valid otherwise false.
+    #| First checks all types. If all are valid, proceeds to check constraints.
     set all_valid true
     dict for {name value} $dict {
         # Check if name is fully qualified
