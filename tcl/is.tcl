@@ -627,6 +627,11 @@ namespace eval qc::is {
         }
     }
 
+    proc url_path {string} {
+	#| Checks if the given string is an url path.
+	return [regexp {/([a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]|/)*$} $string]
+    }
+
     proc ipv4 {string} {
         #| Checks if the given string follows the IPv4 format.
         # TODO checks structure only, will allow 9999.9999.9999.9999
