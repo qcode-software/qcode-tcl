@@ -196,4 +196,15 @@ namespace eval qc::castable {
             return false
         }
     }
+    
+    proc url_path {string} {
+	#| Test if the given string can be cast to an url path
+	#| (See qc::is url_path)
+	try {
+	    qc::cast url_path $string
+	    return true
+	} on error [list error_message options] {
+	    return false
+	}
+    }
 }

@@ -695,4 +695,17 @@ namespace eval qc::cast {
         }  
         return -code error -errorcode CAST "Could not cast $string to an url."      
     }
+    
+    proc url_path {string} {
+	#| Cast the given string to an url_path
+	#| (See also qc::is url_path)
+	set lower [string tolower $string]
+	if { [qc::is url_path $lower] } {
+	    return $lower
+	}
+	if { [qc::is url_path "/$lower"] } {
+	    return "/$lower"
+	}
+	return -code error -errorcode CAST "Could not cast $string to an url path"
+    }
 }
