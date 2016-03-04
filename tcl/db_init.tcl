@@ -43,6 +43,21 @@ proc qc::db_init {} {
 		  );
 	}
     }
+
+    # url_path
+    if {![qc::db_domain_exists -no-cache url_path]} {
+	db_dml {
+	    create or replace function is_url_path(text)
+	    returns boolean as \$\$
+	    select \$1 ~ '/([a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&''()*+,;=:@]|/)*$';
+	    \$\$ language sql immutable strict;
+
+	    create domain url_path as text
+	    check(
+		  is_url_path(value)
+		  );
+	}
+    }   
     
     # user_state
     if {![qc::db_enum_exists -no-cache user_state]} {
