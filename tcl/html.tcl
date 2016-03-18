@@ -211,58 +211,65 @@ proc qc::html_info_tables {args} {
     return [qc::html_table class "columns-container" tbody [list $row]]
 }
 
-proc qc::html_styles2inline {html} {
+proc qc::html_styles2inline {args} {
     #| Applies defined styles in html head as inline styles for relevant elements in body
+    qc::args $args -version 2 -- html
     set styles [regexp -all -inline {<style[^>]*>[^<]*</style>} $html]
     #regsub -all {<style[^>]*>([^<]*)</style>} $html {} html
     foreach style $styles {
 	regexp {<style[^>]*>([^<]*)</style>} $style -> style
-	set html [qc::html_style2inline $html $style]
+	set html [qc::html_style2inline -version $version $html $style]
     }
     return $html
 }
 
-proc qc::html_style2inline {html style} {
+proc qc::html_style2inline {args} {
     #| Helper proc for qc::html_styles2inline
+    qc::args $args -version 2 -- html style
     set data [qc::css_parse $style]
     package require tdom
     dom parse -html $html doc
     foreach {selector styles} $data {
       	set nodes {}
-	set xpath ""
-	foreach part $selector {
-	    if { [regexp {^[a-zA-Z][a-zA-Z0-9]*$} $part] } {
-		# HTML element
-		append xpath //$part
-	    }  elseif { [regexp {^\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> classes] } {
-		# .class.other-class selector
-		append xpath //*
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
+        if { $version == 1 } {
+            # Version 1 deprecated because of XPath "contains" function partially matching IDs and classes
+            set xpath ""
+            foreach part $selector {
+                if { [regexp {^[a-zA-Z][a-zA-Z0-9]*$} $part] } {
+                    # HTML element
+                    append xpath //$part
+                }  elseif { [regexp {^\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> classes] } {
+                    # .class.other-class selector
+                    append xpath //*
+                    foreach class [split $classes "."] {
+                        append xpath \[contains(@class,\"$class\")\]
+                    }
+                }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> tag classes] } {
+                    # tag.class.other-class selector
+                    append xpath //$tag
+                    foreach class [split $classes "."] {
+                        append xpath \[contains(@class,\"$class\")\]
+                    }
+                } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> id] } {
+                    # #id selector
+                    append xpath //*\[contains(@id,\"$id\")\]
+                } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> id classes] } {
+                    # #id.class.otherclass selector
+                    append xpath //*\[contains(@id,\"$id\")\]
+                    foreach class [split $classes "."] {
+                        append xpath \[contains(@class,\"$class\")\]
+                    }
+                } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> tag id] } {
+                    # tag#id selector
+                    append xpath //$tag\[contains(@id,\"$id\")\]
+                } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*):nth-child\(([0-9]+)\)$} $part -> tag nth_child] } {
+                    # tag:nth-child() selector
+                    append xpath //$tag\[position()=$nth_child\]
                 }
-	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> tag classes] } {
-		# tag.class.other-class selector
-		append xpath //$tag
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
-                }
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> id] } {
-		# #id selector
-                append xpath //*\[contains(@id,\"$id\")\]
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> id classes] } {
-		# #id.class.otherclass selector
-                append xpath //*\[contains(@id,\"$id\")\]
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
-                }
-	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> tag id] } {
-		# tag#id selector
-		append xpath //$tag\[contains(@id,\"$id\")\]
-	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*):nth-child\(([0-9]+)\)$} $part -> tag nth_child] } {
-		# tag:nth-child() selector
-		append xpath //$tag\[position()=$nth_child\]
-	    }
-	}
+            }
+        } else {
+            set xpath [qc::css_selector2xpath $selector]
+        }
         set nodes [$doc selectNodes $xpath]
 
 	foreach node $nodes {
