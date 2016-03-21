@@ -1,3 +1,7 @@
+namespace eval qc {
+    namespace export db_init
+}
+
 proc qc::db_init {} {
     #| Initialises the database objects required by qcode-tcl
 
