@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export sql_where sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
+    namespace export sql_where sql_where_not sql_where_like sql_where_cols_start sql_where_col_starts sql_where_combo sql_where_compare sql_where_compare_set sql_where_or sql_where_word_in
 }
 
 proc qc::sql_where { args } {
@@ -22,6 +22,33 @@ proc qc::sql_where { args } {
                  lappend list "$name=[db_quote $value $type]"
                 }
          }
+        }
+    }
+    if { [llength $list]==0 } {
+        return true
+    } else {
+        return [join $list " and "]
+    }
+}
+
+proc qc::sql_where_not {args} {
+    qc::args $args -nocase -type "" -- args
+    #| Construct part of SQL WHERE clause using varNames
+    #| in a pass-by-name list or a dict.
+    #| Any empty values or non-existent variables are ignored
+    set dict [qc::args2dict $args]
+    set list {}
+    foreach {name value} $dict {
+        if { $value eq "" } {
+            # do nothing
+        } elseif { $value eq "NULL" } {
+            lappend list "$name IS NOT NULL"
+        } elseif { $value eq "NOT NULL" } {
+            lappend list "$name IS NULL"
+        } elseif { [info exists nocase] } {
+            lappend list "lower($name)<>lower([db_quote $value $type])"
+        } else {
+            lappend list "$name<>[db_quote $value $type]"
         }
     }
     if { [llength $list]==0 } {
