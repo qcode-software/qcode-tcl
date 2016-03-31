@@ -52,6 +52,52 @@ namespace eval ::qcode::test {
         sql_where -type text ~ name tel_no
     } -cleanup {} -result {name='Townes Van Zandt'::text and tel_no='1234'::text}
 
+
+    test sql_where_not-1.0 {sql_where_not} -setup {
+    } -body {
+        sql_where_not name "Townes Van Zandt" email "townes@tecumseh.com"
+    } -cleanup {} -result {name<>'Townes Van Zandt' and email<>'townes@tecumseh.com'}
+
+    test sql_where_not-1.1 {sql_where_not null} -setup {
+    } -body {
+        sql_where_not name NULL email "townes@tecumseh.com"
+    } -cleanup {} -result {name IS NOT NULL and email<>'townes@tecumseh.com'}
+
+    test sql_where_not-1.2 {sql_where_not empty string} -setup {
+    } -body {
+        sql_where_not name "" email "townes@tecumseh.com"
+    } -cleanup {} -result {email<>'townes@tecumseh.com'}
+
+    test sql_where_not-1.3 {sql_where_not nothing to do} -setup {
+    } -body {
+        sql_where_not name "" email ""
+    } -cleanup {} -result {true}
+
+    test sql_where_not-1.4 {sql_where_not need quoting} -setup {
+    } -body {
+        sql_where_not name "Townes O'Reilly" email ""
+    } -cleanup {} -result {name<>'Townes O''Reilly'}
+
+    test sql_where_not-1.5 {sql_where_not type} -setup {
+    } -body {
+        sql_where_not -type text name "Townes van Zandt" tel_no 1234
+    } -cleanup {} -result {name<>'Townes van Zandt'::text and tel_no<>'1234'::text}
+
+    test sql_where_not-1.6 {sql_where_not by name} -setup {
+        set name "Townes Van Zandt"
+        set email "townes@tecumseh.com"
+    } -body {
+        sql_where_not ~ name email 
+    } -cleanup {} -result {name<>'Townes Van Zandt' and email<>'townes@tecumseh.com'}
+
+    test sql_where_not-1.7 {sql_where_not by name typed} -setup {
+        set name "Townes Van Zandt"
+        set tel_no 1234
+    } -body {
+        sql_where_not -type text ~ name tel_no
+    } -cleanup {} -result {name<>'Townes Van Zandt'::text and tel_no<>'1234'::text}
+
+
     test sql_where_like-1.0 {sql_where_like} -setup {
     } -body {
         sql_where_like name "Townes Van Zandt" email "townes@tecumseh.com"
