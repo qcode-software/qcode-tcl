@@ -37,6 +37,9 @@ proc data_type_parser {args} {
         ^int8$ {
             return [list $namespace bigint]
         }
+        ^float8$ {
+            return [list $namespace decimal]
+        }
         default {
             if { [qc::db_domain_exists $data_type] } {
                 return [list $namespace domain $data_type]
