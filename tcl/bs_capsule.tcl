@@ -94,7 +94,7 @@ proc qc::bs_capsule_markdown {args} {
     # Textarea
     lappend group [h textarea class "form-control" placeholder $this(label) name $this(name) id $this(id) $this(value)]
     set upload_button [h span class "markdown-upload-button" "selecting"]
-    lappend group [h span class "help-block" "Add images by draggin & dropping, $upload_button, pasting"] 
+    lappend group [h span class "help-block" "Add images by dragging & dropping, $upload_button, pasting"] 
    
     # Tab content 
     set content [list]
@@ -107,7 +107,7 @@ proc qc::bs_capsule_markdown {args} {
 }
 
 proc qc::bs_capsule_checkbox {args} {
-    #| Returns bootstrap falvoured checkbox
+    #| Returns bootstrap flavoured checkbox
     args_check_required $args name value label
     array set this $args
     default this(id) $this(name)
