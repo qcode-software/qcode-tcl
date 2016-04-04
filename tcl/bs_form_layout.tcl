@@ -3,7 +3,8 @@ namespace eval qc {
 }
 
 proc qc::bs_form_layout_capsule {args} {
-    #| Constructs a bootstrap floating label form layout with labels and form elements
+    #| Constructs a bootstrap floating label form layout with labels 
+    # and form elements
     args $args -- conf
     
     set level 1

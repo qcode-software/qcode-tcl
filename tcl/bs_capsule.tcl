@@ -11,9 +11,13 @@ proc qc::bs_capsule_text {args} {
 
     set group [list]
     lappend group [h label for $this(id) $this(label)]
-    lappend group [h input type $this(type) class "form-control" placeholder $this(label) value $this(value) name $this(name) id $this(id)]
+    lappend group [h input type $this(type) class "form-control" placeholder \
+		       $this(label) value $this(value) name $this(name) \
+		       id $this(id)]
     if {[info exist this(unit)]} {
-	lappend group [h span class "help-block help-block-inline help-block-background" $this(unit)]
+	lappend group [h span \
+			   class "help-block help-block-inline help-block-background" \
+			   $this(unit)]
     }
     return [h div class "form-group" [join $group \n]]
 
@@ -28,7 +32,9 @@ proc qc::bs_capsule_password {args} {
 
     set group [list]
     lappend group [h label for $this(id) $this(label)]
-    lappend group [h input type $this(type) class "form-control" placeholder $this(label) value $this(value) name $this(name) id $this(id)]
+    lappend group [h input type $this(type) class "form-control" \
+		       placeholder $this(label) value $this(value) \
+		       name $this(name) id $this(id)]
     return [h div class "form-group" [join $group \n]]
 
 }
@@ -43,7 +49,9 @@ proc qc::bs_capsule_select {args} {
 
     set group [list]
     lappend group [h label for $this(id) $this(label)]
-    set dropdown [qc::widget_select name $this(name) id $this(id) value $this(value) options $this(options) class "form-control" null_option $this(null_option)]
+    set dropdown [qc::widget_select name $this(name) id $this(id) \
+		      value $this(value) options $this(options) \
+		      class "form-control" null_option $this(null_option)]
     lappend group [h div class "select-wrapper" $dropdown]
 
     return [h div class "form-group form-group-select" [join $group \n]]
@@ -58,12 +66,14 @@ proc qc::bs_capsule_textarea {args} {
 
     set group [list]
     lappend group [h label for $this(id) $this(label)]
-    lappend group [h textarea class "form-control" rows $this(rows) placeholder $this(label)  name $this(name) id $this(id) $this(value)]
+    lappend group [h textarea class "form-control" rows $this(rows) \
+		       placeholder $this(label)  name $this(name) id $this(id) \
+		       $this(value)]
     return [h div class "form-group form-group-textarea" [join $group \n]]
 }
 
 proc qc::bs_capsule_button {args} {
-    #| Returns bootstrap form group for button 
+    #| Returns bootstrap flavoured button 
     array set this $args
     default this(type) submit
     default this(label) Submit
@@ -83,26 +93,34 @@ proc qc::bs_capsule_markdown {args} {
     set group [list]
 
     
-    # Navbar tab for write/preview
+    # Navbar tabs for write/preview
     set tab [list]
-    lappend tab [h li class "active" [h a href "#$this(id)-write" data-toggle "tab" "Write"]]
-    lappend tab [h li [h a href "#$this(id)-preview" data-toggle "tab" "Preview"]]
-    set tab [h ul class "nav nav-tabs" [join $tab \n]]
+    lappend tab [h li class "active" \
+		     [h a href "#$this(id)-write" \
+			  data-toggle "tab" "Write"]]
+    lappend tab [h li [h a href "#$this(id)-preview" \
+			   data-toggle "tab" "Preview"]]
+    set tab_group [h ul class "nav nav-tabs" [join $tab \n]]
     
     # Label
     lappend group [h label for $this(id) $this(label)]
     # Textarea
-    lappend group [h textarea class "form-control" placeholder $this(label) name $this(name) id $this(id) $this(value)]
+    lappend group [h textarea class "form-control" placeholder $this(label) \
+		       name $this(name) id $this(id) $this(value)]
     set upload_button [h span class "markdown-upload-button" "selecting"]
-    lappend group [h span class "help-block" "Add images by dragging & dropping, $upload_button, pasting"] 
+    lappend group [h span class "help-block" \
+		       "Add images by dragging & dropping, $upload_button, pasting"]
    
     # Tab content 
     set content [list]
-    lappend content [h div class "tab-pane active" id "$this(id)-write" [h div class "form-group form-group-markdown" [join $group \n]]]
-    lappend content [h div class "tab-pane" id "$this(id)-preview" [h div id "$this(id)-result" class "markdown-preview" ]]
-    set content [h div class "tab-content" [join $content \n]]
+    lappend content [h div class "tab-pane active" id "$this(id)-write" \
+			 [h div class "form-group form-group-markdown" \
+			      [join $group \n]]]
+    lappend content [h div class "tab-pane" id "$this(id)-preview" \
+			 [h div id "$this(id)-result" class "markdown-preview"]]
+    set content_group [h div class "tab-content" [join $content \n]]
 
-    return [h div ${tab}${content}]
+    return [h div ${tab_group}${content_group}]
 
 }
 
