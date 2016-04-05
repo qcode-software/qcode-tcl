@@ -84,14 +84,12 @@ proc qc::bs_capsule_button {args} {
 proc qc::bs_capsule_markdown {args} {
     #| Returns bootstrap tab group for markdown write/preview
     # CSS classes to style: markdown-preview, markdown-upload-button
-    # Markdown target id: $this(id)-result
+    # Markdown target class: markdown-preview
     args_check_required $args name value label
     array set this $args
     default this(id) $this(name)
-    #default this(rows) 25
 
     set group [list]
-
     
     # Navbar tabs for write/preview
     set tab [list]
@@ -117,7 +115,7 @@ proc qc::bs_capsule_markdown {args} {
 			 [h div class "form-group form-group-markdown" \
 			      [join $group \n]]]
     lappend content [h div class "tab-pane" id "$this(id)-preview" \
-			 [h div id "$this(id)-result" class "markdown-preview"]]
+			 [h div class "markdown-preview"]]
     set content_group [h div class "tab-content" [join $content \n]]
 
     return [h div ${tab_group}${content_group}]
