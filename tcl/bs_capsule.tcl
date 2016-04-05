@@ -118,7 +118,7 @@ proc qc::bs_capsule_markdown {args} {
 			 [h div class "markdown-preview"]]
     set content_group [h div class "tab-content" [join $content \n]]
 
-    return [h div ${tab_group}${content_group}]
+    return [h div class "markdown-editor" ${tab_group}${content_group}]
 
 }
 
