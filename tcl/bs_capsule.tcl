@@ -82,44 +82,17 @@ proc qc::bs_capsule_button {args} {
 }
 
 proc qc::bs_capsule_markdown {args} {
-    #| Returns bootstrap tab group for markdown write/preview
-    # CSS classes to style: markdown-preview, markdown-upload-button
-    # Markdown target class: markdown-preview
+    #| Returns bootstrap floating label form group for markdown textarea
     args_check_required $args name value label
     array set this $args
     default this(id) $this(name)
 
     set group [list]
-    
-    # Navbar tabs for write/preview
-    set tab [list]
-    lappend tab [h li class "active" \
-		     [h a href "#$this(id)-write" \
-			  data-toggle "tab" "Write"]]
-    lappend tab [h li [h a href "#$this(id)-preview" \
-			   data-toggle "tab" "Preview"]]
-    set tab_group [h ul class "nav nav-tabs" [join $tab \n]]
-    
-    # Label
     lappend group [h label for $this(id) $this(label)]
-    # Textarea
     lappend group [h textarea class "form-control" placeholder $this(label) \
 		       name $this(name) id $this(id) $this(value)]
-    set upload_button [h span class "markdown-upload-button" "selecting"]
-    lappend group [h span class "help-block" \
-		       "Add images by dragging & dropping, $upload_button, pasting"]
-   
-    # Tab content 
-    set content [list]
-    lappend content [h div class "tab-pane active" id "$this(id)-write" \
-			 [h div class "form-group form-group-markdown" \
-			      [join $group \n]]]
-    lappend content [h div class "tab-pane" id "$this(id)-preview" \
-			 [h div class "markdown-preview"]]
-    set content_group [h div class "tab-content" [join $content \n]]
 
-    return [h div class "markdown-editor" ${tab_group}${content_group}]
-
+    return [h div class "form-group form-group-markdown" [join $group \n]]
 }
 
 proc qc::bs_capsule_checkbox {args} {
