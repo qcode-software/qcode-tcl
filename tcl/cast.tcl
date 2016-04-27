@@ -132,9 +132,17 @@ proc qc::cast_values2model {args} {
         } else {           
             lappend errors [qc::html_escape [qc::data_type_error_check $data_type $value]]
         }
+    }
+
+    dict for {name value} $casted_dict {
+        set table ""
+        # Check if name is fully qualified
+        if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+            lassign [qc::db_qualified_table_column $name] table column
+        }
 
         # Check constraints
-        set results [qc::db_eval_column_constraints $table $column $args]
+        set results [qc::db_eval_column_constraints $table $column $casted_dict]
         if { [llength $results]>0 && ! [expr [join [dict values $results] " && "]] } {
             set failed_constraints {}
             dict for {constraint passed} $results {
