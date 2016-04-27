@@ -35,7 +35,7 @@ proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Dict - set all variables or just those specified that exists in the dict
-    #| Pass-by-Value - set all variables or just those specified that exists in caller's namespce.
+    #| Pass-by-Value - set all variables or just those specified that exists in caller's namespace.
 
     if { [llength $callers_args]==1 } {set callers_args [lindex $callers_args 0]}
     set varNames {}
@@ -43,6 +43,12 @@ proc qc::args2vars {callers_args args} {
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
 	foreach varName [lrange $callers_args 1 end] {
+            # Check the varName for invalid characters
+            if { [regexp {[^a-zA-Z0-9_-]} $varName] } {
+                error "Variable names may only contain alphanumeric, underscore,\
+                       and hyphen characters."
+            }
+            
 	    if { [uplevel 2 info exists $varName] && ([llength $args]==0 || [in $args $varName]) } {
 		upset 1 $varName [upset 2 $varName]
 		lappend varNames $varName
@@ -50,6 +56,12 @@ proc qc::args2vars {callers_args args} {
 	}
     } else {
 	foreach {varName varValue} $callers_args {
+            # Check the varName for invalid characters
+            if { [regexp {[^a-zA-Z0-9_-]} $varName] } {
+                error "Variable names may only contain alphanumeric, underscore,\
+                       and hyphen characters."
+            }
+            
 	    if { [llength $args]==0 || [in $args $varName] } {
 		upset 1 $varName $varValue
 		lappend varNames $varName

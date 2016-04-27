@@ -100,10 +100,24 @@ proc qc::dict2vars { dict args } {
     #| If any of the keys do not exist in the dict unset the variable in the caller if it exists.
     if { [llength $args]==0 } {
 	# set all variables
-	foreach {name value} $dict {upset 1 $name $value}
+	foreach {name value} $dict {
+            # Check the name for invalid characters
+            if { [regexp {[^a-zA-Z0-9_-]} $name] } {
+                error "Variable names may only contain alphanumeric, underscore,\
+                       and hyphen characters."
+            }
+            
+            upset 1 $name $value
+        }
     } else {
 	# only set named variables
 	foreach name $args {
+            # Check the name for invalid characters
+            if { [regexp {[^a-zA-Z0-9_-]} $name] } {
+                error "Variable names may only contain alphanumeric, underscore,\
+                       and hyphen characters."
+            }
+            
 	    if { [dict exists $dict $name] } {
 		upset 1 $name [dict get $dict $name]
 	    } else {
