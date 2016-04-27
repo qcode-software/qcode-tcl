@@ -292,7 +292,7 @@ proc qc::db_eval_constraint {table constraint args} {
     set sub_select "SELECT [join $list ,]"
 
     set qry {
-        SELECT $constraint AS result
+        SELECT coalesce($constraint, true) AS result
         FROM ($sub_select) alias;
     }
 

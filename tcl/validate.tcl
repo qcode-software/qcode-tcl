@@ -5,6 +5,7 @@ proc qc::validate2model {dict} {
     #| Validates dictionary against the data model and sets up the record in the global data structure.
     #| First checks all types. If all are valid, proceeds to check constraints.
     set all_valid true
+    set cast_dict [dict create]
     dict for {name value} $dict {
         # Check if name is fully qualified
         if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
@@ -26,6 +27,7 @@ proc qc::validate2model {dict} {
             continue
         } elseif {$nullable && $value eq ""} {
             qc::response record valid $column $value
+            dict set cast_dict $name ""
             continue
         }
         # Check value against data type
@@ -34,11 +36,12 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } 
+        dict set cast_dict $name [qc::cast $data_type $value]
     }
 
     if { $all_valid } {
         # continue to do the constraint checking
-        dict for {name value} $dict {
+        dict for {name value} $cast_dict {
 
             # Check if null
             if { $value eq ""} {
@@ -53,7 +56,7 @@ proc qc::validate2model {dict} {
             set data_type [qc::db_column_type $table $column]
 
             # Check constraints
-            set constraint_results [qc::db_eval_column_constraints $table $column $dict]
+            set constraint_results [qc::db_eval_column_constraints $table $column $cast_dict]
             if {[llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]] } {
                 # Constraint checking failed - skip further checks
                 qc::response record invalid $column $value $message
@@ -62,7 +65,7 @@ proc qc::validate2model {dict} {
             }         
         
             # Record passed all data model validation
-            qc::response record valid $column [qc::cast $data_type $value]        
+            qc::response record valid $column $value
         }
     }
 

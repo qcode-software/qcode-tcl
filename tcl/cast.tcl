@@ -132,19 +132,6 @@ proc qc::cast_values2model {args} {
         } else {           
             lappend errors [qc::html_escape [qc::data_type_error_check $data_type $value]]
         }
-
-        # Check constraints
-        set results [qc::db_eval_column_constraints $table $column $args]
-        if { [llength $results]>0 && ! [expr [join [dict values $results] " && "]] } {
-            set failed_constraints {}
-            dict for {constraint passed} $results {
-                if {!$passed} {
-                    lappend failed_constraints $constraint
-                }
-            }
-            set error_message [qc::html_escape "Value \"$value\" for column \"$column\" failed the following constraint(s) [join $failed_constraints ", "]"]
-            lappend errors $error_message
-        }
     }
     
     if {[llength $errors] > 0} {
