@@ -9,7 +9,7 @@ proc qc::form_var_names {} {
     set names [ns_set_keys [ns_getform]]
     foreach $name $names {
         if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-            error "Form variable names must only contain alphanumeric\
+            error "Form variable names may only contain alphanumeric\
                    underscore, and hyphen characters."
         }
     }
@@ -28,7 +28,7 @@ proc qc::form2vars {args}  {
 	if { [form_var_exists $name] } {
             # Check the name for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Form variable names must only contain alphanumeric,\
+                error "Form variable names may only contain alphanumeric,\
                        underscore, and hyphen characters."
             }
             
@@ -81,7 +81,7 @@ proc qc::form_var_exists { var_name } {
     
     # Check var_name for invalid characters
     if { [regexp {[^a-zA-Z0-9_-]} $var_name] } {
-        error "Form variable names must only contain alphanumeric, underscore,\
+        error "Form variable names may only contain alphanumeric, underscore,\
                and hyphen characters."
     }
     
@@ -107,7 +107,7 @@ proc qc::form2dict {args}  {
     foreach name $args {
         # Check the name for invalid characters
         if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-            error "Form variable names must only contain alphanumeric,\
+            error "Form variable names may only contain alphanumeric,\
                    underscore, and hyphen characters."
         }
         
