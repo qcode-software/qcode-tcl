@@ -651,7 +651,8 @@ proc qc::args_unambiguous {args} {
 proc qc::variable_name_check {name} {
     #| Check the name for any invalid characters.
     if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-        error "Name \"[html_escape $name]\" contains characters that are not\
-               alphanumeric, an underscore, or a hyphen."
+        return -code error "Name \"[html_escape $name]\" contains characters\
+                            that are not alphanumeric, an underscore, or a\
+                            hyphen."
     }
 }
