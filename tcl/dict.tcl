@@ -100,11 +100,13 @@ proc qc::dict2vars { dict args } {
     #| If any of the keys do not exist in the dict unset the variable in the caller if it exists.
     if { [llength $args]==0 } {
 	# set all variables
-	foreach {name value} $dict {upset 1 $name $value}
+	foreach {name value} $dict {
+            upset 1 $name $value
+        }
     } else {
 	# only set named variables
 	foreach name $args {
-	    if { [dict exists $dict $name] } {
+            if { [dict exists $dict $name] } {
 		upset 1 $name [dict get $dict $name]
 	    } else {
 		if { [uplevel 1 [list info exists $name]] } {
