@@ -13,9 +13,7 @@ proc qc::args2dict {callers_args} {
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
 	set dict {}
-	foreach varName [lrange $callers_args 1 end] {
-            qc::variable_name_check $varName
-            
+	foreach varName [lrange $callers_args 1 end] {            
 	    if { [uplevel 2 info exists $varName] } {
 		lappend dict $varName [upset 2 $varName]
 	    }
@@ -24,10 +22,6 @@ proc qc::args2dict {callers_args} {
     } else {
         if { [llength $callers_args] % 2 != 0 } {
             error "Missing name or value in args for qc::args2dict"
-        }
-
-        dict for {name value} $callers_args {
-            qc::variable_name_check $name
         }
         
         set dict [dict create {*}$callers_args]
@@ -49,9 +43,7 @@ proc qc::args2vars {callers_args args} {
 
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
-	foreach varName [lrange $callers_args 1 end] {
-            qc::variable_name_check $varName
-            
+	foreach varName [lrange $callers_args 1 end] {            
 	    if { [uplevel 2 info exists $varName] && ([llength $args]==0 || [in $args $varName]) } {
 		upset 1 $varName [upset 2 $varName]
 		lappend varNames $varName
@@ -59,9 +51,7 @@ proc qc::args2vars {callers_args args} {
 	}
     } else {
 	foreach {varName varValue} $callers_args {
-            qc::variable_name_check $varName
-            
-	    if { [llength $args]==0 || [in $args $varName] } {
+            if { [llength $args]==0 || [in $args $varName] } {
 		upset 1 $varName $varValue
 		lappend varNames $varName
 	    }
@@ -89,15 +79,11 @@ proc qc::args_definition_split {def_args} {
     set index 0
     while {$index<[llength $def_args]} {
         set arg [lindex $def_args $index]
-        qc::variable_name_check $arg
         set next [lindex $def_args [expr {$index+1}]]
         if { [eq $arg "--"] } {
             # -- indicates the end of switches and options, all remaining args are value arguments
             incr index 1
             set others [lrange $def_args $index end]
-            foreach name $others {
-                qc::variable_name_check [lindex $name 0]
-            }
             break
         } elseif { [eq [string index $arg 0] "-"] && [eq [string index $next 0] "-"] } {
             # switch
@@ -135,12 +121,10 @@ proc qc::args_split {caller_args switch_names option_names} {
                 break
             } elseif { [eq [string index $arg 0] "-"] && [in $switch_names [string range $arg 1 end]] } {
                 # switch
-                qc::variable_name_check $arg
                 lappend caller_switches [string range $arg 1 end]
                 incr index 1
             } elseif { [eq [string index $arg 0] "-"] && [in $option_names [string range $arg 1 end]] } {
                 # option
-                qc::variable_name_check $arg
                 lappend caller_options [string range $arg 1 end] $next 
                 incr index 2
             } else {

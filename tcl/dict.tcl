@@ -101,15 +101,12 @@ proc qc::dict2vars { dict args } {
     if { [llength $args]==0 } {
 	# set all variables
 	foreach {name value} $dict {
-            qc::variable_name_check $name
             upset 1 $name $value
         }
     } else {
 	# only set named variables
 	foreach name $args {
-            qc::variable_name_check $name
-            
-	    if { [dict exists $dict $name] } {
+            if { [dict exists $dict $name] } {
 		upset 1 $name [dict get $dict $name]
 	    } else {
 		if { [uplevel 1 [list info exists $name]] } {

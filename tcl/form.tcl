@@ -4,12 +4,7 @@ namespace eval qc {
 
 proc qc::form_var_names {} {
     #| Return a list of form variable names
-    set names [ns_set_keys [ns_getform]]
-    foreach name $names {
-        qc::variable_name_check $name
-    }
-    
-    return $names
+    return [ns_set_keys [ns_getform]]
 }
 
 proc qc::form2vars {args}  {
@@ -21,7 +16,6 @@ proc qc::form2vars {args}  {
     # set vars
     foreach name $args {
 	if { [form_var_exists $name] } {
-            qc::variable_name_check $name
 	    upset 1 $name [form_var_get $name]
 	}
     }
@@ -31,7 +25,6 @@ proc qc::form_var_get { var_name } {
     #| If the form variable exists return its value otherwise throw an error.
     #| A repeated form variable will return a list of corresponding values.
     #| PHP style repeated form variables foo[]=1 foo[]=2 treated as a list.
-    qc::variable_name_check $var_name   
     set set_id [ns_getform]
     if { [string equal $set_id ""] } {
 	error "No such form variable \"$var_name\""
@@ -62,8 +55,6 @@ proc qc::form_var_get { var_name } {
 proc qc::form_var_exists { var_name } {
     #| Test whether a form variable exists or not.
     # Also check for PHP style repeated variables foo[]=1 foo[]=2 using name foo
-    qc::variable_name_check $var_name
-    
     if { [info commands ns_conn] eq "ns_conn"
 	 && [ns_conn isconnected]
 	 && [ne [set set_id [ns_getform]] ""]
@@ -83,9 +74,7 @@ proc qc::form2dict {args}  {
 	set args [ns_set_keys [ns_getform]]
     }
     # set vars
-    foreach name $args {
-        qc::variable_name_check $name
-        
+    foreach name $args {        
 	if { [form_var_exists $name] } {
 	    lappend dict $name [form_var_get $name]
 	}
