@@ -101,22 +101,13 @@ proc qc::dict2vars { dict args } {
     if { [llength $args]==0 } {
 	# set all variables
 	foreach {name value} $dict {
-            # Check the name for invalid characters
-            if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Variable name \"[html_escape $name]\" contains characters\
-                       that are not alphanumeric, an underscore, or a hyphen."
-            }
-            
+            qc::variable_name_check $name
             upset 1 $name $value
         }
     } else {
 	# only set named variables
 	foreach name $args {
-            # Check the name for invalid characters
-            if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Variable name \"[html_escape $name]\" contains characters\
-                       that are not alphanumeric, an underscore, or a hyphen."
-            }
+            qc::variable_name_check $name
             
 	    if { [dict exists $dict $name] } {
 		upset 1 $name [dict get $dict $name]
