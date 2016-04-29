@@ -74,7 +74,7 @@ proc qc::form2dict {args}  {
 	set args [ns_set_keys [ns_getform]]
     }
     # set vars
-    foreach name $args {        
+    foreach name $args {
 	if { [form_var_exists $name] } {
 	    lappend dict $name [form_var_get $name]
 	}

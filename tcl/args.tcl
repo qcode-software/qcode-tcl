@@ -13,7 +13,7 @@ proc qc::args2dict {callers_args} {
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
 	set dict {}
-	foreach varName [lrange $callers_args 1 end] {            
+	foreach varName [lrange $callers_args 1 end] {
 	    if { [uplevel 2 info exists $varName] } {
 		lappend dict $varName [upset 2 $varName]
 	    }
@@ -43,7 +43,7 @@ proc qc::args2vars {callers_args args} {
 
     if { [eq [lindex $callers_args 0] ~] } {
 	# Pass by Name
-	foreach varName [lrange $callers_args 1 end] {            
+	foreach varName [lrange $callers_args 1 end] {
 	    if { [uplevel 2 info exists $varName] && ([llength $args]==0 || [in $args $varName]) } {
 		upset 1 $varName [upset 2 $varName]
 		lappend varNames $varName
