@@ -103,8 +103,9 @@ proc qc::dict2vars { dict args } {
 	foreach {name value} $dict {
             # Check the name for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Variable names may only contain alphanumeric, underscore,\
-                       and hyphen characters."
+                error "Variable name \"[html_escape $name]\" contains\
+                       characters that are not alphanumeric, an underscore, or a\
+                       hyphen."
             }
             
             upset 1 $name $value
@@ -114,8 +115,9 @@ proc qc::dict2vars { dict args } {
 	foreach name $args {
             # Check the name for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Variable names may only contain alphanumeric, underscore,\
-                       and hyphen characters."
+                error "Variable name \"[html_escape $name]\" contains\
+                       characters that are not alphanumeric, an underscore, or a\
+                       hyphen."
             }
             
 	    if { [dict exists $dict $name] } {

@@ -9,8 +9,9 @@ proc qc::form_var_names {} {
     set names [ns_set_keys [ns_getform]]
     foreach $name $names {
         if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-            error "Form variable names may only contain alphanumeric\
-                   underscore, and hyphen characters."
+            error "Form variable name \"[html_escape $name]\" contains\
+                   characters that are not alphanumeric, an underscore, or a\
+                   hyphen."
         }
     }
     
@@ -28,8 +29,9 @@ proc qc::form2vars {args}  {
 	if { [form_var_exists $name] } {
             # Check the name for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-                error "Form variable names may only contain alphanumeric,\
-                       underscore, and hyphen characters."
+                error "Form variable name \"[html_escape $name]\" contains\
+                       characters that are not alphanumeric, an underscore, or a\
+                       hyphen."
             }
             
 	    upset 1 $name [form_var_get $name]
@@ -44,8 +46,9 @@ proc qc::form_var_get { var_name } {
 
     # Check var_name for invalid characters
     if { [regexp {[^a-zA-Z0-9_-]} $var_name] } {
-        error "Form variable names may only contain alphanumeric, underscore,\
-               and hyphen characters."
+        error "Form variable name \"[html_escape $var_name]\" contains\
+               characters that are not alphanumeric, an underscore, or a\
+               hyphen."
     }
             
     set set_id [ns_getform]
@@ -81,8 +84,9 @@ proc qc::form_var_exists { var_name } {
     
     # Check var_name for invalid characters
     if { [regexp {[^a-zA-Z0-9_-]} $var_name] } {
-        error "Form variable names may only contain alphanumeric, underscore,\
-               and hyphen characters."
+        error "Form variable name \"[html_escape $var_name]\" contains\
+               characters that are not alphanumeric, an underscore, or a\
+               hyphen."
     }
     
     if { [info commands ns_conn] eq "ns_conn"
@@ -107,8 +111,9 @@ proc qc::form2dict {args}  {
     foreach name $args {
         # Check the name for invalid characters
         if { [regexp {[^a-zA-Z0-9_-]} $name] } {
-            error "Form variable names may only contain alphanumeric,\
-                   underscore, and hyphen characters."
+            error "Form variable name \"[html_escape $name]\" contains\
+                   characters that are not alphanumeric, an underscore, or a\
+                   hyphen."
         }
         
 	if { [form_var_exists $name] } {

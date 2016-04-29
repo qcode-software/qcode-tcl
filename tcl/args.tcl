@@ -45,8 +45,9 @@ proc qc::args2vars {callers_args args} {
 	foreach varName [lrange $callers_args 1 end] {
             # Check the varName for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $varName] } {
-                error "Variable names may only contain alphanumeric, underscore,\
-                       and hyphen characters."
+                error "Variable name \"[html_escape $varName]\" contains\
+                       characters that are not alphanumeric, an underscore, or a\
+                       hyphen."
             }
             
 	    if { [uplevel 2 info exists $varName] && ([llength $args]==0 || [in $args $varName]) } {
@@ -58,8 +59,9 @@ proc qc::args2vars {callers_args args} {
 	foreach {varName varValue} $callers_args {
             # Check the varName for invalid characters
             if { [regexp {[^a-zA-Z0-9_-]} $varName] } {
-                error "Variable names may only contain alphanumeric, underscore,\
-                       and hyphen characters."
+                error "Variable name \"[html_escape $varName]\" contains\
+                       characters that are not alphanumeric, an underscore, or a\
+                       hyphen."
             }
             
 	    if { [llength $args]==0 || [in $args $varName] } {
