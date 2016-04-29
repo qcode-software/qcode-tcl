@@ -618,12 +618,10 @@ proc qc::args_qualified2unqualified {} {
     #|      -> No new variables set in caller because "foo" would be ambiguous.
     set caller_args [info args [dict get [info frame -1] proc]]
     foreach item [qc::args_unambiguous {*}$caller_args] {
-        if { [regexp {[^a-zA-Z0-9_-]} $item] } {
-            error "Arg name \"[html_escape $item]\" contains characters that are\
-                   not alphanumeric, an underscore, or a hyphen."
-        }
+        set shortname [qc::arg_shortname $item]
+        qc::variable_name_check $shortname
         upvar 1 $item value
-        qc::upset 1 [qc::arg_shortname $item] $value
+        qc::upset 1 $shortname $value
     }
 }
 

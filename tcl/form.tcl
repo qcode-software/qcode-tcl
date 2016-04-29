@@ -4,8 +4,6 @@ namespace eval qc {
 
 proc qc::form_var_names {} {
     #| Return a list of form variable names
-    
-    # Check the names for invalid characters
     set names [ns_set_keys [ns_getform]]
     foreach name $names {
         qc::variable_name_check $name
