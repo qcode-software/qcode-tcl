@@ -17,10 +17,9 @@ proc qc::upcopy { level upname localname } {
 
 proc qc::upset {level upname args} {
     #| Like set in level $level
-    if { [regexp {[^a-zA-Z0-9_-]} $upname] } {
-        return -code error "Variable name \"[html_escape $upname]\" contains\
-                            characters that are not alphanumeric, an underscore,\
-                            or a hyphen."
+    if { [regexp {::} $upname] } {
+        return -code error "Will not set variable outside specified
+	namespace"
     }
     
     incr level
