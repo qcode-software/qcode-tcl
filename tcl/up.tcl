@@ -18,8 +18,8 @@ proc qc::upcopy { level upname localname } {
 proc qc::upset {level upname args} {
     #| Like set in level $level
     if { [regexp {::} $upname] } {
-        return -code error "Will not set variable outside specified
-	namespace"
+        return -code error "Will not set variable outside specified\
+        namespace."
     }
     
     incr level
