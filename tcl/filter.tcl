@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export filter_fastpath_gzip filter_set_expires
+    namespace export filter_fastpath_gzip filter_set_expires filter_http_request_validate
 }
 
 proc qc::filter_fastpath_gzip {filter_when {file_extensions {}}} {
@@ -29,4 +29,34 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
         ns_setexpires $seconds
     }
     return "filter_ok"
+}
+
+
+proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}} {
+    #| Check that request string, connection url, and form variable names are valid.
+    qc::setif error_handler "" "qc::error_handler"
+    ::try {
+        set request [ns_conn request]
+        set url [qc::conn_path]
+        if { ![qc::conn_request_is_valid $request] } {
+            ns_returnbadrequest "\"$request\" is not a valid request."
+            return filter_return
+        }
+        if { ![qc::is_uri_valid $url] } {
+            return [ns_returnbadrequest "\"$url\" is not a valid URL."]
+            return filter_return
+        }
+
+        set names [qc::form_var_names]
+        foreach name $names {
+            if { [regexp {::} $name] } {
+                log "Invalid form variable name: $name"
+            }
+        }
+        
+        return filter_ok
+    } on error {error_message options} {
+        $error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
+        return filter_return
+    }
 }
