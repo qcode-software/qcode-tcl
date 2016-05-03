@@ -160,18 +160,26 @@ proc qc::filter_authenticate {event args} {
     return "filter_ok"
 }
 
-proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}} {
+proc qc::filter_http_request_validate {event args} {
     #| Check that request string, connection url, and form variable names are valid.
-    qc::setif error_handler "" "qc::error_handler"
+    qc::args $args -log -error_handler "qc::error_handler" --
     ::try {
         set request [ns_conn request]
         set url [qc::conn_path]
         if { ![qc::conn_request_is_valid $request] } {
             ns_returnbadrequest "\"$request\" is not a valid request."
+            
+            if { [info exists log] } {
+                log "qc::filter_http_request_validate: Bad Request: $request"
+            }
             return filter_return
         }
         if { ![qc::is uri $url] } {
-            return [ns_returnbadrequest "\"$url\" is not a valid URL."]
+            ns_returnbadrequest "\"$url\" is not a valid URL."
+            
+            if { [info exists log] } {
+                log "qc::filter_http_request_validate: Invalid URL: $url"
+            }
             return filter_return
         }
 
@@ -180,8 +188,18 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
         set names [qc::form_var_names]
         foreach name $names {
             if { [regexp {::} $name] } {
-                log "Invalid form variable name: $name"
-                log "Request: $request"
+                ns_returnbadrequest "Invalid form variable name: \"$name\""
+                
+                if { [info exists log] } {
+                    log "qc::filter_http_request_validate:\
+                         Invalid Form Variable Name: \"$name\"\
+                         for request \"$request\""
+                    qc::email_support \
+                        subject "Invalid HTTP Request" \
+                        html "Invalid request \"[qc::html_escape $request]\""
+                }
+                
+                return filter_return
             }
         }
         
