@@ -47,10 +47,13 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
             return filter_return
         }
 
+        # Check form variable names to prevent Tcl namespaced variables from
+        # being set or overwritten.
         set names [qc::form_var_names]
         foreach name $names {
             if { [regexp {::} $name] } {
                 log "Invalid form variable name: $name"
+                log "Request: $request"
             }
         }
         
