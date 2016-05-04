@@ -375,16 +375,18 @@ proc qc::filter_form_variables {event args} {
         set names [qc::form_var_names]
         foreach name $names {
             if { [regexp {::} $name] } {
-                ns_returnbadrequest "Invalid form variable name: \"$name\""
+                set escaped [qc::html_escape $name]
+                ns_returnbadrequest "Invalid form variable name: \"$escaped\""
                 
                 if { [info exists log] } {
                     set request [ns_conn request]
                     log "qc::filter_http_request_validate:\
-                         Invalid Form Variable Name: \"$name\"\
+                         Invalid Form Variable Name: \"$escaped\"\
                          for request \"$request\""
                     qc::email_support \
                         subject "Invalid HTTP Request" \
-                        html "Invalid request \"[qc::html_escape $request]\""
+                        html "Invalid form variable name \"$escaped\"\
+                              in request \"[qc::html_escape $request]\""
                 }
                 
                 return filter_return
