@@ -381,7 +381,7 @@ proc qc::filter_form_variables {event args} {
                 if { [info exists log] } {
                     set request [ns_conn request]
                     log "qc::filter_http_request_validate:\
-                         Invalid Form Variable Name: \"$escaped\"\
+                         Invalid Form Variable Name: \"$name\"\
                          for request \"$request\""
                     qc::email_support \
                         subject "Invalid HTTP Request" \
