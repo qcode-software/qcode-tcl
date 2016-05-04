@@ -365,3 +365,37 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
     }
     return "filter_ok"
 }
+
+proc qc::filter_form_variables {event args} {
+    #| Check form variable names to prevent Tcl namespaced variables from being
+    #| set or overwritten.
+    qc::args $args -log -error_handler "qc::error_handler" --
+
+    ::try {
+        set names [qc::form_var_names]
+        foreach name $names {
+            if { [regexp {::} $name] } {
+                ns_returnbadrequest "Invalid form variable name: \"$name\""
+                
+                if { [info exists log] } {
+                    set request [ns_conn request]
+                    log "qc::filter_http_request_validate:\
+                         Invalid Form Variable Name: \"$name\"\
+                         for request \"$request\""
+                    qc::email_support \
+                        subject "Invalid HTTP Request" \
+                        html "Invalid request \"[qc::html_escape $request]\""
+                }
+                
+                return filter_return
+            }
+        }
+        
+        return filter_ok
+    } on error {error_message options} {
+        $error_handler $error_message [dict get $options -errorinfo] \
+            [dict get $options -errorcode]
+        return filter_return
+    }
+}
+
