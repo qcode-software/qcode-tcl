@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export filter_fastpath_gzip filter_set_expires filter_http_request_validate
+    namespace export filter_fastpath_gzip filter_set_expires filter_http_request_validate filter_form_variables_validate
 }
 
 proc qc::filter_fastpath_gzip {filter_when {file_extensions {}}} {
@@ -64,7 +64,7 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
     }
 }
 
-proc qc::filter_form_variables {event args} {
+proc qc::filter_form_variables_validate {event args} {
     #| Check form variable names to prevent Tcl namespaced variables from being
     #| set or overwritten.
     qc::args $args -log -error_handler "qc::error_handler" --
