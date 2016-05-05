@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export filter_validate filter_authenticate filter_http_request_validate filter_file_alias_path file_alias_path_exists file_alias_path_new file_alias_path2file_id file_alias_path_update file_alias_path_delete filter_handler_exists filter_fastpath_gzip filter_set_expires
+    namespace export filter_validate filter_authenticate filter_http_request_validate filter_file_alias_path file_alias_path_exists file_alias_path_new file_alias_path2file_id file_alias_path_update file_alias_path_delete filter_handler_exists filter_fastpath_gzip filter_set_expires filter_form_variables_validate
 }
 
 proc qc::filter_validate {event {error_handler qc::error_handler}} {
@@ -366,7 +366,7 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
     return "filter_ok"
 }
 
-proc qc::filter_form_variables {event args} {
+proc qc::filter_form_variables_validate {event args} {
     #| Check form variable names to prevent Tcl namespaced variables from being
     #| set or overwritten.
     qc::args $args -log -error_handler "qc::error_handler" --
