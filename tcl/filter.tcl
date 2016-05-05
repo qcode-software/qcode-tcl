@@ -161,7 +161,7 @@ proc qc::filter_authenticate {event args} {
 }
 
 proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}} {
-    #| Check that request string, connection url, and form variable names are valid.
+    #| Check that request string and connection url are valid.
     qc::setif error_handler "" "qc::error_handler"
     ::try {
         set request [ns_conn request]
@@ -173,16 +173,6 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
         if { ![qc::is uri $url] } {
             return [ns_returnbadrequest "\"$url\" is not a valid URL."]
             return filter_return
-        }
-
-        # Check form variable names to prevent Tcl namespaced variables from
-        # being set or overwritten.
-        set names [qc::form_var_names]
-        foreach name $names {
-            if { [regexp {::} $name] } {
-                log "Invalid form variable name: $name"
-                log "Request: $request"
-            }
         }
         
         return filter_ok
