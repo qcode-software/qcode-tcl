@@ -118,6 +118,10 @@ proc qc::db_cache_foreach { args } {
 		    continue
 		}
 	    }
+            
+            # Clean up the result variable to prevent Tcl's Copy on Write
+            # process from adversely affecting performance
+            unset result
 	}
     }
     # restore saved variables
