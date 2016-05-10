@@ -344,7 +344,7 @@ proc qc::db_canonical_type {udt_name {character_maximum_length ""} {numeric_prec
     #| Returns the canonical type name for the given type name.
     switch -glob -- $udt_name {
         varchar {
-            return [expr {$character_maximum_length ne "" ? "varchar($character_maximum_length)": "varchar"}]
+            return [expr {$character_maximum_length ne "" ? "varchar($character_maximum_length)": "text"}]
         }
         numeric {
             return [expr {$numeric_precision ne "" ? "decimal($numeric_precision,$numeric_scale)": "decimal"}]
