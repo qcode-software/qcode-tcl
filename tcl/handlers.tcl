@@ -8,7 +8,13 @@ namespace eval qc::handlers {
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
         # Add in path variables to form data.
-        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        set args [args $method $pattern]
+        set list [list]
+        foreach arg $args {
+            regexp {^[^\.]+\.([^\.]+)$} $arg -> arg
+            lappend list $arg
+        }
+        set form [dict merge [qc::form2dict $list] [qc::path_variables $path $pattern]]
         # Cast to model
         set dict [qc::cast_values2model {*}[data $form $method $pattern]]
         # Call handler
@@ -25,7 +31,13 @@ namespace eval qc::handlers {
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
         # Add in path variables to form data.
-        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        set args [args $method $pattern]
+        set list [list]
+        foreach arg $args {
+            regexp {^[^\.]+\.([^\.]+)$} $arg -> arg
+            lappend list $arg
+        }
+        set form [dict merge [qc::form2dict $list] [qc::path_variables $path $pattern]]
         # Validate the data.
         return [qc::validate2model [data $form $method $pattern]]
     }
@@ -119,7 +131,13 @@ namespace eval qc::handlers {
             set method [string toupper $method]
             set pattern [qc::path_best_match $path [get $method]]
             # Add in path variables to form data.
-            set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+            set args [args $method $pattern]
+            set list [list]
+            foreach arg $args {
+                regexp {^[^\.]+\.([^\.]+)$} $arg -> arg
+                lappend list $arg
+            }
+            set form [dict merge [qc::form2dict $list] [qc::path_variables $path $pattern]]
             # Grab relevant arg data from form.
             set dict [qc::cast_values2model {*}[data $form $method $pattern]]
             # Call the validation handler.
