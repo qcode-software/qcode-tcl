@@ -75,8 +75,10 @@ proc qc::form2dict {args}  {
     }
     # set vars
     foreach name $args {
+        # if the name is an array then remove the square brackets
+        regexp {^(.+)\[\]$} $name -> name
 	if { [form_var_exists $name] } {
-	    lappend dict $name [form_var_get $name]
+	    dict set dict $name [form_var_get $name]
 	}
     }
     return $dict
