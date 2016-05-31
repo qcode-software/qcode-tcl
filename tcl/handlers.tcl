@@ -7,8 +7,16 @@ namespace eval qc::handlers {
         #| Call the registered handler that matches the given path and method.
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
-        # Add in path variables to form data.
-        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        # Gather a list of form variables we might be interested in and add in
+        # path variables to the form data.
+        set args [args $method $pattern]
+        foreach arg $args {
+            set shortname [qc::arg_shortname $arg]
+            if { $shortname ne $arg } {
+                lappend args $shortname
+            }
+        }
+        set form [dict merge [qc::form2dict {*}$args] [qc::path_variables $path $pattern]]
         # Cast to model
         set dict [qc::cast_values2model {*}[data $form $method $pattern]]
         # Call handler
@@ -24,8 +32,16 @@ namespace eval qc::handlers {
         #| Validates the args of the handler registered for the given path and method.
         set method [string toupper $method]
         set pattern [qc::path_best_match $path [get $method]]
-        # Add in path variables to form data.
-        set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+        # Gather a list of form variables we might be interested in and add in
+        # path variables to the form data.
+        set args [args $method $pattern]
+        foreach arg $args {
+            set shortname [qc::arg_shortname $arg]
+            if { $shortname ne $arg } {
+                lappend args $shortname
+            }
+        }
+        set form [dict merge [qc::form2dict {*}$args] [qc::path_variables $path $pattern]]
         # Validate the data.
         return [qc::validate2model [data $form $method $pattern]]
     }
@@ -118,8 +134,16 @@ namespace eval qc::handlers {
             #| Calls the registered handler that matches the given method and path.
             set method [string toupper $method]
             set pattern [qc::path_best_match $path [get $method]]
-            # Add in path variables to form data.
-            set form [dict merge [qc::form2dict] [qc::path_variables $path $pattern]]
+            # Gather a list of form variables we might be interested in and add in
+            # path variables to the form data.
+            set args [args $method $pattern]
+            foreach arg $args {
+                set shortname [qc::arg_shortname $arg]
+                if { $shortname ne $arg } {
+                    lappend args $shortname
+                }
+            }
+            set form [dict merge [qc::form2dict {*}$args] [qc::path_variables $path $pattern]]
             # Grab relevant arg data from form.
             set dict [qc::cast_values2model {*}[data $form $method $pattern]]
             # Call the validation handler.
