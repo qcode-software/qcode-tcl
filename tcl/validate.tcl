@@ -36,7 +36,7 @@ proc qc::validate2model {dict} {
             qc::response record invalid $column $value $message
             set all_valid false
             continue
-        }
+        } 
         dict set cast_dict $name [qc::cast $data_type $value]
     }
 
