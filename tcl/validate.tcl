@@ -20,13 +20,14 @@ proc qc::validate2model {dict} {
             # Mark field as being sensitive in the global data structure
             qc::response record sensitive $column
         }
+        # Initialise valid flag
+        qc::response record valid $column $value
         # Check if nullable
         if {! $nullable && $value eq ""} {
             qc::response record invalid $column $value $message
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            qc::response record valid $column $value
             dict set cast_dict $name ""
             continue
         }
@@ -37,7 +38,6 @@ proc qc::validate2model {dict} {
             continue
         } 
 
-        qc::response record valid $column $value $message
         dict set cast_dict $name [qc::cast $data_type $value]
     }
 
