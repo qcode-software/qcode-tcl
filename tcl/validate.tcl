@@ -36,6 +36,8 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } 
+
+        qc::response record valid $column $value $message
         dict set cast_dict $name [qc::cast $data_type $value]
     }
 
@@ -63,9 +65,6 @@ proc qc::validate2model {dict} {
                 set all_valid false
                 continue
             }         
-        
-            # Record passed all data model validation
-            qc::response record valid $column $value
         }
     }
 
