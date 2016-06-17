@@ -63,7 +63,7 @@ proc qc::html_tag { tagName args } {
 proc qc::h_tag { tag_name args } {
     #| Generate just the opening html tag
     set singleton_tags [list area base br col command embed hr img input link meta param source]
-    set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize]
+    set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize novalidate]
     set attributes {}
    
     foreach {name value} [qc::dict_exclude $args {*}$minimized] {
