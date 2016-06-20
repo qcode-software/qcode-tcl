@@ -2,12 +2,47 @@ namespace eval qc {
     namespace export file_is_valid_image image_file_info image_resize
 }
 
-proc qc::image_resize {file_id max_width max_height} {
-    #| Resize an image, return dict of file location width height.
-    # Create thumbnail
-    set tmp_file [qc::db_file_export $file_id]
+proc qc::image_file_autocrop {old_file} {
+    #| Autocrop image by trimming white border from jpgs,
+    #| and transparent and white borders from pngs.
+    #| Create a new file with the results and return the file path
     set file /tmp/[uuid::uuid generate]
-    # Call imagemagick convert
+    set exec_proxy_flags {
+        -timeout 20000
+    }
+    set exec_flags {
+        -ignorestderr
+    }
+    set crop_info \
+        [exec_proxy \
+             {*}$exec_proxy_flags \
+             {*}$exec_flags \
+             convert \
+             -quiet \
+             $old_file \
+             -bordercolor white \
+             -border 1x1 \
+             -trim \
+             -format %wx%h%O \
+             info:]
+
+    exec_proxy \
+        {*}$exec_proxy_flags \
+        {*}$exec_flags \
+        convert \
+        -quiet \
+        $old_file \
+        -crop $crop_info \
+        +repage \
+        $file
+
+    return $file
+}
+
+proc qc::image_file_resize {old_file max_width max_height} {
+    #| Resize an image to fit within max_width/height constraint.
+    #| Create a new file with the results and return the file path
+    set file /tmp/[uuid::uuid generate]
     set exec_proxy_flags {
         -timeout 30000
     }
@@ -20,9 +55,38 @@ proc qc::image_resize {file_id max_width max_height} {
         -strip
         -quality 75%
     }]
-    exec_proxy {*}$exec_proxy_flags {*}$exec_flags convert {*}$convert_flags $tmp_file $file
-    file delete $tmp_file    
+    exec_proxy \
+        {*}$exec_proxy_flags \
+        {*}$exec_flags \
+        convert \
+        {*}$convert_flags \
+        $old_file \
+        $file
+
+    return $file
+}
+
+proc qc::image_resize {args} {
+    #| Export an image from the database, constrained to max width/height,
+    #| optionally auto-cropped,
+    #| return dict of file, width, and height
+    qc::args $args -autocrop -- file_id max_width max_height
+    default autocrop false
+
+    set file [qc::db_file_export $file_id]
+    
+    if { $autocrop } {
+        set tmp_file $file
+        set file [qc::image_file_autocrop $tmp_file]
+        file delete $tmp_file
+    }
+
+    set tmp_file $file
+    set file [qc::image_file_resize $tmp_file $max_width $max_height]
+    file delete $tmp_file
+
     dict2vars [qc::image_file_info $file] width height
+
     return [qc::dict_from file width height]
 }
 
@@ -133,9 +197,16 @@ proc qc::image_cache_data {cache_dir file_id max_width max_height} {
     return {}
 }
 
-proc qc::image_cache_create {cache_dir file_id max_width max_height} {
+proc qc::image_cache_create {args} {
     #| Create a file for this image in the disk cache constrained to max_width & max_height
-    dict2vars [qc::image_resize $file_id $max_width $max_height] file width height
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
+    set resize_args [list]
+    if { $autocrop } {
+        lappend resize_args -autocrop
+    }
+    lappend resize_args $file_id $max_width $max_height
+    dict2vars [qc::image_resize {*}$resize_args] file width height
 
     # Place files in cache
     db_1row {select mime_type from file where file_id=:file_id}
@@ -157,7 +228,7 @@ proc qc::image_data {cache_dir file_id max_width max_height} {
     return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
 }
 
-proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560}} {
+proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560} {autocrop false}} {
     #| URL handler to serve images that can not be served by fastpath.
     # Create image cache for canonical URL if it doesn't already exist.
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
@@ -199,7 +270,12 @@ proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_red
                 return [ns_returnnotfound]
             } 
 
-            dict2vars [qc::image_cache_create $cache_dir $file_id $max_width $max_height] width height file
+            set cache_create_args [list]
+            if { $autocrop } {
+                lappend cache_create_args -autocrop
+            }
+            lappend cache_create_args $cache_dir $file_id $max_width $max_height
+            dict2vars [qc::image_cache_create {*}$cache_create_args] width height file
             set canonical_url [qc::file2url $file]
             set canonical_file $file
         } 
