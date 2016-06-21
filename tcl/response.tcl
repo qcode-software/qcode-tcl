@@ -141,7 +141,7 @@ namespace eval qc::response {
         namespace ensemble create
 
         proc redirect {url} {
-            #| Sets the redirect property for an internal URL.
+            #| Sets the redirect property with the given internal URL.
             global data
             reset
             if { [qc::is url $url] } {
