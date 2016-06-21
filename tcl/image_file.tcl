@@ -1,8 +1,8 @@
 namespace eval qc {
-    namespace export file_is_valid_image image_file_info image_resize
+    namespace export file_is_valid_image image_file_info image_resize image_file_autocrop image_file_resize
 }
 
-proc qc::image_file_autocrop {old_file} {
+proc qc::image_file_autocrop {old_file {crop_colour white}} {
     #| Autocrop image by trimming white border from jpgs,
     #| and transparent and white borders from pngs.
     #| Create a new file with the results and return the file path
@@ -13,25 +13,33 @@ proc qc::image_file_autocrop {old_file} {
     set exec_flags {
         -ignorestderr
     }
+    set convert_options {
+        -quiet
+    }
+    if { $crop_colour ne "" } {
+        lappend convert_options \
+            -bordercolor $crop_colour \
+            -border 1x1
+    }
+    lappend convert_options {
+        -trim
+        -format %wx%h%O info:
+    }
     set crop_info \
         [exec_proxy \
              {*}$exec_proxy_flags \
              {*}$exec_flags \
              convert \
-             -quiet \
              $old_file \
-             -bordercolor white \
-             -border 1x1 \
-             -trim \
-             -format %wx%h%O \
-             info:]
+             {*}$convert_options
+             ]
 
     exec_proxy \
         {*}$exec_proxy_flags \
         {*}$exec_flags \
         convert \
-        -quiet \
         $old_file \
+        -quiet \
         -crop $crop_info \
         +repage \
         $file
@@ -162,33 +170,57 @@ proc qc::gif_dimensions {name} {
     return [list $wid $hgt]
 }
 
-proc qc::image_cache_exists {cache_dir file_id max_width max_height} {
+proc qc::image_cache_exists {args} {
     #| Return true if this image (constrained to max_width & max_height) has been cached on disk.
-    if { [llength [qc::image_cache_data $cache_dir $file_id $max_width $max_height]] > 0 } {
+    if { [llength [qc::image_cache_data {*}$args]] > 0 } {
         return true
     } else {
         return false
     }
 }
 
-proc qc::image_cache_data {cache_dir file_id max_width max_height} {
+proc qc::image_cache_data {args} {
     #| Return dict of width, height & url of cached image constrained to max_width & max_height.
     #| Return {} if cached image does not exist.
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
 
-    # Check nsv
-    set nsv_key "$file_id $max_width $max_height"
+    if { $autocrop } {
+        set nsv_key "$file_id $max_width $max_height autocrop"
+    } else {
+        set nsv_key "$file_id $max_width $max_height"
+    }
+
     if { [nsv_exists image_cache_data $nsv_key] } {
         return [nsv_get image_cache_data $nsv_key]
     }
+
+    if { $autocrop } {
+        set glob_patterns \
+            [list \
+                 "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
+                 "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
+        
+        set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
+
+    } else {
+        set glob_patterns \
+            [list \
+                 "${file_id}-${max_width}x*/${file_id}.*" \
+                 "${file_id}-*x${max_height}/${file_id}.*"]
+        
+        set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
+    }
     
-    # Check disk cache for canonical URL (/image/${file_id}-${max_width}x${max_height}/${file_id}${extension})
+    # Check disk cache for canonical URL
     set data {}
     set options [list -nocomplain -types f -directory $cache_dir]
-    foreach file [lunique [glob {*}$options "${file_id}-${max_width}x*/${file_id}.*" "${file_id}-*x${max_height}/${file_id}.*"]] {
+    foreach file [lunique [glob {*}$options {*}$glob_patterns]] {
         set url [qc::file2url $file]
-        regexp {^/image/[0-9]+-([0-9]+)x([0-9]+)/} $url -> width height  
+        regexp $expression $url -> width height
         if { $width<=$max_width && $height<=$max_height } {
-            set data [dict_from width height url]
+            set timestamp [qc::cast timestamp [file mtime $file]]
+            set data [dict_from width height url timestamp]
             nsv_set image_cache_data $nsv_key $data
             return $data
         }
@@ -210,7 +242,13 @@ proc qc::image_cache_create {args} {
 
     # Place files in cache
     db_1row {select mime_type from file where file_id=:file_id}
-    set cache_file ${cache_dir}/${file_id}-${width}x${height}/${file_id}[qc::mime_file_extension $mime_type]
+
+    if { $autocrop } {
+        set cache_file ${cache_dir}/${file_id}/autocrop/${width}x${height}/${file_id}[qc::mime_file_extension $mime_type]
+    } else {
+        set cache_file ${cache_dir}/${file_id}-${width}x${height}/${file_id}[qc::mime_file_extension $mime_type]
+    }
+
     if { ! [file exists [file dirname $cache_file]] } {
         file mkdir [file dirname $cache_file]
     }
@@ -219,16 +257,29 @@ proc qc::image_cache_create {args} {
     return [dict create width $width height $height file $cache_file]
 }
 
-proc qc::image_data {cache_dir file_id max_width max_height} {
+proc qc::image_data {args} {
     #| Return dict of width, height & url of image constrained to max_width & max_height.
     #| Generates image cache if it doesn't already exist.
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
     if { ! [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
-        qc::image_cache_create $cache_dir $file_id $max_width $max_height
+        if { $autocrop } {
+            qc::image_cache_create -autocrop -- $cache_dir $file_id $max_width $max_height
+        } else {
+            qc::image_cache_create $cache_dir $file_id $max_width $max_height
+        }
     }
-    return [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
+    set cache_data [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
+    return [dict_subset $cache_data url width height]
 }
 
-proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_redirect_handler "qc::image_redirect_handler"} {allowed_max_width 2560} {allowed_max_height 2560} {autocrop false}} {
+proc qc::image_handler {
+    cache_dir
+    {error_handler "qc::error_handler"}
+    {image_redirect_handler "qc::image_redirect_handler"}
+    {allowed_max_width 2560}
+    {allowed_max_height 2560}
+} {
     #| URL handler to serve images that can not be served by fastpath.
     # Create image cache for canonical URL if it doesn't already exist.
     # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
@@ -240,20 +291,36 @@ proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_red
         set request_path [qc::conn_path]
         setif image_redirect_handler "" "qc::image_redirect_handler"
         
-        if { ! [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename] } {
+        if { [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} \
+                  $request_path -> file_id max_width max_height filename]
+         } {
+            set autocrop false
+        } elseif { [regexp {^/image/([0-9]+)/autocrop/([0-9]+)x([0-9]+)(?:/(.*)|$)} \
+                        $request_path -> file_id max_width max_height filename]
+               } {
+            set autocrop true
+        } else {
             # Invalid image url
             return [ns_returnnotfound]
         }
         
-        # Check requested max width and height does not exceed allowed max width and height
-        if { ($allowed_max_width ne "" && $max_width > $allowed_max_width) || ($allowed_max_height ne "" && $max_height > $allowed_max_height) } {
+        # Check requested max width and height does not exceed allowed maximums
+        if { ($allowed_max_width ne "" && $max_width > $allowed_max_width)
+             || ($allowed_max_height ne "" && $max_height > $allowed_max_height)
+         } {
             return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
         }
 
+        set cache_args [list]
+        if { $autocrop } {
+            lappend cache_args -autocrop
+        }
+        lappend cache_args $cache_dir $file_id $max_width $max_height
+
         # Canonical URL
-        if { [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
+        if { [qc::image_cache_exists {*}$cache_args] } {
             # Cache already exists for canonical url
-            dict2vars [qc::image_cache_data $cache_dir $file_id $max_width $max_height] width height url
+            dict2vars [qc::image_cache_data $cache_args] width height url
             set canonical_url $url
             set canonical_file [ns_pagepath]$canonical_url
         } else {
@@ -270,12 +337,7 @@ proc qc::image_handler {cache_dir {error_handler "qc::error_handler"} {image_red
                 return [ns_returnnotfound]
             } 
 
-            set cache_create_args [list]
-            if { $autocrop } {
-                lappend cache_create_args -autocrop
-            }
-            lappend cache_create_args $cache_dir $file_id $max_width $max_height
-            dict2vars [qc::image_cache_create {*}$cache_create_args] width height file
+            dict2vars [qc::image_cache_create {*}$cache_args] width height file
             set canonical_url [qc::file2url $file]
             set canonical_file $file
         } 
@@ -298,16 +360,34 @@ proc qc::image_redirect_handler {cache_dir}  {
     #| Redirect client to correct image dimesions or the canonical URL.
     set request_path [qc::conn_path]
 
-    regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} $request_path -> file_id max_width max_height filename
+    if { [regexp {^/image/([0-9]+)-([0-9]+)x([0-9]+)(?:/(.*)|$)} \
+              $request_path -> file_id max_width max_height filename]
+     } {
+        set autocrop false
+    } else {
+        regexp {^/image/([0-9]+)/autocrop/([0-9]+)x([0-9]+)(?:/(.*)|$)} \
+            $request_path -> file_id max_width max_height filename
+        set autocrop true
+    }
 
-    dict2vars [qc::image_cache_data $cache_dir $file_id $max_width $max_height] width height url
+    if { $autocrop } {
+        dict2vars \
+            [qc::image_cache_data \
+                 -autocrop $cache_dir $file_id $max_width $max_height] \
+            width height url
+    } else {
+        dict2vars \
+            [qc::image_cache_data $cache_dir $file_id $max_width $max_height] \
+            width height url
+    }
     set canonical_url $url
     set canonical_file [ns_pagepath]$canonical_url
     
     # Check requested image dimensions
     if { $width != $max_width || $height != $max_height } {            
         # Redirect to url with correct image dimensions 
-        return [ns_returnredirect "[conn_location][file dirname $canonical_url]/$filename"]
+        return [ns_returnredirect \
+                    "[conn_location][file dirname $canonical_url]/$filename"]
     }
     
     # Catch All - redirect to Canonical URL
