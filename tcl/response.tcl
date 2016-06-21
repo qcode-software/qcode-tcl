@@ -141,10 +141,20 @@ namespace eval qc::response {
         namespace ensemble create
 
         proc redirect {url} {
-            #| Sets the redirect property with the given URL.
+            #| Sets the redirect property for an internal URL.
             global data
             reset
-            dict set data action redirect value [url $url]
+            if { [qc::is url $url] } {
+                # valid URL
+                if { [regexp {^https?://} $url] && ![regexp "^https?://[qc::conn_host](:\[0-9\]+)?(/|\$)" $url] } {
+                    # absolute URL is for another domain
+                    error "Will not redirect to a different domain. Host [qc::conn_host]. Redirect to \"[html_escape $url]\""
+                }
+            } else {
+                # invalid URL
+                error "\"[html_escape $url]\" is not a valid url."
+            }
+            dict set data action redirect value $url
         }
 
         proc resubmit {} {
@@ -155,10 +165,20 @@ namespace eval qc::response {
         }
 
         proc login {url} {
-            #| Sets the login property with the given URL.
+            #| Sets the login property with the given internal URL.
             global data
             reset
-            dict set data action login value [url $url]
+            if { [qc::is url $url] } {
+                # valid URL
+                if { [regexp {^https?://} $url] && ![regexp "^https?://[qc::conn_host](:\[0-9\]+)?(/|\$)" $url] } {
+                    # absolute URL is for another domain
+                    error "Will not redirect to a different domain. Host [qc::conn_host]. Redirect to \"[html_escape $url]\""
+                }
+            } else {
+                # invalid URL
+                error "\"[html_escape $url]\" is not a valid url."
+            }
+            dict set data action login value $url
         }
 
         proc reset {} {
