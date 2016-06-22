@@ -185,6 +185,7 @@ proc qc::image_cache_data {args} {
     qc::args $args -autocrop -- cache_dir file_id max_width max_height
     default autocrop false
 
+    # Image cache data stored in nsv when first requested
     if { $autocrop } {
         set nsv_key "$file_id $max_width $max_height autocrop"
     } else {
@@ -195,6 +196,17 @@ proc qc::image_cache_data {args} {
         return [nsv_get image_cache_data $nsv_key]
     }
 
+    # If not stored in nsv, check local filesystem
+
+    # A suitable cached image will have one of:
+    # width exactly equal to max_width, and height less than max height
+    # height exactly equal to max_height, and width less than max width
+    # width and height exactly equal to max width and height
+    # (Only one such image should exist, since all chached images should
+    #  be based on the same aspect ratio)
+
+    # Construct glob patterns to search for candidate cached images,
+    # and regex to extract actual image width and height from file path
     if { $autocrop } {
         set glob_patterns \
             [list \
@@ -212,10 +224,9 @@ proc qc::image_cache_data {args} {
         set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
     }
     
-    # Check disk cache for canonical URL
-    set data {}
-    set options [list -nocomplain -types f -directory $cache_dir]
-    foreach file [lunique [glob {*}$options {*}$glob_patterns]] {
+    set data [list]
+    set glob_options [list -nocomplain -types f -directory $cache_dir]
+    foreach file [lunique [glob {*}$glob_options {*}$glob_patterns]] {
         set url [qc::file2url $file]
         regexp $expression $url -> width height
         if { $width<=$max_width && $height<=$max_height } {
@@ -226,11 +237,13 @@ proc qc::image_cache_data {args} {
         }
     }
         
-    return {}
+    return [list]
 }
 
 proc qc::image_cache_create {args} {
-    #| Create a file for this image in the disk cache constrained to max_width & max_height
+    #| Create a file for this image in the disk cache,
+    #| constrained to max_width & max_height,
+    #| optionally auto-cropped,
     qc::args $args -autocrop -- cache_dir file_id max_width max_height
     default autocrop false
     set resize_args [list]
@@ -258,18 +271,27 @@ proc qc::image_cache_create {args} {
 }
 
 proc qc::image_data {args} {
-    #| Return dict of width, height & url of image constrained to max_width & max_height.
+    #| Return dict of width, height & url of image,
+    #| constrained to max_width & max_height, optionally auto-cropped
     #| Generates image cache if it doesn't already exist.
     qc::args $args -autocrop -- cache_dir file_id max_width max_height
     default autocrop false
-    if { ! [qc::image_cache_exists $cache_dir $file_id $max_width $max_height] } {
-        if { $autocrop } {
-            qc::image_cache_create -autocrop -- $cache_dir $file_id $max_width $max_height
-        } else {
-            qc::image_cache_create $cache_dir $file_id $max_width $max_height
-        }
+
+    set cache_args [list]
+    if { $autocrop } {
+        lappend cache_args -autocrop
     }
-    set cache_data [qc::image_cache_data $cache_dir $file_id $max_width $max_height]
+    lappend cache_args \
+        $cache_dir \
+        $file_id \
+        $max_width \
+        $max_height
+        
+    if { ! [qc::image_cache_exists {*}$cache_args] } {
+        qc::image_cache_create {*}$cache_args
+    }
+    set cache_data [qc::image_cache_data {*}$cache_args]
+
     return [dict_subset $cache_data url width height]
 }
 
@@ -282,8 +304,10 @@ proc qc::image_handler {
 } {
     #| URL handler to serve images that can not be served by fastpath.
     # Create image cache for canonical URL if it doesn't already exist.
-    # If canonical URL was requested return file to client and register URL to be servered by fastpath for future requests.
-    # Otherwise default redirect handler will redirect client to correct image dimesions or the canonical URL.
+    # If canonical URL was requested return file to client,
+    # and register URL to be servered by fastpath for future requests.
+    # Otherwise default redirect handler will redirect client,
+    # to correct image dimesions or the canonical URL.
     # By default enforce a max width and height of 2560x2560
     # Uses default qc::error_handler
     setif error_handler "" "qc::error_handler"
