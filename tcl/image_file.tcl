@@ -21,7 +21,7 @@ proc qc::image_file_autocrop {old_file {crop_colour white}} {
             -bordercolor $crop_colour \
             -border 1x1
     }
-    lappend convert_options {
+    lappend convert_options {*}{
         -trim
         -format %wx%h%O info:
     }
@@ -344,7 +344,7 @@ proc qc::image_handler {
         # Canonical URL
         if { [qc::image_cache_exists {*}$cache_args] } {
             # Cache already exists for canonical url
-            dict2vars [qc::image_cache_data $cache_args] width height url
+            dict2vars [qc::image_cache_data {*}$cache_args] width height url
             set canonical_url $url
             set canonical_file [ns_pagepath]$canonical_url
         } else {
