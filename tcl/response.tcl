@@ -246,7 +246,7 @@ namespace eval qc::response {
                 }
             }
 
-            dict set data action login value $url
+            dict set data action login value [url $url]
         }
 
         proc reset {} {
