@@ -783,7 +783,7 @@ namespace eval qc::is {
         set relative_uri_re1 [subst -nocommands -nobackslashes {
             ^
             (?:
-             (${path_absolute})
+             ${path_absolute}
              (?:\?${query_char}*)?
              (\#${fragment_char}*)?
              )
@@ -793,7 +793,7 @@ namespace eval qc::is {
         set relative_uri_re2 [subst -nocommands -nobackslashes {
             ^
             (?:
-             (${path_noscheme})
+             ${path_noscheme}
              (?:\?${query_char}*)?
              (\#${fragment_char}*)?
              )
@@ -803,7 +803,7 @@ namespace eval qc::is {
         set relative_uri_re3 [subst -nocommands -nobackslashes {
             ^
             (?:
-             (${path_empty})
+             ${path_empty}
              (?:\?${query_char}*)?
              (\#${fragment_char}*)?
              )
@@ -813,7 +813,7 @@ namespace eval qc::is {
         set relative_uri_re4 [subst -nocommands -nobackslashes {
             ^
             (?:
-             (?://${authority}${path_abempty})
+             //${authority}${path_abempty}
              (?:\?${query_char}*)?
              (\#${fragment_char}*)?
              )
