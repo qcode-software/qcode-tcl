@@ -111,11 +111,11 @@ proc qc::cast_values2model {args} {
         set table ""
         # Check if name is fully qualified
         if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-            lassign [qc::db_qualified_table_column $name] table column
+            lassign [qc::memoize qc::db_qualified_table_column $name] table column
         }
         
-        set data_type [qc::db_column_type $table $column]
-        set nullable [qc::db_column_nullable $table $column]
+        set data_type [qc::memoize qc::db_column_type $table $column]
+        set nullable [qc::memoize qc::db_column_nullable $table $column]
 
         # Check if nullable
         if {! $nullable && $value eq ""} {
@@ -216,13 +216,13 @@ proc qc::data_type_error_check {data_type value} {
         }
         default {
             # might be an enumeration or domain
-            if {[qc::db_enum_exists $data_type]} {
+            if {[qc::memoize qc::db_enum_exists $data_type]} {
                 if {! [qc::castable enumeration $data_type $value]} {
                     return "\"$value\" is not a valid value for enum \"$data_type\"."
                 }
-            } elseif {[qc::db_domain_exists $data_type]} {
-                set base_type [qc::db_domain_base_type $data_type]
-                set constraints [qc::db_domain_constraints $data_type]
+            } elseif {[qc::memoize qc::db_domain_exists $data_type]} {
+                set base_type [qc::memoize qc::db_domain_base_type $data_type]
+                set constraints [qc::memoize qc::db_domain_constraints $data_type]
                 set is_base_type [qc::is $base_type $value]
                 set failed_constraints [list]
                 dict for {constraint_name check_clause} $constraints {
@@ -400,7 +400,7 @@ namespace eval qc::cast {
     proc enumeration {name value} {
         #| Cast $value to enumeration of $name.
         set value [string toupper $value]
-        if {$value in [qc::db_enum_values $name]} {
+        if {$value in [qc::memoize qc::db_enum_values $name]} {
             return $value
         } else {
             return -code error -errorcode CAST "Can't cast \"$value\": not a valid value for enumeration \"$name\"."
@@ -409,7 +409,7 @@ namespace eval qc::cast {
 
     proc domain {domain_name value} {
         #| Cast value to the domain $domain_name.
-        set base_type [qc::db_domain_base_type $domain_name]
+        set base_type [qc::memoize qc::db_domain_base_type $domain_name]
         if { [qc::castable $base_type $value] } {
             set value [qc::cast $base_type $value]
         } else {

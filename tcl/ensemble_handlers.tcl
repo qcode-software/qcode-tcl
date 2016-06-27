@@ -41,9 +41,9 @@ proc data_type_parser {args} {
             return [list $namespace decimal]
         }
         default {
-            if { [qc::db_domain_exists $data_type] } {
+            if { [qc::memoize qc::db_domain_exists $data_type] } {
                 return [list $namespace domain $data_type]
-            } elseif { [qc::db_enum_exists $data_type] } {
+            } elseif { [qc::memoize qc::db_enum_exists $data_type] } {
                 return [list $namespace enumeration $data_type]
             }
         }

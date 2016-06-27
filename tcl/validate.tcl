@@ -9,11 +9,11 @@ proc qc::validate2model {dict} {
     dict for {name value} $dict {
         # Check if name is fully qualified
         if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-            lassign [qc::db_qualified_table_column $name] table column
+            lassign [qc::memoize qc::db_qualified_table_column $name] table column
         }
-        set message [qc::db_validation_message $table $column]
-        set data_type [qc::db_column_type $table $column]
-        set nullable [qc::db_column_nullable $table $column]
+        set message [qc::memoize qc::db_validation_message $table $column]
+        set data_type [qc::memoize qc::db_column_type $table $column]
+        set nullable [qc::memoize qc::db_column_nullable $table $column]
 
         # Check if this is a sensitive data type - values should not be echo'd back to the client
         if { $data_type in [list "password" "card_number"] } {
@@ -51,10 +51,10 @@ proc qc::validate2model {dict} {
 
             # Check if name is fully qualified
             if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-                lassign [qc::db_qualified_table_column $name] table column
+                lassign [qc::memoize qc::db_qualified_table_column $name] table column
             }
-            set message [qc::db_validation_message $table $column]
-            set data_type [qc::db_column_type $table $column]
+            set message [qc::memoize qc::db_validation_message $table $column]
+            set data_type [qc::memoize qc::db_column_type $table $column]
 
             # Check constraints
             set constraint_results [qc::db_eval_column_constraints $table $column $cast_dict]
