@@ -779,6 +779,17 @@ namespace eval qc::is {
         set query_char [subst -nobackslashes {
             (?:${pchar}|/|\?)
         }]   
+
+        set absolute_uri_re [subst -nocommands -nobackslashes {
+            ^
+            (?:
+             ${scheme}:
+             (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
+             (?:\?${query_char}*)?
+             (?:\#${fragment_char}*)?
+             )
+            $
+        }]
         
         set relative_uri_re1 [subst -nocommands -nobackslashes {
             ^
@@ -818,18 +829,7 @@ namespace eval qc::is {
              (\#${fragment_char}*)?
              )
             $
-        }]
-
-        set absolute_uri_re [subst -nocommands -nobackslashes {
-            ^
-            (?:
-             ${scheme}:
-             (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
-             (?:\?${query_char}*)?
-             (?:\#${fragment_char}*)?
-             )
-            $
-        }]
+        }]      
 
         if {
             [regexp -expanded $absolute_uri_re $uri] 
