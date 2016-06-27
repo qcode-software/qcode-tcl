@@ -779,35 +779,69 @@ namespace eval qc::is {
         set query_char [subst -nobackslashes {
             (?:${pchar}|/|\?)
         }]   
-        
-        set relative_uri [subst -nocommands -nobackslashes {
-            (?:
-             (?://${authority}${path_abempty}|${path_absolute}|${path_noscheme}|${path_empty})
-             (?:\?${query_char}*)?
-             (\#${fragment_char}*)?
-             )
-        }]
 
-        set absolute_uri [subst -nocommands -nobackslashes {
+        set absolute_uri_re [subst -nocommands -nobackslashes {
+            ^
             (?:
              ${scheme}:
              (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
              (?:\?${query_char}*)?
              (?:\#${fragment_char}*)?
              )
-        }]
-
-        set re [subst -nocommands -nobackslashes {
-            ^
-            (?:
-             ${absolute_uri}
-             |
-             ${relative_uri}
-             )
             $
         }]
         
-        return [regexp -expanded $re $uri]
+        set relative_uri_re1 [subst -nocommands -nobackslashes {
+            ^
+            (?:
+             ${path_absolute}
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
+             )
+            $
+        }]
+
+        set relative_uri_re2 [subst -nocommands -nobackslashes {
+            ^
+            (?:
+             ${path_noscheme}
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
+             )
+            $
+        }]
+
+        set relative_uri_re3 [subst -nocommands -nobackslashes {
+            ^
+            (?:
+             ${path_empty}
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
+             )
+            $
+        }]
+
+        set relative_uri_re4 [subst -nocommands -nobackslashes {
+            ^
+            (?:
+             //${authority}${path_abempty}
+             (?:\?${query_char}*)?
+             (\#${fragment_char}*)?
+             )
+            $
+        }]      
+
+        if {
+            [regexp -expanded $absolute_uri_re $uri] 
+            || [regexp -expanded $relative_uri_re1 $uri] 
+            || [regexp -expanded $relative_uri_re2 $uri]
+            || [regexp -expanded $relative_uri_re3 $uri]
+            || [regexp -expanded $relative_uri_re4 $uri] 
+        } {
+            return 1
+        } else {
+            return 0
+        }
     }
 }
 
