@@ -14,7 +14,7 @@ proc qc::schema_update {version code} {
 	    log "Schema updated to version $version"
             # Clear db_introspection caches
             qc::db_cache_clear
-            if { info commands "ns_memoize_flush" eq "ns_memoize_flush" } {
+            if { [info commands "ns_memoize_flush"] eq "ns_memoize_flush" } {
                 ns_memoize_flush db_*
             }
 	}
