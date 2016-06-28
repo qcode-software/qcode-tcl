@@ -236,7 +236,7 @@ proc qc::db_domain_exists {args} {
 proc qc::db_domain_constraints {domain_name} {
     #| Returns a dict of the constraint name with the check clause for the given domain in the database.
     set constraints [dict create]
-    if {[qc::db_domain_exists $domain_name]} {
+    if {[qc::memoize qc::db_domain_exists $domain_name]} {
         set qry {
             SELECT cc.constraint_name, check_clause
             FROM information_schema.check_constraints cc
@@ -277,7 +277,7 @@ proc qc::db_column_constraints {table column} {
 proc qc::db_eval_constraint {table constraint args} {
     #| Check a db constraint expression by substituting in corresponding values from args
     # eg constraint_test {(col1 > col2)} col1 17 col2 16
-    set column_types [qc::db_table_column_types $table]
+    set column_types [qc::memoize qc::db_table_column_types $table]
     set columns [dict keys $column_types]
     set fq_columns [qc::map [list x "return $table.\$x"] $columns]
     set column_values [qc::dict_subset $args {*}$columns {*}$fq_columns]
@@ -317,7 +317,7 @@ proc qc::db_eval_domain_constraint {value base_type check_clause} {
 proc qc::db_eval_column_constraints {table column values} {
     #| Evaluates constraints on the given table.column with the given values.
     #| Returns a dict of the constraints and their results.
-    set constraints [qc::db_column_constraints $table $column]
+    set constraints [qc::memoize qc::db_column_constraints $table $column]
     set results {}
     foreach {constraint_name check_clause} $constraints {
         lappend results $constraint_name [qc::db_eval_constraint $table $check_clause {*}$values]
@@ -327,7 +327,7 @@ proc qc::db_eval_column_constraints {table column values} {
 
 proc qc::db_domain_base_type {domain_name} {
     #| Returns the base type of the given domain.
-    if {[qc::db_domain_exists $domain_name]} {
+    if {[qc::memoize qc::db_domain_exists $domain_name]} {
         set qry {
             SELECT udt_name, character_maximum_length, numeric_precision, numeric_scale
             FROM information_schema.domains

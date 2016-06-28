@@ -352,7 +352,7 @@ namespace eval qc::is {
 
     proc enumeration {enum_name value} {
         #| Checks if the given value is a value in enumeration enum_name.
-        if {[qc::db_enum_exists $enum_name] && $value in [qc::db_enum_values $enum_name]} {
+        if {[qc::memoize qc::db_enum_exists $enum_name] && $value in [qc::memoize qc::db_enum_values $enum_name]} {
             return 1
         } else {
             return 0
@@ -366,12 +366,12 @@ namespace eval qc::is {
 
     proc domain {domain_name value} {
         #| Checks if the given value falls under the domain domain_name.
-        if {[qc::db_domain_exists $domain_name]} {
-            set base_type [qc::db_domain_base_type $domain_name]
+        if {[qc::memoize qc::db_domain_exists $domain_name]} {
+            set base_type [qc::memoize qc::db_domain_base_type $domain_name]
             if { ! [qc::is $base_type $value] } {
                 return 0
             }
-            set constraints [qc::db_domain_constraints $domain_name]
+            set constraints [qc::memoize qc::db_domain_constraints $domain_name]
             dict for {constraint_name check_clause} $constraints {
                 if { ! [qc::db_eval_domain_constraint $value $base_type $check_clause] } {
                     return 0
