@@ -274,23 +274,10 @@ proc qc::image_data {args} {
     #| Return dict of width, height & url of image,
     #| constrained to max_width & max_height, optionally auto-cropped
     #| Generates image cache if it doesn't already exist.
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    set cache_args [list]
-    if { $autocrop } {
-        lappend cache_args -autocrop
+    if { ! [qc::image_cache_exists {*}$args] } {
+        qc::image_cache_create {*}$args
     }
-    lappend cache_args \
-        $cache_dir \
-        $file_id \
-        $max_width \
-        $max_height
-        
-    if { ! [qc::image_cache_exists {*}$cache_args] } {
-        qc::image_cache_create {*}$cache_args
-    }
-    set cache_data [qc::image_cache_data {*}$cache_args]
+    set cache_data [qc::image_cache_data {*}$args]
 
     return [dict_subset $cache_data url width height]
 }
