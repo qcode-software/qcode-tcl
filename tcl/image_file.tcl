@@ -294,7 +294,7 @@ proc qc::image_handler {
     # If canonical URL was requested return file to client,
     # and register URL to be servered by fastpath for future requests.
     # Otherwise default redirect handler will redirect client,
-    # to correct image dimesions or the canonical URL.
+    # to correct image dimensions or the canonical URL.
     # By default enforce a max width and height of 2560x2560
     # Uses default qc::error_handler
     setif error_handler "" "qc::error_handler"
