@@ -41,17 +41,27 @@ namespace eval ::qcode::test {
     test sql_sort-1.0 {sql_sort} -setup {
     } -body {
         sql_sort name email user_code 
-    } -cleanup {} -result {name,email,user_code}
+    } -cleanup {} -result {"name","email","user_code"}
 
     test sql_sort-1.1 {sql_sort with order} -setup {
     } -body {
         sql_sort name DESC email user_code 
-    } -cleanup {} -result {name DESC NULLS LAST,email,user_code}
+    } -cleanup {} -result {"name" DESC NULLS LAST,"email","user_code"}
 
     test sql_sort-1.2 {sql_sort with paging} -setup {
     } -body {
         sql_sort -paging name email user_code 
-    } -cleanup {} -result {name,email,user_code limit 100 offset 0}
+    } -cleanup {} -result {"name","email","user_code" limit '100' offset '0'}
+
+    test sql_sort-1.3 {sql_sort with potential injection} -setup {
+    } -body {
+        sql_sort {session_id"; delete from session;} {"username}
+    } -cleanup {} -result {"session_id""; delete from session;","""username"}
+
+    test sql_sort-1.4 {sql_sort with potential limit-based injection} -setup {
+    } -body {
+        sql_sort -limit {10'; delete from session;} username
+    } -cleanup {} -result {"username" limit '10''; delete from session;' offset '0'}
 
     test sql_in-1.0 {sql_in} -setup {
     } -body {
