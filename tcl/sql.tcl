@@ -63,6 +63,7 @@ proc qc::sql_sort { args } {
     set order_by_list {}
     for {set i 0} {$i<[llength $list]} {incr i} {
 	set this_item [lindex $list $i]
+        set this_item [qc::db_quote_identifier $this_item]
 	set next_item [lindex $list [expr {$i+1}]]
 	switch -nocase $next_item {
 	    ASC {
@@ -129,7 +130,7 @@ proc qc::sql_sort { args } {
         }
         upset 1 offset $offset
 
-        return "$sql limit $limit offset $offset"
+        return "$sql limit [qc::db_quote $limit] offset [qc::db_quote $offset]"
     } else {
 	return $sql
     }
