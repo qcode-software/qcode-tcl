@@ -32,7 +32,7 @@ proc qc::perm_test_user { user_id perm_name method } {
     #| Test whether the user can perform $method on $perm_name
     #| Returns boolean
     set method [upper $method]
-    db_0or1row {
+    db_cache_0or1row {
         select 
         perm_id
         from user_perm
