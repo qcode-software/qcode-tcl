@@ -68,10 +68,15 @@ namespace eval ::qcode::test {
         sql_sort -nulls first -- name ASC
     } -cleanup {} -result {"name" NULLS FIRST}
 
-    test sql_sort-1.5 {sql_sort descending with nulls option} -setup {
+    test sql_sort-1.6 {sql_sort descending with nulls option} -setup {
     } -body {
         sql_sort -nulls last -- name DESC
     } -cleanup {} -result {"name" DESC NULLS LAST}
+
+    test sql_sort-1.7 {sql sort with commas} -setup {
+    } -body {
+        sql_sort name, email, user_code
+    } -cleanup {} -result {"name","email","user_code"}
 
     test sql_in-1.0 {sql_in} -setup {
     } -body {
