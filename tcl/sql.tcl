@@ -62,11 +62,27 @@ proc qc::sql_sort { args } {
     }
     set order_by_list {}
     for {set i 0} {$i<[llength $list]} {incr i} {
+
 	set this_item [lindex $list $i]
         set this_item [string trim $this_item]
-        set this_item [qc::db_quote_identifier $this_item]
+        set parts [split $this_item "."]
+        switch [llength $parts] {
+            1 {
+                set this_item [qc::db_quote_identifier $this_item]                
+            }
+            2 {
+                set table [qc::db_quote_identifier [lindex $parts 0]]
+                set column [qc::db_quote_identifier [lindex $parts 1]]
+                set this_item "${table}.${column}"
+            }
+            default {
+                error "Unable to parse identifier \"$this_item\""
+            }
+        }
+
 	set next_item [lindex $list [expr {$i+1}]]
         set next_item [string trim $next_item]
+
 	switch -nocase $next_item {
 	    ASC {
 		if { [string toupper $nulls] eq "FIRST" } {
