@@ -93,6 +93,17 @@ proc qc::db_init {} {
 	}
     }
 
+    # Make sure pgcrypto extension exists
+    if {![qc::db_extension_exists pgcrypto]} {
+	if { [qc::db_user_is_superuser [qc::db_user]]} {
+	    db_dml {
+		CREATE EXTENSION pgcrypto;
+	    }
+	} else {
+	    error "Database user \"[qc::db_user]\" is not superuser so pgcrypto extension cannot be created"
+	}
+    }
+    
     # pgcryto
     if {[qc::db_extension_exists pgcrypto]} {
 	db_dml {
