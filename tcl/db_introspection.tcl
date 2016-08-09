@@ -443,17 +443,14 @@ proc qc::db_extension_exists {extension_name} {
 
 proc qc::db_is_superuser {} {
     #| Returns true if current database user is a superuser
-    qc::db_0or1row {
-	select
-	usesuper
-	from 
-	pg_user
-	where usename = CURRENT_USER;
+    set qry {
+	SELECT usesuper
+	FROM pg_user
+	WHERE usename = CURRENT_USER;
+    } 
+    db_0or1row $qry {    
+ 	return false
     } {
-	qc::log "table pg_user not found"
-     	return false
-    } {
-	qc::log "is this user a superuser? $usesuper"
 	return $usesuper
     }
 }
