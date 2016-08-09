@@ -450,7 +450,7 @@ proc qc::db_user_is_superuser {username} {
     } 
     db_0or1row $qry {  
 	# user does not exist
- 	return false
+	error "Database user \"$username\" does not exist." 
     } {
 	return $usesuper
     }
