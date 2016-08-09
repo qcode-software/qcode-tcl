@@ -441,14 +441,15 @@ proc qc::db_extension_exists {extension_name} {
 
 }
 
-proc qc::db_is_superuser {} {
-    #| Returns true if current database user is a superuser
+proc qc::db_user_is_superuser {username} {
+    #| Returns true if username specified is a superuser
     set qry {
 	SELECT usesuper
 	FROM pg_user
-	WHERE usename = CURRENT_USER;
+	WHERE usename=:username;
     } 
-    db_0or1row $qry {    
+    db_0or1row $qry {  
+	# user does not exist
  	return false
     } {
 	return $usesuper
