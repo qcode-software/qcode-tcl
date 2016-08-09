@@ -440,3 +440,18 @@ proc qc::db_extension_exists {extension_name} {
     }
 
 }
+
+proc qc::db_user_is_superuser {username} {
+    #| Returns true if username specified is a superuser
+    set qry {
+	SELECT usesuper
+	FROM pg_user
+	WHERE usename=:username;
+    } 
+    db_0or1row $qry {  
+	# user does not exist
+	error "Database user \"$username\" does not exist." 
+    } {
+	return $usesuper
+    }
+}
