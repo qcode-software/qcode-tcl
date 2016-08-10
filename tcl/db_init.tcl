@@ -224,8 +224,7 @@ proc qc::db_init {} {
 	    INSERT INTO
 	    users (user_id, firstname, surname, email, password_hash)
 	    VALUES
-	    (-1, 'anonymous', 'anonymous', 'anonymous@nowhere.co.uk', :password_hash
-	     );
+	    (-1, 'anonymous', 'anonymous', 'anonymous@nowhere.co.uk', :password_hash);
 	}
     }
 }
