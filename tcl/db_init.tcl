@@ -216,4 +216,15 @@ proc qc::db_init {} {
 						    file_id int REFERENCES file(file_id) NOT NULL
 						    );
     }
+
+    # Create anonymous user if none exists
+    qc::db_0or1row {SELECT user_id FROM users WHERE user_id='-1'} {
+	set password_hash [qc::password_hash TheAnonymousUserCreepsSilentlyIntoTheDatabase]
+	qc::db_dml {
+	    INSERT INTO
+	    users (user_id, firstname, surname, email, password_hash)
+	    VALUES
+	    (-1, 'anonymous', 'anonymous', 'anonymous@nowhere.co.uk', :password_hash);
+	}
+    }
 }
