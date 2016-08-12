@@ -38,6 +38,48 @@ namespace eval ::qcode::test {
         html_tag input name firstname value "Aquarian" disabled yes
     } -result {<input name="firstname" value="Aquarian" disabled="disabled">}
 
+    test h-1.0 {html simple } -setup {
+    } -body {
+        h span "Hello There"
+    } -result {<span>Hello There</span>}
+    test h-1.1 {html class } -setup {
+    } -body {
+        h span \
+            class greeting \
+            "Hello There"
+    } -result {<span class="greeting">Hello There</span>}
+    test h-1.2 {html escaped value } -setup {
+    } -body {
+        h span \
+            class greeting \
+            value Escape&Me \
+            "Hello There"
+    } -result {<span class="greeting" value="Escape&amp;Me">Hello There</span>}
+    test h-1.3 {html quotes } -setup {
+    } -body {
+        h span \
+            class greeting \
+            value "don't \"quote\" me" \
+            {Hello There} 
+    } -result {<span class="greeting" value="don't &#34;quote&#34; me">Hello There</span>}
+
+    test h_tag-1.0 {html_tag simple } -setup {
+    } -body {
+        h_tag input name firstname
+    } -result {<input name="firstname"/>}
+    test h_tag-1.1 {html_tag simple2 } -setup {
+    } -body {
+        h_tag input \
+            name firstname \
+            value "Aquarian"
+    } -result {<input name="firstname" value="Aquarian"/>}
+    test h_tag-1.2 {html_tag disabled } -setup {
+    } -body {
+        h_tag input \
+            name firstname \
+            value "Aquarian" \
+            disabled yes
+    } -result {<input name="firstname" value="Aquarian" disabled="disabled"/>}
 
     test html_escape-1.0 {html_escape  } -setup {
     } -body {
