@@ -339,3 +339,47 @@ proc qc::strip_html {html} {
     #| Returns a string that is the HTML with all the HTML tags removed
     return [regsub -all -- {<[^>]+>} $html ""]
 }
+
+proc qc::h {tag_name args} {
+    #| Generate an html node
+    set singleton_tags [list area base br col command embed hr img input link meta param source]
+    if { $tag_name in $singleton_tags } {
+        return "[qc::h_tag $tag_name {*}$args]"
+    } else {
+        if { [llength $args]%2 == 0 } {
+            return "[qc::h_tag $tag_name {*}$args]</$tag_name>"
+        } else {
+            return "[qc::h_tag $tag_name {*}[lrange $args 0 end-1]][lindex $args end]</$tag_name>"
+        }
+    }
+}
+
+proc qc::h_tag { tag_name args } {
+    #| Generate just the opening html tag
+    set singleton_tags [list area base br col command embed hr img input link meta param source]
+    set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize novalidate]
+    set attributes {}
+   
+    foreach {name value} [qc::dict_exclude $args {*}$minimized] {
+        if { $name eq "classes" } {
+            lappend attributes "class=\"[string map {< &lt; > &gt; & &amp; \" &#34;} [join $value]]\""
+        } else {
+            lappend attributes "$name=\"[string map {< &lt; > &gt; & &amp; \" &#34;} $value]\""
+        }
+    }
+    foreach {name value} [qc::dict_subset $args {*}$minimized] {
+	if { [string is true $value] } {
+	    lappend attributes "$name=\"$name\""
+	}
+    }
+
+    if { $tag_name in $singleton_tags && [llength $attributes]==0 } { 
+	return "<$tag_name/>"
+    } elseif { $tag_name in $singleton_tags } { 
+        return "<$tag_name [join $attributes]/>"
+    } elseif { [llength $attributes]==0 } {
+	return "<$tag_name>"
+    } else {
+	return "<$tag_name [join $attributes]>"
+    }
+}
