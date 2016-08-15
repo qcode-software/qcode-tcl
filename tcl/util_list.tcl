@@ -101,11 +101,32 @@ proc qc::lunique {list} {
 }
 
 proc qc::lequal {a b} {
-    #| Compare 2 list 
+    #| Compare 2 lists
     # Author RS Tcl wiki
-    if {[llength $a] != [llength $b]} {return 0}
-    if {[lindex $a 0] == $a} {return [string equal $a $b]}
-    foreach i $a j $b {if {![lequal $i $j]} {return 0}}
+    
+    # a or b not a list
+    if { ! [string is list $a]
+         || ! [string is list $b]
+     } {
+        return [string equal $a $b]
+    }
+
+    # a and b different lengths
+    if { [llength $a] != [llength $b] } {
+        return 0
+    }
+
+    # both are length 1
+    if { [lindex $a 0] == $a } {
+        return [string equal $a $b]
+    }
+
+    # compare each element
+    foreach i $a j $b {
+        if { ! [lequal $i $j] } {
+            return 0
+        }
+    }
     return 1
 } 
 
