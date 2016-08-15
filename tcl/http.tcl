@@ -183,8 +183,23 @@ proc qc::http_header {name value} {
 }
 
 proc qc::http_put {args} {
-    # usage http_put ?-header 0? ?-timeout timeout? ?-infile infile? ?-data data? ?-headers {name value name value ...}? url
-    args $args -header 0 -timeout 60 -sslversion tlsv1 -headers {} -infile ? -data ? url 
+    # usage http_put \
+    #   ?-valid_response_codes 200? \
+    #   ?-header 0? \
+    #   ?-timeout timeout? \
+    #   ?-infile infile? \
+    #   ?-data data? \
+    #   ?-headers {name value name value ...}? \
+    #   url
+    args $args \
+        -header 0 \
+        -timeout 60 \
+        -valid_response_codes [list 200] \
+        -sslversion tlsv1 \
+        -headers {} \
+        -infile ? \
+        -data ? \
+        url 
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -194,30 +209,88 @@ proc qc::http_put {args} {
     if { [info exists data] && [info exists infile]} {
         error "qc::http:put must have only 1 of -data or -infile specified"
     } elseif { [info exists infile] } {
-        dict2vars [qc::http_curl -header $header -upload 1 -infile $infile -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+        dict2vars \
+                [qc::http_curl 
+                    -header $header \
+                    -upload 1 \
+                    -infile $infile \
+                    -headervar return_headers \
+                    -url $url \
+                    -sslverifypeer 0 \
+                    -sslverifyhost 0 \
+                    -timeout $timeout \
+                    -sslversion $sslversion \
+                    -followlocation 1 \
+                    -httpheader $httpheaders \
+                    -bodyvar html \
+                ] \
+                return_headers \
+                html \
+                responsecode \
+                curlErrorNumber
+
     } elseif { [info exists data] }  {
-        dict2vars [qc::http_curl -header $header -customrequest PUT -postfields $data -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -followlocation 1 -httpheader $httpheaders  -bodyvar html] return_headers html responsecode curlErrorNumber
+        dict2vars \
+            [qc::http_curl \
+                -header $header \
+                -customrequest PUT \
+                -postfields $data \
+                -headervar return_headers \
+                -url $url \
+                -sslverifypeer 0 \
+                -sslverifyhost 0 \
+                -timeout $timeout \
+                -sslversion $sslversion \
+                -followlocation 1 \
+                -httpheader $httpheaders \
+                -bodyvar html \
+            ] \
+            return_headers \
+            html \
+            responsecode \
+            curlErrorNumber
+
     } else {
         error "qc::http:put must have 1 of -data or -infile specified"
     }
 
     switch $curlErrorNumber {
 	0 {
+            if { $responsecode in $valid_response_codes } {
+	        return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
+            }
 	    switch $responsecode {
-		200 { 
-		    # OK
-		    return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
-		}
-		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
-		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
-		default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+		404 {
+                    return \
+                        -code error \
+                        -errorcode CURL \
+                        "URL NOT FOUND $url"
+                    }
+		500 {
+                    return \
+                        -code error \
+                        -errorcode CURL \
+                        "SERVER ERROR $url"
+                }
+		default {
+                    return \
+                        -code error \
+                        -errorcode CURL \
+                        "RESPONSE $responsecode while contacting $url"
+                }
 	    }
 	}
 	28 {
-	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
+	    return \
+                -code error \
+                -errorcode TIMEOUT \
+                "Timeout after $timeout seconds trying to contact $url"
 	}
 	default {
-	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	    return \
+                -code error \
+                -errorcode CURL \
+                [curl::easystrerror $curlErrorNumber]
 	}
     }
 }
