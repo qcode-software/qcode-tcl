@@ -239,6 +239,12 @@ namespace eval ::qcode::test {
         lequal [list {"}] [list {"}]
     } -cleanup {} -result {1}
 
+    test lequal-1.5 {lequal nested non-equal} -setup {
+    } -body {
+        lequal [list [list b a] [list d c]] [list [list a b] [list c d]]
+    } -cleanup {} -result {0}
+
+    # lsort
     test lsort_using-1.0 {lsort_using } -setup {
     } -body {
         lsort_using [list T W E Q] {Q W E R T Y}
