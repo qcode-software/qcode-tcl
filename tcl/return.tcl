@@ -50,10 +50,10 @@ proc qc::return2client { args } {
     # Content-Disposition
     if { $download } {
         # Download payload as an attachment
-        default content-disposition "attachment; filename=$filename"
+        default content-disposition "attachment; \"filename=$filename\""
     } else {
         # Display payload inline
-        default content-disposition "inline; filename=$filename"
+        default content-disposition "inline; \"filename=$filename\""
     }
     if { "content-disposition" ni $headers } {
         lappend headers content-disposition       
