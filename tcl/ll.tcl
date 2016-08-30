@@ -37,7 +37,7 @@ proc qc::ll2pg_copy {ll} {
     return $pg_copy_data
 }
 
-proc list2pg_copy {list} {
+proc qc::list2pg_copy {list} {
     #| Return data in the format accepted by postgresql's copy statements
     set temp {}
     foreach value $list {
