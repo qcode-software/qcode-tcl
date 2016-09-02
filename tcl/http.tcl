@@ -74,8 +74,22 @@ proc qc::http_curl {args} {
 proc qc::http_post {args} {
     #| Perform an HTTP POST
     # args is name value name value ... list
-    # usage http_post ?-noproxy? ?-timeout timeout? ?-encoding encoding? ?-content-type content-type? ?-soapaction soapaction? ?-accept accept? ?-authorization authorization? ?-data data? ?-valid_response_codes? ?-headers {name value name value ...}? url ?name value? ?name value?
-    args $args -noproxy -timeout 60 -sslversion tlsv1 -encoding utf-8 -content-type ? -soapaction ? -accept ? -authorization ? -headers {} -data ? -valid_response_codes {100 200} url args
+    args \
+        $args \
+        -noproxy \
+        -timeout 60 \
+        -sslversion tlsv1 \
+        -encoding utf-8 \
+        -content-type ? \
+        -soapaction ? \
+        -accept ? \
+        -authorization ? \
+        -headers {} \
+        -data ? \
+        -filename ? \
+        -valid_response_codes [list 100 200] \
+        url \
+        args
 
     if { ![info exists data]} {
 	set pairs {}
@@ -105,7 +119,18 @@ proc qc::http_post {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
    
-    set curl_args [list {*}[qc::iif [info exists noproxy] {-proxy ""} {}] -headervar return_headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -sslversion $sslversion -bodyvar html -post 1 -httpheader $httpheaders]
+    set curl_args [list \
+                      {*}[qc::iif [info exists noproxy] {-proxy ""} {}] \
+                      -headervar return_headers \
+                      -url $url \
+                      -sslverifypeer 0 \
+                      -sslverifyhost 0 \
+                      -timeout $timeout \
+                      -sslversion $sslversion \
+                      -bodyvar html \
+                      -post 1 \
+                      -httpheader $httpheaders \
+                   ]
 
     if { [info exists content-type] && [string match "multipart/*" ${content-type}] } {
         # eg. multipart/formdata
@@ -116,6 +141,10 @@ proc qc::http_post {args} {
     } else {
         # eg. application/x-www-form-urlencoded
         lappend curl_args -postfields $data
+    }
+
+    if { [info exists filename] } {
+        lappend curl_args -file $filename
     }
 
     dict2vars [qc::http_curl {*}$curl_args] return_headers html responsecode curlErrorNumber
