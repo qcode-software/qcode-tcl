@@ -216,6 +216,13 @@ proc qc::db_init {} {
 						    file_id int REFERENCES file(file_id) NOT NULL
 						    );
     }
+    
+    # Utility tables for validation
+    db_dml {
+	CREATE TABLE IF NOT EXISTS form ();
+	CREATE TABLE IF NOT EXISTS required ();
+	CREATE TABLE IF NOT EXISTS optional ();
+    }
 
     # Create anonymous user if none exists
     qc::db_0or1row {SELECT user_id FROM users WHERE user_id='-1'} {
