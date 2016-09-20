@@ -18,6 +18,7 @@ Qcode Tcl Lib Documentation
 * [`qc::is` Ensemble](is.md)
 * [`qc::cast` Ensemble](cast.md)
 * [`qc::castable` Ensemble](castable.md)
+* [Define a new data type](data-type-define.md)
 
 [Authentication][3]
 -------------------
