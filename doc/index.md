@@ -15,7 +15,7 @@ Qcode Tcl Lib Documentation
 
 [Data Types: is, cast, castable][2]
 -----------------------------------
-* [Is API](is.md)
+* [`qc::is` Ensemble](is.md)
 * [Cast API](cast.md)
 * [Castable API](castable.md)
 
