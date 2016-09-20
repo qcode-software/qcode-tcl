@@ -80,8 +80,10 @@ Qcode Tcl Lib Documentation
 [Data Model Dependencies][17]
 -----------------------------
 
-[Setting Up][18]
-----------------
+Tutorials
+---------
+* [Setting Up][18]
+* [How to Define a New Data Type (Domain)][19]
 
 * * *
 
@@ -103,3 +105,4 @@ Qcode Tcl Lib Documentation
 [16]: security.md
 [17]: data-model-dependencies.md
 [18]: setting-up.md
+[19]: data-type-define.md
