@@ -1,10 +1,12 @@
-Is API
+qc::is Ensemble
 =======
 part of [Qcode Documentation](index.md)
 
 * * *
 
-The `is` API provides a way to test if a string is a certain data type - returning 1 if it is otherwise 0.
+The `qc::is` ensemble provides a way to test if a string is a certain data type - returning 1 if it is otherwise 0.
+
+Everything in Tcl is a string so we are really testing if the string representation is canonical.
 
 For further detail see [Data Types: is, cast, castable](data-types.md).
 
