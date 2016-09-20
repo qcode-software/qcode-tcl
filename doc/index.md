@@ -13,7 +13,7 @@ Qcode Tcl Lib Documentation
 * SQL helpers
 * Database Introspection
 
-[Data Types: is, cast, castable][2]
+[Data Types][2]
 -----------------------------------
 * [`qc::is` Ensemble](is.md)
 * [`qc::cast` Ensemble](cast.md)
