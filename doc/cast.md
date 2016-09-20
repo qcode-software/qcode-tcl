@@ -1,10 +1,10 @@
-Cast API
+qc::cast Ensemble
 =======
 part of [Qcode Documentation](index.md)
 
 * * *
 
-The `cast` API provides a way to cast to a certain data type - returning the canonical string representation of the type if it is castable otherwise an error.
+The `cast` ensemble provides a way to cast to a certain data type - returning the canonical string representation of the type if it is castable otherwise an error.
 
 To test for castability see [castable](castable.md).
 
