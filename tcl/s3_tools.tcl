@@ -8,10 +8,13 @@ namespace eval qc {
     namespace export s3 s3_* aws_*
 }
 
-proc qc::aws_credentials_set { access_key secret_key } {
+proc qc::aws_credentials_set { access_key secret_key {token ""}} {
     #| Set globals containing AWS credentials
     set ::env(AWS_ACCESS_KEY_ID) $access_key
     set ::env(AWS_SECRET_ACCESS_KEY) $secret_key
+    if { $token ne "" } {
+        set ::env(AWS_SESSION_TOKEN) $token
+    }
     return true
 }
 
