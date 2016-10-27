@@ -56,7 +56,7 @@ namespace eval ::qcode::test {
     test sql_sort-1.3 {sql_sort with potential injection} -setup {
     } -body {
         sql_sort {session_id"; delete from session;} {"username}
-    } -cleanup {} -result {"session_id""; delete from session;","""username"}
+    } -cleanup {} -result {"session_id"";","delete","from","session;","""username"}
 
     test sql_sort-1.4 {sql_sort with potential limit-based injection} -setup {
     } -body {
@@ -75,13 +75,19 @@ namespace eval ::qcode::test {
 
     test sql_sort-1.7 {sql_sort with commas} -setup {
     } -body {
-        sql_sort name, email, user_code
-    } -cleanup {} -result {"name","email","user_code"}
+        sql_sort name, email DESC, user_code
+    } -cleanup {} -result {"name","email" DESC NULLS LAST,"user_code"}
 
     test sql_sort-1.8 {sql_sort with qualified fields} -setup {
     } -body {
         sql_sort user.name user.email session.session_id
     } -cleanup {} -result {"user"."name","user"."email","session"."session_id"}
+
+     test sql_sort-1.9 {sql_sort from string} -setup {
+     } -body {
+         set sort_order "name, date DESC"
+         sql_sort $sort_order
+    } -cleanup {} -result {"name","date" DESC NULLS LAST}
 
     test sql_in-1.0 {sql_in} -setup {
     } -body {
