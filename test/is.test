@@ -2738,6 +2738,14 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
         is url -relative index.html?foo=bar?test=broken
     } -result 0
 
+    test is-url-1.14 {is url -relative} -body {
+        is url -relative a&b.html?foo=bar&fiz=baz
+    } -result 0
+
+    test is-url-1.15 {is url} -body {
+        is url https://www.domain.com/a&b.html?foo=bar&fiz=baz
+    } -result 0
+
     test is-url-path-1.0 {is url_path} -body {
 	is url_path /home
     } -result 1
