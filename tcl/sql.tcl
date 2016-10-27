@@ -52,14 +52,13 @@ proc qc::sql_sort { args } {
     if { [form_var_exists sortCols] } {
         set string [form_var_get sortCols]
     } else {
-        set string $args
+        set string [join $args " "]
     } 
 
-    if { [regexp , $string] } {
-	set list [split $string ","]
-    } else {
-	set list $string
-    }
+    # collapse consequetive spaces and commas down to a single space
+    set string [regsub -all {[\s,]+} $string " "]
+
+    set list [split $string " "]
     set order_by_list {}
     for {set i 0} {$i<[llength $list]} {incr i} {
 
