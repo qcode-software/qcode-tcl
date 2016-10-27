@@ -2740,11 +2740,11 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
 
     test is-url-1.14 {is url -relative} -body {
         is url -relative a&b.html?foo=bar&fiz=baz
-    } -result 0
+    } -result 1
 
     test is-url-1.15 {is url} -body {
         is url https://www.domain.com/a&b.html?foo=bar&fiz=baz
-    } -result 0
+    } -result 1
 
     test is-url-path-1.0 {is url_path} -body {
 	is url_path /home
