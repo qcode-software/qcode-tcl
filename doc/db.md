@@ -65,6 +65,15 @@ part of [Qcode Documentation](index.md)
 * [db_domain_base_type]
 * [db_canonical_type]
 * [db_validation_message]
+* [db_sequence_exists]
+* [db_owner]
+* [db_database_name]
+* [db_user]
+* [db_extension_exists]
+* [db_user_is_superuser]
+
+### Database Initialisation
+* [db_init]
 
 ---
 
@@ -197,3 +206,10 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [db_domain_base_type]: procs/db_domain_base_type.md
 [db_canonical_type]: procs/db_canonical_type.md
 [db_validation_message]: procs/db_validation_message.md
+[db_sequence_exists]: procs/db_sequence_exists.md
+[db_owner]: procs/db_owner.md
+[db_database_name]: procs/db_database_name.md
+[db_user]: procs/db_user.md
+[db_extension_exists]: procs/db_extension_exists.md
+[db_user_is_superuser]: procs/db_user_is_superuser.md
+[db_init]: procs/db_init.md
