@@ -4,7 +4,9 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-Certain parts of the qcode-tcl library are dependent upon a data model being in place and other parts depend upon specific tables existing. Below are the procs and their dependents along with the SQL statements to add the data model dependency.
+Certain parts of the qcode-tcl library are dependent upon a data model being in place and other parts depend upon specific tables existing. Below are the procs and their dependencies along with the SQL statements to add the data model dependency.
+
+To initialise a database with all dependencies please see [db_init].
 
 **Note:** `?` wrapped around table names means that there's only a partial dependency and may not be necessary depending on input or other circumstances.
 
@@ -92,37 +94,6 @@ Proc | Table(s) | Other
 | `qc::perm_if` | [perm], [perm_category], [perm_class], [user_perm], [users] |
 | `qc::perm_category_add` | [perm_category] |
 | `qc::perm_add` | [perm], [perm_category], [perm_class] |
-
-#### pgcrypto
-
-The [pgcrypto module] for PostgreSQL provides cryptographic functions - some of which are used by procs in the library. In order to install the pgcrypto extension the [postgresql-contrib] package will need to be installed first.
-
-
-```SQL
-CREATE EXTENSION pgcrypto;
-
-CREATE OR REPLACE FUNCTION sha1(bytea) returns text AS $$
-    SELECT encode(digest($1, 'sha1'), 'hex')
-$$ LANGUAGE SQL STRICT IMMUTABLE;
-```
-
-#### Anonymous User
-
-The anonymous session depends upon a user with the ID -1 being present in the `users` table. This is a special ID chosen for the anonymous user and should be reserved for it.
-
-As an example:
-
-```TCL
-# Generate a password hash for the anonymous user
-set password_hash [qc::password_hash TheAnonymousUserCreepsSilentlyIntoTheDatabase]
-db_dml {
-    INSERT INTO
-    users (user_id, firstname, surname, email, password_hash)
-    VALUES
-    (-1, 'anonymous', 'anonymous', 'anonymous@qcode.co.uk', :password_hash
-);
-
-```
 
 Tables
 ------
@@ -285,6 +256,41 @@ CREATE TABLE image (
 );
 ```
 
+Extensions
+----------
+#### pgcrypto
+
+The [pgcrypto module] for PostgreSQL provides cryptographic functions - some of which are used by procs in the library. In order to install the pgcrypto extension the [postgresql-contrib] package will need to be installed first.
+
+
+```SQL
+CREATE EXTENSION pgcrypto;
+
+CREATE OR REPLACE FUNCTION sha1(bytea) returns text AS $$
+    SELECT encode(digest($1, 'sha1'), 'hex')
+$$ LANGUAGE SQL STRICT IMMUTABLE;
+```
+
+Users
+-----
+#### Anonymous User
+
+The anonymous session depends upon a user with the ID -1 being present in the `users` table. This is a special ID chosen for the anonymous user and should be reserved for it.
+
+As an example:
+
+```TCL
+# Generate a password hash for the anonymous user
+set password_hash [qc::password_hash TheAnonymousUserCreepsSilentlyIntoTheDatabase]
+db_dml {
+    INSERT INTO
+    users (user_id, firstname, surname, email, password_hash)
+    VALUES
+    (-1, 'anonymous', 'anonymous', 'anonymous@qcode.co.uk', :password_hash
+);
+
+```
+
 * * *
 
 Qcode Software Limited <http://www.qcode.co.uk>
@@ -309,3 +315,4 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [file]: #file
 [file_alias_path]: #file_alias_path
 [image]: #image
+[db_init]: procs/db_init.md
