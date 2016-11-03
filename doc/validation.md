@@ -53,6 +53,53 @@ In order to validate arguments for a request handler they must be present as the
 
 Should any item turn out to be invalid then the connection response is returned to the client to let them know what was wrong. See [`qc::filter_validate`] for more information on the validation process.
 
+### Differing Constraints & Arguments Not Present in the Data Model
+
+There may be arguments for a request handler that are not present in your data model or that require different constraints from those already present in the data model.
+
+Consider a request handler for viewing a sales report. Such a report might have many filters e.g. dates, customers, and products. However, many of these filters may not be present in your data model so how can they be validated?
+
+Our solution is to add columns with appropriate types and constraints to tables called "required", "optional", and "form".
+
+```sql
+alter table required
+add column from_date date not null,
+add column to_date date not null;
+
+alter table optional
+add column products plain_text,
+add column customers plain_test;
+```
+
+```tcl
+register GET /reports/sales/by-category {
+   required.from_date
+   required.to_date
+   {optional.products ""}
+   {optional.customers ""}
+} {
+   ...
+}
+```
+
+All columns that we've added to the table "required" have not null constraints while those added to the table "optional" are nullable. We found that this was the best way to deal with different requirements for arguments with the same names across different request handlers.
+
+The table "form" exists to capture different constraints on arguments where the columns may already exist in other tables. For example, you may wish to constrain `from_date` on some sales reports to no earlier than 1 year ago but still allow other reports to filter earlier than this.
+
+```sql
+alter table form
+add column from_date date not null,
+add check (from_date >= current_date - '1 year'::interval);
+```
+
+```tcl
+register GET /reports/sales {
+   form.from_date
+   required.to_date
+} {
+   ...
+}
+```
 
 ### Custom & Manual Validation
 
