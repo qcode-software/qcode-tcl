@@ -50,10 +50,14 @@ Scheduled Tasks
 
 Each scheduled task needs to be wrapped in a [try](procs/try.md) clause with custom [error reporting](procs/error_report_no_conn.md). E.g.
 
-```
+```tcl
 try {
     a_scheduled_task
-} {
-    email_send from nsd@localhost to support@domain.com subject $errorMessage html qc::error_report_no_conn
+} on error [list message options] {
+    email_send \
+        from nsd@localhost \
+        to support@domain.com \
+        subject $message \
+        html [qc::error_report_no_conn $message [dict get $options -errorinfo] [dict get $options -errorcode]]
 }
 ```	
