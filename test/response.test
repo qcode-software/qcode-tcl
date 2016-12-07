@@ -1,0 +1,108 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    test response_data2json-1.0 {response data and response2json} -body {
+        response status valid
+        response data {object
+            firstname Robert
+            surname {string "O'Neil"}
+            age 22
+            height {number 180}
+            employed {boolean true}
+            commision false
+            emails {array
+                {string "boboneil@test.com"}
+                {object
+                    address {string "robertneil@test.com"}
+                    description business
+                }
+            }
+        }
+        response2json
+    } -cleanup {
+        unset ::data
+    } -result {{
+"status": "valid",
+"record": {
+
+},
+"message": {
+
+},
+"action": {
+
+},
+"data": {
+"firstname": "Robert",
+"surname": "O'Neil",
+"age": 22,
+"height": 180,
+"employed": true,
+"commision": false,
+"emails": ["boboneil@test.com",{
+"address": "robertneil@test.com",
+"description": "business"
+}]
+}
+}}
+
+    test response_data2html-1.0 {response data and response2html} -body {
+        response status valid
+        response data {object
+            firstname Robert
+            surname {string "O'Neil"}
+            age 22
+            height {number 180}
+            employed {boolean true}
+            commision false
+            emails {array
+                {string "boboneil@test.com"}
+                {object
+                    address {string "robertneil@test.com"}
+                    description business
+                }
+            }
+        }
+        response2html
+    } -cleanup {
+        unset ::data
+    } -result {<!doctype html>
+        <html>
+        <head>
+        <title>Data Validation Passed</title>
+        <style>
+        
+            .validation-response * {
+                display: none;
+            }
+        
+        </style>
+        </head>
+        <body>
+        <h1 class="validation-response-page-title">Data Validation Passed</h1><div id="validation_response" class="validation-response"><div class="status">valid</div>
+<div class="message"></div>
+<div class="record"></div>
+<div class="action"></div>
+<div class="data"><div class="object-property" id="data.firstname">Robert</div>
+<div class="object-property" id="data.surname"><span class="string">O&#39;Neil</span></div>
+<div class="object-property" id="data.age">22</div>
+<div class="object-property" id="data.height"><span class="number">180</span></div>
+<div class="object-property" id="data.employed"><span class="boolean">true</span></div>
+<div class="object-property" id="data.commision">false</div>
+<div class="object-property" id="data.emails"><div class="array-element"><span class="string">boboneil@test.com</span></div>
+<div class="array-element"><div class="object-property" id="data.address"><span class="string">robertneil@test.com</span></div>
+<div class="object-property" id="data.description">business</div></div></div></div>
+<div class="extended"></div></div><div class="validation-response-advice">Please go back and try again.</div>
+        </body>
+        </html>}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
