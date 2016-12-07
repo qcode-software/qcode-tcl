@@ -90,15 +90,15 @@ namespace eval ::qcode::test {
 <div class="message"></div>
 <div class="record"></div>
 <div class="action"></div>
-<div class="data"><div class="object-property" id="data.firstname">Robert</div>
-<div class="object-property" id="data.surname"><span class="string">O&#39;Neil</span></div>
-<div class="object-property" id="data.age">22</div>
-<div class="object-property" id="data.height"><span class="number">180</span></div>
-<div class="object-property" id="data.employed"><span class="boolean">true</span></div>
-<div class="object-property" id="data.commision">false</div>
-<div class="object-property" id="data.emails"><div class="array-element"><span class="string">boboneil@test.com</span></div>
-<div class="array-element"><div class="object-property" id="data.address"><span class="string">robertneil@test.com</span></div>
-<div class="object-property" id="data.description">business</div></div></div></div>
+<div class="data"><div class="object-property" data-name="firstname">Robert</div>
+<div class="object-property" data-name="surname"><span class="string">O&#39;Neil</span></div>
+<div class="object-property" data-name="age">22</div>
+<div class="object-property" data-name="height"><span class="number">180</span></div>
+<div class="object-property" data-name="employed"><span class="boolean">true</span></div>
+<div class="object-property" data-name="commision">false</div>
+<div class="object-property" data-name="emails"><div class="array-element"><span class="string">boboneil@test.com</span></div>
+<div class="array-element"><div class="object-property" data-name="address"><span class="string">robertneil@test.com</span></div>
+<div class="object-property" data-name="description">business</div></div></div></div>
 <div class="extended"></div></div><div class="validation-response-advice">Please go back and try again.</div>
         </body>
         </html>}

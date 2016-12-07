@@ -17,6 +17,10 @@ namespace eval qc::response {
             return -code error "Usage: qc::response extend name key value ?key value ...?"
         }
         global data
+
+        # Note: qc::response extend data is deprecated, use qc::response data instead
+        # (To-do: audit existing code to make sure we aren't breaking anything, then
+        #  remove this and bump to a breaking version number)
         if { $name eq "data" } {
             set tson [qc::tson_object {*}$args]
             qc::response data $tson
@@ -401,7 +405,7 @@ proc qc::response2html_snippet {} {
                     set status $value
                 }
                 data {
-                    set data_html [qc::response_tson2html_fragment $value]
+                    set data_html [qc::response_tson2html_snippet $value]
                 }
                 default {
                     foreach {name val} $value {
@@ -431,8 +435,8 @@ proc qc::response2html_snippet {} {
                ]
 }
 
-proc qc::response_tson2html_fragment {tson} {
-    #| Converts tson into a HTML fragment recursively
+proc qc::response_tson2html_snippet {tson} {
+    #| Converts tson into a HTML snippet recursively
     switch -- [lindex $tson 0] {
         object {
             set elements [list]
@@ -440,8 +444,8 @@ proc qc::response_tson2html_fragment {tson} {
                 lappend elements \
                     [h div \
                          class object-property \
-                         id "data.$name" \
-                         [qc::response_tson2html_fragment $value]]
+                         data-name $name \
+                         [qc::response_tson2html_snippet $value]]
             }
             return [join $elements \n]                        
         }
@@ -451,7 +455,7 @@ proc qc::response_tson2html_fragment {tson} {
                 lappend elements \
                     [h div \
                          class array-element \
-                         [qc::response_tson2html_fragment $value]]
+                         [qc::response_tson2html_snippet $value]]
             }
             return [join $elements \n]
         }
