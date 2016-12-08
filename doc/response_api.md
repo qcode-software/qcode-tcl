@@ -31,7 +31,13 @@ This describes the API is for modifying the [connection response].
 * [redirect]
 * [resubmit]
 
+### Data
+
+* [data]
+
 ### Extending The Response
+
+(Deprecated in favour of qc::response data)
 
 * [extend]
 
@@ -58,6 +64,7 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [redirect]: procs/response_action_redirect.md
 [resubmit]: procs/response_action_resubmit.md
 [extend]: procs/response_extend.md
+[data]: procs/response_data.md
 
 [response2json]: procs/response2json.md
 [response2xml]: procs/response2xml.md

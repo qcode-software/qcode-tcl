@@ -4,12 +4,13 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-The connection response represents a response to be delivered to the client. It consists of four main elements:
+The connection response represents a response to be delivered to the client. It consists of five main elements:
 
 * Status
 * Record
 * Messages
 * Actions
+* Data
 
 ### Status
 The status indicates if everything was valid or if, for some reason, some element is invalid. The status should be set to `invalid` on any error such as:
@@ -49,6 +50,9 @@ Actions suggest what the client should do next. Each action has a single propert
 
 `Resubmit` Resubmit the form.
 
+### Data
+Data contains action-specific response data, such as a rescource representation used to update the current page client-side.
+
 
 Setting Up The Response
 -----------------------
@@ -59,7 +63,7 @@ Details on setting up the response can be found in the [API].
 Extending The Response
 ----------------------
 
-The response can be extended to include more objects alongside the four standard ones. See the [API] for more information.
+The response can be extended to include more objects alongside the standard ones. See the [API] for more information.
 
 
 Sensitive Information
@@ -117,9 +121,8 @@ Following are examples of different formats of response for an invalid login att
             "value": "Sorry, that email or password is not recognised."
         }
     },
-    "action": {
-        
-    }
+    "action": {}
+    "data": {}
 }
 
 ```
@@ -145,7 +148,7 @@ Following are examples of different formats of response for an invalid login att
   </alert>
 </message>
 <action></action>
-
+<data></data>
 ```
 
 **HTML:**
@@ -197,12 +200,12 @@ Following are examples of different formats of response for an invalid login att
        </div>
      </div>
      <div class="action"></div>
+     <div class="data"></div>
      <div class="extended"></div>
    </div>
    <div class="validation-response-advice">Please go back and try again.</div>
   </body>
-</html>  
-
+</html>
 ```
 
 * * *

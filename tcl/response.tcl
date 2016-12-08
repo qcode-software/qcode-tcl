@@ -1,12 +1,19 @@
 namespace eval qc::response {
 
-    namespace export status record message action extend
+    namespace export status record message action extend data
     namespace ensemble create -unknown {
         response_subcommand_map
     }
 
+    proc data {tson} {
+        #| Sets the JSON response object data property using tson
+        global data
+        dict set data data $tson
+    }
+
     proc extend {name args} {
         #| Extends the JSON response with an object named $name with properties defined in $args.
+        #| Deprecated in favour of qc::response data
         if { [llength $args] % 2 != 0 } {
             return -code error "Usage: qc::response extend name key value ?key value ...?"
         }
@@ -265,6 +272,7 @@ proc qc::response2tson {} {
     set record_objects [list object]
     set action_objects [list object]
     set message_objects [list object]
+    set data_tson [list]
     set extensions [list]
     # Default status is "valid"
     set status "valid"
@@ -297,6 +305,9 @@ proc qc::response2tson {} {
                 status {
                     set status $value
                 }
+                data {
+                    set data_tson $value
+                }
                 default {
                     set object [list object]
                     foreach {name val} $value {
@@ -306,7 +317,7 @@ proc qc::response2tson {} {
                 }
             }
         }
-        set result [list object status $status record $record_objects message $message_objects action $action_objects {*}$extensions]
+        set result [list object status $status record $record_objects message $message_objects action $action_objects data $data_tson {*}$extensions]
         return $result
     } on error [list error_message options] {
         return -code error "Malformed data: $error_message"
@@ -330,6 +341,7 @@ proc qc::response2html_snippet {} {
     set action_elements {}
     set message_elements {}
     set extended_elements {}
+    set data_html ""
     # Default status is "valid"
     set status "valid"
     ::try {
@@ -383,6 +395,9 @@ proc qc::response2html_snippet {} {
                 status {
                     set status $value
                 }
+                data {
+                    set data_html [qc::response_tson2html_snippet $value]
+                }
                 default {
                     foreach {name val} $value {
                         lappend extended_elements [h div \
@@ -405,9 +420,48 @@ proc qc::response2html_snippet {} {
                            [h div class message [join $message_elements \n]] \
                            [h div class record [join $record_elements \n]] \
                            [h div class action [join $action_elements \n]] \
+                           [h div class data $data_html] \
                            [h div class extended [join $extended_elements \n]]
                           ] \n] \
                ]
+}
+
+proc qc::response_tson2html_snippet {tson} {
+    #| Converts tson into a HTML snippet recursively
+    switch -- [lindex $tson 0] {
+        object {
+            set elements [list]
+            foreach {name value} [lrange $tson 1 end] {
+                lappend elements \
+                    [h div \
+                         class object-property \
+                         data-name $name \
+                         [qc::response_tson2html_snippet $value]]
+            }
+            return [join $elements \n]                        
+        }
+        array {
+            set elements [list]
+	    foreach value [lrange $tson 1 end] {
+                lappend elements \
+                    [h div \
+                         class array-element \
+                         [qc::response_tson2html_snippet $value]]
+            }
+            return [join $elements \n]
+        }
+        string -
+        number -
+        boolean {
+            return \
+                [h span \
+                     class [lindex $tson 0] \
+                     [qc::html_escape [lindex $tson 1]]]
+        }
+        default {
+            return [qc::html_escape $tson]
+        }
+    }
 }
 
 proc qc::response2html {} {
@@ -433,6 +487,7 @@ proc qc::response2html {} {
             .validation-response > .record .field.valid,
             .validation-response > .record .field.invalid .value,
             .validation-response > .action,
+            .validation-response > .data,
             .validation-response > .extended {
                 display: none;
             }
@@ -456,24 +511,21 @@ proc qc::response2html {} {
     append content [qc::response2html_snippet]
     append content [h div class "validation-response-advice" "Please go back and try again."]
     
-    set template {
-        <!doctype html>
-        <html>
-        <head>
-        <title>$title</title>
-        <style>
-        $css
-        </style>
-        </head>
-        <body>
-        $content
-        </body>
-        </html>        
-    }
-    
-    set map {}
-    lappend map \$title $title
-    lappend map \$css $css
-    lappend map \$content $content
-    return [string map $map $template]
+    set html [h_tag "!doctype html"]
+    append html [h html \
+                     lang "en" \
+                     [join [list \
+                                [h head \
+                                     [join [list \
+                                                [h title $title] \
+                                                [h style $css] \
+                                               ] \n] \
+                                     ] \
+                                [h body \
+                                     $content \
+                                    ] \
+                               ] \n] \
+                     ]                      
+
+    return $html
 }
