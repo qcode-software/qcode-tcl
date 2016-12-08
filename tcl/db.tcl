@@ -278,7 +278,20 @@ proc qc::db_quote { value {type ""}} {
 
 proc qc::db_quote_identifier {value} {
     #| Quote a sql identifier (eg. a table or column name)
-    return "\"[string map {\" \"\"} $value]\""
+    set parts [split $value "."]
+    switch [llength $parts] {
+        1 {
+            return "\"[string map {\" \"\"} $value]\""
+        }
+        2 {
+            set table [qc::db_quote_identifier [lindex $parts 0]]
+            set column [qc::db_quote_identifier [lindex $parts 1]]
+            return "${table}.${column}"
+        }
+        default {
+            error "Unable to parse identifier \"$value\""
+        }
+    }
 }
 
 proc qc::db_escape_regexp { string } {

@@ -154,6 +154,19 @@ namespace eval ::qcode::test {
             return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud] [db_quote $fred text] [db_quote $fred]"
         } -result {'1' 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text '999'}
 
+        # db_quote_identifier
+        test db_quote_identifier-1.0 {db_quote_identifier} -body {
+            db_quote_identifier user
+        } -result {"user"}
+
+        test db_quote_identifier-1.1 {db_quote_identifier with quotes} -body {
+            db_quote_identifier {user "name"}
+        } -result {"user ""name"""}
+
+        test db_quote_identifier-1.2 {db_quote_identifier qualified} -body {
+            db_quote_identifier user.name
+        } -result {"user"."name"}
+
         # db_escape_regexp
         test db_escape_regexp-1.0 {db_escape_regexp} -body {
             db_escape_regexp "*fi+sh(es)?"
