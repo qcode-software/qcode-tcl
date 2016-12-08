@@ -73,20 +73,13 @@ namespace eval ::qcode::test {
         response2html
     } -cleanup {
         unset ::data
-    } -result {<!doctype html>
-        <html>
-        <head>
-        <title>Data Validation Passed</title>
-        <style>
-        
+    } -result {<!doctype html><html lang="en"><head><title>Data Validation Passed</title>
+<style>
             .validation-response * {
                 display: none;
             }
-        
-        </style>
-        </head>
-        <body>
-        <h1 class="validation-response-page-title">Data Validation Passed</h1><div id="validation_response" class="validation-response"><div class="status">valid</div>
+        </style></head>
+<body><h1 class="validation-response-page-title">Data Validation Passed</h1><div id="validation_response" class="validation-response"><div class="status">valid</div>
 <div class="message"></div>
 <div class="record"></div>
 <div class="action"></div>
@@ -99,9 +92,7 @@ namespace eval ::qcode::test {
 <div class="object-property" data-name="emails"><div class="array-element"><span class="string">boboneil@test.com</span></div>
 <div class="array-element"><div class="object-property" data-name="address"><span class="string">robertneil@test.com</span></div>
 <div class="object-property" data-name="description">business</div></div></div></div>
-<div class="extended"></div></div><div class="validation-response-advice">Please go back and try again.</div>
-        </body>
-        </html>}
+<div class="extended"></div></div><div class="validation-response-advice">Please go back and try again.</div></body></html>}
 
     cleanupTests
 }

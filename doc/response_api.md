@@ -37,6 +37,8 @@ This describes the API is for modifying the [connection response].
 
 ### Extending The Response
 
+(Deprecated in favour of qc::response data)
+
 * [extend]
 
 ## Response Formats

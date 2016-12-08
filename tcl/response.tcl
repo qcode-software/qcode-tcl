@@ -13,22 +13,13 @@ namespace eval qc::response {
 
     proc extend {name args} {
         #| Extends the JSON response with an object named $name with properties defined in $args.
+        #| Deprecated in favour of qc::response data
         if { [llength $args] % 2 != 0 } {
             return -code error "Usage: qc::response extend name key value ?key value ...?"
         }
         global data
-
-        # Note: qc::response extend data is deprecated, use qc::response data instead
-        # (To-do: audit existing code to make sure we aren't breaking anything, then
-        #  remove this and bump to a breaking version number)
-        if { $name eq "data" } {
-            set tson [qc::tson_object {*}$args]
-            qc::response data $tson
-
-        } else {
-            dict for {key value} $args {
-                dict set data $name $key $value
-            }
+        dict for {key value} $args {
+            dict set data $name $key $value
         }
     }
 
@@ -520,24 +511,21 @@ proc qc::response2html {} {
     append content [qc::response2html_snippet]
     append content [h div class "validation-response-advice" "Please go back and try again."]
     
-    set template {
-        <!doctype html>
-        <html>
-        <head>
-        <title>$title</title>
-        <style>
-        $css
-        </style>
-        </head>
-        <body>
-        $content
-        </body>
-        </html>        
-    }
-    
-    set map {}
-    lappend map \$title $title
-    lappend map \$css $css
-    lappend map \$content $content
-    return [string trim [string map $map $template]]
+    set html [h_tag "!doctype html"]
+    append html [h html \
+                     lang "en" \
+                     [join [list \
+                                [h head \
+                                     [join [list \
+                                                [h title $title] \
+                                                [h style $css] \
+                                               ] \n] \
+                                     ] \
+                                [h body \
+                                     $content \
+                                    ] \
+                               ] \n] \
+                     ]                      
+
+    return $html
 }
