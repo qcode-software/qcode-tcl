@@ -5,7 +5,7 @@ part of [Connection Response API](../response_api.md)
 
 Usage
 -----
-`qc::reponse data data_tson`
+`qc::reponse data $data_tson`
 
 Description
 -----------
