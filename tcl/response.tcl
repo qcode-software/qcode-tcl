@@ -183,12 +183,7 @@ namespace eval qc::response {
                     }
                 }
 
-            } else {
-                # Absolute url
-                # check that redirection is to the same domain
-                if { ![regexp "^https?://${host}(:\[0-9\]+)?(/|\$)" $url] } {
-                    error "Will not redirect to a different domain. Host $host. Redirect to \"[html_escape $url]\""
-                }
+            } else {                
                 # check for malicious mal-formed url
                 if { ![qc::is url $url] } {
                     error "\"[html_escape $url]\" is not a valid url."
