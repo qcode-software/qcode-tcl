@@ -144,7 +144,7 @@ namespace eval qc::response {
     ##################################################
     namespace eval action {
         
-        namespace export redirect resubmit login
+        namespace export redirect external_redirect resubmit login
         namespace ensemble create
 
         proc redirect {url} {
@@ -196,6 +196,19 @@ namespace eval qc::response {
             }
             
             dict set data action redirect value [url $url]
+        }
+
+        proc external_redirect {url} {
+            #| Sets the redirect property with the given external URL.
+            global data
+            reset
+                        
+            # check for malicious mal-formed url
+            if { ![qc::is url $url] } {
+                error "\"[html_escape $url]\" is not a valid url."
+            }
+
+            dict set data action redirect value $url
         }
 
         proc resubmit {} {
