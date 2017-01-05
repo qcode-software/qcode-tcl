@@ -458,7 +458,7 @@ proc qc::http_head {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
+    dict2vars [qc::http_curl -nobody 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
@@ -487,7 +487,7 @@ proc qc::http_exists {args} {
     args $args -timeout 60 -useragent ? -valid_response_codes {100 200} url
     default useragent "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.7) Gecko/20060909 FreeBSD/i386 Firefox/1.5.0.7"
     #
-    dict2vars [qc::http_curl  -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] responsecode curlErrorNumber
+    dict2vars [qc::http_curl  -nobody 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1] responsecode curlErrorNumber
 
     if { [in $valid_response_codes $responsecode] } {
 	return true

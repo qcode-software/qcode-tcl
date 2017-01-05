@@ -148,6 +148,23 @@ namespace eval ::qcode::test {
         return [qc::http_header_sort_values_by_weight $accept_header]
     } -result {{token application/json params {indent 4}} {token text/html params {level 1 q 0.9}} {token text/xml params {q 0.7}} {token */* params {q 0.01}}}
 
+    test http_exists-1.0 {http_exists true} -body {
+        http_exists -timeout 30 -- http://httpbin.org/
+    } -result {true}
+
+    test http_exists-1.1 {http_exists false} -body {
+        http_exists -timeout 30 -- http://httpbin.org/idontexist
+    } -result {false}
+
+    test http_head-1.0 {http_head} -body {
+        set response [qc::http_head -timeout 30 http://httpbin.org/response-headers?test=hello]
+        if { [dict exists $response test] } {
+            return [dict get $response test]
+        } else {
+            return ""
+        }
+    } -result {hello}
+
     cleanupTests
 }
 namespace delete ::qcode::test
