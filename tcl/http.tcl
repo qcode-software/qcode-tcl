@@ -458,7 +458,7 @@ proc qc::http_head {args} {
 	lappend httpheaders [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -nobody 1 -header 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
+    dict2vars [qc::http_curl -nobody 1 -headervar headers -url $url -sslverifypeer 0 -sslverifyhost 0 -timeout $timeout -followlocation 1 -httpheader $httpheaders] headers responsecode curlErrorNumber
 
     switch $curlErrorNumber {
 	0 {
