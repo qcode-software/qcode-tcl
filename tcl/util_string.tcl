@@ -230,8 +230,8 @@ proc qc::strip_common_leading_whitespace {text} {
     return $text
 }
 
-proc qc::spell_index { corpus_file } {
-    #| Takes a filename containing a text corpus & creates spell_corpus table
+proc qc::spell_index { corpus } {
+    #| Takes a string containing a text corpus & creates spell_corpus table
     #| containing each word and its number of entries.
     #| spell_corpus table is:
     #|         create table spell_corpus (
@@ -243,9 +243,6 @@ proc qc::spell_index { corpus_file } {
     db_dml {drop table if exists temp_corpus}
     db_dml {create table temp_corpus(words text)}
 
-    set fh [open $corpus_file r]
-    set corpus [read $fh]
-    close $fh
     foreach line [split $corpus \n] {
         db_dml { insert into temp_corpus (words) values(:line) }
     }
