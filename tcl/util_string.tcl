@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
+    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace spell_correct spell_index
 }
 
 proc qc::upper { string } {
@@ -228,4 +228,67 @@ proc qc::strip_common_leading_whitespace {text} {
         regsub -all -line "^ {$min}" $text {} text
     }
     return $text
+}
+
+proc qc::spell_index { corpus_file } {
+    #| Takes a filename containing a text corpus & creates spell_corpus table
+    #| containing each word and its number of entries.
+    #| spell_corpus table is:
+    #|         create table spell_corpus (
+    #|                  word text,
+    #|                  entries int
+    #|                  );
+
+    # insert into temp table since ts_stat takes a sql query as parameter
+    db_dml {drop table if exists temp_corpus}
+    db_dml {create table temp_corpus(words text)}
+
+    set fh [open $corpus_file r]
+    set corpus [read $fh]
+    close $fh
+    foreach line [split $corpus \n] {
+        db_dml { insert into temp_corpus (words) values(:line) }
+    }
+
+    # Use ts_stat to extract lexemes and statistical data from the tsvectorised
+    # text corpus
+    db_dml {truncate spell_corpus}
+    db_dml {
+        insert
+        into
+        spell_corpus
+        select
+        word,
+        nentry
+        from
+        ts_stat('select to_tsvector(''simple'',words) from temp_corpus')
+    }
+    db_dml {drop table temp_corpus}
+}
+
+proc qc::spell_correct { word } {
+    #| Returns the most frequently occuring valid word from spell_corpus which
+    #| is within a levenshtein distance of 2 of the supplied word.
+    #| Returns an empty string if no alternative suggestion is found.
+    #| The spell_corpus table is populated by qc::spell_index
+
+    set qry {
+        select 
+        word as suggestion
+        from
+        spell_corpus 
+        where 
+        levenshtein(lower(word),lower(:word))<=2
+        order by levenshtein(lower(word),lower(:word)) asc,entries desc 
+        limit 1
+    }
+    db_0or1row $qry {
+        set suggestion ""
+    } 
+
+    if { $suggestion ne $word } {
+        return $suggestion
+    } else {
+        return "" 
+    }
 }
