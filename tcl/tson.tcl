@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get
 }
 
 proc qc::tson_object { args } {
@@ -118,4 +118,20 @@ proc qc::tson2xml { tson } {
 	    }
 	}
     }
+}
+
+proc qc::tson_get {tson args} {
+    #| Returns the value at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+
+    # Construct a PostgreSQL array literal from the path.
+    set path "\{[join $args ","]\}"
+    # Convert TSON to JSON.
+    set json [qc::tson2json $tson]
+    # Use PostgreSQL JSON operators to get the value at the path.
+    qc::db_cache_1row -ttl 86400 {
+        select :json::json#>>:path as value
+    }
+
+    return $value
 }
