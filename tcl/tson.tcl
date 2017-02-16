@@ -125,12 +125,12 @@ proc qc::tson_get {tson args} {
     #| Requires PostgreSQL 9.3 or later.
 
     # Construct a PostgreSQL array literal from the path.
-    set path "\{[join $args ","]\}"
+    set path [qc::sql_list2array -type text $args]
     # Convert TSON to JSON.
     set json [qc::tson2json $tson]
     # Use PostgreSQL JSON operators to get the value at the path.
     qc::db_cache_1row -ttl 86400 {
-        select :json::json#>>:path as value
+        select :json::json#>>$path as value
     }
 
     return $value
