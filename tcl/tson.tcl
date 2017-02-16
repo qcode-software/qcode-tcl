@@ -135,3 +135,48 @@ proc qc::tson_get {tson args} {
 
     return $value
 }
+
+proc qc::tson_exists {tson args} {
+    #| Determines if a value exists at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+    if { [llength $args] == 0 } {
+        # No path specified.
+        return false
+    }
+
+    # Check if the outermost key in the path exists.
+    set json [qc::tson2json $tson]
+    set key [lindex $args 0]
+    
+    switch [lindex $tson 0] {
+        "object" {
+            qc::db_cache_1row -ttl 86400 {
+                select :key in (select json_object_keys(:json::json)) as key_exists
+            }
+        }
+        "array" {
+            qc::db_cache_1row -ttl 86400 {
+                select json_array_length(:json::json) as array_length
+            }
+            
+            if { $array_length == 0 || $key > $array_length - 1 } {
+                # Array has no elements or key is out of bounds.
+                return false
+            }
+
+            set key_exists true
+        }
+        default {
+            error "TSON must be an object or an array."
+        }
+    }
+    
+    if { [llength $args] == 1 } {
+        # No more keys in the path to check.
+        return $key_exists
+    }
+
+    return [qc::tson_exists \
+                [qc::json2tson [qc::tson_get $tson $key]] \
+                {*}[lrange $args 1 end]]
+}
