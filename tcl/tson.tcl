@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists
 }
 
 proc qc::tson_object { args } {
@@ -171,8 +171,8 @@ proc qc::tson_exists {tson args} {
         }
     }
     
-    if { [llength $args] == 1 } {
-        # No more keys in the path to check.
+    if { !$key_exists || [llength $args] == 1 } {
+        # Key doesn't exist or no more keys in the path to check.
         return $key_exists
     }
 
