@@ -180,3 +180,43 @@ proc qc::tson_exists {tson args} {
                 [qc::json2tson [qc::tson_get $tson $key]] \
                 {*}[lrange $args 1 end]]
 }
+
+proc qc::tson_type {tson args} {
+    #| Returns the type of the value at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+    set value_tson $tson
+    
+    if { [llength $args] > 0 } {
+        # A path was specified so get the value at the path.
+
+        if { ![qc::tson_exists $tson {*}$args] } {
+            # Path doesn't existin the TSON.
+            error "Path \"{*}$args\" not found in TSON."
+        }
+        
+        # Construct a PostgreSQL array literal from the path.
+        set path [qc::sql_list2array -type text $args]
+        
+        # Convert TSON to JSON.
+        set json [qc::tson2json $tson]
+        
+        # Use PostgreSQL JSON operators to get the value at the path.
+        qc::db_cache_1row -ttl 86400 {
+            select :json::json#>$path as value
+        }
+        
+        # Convert the JSON to TSON.
+        set value_tson [qc::json2tson $value]
+    }
+
+    if { $value_tson in [list "true" "false"] } {
+        return "boolean"
+    } elseif { [qc::is decimal $value_tson] } {
+        return "number"
+    } elseif { $value_tson eq "null" } {
+        return "null"
+    } else {
+        # object, array, or string.
+        return [lindex $value_tson 0]
+    }
+}
