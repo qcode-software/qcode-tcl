@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type
 }
 
 proc qc::tson_object { args } {
@@ -141,7 +141,7 @@ proc qc::tson_exists {tson args} {
     #| Requires PostgreSQL 9.3 or later.
     if { [llength $args] == 0 } {
         # No path specified.
-        return false
+        error "Usage: qc::tson_exists tson key ?key ...?"
     }
 
     # Check if the outermost key in the path exists.
@@ -161,10 +161,10 @@ proc qc::tson_exists {tson args} {
             
             if { $array_length == 0 || $key > $array_length - 1 } {
                 # Array has no elements or key is out of bounds.
-                return false
+                return f
             }
 
-            set key_exists true
+            set key_exists t
         }
         default {
             error "TSON must be an object or an array."
