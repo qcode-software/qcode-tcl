@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists
 }
 
 proc qc::tson_object { args } {
