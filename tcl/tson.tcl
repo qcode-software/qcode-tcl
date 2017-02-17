@@ -171,8 +171,8 @@ proc qc::tson_exists {tson args} {
         }
     }
     
-    if { [llength $args] == 1 } {
-        # No more keys in the path to check.
+    if { !$key_exists || [llength $args] == 1 } {
+        # Key doesn't exist or no more keys in the path to check.
         return $key_exists
     }
 
