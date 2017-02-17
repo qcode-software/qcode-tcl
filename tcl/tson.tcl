@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type
 }
 
 proc qc::tson_object { args } {
@@ -191,7 +191,7 @@ proc qc::tson_type {tson args} {
 
         if { ![qc::tson_exists $tson {*}$args] } {
             # Path doesn't existin the TSON.
-            error "Path \"{*}$args\" not found in TSON."
+            error "Path \"$args\" not found in TSON."
         }
         
         # Construct a PostgreSQL array literal from the path.
@@ -215,8 +215,9 @@ proc qc::tson_type {tson args} {
         return "number"
     } elseif { $value_tson eq "null" } {
         return "null"
-    } else {
-        # object, array, or string.
+    } elseif { [lindex $value_tson 0] in [list "object" "array" "string"] } {
         return [lindex $value_tson 0]
+    } else {
+        error "Invalid TSON."
     }
 }
