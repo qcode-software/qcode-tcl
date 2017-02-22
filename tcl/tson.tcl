@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type
+    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type tson_array_foreach
 }
 
 proc qc::tson_object { args } {
@@ -219,5 +219,13 @@ proc qc::tson_type {tson args} {
         return [lindex $value_tson 0]
     } else {
         error "Invalid TSON."
+    }
+}
+
+proc qc::tson_array_foreach {varName tson code} {
+    #| Iterator for a tson array.
+    foreach element [lrange $tson 1 end] {
+        upset 1 $varName $element
+        uplevel 1 $code
     }
 }
