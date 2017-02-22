@@ -97,6 +97,34 @@ proc qc::is_period {string} {
     return [qc::is period $string]
 }
 
+proc qc::cast_value2model {name value} {
+    #| Return the value cast to the data model.
+    #| Name can be a partial or fully qualified column identifier.
+    set table ""
+    
+    # Check if name is fully qualified
+    if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+        lassign [qc::memoize qc::db_qualified_table_column $name] table column
+    }
+
+    set data_type [qc::memoize qc::db_column_type $table $column]
+    set nullable [qc::memoize qc::db_column_nullable $table $column]
+
+    # Check if nullable
+    if {! $nullable && $value eq ""} {
+        error "$column cannot be empty."
+    } elseif {$nullable && $value eq ""} {
+        return $value
+    }
+
+    # Check value against data type
+    if {[qc::castable $data_type $value]} {
+        return [qc::cast $data_type $value]
+    } else {
+        error [qc::data_type_error_check $data_type $value]
+    }
+}
+
 proc qc::cast_values2model {args} {
     #| Check the data types of the values against the definitions for these names.
     #| Returns a new list of values after casting to appropriate type.
