@@ -10,7 +10,7 @@ proc qc::tson_string {value} {
 
 proc qc::tson_number {value} {
     #| Returns a TSON number.
-    if { $value eq "" } {
+    if { [string tolower $value] in [list "" "null"] } {
         return "null"
     }
     return [list number $value]
@@ -18,7 +18,7 @@ proc qc::tson_number {value} {
 
 proc qc::tson_boolean {value} {
     #| Returns a TSON boolean.
-    if { $value eq "" } {
+    if { [string tolower $value] in [list "" "null"] } {
         return "null"
     }
     return [list boolean [qc::cast boolean $value true false]]
@@ -26,7 +26,7 @@ proc qc::tson_boolean {value} {
 
 proc qc::tson_array {args} {
     #| Return a tson array from list of values.
-    if { $args eq "" } {
+    if { [llength $args] == 0 } {
         return "null"
     }
     
@@ -55,7 +55,7 @@ proc qc::tson_object { args } {
     # EXAMPLE:  
     # % tson_object firstname "Daniel" surname "Clark" age 23
     # object firstname {string Daniel} surname {string Clark} age {number 23}
-    if { $args eq "" } {
+    if { [llength $args] == 0 } {
         return "null"
     }
     

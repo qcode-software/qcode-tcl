@@ -455,3 +455,17 @@ proc qc::db_user_is_superuser {username} {
 	return $usesuper
     }
 }
+
+proc qc::db_is {data_type value} {
+    #| Determines if the value is a database data type.
+    set qry {
+        SELECT :value::$data_type as VALUE;
+    }
+    
+    ::try {
+        qc::db_cache_1row -ttl 86400 $qry
+        return t
+    } on error [list error_message options] {
+        return f
+    }
+}
