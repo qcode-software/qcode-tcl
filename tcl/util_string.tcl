@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace spell_correct spell_index
+    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace spell_correct spell_index noun_indefinite_determiner
 }
 
 proc qc::upper { string } {
@@ -287,5 +287,14 @@ proc qc::spell_correct { word } {
         return $suggestion
     } else {
         return "" 
+    }
+}
+
+proc qc::noun_indefinite_determiner {noun} {
+    #| Returns the indefinite determiner for a noun.
+    if { [string tolower [string index $noun 0]] in [list a e i o u] } {
+        return "an"
+    } else {
+        return "a"
     }
 }

@@ -1,5 +1,52 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml tson_get tson_exists tson_type tson_array_foreach
+    namespace export tson* json_quote
+}
+
+
+proc qc::tson_string {value} {
+    #| Returns a TSON string.
+    return [list string $value]
+}
+
+proc qc::tson_number {value} {
+    #| Returns a TSON number.
+    if { [string tolower $value] in [list "" "null"] } {
+        return "null"
+    }
+    return [list number $value]
+}
+
+proc qc::tson_boolean {value} {
+    #| Returns a TSON boolean.
+    if { [string tolower $value] in [list "" "null"] } {
+        return "null"
+    }
+    return [list boolean [qc::cast boolean $value true false]]
+}
+
+proc qc::tson_array {args} {
+    #| Return a tson array from list of values.
+    if { [llength $args] == 0 } {
+        return "null"
+    }
+    
+    set tson [list array]
+    
+    foreach value $args {
+        if { [lindex $value 0] in [list object array string number boolean] } {
+            lappend tson $value
+        } elseif { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+            lappend tson [list number $value]
+        } elseif { $value in [list true false] } {
+            lappend tson [list boolean $value]
+        } elseif { $value eq "null" } {
+            lappend tson $value
+        } else {
+            lappend tson [list string $value]
+        }
+    }
+
+    return $tson
 }
 
 proc qc::tson_object { args } {
@@ -8,19 +55,26 @@ proc qc::tson_object { args } {
     # EXAMPLE:  
     # % tson_object firstname "Daniel" surname "Clark" age 23
     # object firstname {string Daniel} surname {string Clark} age {number 23}
-
+    if { [llength $args] == 0 } {
+        return "null"
+    }
+    
     set tson [list object]
     
     foreach {name value} $args {
-	if { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
-            lappend tson $name [list number $value]
-        } elseif { $value in [list true false] } {
-	    lappend tson $name [list boolean $value]
-	} elseif { $value eq "null" } {
-	    lappend tson $name $value
-	} else { 
-	    lappend tson $name [list string $value]
-	}
+        if { [lindex $value 0] in [list object array string number boolean] } {
+            lappend tson $name $value
+        } else {
+            if { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+                lappend tson $name [list number $value]
+            } elseif { $value in [list true false] } {
+                lappend tson $name [list boolean $value]
+            } elseif { $value eq "null" } {
+                lappend tson $name $value
+            } else {
+                lappend tson $name [list string $value]
+            }
+        }
     }
 
     return $tson
