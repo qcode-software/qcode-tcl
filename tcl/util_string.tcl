@@ -249,16 +249,18 @@ proc qc::spell_index { corpus } {
 
     # Use ts_stat to extract lexemes and statistical data from the tsvectorised
     # text corpus
-    db_dml {truncate spell_corpus}
-    db_dml {
-        insert
-        into
-        spell_corpus
-        select
-        word,
-        nentry
-        from
-        ts_stat('select to_tsvector(''simple'',words) from temp_corpus')
+    db_trans {
+        db_dml {truncate spell_corpus}
+        db_dml {
+            insert
+            into
+            spell_corpus
+            select
+            word,
+            nentry
+            from
+            ts_stat('select to_tsvector(''simple'',words) from temp_corpus')
+        }
     }
     db_dml {drop table temp_corpus}
 }
