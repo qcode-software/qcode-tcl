@@ -2642,27 +2642,27 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is_mobile_number-1.0 {is_mobile_number valid} -setup {
     } -body {
         is_mobile_number 07768777777
-    } -result true
+    } -result 1
 
     test is_mobile_number-1.1 {is_mobile_number exta chars} -setup {
     } -body {
         is_mobile_number "07768 - 777-777 "
-    } -result true
+    } -result 1
 
     test is_mobile_number-1.2 {is_mobile_number invalid} -setup {
     } -body {
         is_mobile_number 09768777777
-    } -result false
+    } -result 0
 
     test is_mobile_number-1.3 {is_mobile_number too short} -setup {
     } -body {
         is_mobile_number 0751111111
-    } -result false
+    } -result 0
 
     test is_mobile_number-1.4 {is_mobile_number empty} -setup {
     } -body {
-        is_mobile_number {}
-    } -result false
+        string is true [is_mobile_number {}]
+    } -result 0
 
     test contains_creditcard-1.0 {contains_creditcard cc no only} -setup {
     } -body {
@@ -2780,32 +2780,32 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is_ipv4-1.0 {is_ipv4 ip6} -setup {
     } -body {
         is_ipv4 2001:0db8:85a3:0042:0000:8a2e:0370:7334
-    } -result false
+    } -result 0
 
     test is_ipv4-1.1 {is_ipv4 partial} -setup {
     } -body {
         is_ipv4 192.168.1
-    } -result false
+    } -result 0
 
     test is_ipv4-1.2 {is_ipv4 invalid but still true} -setup {
     } -body {
         is_ipv4 192.168.1.354
-    } -result true
+    } -result 1
 
     test is_ipv4-1.3 {is_ipv4 valid} -setup {
     } -body {
         is_ipv4 192.168.1.1
-    } -result true
+    } -result 1
 
     test is_cidrnetv4-1.0 {is_cidrnetv4 ip only} -setup {
     } -body {
         is_cidrnetv4  192.168.1.20
-    } -result false
+    } -result 0
 
     test is_cidrnetv4-1.1 {is_cidrnetv4 valid cidr} -setup {
     } -body {
         is_cidrnetv4  192.168.1.0/24
-    } -result true
+    } -result 1
 
     test is_uri-1.0 {is_uri absolute} -setup {} -body {
         qc::is_uri_valid http://test.com
