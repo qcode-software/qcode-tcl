@@ -33,7 +33,9 @@ proc qc::tson_array {args} {
     set tson [list array]
     
     foreach value $args {
-        if { [lindex $value 0] in [list object array string number boolean] } {
+        if { [string is list $value]
+             && [lindex $value 0] in [list object array string number boolean]
+         } {
             lappend tson $value
         } elseif { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
             lappend tson [list number $value]
@@ -62,7 +64,8 @@ proc qc::tson_object { args } {
     set tson [list object]
     
     foreach {name value} $args {
-        if { [lindex $value 0] in [list object array string number boolean] } {
+        if { [string is list $value]
+             && [lindex $value 0] in [list object array string number boolean] } {
             lappend tson $name $value
         } else {
             if { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
