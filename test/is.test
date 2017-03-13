@@ -2943,6 +2943,43 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is-period-1.8 {qc::is period "1st February 2014 to 14th February 2014"} -body {
         qc::is period "1st February 2014 to 14th February 2014"
     } -result 1
+
+
+    test is-time-1.0 {qc::is time "00:00:00.000000"} -body {
+        qc::is time "00:00:00.000000"
+    } -result 1
+
+    test is-time-1.1 {qc::is time "00:00:00"} -body {
+        qc::is time "00:00:00"
+    } -result 1
+
+    test is-time-1.2 {qc::is time "24:00:00.000000"} -body {
+        qc::is time "24:00:00.000000"
+    } -result 1
+
+    test is-time-1.3 {qc::is time "24:00:00"} -body {
+        qc::is time "24:00:00"
+    } -result 1
+
+    test is-time-1.4 {qc::is time "12:34:56.789"} -body {
+        qc::is time "12:34:56.789"
+    } -result 1
+
+    test is-time-1.5 {qc::is time "12:34:56"} -body {
+        qc::is time "12:34:56"
+    } -result 1
+
+    test is-time-1.6 {qc::is time "24:00:01"} -body {
+        qc::is time "24:00:01"
+    } -result 0
+
+    test is-time-1.7 {qc::is time "98:76:54"} -body {
+        qc::is time "98:76:54"
+    } -result 0
+
+    test is-time-1.8 {qc::is time "12:59"} -body {
+        qc::is time "12:59"
+    } -result 0
     
     cleanupTests
 }
