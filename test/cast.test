@@ -89,6 +89,35 @@ namespace eval ::qcode::test {
     test cast-period-1.8 {qc::cast period "1st February 2014 to 14th February 2014"} {qc::cast period "1st February 2014 to 14th February 2014"} [list 2014-02-01 2014-02-14]
     test cast-period-1.9 {qc::cast period "1st February 2014"} {qc::cast period "1st February 2014"} [list 2014-02-01 2014-02-01]
 
+
+    test cast-time-1.0 {qc::cast time "00:00:00.000000"} -body {
+        qc::cast time "00:00:00.000000"
+    } -result "00:00:00"
+
+    test cast-time-1.1 {qc::cast time "00:00:00"} -body {
+        qc::cast time "00:00:00"
+    } -result "00:00:00"
+
+    test cast-time-1.2 {qc::cast time "24:00:00.000000"} -body {
+        qc::cast time "24:00:00.000000"
+    } -result "24:00:00"
+
+    test cast-time-1.3 {qc::cast time "24:00:00"} -body {
+        qc::cast time "24:00:00"
+    } -result "24:00:00"
+
+    test cast-time-1.4 {qc::cast time "12:34:56.789"} -body {
+        qc::cast time "12:34:56.789"
+    } -result "12:34:56.789"
+
+    test cast-time-1.5 {qc::cast time "12:34:56"} -body {
+        qc::cast time "12:34:56"
+    } -result "12:34:56"
+
+    test cast-time-1.6 {qc::cast time "12:59"} -body {
+        qc::cast time "12:59"
+    } -result "12:59:00"
+
     cleanupTests
 }
 namespace delete ::qcode::test

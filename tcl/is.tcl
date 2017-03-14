@@ -229,7 +229,7 @@ proc qc::is_uri_valid {uri} {
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path time
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -435,6 +435,12 @@ namespace eval qc::is {
             return 1
         }
         return 0
+    }
+
+    proc time {time} {
+        #| Check if the given date is a time
+        #| in the form 23:59:59 or 23:59:59.01
+        return [regexp {^(([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]|24:00:00)(\.\d{1,6})?$} $time]
     }
 
     proc email {email} {

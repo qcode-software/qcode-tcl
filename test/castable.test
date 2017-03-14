@@ -333,6 +333,43 @@ namespace eval ::qcode::test {
     test castable-period-1.8 {castable period invalid} -body {
         castable period "Foo 2000"
     } -result false
+
+
+    test castable-time-1.0 {qc::castable time "00:00:00.000000"} -body {
+        qc::castable time "00:00:00.000000"
+    } -result true
+
+    test castable-time-1.1 {qc::castable time "00:00:00"} -body {
+        qc::castable time "00:00:00"
+    } -result true
+
+    test castable-time-1.2 {qc::castable time "24:00:00.000000"} -body {
+        qc::castable time "24:00:00.000000"
+    } -result true
+
+    test castable-time-1.3 {qc::castable time "24:00:00"} -body {
+        qc::castable time "24:00:00"
+    } -result true
+
+    test castable-time-1.4 {qc::castable time "12:34:56.789"} -body {
+        qc::castable time "12:34:56.789"
+    } -result true
+
+    test castable-time-1.5 {qc::castable time "12:34:56"} -body {
+        qc::castable time "12:34:56"
+    } -result true
+
+    test castable-time-1.6 {qc::castable time "24:00:01"} -body {
+        qc::castable time "24:00:01"
+    } -result false
+
+    test castable-time-1.7 {qc::castable time "98:76:54"} -body {
+        qc::castable time "98:76:54"
+    } -result false
+
+    test castable-time-1.8 {qc::castable time "12:59"} -body {
+        qc::castable time "12:59"
+    } -result true
     
     cleanupTests
 }

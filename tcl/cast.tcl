@@ -276,7 +276,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path time
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -472,6 +472,40 @@ namespace eval qc::cast {
     proc date {string} {
         #| Try to convert the given string into an ISO date.
         return [clock format [epoch $string] -format "%Y-%m-%d"]
+    }
+
+    proc time {time} {
+        #| Try to convert the given string into a time,
+        # in hh:mm:ss or hh:mm:ss.xxxxxx format
+        if { [regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9]):([0-5][0-9])\.(\d+)$} \
+                  $time -> hours minutes seconds subseconds] } {
+        } elseif {[regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9]):([0-5][0-9])$} \
+                  $time -> hours minutes seconds] } {
+            set subseconds 0
+        } elseif {[regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9])$} \
+                       $time -> hours minutes] } {
+            set seconds 00
+            set subseconds 0
+        } elseif { [regexp {^24:00(:00(\.0+)?)?$} $time] } {
+            set hours 24
+            set minutes 00
+            set seconds 00
+            set subseconds 0
+        } else {
+            return -code error -errorcode CAST "Can't cast \"[qc::trunc $time 100]...\": not recognised time."            
+        }
+        set hours [format %02s $hours]
+        set minutes [format %02s $minutes]
+        set seconds [format %02s $seconds]
+        set subseconds [qc::cast decimal -precision 7 -scale 6 "0.$subseconds"]
+
+        if { $subseconds > 0.0 } {
+            set subseconds [string range [string trimright $subseconds 0] 2 end]
+            return "${hours}:${minutes}:${seconds}.$subseconds"
+            
+        } else {
+            return "${hours}:${minutes}:${seconds}"
+        }
     }
 
     proc epoch {string} {
