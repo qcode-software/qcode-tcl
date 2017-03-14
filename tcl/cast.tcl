@@ -477,7 +477,7 @@ namespace eval qc::cast {
     proc time {time} {
         #| Try to convert the given string into a time,
         # in hh:mm:ss or hh:mm:ss.xxxxxx format
-        if { [regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9]):([0-5][0-9])\.(\d{1,6})$} \
+        if { [regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9]):([0-5][0-9])\.(\d+)$} \
                   $time -> hours minutes seconds subseconds] } {
         } elseif {[regexp {^((?:[0-1])?[0-9]|2[0-3]):((?:[0-5])?[0-9]):([0-5][0-9])$} \
                   $time -> hours minutes seconds] } {
@@ -486,7 +486,7 @@ namespace eval qc::cast {
                        $time -> hours minutes] } {
             set seconds 00
             set subseconds 0
-        } elseif { [regexp {^24:00(:00(\.0*)?)?$} $time] } {
+        } elseif { [regexp {^24:00(:00(\.0+)?)?$} $time] } {
             set hours 24
             set minutes 00
             set seconds 00
@@ -497,7 +497,7 @@ namespace eval qc::cast {
         set hours [format %02s $hours]
         set minutes [format %02s $minutes]
         set seconds [format %02s $seconds]
-        set subseconds [qc::cast_decimal "0.$subseconds" 6]
+        set subseconds [qc::cast decimal -precision 7 -scale 6 "0.$subseconds"]
 
         if { $subseconds > 0.0 } {
             set subseconds [string range [string trimright $subseconds 0] 2 end]
