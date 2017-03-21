@@ -239,7 +239,7 @@ proc qc::http_put {args} {
         error "qc::http:put must have only 1 of -data or -infile specified"
     } elseif { [info exists infile] } {
         dict2vars \
-                [qc::http_curl 
+                [qc::http_curl \
                     -header $header \
                     -upload 1 \
                     -infile $infile \
