@@ -268,7 +268,9 @@ proc qc::image_cache_data {args} {
         }
         lappend resize_args $cache_dir $file_id $width $height
         set data [qc::image_cache_data {*}$resize_args]
-        nsv_set image_cache_data $nsv_key $data
+        if { [llength $data] > 0 } {
+            nsv_set image_cache_data $nsv_key $data
+        }
         return $data
     }
         
