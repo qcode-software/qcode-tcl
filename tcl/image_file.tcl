@@ -89,11 +89,17 @@ proc qc::image_resize {args} {
         file delete $tmp_file
     }
 
-    set tmp_file $file
-    set file [qc::image_file_resize $tmp_file $max_width $max_height]
-    file delete $tmp_file
-
     dict2vars [qc::image_file_info $file] width height
+
+    # Check whether image needs resizing
+    if { $width > $max_width
+         || $height > $max_height
+     } {
+        set tmp_file $file
+        set file [qc::image_file_resize $tmp_file $max_width $max_height]
+        file delete $tmp_file
+        dict2vars [qc::image_file_info $file] width height
+    }
 
     return [qc::dict_from file width height]
 }
