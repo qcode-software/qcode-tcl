@@ -91,6 +91,7 @@ proc qc::image_resize {args} {
 
     dict2vars [qc::image_file_info $file] width height
 
+    # Check whether image needs resizing
     if { $width > $max_width
          || $height > $max_height
      } {
