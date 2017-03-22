@@ -200,7 +200,7 @@ proc qc::image_cache_data {args} {
 
     if { [nsv_exists image_cache_data $nsv_key] } {
         return [nsv_get image_cache_data $nsv_key]
-    }
+    }  
 
     # If not stored in nsv, check local filesystem
 
@@ -241,6 +241,35 @@ proc qc::image_cache_data {args} {
             nsv_set image_cache_data $nsv_key $data
             return $data
         }
+    }
+
+    # If no cache is found at this point, max_width and max_height may both
+    # exceed original (or autocropped) image dimensions - check whether this
+    # is the case and return cache for full-sized image if it is.
+    if { $autocrop } {
+        set tmp_file1 [qc::db_file_export $file_id]  
+        set tmp_file2 [qc::image_file_autocrop $tmp_file1]
+        dict2vars [qc::image_file_info $tmp_file2] width height
+        file delete $tmp_file1
+        file delete $tmp_file2
+    } else {
+        db_cache_1row {
+            select width, height
+            from image
+            where file_id=:file_id
+        }
+    }
+    if { $max_width > $width
+         && $max_height > $height
+     } {
+        set resize_args [list]
+        if { $autocrop } {
+            lappend resize_args -autocrop
+        }
+        lappend resize_args $cache_dir $file_id $width $height
+        set data [qc::image_cache_data {*}$resize_args]
+        nsv_set image_cache_data $nsv_key $data
+        return $data
     }
         
     return [list]
