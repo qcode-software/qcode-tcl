@@ -388,12 +388,26 @@ proc qc::s3 { args } {
                                 incr attempt
                             }
                         }
-                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } { 
+
+                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } {
                             #TODO should we abort or leave for potential recovery later?
-                            try {
+                            ::try {
                                 qc::s3 upload abort $bucket $remote_path $upload_id
+                            } on error [list error_message options] {
+                                # error when attempting to abort upload; do nothing
                             }
-                            error "Upload timed out"
+
+                            set message "Failed to upload file to bucket $bucket."
+
+                            if { $s3_timeout($upload_id) } {
+                                append message " Upload timed out."
+                            }
+
+                            if { $attempt > $max_attempt } {
+                                append message " Number of attempts exceeded max attempts (${max_attempt})."
+                            }
+
+                            error $message
                         }
                         regexp -line -- {^ETag: "(\S+)"\s*$} $response match etag
                       
