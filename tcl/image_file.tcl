@@ -460,6 +460,21 @@ proc qc::image_cache_original_exists {cache_dir file_id} {
     }
 }
 
+proc qc::image_cache_original_exists {cache_dir file_id} {
+    #| Check whether a cache exists of an image at its original dimensions
+    set nsv_key "$file_id original"
+    if { [nsv_exists image_cache_data $nsv_key] } {
+        return true
+    }
+    set glob_pattern "${file_id}.*"
+    set glob_options [list -nocomplain -types f -directory $cache_dir]
+    if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
+        return true
+    } else {
+        return false
+    }
+}
+
 proc qc::image_cache_original_data {cache_dir file_id} {
     #| Dict of image cache data at original dimensions
     #| (file, width, height, url, timestamp)
@@ -471,17 +486,8 @@ proc qc::image_cache_original_data {cache_dir file_id} {
     set glob_pattern "${file_id}.*"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     set links [glob {*}$glob_options {*}$glob_pattern]
-    switch [llength $links] {
-        0 {
-            return [list]
-        }
-        1 {
-            set file [file link [lindex $links 0]]
-        }
-        default {
-            error "Too many original-image links"
-        }
-    }
+    set file [file link [lindex $links 0]]
+
     set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
     set url [qc::file2url $file]
     regexp $expression $url -> width height
@@ -524,8 +530,13 @@ proc qc::image_cache_original_autocrop_create {cache_dir file_id} {
 
 proc qc::image_cache_original_autocrop_exists {cache_dir file_id} {
     #| Check if cache exists of autocropped image at original dimensions
-    if { [llength [qc::image_cache_original_autocrop_data $cache_dir $file_id]]
-         > 0 } {
+    set nsv_key "$file_id original autocrop"
+    if { [nsv_exists image_cache_data $nsv_key] } {
+        return true
+    }
+    set glob_pattern "autocrop/${file_id}.*"
+    set glob_options [list -nocomplain -types f -directory $cache_dir]
+    if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
         return true
     } else {
         return false
@@ -543,17 +554,8 @@ proc qc::image_cache_original_autocrop_data {cache_dir file_id} {
     set glob_pattern "autocrop/${file_id}.*"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     set links [glob {*}$glob_options {*}$glob_pattern]
-    switch [llength $links] {
-        0 {
-            return [list]
-        }
-        1 {
-            set file [file link [lindex $links 0]]
-        }
-        default {
-            error "Too many original-image links"
-        }
-    }
+    set file [file link [lindex $links 0]]
+
     set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
     set url [qc::file2url $file]
     regexp $expression $url -> width height
