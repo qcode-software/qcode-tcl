@@ -453,15 +453,6 @@ proc qc::image_cache_original_create {cache_dir file_id} {
 
 proc qc::image_cache_original_exists {cache_dir file_id} {
     #| Check whether a cache exists of an image at its original dimensions
-    if { [llength [qc::image_cache_original_data $cache_dir $file_id]] > 0 } {
-        return true
-    } else {
-        return false
-    }
-}
-
-proc qc::image_cache_original_exists {cache_dir file_id} {
-    #| Check whether a cache exists of an image at its original dimensions
     set nsv_key "$file_id original"
     if { [nsv_exists image_cache_data $nsv_key] } {
         return true
