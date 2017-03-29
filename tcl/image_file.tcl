@@ -177,17 +177,127 @@ proc qc::gif_dimensions {name} {
 }
 
 proc qc::image_cache_exists {args} {
-    #| Return true if this image (constrained to max_width & max_height) has been cached on disk.
-    if { [llength [qc::image_cache_data {*}$args]] > 0 } {
+    #| Return true if a cached version of the image exists
+    set original_args $args
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
+
+    # Image cache data stored in nsv when first requested
+    if { $autocrop } {
+        set nsv_key "$file_id $max_width $max_height autocrop"
+    } else {
+        set nsv_key "$file_id $max_width $max_height"
+    }
+
+    if { [nsv_exists image_cache_data $nsv_key] } {
+        return true
+    }  
+
+    # If not stored in nsv, check local filesystem
+
+    # A suitable cached image will have one of:
+    # width exactly equal to max_width, and height less than max height
+    # height exactly equal to max_height, and width less than max width
+    # width and height exactly equal to max width and height
+    # (Only one such image should exist, since all chached images should
+    #  be based on the same aspect ratio)
+
+    # Construct glob patterns to search for candidate cached images,
+    # and regex to extract actual image width and height from file path
+    if { $autocrop } {
+        set glob_patterns \
+            [list \
+                 "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
+                 "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
+        
+        set expression {/[0-9]+/autocrop/([0-9]+)x([0-9]+)/[^/.]\.[a-z]+$}
+
+    } else {
+        set glob_patterns \
+            [list \
+                 "${file_id}-${max_width}x*/${file_id}.*" \
+                 "${file_id}-*x${max_height}/${file_id}.*"]
+        
+        set expression {/[0-9]+-([0-9]+)x([0-9]+)/[^/.]\.[a-z]+$}
+    }
+    
+    set data [list]
+    set glob_options [list -nocomplain -types f -directory $cache_dir]
+    foreach file [lunique [glob {*}$glob_options {*}$glob_patterns]] {
+        regexp $expression $file -> width height
+        if { $width<=$max_width && $height<=$max_height } {
+            return true
+        }
+    }
+
+    # If no cache is found at this point, max_width and max_height may both
+    # exceed original (or autocropped) image dimensions - check whether this
+    # is the case.
+    puts "args: $original_args"
+    puts "qc::image_cache_bigger {*}$original_args"
+    if { [qc::image_cache_bigger {*}$original_args] } {
+        return [qc::image_cache_exists {*}[qc::image_cache_biggest]]
+    }
+        
+    return false
+}
+
+proc qc::image_cache_biggest {args} {
+    #| Limit request to biggest size
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
+    if { $autocrop } {
+        dict2vars [qc::image_original_autocrop_data $cache_dir $file_id] \
+            width height
+        
+        set return_args [list -autocrop -- $cache_dir $file_id]
+    } else {
+        dict2vars [qc::image_original_data $cache_dir $file_id] \
+            width height
+
+        set return_args [list $cache_dir $file_id]
+    }
+    if { $max_width > $width } {
+        lappend return_args $width
+    } else {
+        lappend return_args $max_width
+    }
+    if { $max_height > $height } {
+        lappend return_args $height
+    } else {
+        lappend return_args $max_height
+    }
+    return $return_args
+}
+
+proc qc::image_cache_bigger {args} {
+    #| Request exceeds the largest image available
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
+    if { $autocrop } {
+        dict2vars [qc::image_original_autocrop_data $cache_dir $file_id] \
+            width height
+        
+        set return_args [list -autocrop -- $cache_dir $file_id]
+    } else {
+        dict2vars [qc::image_original_data $cache_dir $file_id] \
+            width height
+
+        set return_args [list $cache_dir $file_id]
+    }
+    if { $max_width > $width && \
+             $max_height > $height } {
         return true
     } else {
         return false
     }
 }
 
+
 proc qc::image_cache_data {args} {
     #| Return dict of width, height & url of cached image constrained to max_width & max_height.
     #| Return {} if cached image does not exist.
+    set original_args $args
     qc::args $args -autocrop -- cache_dir file_id max_width max_height
     default autocrop false
 
@@ -213,13 +323,14 @@ proc qc::image_cache_data {args} {
 
     # Construct glob patterns to search for candidate cached images,
     # and regex to extract actual image width and height from file path
+
     if { $autocrop } {
         set glob_patterns \
             [list \
                  "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
                  "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
         
-        set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
+        set expression {/[0-9]+/autocrop/([0-9]+)x([0-9]+)/[^/.]\.[a-z]+$}
 
     } else {
         set glob_patterns \
@@ -227,7 +338,7 @@ proc qc::image_cache_data {args} {
                  "${file_id}-${max_width}x*/${file_id}.*" \
                  "${file_id}-*x${max_height}/${file_id}.*"]
         
-        set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
+        set expression {/[0-9]+-([0-9]+)x([0-9]+)/[^/.]\.[a-z]+$}
     }
     
     set data [list]
@@ -246,17 +357,8 @@ proc qc::image_cache_data {args} {
     # If no cache is found at this point, max_width and max_height may both
     # exceed original (or autocropped) image dimensions - check whether this
     # is the case and return cache for full-sized image if it is.
-    if { $autocrop } {
-        dict2vars [qc::image_original_autocrop_data $cache_dir $file_id] \
-            file width height url timestamp
-    } else {
-        dict2vars [qc::image_original_data $cache_dir $file_id] \
-            file width height url timestamp
-    }
-    if { $max_width > $width
-         && $max_height > $height
-     } {
-        return [dict_from width height url timestamp]
+    if { [qc::image_cache_bigger $original_args] } {
+        return [qc::image_cache_data {*}[qc::image_cache_biggest]]
     }
         
     return [list]
