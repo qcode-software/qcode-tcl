@@ -102,8 +102,9 @@ proc qc::return_headers {} {
     lappend list "Date: [ns_httptime [clock seconds]]"
     lappend list "MIME-Version: 1.0"
     lappend list "Content-Type: text/html"
-    ns_write [join $list \r\n]
-    ns_write \r\n\r\n
+    set output [join $list \r\n]
+    append output \r\n\r\n
+    ns_write $output
 }
 
 proc qc::return_headers_chunked {} {
@@ -113,8 +114,9 @@ proc qc::return_headers_chunked {} {
     lappend list "MIME-Version: 1.0"
     lappend list "Content-Type: text/html"
     lappend list "Transfer-Encoding: chunked"
-    ns_write [join $list \r\n]
-    ns_write \r\n\r\n
+    set output [join $list \r\n]
+    append output \r\n\r\n
+    ns_write $output
 }
 
 proc qc::return_chunks {string} {
