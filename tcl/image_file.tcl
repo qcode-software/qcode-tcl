@@ -444,11 +444,14 @@ proc qc::image_cache_original_create {cache_dir file_id} {
         where file_id=:file_id
     }
     set ext [file extension $filename]
-    set cache_file ${cache_dir}/${file_id}-${width}x${height}/${file_id}${ext}
-    set file [qc::db_file_export $file_id]
-    file mkdir [file dirname $cache_file]
-    file rename -force $file $cache_file
-    file link ${cache_dir}/${file_id}${ext} $cache_file
+    set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
+    set cache_file ${cache_dir}/${cache_file_relative}
+    if { ! [file exists $cache_file] } {
+        set file [qc::db_file_export $file_id]
+        file mkdir [file dirname $cache_file]
+        file rename -force $file $cache_file
+    }
+    file link ${cache_dir}/${file_id}${ext} $cache_file_relative
 }
 
 proc qc::image_cache_original_exists {cache_dir file_id} {
@@ -477,7 +480,8 @@ proc qc::image_cache_original_data {cache_dir file_id} {
     set glob_pattern "${file_id}.*"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     set links [glob {*}$glob_options {*}$glob_pattern]
-    set file [file link [lindex $links 0]]
+    set file_relative [file link [lindex $links 0]]
+    set file ${cache_dir}/${file_relative}
 
     set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
     set url [qc::file2url $file]
@@ -508,15 +512,21 @@ proc qc::image_cache_original_autocrop_create {cache_dir file_id} {
     if { $width < [dict get $original width]
          || $height < [dict get $original height]
      } {
-        set cache_file ${cache_dir}/${file_id}/autocrop/${width}x${height}/${file_id}${ext}   
+        set cache_file_root_relative \
+            ${file_id}/autocrop/${width}x${height}/${file_id}${ext}
+        set cache_file ${cache_dir}/${cache_file_root_relative}
         file mkdir [file dirname $cache_file]     
         file rename -force $file $cache_file
     } else {
-        set cache_file $original_file
+        set cache_file_root_relative \
+            [string range [dict get $original url] 1 end]
+        set cache_file ${cache_dir}/${cache_file_root_relative}
         file delete $file
     }
     file mkdir ${cache_dir}/autocrop
-    file link ${cache_dir}/autocrop/${file_id}${ext} $cache_file
+    file link \
+        ${cache_dir}/autocrop/${file_id}${ext} \
+        ../$cache_file_root_relative
 }
 
 proc qc::image_cache_original_autocrop_exists {cache_dir file_id} {
@@ -545,7 +555,9 @@ proc qc::image_cache_original_autocrop_data {cache_dir file_id} {
     set glob_pattern "autocrop/${file_id}.*"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     set links [glob {*}$glob_options {*}$glob_pattern]
-    set file [file link [lindex $links 0]]
+    set file_relative [file link [lindex $links 0]]
+    set file_root_relative [string range $file_relative 3 end]
+    set file ${cache_dir}/$file_root_relative
 
     set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
     set url [qc::file2url $file]
