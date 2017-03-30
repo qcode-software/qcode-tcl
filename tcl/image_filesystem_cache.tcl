@@ -109,8 +109,13 @@ proc qc::image_filesystem_cache_create {args} {
     #| Create a file for this image in the disk cache,
     #| constrained to max_width & max_height,
     #| optionally auto-cropped,
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
+    qc::args2vars $args {*}{
+        cache_dir
+        file_id
+        max_width
+        max_height
+        autocrop
+    }
 
     if { $autocrop } {
         dict2vars [qc::image_cache_autocrop_data ~ cache_dir file_id] \
