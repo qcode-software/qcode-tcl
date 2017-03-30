@@ -1,3 +1,20 @@
+namespace eval qc {
+    namespace export {*}{
+        image_nsv_cache_exists
+        image_nsv_cache_data
+        image_nsv_cache_create
+        image_nsv_cache_smaller_biggest_exists
+        image_nsv_cache_glob
+        image_nsv_cache_file2dimensions
+        image_nsv_cache_original_exists
+        image_nsv_cache_original_data
+        image_nsv_cache_original_create
+        image_nsv_cache_autocrop_exists
+        image_nsv_cache_autocrop_data
+        image_nsv_cache_autocrop_create
+    }
+}
+
 ################################################################################
 # NSV Cache of Image
 
@@ -96,7 +113,7 @@ proc qc::image_nsv_cache_set {args} {
     dict2vars $data width height
     set nsv_key "$file_id $autocrop"
     if { [nsv_exists image_cache_data $nsv_key] } {
-        set cache [nsv_get $nsv_key]
+        set cache [nsv_get image_cache_data $nsv_key]
     } else {
         set cache [dict create]
     }
@@ -144,12 +161,12 @@ proc qc::image_nsv_cache_original_exists {file_id} {
 
 proc qc::image_nsv_cache_original_data {file_id} {
     #| Get the original data for this image from nsv cache
-    return [nsv_get image_cache_data "$file original"]
+    return [nsv_get image_cache_data "$file_id original"]
 }
 
 proc qc::image_nsv_cache_original_set {file_id data} {
     #| Set the data for the original of this image in nsv cache
-    return [nsv_set image_cache_data "$file original" $data]
+    return [nsv_set image_cache_data "$file_id original" $data]
 }
 
 ################################################################################
@@ -162,10 +179,10 @@ proc qc::image_nsv_cache_autocrop_exists {file_id} {
 
 proc qc::image_nsv_cache_autocrop_data {file_id} {
     #| Get the autocrop data for this image from nsv cache
-    return [nsv_get image_cache_data "$file autocrop"]
+    return [nsv_get image_cache_data "$file_id autocrop"]
 }
 
 proc qc::image_nsv_cache_autocrop_set {file_id data} {
     #| Set the data for the autocrop of this image in nsv cache
-    return [nsv_set image_cache_data "$file autocrop" $data]
+    return [nsv_set image_cache_data "$file_id autocrop" $data]
 }

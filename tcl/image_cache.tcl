@@ -1,3 +1,11 @@
+namespace eval qc {
+    namespace export {*}{
+        image_data
+        image_cache_exists
+        image_cache_data
+        image_cache_create
+    }
+}
 proc qc::image_data {args} {
     #| Return dict of width, height, & url of an image
     #| args: ?-autocrop? -- cache_dir file_id max_width max_height
@@ -12,10 +20,26 @@ proc qc::image_data {args} {
 proc qc::image_cache_exists {args} {
     #| Return true if a cached version of the image exists
     #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    if { [qc::image_nsv_cache_exists {*}$args] } {
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    default autocrop false
+
+    if { [qc::image_nsv_cache_exists ~ {*}{
+        file_id
+        max_width
+        max_height
+        autocrop
+    }] } {
         return true
     }
-    if { [qc::image_filesystem_cache_exists {*}$args] } {
+
+    if { [qc::image_filesystem_cache_exists ~ {*}{
+        cache_dir
+        file_id
+        max_width
+        max_height
+        autocrop
+        
+    }] } {
         return true
     }
     return false

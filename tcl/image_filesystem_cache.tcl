@@ -1,3 +1,20 @@
+namespace eval qc {
+    namespace export {*}{
+        image_filesystem_cache_exists
+        image_filesystem_cache_data
+        image_filesystem_cache_create
+        image_filesystem_cache_smaller_biggest_exists
+        image_filesystem_cache_glob
+        image_filesystem_cache_file2dimensions
+        image_filesystem_cache_original_exists
+        image_filesystem_cache_original_data
+        image_filesystem_cache_original_create
+        image_filesystem_cache_autocrop_exists
+        image_filesystem_cache_autocrop_data
+        image_filesystem_cache_autocrop_create
+    }
+}
+
 ################################################################################
 # Filesystem Cache of Image
 
@@ -53,12 +70,12 @@ proc qc::image_filesystem_cache_data {args} {
         if { $autocrop } {
             set data [qc::image_filesystem_cache_autocrop_data \
                         ~ file_id cache_dir]
-            qc::image_nsv_cache_autocrop_set $file_id data
+            qc::image_nsv_cache_autocrop_set $file_id $data
 
         } else {
             set data [qc::image_filesystem_cache_original_data \
                         ~ file_id cache_dir]
-            qc::image_nsv_cache_original_set $file_id data
+            qc::image_nsv_cache_original_set $file_id $data
         }
         return $data
     }
@@ -146,7 +163,7 @@ proc qc::image_filesystem_cache_smaller_biggest_exists {args} {
         set command_prefix "qc::image_filesystem_cache_original"
     }
 
-    if { [${command_prefix}_exists $file_id]
+    if { [${command_prefix}_exists ~ cache_dir file_id]
      } {
         dict2vars [${command_prefix}_data ~ cache_dir file_id] \
             width height
@@ -199,7 +216,7 @@ proc qc::image_filesystem_cache_file2dimensions {file} {
 ################################################################################
 # Filesystem Cache of Original Image
 
-proc qc::image_fileststem_cache_original_exists {args} {
+proc qc::image_filesystem_cache_original_exists {args} {
     #| Test whether a filesystem cache of the original image file exists
     qc::args2vars $args {*}{
         cache_dir
@@ -259,7 +276,7 @@ proc qc::image_filesystem_cache_original_create {args} {
 ################################################################################
 # Filesystem Cache of Autocrop Image
 
-proc qc::qc::image_fileststem_cache_autocrop_exists {args} {
+proc qc::image_filesystem_cache_autocrop_exists {args} {
     #| Test whether a filesystem cache of the autocrop image file exists
     qc::args2vars $args {*}{
         cache_dir
@@ -275,7 +292,7 @@ proc qc::qc::image_fileststem_cache_autocrop_exists {args} {
     }
 }
 
-proc qc::qc::image_fileststem_cache_autocrop_data {args} {
+proc qc::image_filesystem_cache_autocrop_data {args} {
     #| Dict of data for the autocrop image, from the filesystem cache
     qc::args2vars $args {*}{
         cache_dir
@@ -297,7 +314,7 @@ proc qc::qc::image_fileststem_cache_autocrop_data {args} {
     return [dict_from file width height url timestamp]
 }
 
-proc qc::qc::image_fileststem_cache_autocrop_create {args} {
+proc qc::image_filesystem_cache_autocrop_create {args} {
     #| Create image cache, autocropped, from original dimensions
     #| Create symbolic link to cached image
     qc::args2vars $args {*}{

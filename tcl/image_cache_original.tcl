@@ -1,3 +1,12 @@
+namespace eval qc {
+    namespace export {*}{
+        image_original_data
+        image_cache_original_exists
+        image_cache_original_data
+        image_cache_original_create
+    }
+}
+
 proc qc::image_original_data {cache_dir file_id} {
     #| Dict of image cache data at original dimensions, create if needed
     #| (file, width, height, url, timestamp)
@@ -31,6 +40,7 @@ proc qc::image_cache_original_data {args} {
 }
 
 proc qc::image_cache_original_create {args} {
+    #| Create cache of original image data
     qc::args $args -autocrop -- cache_dir file_id max_width max_height
     default autocrop false
 
@@ -41,5 +51,5 @@ proc qc::image_cache_original_create {args} {
         max_width
         max_height
     }]
-    qc::image_filesystem_cache_original_create {*}$filesystem_args}
+    qc::image_filesystem_cache_original_create {*}$filesystem_args
 }

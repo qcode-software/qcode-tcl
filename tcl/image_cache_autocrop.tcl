@@ -1,3 +1,12 @@
+namespace eval qc {
+    namespace export {*}{
+        image_autocrop_data
+        image_cache_autocrop_exists
+        image_cache_autocrop_data
+        image_cache_autocrop_create
+    }
+}
+
 proc qc::image_autocrop_data {cache_dir file_id} {
     #| Dict of autocropped image cache data at original dimensions,
     #| create if needed
