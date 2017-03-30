@@ -21,35 +21,26 @@ proc qc::image_cache_original_exists {cache_dir file_id} {
     if { [qc::image_nsv_cache_original_exists $file_id] } {
         return true
     }
-    if { [qc::image_nsv_filesystem_original_exists $file_id] } {
+    if { [qc::image_filesystem_cache_original_exists ~ cache_dir file_id] } {
         return true
     }
     return false
 }
 
-proc qc::image_cache_original_data {args} {
+proc qc::image_cache_original_data {cache_dir file_id} {
     #| Dict of image cache data at original dimensions
     #| (file, width, height, url, timestamp)
     #| (empty list if cache does not exist)
+    
     if { [qc::image_nsv_cache_original_exists $file_id] } {
         return [qc::image_nsv_cache_original_data $file_id]
     }
-    set data [qc::image_filesystem_cache_original_data {*}$args]
-    qc::image_nsv_cache_original_set {*}$args $data
+    set data [qc::image_filesystem_cache_original_data ~ cache_dir file_id]
+    qc::image_nsv_cache_original_set $file_id $data
     return $data
 }
 
-proc qc::image_cache_original_create {args} {
+proc qc::image_cache_original_create {cache_dir file_id} {
     #| Create cache of original image data
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    set filesystem_args [dict from {*}{
-        autocrop
-        cache_dir
-        file_id
-        max_width
-        max_height
-    }]
-    qc::image_filesystem_cache_original_create {*}$filesystem_args
+    qc::image_filesystem_cache_original_create ~ cache_dir file_id
 }

@@ -118,10 +118,10 @@ proc qc::image_filesystem_cache_create {args} {
     }
 
     if { $autocrop } {
-        dict2vars [qc::image_cache_autocrop_data ~ cache_dir file_id] \
+        dict2vars [qc::image_autocrop_data $cache_dir $file_id] \
             file width height
     } else {
-        dict2vars [qc::image_cache_original_data ~ cache_dir file_id] \
+        dict2vars [qc::image_original_data $cache_dir $file_id] \
             file width height
     }
     set ext [file extension $file]
@@ -261,6 +261,10 @@ proc qc::image_filesystem_cache_original_data {args} {
 proc qc::image_filesystem_cache_original_create {args} {
     #| Create an cache of an image at its original dimensions, in cache_dir
     #| Create symbolic link to cached image
+    qc::args2vars $args {*}{
+        cache_dir
+        file_id
+    }
     db_1row {
         select filename, mime_type, width, height
         from file

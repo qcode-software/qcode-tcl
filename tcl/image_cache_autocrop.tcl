@@ -11,10 +11,10 @@ proc qc::image_autocrop_data {cache_dir file_id} {
     #| Dict of autocropped image cache data at original dimensions,
     #| create if needed
     #| (file, width, height, url, timestamp)
-    if { ! [qc::image_cache_original_autocrop_exists $cache_dir $file_id] } {
-        qc::image_cache_original_autocrop_create $cache_dir $file_id
+    if { ! [qc::image_cache_autocrop_exists $cache_dir $file_id] } {
+        qc::image_cache_autocrop_create $cache_dir $file_id
     }
-    return [qc::image_cache_original_autocrop_data $cache_dir $file_id]
+    return [qc::image_cache_autocrop_data $cache_dir $file_id]
 }
 
 proc qc::image_cache_autocrop_exists {cache_dir file_id} {
