@@ -86,10 +86,13 @@ proc qc::cat {filename} {
 
 proc qc::file2url {file} {
     # Takes a file and returns url path relative to www root.
-    if { [regexp "^[ns_pagepath](.+)\$" $file -> url] } {
-        return $url
+    set root [ns_pagepath]
+    if { [string equal -length [string length $root] $root $file]
+         && [string length $file] > [string length $root]
+     } {
+        return [string range $file [string length $root] end]
     } else {
-        error "$file is outside page root [ns_pagepath]"
+        error "$file is outside page root $root"
     }
 }
 
