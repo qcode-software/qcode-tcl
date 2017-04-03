@@ -78,6 +78,7 @@ proc qc::image_resize {args} {
     #| Export an image from the database, constrained to max width/height,
     #| optionally auto-cropped,
     #| return dict of file, width, and height
+    # Deprecated
     qc::args $args -autocrop -- file_id max_width max_height
     default autocrop false
 
@@ -176,141 +177,6 @@ proc qc::gif_dimensions {name} {
     return [list $wid $hgt]
 }
 
-proc qc::image_cache_exists {args} {
-    #| Return true if this image (constrained to max_width & max_height) has been cached on disk.
-    if { [llength [qc::image_cache_data {*}$args]] > 0 } {
-        return true
-    } else {
-        return false
-    }
-}
-
-proc qc::image_cache_data {args} {
-    #| Return dict of width, height & url of cached image constrained to max_width & max_height.
-    #| Return {} if cached image does not exist.
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    # Image cache data stored in nsv when first requested
-    if { $autocrop } {
-        set nsv_key "$file_id $max_width $max_height autocrop"
-    } else {
-        set nsv_key "$file_id $max_width $max_height"
-    }
-
-    if { [nsv_exists image_cache_data $nsv_key] } {
-        return [nsv_get image_cache_data $nsv_key]
-    }  
-
-    # If not stored in nsv, check local filesystem
-
-    # A suitable cached image will have one of:
-    # width exactly equal to max_width, and height less than max height
-    # height exactly equal to max_height, and width less than max width
-    # width and height exactly equal to max width and height
-    # (Only one such image should exist, since all chached images should
-    #  be based on the same aspect ratio)
-
-    # Construct glob patterns to search for candidate cached images,
-    # and regex to extract actual image width and height from file path
-    if { $autocrop } {
-        set glob_patterns \
-            [list \
-                 "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
-                 "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
-        
-        set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
-
-    } else {
-        set glob_patterns \
-            [list \
-                 "${file_id}-${max_width}x*/${file_id}.*" \
-                 "${file_id}-*x${max_height}/${file_id}.*"]
-        
-        set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
-    }
-    
-    set data [list]
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    foreach file [lunique [glob {*}$glob_options {*}$glob_patterns]] {
-        set url [qc::file2url $file]
-        regexp $expression $url -> width height
-        if { $width<=$max_width && $height<=$max_height } {
-            set timestamp [qc::cast timestamp [file mtime $file]]
-            set data [dict_from width height url timestamp]
-            nsv_set image_cache_data $nsv_key $data
-            return $data
-        }
-    }
-
-    # If no cache is found at this point, max_width and max_height may both
-    # exceed original (or autocropped) image dimensions - check whether this
-    # is the case and return cache for full-sized image if it is.
-    if { $autocrop } {
-        dict2vars [qc::image_original_autocrop_data $cache_dir $file_id] \
-            file width height url timestamp
-    } else {
-        dict2vars [qc::image_original_data $cache_dir $file_id] \
-            file width height url timestamp
-    }
-    if { $max_width > $width
-         && $max_height > $height
-     } {
-        return [dict_from width height url timestamp]
-    }
-        
-    return [list]
-}
-
-proc qc::image_cache_create {args} {
-    #| Create a file for this image in the disk cache,
-    #| constrained to max_width & max_height,
-    #| optionally auto-cropped,
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    if { $autocrop } {
-        dict2vars [qc::image_cache_original_autocrop_data $cache_dir $file_id] \
-            file width height
-    } else {
-        dict2vars [qc::image_cache_original_data $cache_dir $file_id] \
-            file width height
-    }
-    set ext [file extension $file]
-
-    if { $width > $max_width
-         || $height > $max_height
-     } {
-        set file [qc::image_file_resize $file $max_width $max_height]
-        dict2vars [qc::image_file_info $file] width height
-
-        if { $autocrop } {
-            set cache_file ${cache_dir}/${file_id}/autocrop/${width}x${height}/${file_id}${ext}
-        } else {
-            set cache_file ${cache_dir}/${file_id}-${width}x${height}/${file_id}${ext}
-        }
-        file mkdir [file dirname $cache_file]
-        file rename -force $file $cache_file
-
-        return [dict create width $width height $height file $cache_file]
-
-    } else {
-        return [dict_from width height file]
-    } 
-}
-
-proc qc::image_data {args} {
-    #| Return dict of width, height & url of image,
-    #| constrained to max_width & max_height, optionally auto-cropped
-    #| Generates image cache if it doesn't already exist.
-    if { ! [qc::image_cache_exists {*}$args] } {
-        qc::image_cache_create {*}$args
-    }
-    set cache_data [qc::image_cache_data {*}$args]
-
-    return [dict_subset $cache_data url width height]
-}
-
 proc qc::image_handler {
     cache_dir
     {error_handler "qc::error_handler"}
@@ -358,12 +224,7 @@ proc qc::image_handler {
         lappend cache_args $cache_dir $file_id $max_width $max_height
 
         # Canonical URL
-        if { [qc::image_cache_exists {*}$cache_args] } {
-            # Cache already exists for canonical url
-            dict2vars [qc::image_cache_data {*}$cache_args] width height url
-            set canonical_url $url
-            set canonical_file [ns_pagepath]$canonical_url
-        } else {
+        if { ! [qc::image_cache_exists {*}$cache_args] } {
             # Create cache for canonical url
             
             # Check file exists
@@ -376,11 +237,12 @@ proc qc::image_handler {
             } {
                 return [ns_returnnotfound]
             } 
+            qc::image_cache_create {*}$cache_args
+        }
+        dict2vars [qc::image_cache_data {*}$cache_args] width height url
+        set canonical_url $url
+        set canonical_file [ns_pagepath]$url
 
-            dict2vars [qc::image_cache_create {*}$cache_args] width height file
-            set canonical_url [qc::file2url $file]
-            set canonical_file $file
-        } 
         if { $request_path eq $canonical_url } {
             # Canonical URL was requested - return file
             ns_register_fastpath GET $canonical_url
@@ -432,148 +294,4 @@ proc qc::image_redirect_handler {cache_dir}  {
     
     # Catch All - redirect to Canonical URL
     return [ns_returnredirect $canonical_url]      
-}
-
-proc qc::image_cache_original_create {cache_dir file_id} {
-    #| Create an cache of an image at its original dimensions, in cache_dir
-    #| Create symbolic link to cached image
-    db_1row {
-        select filename, mime_type, width, height
-        from file
-        join image using(file_id)
-        where file_id=:file_id
-    }
-    set ext [file extension $filename]
-    set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
-    set cache_file ${cache_dir}/${cache_file_relative}
-    if { ! [file exists $cache_file] } {
-        set file [qc::db_file_export $file_id]
-        file mkdir [file dirname $cache_file]
-        file rename -force $file $cache_file
-    }
-    file link ${cache_dir}/${file_id}${ext} $cache_file_relative
-}
-
-proc qc::image_cache_original_exists {cache_dir file_id} {
-    #| Check whether a cache exists of an image at its original dimensions
-    set nsv_key "$file_id original"
-    if { [nsv_exists image_cache_data $nsv_key] } {
-        return true
-    }
-    set glob_pattern "${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
-        return true
-    } else {
-        return false
-    }
-}
-
-proc qc::image_cache_original_data {cache_dir file_id} {
-    #| Dict of image cache data at original dimensions
-    #| (file, width, height, url, timestamp)
-    #| (empty list if cache does not exist)
-    set nsv_key "$file_id original"
-    if { [nsv_exists image_cache_data $nsv_key] } {
-        return [nsv_get image_cache_data $nsv_key]
-    }
-    set glob_pattern "${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set links [glob {*}$glob_options {*}$glob_pattern]
-    set file_relative [file link [lindex $links 0]]
-    set file ${cache_dir}/${file_relative}
-
-    set expression {^/image/[0-9]+-([0-9]+)x([0-9]+)/}
-    set url [qc::file2url $file]
-    regexp $expression $url -> width height
-    set timestamp [qc::cast timestamp [file mtime $file]]
-    set data [dict_from file width height url timestamp]
-    nsv_set image_cache_data $nsv_key $data
-    return $data
-}
-
-proc qc::image_original_data {cache_dir file_id} {
-    #| Dict of image cache data at original dimensions, create if needed
-    #| (file, width, height, url, timestamp)
-    if { ! [qc::image_cache_original_exists $cache_dir $file_id] } {
-        qc::image_cache_original_create $cache_dir $file_id
-    }
-    return [qc::image_cache_original_data $cache_dir $file_id]
-}
-
-proc qc::image_cache_original_autocrop_create {cache_dir file_id} {
-    #| Create image cache, autocropped, from original dimensions
-    #| Create symbolic link to cached image
-    set original [qc::image_original_data $cache_dir $file_id]
-    set original_file [dict get $original file]
-    set ext [file extension $original_file]
-    set file [qc::image_file_autocrop $original_file]
-    dict2vars [qc::image_file_info $file] width height
-    if { $width < [dict get $original width]
-         || $height < [dict get $original height]
-     } {
-        set cache_file_root_relative \
-            ${file_id}/autocrop/${width}x${height}/${file_id}${ext}
-        set cache_file ${cache_dir}/${cache_file_root_relative}
-        file mkdir [file dirname $cache_file]     
-        file rename -force $file $cache_file
-    } else {
-        set cache_file_root_relative \
-            [string range [dict get $original url] 1 end]
-        set cache_file ${cache_dir}/${cache_file_root_relative}
-        file delete $file
-    }
-    file mkdir ${cache_dir}/autocrop
-    file link \
-        ${cache_dir}/autocrop/${file_id}${ext} \
-        ../$cache_file_root_relative
-}
-
-proc qc::image_cache_original_autocrop_exists {cache_dir file_id} {
-    #| Check if cache exists of autocropped image at original dimensions
-    set nsv_key "$file_id original autocrop"
-    if { [nsv_exists image_cache_data $nsv_key] } {
-        return true
-    }
-    set glob_pattern "autocrop/${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
-        return true
-    } else {
-        return false
-    }
-}
-
-proc qc::image_cache_original_autocrop_data {cache_dir file_id} {
-    #| Dict of autocropped image cache data at original dimensions
-    #| (file, width, height, url, timestamp)
-    #| (empty list if cache does not exist)
-    set nsv_key "$file_id original autocrop"
-    if { [nsv_exists image_cache_data $nsv_key] } {
-        return [nsv_get image_cache_data $nsv_key]
-    }
-    set glob_pattern "autocrop/${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set links [glob {*}$glob_options {*}$glob_pattern]
-    set file_relative [file link [lindex $links 0]]
-    set file_root_relative [string range $file_relative 3 end]
-    set file ${cache_dir}/$file_root_relative
-
-    set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
-    set url [qc::file2url $file]
-    regexp $expression $url -> width height
-    set timestamp [qc::cast timestamp [file mtime $file]]
-    set data [dict_from file width height url timestamp]
-    nsv_set image_cache_data $nsv_key $data
-    return $data
-}
-
-proc qc::image_original_autocrop_data {cache_dir file_id} {
-    #| Dict of autocropped image cache data at original dimensions,
-    #| create if needed
-    #| (file, width, height, url, timestamp)
-    if { ! [qc::image_cache_original_autocrop_exists $cache_dir $file_id] } {
-        qc::image_cache_original_autocrop_create $cache_dir $file_id
-    }
-    return [qc::image_cache_original_autocrop_data $cache_dir $file_id]
 }
