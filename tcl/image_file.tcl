@@ -224,12 +224,7 @@ proc qc::image_handler {
         lappend cache_args $cache_dir $file_id $max_width $max_height
 
         # Canonical URL
-        if { [qc::image_cache_exists {*}$cache_args] } {
-            # Cache already exists for canonical url
-            dict2vars [qc::image_cache_data {*}$cache_args] width height url
-            set canonical_url $url
-            set canonical_file [ns_pagepath]$canonical_url
-        } else {
+        if { ! [qc::image_cache_exists {*}$cache_args] } {
             # Create cache for canonical url
             
             # Check file exists
@@ -242,11 +237,12 @@ proc qc::image_handler {
             } {
                 return [ns_returnnotfound]
             } 
+            qc::image_cache_create {*}$cache_args
+        }
+        dict2vars [qc::image_cache_data {*}$cache_args] width height url
+        set canonical_url $url
+        set canonical_file [ns_pagepath]$url
 
-            dict2vars [qc::image_cache_create {*}$cache_args] width height file
-            set canonical_url [qc::file2url $file]
-            set canonical_file $file
-        } 
         if { $request_path eq $canonical_url } {
             # Canonical URL was requested - return file
             ns_register_fastpath GET $canonical_url
