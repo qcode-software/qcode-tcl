@@ -49,11 +49,27 @@ proc qc::db_file_export {args} {
     args $args -tmp_file ? -- file_id
 
     default tmp_file /tmp/[uuid::uuid generate]
-    db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
-    set id [open $tmp_file w]
-    fconfigure $id -translation binary
-    puts $id [base64::decode $base64]
-    close $id
+
+    db_cache_1row {
+        select current_database() as dbname;
+    }
+    set conninfo_dict [dict_create \
+                           user [ns_db user [qc::db_get_handle]] \
+                           password [ns_db password [qc::db_get_handle]] \
+                           dbname $dbname]
+    set conninfo_pairs [list]
+    dict for {param value} $conninfo_dict {
+        lappend conninfo_pairs "${param}=${value}"
+    }
+    qc::exec_proxy psql \
+        [join $conninfo_pairs " "] \
+        -c "\copy (
+                   select encode(data, 'hex')
+                   from file
+                   where file_id=[db_quote $file_id]
+                   ) to STDOUT" \
+        | xxd -p -r > $tmp_file
+
     return $tmp_file
 }
 
