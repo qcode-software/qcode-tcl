@@ -632,3 +632,32 @@ proc qc::db_connect {args} {
         error "Could not connect to database. $errorMessage" $errorInfo
     }
 }
+
+proc qc::db_pg_copy_load { args } {
+    #| Will load a file of data in pg copy format to the specified database table.
+    #| $columns is the list of column names to insert the corresponding column 
+    #| into.
+    qc::args \
+        $args \
+        -user "postgres" \
+        -password "" \
+        -host "localhost" \
+        -db_table "" \
+        -columns "" \
+        -header 0 \
+        -footer 0 \
+        -- \
+        filename
+    
+    set qry [db_qry_parse {
+        SET client_min_messages TO WARNING;
+        
+        BEGIN;
+        truncate $db_table;
+        COPY $db_table ([join $columns ,]) FROM STDIN;
+        COMMIT;
+    }]
+    set ::env(PGPASSWORD) $password 
+    set psql [qc::which psql]
+    exec cat $filename | $psql -w -U $user -h $host tlc -c $qry
+}
