@@ -653,6 +653,7 @@ proc qc::db_pg_copy_load { args } {
         -user "postgres" \
         -password "" \
         -host "localhost" \
+        -database "" \
         -db_table "" \
         -columns "" \
         -header 0 \
@@ -670,5 +671,5 @@ proc qc::db_pg_copy_load { args } {
     }]
     set ::env(PGPASSWORD) $password 
     set psql [qc::which psql]
-    exec cat $filename | $psql -w -U $user -h $host tlc -c $qry
+    exec cat $filename | $psql -w -U $user -h $host $database -c $qry
 }
