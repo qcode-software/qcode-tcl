@@ -86,8 +86,11 @@ proc qc::image_resize {args} {
     
     if { $autocrop } {
         set tmp_file $file
-        set file [qc::image_file_autocrop $tmp_file]
-        file delete $tmp_file
+        ::try {
+            set file [qc::image_file_autocrop $tmp_file]
+        } finally {
+            file delete $tmp_file
+        }
     }
 
     dict2vars [qc::image_file_info $file] width height
@@ -97,8 +100,11 @@ proc qc::image_resize {args} {
          || $height > $max_height
      } {
         set tmp_file $file
-        set file [qc::image_file_resize $tmp_file $max_width $max_height]
-        file delete $tmp_file
+        ::try {
+            set file [qc::image_file_resize $tmp_file $max_width $max_height]
+        } finally {
+            file delete $tmp_file
+        }
         dict2vars [qc::image_file_info $file] width height
     }
 
