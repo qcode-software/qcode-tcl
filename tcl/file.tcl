@@ -99,18 +99,11 @@ proc qc::file2url {file} {
     }
 }
 
-proc qc::file_handler {cache_dir {error_handler "qc::error_handler"}} {
+proc qc::file_handler {file_id cache_dir canonical_url {error_handler "qc::error_handler"}} {
     #| URL handler to serve files that can not be served by fastpath.
-    # If canonical url was requested return file to client and register URL to be servered by fastpath for future requests.
+    # If canonical url was requested return file to client and register URL to be served by fastpath for future requests.
     setif error_handler "" "qc::error_handler"
-    ::try {
-        set request_path [qc::conn_path]
-        
-        if { ! [regexp {^/file/([0-9]+)(?:/.*|$)} $request_path -> file_id] } {
-            # Invalid file url
-            return [ns_returnnotfound]
-        }
-        
+    ::try {        
         if { [qc::file_cache_exists $cache_dir $file_id] } {
             # Cache already exists for canonical url
             dict2vars [qc::file_cache_data $cache_dir $file_id] url
