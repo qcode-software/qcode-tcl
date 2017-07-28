@@ -356,6 +356,12 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
     return "filter_ok"
 }
 
+proc qc::filter_set_content_disposition {filter_when value} {
+    #| Filter to set the content-disposition header.
+    ns_set update [ns_conn outputheaders] content-disposition $value
+    return "filter_ok"
+}
+
 proc qc::filter_form_variables_validate {event args} {
     #| Check form variable names to prevent Tcl namespaced variables from being
     #| set or overwritten.
