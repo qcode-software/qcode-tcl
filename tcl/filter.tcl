@@ -356,9 +356,11 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
     return "filter_ok"
 }
 
-proc qc::filter_set_content_disposition {filter_when value} {
-    #| Filter to set the content-disposition header.
-    ns_set update [ns_conn outputheaders] content-disposition $value
+proc qc::filter_set_headers {filter_when args} {
+    #| Filter to set header values.
+    foreach {name value} $args {
+        ns_set update [ns_conn outputheaders] $name $value
+    }
     return "filter_ok"
 }
 
