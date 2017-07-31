@@ -356,6 +356,14 @@ proc qc::filter_set_expires {filter_when seconds {cache_response_directive ""}} 
     return "filter_ok"
 }
 
+proc qc::filter_set_headers {filter_when args} {
+    #| Filter to set header values.
+    foreach {name value} $args {
+        ns_set update [ns_conn outputheaders] $name $value
+    }
+    return "filter_ok"
+}
+
 proc qc::filter_form_variables_validate {event args} {
     #| Check form variable names to prevent Tcl namespaced variables from being
     #| set or overwritten.
