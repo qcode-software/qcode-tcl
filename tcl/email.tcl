@@ -565,6 +565,9 @@ proc qc::mime_type_guess { filename } {
         ".doc" {
             return "application/msword"
         }
+        ".docx" {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        }
         ".dp" {
             return "application/commonground"
         }
@@ -1068,6 +1071,7 @@ proc qc::mime_file_extension { mime_type } {
         "application/octet-stream" ".dll"
         "application/octet-stream" ".dms"
         "application/msword" ".doc"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ".docx"
         "application/commonground" ".dp"
         "applications/x-dvi" ".dvi"
         "image/vnd.dwg" ".dwg"
