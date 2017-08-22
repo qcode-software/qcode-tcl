@@ -5,12 +5,16 @@ namespace eval qc {
 proc qc::widget {args} {
     #| Look for a proc "widget_$type" to make the widget
     set type [dict get $args type]
+    # Check the qc namespace for a widget proc to create the widget type.
     if { [eq [info procs "::qc::widget_$type"] "::qc::widget_$type"] } {
 	return ["::qc::widget_$type" {*}$args]
-    } 
-    if { [eq [info procs "widget_$type"] "widget_$type"] } {
-	return ["widget_$type" {*}$args]
-    } 
+    }
+
+    # No widget proc found in the qc namespace for the type.
+    # Check the global namespace for a proc to create the widget type.
+    if { [eq [info procs "::widget_$type"] "::widget_$type"] } {
+	return ["::widget_$type" {*}$args]
+    }
     error "No widget proc defined for $type"
 }
 
