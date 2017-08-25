@@ -39,7 +39,7 @@ apt-get install tdom
 -----
 ### Implementing Qcode TCL
 
-Once you've got the Debian package installed we can include the Qcode TCL library into a project and begin working with it.
+Once you've got the Debian package installed we can include the Qcode TCL library into a project and begin working with it.  You'll need to have followed the naviserver set-up that includes implementing a tcl library, and any tcl files you create should be saved into the directory you specify during that set-up.
 
 At the top of any tcl file where you need to work with the Qcode TCL library you should include the following code:
 
@@ -48,22 +48,25 @@ At the top of any tcl file where you need to work with the Qcode TCL library you
 package require qcode
 ```
 
+If following the example of our naviserver tcl procedure, this would be under `/var/www/alpha.co.uk/tcl`.
+
 -----
 ### Testing Your Implementation
 
 A simple test to make sure you can connect to the Qcode tcl library is to reference once of the procs inside the library and return some basic data.
 
-For this exercise I'd recommend connecting to a proc that does not use the Qcode session management code, the connection marshalling or anything that requires that a database be set up.  To that end, using one of the error procs to return HTML to the page is the simplest way to check your implementation.
+For this exercise we can use the handler_restful proc which provides an interface over ns_register_proc that includes connection handling and returning correctly formatted HTML data.
 
-The following code, saved as a .tcl file in your active directory should, when visiting the page "qcode.html", return a "Software Bug" with the errorMessage "Hello World", the errorInfo "Test" and the errorCode "000".
+The following code, saved as a .tcl file in your active directory should, when visiting the page "qcode.html", return the message "Hello World" as a valid HTML response.
 
 ```
 package require qcode
 namespace import qc::*
 
-ns_register_proc GET /qcode.html qcode
+ns_register_proc GET /* qc::handler_restful
 
-proc qcode {} {
-    ns_return 200 text/html [qc::error_report "Hello World" "Test" "000"]
+register GET /qcode.html {} {
+    #| Hello World using handler_restful
+    return "Hello World"
 }
 ```
