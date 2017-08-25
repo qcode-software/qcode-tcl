@@ -82,6 +82,7 @@ Qcode Tcl Lib Documentation
 
 Tutorials
 ---------
+* [An Introduction to Qcode TCL][20]
 * [Setting Up][18]
 * [How to Define a New Data Type (Domain)][19]
 
@@ -106,3 +107,4 @@ Tutorials
 [17]: data-model-dependencies.md
 [18]: setting-up.md
 [19]: data-type-define.md
+[20]: installation.md
