@@ -5,7 +5,7 @@ part of [Qcode Documentation](index.md)
 * * *
 ### Prerequisites
 
-In order to use Qcode TCL you need to have a working naviserver instance. You can follow the instructions [here](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-introduction.md) to set up an instance if you do not already have one, you should use the TCL Library [config file](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-tcl.md). 
+In order to use Qcode TCL you need to have a working naviserver instance. You can follow the instructions [here](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-introduction.md) to set up an instance if you do not already have one, and you should use the TCL Library [config file](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-tcl.md). 
 
 -----
 ### Installation
@@ -16,8 +16,6 @@ Qcode TCL is provided as a Debian package to facilitate a simple installation.  
 apt-get update
 apt-get install qcode-tcl-8.0.0
 ```
-
-(The version number above was correct at the time of writing, you will need to substitute in the latest version number - easily found by looking at the packages in the list shown at `http://debian.qcode.co.uk/debs/`).
 
 -----
 ### Dependencies / Prerequisites
