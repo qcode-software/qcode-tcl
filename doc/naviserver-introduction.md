@@ -32,7 +32,7 @@ apt-get install naviserver-dev naviserver-dbg naviserver-nsdbpg
 -----
 ### Configuring Naviserver
 
-Once you've got naviserver installed, you should first try and get everything running with a [minimal config](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-minimal.md).  Once you've done this, you can try different config files, alternative setups and various options.
+Once you've got naviserver installed, you should first try and get everything running with a [minimal config](naviserver-config-minimal.md).  Once you've done this, you can try different config files, alternative setups and various options.
 
 To install the minimal config, you'll need to navigate to `/env/naviserver/` and create a minimal.tcl file.  We can then add code to this file to configure naviserver correctly.
 
@@ -172,7 +172,7 @@ In order to see something meaningful in there, you can upload a basic index.html
 
 To allow multiple sites to be hosted on the same IP address you can set up a config file that will tell naviserver to look for host headers in order to determine which content should be served.
 
-In the [example config](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-virtual-host.md) file you can see that we've added multiple server names.  The nssock module is still running globally in order to handle the socket connections, but we've shown an example of "instanced" nslog modules running under each of these servers.
+In the [example config](naviserver-config-virtual-host.md) file you can see that we've added multiple server names.  The nssock module is still running globally in order to handle the socket connections, but we've shown an example of "instanced" nslog modules running under each of these servers.
 
 In order to test host headers on your dev environment you can use the hosts file (`/etc/hosts`) to simulate how visitors would be directed to the relevant site. In the case of the virtual housts config file provided, you could test this functionality by adding the following lines to your hosts file:
 
@@ -184,7 +184,7 @@ In order to test host headers on your dev environment you can use the hosts file
 -----
 ### Serving pages via TCL
 
-In order to provision a server capable of serving dynamic pages, rather than static HTML, you will need to include the nscgi module, as in the provided [CGI config file](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-cgi.md).
+In order to provision a server capable of serving dynamic pages, rather than static HTML, you will need to include the nscgi module, as in the provided [CGI config file](naviserver-config-cgi.md).
 
 Most of the setup should be the same as the minimal config, with the noted addition of the following lines:
 
@@ -216,7 +216,7 @@ You can then serve content directly from this tcl directory using some naviserve
 -----
 ### Adding Postgresql to the mix
 
-The last set of files demonstrate how to connect a naviserver instance to postgresql, such as this [postgres config file](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-postgres.md).  You can then use tcl and postgresql to query and return data from a database.
+The last set of files demonstrate how to connect a naviserver instance to postgresql, such as this [postgres config file](naviserver-config-postgres.md).  You can then use tcl and postgresql to query and return data from a database.
 
 You will need to install and set up a database in Postgresql before being able to connect using the following code, it's recommended you take a look [here](postgresql-setup.md) for help getting set up.
 
@@ -253,4 +253,4 @@ ns_section      "ns/db/pool/main"
 
 - Set up and connect to the postgres server, passing in the datasource (comprising server IP, port and database name), username, and password.
 
-With all of the above added to your config file, you should then be able to connect to postgres using tcl naviserver database commands. A few examples are provided on the [example configs page](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-examples.md).
+With all of the above added to your config file, you should then be able to connect to postgres using tcl naviserver database commands. A few examples are provided on the [example configs page](naviserver-config-examples.md).
