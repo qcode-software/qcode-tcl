@@ -182,7 +182,7 @@ proc qc::sql_array2list {array} {
 }
 
 proc qc::sql_list2array { args } {
-    #| Convert a list into a PostgrSQL array literal.
+    #| Convert a list into a PostgrSQL array constructor.
     qc::args $args -type "" -- list
     foreach item $list {
 	lappend lquoted [db_quote $item $type]
