@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Convert a list into a PostgrSQL array literal.
+Convert a list into a PostgrSQL array constructor function call.
 
 Examples
 --------
