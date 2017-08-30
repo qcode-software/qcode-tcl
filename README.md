@@ -1,7 +1,6 @@
 <p align="center">
 <img src="logo_qcode_420x120.png" alt="Qcode" title="Qcode" />
 </p>
-<br><br>
 
 Qcode Tcl Lib
 =============
@@ -24,7 +23,19 @@ A library for building Tcl Web Apps running on Naviserver.
 ## 4. [Connection Response][11]
 * [API](doc/response_api.md)
 
-## 5. [Database API][1]
+## 5. [Filters][13]
+
+## 6. [Authentication][3]
+
+## 7. [Argument Passing in Tcl][5]
+
+## 8. [Validating User Input][6]
+
+## 9. [Cookie Handling][4]
+
+## 10. [Date Handling][7]
+
+## 11. [Database API][1]
 
 * Select data out of the db. [`db_1row`](doc/procs/db_1row.md), [`db0or1row`](doc/procs/db_0or1row.md), [`db_foreach`](doc/procs/db_foreach.md)
 * DML statements - `INSERT`, `UPDATE`, `DELETE`
@@ -34,24 +45,14 @@ A library for building Tcl Web Apps running on Naviserver.
 * SQL helpers
 * Database Introspection
 
-## 6. [Data Types][2]
+## 12. [Data Types][2]
 
 * [`qc::is` Ensemble](doc/is.md)
 * [`qc::cast` Ensemble](doc/cast.md)
 * [`qc::castable` Ensemble](doc/castable.md)
 * [Define a new data type](doc/data-type-define.md)
 
-## 7. [Authentication][3]
-
-## 8. [Cookie Handling][4]
-
-## 9. [Argument Passing in Tcl][5]
-
-## 10. [Validating User Input][6]
-
-## 11. [Date Handling][7]
-
-## 12. [Sending Email][8]
+## 13. [Sending Email][8]
 * CC and BCC
 * Custom SMTP headers
 * Sending plain text and rich HTML
@@ -61,12 +62,10 @@ A library for building Tcl Web Apps running on Naviserver.
 * Word wrapping
 * UTF-8 Subject
 
-## 13. [Error Handling][9]
+## 14. [Error Handling][9]
 * Return validation errors to the user
 * Automatic email notification
 * [Form Variables][10]
-
-## 14. [Filters][13]
 
 ## 15. [Safe HTML & Markdown][15]
 
