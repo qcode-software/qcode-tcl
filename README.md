@@ -13,7 +13,7 @@ A library for building Tcl Web Apps running on Naviserver.
 
 ## 2. [Database API][1]
 
-* Select data out of the db. [`db_1row`](procs/db_1row.md), [`db0or1row`](procs/db_0or1row.md), [`db_foreach`](procs/db_foreach.md)
+* Select data out of the db. [`db_1row`](doc/procs/db_1row.md), [`db0or1row`](doc/procs/db_0or1row.md), [`db_foreach`](doc/procs/db_foreach.md)
 * DML statements - `INSERT`, `UPDATE`, `DELETE`
 * Database Transactions
 * Sequences
@@ -23,10 +23,10 @@ A library for building Tcl Web Apps running on Naviserver.
 
 ## 3. [Data Types][2]
 
-* [`qc::is` Ensemble](is.md)
-* [`qc::cast` Ensemble](cast.md)
-* [`qc::castable` Ensemble](castable.md)
-* [Define a new data type](data-type-define.md)
+* [`qc::is` Ensemble](doc/is.md)
+* [`qc::cast` Ensemble](doc/cast.md)
+* [`qc::castable` Ensemble](doc/castable.md)
+* [Define a new data type](doc/data-type-define.md)
 
 ## 4. [Authentication][3]
 
@@ -54,10 +54,10 @@ A library for building Tcl Web Apps running on Naviserver.
 * [Form Variables][10]
 
 ## 11. [Connection Response][11]
-* [API](response_api.md)
+* [API](doc/response_api.md)
 
 ## 12. [Handler and Path Registration][12]
-* [Handlers API](handlers-api.md)
+* [Handlers API](doc/handlers-api.md)
 
 ## 13. [Filters][13]
 
@@ -74,9 +74,9 @@ A library for building Tcl Web Apps running on Naviserver.
 ## 17. [Data Model Dependencies][17]
 
 ## 18. Appendix: Naviserver
-* [Naviserver Introduction](naviserver-introduction.md)
-* [Naviserver Example Configs](naviserver-config-examples.md)
-* [Postgresql Setup](postgresql-setup.md)
+* [Naviserver Introduction](doc/naviserver-introduction.md)
+* [Naviserver Example Configs](doc/naviserver-config-examples.md)
+* [Postgresql Setup](doc/postgresql-setup.md)
 
 
 ----------------------------------
@@ -88,23 +88,23 @@ A library for building Tcl Web Apps running on Naviserver.
 
 
 
-[1]: db.md
-[2]: data-types.md
-[3]: auth.md
-[4]: cookie.md
-[5]: args.md
-[6]: validation.md
-[7]: date.md
-[8]: email.md
-[9]: error.md
-[10]: form-vars.md
-[11]: connection-response.md
-[12]: registration.md
-[13]: filters.md
-[14]: connection-handlers.md
-[15]: safe-html-markdown.md
-[16]: security.md
-[17]: data-model-dependencies.md
-[18]: setting-up.md
-[19]: data-type-define.md
-[20]: installation.md
+[1]: doc/db.md
+[2]: doc/data-types.md
+[3]: doc/auth.md
+[4]: doc/cookie.md
+[5]: doc/args.md
+[6]: doc/validation.md
+[7]: doc/date.md
+[8]: doc/email.md
+[9]: doc/error.md
+[10]: doc/form-vars.md
+[11]: doc/connection-response.md
+[12]: doc/registration.md
+[13]: doc/filters.md
+[14]: doc/connection-handlers.md
+[15]: doc/safe-html-markdown.md
+[16]: doc/security.md
+[17]: doc/data-model-dependencies.md
+[18]: doc/setting-up.md
+[19]: doc/data-type-define.md
+[20]: doc/installation.md
