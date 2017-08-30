@@ -3,6 +3,22 @@ Qcode Tcl Lib Documentation
 
 * * *
 
+Tutorials
+---------
+* [An Introduction to Qcode TCL][20]
+* [Setting Up][18]
+* [How to Define a New Data Type (Domain)][19]
+
+* * *
+
+Naviserver
+---------
+* [Naviserver Introduction](naviserver-introduction.md)
+* [Naviserver Example Configs](naviserver-config-examples.md)
+* [Postgresql Setup](postgresql-setup.md)
+
+* * *
+
 [Database API][1]
 -----------------
 * Select data out of the db. [`db_1row`](procs/db_1row.md), [`db0or1row`](procs/db_0or1row.md), [`db_foreach`](procs/db_foreach.md)
@@ -79,14 +95,6 @@ Qcode Tcl Lib Documentation
 
 [Data Model Dependencies][17]
 -----------------------------
-
-Tutorials
----------
-* [An Introduction to Qcode TCL][20]
-* [Setting Up][18]
-* [How to Define a New Data Type (Domain)][19]
-
-* * *
 
 [1]: db.md
 [2]: data-types.md

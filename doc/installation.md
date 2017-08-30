@@ -2,13 +2,13 @@ An Introduction to Qcode Tcl
 ========
 part of [Qcode Documentation](index.md)
 
-* * *
+-----
 ### Prerequisites
 
-In order to use Qcode Tcl you need to have a working naviserver instance. You should follow the instructions [here](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-introduction.md) to set up an instance if you do not already have one, and you should use the [Tcl Library config file](https://github.com/qcode-software/qcode/blob/master/wiki/naviserver-config-tcl.md). 
+In order to use Qcode Tcl you need to have a working naviserver instance. You should follow the instructions [here](naviserver-introduction.md) to set up an instance if you do not already have one, and you should use the [Tcl Library config file](naviserver-config-tcl.md). 
 
 -----
-### Installation
+### Installing Qcode Tcl
 
 Qcode Tcl is provided as a Debian package to facilitate a simple installation.  Simply run the following commands to install the Qcode Tcl library:
 
@@ -18,7 +18,7 @@ apt-get install qcode-tcl-8.0.0
 ```
 
 -----
-### Dependencies
+### Tcl Dependencies
 
 Qcode Tcl has two fundamental dependencies:
 
@@ -49,4 +49,4 @@ register GET /hello.html {} {
 }
 ```
 
-Visit the page `http://locahost/hello.html` and you will see the text "Hello World".
+Visit the page `http://localhost/hello.html` and you will see the text "Hello World".
