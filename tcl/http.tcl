@@ -144,7 +144,7 @@ proc qc::http_post {args} {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
-    args $args -timeout 60 -sslversion tlsv1 -headers {} -noproxy -- url
+    args $args -timeout 60 -sslversion tlsv1 -headers {} -valid_response_codes {200} -noproxy -- url
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -154,15 +154,16 @@ proc qc::http_get {args} {
 
     switch $curlErrorNumber {
 	0 {
-	    switch $responsecode {
-		200 { 
-		    # OK
-		    return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
-		}
-		404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
-		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
-		default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
-	    }
+            if { [in $valid_response_codes $responsecode] } {
+                # OK
+                return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
+            } else {
+                switch $responsecode {                    
+                    404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+                    500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+                    default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+                }
+            }
 	}
 	28 {
 	    return -code error -errorcode TIMEOUT "Timeout after $timeout seconds trying to contact $url"
