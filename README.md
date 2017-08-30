@@ -12,7 +12,7 @@ A library for building Tcl Web Apps running on Naviserver.
 ## 1. Tutorials
 
 * [An Introduction to Qcode Tcl][20]
-* [Setting Up][18]
+* [Setting Up a Connection Marshal and Request Handlers][18]
 * [How to Define a New Data Type (Domain)][19]
 
 ## 2. [Handler and Path Registration][12]
