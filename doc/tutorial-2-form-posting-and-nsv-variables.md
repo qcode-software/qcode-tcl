@@ -1,4 +1,4 @@
-Tutorial 2: An introduction to forms
+Tutorial 2: An Introduction to Forms
 ========
 part of [Qcode Documentation](index.md)
 
@@ -36,7 +36,9 @@ register GET /form.html {} {
 -----
 ### Handling the form post
 
-Add the code below to the `init.tcl` file.  When the form is submitted from "form.html" the action will look for "form_process" and find our proc.
+Add the code below to the `init.tcl` file.  When the form is submitted from `form.html` the action will look for `form_process` and find our proc.
+
+This proc will find the values posted into the first and last name fields and set them as nsv variables to be referenced later, it will then redirect the user to the `form_results.html` page.
 
 ```tcl
 ns_register_proc POST /form_process form_process
@@ -48,14 +50,14 @@ proc form_process {} {
     nsv_set _form first_name $first_name
     nsv_set _form last_name $last_name
 
-    qc::return2client html "Form Submitted"
+    ns_returnredirect form_results.html
 }
 ```
 
 -----
 ### Viewing the stored variables
 
-Once the form has been filled out and submitted, we can then reference the values entered by the user.
+We can now retrieve the values from the form submission we committed to nsv variables, and then reference these values in our code.
 
 ```tcl
 register GET /form_results.html {} {
