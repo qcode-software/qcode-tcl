@@ -13,6 +13,7 @@ A library for building Tcl Web Apps running on Naviserver.
 
 * [An Introduction to Qcode Tcl][20]
 * [An Introduction to Forms][21]
+* [Setting up the database][22]
 * [Setting Up a Connection Marshal and Request Handlers][18]
 * [How to Define a New Data Type (Domain)][19]
 
@@ -113,3 +114,4 @@ A library for building Tcl Web Apps running on Naviserver.
 [19]: doc/data-type-define.md
 [20]: doc/installation.md
 [21]: doc/tutorial-2-form-posting-and-nsv-variables.md
+[22]: doc/tutorial-3-the-database.md
