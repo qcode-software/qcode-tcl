@@ -15,7 +15,6 @@ A library for building Tcl Web Apps running on Naviserver.
 * [An Introduction to Forms][21]
 * [Setting up the Database][22]
 * [Validation and the Data Model][23]
-
 * [Setting Up a Connection Marshal and Request Handlers][18]
 * [How to Define a New Data Type (Domain)][19]
 
