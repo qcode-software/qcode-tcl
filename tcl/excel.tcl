@@ -282,7 +282,7 @@ proc qc::excel_file_create {args} {
     ::try {
         log Debug $script_filename
         exec_proxy -timeout $timeout perl $script_filename
-        #file delete $script_filename
+        file delete $script_filename
     } on error {error_message options} {
         file delete $script_filename
         error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
