@@ -203,7 +203,15 @@ proc qc::excel_file_create {args} {
     ########################################
     # Variable substitution
     ########################################
-    set token_vars {writer filename cell_data formats column_meta row_meta cell_meta}
+    set token_vars {
+        writer
+        filename
+        cell_data
+        formats
+        column_meta
+        row_meta
+        cell_meta
+    }
     set map {}
     foreach token $token_vars {
         lappend map <$token> [set $token]
