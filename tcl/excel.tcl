@@ -14,6 +14,10 @@ proc qc::excel_file_create {args} {
     #   {5 2} {class "baz" type "string|number|formula|url"}
     #   {1 1} {class "bar"}
     # }
+    # images: ldict, eg. {
+    #   {filename /tmp/foo.png row 1 col 5}
+    #   {filename /tmp/bar.png row 2 col 3 x 5 y 10 x_scale 1.2 y_scale 1.3}
+    # }
     qc::args2vars $args {*}{
         data
         formats
@@ -22,6 +26,7 @@ proc qc::excel_file_create {args} {
         cell_meta
         timeout
         type
+        images
     }
     default {*}{
         data {}
@@ -31,6 +36,7 @@ proc qc::excel_file_create {args} {
         cell_meta {}
         timeout 1000
         type "xlsx"
+        images {}
     }
     switch $type {
         "xls" {
@@ -112,6 +118,25 @@ proc qc::excel_file_create {args} {
         # };
         my $cell_meta = <cell_meta>;
 
+        # Images, eg.
+        # my $images = [
+        #   {
+        #     filename => /tmp/foo.png,
+        #     row => 1,
+        #     col => 5,
+        #   },
+        #   {
+        #     filename => /tmp/bar.png,
+        #     row => 2,
+        #     col => 3,
+        #     x => 5,
+        #     y => 10,
+        #     x_scale => 1.2,
+        #     y_scale => 1.3
+        #   }
+        # ];
+        my $images = <images>;
+
         ####################
         # Logic
         ####################
@@ -179,6 +204,34 @@ proc qc::excel_file_create {args} {
                 }
             }
         }
+
+        # Images
+        for my $i ( 0 .. $#{$images} ) {
+            if ( not ( exists $images->[$i]{"x"} && exists $images->[$i]{"y"} ) ) {
+                $worksheet->insert_image(
+                                         $images->[$i]{"row"},
+                                         $images->[$i]{"col"},
+                                         $images->[$i]{"filename"});
+            } elsif ( not ( exists $images->[$i]{"x_scale"}
+                            && exists $images->[$i]{"y_scale"} )
+                      ) {
+                $worksheet->insert_image(
+                                         $images->[$i]{"row"},
+                                         $images->[$i]{"col"},
+                                         $images->[$i]{"filename"},
+                                         $images->[$i]{"x"},
+                                         $images->[$i]{"y"});                
+            } else {
+                $worksheet->insert_image(
+                                         $images->[$i]{"row"},
+                                         $images->[$i]{"col"},
+                                         $images->[$i]{"filename"},
+                                         $images->[$i]{"x"},
+                                         $images->[$i]{"y"},
+                                         $images->[$i]{"x_scale"},
+                                         $images->[$i]{"y_scale"});
+            }
+        }
     }
     # End of template
 
@@ -187,7 +240,7 @@ proc qc::excel_file_create {args} {
     ########################################
     # Cell data - A list of list becomes an array of arrays
     set cell_data [llist2perl_aarray $data]
-
+    
     # Formats - a dict of dicts becomes a hash of format objects added to the current workbook
     set formats [qc::excel_formats $formats]
 
@@ -200,6 +253,9 @@ proc qc::excel_file_create {args} {
     # Cell meta-data - a dict of dicts with lists for keys becomes a hash of hashes of hashes
     set cell_meta [qc::cell_meta2perl $cell_meta]
 
+    # Images - An ldict becomes an array of hashes
+    set images [qc::ldict2perl_ahash $images]
+
     ########################################
     # Variable substitution
     ########################################
@@ -211,6 +267,7 @@ proc qc::excel_file_create {args} {
         column_meta
         row_meta
         cell_meta
+        images
     }
     set map {}
     foreach token $token_vars {
@@ -225,7 +282,7 @@ proc qc::excel_file_create {args} {
     ::try {
         log Debug $script_filename
         exec_proxy -timeout $timeout perl $script_filename
-        file delete $script_filename
+        #file delete $script_filename
     } on error {error_message options} {
         file delete $script_filename
         error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]

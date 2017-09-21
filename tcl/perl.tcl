@@ -42,3 +42,12 @@ proc qc::ddict2perl_hhash {ddict} {
     }
     return \{[join $pairs ", "]\}
 }
+
+proc qc::ldict2perl_ahash {ldict} {
+    #| Convert a list of dictionaries into a perl array of hashes
+    set hash_list {}
+    foreach dict $ldict {
+        lappend hash_list [dict2perl_hash $dict]
+    }
+    return \[[join $hash_list ", "]\]
+}
