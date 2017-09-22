@@ -19,9 +19,9 @@ ALTER TABLE form
   ADD COLUMN last_name plain_string
 ```
 
-This will add the parameters `first_name` and `last_name` to the `form` table and define them as the `plain_string` custom data type as implemented by the Qcode tcl DB init procedure ([See Supported Data Types](doc/supported-data-types.md)).
+This will add the parameters `first_name` and `last_name` to the `form` table and define them as the `plain_string` custom data type as implemented by the Qcode tcl DB init procedure ([See Supported Data Types](supported-data-types.md)).
 
-When using `qc::handler_restful` the ensemble `qc::handlers call` is called. This uses the [validate2model](doc/validation.md) library.
+When using `qc::handler_restful` the ensemble `qc::handlers call` is called. This uses the [validate2model](validation.md) library.
 
 -----
 ## Registering a POST handler
