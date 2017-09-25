@@ -4,9 +4,9 @@ part of [Qcode Documentation](index.md)
 
 -----
 
-Qcode tcl supports all standard postgresql data types in addition to several bespoke data types. 
+Qcode-tcl extends the standard postgresql data types with several custom data types. 
 
-Definitions for the custom Qcode data types follow:
+Definitions for the custom data types are as follows:
 
 |	Name	       | Description	|
 |	------------ | ------------ |
