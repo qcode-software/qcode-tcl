@@ -6,7 +6,7 @@ part of [Qcode Documentation](index.md)
 
 ### Introduction
 
-This tutorial will guide you through preparing the database for validation using validate2model, using the register POST handler and specifying arguments for the POST handler.
+This tutorial will guide you through using the database datamodel to validate user supplied data. This is implemented by validate2model, using the register POST handler and specifying arguments for the POST handler.
 
 -----
 ## Adding the validation rules
@@ -19,7 +19,7 @@ ALTER TABLE form
   ADD COLUMN last_name plain_string
 ```
 
-This will add the parameters `first_name` and `last_name` to the `form` table and define them as the `plain_string` custom data type as implemented by the Qcode tcl DB init procedure ([See Supported Data Types](supported-data-types.md)).
+This will add columns `first_name` and `last_name` to the `form` table using the `plain_string` type ([See Supported Data Types](supported-data-types.md)).
 
 When using `qc::handler_restful` the ensemble `qc::handlers call` is called. This uses the [validate2model](validation.md) library.
 
@@ -58,8 +58,8 @@ register POST /form_process {
 }
 ```
 
-This changes our code from using `ns_register_proc` to using `handler_restful` to register the `form_process` procedure.  This procedure takes two arguments, `first_name` and `last_name` and checks them against the database using validate2model, doing away with the requirement to use `form_get_var`.
+This changes our code from using `ns_register_proc` to using `handler_restful` to register the `form_process` url path.  This procedure takes two arguments, `first_name` and `last_name` and checks them against the database using validate2model, doing away with the requirement to use `form_get_var`.
 
-Qcode tcl will then will make these form variables available as local tcl variables in the proc, which then continues to register them as naviserver variables as before.
+Qcode tcl will make the form variables `first_name` and `last_name` available as local tcl variables when executing the code defined by the `register` url handler.
 
-Once the changes above are complete, adding a valid first and last name to the form will submit correctly.  Adding a value that does not comply with the `plain_string` rule (e.g a string containing an HTML tag) will result in an error message being displayed.
+Once the changes above are complete, adding a valid first and last name to the form will submit correctly.  Adding a value that does not comply with the `plain_string` rule (e.g a string containing an HTML tag) will raise an error.
