@@ -11,10 +11,12 @@ A library for building Tcl Web Apps running on Naviserver.
 
 ## 1. Tutorials
 
-* [An Introduction to Qcode Tcl][20]
+* [An Introduction to Qcode-tcl][20]
 * [An Introduction to Forms][21]
 * [Setting up the Database][22]
-* [Validation against the data model][23]
+* [Validation Against the Data Model][23]
+* [Filter Validate][24]
+* [Storing User Input in the Database][25]
 * [Setting Up a Connection Marshal and Request Handlers][18]
 * [How to Define a New Data Type (Domain)][19]
 
@@ -117,3 +119,5 @@ A library for building Tcl Web Apps running on Naviserver.
 [21]: doc/tutorial-2-form-posting-and-nsv-variables.md
 [22]: doc/tutorial-3-the-database.md
 [23]: doc/tutorial-4-validation.md
+[24]: doc/tutorial-5-filter-validate.md
+[25]: doc/tutorial-6-database.md
