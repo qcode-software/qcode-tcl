@@ -6,7 +6,7 @@ part of [Qcode Documentation](index.md)
 
 ### Introduction
 
-This tutorial will guide you through using the database datamodel to validate user supplied data. This is implemented by validate2model, using the register POST handler and specifying arguments for the POST handler.
+This tutorial will guide you through using the database data model to validate user supplied data. This is implemented by validate2model, using the register POST handler and specifying arguments for the POST handler.
 
 -----
 ## Adding the validation rules
