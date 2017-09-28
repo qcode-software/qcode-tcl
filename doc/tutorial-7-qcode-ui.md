@@ -3,9 +3,14 @@ Tutorial 7: Validation with qcode-ui
 part of [Qcode Documentation](index.md)
 
 -----
-### Adding qcode-ui
+### Introduction
 
-Amend your form html code to include a `<head>` element with calls to the requisite libraries and to instantiate the AJAX validation, as follows:
+This tutorial will take you through adding client side validation to your form using the [validation plugin in qcode-ui](https://github.com/qcode-software/qcode-ui/blob/master/docs/forms/validation/validation.md).
+
+-----
+### Applying the validation plugin
+
+Amend the form.html code to include a `<head>` element with the required libraries and initialise the validation plugin, as follows:
 
 ```html
 <html>
@@ -70,7 +75,7 @@ Amend your form html code to include a `<head>` element with calls to the requis
 </html>
 ```
 
-You will also need to amend the `register POST /form_process` proc, removing the line 
+Amend the `register POST /form_process` proc, removing the line 
 `ns_returnredirect [qc::url form_results.html id $person_id]` and replacing it with the following:
 
 ```
@@ -78,4 +83,4 @@ qc::response action redirect [qc::url form_results.html person_id $person_id]
 return [qc::return_response]
 ```
 
-Submitting the form with non valid information will now provide an error message via AJAX above the form instead of the unformatted message as previously displayed.
+Submitting the form with invalid information will now provide validation messages without reloading the page.
