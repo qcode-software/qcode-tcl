@@ -46,10 +46,25 @@ proc qc::db_column_exists {column} {
 proc qc::db_table_columns {table} {
     #| Returns a list of columns for the given table.
     set qry {
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_name=:table
-        ORDER BY ordinal_position;
+        select column_name
+        from information_schema.columns
+        join (
+              select
+              table_name,
+              table_schema
+              
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+              
+              where table_schema=(current_schemas(true))\[i\]
+              and table_name=:table
+              
+              order by i
+              limit 1
+              ) t using(table_name, table_schema)
+        order by ordinal_position;
     }
     set columns {}
     qc::db_cache_foreach -ttl 86400 $qry {
