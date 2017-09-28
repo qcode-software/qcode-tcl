@@ -194,12 +194,16 @@ proc qc::db_enum_exists {args} {
     #| Checks if the given enum exists in the database.
     qc::args $args -no-cache -- enum_name
     set qry {
-        SELECT e.enumtypid
-        FROM pg_enum e
-        JOIN pg_type t
-        ON t.oid = e.enumtypid
-        WHERE t.typname=:enum_name
-        LIMIT 1;
+        select e.enumtypid
+        from pg_enum e
+        join pg_type t on t.oid = e.enumtypid
+        join pg_namespace n on n.oid = t.typnamespace
+        where t.typname=:enum_name
+        and n.nspname in (
+                          select *
+                          from unnest(current_schemas(true))
+                          )
+        limit 1;
     }
     if { [info exists no-cache] } {
 	set ttl -1
