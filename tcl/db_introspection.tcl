@@ -30,11 +30,27 @@ proc qc::db_col_varchar_length { table_name col_name } {
 }
 
 proc qc::db_column_exists {column} {
-    #| Checks if the given column name exists in the database.
+    #| Checks if the given column name exists in the database
+    # (Check only tables visible in the current flattened schema)
     db_cache_1row -ttl 86400 {
-        SELECT count(*) as count 
-        FROM information_schema.columns
-        WHERE column_name=:column
+        select count(*) as count 
+        from information_schema.columns
+        join (
+              select distinct on (table_name)
+              table_name,
+              table_schema
+
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+
+              where table_schema=(current_schemas(true))\[i\]
+
+              order by table_name, i
+              ) t using(table_name, table_schema)
+              
+        where column_name=:column
     }
     if {$count > 0} {
         return true
