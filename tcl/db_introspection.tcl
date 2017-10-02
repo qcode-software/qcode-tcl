@@ -18,18 +18,21 @@ proc qc::db_table_schema {table_name} {
     return $table_schema
 }
 
-proc qc::db_col_varchar_length { table_name col_name } {
+proc qc::db_col_varchar_length {schema_name table_name col_name} {
     #| Returns the varchar length of a db table column
     set qry "
         SELECT
                 a.atttypmod-4 AS lengthvar,
                 t.typname AS type
         FROM
+                pg_namespace n,
                 pg_attribute a,
                 pg_class c,
                 pg_type t
         WHERE
-                c.relname = :table_name
+                n.nspname = :schema_name
+                and c.relnamespace = n.oid
+                and c.relname = :table_name
                 and a.attnum > 0
                 and a.attrelid = c.oid
                 and a.atttypid = t.oid

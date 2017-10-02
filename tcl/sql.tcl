@@ -10,8 +10,10 @@ proc qc::sql_set {args} {
 }
 
 proc qc::sql_set_varchars_truncate {table args} {
+    set schema_name [qc::db_table_schema $table]
     foreach name $args {
-        lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
+        set length [db_col_varchar_length $schema_name $table $name]
+        lappend set_list "${name}=:${name}::varchar($length)"
     }
     return [join $set_list ,]
 }
