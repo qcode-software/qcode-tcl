@@ -1,6 +1,23 @@
 namespace eval qc {
     namespace export db_*
 }
+
+proc qc::db_table_schema {table_name} {
+    #| Returns the schema a table name resolves to with the current connection
+    db_1row {
+        select table_schema
+        from information_schema.tables
+        cross join generate_series(1,
+                                   array_length(current_schemas(true),1)
+                                   ) as index
+        where table_schema = (current_schemas(true))\[index\]
+        and table_name = :table_name
+        order by index
+        limit 1
+    }
+    return $table_schema
+}
+
 proc qc::db_col_varchar_length { table_name col_name } {
     #| Returns the varchar length of a db table column
     set qry "
