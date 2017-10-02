@@ -60,12 +60,13 @@ proc qc::db_column_exists {column} {
     }
 }
 
-proc qc::db_table_columns {table} {
+proc qc::db_table_columns {schema table} {
     #| Returns a list of columns for the given table.
     set qry {
         SELECT column_name
         FROM information_schema.columns
         WHERE table_name=:table
+        AND table_schema=:schema
         ORDER BY ordinal_position;
     }
     set columns {}
