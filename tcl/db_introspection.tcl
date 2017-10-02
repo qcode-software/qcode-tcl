@@ -51,6 +51,117 @@ proc qc::db_table_column_schemas {table column} {
     return $schemas
 }
 
+proc qc::db_resolve_field_name {name} {
+    #| Resolve a field name to schema, table, column
+    set parts [split $name "."]
+    switch [llength $parts] {
+        1 {
+            lassign $parts column_name
+
+            set data [list]
+            db_cache_foreach -ttl 86400 {
+                select *
+                from (
+                      select
+                      table_schema,
+                      index,
+                      table_name,
+                      min(index) over () as min_index
+
+                      from information_schema.columns
+                      join (                
+                            select distinct on(table_name)
+                            table_name,
+                            table_schema,
+                            index
+
+                            from information_schema.tables
+                            cross join
+                            generate_series(1,
+                                            array_length(current_schemas(true),1)
+                                            ) as index
+
+                            where table_schema = (current_schemas(true))\[index\]
+
+                            order by
+                            table_name,
+                            index
+                            ) i using(table_schema,table_name)
+                      
+                      where column_name = :column_name
+                      ) t
+                where index=min_index
+            } {
+                lappend data [dict_from {*}{
+                    table_schema
+                    table_name
+                }]
+            }
+            if { [llength $data] == 0 } {
+                db_cache_foreach -ttl 86400 {
+                    select
+                    table_schema,
+                    table_name
+                    
+                    from information_schema.columns
+
+                    where column_name = :column_name
+                } {
+                    lappend data [dict_from {*}{
+                        table_schema
+                        table_name
+                    }]
+                }
+            }
+            if { [llength $data] == 0 } {
+                error "TO DO: error message here"
+            }
+            if { [llength $data] == 1 } {
+                dict2vars [lindex $data 0] table_schema table_name
+            } else {
+                set schema_tables [list]
+                foreach row $data {
+                    dict2vars $row table_schema table_name
+                    lappend schema_tables "${table_schema}.${table_name}"
+                }
+                set qry {
+                    select
+                    table_schema,
+                    table_name
+                    
+                    from information_schema.table_constraints tc
+                    join information_schema.constraint_column_usage ccu
+                    using (table_schema, table_name, constraint_name)
+
+                    where [sql_where_in \
+                               "table_schema::text || '.' || table_name::text" \
+                               $schema_tables]
+                    and column_name=:column
+                    and constraint_type='PRIMARY KEY'
+
+                    limit 1
+                }
+            }
+        }
+        2 {
+            lassign $parts table_name column_name
+            if { [qc::db_table_in_search_path $table] } {
+                set schema [qc::db_table_schema $table]
+            } else {
+                set schemas [qc::db_table_column_schemas $table $column]
+                if { [llength $schemas] == 1 } {
+                    set schema [lindex $schemas 0]
+                }
+            }
+        }
+        3 { lassign $parts table_schema table_name column_name }
+        default {
+            error "Unable to resolve field \"$name\""
+        }
+    }
+    return [list $table_schema $table_name $column_name]
+}
+
 proc qc::db_col_varchar_length {args} {
     #| Returns the varchar length of a db table column
     switch [llength $args] {
