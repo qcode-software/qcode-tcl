@@ -2,62 +2,14 @@ namespace eval qc {
     namespace export db_*
 }
 
-proc qc::db_table_schema {table_name} {
-    #| Returns the schema a table name resolves to with the current connection
-    db_cache_1row -ttl 86400 {
-        select table_schema
-        from information_schema.tables
-        cross join generate_series(1,
-                                   array_length(current_schemas(true),1)
-                                   ) as index
-        where table_schema = (current_schemas(true))\[index\]
-        and table_name = :table_name
-        order by index
-        limit 1
-    }
-    return $table_schema
-}
-
-proc qc::db_table_in_search_path {table_name} {
-    #| Test whether the table can be found in the current schema path
-    db_cache_0or1row -ttl 86400 {
-        select table_schema
-        from information_schema.tables
-        cross join generate_series(1,
-                                   array_length(current_schemas(true),1)
-                                   ) as index
-        where table_schema = (current_schemas(true))\[index\]
-        and table_name = :table_name
-        order by index
-        limit 1
-    } {
-        return false
-    } {
-        return true
-    }
-}
-
-proc qc::db_table_column_schemas {table column} {
-    #| Returns all schemas containing the give table-column pair
-    set schemas [list]
-    db_cache_foreach -ttl 86400 {
-        select table_schema
-        from information_schema.columns
-        where table_name=:table
-        and column_name=:column
-    } {
-        lappend schemas $table_schema
-    }
-    return $schemas
-}
-
-proc qc::db_resolve_field_name {name} {
-    #| Resolve a field name to schema, table, column
-    set parts [split $name "."]
-    switch [llength $parts] {
+proc qc::db_qualify_column {args} {
+    #| Attempt to resolve 1-3 args as schema, table, column
+    switch [llength $args] {
         1 {
-            lassign $parts column_name
+            lassign $args column_name
 
+            # Select whichever table(s) in the current search path contain
+            # column, and are earliest in schema search path
             set data [list]
             db_cache_foreach -ttl 86400 {
                 select *
@@ -97,6 +49,8 @@ proc qc::db_resolve_field_name {name} {
                     table_name
                 }]
             }
+
+            # No tables in search path, check for all tables containing column
             if { [llength $data] == 0 } {
                 db_cache_foreach -ttl 86400 {
                     select
@@ -113,78 +67,132 @@ proc qc::db_resolve_field_name {name} {
                     }]
                 }
             }
+
+            # Still no tables found
             if { [llength $data] == 0 } {
-                error "TO DO: error message here"
+                error "No table containing column \"$column\""
             }
+
+            # Exactly one table found
             if { [llength $data] == 1 } {
                 dict2vars [lindex $data 0] table_schema table_name
-            } else {
-                set schema_tables [list]
-                foreach row $data {
-                    dict2vars $row table_schema table_name
-                    lappend schema_tables "${table_schema}.${table_name}"
-                }
-                set qry {
-                    select
-                    table_schema,
-                    table_name
-                    
-                    from information_schema.table_constraints tc
-                    join information_schema.constraint_column_usage ccu
-                    using (table_schema, table_name, constraint_name)
+                return [list $table_schema $table_name $column_name]
+            }
+            
+            # Filter selected tables for one where column is a primary key
+            set sql_value_rows [list]
+            foreach row $data {
+                dict2vars $row table_schema table_name
+                lappend sql_value_rows \
+                    "([db_quote $table_schema], [db_quote $table_name])"
+            }
 
-                    where [sql_where_in \
-                               "table_schema::text || '.' || table_name::text" \
-                               $schema_tables]
-                    and column_name=:column
-                    and constraint_type='PRIMARY KEY'
+            db_cache_0or1row -ttl 86400 {
+                select
+                table_schema,
+                table_name
 
+                from (VALUES [join $sql_value_rows ,])
+                as t (table_schema, table_name)
+                
+                join information_schema.table_constraints tc
+                using (table_schema, table_name)
+
+                join information_schema.constraint_column_usage ccu
+                using (table_schema, table_name, constraint_name)
+
+                where column_name=:column_name
+                and constraint_type='PRIMARY KEY'
+
+                limit 1
+            } {
+                # No tables with column as a primary key;
+                # just return the first table found
+                dict2vars [lindex $data 0] table_schema table_name                
+            }
+            return [list $table_schema $table_name $column_name]
+        }
+        2 {
+            lassign $args table_name column_name
+            db_cache_0or1row -ttl 86400 {
+                select table_schema
+                from information_schema.tables
+                cross join generate_series(1,
+                                           array_length(current_schemas(true),1)
+                                           ) as index
+                where table_schema = (current_schemas(true))\[index\]
+                and table_name = :table_name
+                order by index
+                limit 1
+            } {
+                db_cache_1row -ttl 86400 {
+                    select table_schema
+                    from information_schema.columns
+                    where table_name=:table_name
+                    and column_name=:column_name
                     limit 1
                 }
             }
         }
-        2 {
-            lassign $parts table_name column_name
-            if { [qc::db_table_in_search_path $table] } {
-                set schema [qc::db_table_schema $table]
-            } else {
-                set schemas [qc::db_table_column_schemas $table $column]
-                if { [llength $schemas] == 1 } {
-                    set schema [lindex $schemas 0]
-                }
-            }
-        }
-        3 { lassign $parts table_schema table_name column_name }
+        3 { lassign $args table_schema table_name column_name }
         default {
-            error "Unable to resolve field \"$name\""
+            error "Unable to resolve args to db_qualify_column"
         }
     }
     return [list $table_schema $table_name $column_name]
 }
 
-proc qc::db_col_varchar_length {args} {
-    #| Returns the varchar length of a db table column
+proc qc::db_resolve_field_name {name} {
+    #| Resolve a field name to schema, table, column
+    set parts [split $name "."]
+    return [qc::db_qualify_column {*}$parts]
+}
+
+proc qc::db_qualify_table {args} {
+    #| Resolve args to schema and table
     switch [llength $args] {
-        3 {
-            lassign $args schema table column
-        }
-        2 {
-            lassign $args table column
-            if { [qc::db_table_in_search_path $table] } {
-                set schema [qc::db_table_schema $table]
-            } else {
-                set schemas [qc::db_table_column_schemas $table $column]
-                if { [llength $schemas] == 1 } {
-                    set schema [lindex $schemas 0]
+        1 {
+            lassign $args table_name
+
+            db_cache_0or1row {
+                select table_schema
+
+                from information_schema.tables
+                cross join generate_series(1,
+                                           array_length(current_schemas(true),1)
+                                           ) as index
+
+                where table_schema = (current_schemas(true))\[index\]
+                and table_name = :table_name
+
+                order by index
+                
+                limit 1
+            } {
+                db_1row {
+                    select table_schema
+                    from information_schema.tables
+                    where table_name = :table_name
+                    limit 1
                 }
             }
         }
+        2 {
+            lassign $args table_schema table_name
+        }
         default {
-            error "Invalid db_col_varchar_length usage"
+            error "Unable to resolve args to db_qualify_table"
         }
     }
-    if { ! [info exists schema] } {
-        error "Unknown schema for column \"$column\" in table \"$table\""
+    return [list $table_schema $table_name]
+}
+
+proc qc::db_col_varchar_length {args} {
+    #| Returns the varchar length of a db table column
+    lassign [qc::db_qualify_column {*}$args] {*}{
+        schema
+        table
+        column
     }
     set qry {
         SELECT
@@ -232,12 +240,17 @@ proc qc::db_column_exists {column} {
     }
 }
 
-proc qc::db_table_columns {table} {
+proc qc::db_table_columns {args} {
     #| Returns a list of columns for the given table.
+    lassign [qc::db_qualify_table {*}$args] {*}{
+        table_schema
+        table_name
+    }
     set qry {
         SELECT column_name
         FROM information_schema.columns
         WHERE table_name=:table
+        AND table_schema=:table_schema
         ORDER BY ordinal_position;
     }
     set columns {}
@@ -247,13 +260,19 @@ proc qc::db_table_columns {table} {
     return $columns
 }
 
-proc qc::db_table_column_exists {table column} {
+proc qc::db_table_column_exists {args} {
     #| Checks if the column exists in the given table.
+    lassign [qc::db_qualify_table {*}[lrange $args 0 end-1]] {*}{
+        table_schema
+        table_name
+    }
+    set column [lindex $args end]
     set qry {
         SELECT column_name
         FROM information_schema.columns
         WHERE column_name=:column
-        AND table_name=:table;
+        AND table_name=:table_name
+        AND table_schema=:table_schema;
     }
     qc::db_cache_0or1row -ttl 86400 $qry {
         return false
@@ -278,6 +297,7 @@ proc qc::db_column_table {column} {
 
 proc qc::db_qualified_table_column {column} {
     #| Returns a fully qualified table column as a list of a pair: {table column}
+    # No multi-schema support; use qc::db_qualify_column instead
     if {[qc::db_column_exists $column]} {
         set tables [qc::db_column_table $column]
         if {[llength $tables] > 1 && [qc::db_column_table_primary_exists $column]} {
@@ -318,26 +338,72 @@ proc qc::db_column_table_primary {column} {
     return $table_name
 }
 
-proc qc::db_column_type {table column} {
+proc qc::db_column_type {args} {
     #| Returns the data type of the column in the given table.
+    qc::args $args -qualified -- args
+    default qualified false
+    lassign [qc::db_qualify_column {*}$args] {*}{
+        table_schema
+        table_name
+        column_name
+    }
     set qry {
-        SELECT column_name, coalesce(domain_name, udt_name) as data_type, character_maximum_length, numeric_precision, numeric_scale
+        SELECT
+        column_name,
+        domain_name,
+        domain_schema,
+        udt_name,
+        udt_schema,
+        character_maximum_length,
+        numeric_precision,
+        numeric_scale
+
         FROM information_schema.columns
-        WHERE table_name=:table and column_name=:column
+
+        WHERE table_schema=:table_schema
+        and table_name=:table_name
+        and column_name=:column_name
     }
     qc::db_cache_0or1row -ttl 86400 $qry {
-         return -code error -errorcode DB_COLUMN "Column \"$column\" does not exist for table \"$table\"."
+        return -code error -errorcode DB_COLUMN "Column \"$column\" does not exist for table \"$table\"."
     } {
+        if { $qualified } {
+            if { $domain_name ne "" } {
+                set data_type "${domain_schema}.${domain_name}"
+            } elseif { $udt_schema ne "pg_catalog" } {
+                set data_type "${udt_schema}.${udt_name}"
+            } else {
+                set data_type $udt_name
+            }
+        } else {
+            if { $domain_name ne "" } {
+                set data_type $domain_name
+            } else {
+                set data_type $udt_name
+            }
+        }
         return [qc::db_canonical_type $data_type $character_maximum_length $numeric_precision $numeric_scale]
     }
 }
 
-proc qc::db_table_column_types {table} {
+proc qc::db_table_column_types {args} {
     #| Returns a dict of all columns and their types in the given table.
+    lassign [qc::db_qualify_table {*}$args] {*}{
+        table_schema
+        table_name
+    }
     set qry {
-        SELECT column_name, coalesce(domain_name, udt_name) as data_type, character_maximum_length, numeric_precision, numeric_scale
+        SELECT column_name,
+        coalesce(domain_name, udt_name) as data_type,
+        character_maximum_length,
+        numeric_precision,
+        numeric_scale
+
         FROM information_schema.columns
-        WHERE table_name=:table
+
+        WHERE table_schema=:table_schema
+        and table_name=:table_name
+
         ORDER BY ordinal_position;
     }
     set column_types {}
@@ -347,13 +413,19 @@ proc qc::db_table_column_types {table} {
     return $column_types
 }
 
-proc qc::db_column_nullable {table column} {
+proc qc::db_column_nullable {args} {
     #| Checks if the column in the given table can hold null values.
+    lassign [qc::db_qualify_column {*}$args] {*}{
+        table_schema
+        table_name
+        column_name
+    }
     set qry {
         SELECT is_nullable
         FROM information_schema.columns
-        WHERE table_name=:table
-        AND column_name=:column
+        WHERE table_schema=:table_schema
+        and table_name=:table_name
+        and column_name=:column_name
     }
     qc::db_cache_1row -ttl 86400 $qry
     if {$is_nullable} {
@@ -363,14 +435,69 @@ proc qc::db_column_nullable {table column} {
     }
 }
 
+proc qc::db_resolve_type_name {name} {
+    #| Attempt to resolve args to schema and type_name
+    set parts [split $name "."]
+    switch [llength $parts] {
+        2 { return $parts }
+        1 {
+            set type_name [lindex $parts 0]
+            db_cache_0or1row {
+                select
+                n.nspname as schema
+
+                from
+                pg_namespace n,
+                pg_type t,
+                generate_series(1,
+                                array_length(current_schemas(true),1)
+                                ) as index
+
+                where t.typnamespace = n.oid
+                and t.typname = :type_name
+                and n.nspname = (current_schemas(true))\[index\]
+
+                order by index
+
+                limit 1
+            } {
+                db_cache_1row -ttl 86400 {
+                    select
+                    n.nspname as schema
+
+                    from
+                    pg_namespace n,
+                    pg_type t
+
+                    where t.typnamespace = n.oid
+                    and t.typname = :type_name
+
+                    limit 1
+                }
+            }
+            return [list $schema $type_name]
+        }
+        default {
+            error "Unable to resolve type name \"$name\""
+        }
+    }
+}
+
 proc qc::db_enum_values {enum_name} {
     #| Returns a list of the values for the given enumeration
+    lassign [qc::db_resolve_type_name $enum_name] {*}{
+        schema
+        enum_name
+    }
     set qry {
         SELECT e.enumlabel as value
         FROM pg_enum e 
         JOIN pg_type t
         ON t.oid = e.enumtypid
-        WHERE t.typname=:enum_name;
+        JOIN pg_namespace n
+        ON t.typnamespace = n.oid
+        WHERE t.typname=:enum_name
+        AND n.nspname=:schema;
     }
     set values {}
     qc::db_cache_foreach -ttl 86400 $qry {
@@ -382,13 +509,29 @@ proc qc::db_enum_values {enum_name} {
 proc qc::db_enum_exists {args} {
     #| Checks if the given enum exists in the database.
     qc::args $args -no-cache -- enum_name
-    set qry {
-        SELECT e.enumtypid
-        FROM pg_enum e
-        JOIN pg_type t
-        ON t.oid = e.enumtypid
-        WHERE t.typname=:enum_name
-        LIMIT 1;
+    set parts [split $enum_name "."]
+    if { [llength $parts] == 2 } {
+        lassign $parts schema enum_name
+        set qry {
+            SELECT e.enumtypid
+            FROM pg_enum e
+            JOIN pg_type t
+            ON t.oid = e.enumtypid
+            JOIN pg_namespace n
+            ON t.typnamespace = n.oid
+            WHERE t.typname=:enum_name
+            AND n.nspname=:schema
+            LIMIT 1;
+        }
+    } else {
+        set qry {
+            SELECT e.enumtypid
+            FROM pg_enum e
+            JOIN pg_type t
+            ON t.oid = e.enumtypid
+            WHERE t.typname=:enum_name
+            LIMIT 1;
+        }
     }
     if { [info exists no-cache] } {
 	set ttl -1
@@ -405,10 +548,22 @@ proc qc::db_enum_exists {args} {
 proc qc::db_domain_exists {args} {
     #|Checks if the given domain exists in the database
     qc::args $args -no-cache -- domain_name
-    set qry {
-	SELECT domain_name
-	FROM information_schema.domains
-	WHERE domain_name=:domain_name;
+    set parts [split $domain_name "."]
+    if { [llength $parts] == 2 } {
+        lassign $parts domain_schema domain_name
+        set qry {
+            SELECT domain_name
+            FROM information_schema.domains
+            WHERE domain_name=:domain_name
+            AND domain_schema=:domain_schema;
+        }
+    } else {
+        set qry {
+            SELECT domain_name
+            FROM information_schema.domains
+            WHERE domain_name=:domain_name
+            LIMIT 1;
+        }
     }
     if { [info exists no-cache] } {
 	set ttl -1
@@ -422,8 +577,51 @@ proc qc::db_domain_exists {args} {
     }
 }
 
-proc qc::db_domain_constraints {domain_name} {
+proc qc::db_resolve_domain_name {name} {
+    #| Resolve args to schema and domain
+    set parts [split $name "."]
+    switch [llength $parts] {
+        2 { return $parts }
+        1 {
+            set domain_name [lindex $parts 0]
+            db_cache_0or1row -ttl 86400 {
+                select domain_schema
+
+                from information_schema.domains,
+                generate_series(1,
+                                array_length(current_schemas(true),1)
+                                ) as index
+
+                where domain_schema = (current_schemas(true))\[index\]
+                and domain_name=:domain_name
+
+                order by index
+                limit 1
+            } {
+                db_cache_1row -ttl 86400 {
+                    select domain_schema
+
+                    from information_schema.domains
+
+                    where domain_name=:domain_name
+                    
+                    limit 1
+                }
+            }
+            return [list $domain_schema $domain_name]
+        }
+        default {
+            error "Unable to resolve domain name"
+        }
+    }
+}
+
+proc qc::db_domain_constraints {name} {
     #| Returns a dict of the constraint name with the check clause for the given domain in the database.
+    lassign [qc::db_resolve_domain_name $name] {*}{
+        domain_schema
+        domain_name
+    }
     set constraints [dict create]
     if {[qc::memoize qc::db_domain_exists $domain_name]} {
         set qry {
@@ -431,7 +629,9 @@ proc qc::db_domain_constraints {domain_name} {
             FROM information_schema.check_constraints cc
             JOIN information_schema.domain_constraints dc
             ON dc.constraint_name=cc.constraint_name
-            WHERE dc.domain_name=:domain_name;
+            AND dc.constraint_schema=cc.constraint_schema
+            WHERE dc.domain_name=:domain_name
+            AND dc.domain_schema=:domain_schema;
         }
         qc::db_cache_foreach -ttl 86400 $qry {
             dict set constraints $constraint_name $check_clause
@@ -442,15 +642,21 @@ proc qc::db_domain_constraints {domain_name} {
     }
 }
 
-proc qc::db_column_constraints {table column} {
+proc qc::db_column_constraints {args} {
     #| Returns a dict of constraint name and check clause for the given column
+    lassign [qc::db_qualify_column {*}$args] {*}{
+        schema
+        table
+        column
+    }
     if {[qc::db_table_column_exists $table $column]} {
         set qry {
             SELECT cc.constraint_name, check_clause
             FROM information_schema.check_constraints cc
             JOIN information_schema.constraint_column_usage ccu
             ON cc.constraint_name=ccu.constraint_name
-            WHERE ccu.table_name=:table
+            WHERE ccu.table_schema=:schema
+            AND ccu.table_name=:table
             AND ccu.column_name=:column;
         }
         set constraints {}
@@ -459,23 +665,32 @@ proc qc::db_column_constraints {table column} {
         }
         return $constraints
     } else {
-        return -code error -errorcode DB_COLUMN "Column \"$table.$column\" does not exist."
+        return -code error -errorcode DB_COLUMN "Column \"$schema.$table.$column\" does not exist."
     }
 }
 
-proc qc::db_eval_constraint {table constraint args} {
+proc qc::db_eval_constraint {args} {
     #| Check a db constraint expression by substituting in corresponding values from args
     # eg constraint_test {(col1 > col2)} col1 17 col2 16
-    set column_types [qc::memoize qc::db_table_column_types $table]
+    qc::args $args -schema ? -- table constraint args
+    if { ! [info exists schema] } {
+        lassign [qc::db_qualify_table $table] {*}{
+            schema
+            table
+        }
+    }
+    set column_types [qc::memoize qc::db_table_column_types $schema $table]
     set columns [dict keys $column_types]
-    set fq_columns [qc::map [list x "return $table.\$x"] $columns]
-    set column_values [qc::dict_subset $args {*}$columns {*}$fq_columns]
+    set tq_columns [qc::map [list x "return $table.\$x"] $columns]
+    set sq_columns [qc::map [list x "return $schema.$table.\$x"] $columns]
+    set column_values [qc::dict_subset $args {*}$columns {*}$tq_columns {*}$sq_columns]
     set list {}
     foreach {name value} $column_values {
-        if { ![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-            set column $name
-        }
-            
+        lassign [qc::db_resolve_field_name $name] {*}{
+            schema
+            table
+            column
+        }            
         lappend list "[qc::db_quote $value]::[dict get $column_types $column] as $column"
     }    
     set sub_select "SELECT [join $list ,]"
@@ -503,24 +718,44 @@ proc qc::db_eval_domain_constraint {value base_type check_clause} {
     }
 }
 
-proc qc::db_eval_column_constraints {table column values} {
+proc qc::db_eval_column_constraints {args} {
     #| Evaluates constraints on the given table.column with the given values.
     #| Returns a dict of the constraints and their results.
-    set constraints [qc::memoize qc::db_column_constraints $table $column]
+    set values [lindex $args end]
+    lassign [qc::db_qualify_column {*}[lrange $args 0 end-1]] {*}{
+        schema
+        table
+        column
+    }
+    set constraints \
+        [qc::memoize qc::db_column_constraints $schema $table $column]
     set results {}
     foreach {constraint_name check_clause} $constraints {
-        lappend results $constraint_name [qc::db_eval_constraint $table $check_clause {*}$values]
+        lappend results $constraint_name \
+            [qc::db_eval_constraint \
+                 -schema $schema -- $table $check_clause {*}$values]
     }
     return $results
 }
 
-proc qc::db_domain_base_type {domain_name} {
+proc qc::db_domain_base_type {domain} {
     #| Returns the base type of the given domain.
-    if {[qc::memoize qc::db_domain_exists $domain_name]} {
+    if { [qc::memoize qc::db_domain_exists $domain] } {
+        lassign [qc::db_resolve_domain_name $domain] {*}{
+            schema
+            domain_name
+        }
         set qry {
-            SELECT udt_name, character_maximum_length, numeric_precision, numeric_scale
+            SELECT
+            udt_name,
+            character_maximum_length,
+            numeric_precision,
+            numeric_scale
+
             FROM information_schema.domains
-            WHERE domain_name=:domain_name;
+
+            WHERE domain_name=:domain_name
+            AND domain_schema=:schema;
         }
         qc::db_cache_1row -ttl 86400 $qry
         return [qc::db_canonical_type $udt_name $character_maximum_length $numeric_precision $numeric_scale]
@@ -627,7 +862,6 @@ proc qc::db_extension_exists {extension_name} {
     } {
 	return true
     }
-
 }
 
 proc qc::db_user_is_superuser {username} {

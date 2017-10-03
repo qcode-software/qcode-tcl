@@ -7,13 +7,16 @@ proc qc::validate2model {dict} {
     set all_valid true
     set cast_dict [dict create]
     dict for {name value} $dict {
-        # Check if name is fully qualified
-        if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-            lassign [qc::memoize qc::db_qualified_table_column $name] table column
+        # Resolve name to column, table, and schema
+        lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+            schema
+            table
+            column
         }
         set message [qc::memoize qc::db_validation_message $table $column]
-        set data_type [qc::memoize qc::db_column_type $table $column]
-        set nullable [qc::memoize qc::db_column_nullable $table $column]
+        set data_type [qc::memoize qc::db_column_type \
+                           -qualified -- $schema $table $column]
+        set nullable [qc::memoize qc::db_column_nullable $schema $table $column]
 
         # Check if this is a sensitive data type - values should not be echo'd back to the client
         if { $data_type in [list "password" "card_number"] } {
@@ -49,15 +52,19 @@ proc qc::validate2model {dict} {
                 continue
             }
 
-            # Check if name is fully qualified
-            if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-                lassign [qc::memoize qc::db_qualified_table_column $name] table column
+            # Resolve name to column, table, and schema
+            lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+                schema
+                table
+                column
             }
+
             set message [qc::memoize qc::db_validation_message $table $column]
-            set data_type [qc::memoize qc::db_column_type $table $column]
+            set data_type [qc::memoize qc::db_column_type \
+                               -qualified -- $schema $table $column]
 
             # Check constraints
-            set constraint_results [qc::db_eval_column_constraints $table $column $cast_dict]
+            set constraint_results [qc::db_eval_column_constraints $schema $table $column $cast_dict]
             if {[llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]] } {
                 # Constraint checking failed - skip further checks
                 qc::response record invalid $column $value $message
