@@ -4,6 +4,10 @@ namespace eval qc {
 
 proc qc::db_qualify_column {args} {
     #| Attempt to resolve 1-3 args as schema, table, column
+    # Assume args are one of:
+    # column
+    # table column
+    # schema table column
     switch [llength $args] {
         1 {
             lassign $args column_name
@@ -21,7 +25,7 @@ proc qc::db_qualify_column {args} {
                       min(index) over () as min_index
 
                       from information_schema.columns
-                      join (                
+                      join (
                             select distinct on(table_name)
                             table_name,
                             table_schema,
@@ -86,7 +90,6 @@ proc qc::db_qualify_column {args} {
                 lappend sql_value_rows \
                     "([db_quote $table_schema], [db_quote $table_name])"
             }
-
             db_cache_0or1row -ttl 86400 {
                 select
                 table_schema,
@@ -114,6 +117,9 @@ proc qc::db_qualify_column {args} {
         }
         2 {
             lassign $args table_name column_name
+
+            # Look for a table in the current search path matching
+            # table name
             db_cache_0or1row -ttl 86400 {
                 select table_schema
                 from information_schema.tables
@@ -125,12 +131,25 @@ proc qc::db_qualify_column {args} {
                 order by index
                 limit 1
             } {
+                # No table found in search path;
+                # fall back to any table containing column
                 db_cache_1row -ttl 86400 {
                     select table_schema
                     from information_schema.columns
                     where table_name=:table_name
                     and column_name=:column_name
                     limit 1
+                }
+            } {
+                # Check that selected table contains column
+                db_cache_0or1row -ttl 86400 {
+                    select true as exists
+                    from information_schema.columns
+                    where table_name=:table_name
+                    and table_schema=:table_schema
+                    and column_name=:column_name
+                } {
+                    error "Column \"$column_name\" not found in table \"$table_name\""
                 }
             }
         }
@@ -154,7 +173,8 @@ proc qc::db_qualify_table {args} {
         1 {
             lassign $args table_name
 
-            db_cache_0or1row {
+            # Look for first table in search path matching table_name
+            db_cache_0or1row -ttl 86400 {
                 select table_schema
 
                 from information_schema.tables
@@ -169,7 +189,8 @@ proc qc::db_qualify_table {args} {
                 
                 limit 1
             } {
-                db_1row {
+                # Fall back to any table matching table_name
+                db_cache_1row -ttl 86400 {
                     select table_schema
                     from information_schema.tables
                     where table_name = :table_name
@@ -442,7 +463,7 @@ proc qc::db_resolve_type_name {name} {
         2 { return $parts }
         1 {
             set type_name [lindex $parts 0]
-            db_cache_0or1row {
+            db_cache_0or1row -ttl 86400 {
                 select
                 n.nspname as schema
 
