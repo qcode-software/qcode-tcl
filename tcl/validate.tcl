@@ -60,8 +60,6 @@ proc qc::validate2model {dict} {
             }
 
             set message [qc::memoize qc::db_validation_message $table $column]
-            set data_type [qc::memoize qc::db_column_type \
-                               -qualified -- $schema $table $column]
 
             # Check constraints
             set constraint_results [qc::db_eval_column_constraints $schema $table $column $cast_dict]

@@ -409,14 +409,19 @@ proc qc::db_column_type {args} {
 
 proc qc::db_table_column_types {args} {
     #| Returns a dict of all columns and their types in the given table.
+    qc::args $args -qualified -- args
+    default qualified false
     lassign [qc::db_qualify_table {*}$args] {*}{
         table_schema
         table_name
     }
     set qry {
         SELECT column_name,
-        coalesce(domain_name, udt_name) as data_type,
         character_maximum_length,
+        domain_name,
+        domain_schema,
+        udt_name,
+        udt_schema,
         numeric_precision,
         numeric_scale
 
@@ -429,6 +434,21 @@ proc qc::db_table_column_types {args} {
     }
     set column_types {}
     qc::db_cache_foreach -ttl 86400 $qry {
+        if { $qualified } {
+            if { $domain_name ne "" } {
+                set data_type "${domain_schema}.${domain_name}"
+            } elseif { $udt_schema ne "pg_catalog" } {
+                set data_type "${udt_schema}.${udt_name}"
+            } else {
+                set data_type $udt_name
+            }
+        } else {
+            if { $domain_name ne "" } {
+                set data_type $domain_name
+            } else {
+                set data_type $udt_name
+            }
+        }
         lappend column_types $column_name [qc::db_canonical_type $data_type $character_maximum_length $numeric_precision $numeric_scale]
     }
     return $column_types
@@ -676,6 +696,7 @@ proc qc::db_column_constraints {args} {
             FROM information_schema.check_constraints cc
             JOIN information_schema.constraint_column_usage ccu
             ON cc.constraint_name=ccu.constraint_name
+            AND ccu.constraint_schema=cc.constraint_schema
             WHERE ccu.table_schema=:schema
             AND ccu.table_name=:table
             AND ccu.column_name=:column;
@@ -700,7 +721,8 @@ proc qc::db_eval_constraint {args} {
             table
         }
     }
-    set column_types [qc::memoize qc::db_table_column_types $schema $table]
+    set column_types [qc::memoize qc::db_table_column_types \
+                          -qualified -- $schema $table]
     set columns [dict keys $column_types]
     set tq_columns [qc::map [list x "return $table.\$x"] $columns]
     set sq_columns [qc::map [list x "return $schema.$table.\$x"] $columns]
