@@ -7,20 +7,20 @@ proc qc::my {args} {
     #| Written to be debian specific but may work on some other Linux distributions.
     switch [lindex $args 0] {
 	hostname {
-	    return [::exec hostname -s]
+	    return [qc::exec_proxy hostname -s]
 	}
 	fqdn {
-	    return [::exec hostname -f]
+	    return [qc::exec_proxy hostname -f]
 	}
 	domain {
-	    return [::exec hostname -d]
+	    return [qc::exec_proxy hostname -d]
 	}
         ip {
-	    regexp {inet ([^/]*)/} [::exec ip addr show scope global | fgrep inet] -> ip
+	    regexp {inet ([^/]*)/} [qc::exec_proxy ip addr show scope global | fgrep inet] -> ip
 	    return $ip
         }
         arch {
-            switch [::exec getconf LONG_BIT] {
+            switch [qc::exec_proxy getconf LONG_BIT] {
                 64 { return "amd64" }
                 32 { return "i386" }
             }
