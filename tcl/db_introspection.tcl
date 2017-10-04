@@ -132,9 +132,32 @@ proc qc::db_column_table_primary {column} {
 proc qc::db_column_type {table column} {
     #| Returns the data type of the column in the given table.
     set qry {
-        SELECT column_name, coalesce(domain_name, udt_name) as data_type, character_maximum_length, numeric_precision, numeric_scale
+        SELECT
+        column_name,
+        coalesce(domain_name, udt_name) as data_type,
+        character_maximum_length,
+        numeric_precision,
+        numeric_scale
+
         FROM information_schema.columns
-        WHERE table_name=:table and column_name=:column
+        join (
+              select
+              table_name,
+              table_schema
+              
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+              
+              where table_schema=(current_schemas(true))\[i\]
+              and table_name=:table
+              
+              order by i
+              limit 1
+              ) t using(table_name, table_schema)
+
+        WHERE column_name=:column
     }
     qc::db_cache_0or1row -ttl 86400 $qry {
          return -code error -errorcode DB_COLUMN "Column \"$column\" does not exist for table \"$table\"."
