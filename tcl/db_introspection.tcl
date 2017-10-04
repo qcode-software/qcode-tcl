@@ -163,8 +163,23 @@ proc qc::db_column_nullable {table column} {
     set qry {
         SELECT is_nullable
         FROM information_schema.columns
-        WHERE table_name=:table
-        AND column_name=:column
+        join (
+              select
+              table_name,
+              table_schema
+              
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+              
+              where table_schema=(current_schemas(true))\[i\]
+              and table_name=:table
+              
+              order by i
+              limit 1
+              ) t using(table_name, table_schema)
+        WHERE column_name=:column
     }
     qc::db_cache_1row -ttl 86400 $qry
     if {$is_nullable} {
