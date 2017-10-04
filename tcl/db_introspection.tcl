@@ -1,24 +1,39 @@
 namespace eval qc {
     namespace export db_*
 }
-proc qc::db_col_varchar_length { table_name col_name } {
+proc qc::db_col_varchar_length {table_name col_name} {
     #| Returns the varchar length of a db table column
-    set qry "
-        SELECT
-                a.atttypmod-4 AS lengthvar,
-                t.typname AS type
-        FROM
-                pg_attribute a,
-                pg_class c,
-                pg_type t
-        WHERE
-                c.relname = :table_name
-                and a.attnum > 0
-                and a.attrelid = c.oid
-                and a.atttypid = t.oid
-                and a.attname = :col_name
-        ORDER BY a.attnum
-    "
+    set qry {
+        select
+        a.atttypmod-4 AS lengthvar,
+        t.typname AS type
+
+        from (
+              select
+              c.oid as relid
+
+              from
+              pg_namespace n,
+              pg_class c,
+              generate_series(1,
+                              array_length(current_schemas(true),1)
+                              ) as i
+
+              where c.relnamespace = n.oid
+              and c.relname = :table_name
+              and n.nspname = (current_schemas(true))\[i\]
+
+              order by i
+              limit 1
+              ) r,
+        pg_attribute a,
+        pg_type t
+
+        where a.attnum > 0
+        and a.attrelid = r.relid
+        and a.atttypid = t.oid
+        and a.attname = :col_name
+    }
     db_cache_0or1row -ttl 86400 $qry {
     error "No such column \"$col_name\" in table \"$table_name\""
     } 
