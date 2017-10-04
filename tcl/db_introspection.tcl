@@ -78,6 +78,20 @@ proc qc::db_column_table {column} {
     set qry {
         SELECT table_name
         FROM information_schema.columns
+        join (
+              select distinct on (table_name)
+              table_name,
+              table_schema
+
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+
+              where table_schema=(current_schemas(true))\[i\]
+
+              order by table_name, i
+              ) t using(table_name, table_schema)
         WHERE column_name=:column
     }
     set tables {}
