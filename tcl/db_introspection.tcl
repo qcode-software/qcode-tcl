@@ -120,7 +120,21 @@ proc qc::db_column_table_primary {column} {
         SELECT tc.table_name
         FROM information_schema.table_constraints tc
         JOIN information_schema.constraint_column_usage ccu
-        USING (table_name, constraint_name)
+        USING (table_schema, table_name, constraint_name)
+        join (
+              select distinct on (table_name)
+              table_name,
+              table_schema
+
+              from information_schema.columns
+              cross join generate_series(1,
+                                         array_length(current_schemas(true),1)
+                                         ) as i
+
+              where table_schema=(current_schemas(true))\[i\]
+
+              order by table_name, i
+              ) t using(table_name, table_schema)
         WHERE column_name=:column
         AND constraint_type='PRIMARY KEY'
         LIMIT 1;
