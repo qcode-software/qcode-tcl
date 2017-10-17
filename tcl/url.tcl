@@ -110,9 +110,9 @@ proc qc::url_encoding_init {} {
         }
         # Decode any percent hex encoded characters
         lappend url_decode_map $hex $char
-        # Decode + char as a space
-        lappend url_decode_map + " " 
     }    
+    # Decode + char as a space
+    lappend url_decode_map + " " 
 }
 
 proc qc::url_encode {string {charset utf-8}} { 
