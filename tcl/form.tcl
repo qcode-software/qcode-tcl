@@ -76,10 +76,7 @@ proc qc::form2dict {args}  {
 
 proc qc::form2url { url } {
     #| Encode the names and values of a form in an url
-    foreach {name value} [qc::ns_set_to_multimap [ns_getform]] {
-	set url [url $url $name $value]
-    }
-    return $url
+    return [qc::url $url {*}[dict create {*}[qc::ns_set_to_multimap [ns_getform]]]]
 }
 
 proc qc::form_proc { proc_name } {
