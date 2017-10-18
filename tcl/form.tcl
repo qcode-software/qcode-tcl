@@ -84,10 +84,10 @@ proc qc::form2dict {args}  {
 
 proc qc::form2url { url } {
     #| Encode the names and values of a form in an url
-    foreach {name value} [qc::ns_set_to_multimap [ns_getform]] {
-	set url [url $url $name $value]
-    }
-    return $url
+
+    # Currently qc::args2dict will throw an error where duplicate args are passed
+    # so we protect against that with the "dict create"
+    return [qc::url $url {*}[dict create {*}[qc::ns_set_to_multimap [ns_getform]]]]
 }
 
 proc qc::form_proc { proc_name } {
