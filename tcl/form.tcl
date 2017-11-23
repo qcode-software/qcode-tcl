@@ -31,7 +31,7 @@ proc qc::form_var_get { var_name } {
     }
     if { [ns_set find $set_id $var_name] != -1 } {
 	if { [ns_set unique $set_id $var_name] } {
-	    return [ns_set get $set_id $var_name]
+	    return [ns_set iget $set_id $var_name]
 	} else {
 	    return [qc::ns_set_getall $set_id $var_name]
 	}	

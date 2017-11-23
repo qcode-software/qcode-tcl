@@ -44,10 +44,10 @@ proc qc::authorise_token {} {
 
     # referrer
     set header_set_id [ns_conn headers]
-    if { [ns_set find $header_set_id Referer] == -1 } {
+    if { [ns_set ifind $header_set_id Referer] == -1 } {
         set referrer ""
     } else {
-        set referrer [url_root [ns_set get [ns_conn headers] Referer]]
+        set referrer [url_root [ns_set iget [ns_conn headers] Referer]]
     }
 
     set target [qc::conn_url]

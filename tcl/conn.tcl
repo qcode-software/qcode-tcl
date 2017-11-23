@@ -6,7 +6,7 @@ proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection
     #| Trust that a reverse proxy like nginx is setup to pass an X-Forwarded-For header.
     set headers [ns_conn headers]
-    if { [ns_set find $headers X-Forwarded-For]!=-1 && ([eq [ns_conn peeraddr] 127.0.0.1] || [string match  192.168* [ns_conn peeraddr]] ||  [eq [ns_conn peeraddr] [ns_info address]]) } {
+    if { [ns_set ifind $headers X-Forwarded-For]!=-1 && ([eq [ns_conn peeraddr] 127.0.0.1] || [string match  192.168* [ns_conn peeraddr]] ||  [eq [ns_conn peeraddr] [ns_info address]]) } {
 	# Proxied so trust X-Forwarded-For
 	set forwarded [ns_set iget $headers X-Forwarded-For]
 	set ip $forwarded
@@ -149,7 +149,7 @@ proc qc::conn_ie {} {
 	return false
     }
     set header_set [ns_conn headers]
-    set ui_string [ns_set get $header_set "User-Agent"]
+    set ui_string [ns_set iget $header_set "User-Agent"]
     if { [regexp {[\s;]MSIE\s([1-9][0-9]*)\.[0-9]+[bB]?;} $ui_string] } {
         # MSIE token only specified for IE < 11
     	return true
@@ -203,7 +203,7 @@ proc qc::conn_if_modified_since {} {
     #| Return the value of the current If-Modified-Since header, if one exists, or "" otherwise.
     # discard Netscape-style additional params
     set headers [ns_conn headers]
-    if { [ns_set find $headers If-Modified-Since]!=-1 } {
+    if { [ns_set ifind $headers If-Modified-Since]!=-1 } {
         return [lindex [split [ns_set iget [ns_conn headers] If-Modified-Since] ";"] 0]
     } else {
         return ""
