@@ -181,31 +181,6 @@ proc qc::sql_list2array { args } {
     }
 }
 
-proc qc::postcode_parse { postcode } {
-    #| Parse postcode into dict of constituent parts
-
-    set postcode [string toupper $postcode]
-    set area_regexp {[A-Z]{1,2}}
-    set district_regexp {[0-9][0-9]?[A-Z]?}
-    set space_regexp {\s}
-    set sector_regexp {[0-9]}
-    set unit_regexp {[A-Z]{2}}
-    set parse_regexp "
-        ^
-        ( \$ | ${area_regexp} )
-        ( \$ | ${district_regexp} )
-        ( \$ | ${space_regexp} )
-        ( \$ | ${sector_regexp} )
-        ( \$ | ${unit_regexp} )
-        $
-    "
-    # Parse postcode extracting area, district, sector and unit.
-    if { ! [regexp -expanded $parse_regexp $postcode match area district space sector unit] } {
-        error "Unable to parse postcode \"$postcode\""
-    }
-    return [qc::dict_from area district space sector unit]
-}
-
 proc qc::sql_where_postcode {column postcode} {
     #| Search for rows matching this full or partial UK postcode.
     # Eg. [sql_where_postcode "delivery_postcode" "IV"] matches "IV1 5DZ", "IV10 5DZ" etc.
