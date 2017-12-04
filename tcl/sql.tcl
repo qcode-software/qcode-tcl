@@ -181,27 +181,48 @@ proc qc::sql_list2array { args } {
     }
 }
 
+proc qc::postcode_regexp { {component ""} } {
+    #| Return a dict of postcode regexps for requested component
+    #| or the whole postcode if component not specified.
 
-proc qc::postcode_parse { postcode } {
-    #| Parse postcode into dict of  constituent parts
-
-    set postcode [string toupper $postcode]
     set area_regexp {[A-Z]{1,2}}
     set district_regexp {[0-9][0-9]?[A-Z]?}
     set space_regexp {\s}
     set sector_regexp {[0-9]}
     set unit_regexp {[A-Z]{2}}
-    set parse_regexp "
-        ^
-        ( \$ | ${area_regexp} )
-        ( \$ | ${district_regexp} )
-        ( \$ | ${space_regexp} )
-        ( \$ | ${sector_regexp} )
-        ( \$ | ${unit_regexp} )
-        $
-    "
+
+    if { $component eq "" } {
+        return "        ^
+            ( \$ | ${area_regexp} )
+            ( \$ | ${district_regexp} )
+            ( \$ | ${space_regexp} )
+            ( \$ | ${sector_regexp} )
+            ( \$ | ${unit_regexp} )
+            $
+        "
+    } else {
+        switch -exact $component {
+            area { return $area_regexp }
+            district { return $district_regexp }
+            space { return $space_regexp }
+            sector { return $sector_regexp }
+            unit { return $unit_regexp }
+            default { error "Unknown postcode component" }
+        }
+    }
+}
+
+proc qc::postcode_parse { postcode } {
     # Parse postcode extracting area, district, sector and unit.
-    if { ! [regexp -expanded $parse_regexp $postcode match area district space sector unit] } {
+    if { ! [regexp -expanded [qc::postcode_regexp] $postcode \
+                match \
+                area \
+                district \
+                space \
+                sector \
+                unit \
+            ] \
+    } {
         error "Unable to parse postcode \"$postcode\""
     }
     return [qc::dict_from area district space sector unit]
@@ -216,17 +237,11 @@ proc qc::sql_where_postcode {column postcode} {
 
     # Build regexp
     set regexp {^}
-    foreach var [list \
-                    [dict get $postcode_dict area] \
-                    [dict get $postcode_dict district] \
-                    [dict get $postcode_dict space] \
-                    [dict get $postcode_dict sector] \
-                    [dict get $postcode_dict unit] \
-                ] {
-        if { [set $var] ne "" && $var ne "space" } {
-            append regexp [db_escape_regexp [set $var]]
+    foreach component [list area district space sector unit] {
+        if { [dict get $postcode_dict $component] ne "" && $component ne "space" } {
+            append regexp [qc::db_escape_regexp [dict get $postcode_dict $component]]
         } else {
-            append regexp [set ${var}_regexp]
+            append regexp [qc::postcode_regexp $component]
         }
     }
     append regexp {$}
