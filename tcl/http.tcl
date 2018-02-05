@@ -397,19 +397,27 @@ proc qc::http_exists {args} {
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    args $args -timeout 60 -headers {} -- url file
+    args $args -timeout 60 -filetime 0 -headers {} -- url file
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
+    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -filetime $filetime -infovar info -url $url -file $file -sslverifypeer 0 -sslverifyhost 0] info responsecode curlErrorNumber
     if { $responsecode != 200 } {
 	file delete $file
     }
+
     switch $responsecode {
-	200 { 
+	200 {
+            if { $filetime == 1 } {
+                # Set mtime of file on disk to match the remote file
+                set file_mtime [dict get $info filetime]
+                if { [qc::is_timestamp_castable $file_mtime] } {
+                    file mtime $file $file_mtime
+                }
+            }
 	    # OK 
 	}
 	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
