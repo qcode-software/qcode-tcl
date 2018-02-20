@@ -8,7 +8,7 @@ part of [Qcode Documentation](index.md)
 ### Introduction
 
 This tutorial will guide you through connecting and initialising the database for use with Qcode Tcl.
-A list of data model dependencies can be viewed [here](doc/data-model-dependencies.md).
+A list of data model dependencies can be viewed [here](/doc/data-model-dependencies.md).
 
 -----
 ### Prerequisites
