@@ -23,10 +23,10 @@ apt-get update
 apt-get install naviserver
 ```
 
-You can then also install the naviserver support packages:
+You can then also install the naviserver database driver package:
 
 ```
-apt-get install naviserver-dev naviserver-dbg naviserver-nsdbpg
+apt-get install naviserver-nsdbpg
 ```
 
 -----
