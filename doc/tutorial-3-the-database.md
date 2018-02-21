@@ -21,9 +21,9 @@ apt-get install postgresql-contrib-9.4
 
 Create a blank database called `test`.
 
-Modify your naviserver config to link to postgresql as shown [here](doc/naviserver-config-postgres.md)
+Modify your naviserver config to link to postgresql as shown [here](/doc/naviserver-config-postgres.md)
 
-Set up a control port in your naviserver config.  Details can be found in the [full config file](doc/naviserver-config-full.md) or the [naviserver API documentation](https://naviserver.sourceforge.io/n/nscp/files/nscp.html)
+Set up a control port in your naviserver config.  Details can be found in the [full config file](/doc/naviserver-config-full.md) or the [naviserver API documentation](https://naviserver.sourceforge.io/n/nscp/files/nscp.html)
 
 ## Initialising the database
 
