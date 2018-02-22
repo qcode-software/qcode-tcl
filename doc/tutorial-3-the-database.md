@@ -21,11 +21,26 @@ apt-get install postgresql-contrib-9.4
 
 Create a blank database called `test`.
 
-Modify your naviserver config to link to postgresql as shown [here](/doc/naviserver-config-postgres.md)
+#### Set postgresql and controlport
+Now we need to modiyfy your naviserver config to set the parameters for postgresql and a controlport. 
+To make sure it all works replace your full config file with [full config](/doc/qc-config.tcl)
 
-Set up a control port in your naviserver config.  Details can be found in the [full config file](/doc/naviserver-config-full.md) or the [naviserver API documentation](https://naviserver.sourceforge.io/n/nscp/files/nscp.html)
+You can find more about the configurations at the bottom of your new file.
+
+The other part is the controlport. You can find the details and comments about it [full config file](/doc/naviserver-config-full.md) or the [naviserver API documentation](https://naviserver.sourceforge.io/n/nscp/files/nscp.html)
 
 ## Initialising the database
+Use either telnet or nc(netcat) to your control port.
+```
+#| Telnet
+telnet 127.0.0.1 9980
+#| netcat
+nc 127.0.0.1 9980
+#| same same, but different but still same!
+
+Login: nsd
+Password: x
+```
 
 Telnet to your control port. Type the following commands:
 
@@ -34,7 +49,7 @@ Telnet to your control port. Type the following commands:
 > qc::db_init
 ```
 
-The final command should return a value of "1" indicating that the data structure has been successfully set up.
+The final command should return nothing indicating that the data structure has been successfully set up.
 
 You may receive an error message from the module PgCrypto stating that the database user "www-data" is not superuser. 
 
@@ -46,6 +61,7 @@ To correct this:
 * 4) Remove superuser priviledges from "www-data" user `ALTER USER "www-data" WITH NOSUPERUSER;`
 
 From a psql shell you will see the following tables created:
+by using the command ```\dt ```
 
 ```
 Schema |        Name         | Type  |  Owner
