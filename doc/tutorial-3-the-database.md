@@ -29,6 +29,11 @@ You can find more about the configurations at the bottom of your new file.
 
 The other part is the controlport. You can find the details and comments about it [full config file](/doc/naviserver-config-full.md) or the [naviserver API documentation](https://naviserver.sourceforge.io/n/nscp/files/nscp.html)
 
+Dont forget to update your config.env, if you use the same host and port as the example config make sure the .env looks like this:
+```
+OPTS="-b 127.0.0.1:80"
+```
+
 ## Initialising the database
 Use either telnet or nc(netcat) to your control port.
 ```
