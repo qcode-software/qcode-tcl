@@ -54,6 +54,10 @@ In the `register GET /form_results.html` proc, remove the two lines we currently
 ```
 db_1row "SELECT first_name, last_name FROM people WHERE person_id = :person_id"
 ```
+And add the variable as a arg
+```
+register GET /form_results.html { person_id }
+```
 
 The [`db_1row`](procs/db_1row.md) proc will return a single row from the database, placing variables corresponding to column names in the caller's namespace.
 
