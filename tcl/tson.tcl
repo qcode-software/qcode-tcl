@@ -21,7 +21,7 @@ proc qc::tson_boolean {value} {
     if { [string tolower $value] in [list "" "null"] } {
         return "null"
     }
-    return [list boolean [qc::cast boolean $value true false]]
+    return [list boolean [qc::cast_boolean $value true false]]
 }
 
 proc qc::tson_array {args} {
