@@ -1,5 +1,54 @@
 namespace eval qc {
-    namespace export tson_object json_quote tson2json tson_object_from tson2xml
+    namespace export tson* json_quote
+}
+
+
+proc qc::tson_string {value} {
+    #| Returns a TSON string.
+    return [list string $value]
+}
+
+proc qc::tson_number {value} {
+    #| Returns a TSON number.
+    if { [string tolower $value] in [list "" "null"] } {
+        return "null"
+    }
+    return [list number $value]
+}
+
+proc qc::tson_boolean {value} {
+    #| Returns a TSON boolean.
+    if { [string tolower $value] in [list "" "null"] } {
+        return "null"
+    }
+    return [list boolean [qc::cast boolean $value true false]]
+}
+
+proc qc::tson_array {args} {
+    #| Return a tson array from list of values.
+    if { [llength $args] == 0 } {
+        return "null"
+    }
+    
+    set tson [list array]
+    
+    foreach value $args {
+        if { [string is list $value]
+             && [lindex $value 0] in [list object array string number boolean]
+         } {
+            lappend tson $value
+        } elseif { ([qc::is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+            lappend tson [list number $value]
+        } elseif { $value in [list true false] } {
+            lappend tson [list boolean $value]
+        } elseif { $value eq "null" } {
+            lappend tson $value
+        } else {
+            lappend tson [list string $value]
+        }
+    }
+
+    return $tson
 }
 
 proc qc::tson_object { args } {
@@ -8,19 +57,27 @@ proc qc::tson_object { args } {
     # EXAMPLE:  
     # % tson_object firstname "Daniel" surname "Clark" age 23
     # object firstname {string Daniel} surname {string Clark} age {number 23}
-
+    if { [llength $args] == 0 } {
+        return "null"
+    }
+    
     set tson [list object]
     
     foreach {name value} $args {
-	if { ([is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
-            lappend tson $name [list number $value]
-        } elseif { $value in [list true false] } {
-	    lappend tson $name [list boolean $value]
-	} elseif { $value eq "null" } {
-	    lappend tson $name $value
-	} else { 
-	    lappend tson $name [list string $value]
-	}
+        if { [string is list $value]
+             && [lindex $value 0] in [list object array string number boolean] } {
+            lappend tson $name $value
+        } else {
+            if { ([qc::is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+                lappend tson $name [list number $value]
+            } elseif { $value in [list true false] } {
+                lappend tson $name [list boolean $value]
+            } elseif { $value eq "null" } {
+                lappend tson $name $value
+            } else {
+                lappend tson $name [list string $value]
+            }
+        }
     }
 
     return $tson
@@ -120,3 +177,112 @@ proc qc::tson2xml { tson } {
     }
 }
 
+proc qc::tson_get {tson args} {
+    #| Returns the value at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+
+    # Construct a PostgreSQL array literal from the path.
+    set path [qc::sql_list2array -type text $args]
+    # Convert TSON to JSON.
+    set json [qc::tson2json $tson]
+    # Use PostgreSQL JSON operators to get the value at the path.
+    qc::db_cache_1row -ttl 86400 {
+        select :json::json#>>$path as value
+    }
+
+    return $value
+}
+
+proc qc::tson_exists {tson args} {
+    #| Determines if a value exists at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+    if { [llength $args] == 0 } {
+        # No path specified.
+        error "Usage: qc::tson_exists tson key ?key ...?"
+    }
+
+    # Check if the outermost key in the path exists.
+    set json [qc::tson2json $tson]
+    set key [lindex $args 0]
+    
+    switch [lindex $tson 0] {
+        "object" {
+            qc::db_cache_1row -ttl 86400 {
+                select :key in (select json_object_keys(:json::json)) as key_exists
+            }
+        }
+        "array" {
+            qc::db_cache_1row -ttl 86400 {
+                select json_array_length(:json::json) as array_length
+            }
+            
+            if { $array_length == 0 || $key > $array_length - 1 } {
+                # Array has no elements or key is out of bounds.
+                return f
+            }
+
+            set key_exists t
+        }
+        default {
+            error "TSON must be an object or an array."
+        }
+    }
+    
+    if { !$key_exists || [llength $args] == 1 } {
+        # Key doesn't exist or no more keys in the path to check.
+        return $key_exists
+    }
+
+    return [qc::tson_exists \
+                [qc::json2tson [qc::tson_get $tson $key]] \
+                {*}[lrange $args 1 end]]
+}
+
+proc qc::tson_type {tson args} {
+    #| Returns the type of the value at the specified path in the TSON.
+    #| Requires PostgreSQL 9.3 or later.
+    set value_tson $tson
+    
+    if { [llength $args] > 0 } {
+        # A path was specified so get the value at the path.
+
+        if { ![qc::tson_exists $tson {*}$args] } {
+            # Path doesn't existin the TSON.
+            error "Path \"$args\" not found in TSON."
+        }
+        
+        # Construct a PostgreSQL array literal from the path.
+        set path [qc::sql_list2array -type text $args]
+        
+        # Convert TSON to JSON.
+        set json [qc::tson2json $tson]
+        
+        # Use PostgreSQL JSON operators to get the value at the path.
+        qc::db_cache_1row -ttl 86400 {
+            select :json::json#>$path as value
+        }
+        
+        # Convert the JSON to TSON.
+        set value_tson [qc::json2tson $value]
+    }
+
+    if { $value_tson in [list "true" "false"] } {
+        return "boolean"
+    } elseif { [qc::is_decimal $value_tson] } {
+        return "number"
+    } elseif { $value_tson eq "null" } {
+        return "null"
+    } elseif { [lindex $value_tson 0] in [list "object" "array" "string"] } {
+        return [lindex $value_tson 0]
+    } else {
+        error "Invalid TSON."
+    }
+}
+
+proc qc::tson_array_foreach {varName tson code} {
+    #| Iterator for a tson array.
+    foreach element [lrange $tson 1 end] {
+        upset 1 $varName $element
+        uplevel 1 $code
+    }
+}
