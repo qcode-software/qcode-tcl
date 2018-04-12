@@ -32,11 +32,25 @@ namespace eval ::qcode::test {
     test cast-decimal-1.7 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3} 3.00
     test cast-decimal-1.8 {cast decimal precision scale} {qc::cast decimal -precision 4 -scale 2 3.6534} 3.65
 
-    test cast-date-1.0 {cast date forward slashes} {qc::cast date 12/5/07} 2007-05-12
+    # Cast Date
+    test cast-date-1.0 {cast date forward slashes} {
+        qc::cast date 12/5/07
+    } 2007-05-12
     test cast-date-1.1 {cast date relative time} -body {
         qc::cast date yesterday
     } -result [clock format [clock scan yesterday] -format "%Y-%m-%d"]
-    test cast-date-1.2 {cast date long format} {qc::cast date "June 23rd 2010"} 2010-06-23
+    test cast-date-1.2 {cast date long format} {
+        qc::cast date "June 23rd 2010"
+    } 2010-06-23
+    test cast-date-1.3 {cast date yyyymmdd} {
+        qc::cast date 20180412
+    } 2018-04-12
+    test cast-date-1.4 {cast date ddmmyyyy} {
+        qc::cast date 12042018
+    } 2018-04-12
+    test cast-date-1.5 {cast date dd-mm-yyyy} {
+        qc::cast date 12-04-2018
+    } 2018-04-12
 
     test cast-timestamp-1.0 {cast timestamp relative time} -body {
         qc::cast timestamp tomorrow
