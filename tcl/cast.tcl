@@ -511,14 +511,64 @@ namespace eval qc::cast {
     proc epoch {string} {
         #| Try to convert the given string into an epoch.
         set string [string map [list "&#8209;" -] $string]
+
         #### EXACT MATCHES ####
         if { [string equal $string ""] } {
             return -code error -errorcode CAST "Can't cast an empty string to epoch"
         }
-        # Looks like a number but really an iso date without delimitor.
-        if { [regexp {^(19\d\d|20\d\d)(\d\d)(\d\d)$} $string -> year month day] } {
-            return [clock scan "$year-$month-$day"]
+
+        # Looks like an eight-digit number, try to interpret as yyyymmdd or ddmmyyyy
+        if { [regexp {^\d{8}$} $string] } {
+
+            # Try yyyymmdd
+            set year1 [string range $string 0 3]
+            set month1 [string range $string 4 5]
+            set day1 [string range $string 6 7]
+
+            if { 0 < $month1 && $month1 <= 12
+                 &&
+                 0 < $day1 && $day1 <= [lindex {
+                     - 31 29 31 30 31 30 31 31 30 31 30 31
+                 } [string trimleft $month1 0]]
+                 &&
+                 1990 <= $year1 && $year1 < 2100
+             } {
+                set date1_valid true
+            } else {
+                set date1_valid false
+            }
+
+            # Try ddmmyyyy
+            set year2 [string range $string 4 7]
+            set month2 [string range $string 2 3]
+            set day2 [string range $string 0 1]
+
+            if { 0 < $month2 && $month2 <= 12
+                 &&
+                 0 < $day2 && $day2 <= [lindex {
+                     - 31 29 31 30 31 30 31 31 30 31 30 31
+                 } [string trimleft $month2 0]]
+                 &&
+                 1990 <= $year2 && $year2 < 2100
+             } {
+                set date2_valid true
+            } else {
+                set date2_valid false
+            }
+
+            # If one result is valid, return it. If both are, error.
+            if { $date1_valid && $date2_valid } {
+                return -code error -errorcode CAST "Ambiguous date"
+
+            } elseif { $date1_valid } {
+                return [clock scan "$year1-$month1-$day1"]
+
+            } elseif { $date2_valid } {
+                return [clock scan "$year2-$month2-$day2"]
+
+            }
         }
+
         # Already an epoch
         if { [string is wideinteger -strict $string] } {
             if { $string > [clock scan "5000-01-01"] } {
@@ -528,14 +578,17 @@ namespace eval qc::cast {
                 return $string
             }
         }
+
         # Exact ISO date
         if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})$} $string -> year month day] } {
             return [clock scan "$year-$month-$day"]
         }
+
         # Exact ISO datetime
         if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})( |T)(\d{1,2}:\d{1,2}(:\d{1,2})?)$} $string -> year month day . time] } {
             return [clock scan "$year-$month-$day $time"]
         }
+
         # Exact ISO datetime with offset timezone e.g. "2012-08-13 10:21:23.7777 -06:00"
         # Accepts offsets in formats -hh, -hhmm, or -hh:mm
         if { [regexp {^(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})(?: |T)(\d{1,2}:\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?\s?(Z|[-+]\d\d(:?\d\d)?)$} $string -> year month day time sec timezone] } {
@@ -547,6 +600,7 @@ namespace eval qc::cast {
             }
             return [clock scan "$year-$month-$day $time" -timezone "$timezone"]
         }
+
         # rfc-822 style dates used in emails.
         # "Fri, 17 Aug 2012 12:51:36 +0100"
         if { [regexp {(\d{1,2}) +(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December) +(\d{4}) +(\d{1,2}:\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?\s?(Z|[-+]\d\d(:?\d\d)?)} $string -> day mon year time sec timezone] } {
@@ -559,37 +613,46 @@ namespace eval qc::cast {
             set month [expr {[lsearch {January February March April May June July August September October November December} "${mon}*"]+1}]
             return [clock scan "$year-$month-$day $time" -timezone "$timezone"]
         }
+
         # ISO datetime Don't match the end of line for e.g. "2009-04-06 12:25:18.343"
         if { [regexp {^(19\d\d|20\d\d)(\d\d)(\d\d)( |T)(\d{1,2}:\d{1,2}(:\d{1,2})?)} $string -> year month day . time] } {
             return [clock scan "$year-$month-$day $time"]
         }
+
         # dd/mm/yyYY
-        if { [regexp {^(\d{1,2})[/\.](\d{1,2})[/\.](\d{4}|\d{2}|\d)$} $string -> day month year] } {
-            # Assume UK locale dd/mm/yy or dd.mm.yy
+        if { [regexp {^(\d{1,2})[-/\.](\d{1,2})[-/\.](\d{4}|\d{2}|\d)$} $string -> day month year] } {
+            # Assume UK locale dd/mm/yy, dd.mm.yy, or dd-mm-yy
             return [clock scan "$year-$month-$day"]
         }
+
         #### RELATIVE ####
         if { [regexp -nocase -- {(\+-)? ?(this|last|next|[0-9]+) ?(year|month|week|day|hour|minute)s?( ago)?} $string] \
                  || [regexp -nocase -- {(this|last|next) (Mon|Monday|Tue|Tuesday|Wed|Wednesday|Thu|Thurs|Thursday|Fri|Friday|Sat|Saturday|Sun|Sunday)} $string] \
                  || [regexp -nocase -- {today|yesterday|tomorrow} $string] } {
             return [clock scan $string]
         }
+
         #### RELAXED ####
+
         # Look for time hh:mm or hh:mm:ss
         if { ![regexp {(^|\W)(\d{1,2}:\d{1,2}(:\d{1,2})?)(\W|$)} $string -> ~ time ~] } { set time "" }
+
         # ISO format
         if { [regexp {(^|[^0-9])(\d{4}|\d{2}|\d)-(\d{1,2})-(\d{1,2})([^0-9]|$)} $string -> start year month day end] } {
             return [clock scan "$year-$month-$day $time"]
         }
+
         if { [regexp {(^|[^0-9])(\d{1,2})[/\.](\d{1,2})[/\.](\d{4}|\d{2}|\d)([^0-9]|$)} $string -> start day month year end] } {
             # Assume UK locale dd/mm/yy or dd.mm.yy
             return [clock scan "$year-$month-$day $time"]
         }
+
         # dd/mm or dd.mm
         if { [regexp {(^|\W)(\d{1,2})[/\.](\d{1,2})(\W|$)} $string -> start day month end] } {
             set year [clock format [clock seconds] -format "%Y"]
             return [clock scan "$year-$month-$day $time"]
         }
+
         if { [regexp {(^|[^0-9])(\d{4})([^0-9]|$)} $string -> start year end] } {
             #### Matched YEAR ####
             # year && month && dom
@@ -618,8 +681,12 @@ namespace eval qc::cast {
                 return [clock scan "$dow $time"]
             }
         }
-        # try TCL
-        return [clock scan $string]
+
+        if { [regexp -nocase -- {(year|fortnight|month|week|day|hour|min|sec|tomorrow|yesterday|today|now|last|next|ago)} $string] } {
+            return [clock scan $string]
+        }
+
+        return -code error -errorcode CAST "Could not cast string to epoch"
     }
 
     proc postcode {string} {
