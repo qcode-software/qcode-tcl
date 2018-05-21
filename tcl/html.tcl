@@ -9,7 +9,14 @@ proc qc::html2pdf { args } {
     # | Requires wkhtmltopdf 0.12.2.1 (with patched qt)
     # Adds pagesize and margin arguments for label printing.
     # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? ?-nomargin boolean? ?-pagesize size? html
-    args $args -encoding base64 -pagesize A4 -timeout 20 -nomargin false -- html
+    args $args \
+        -encoding base64 \
+        -pagesize A4 \
+        -timeout 20 \
+        -nomargin false \
+        -orientation portrait \
+        -- html
+    
     if { ![in {base64 binary} $encoding] } {
         error "HTML2PDF: Unknown encoding $encoding"
     }
@@ -23,7 +30,18 @@ proc qc::html2pdf { args } {
     } else {
         set margin_switches {}
     }
-    qc::exec_proxy -timeout [expr {$timeout * 1000}] << $html $wkhtmltopdf {*}$margin_switches --page-size $pagesize --encoding UTF-8 --print-media-type -q - $filename
+    qc::exec_proxy \
+        -timeout [expr {$timeout * 1000}] \
+        << $html \
+        $wkhtmltopdf \
+        {*}$margin_switches \
+        --page-size $pagesize \
+        --orientation $orientation \
+        --encoding UTF-8 \
+        --print-media-type \
+        -q \
+        - $filename
+    
     set pdf [read $fh]
     close $fh
     file delete $filename
