@@ -22,7 +22,7 @@ apt-get install postgresql-contrib-9.4
 Create a blank database called `test`.
 
 #### Set postgresql and controlport
-Now we need to modiyfy your naviserver config to set the parameters for postgresql and a controlport. 
+Now we need to modify your Naviserver config to set the parameters for postgresql and a controlport. 
 To make sure it all works replace your full config file with [full config](/doc/qc-config.tcl)
 
 You can find more about the configurations at the bottom of your new file.
