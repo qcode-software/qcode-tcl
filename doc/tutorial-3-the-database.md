@@ -54,7 +54,7 @@ Telnet to your control port. Type the following commands:
 > qc::db_init
 ```
 
-The final command should return nothing indicating that the data structure has been successfully set up.
+The final command should return a empty string indicating that the data structure has been successfully set up.
 
 You may receive an error message from the module PgCrypto stating that the database user "www-data" is not superuser. 
 
