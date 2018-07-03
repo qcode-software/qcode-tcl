@@ -62,15 +62,18 @@ proc qc::file_upload {name chunk chunks file} {
 	}
     }
     if { $complete } {
-	# Join parts together
-	exec_proxy cat {*}$files > /tmp/$id
-	# Clean up
-	foreach file $files {
-	    file delete $file
-	}
+        # Join parts together
+        ::try {
+            exec_proxy cat {*}$files > /tmp/$id
+        } finally {
+            # Clean up
+            foreach file $files {
+                file delete $file
+            }
+        }
 	dict unset dict $id
 	nsv_set uploads $user_id $dict
-	return /tmp/$id
+	return /tmp/$id        
     } else {
 	nsv_set uploads $user_id $dict
 	return ""
