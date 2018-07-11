@@ -246,16 +246,18 @@ proc qc::html_style2inline {html style} {
     package require tdom
     dom parse -html $html doc
     foreach {selector styles} $data {
-      	set xpath [qc::css_selector2xpath $selector]
-        set nodes [$doc selectNodes $xpath]
+        foreach item [split $selector ","] {
+            set xpath [qc::css_selector2xpath [string trim $item]]
+            set nodes [$doc selectNodes $xpath]
 
-	foreach node $nodes {
-	    if { [$node hasAttribute style] } {
-		$node setAttribute style [style_set [$node getAttribute style] {*}$styles]
-	    } else {
-		$node setAttribute style [style_set "" {*}$styles]
-	    }
-	}
+            foreach node $nodes {
+                if { [$node hasAttribute style] } {
+                    $node setAttribute style [style_set [$node getAttribute style] {*}$styles]
+                } else {
+                    $node setAttribute style [style_set "" {*}$styles]
+                }
+            }
+        }
     }
     set html [$doc asHTML  -escapeNonASCII -htmlEntities]
     $doc delete
