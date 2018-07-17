@@ -2,25 +2,37 @@ namespace eval qc {
     namespace export file_temp file_write file_upload
 }
 
-proc qc::file_temp {text {mode 0600}} {
+proc qc::file_temp {args} {
     #| Write the text $text out into a temporary file
     #| and return the name of the file.
+    qc::args $args -binary -- contents {mode 0600}
+    default binary false
     package require fileutil
     set filename [fileutil::tempfile]
-    set out [open $filename w $mode]
-    puts -nonewline $out $text
-    close $out
+    set switches {}
+    if { $binary } {
+        lappend switches -binary
+    }
+    qc::file_write {*}$switches -- $filename $contents $mode
     return $filename
 }
 
-proc qc::file_write {filename contents {perms ""}} {
+proc qc::file_write {args} {
     # Return true if file has changed by writing to it.
+    qc::args $args -binary -- filename contents {perms ""}
+    default binary false
     if { $perms ne "" } {
 	set perms [qc::format_right0 $perms 5]
     }
-    if { ![file exists $filename] || [qc::cat $filename] ne $contents || [file attributes $filename -permissions]!=$perms } { 
+    if { ![file exists $filename]
+         || [qc::cat $filename] ne $contents
+         || [file attributes $filename -permissions]!=$perms
+     } { 
         log Debug "writing ${filename} ..."
         set handle [open $filename w+ 00600]
+        if { $binary } {
+            fconfigure $handle -translation "binary"
+        }
         puts -nonewline $handle $contents
         close $handle
         if { $perms ne "" } {
