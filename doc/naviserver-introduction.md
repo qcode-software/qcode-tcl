@@ -23,10 +23,10 @@ apt-get update
 apt-get install naviserver
 ```
 
-You can then also install the naviserver support packages:
+You can then also install the naviserver database driver package:
 
 ```
-apt-get install naviserver-dev naviserver-dbg naviserver-nsdbpg
+apt-get install naviserver-nsdbpg
 ```
 
 -----
@@ -34,7 +34,7 @@ apt-get install naviserver-dev naviserver-dbg naviserver-nsdbpg
 
 Once you've got naviserver installed, you should first try and get everything running with a [minimal config](naviserver-config-minimal.md).  Once you've done this, you can try different config files, alternative setups and various options.
 
-To install the minimal config, you'll need to navigate to `/env/naviserver/` and create a minimal.tcl file.  We can then add code to this file to configure naviserver correctly.
+To install the minimal config, you'll need to navigate to `/etc/naviserver/` and create a minimal.tcl file.  We can then add code to this file to configure naviserver correctly.
 
 It's worth noting that Linux requires root privileges for ports 0 - 1024, so if you're setting up a webserver to run under one of those ports you will need to use the "-b" option to prebind the specified port as root then fork the process to run under the requested the user.
 
