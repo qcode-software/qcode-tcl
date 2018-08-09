@@ -100,15 +100,17 @@ proc qc::is_period {string} {
 proc qc::cast_value2model {name value} {
     #| Return the value cast to the data model.
     #| Name can be a partial or fully qualified column identifier.
-    set table ""
     
-    # Check if name is fully qualified
-    if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-        lassign [qc::memoize qc::db_qualified_table_column $name] table column
+    # Resolve name to column, table, and schema
+    lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+        schema
+        table
+        column
     }
 
-    set data_type [qc::memoize qc::db_column_type $table $column]
-    set nullable [qc::memoize qc::db_column_nullable $table $column]
+    set data_type [qc::memoize qc::db_column_type \
+                       -qualified -- $schema $table $column]
+    set nullable [qc::memoize qc::db_column_nullable $schema $table $column]
 
     # Check if nullable
     if {! $nullable && $value eq ""} {
@@ -136,14 +138,17 @@ proc qc::cast_values2model {args} {
     set errors {}
     
     dict for {name value} $args {
-        set table ""
-        # Check if name is fully qualified
-        if {![regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
-            lassign [qc::memoize qc::db_qualified_table_column $name] table column
+
+        # Resolve name to column, table, and schema
+        lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+            schema
+            table
+            column
         }
         
-        set data_type [qc::memoize qc::db_column_type $table $column]
-        set nullable [qc::memoize qc::db_column_nullable $table $column]
+        set data_type [qc::memoize qc::db_column_type \
+                           -qualified -- $schema $table $column]
+        set nullable [qc::memoize qc::db_column_nullable $schema $table $column]
 
         # Check if nullable
         if {! $nullable && $value eq ""} {

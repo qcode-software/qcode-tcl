@@ -9,9 +9,17 @@ proc qc::sql_set {args} {
     return [join $set_list ,]
 }
 
-proc qc::sql_set_varchars_truncate {table args} {
+proc qc::sql_set_varchars_truncate {args} {
+    qc::args $args -schema ? -- table args
+    if { ! [info exists schema] } {
+        lassign [qc::db_qualify_table $table] {*}{
+            schema
+            table
+        }
+    }
     foreach name $args {
-        lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
+        set length [db_col_varchar_length $schema $table $name]
+        lappend set_list "${name}=:${name}::varchar($length)"
     }
     return [join $set_list ,]
 }
