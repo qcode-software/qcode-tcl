@@ -16,6 +16,13 @@ You can do this by adding the following line to your apt sources file (`/etc/apt
 deb http://debian.qcode.co.uk jessie main
 ```
 
+Next you can add the public key to make `http://debian.qcode.co.uk` a trusted source. To do this first download the key then add it to `apt-key`:
+
+```
+wget http://debian.qcode.co.uk/packages.key
+apt-key add packages.key
+```
+
 Once you've added the apt source above, you should then be able to run the following commands to install naviserver (remember, you may need to prefix these commands with sudo for permission):
 
 ```
