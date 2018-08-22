@@ -14,7 +14,7 @@ Qcode Tcl is provided as a Debian package to facilitate a simple installation.  
 
 ```
 apt-get update
-apt-get install qcode-tcl-8.0.0
+apt-get install qcode-tcl-8.8.0
 ```
 
 -----
