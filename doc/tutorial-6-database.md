@@ -37,7 +37,7 @@ Replace the body of our `register POST /form_process` proc with the following:
 set person_id [db_seq person_id_seq]
 db_dml "insert into people [sql_insert person_id first_name last_name]"
 
-ns_returnredirect [qc::url form_results.html id $person_id]
+ns_returnredirect [qc::url form_results.html person_id $person_id]
 ```
 
 [`db_seq person_id_seq`](procs/db_seq.md) increments and retrieves the next number in the sequence we created for use as an ID.
