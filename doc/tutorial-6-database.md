@@ -13,7 +13,7 @@ This tutorial will guide you through replacing our previously used naviserver va
 
 Before we can store user input in the database, we need to set up a simple table, as follows:
 
-```
+```sql
 CREATE TABLE people (
           person_id INT PRIMARY KEY,
           first_name VARCHAR(255),
@@ -33,7 +33,7 @@ In order to store our `first_name` and `last_name` user input, we use the `db_dm
 
 Replace the body of our `register POST /form_process` proc with the following:
 
-```
+```tcl
 set person_id [db_seq person_id_seq]
 db_dml "insert into people [sql_insert person_id first_name last_name]"
 
@@ -51,11 +51,11 @@ The ID generated is then appended to our results URL as a structured string usin
 
 In the `register GET /form_results.html` proc, remove the two lines we currently use to retreive the `first_name` and `last_name` from naviserver variables and replace them with the following:
 
-```
+```tcl
 db_1row "SELECT first_name, last_name FROM people WHERE person_id = :person_id"
 ```
 And add the variable as a arg
-```
+```tcl
 register GET /form_results.html { person_id }
 ```
 
@@ -63,6 +63,6 @@ The [`db_1row`](procs/db_1row.md) proc will return a single row from the databas
 
 You can verify that the data is being stored correctly with a properly incrementing ID by entering a few names, then viewing the data in a psql shell using the following command:
 
-```psql
+```sql
 select person_id, first_name, last_name from people;
 ```
