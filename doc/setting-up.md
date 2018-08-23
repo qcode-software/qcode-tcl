@@ -141,34 +141,18 @@ register GET /entry/:entry_id {entry_id} {
 }
 ```
 ### Updating the form
-You may notice the form your created in `init.tcl` from [Tutorial 2] fails at the authentication filter and an error is returned to the client. To correct this you can pass the `authenticity_token` as a hidden input in the form or as an HTTP header.
-
-Here we will use the first method by getting the `authenticity_token`:
+You may notice the form your created in `init.tcl` from [Tutorial 2] fails at the authentication filter and an error is returned to the client.
+To correct this we can reconstruct our form using the `qc::form` helper proc that will handle the `authenticity_token` for us:
 ```tcl
-#| Get the session_id
-set session_id [qc::session_id]
-#| Using the session_id, get the authenticity_token
-db_1row {select authenticity_token from session where session_id=:session_id}
+register GET /form.html {} {
+	#|        <form method="POST" action="form_process">
+	return [qc::form method POST action form_process \
+		"[h label {First Name}] [h input type text name first_name]
+		[h label {Last Name} ] [h input type text name last_name]
+		[h input type submit name submit value submit]"] 
+}
 ```
-Then by adding the hidden input containing the token to the form:
-```html
-<input name="_authenticity_token" type="hidden" value="$authenticity_token" />
-```
-We must then manually substitute `$authenticity_token` as the html is within curly braces `{}`. By using `string map` we can choose exactly what is substituted and therefore help protect against [injection attacks] with the final `set html` looking like this:
-```tcl
-set html [string map [list \$authenticity_token $authenticity_token] {
-    <html>
-        <body>
-            <form method="POST" action="form_process">
-                First Name <input name="first_name" type="text" />
-	            Last Name  <input name="last_name" type="text" />
-	            <input name="_authenticity_token" type="hidden" value="$authenticity_token" />
-	            <input type="submit" name"submit" value="submit" />
-	        </form>
-	    </body>
-	</html>
-}]
-```
+The `h` proc creates html elements, all of which are the second argument to `qc::form` and placed within the html form element.
 ### Data Model Dependencies
 
 Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate` and `qc::filter_authenticate` within the [Data Model Dependencies] documentation to set up the data model for this guide.
