@@ -15,7 +15,7 @@ Repeated Variable Names
 --------------------------
 Some HTML input elements like checkboxes 
 	
-	<input type="checkbox" name="email_id" value=="1">
+	<input type="checkbox" name="email_id" value="1">
 	<input type="checkbox" name="email_id" value="2">
 	
 can be used repeatedly within a form.
