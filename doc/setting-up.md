@@ -4,7 +4,7 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-This guide will demonstrate how to use the qcode-tcl library with Naviserver to handle incoming requests, perform validation of user input, and perform user authentication.
+This guide will demonstrate how to use the qcode-tcl library with Naviserver to handle incoming requests, perform validation of user input, and perform user authentication. Create a new file called `zz.tcl` for this.
 
 ### Naviserver Initialization
 Firstly, we'll need to register filters and procs and ensure that the anonymous session has been created. There are a few filters provided by the library and here we will use three of them:
@@ -46,6 +46,7 @@ if {![nsv_exists . init]} {
 
 ```
 
+
 ### Connection Marshal
 Next we want to create a connection marshal that will actually deal with the requests if they make it through validation and authentication. The following example is a very simple connection marshal that makes use of the connection handler [`qc::handler_restful`] provided by the library. Note that we registered this connection marshal above.
 
@@ -73,7 +74,7 @@ proc conn_marshal {} {
 ```
 
 ### Request Handlers
-Lastly, we need to register a request handler that will determine what happens to specific requests. Below is a handler for the request `GET /` that simply returns the string "Hello World". [`qc::handler_restful`] makes use of the [Handlers API] to resolve requests to these request handlers and will also return the information to the client if the the request handler does not.
+Lastly, we need to register a request handler that will determine what happens to specific requests. Below is a handler for the request `GET /` (from [Tutorial 1]) that simply returns the string "Hello World". [`qc::handler_restful`] makes use of the [Handlers API] to resolve requests to these request handlers and will also return the information to the client if the the request handler does not.
 
 For more information on request handlers see [Handler and Path Registration].
 
@@ -139,7 +140,35 @@ register GET /entry/:entry_id {entry_id} {
     return [entries_get $entry_id]
 }
 ```
+### Updating the form
+You may notice the form your created in `init.tcl` from [Tutorial 2] fails at the authentication filter and an error is returned to the client. To correct this you can pass the `authenticity_token` as a hidden input in the form or as an HTTP header.
 
+Here we will use the first method by getting the `authenticity_token`:
+```tcl
+#| Get the session_id
+set session_id [qc::session_id]
+#| Using the session_id, get the authenticity_token
+db_1row {select authenticity_token from session where session_id=:session_id}
+```
+Then by adding the hidden input containing the token to the form:
+```html
+<input name="_authenticity_token" type="hidden" value="$authenticity_token" />
+```
+We must then manually substitute `$authenticity_token` as the html is within curly braces `{}`. By using `string map` we can choose exactly what is substituted and therefore help protect against [injection attacks] with the final `set html` looking like this:
+```tcl
+set html [string map [list \$authenticity_token $authenticity_token] {
+    <html>
+        <body>
+            <form method="POST" action="form_process">
+                First Name <input name="first_name" type="text" />
+	            Last Name  <input name="last_name" type="text" />
+	            <input name="_authenticity_token" type="hidden" value="$authenticity_token" />
+	            <input type="submit" name"submit" value="submit" />
+	        </form>
+	    </body>
+	</html>
+}]
+```
 ### Data Model Dependencies
 
 Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate` and `qc::filter_authenticate` within the [Data Model Dependencies] documentation to set up the data model for this guide.
@@ -150,10 +179,13 @@ Qcode Software Limited <http://www.qcode.co.uk>
 
 [Filters]: filters.md
 [Connection Handlers]: connection-handlers.md
+[Tutorial 1]: installation.md
 [`qc::handler_restful`]: connection-handlers.md#handler_restful.md
 [Handlers API]: handlers-api.md
 [Handler and Path Registration]: registration.md
 [Connection Response]: connection-response.md
 [colon variables]: registration.md#paths-with-variable-elements
+[Tutorial 2]: tutorial-2-form-posting-and-nsv-variables.md
+[injection attacks]: security.md
 [validation handlers]: registration.md#validate
 [Data Model Dependencies]: data-model-dependencies.md
