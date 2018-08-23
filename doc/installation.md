@@ -10,11 +10,13 @@ In order to use Qcode Tcl you need to have a working naviserver instance. You sh
 -----
 ### Installing Qcode Tcl
 
-Qcode Tcl is provided as a Debian package to facilitate a simple installation.  Simply run the following commands to install the Qcode Tcl library:
+Qcode Tcl is provided as a Debian package to facilitate a simple installation.  
+First find the latest version with with `apt-cache search qcode-tcl` (which in this example is 8.12.0).
+Then simply run the following commands to install the Qcode Tcl library:
 
 ```
 apt-get update
-apt-get install qcode-tcl-8.8.0
+apt-get install qcode-tcl-8.12.0
 ```
 
 -----
