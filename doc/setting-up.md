@@ -142,14 +142,15 @@ register GET /entry/:entry_id {entry_id} {
 ```
 ### Updating the form
 You may notice the form your created in `init.tcl` from [Tutorial 2] fails at the authentication filter and an error is returned to the client.
-To correct this we can reconstruct our form using the [`qc::form`] helper proc that will handle the `authenticity_token` for us:
+To correct this we can construct our form using the [`qc::form`] helper proc that will handle the `authenticity_token` for us:
 ```tcl
 register GET /form.html {} {
-	#|        <form method="POST" action="form_process">
-	return [qc::form method POST action form_process \
-		{<label>First Name:</label><input type="text" name="first_name">
+	set form {
+		<label>First Name:</label><input type="text" name="first_name">
 		<label>Last Name:</label><input type="text" name="last_name">
-		<input type="submit" name="submit" value="submit">}]
+		<input type="submit" name="submit" value="submit">
+	}
+	return [qc::form method POST action form_process $form]
 }
 ```
 
