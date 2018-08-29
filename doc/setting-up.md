@@ -147,12 +147,12 @@ To correct this we can reconstruct our form using the `qc::form` helper proc tha
 register GET /form.html {} {
 	#|        <form method="POST" action="form_process">
 	return [qc::form method POST action form_process \
-		"[h label {First Name}] [h input type text name first_name]
-		[h label {Last Name} ] [h input type text name last_name]
-		[h input type submit name submit value submit]"] 
+		{<label>First Name:</label><input type="text" name="first_name">
+		<label>Last Name:</label><input type="text" name="last_name">
+		<input type="submit" name="submit" value="submit">}]
 }
 ```
-The `h` proc creates html elements, all of which are the second argument to `qc::form` and placed within the html form element.
+
 ### Data Model Dependencies
 
 Various aspects of this implementation rely upon a data model being present with certain tables in place. In particular, see `qc::filter_validate` and `qc::filter_authenticate` within the [Data Model Dependencies] documentation to set up the data model for this guide.
