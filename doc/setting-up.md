@@ -142,7 +142,7 @@ register GET /entry/:entry_id {entry_id} {
 ```
 ### Updating the form
 You may notice the form your created in `init.tcl` from [Tutorial 2] fails at the authentication filter and an error is returned to the client.
-To correct this we can reconstruct our form using the `qc::form` helper proc that will handle the `authenticity_token` for us:
+To correct this we can reconstruct our form using the [`qc::form`] helper proc that will handle the `authenticity_token` for us:
 ```tcl
 register GET /form.html {} {
 	#|        <form method="POST" action="form_process">
@@ -172,4 +172,5 @@ Qcode Software Limited <http://www.qcode.co.uk>
 [Tutorial 2]: tutorial-2-form-posting-and-nsv-variables.md
 [injection attacks]: security.md
 [validation handlers]: registration.md#validate
+[`qc::form`]: procs/form.md
 [Data Model Dependencies]: data-model-dependencies.md
