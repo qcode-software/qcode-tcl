@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace
+    namespace export upper lower trim truncate plural singular cmplen levenshtein_distance string_similarity strip_common_leading_whitespace spell_correct spell_index noun_indefinite_determiner
 }
 
 proc qc::upper { string } {
@@ -249,18 +249,16 @@ proc qc::spell_index { corpus } {
 
     # Use ts_stat to extract lexemes and statistical data from the tsvectorised
     # text corpus
-    db_trans {
-        db_dml {truncate spell_corpus}
-        db_dml {
-            insert
-            into
-            spell_corpus
-            select
-            word,
-            nentry
-            from
-            ts_stat('select to_tsvector(''simple'',words) from temp_corpus')
-        }
+    db_dml {truncate spell_corpus}
+    db_dml {
+        insert
+        into
+        spell_corpus
+        select
+        word,
+        nentry
+        from
+        ts_stat('select to_tsvector(''simple'',words) from temp_corpus')
     }
     db_dml {drop table temp_corpus}
 }
@@ -272,23 +270,31 @@ proc qc::spell_correct { word } {
     #| The spell_corpus table is populated by qc::spell_index
 
     set qry {
-        select
+        select 
         word as suggestion
         from
-        spell_corpus
-        where
+        spell_corpus 
+        where 
         levenshtein(lower(word),lower(:word))<=2
-        order by levenshtein(lower(word),lower(:word)) asc,entries desc
+        order by levenshtein(lower(word),lower(:word)) asc,entries desc 
         limit 1
     }
     db_0or1row $qry {
         set suggestion ""
-    }
+    } 
 
     if { $suggestion ne $word } {
         return $suggestion
     } else {
-        return ""
+        return "" 
     }
 }
 
+proc qc::noun_indefinite_determiner {noun} {
+    #| Returns the indefinite determiner for a noun.
+    if { [string tolower [string index $noun 0]] in [list a e i o u] } {
+        return "an"
+    } else {
+        return "a"
+    }
+}
