@@ -60,3 +60,23 @@ proc qc::csv2ll {csv } {
     }
     return $result
 }
+
+proc qc::csv_file_foreach { filename code } {
+    #| Loop through a CSV file setting local variables with values in the row.
+    #| Var names are based on the CSV header line.
+    set in [open $filename r]
+    fconfigure $in -buffering line
+
+    # Load header
+    gets $in line
+    set keys [lindex [qc::csv2ll $line] 0]
+
+    # Read file line by line
+    while { [gets $in line] >= 0 } {
+	foreach key $keys value [lindex [qc::csv2ll $line] 0] {
+	    upset 1 $key $value
+	}
+	uplevel 1 $code
+    }
+    close $in
+}
