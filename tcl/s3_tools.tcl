@@ -34,7 +34,13 @@ proc qc::s3_auth_headers { args } {
     #| See: http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
     qc::args $args -amz_headers "" -content_type "" -content_md5 "" -- verb path bucket 
     # eg s3_auth_headers -content_type image/jpeg -content_md5 xxxxxx PUT /pics/image.jpg mybucket
-    
+
+    # check for security token
+    if { [info exists ::env(AWS_SESSION_TOKEN)] && $::env(AWS_SESSION_TOKEN) ne "" } {
+        # We're using temporary security credentials - add token header
+        lappend amz_headers x-amz-security-token $::env(AWS_SESSION_TOKEN)
+    }    
+
     set date [qc::format_timestamp_http now]
    
     if { $bucket ne "" } {
@@ -78,7 +84,13 @@ proc qc::s3_auth_headers { args } {
     set signature [::base64::encode [::sha1::hmac -bin ${::env(AWS_SECRET_ACCESS_KEY)} $string_to_sign]]
     set authorization "AWS ${::env(AWS_ACCESS_KEY_ID)}:$signature"
 
-    return [list Host [s3_url $bucket] Date $date Authorization $authorization]
+    set return_headers [list Host [s3_url $bucket] Date $date Authorization $authorization]
+
+    if { [dict exists $amz_headers "x-amz-security-token"] } {
+        lappend return_headers "x-amz-security-token" [dict get $amz_headers "x-amz-security-token"]
+    }
+
+    return $return_headers
 }
 
 proc qc::s3_get { bucket path } {
@@ -388,12 +400,26 @@ proc qc::s3 { args } {
                                 incr attempt
                             }
                         }
-                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } { 
+
+                        if { $s3_timeout($upload_id) || $attempt>$max_attempt } {
                             #TODO should we abort or leave for potential recovery later?
-                            try {
+                            ::try {
                                 qc::s3 upload abort $bucket $remote_path $upload_id
+                            } on error [list error_message options] {
+                                # error when attempting to abort upload; do nothing
                             }
-                            error "Upload timed out"
+
+                            set message "Failed to upload file to bucket $bucket."
+
+                            if { $s3_timeout($upload_id) } {
+                                append message " Upload timed out."
+                            }
+
+                            if { $attempt > $max_attempt } {
+                                append message " Number of attempts exceeded max attempts (${max_attempt})."
+                            }
+
+                            error $message
                         }
                         regexp -line -- {^ETag: "(\S+)"\s*$} $response match etag
                       
