@@ -32,19 +32,25 @@ proc qc::ll2pg_copy {ll} {
     #| Return data in the format accepted by postgresql's copy statements
     set pg_copy_data ""
     foreach list $ll {
-        set temp {}
-        foreach value $list {
-            if { $value eq "" } {
-                # Encode empty string as NULL
-                set value \\N
-            } else {
-                # Escape backslash, newline, carriage return, tab characters
-                set value [string map {\\ \\\\ \n \\n \r \\r \t \\t \v \\v} $value]
-            }
-            lappend temp $value
-        }
-        append pg_copy_data "[join $temp \t]\n"
+        append pg_copy_data "[qc::list2pg_copy $list]\n"
     }
     return $pg_copy_data
 }
+
+proc qc::list2pg_copy {list} {
+    #| Return data in the format accepted by postgresql's copy statements
+    set temp {}
+    foreach value $list {
+        if { $value eq "" } {
+            # Encode empty string as NULL
+            set value \\N
+        } else {
+            # Escape backslash, newline, carriage return, tab characters
+            set value [string map {\\ \\\\ \n \\n \r \\r \t \\t \v \\v} $value]
+        }
+        lappend temp $value
+    }
+    return "[join $temp \t]"
+}
+
 

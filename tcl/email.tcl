@@ -7,7 +7,7 @@ package require uuid
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
-    # email_send from to subject text|html ?cc? ?bcc? ?bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
+    # email_send from to subject text|html ?cc? ?bcc? ?reply-to? ?bounce-to? ?sender? ?attachment? ?attachments? ?filename? ?filenames?
 
     #| attachments is a list of dicts
     #| dict keys are encoding data filename ?cid?
@@ -34,7 +34,7 @@ proc qc::email_send {args} {
     # From
     lappend headers From $from
     # To
-    set rcpt [list]
+    set rcpts [list]
     foreach address [qc::email_addresses $to] {
 	lappend rcpts $address
     }
@@ -565,6 +565,9 @@ proc qc::mime_type_guess { filename } {
         ".doc" {
             return "application/msword"
         }
+        ".docx" {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        }
         ".dp" {
             return "application/commonground"
         }
@@ -892,6 +895,9 @@ proc qc::mime_type_guess { filename } {
         ".stw" {
             return "application/vnd.sun.xml.writer.template"
         }
+        ".svg" {
+            return "image/svg+xml"
+        }
         ".swf" {
             return "application/x-shockwave-flash"
         }
@@ -1065,6 +1071,7 @@ proc qc::mime_file_extension { mime_type } {
         "application/octet-stream" ".dll"
         "application/octet-stream" ".dms"
         "application/msword" ".doc"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ".docx"
         "application/commonground" ".dp"
         "applications/x-dvi" ".dvi"
         "image/vnd.dwg" ".dwg"
@@ -1167,6 +1174,7 @@ proc qc::mime_file_extension { mime_type } {
         "application/vnd.sun.xml.impress.template" ".sti"
         "application/x-navistyle" ".stl"
         "application/vnd.sun.xml.writer.template" ".stw"
+        "image/svg+xml" ".svg"
         "application/x-shockwave-flash" ".swf"
         "application/vnd.sun.xml.calc" ".sxc"
         "application/vnd.sun.xml.draw" ".sxd"
