@@ -3,7 +3,7 @@ namespace eval qc {
     namespace import ::tcl::mathop::eq
     namespace import ::tcl::mathop::ne
 
-    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne
+    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne commonmark2html
 }
 
 proc qc::K {a b} {set a}
@@ -147,6 +147,33 @@ proc qc::call { proc_name args } {
 	}
 	return [uplevel 1 $proc_name $largs]
     }
+}
+
+proc qc::call_with {proc_name args} {
+    #| Calls proc_name by mapping name value pairs to named args.
+    if { [llength $args]%2 != 0 } {
+        return -code error "usage qc::call_with proc_name ?name value?"
+    }
+
+    set proc_args [info args $proc_name]
+    set largs {}
+    foreach arg $proc_args {
+	if { [dict exists $args $arg] } {
+            set value [dict get $args $arg]
+            if {$arg eq "args"} {
+                lappend largs {*}$value
+            } else {
+                lappend largs $value
+            }
+	} else {
+            if { [info default $proc_name $arg default_value] } {
+                lappend largs $default_value
+            } else {
+                return -code error "Missing argument: \"$arg\"."
+            }
+        }
+    }
+    return [uplevel 0 $proc_name $largs]
 }
 
 proc qc::margin { cost price {dec_places 1} } {
@@ -483,13 +510,13 @@ proc qc::exec_proxy {args} {
     }
     if { [info commands ns_proxy] eq "ns_proxy" } {
 	set handle [ns_proxy get exec]
-	qc::try {
+	::try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
 	    return $result
-	} {
+	} on error {error_message options} {
 	    ns_proxy release $handle
-	    error $::errorMessage $::errorInfo $::errorCode
+	    error $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
 	}
     } else {
 	# No ns_proxy
@@ -516,8 +543,6 @@ proc qc::info_proc { proc_name } {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }
 
-   
-
 proc qc::which {command} {
     #| Return path of unix command - cache result in nsv on AOLserver if present
     if { [info commands nsv_exists] eq "nsv_exists" } {
@@ -541,6 +566,20 @@ proc qc::not_null {var} {
     #| Test if this variable exists and is not the empty string
     upvar $var value
     return [expr {[info exists value] && $value ne "" }]
+}
+
+proc qc::commonmark2html {args} {
+    #| Converts Commonmark Markdown (http://commonmark.org) to  HTML.
+    qc::args $args -unsafe -- markdown
+    set markdown [string map {\r ""} $markdown] ;#removes ^M (alternative carriage return) characters
+    set html [exec cmark << $markdown]
+    if {[info exists unsafe]} {
+        return $html
+    } elseif { [qc::is safe_html $html] } {
+        return $html
+    } else {
+        return -code error -errorcode CAST "Markdown contains unsafe HTML."
+    }
 }
 
 proc qc::glob_recursive {args} {
@@ -581,6 +620,65 @@ proc qc::glob_recursive {args} {
 
     # Call glob and return the results
     return [glob {*}$switches {*}$options -- {*}$patterns]
+}
+
+proc qc::args_qualified2unqualified {} {
+    #| Creates an unqualified variable in the caller's stack frame for each qualified argument
+    #| present in the caller but only if the resulting variable would be unambiguous.
+    #| E.G. Caller's args: { table.foo }
+    #|      -> Variable named "foo" is set in caller.
+    #|      Caller's args: { table.foo other.foo }
+    #|      -> No new variables set in caller because "foo" would be ambiguous.
+    set caller_args [info args [dict get [info frame -1] proc]]
+    foreach item [qc::args_unambiguous {*}$caller_args] {
+        upvar 1 $item value
+        qc::upset 1 [qc::arg_shortname $item] $value
+    }
+}
+
+proc qc::arg_shortname {name} {
+    #| Returns the shortname of a name if it is qualified otherwise returns the name.
+    if { [regexp {^([^\.]+)\.([^\.]+)$} $name -> table column] } {
+        return $column
+    } else {
+        return $name
+    }
+}
+
+proc qc::args_unambiguous {args} {
+    #| Returns items from the given list that would be unambiguous if shortnened by unqualifying them.
+    #| E.G. unamibguous table.foo table.bar table.baz other.baz
+    #|      -> table.foo table.bar
+    set unambiguous {}
+    set shortnames [map {x {qc::arg_shortname $x}} $args]
+    foreach shortname $shortnames arg $args {
+        if { [llength [lsearch -all $shortnames $shortname]]==1 } {
+            lappend unambiguous $arg
+        }
+    }
+    return $unambiguous
+}
+
+proc qc::memoize {args} {
+    #| Wrapper that caches the result of script evaluation to improve performance for future evaluations.
+    #| Usage: `qc::memoize -timeout ? -expires ? script args`
+    #| Example: `qc::memoize -expires 2520 -timeout 1 deep_tought "meaning of life"`
+    # The script result remains valid until the supplied expire time passes, or forever if not specified.
+    # The value for -expires can be expressed either as an absolute time (large values intrepreted as seconds since epoch)
+    # or as an seconds offset from the current time.
+    # If two threads execute the same script and args, one will wait for the other to compute the result and store it in the cache.
+    # The -timeout option specifies how long to wait in seconds.
+    # nb. currently requires ns_memoize to perform memoization.
+
+    if { [info commands ns_memoize] eq "ns_memoize" } {
+        # ns_memoize available
+        return [eval [list ns_memoize {*}$args]]
+    } else {
+        # ns_memoize is unavailable - evaluate script in the caller without memoization
+        qc::args $args -expires ? -timeout ? -- args
+
+        return [eval {*}$args]
+    }
 }
 
 proc qc::postcode_parse { postcode } {
