@@ -20,7 +20,15 @@ proc qc::args2dict {callers_args} {
 	}
 	return $dict
     } else {
-	return $callers_args
+        if { [llength $callers_args] % 2 != 0 } {
+            error "Missing name or value in args for qc::args2dict"
+        }
+        
+        set dict [dict create {*}$callers_args]
+        if { [llength $callers_args] ne [llength $dict] } {
+            error "Duplicate key for qc::args2dict"
+        }
+	return $dict
     }
 }
 
@@ -28,7 +36,7 @@ proc qc::args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Dict - set all variables or just those specified that exists in the dict
-    #| Pass-by-Value - set all variables or just those specified that exists in caller's namespce.
+    #| Pass-by-Value - set all variables or just those specified that exists in caller's namespace.
 
     if { [llength $callers_args]==1 } {set callers_args [lindex $callers_args 0]}
     set varNames {}
@@ -43,7 +51,7 @@ proc qc::args2vars {callers_args args} {
 	}
     } else {
 	foreach {varName varValue} $callers_args {
-	    if { [llength $args]==0 || [in $args $varName] } {
+            if { [llength $args]==0 || [in $args $varName] } {
 		upset 1 $varName $varValue
 		lappend varNames $varName
 	    }
