@@ -6,10 +6,18 @@ proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection
     #| Trust that a reverse proxy like nginx is setup to pass an X-Forwarded-For header.
     set headers [ns_conn headers]
-    if { [ns_set ifind $headers X-Forwarded-For]!=-1 && ([eq [ns_conn peeraddr] 127.0.0.1] || [string match  192.168* [ns_conn peeraddr]] ||  [eq [ns_conn peeraddr] [ns_info address]]) } {
+    if { \
+        [ns_set ifind $headers X-Forwarded-For]!=-1 \
+        && ( \
+               [ns_conn peeraddr] eq "127.0.0.1" \
+            || [string match  192.168* [ns_conn peeraddr]] \
+            || [ns_conn peeraddr] eq [ns_info address] \
+            ) \
+        } {
 	# Proxied so trust X-Forwarded-For
-	set forwarded [ns_set iget $headers X-Forwarded-For]
-	set ip $forwarded
+        # X-Forwarded-For can be a list of IPs. The client IP is always leftmost.
+	set forwarded [split [ns_set iget $headers X-Forwarded-For] ,]
+        set ip [string trim [lindex $forwarded 0]]
     } else {
 	set ip [ns_conn peeraddr]
     }
@@ -70,7 +78,8 @@ proc qc::conn_marshal { {error_handler qc::error_handler} {namespace ""} } {
 }
 
 proc qc::conn_url {args} {
-    #| Try to construct the full url of this request (uses the encoded version of the path unless the -decoded flag is present).
+    #| Try to construct the full url of this request.
+    # Return the encoded version of the path by default unless the -decoded flag is present
     args $args -decoded -- args
     if { [info exist decoded] } {
         return [qc::conn_location][qc::conn_path -decoded]
@@ -80,7 +89,8 @@ proc qc::conn_url {args} {
 }
 
 proc qc::conn_path {args} {
-    #| Return the encoded version of the path of the current connection unless the -decoded flag is present.
+    #| Return the path of the current connection
+    #| Return the encoded version of the path by default unless the -decoded flag is present
     # Note: using "ns_conn url" instead of "ns_conn request" as the latter is not updated for "ns_internalredirect"
     args $args -decoded -- args
     if { [info exist decoded] } {
@@ -208,4 +218,36 @@ proc qc::conn_if_modified_since {} {
     } else {
         return ""
     }
+}
+
+proc qc::conn_open {} {
+    #| Check if the client connection is open
+    set NS_CONN_CLOSED 0x1
+    return [expr {
+                  [ns_conn isconnected] 
+                  && ($NS_CONN_CLOSED & [ns_conn flags]) == 0 
+              }]
+}
+
+proc qc::conn_response_headers_sent {} {
+    #| Inspect ns_conn flags to determine whether response headers have been sent
+    set NS_CONN_SENT_HEADERS 0x10
+    return [expr {($NS_CONN_SENT_HEADERS & [ns_conn flags]) != 0}]
+}
+
+proc qc::conn_served {} {
+    #| Return true if a response has been served to the client (connection closed or response headers returned)
+    #| Otherwise return false
+    return [expr {![qc::conn_open] || [qc::conn_response_headers_sent]}]
+    
+}
+
+proc qc::conn_method {} {
+    #| Return the method of the current connection.
+    if {[qc::form_var_exists _method]} {
+        set method [qc::form_var_get _method]
+    } else {
+        set method [ns_conn method]
+    }
+    return $method
 }
