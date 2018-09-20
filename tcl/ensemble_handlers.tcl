@@ -4,7 +4,6 @@
 #
 ###################################################
 proc data_type_parser {args} {
-    qc::log "** $args **"
     #| Try to map args to data type
     set namespace [lindex $args 0]
     set data_type [lindex $args 1]
