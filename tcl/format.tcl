@@ -67,7 +67,7 @@ proc qc::format_cc_tail {cc_no {suffix 4}} {
 }
 
 proc qc::format_cc_masked {cc_no {prefix 6} {suffix 4}} {
-    if { ![is_creditcard $cc_no] } {
+    if { ![qc::is creditcard $cc_no] } {
 	error "Can't mask \"$cc_no\" because its is not a credit card number."
     }
     if { $prefix > 6 } { error "prefix must be less than 6" }
@@ -94,7 +94,7 @@ proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
 	set cc_no_str [string range $string [lindex $item 0] [lindex $item 1]]
 	set cc_no [string map {" " "" - "" . ""} $cc_no_str]
 
-	if { [is_creditcard $cc_no] } {
+	if { [qc::is creditcard $cc_no] } {
 	    append masked_string [string range $string $start [lindex $item 0]-1]
 	    
 	    set masked_cc_no [string range $cc_no 0 [expr {$prefix - 1}]]
@@ -181,11 +181,11 @@ proc qc::format_number {args} {
 proc qc::format_if_number {args} {
     #| If value is a number then commify
     args $args -dp ? -sigfigs ? -zeros yes -commify yes -- value
-    if { [is_decimal $value] } {
-	if { [info exists sigfigs] && [is_integer $sigfigs]} {
+    if { [qc::is decimal $value] } {
+	if { [info exists sigfigs] && [qc::is integer $sigfigs]} {
 	    set value [qc::sigfigs $value $sigfigs]
 	}
-	if { [info exists dp] && [is_integer $dp] } {
+	if { [info exists dp] && [qc::is integer $dp] } {
 	    set value [qc::round $value $dp]
 	}
 	if { !$zeros && $value==0 } {
@@ -198,3 +198,16 @@ proc qc::format_if_number {args} {
     return $value
 }
 
+proc qc::format_safe_html {safe_html} {
+    #| Formats the given text by removing <root> node if present and converting back to HTML from XML.
+    if {[qc::is safe_html $safe_html]} {
+        set doc [dom parse $safe_html]
+        set html [$doc asHTML -escapeNonASCII -htmlEntities]
+        # remove root node if it was present
+        regexp {^<root>(.+)</root>$} $html -> html
+        $doc delete
+        return $html
+    } else {
+        return -code error  "Cannot format \"[qc::trunc $html 50]...\" as it is not safe HTML."
+    }
+}

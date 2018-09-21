@@ -383,3 +383,224 @@ proc qc::h_tag { tag_name args } {
 	return "<$tag_name [join $attributes]>"
     }
 }
+
+proc qc::safe_elements_check {node} {
+    #| Checks the node and all of it's children for unsafe html elements.
+    #| Returns true if all elements are safe otherwise false.
+    if {[$node nodeType] eq "ELEMENT_NODE"} {
+        set element [$node nodeName]
+        set table_elements [list thead tbody tfoot tr td th]
+        if {$element ni [safe_elements]} {
+            return false
+        } elseif {$element eq "li"} {
+            # top-level <li> elements are considered unsafe because they can break out of containing markup
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "ul" || [$ancestor nodeName] eq "ol"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                return false
+            }
+        } elseif {$element in $table_elements} {
+            # check for any table elements that are not contained in a table
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "table"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                return false
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        if {! [qc::safe_elements_check $child]} {
+            return false
+        }
+    }
+    return true
+}
+
+proc qc::safe_attributes_check {node} {
+    #| Checks the node and all of it's children for safe attributes.
+    #| Returns true if all attributes are safe otherwise false.
+    set safe_attributes [dict get [safe_attributes] all]
+    set nodeName [$node nodeName]
+    # add specific element attributes to the whitelist if the node is one of them
+    if {[dict exists [safe_attributes] $nodeName]} {
+        lappend safe_attributes {*}[dict get [safe_attributes] $nodeName]
+    }
+    set attributes [$node attributes]
+    foreach attribute $attributes {
+        if {$attribute ni $safe_attributes} {
+            return false
+        } elseif {$attribute eq "href"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https|mailto):\/\/" $value]} {
+                return false
+            }
+        } elseif {$attribute eq "src"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https):\/\/" $value]} {
+                return false
+            }
+        } elseif {$attribute eq "class"} {
+            set value [$node getAttribute $attribute]
+            if {! [regexp {^language-} $value]} {
+                return false
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        if {! [qc::safe_attributes_check $child]} {
+            return false
+        }
+    }
+    return true
+}
+
+
+proc qc::safe_elements {} {
+    #| Returns a list of safe html elements.
+    set safe_elements {}
+    lappend safe_elements a
+    lappend safe_elements b
+    lappend safe_elements blockquote
+    lappend safe_elements br
+    lappend safe_elements code
+    lappend safe_elements dd
+    lappend safe_elements del
+    lappend safe_elements div
+    lappend safe_elements dl
+    lappend safe_elements dt
+    lappend safe_elements em
+    lappend safe_elements h1
+    lappend safe_elements h2
+    lappend safe_elements h3
+    lappend safe_elements h4
+    lappend safe_elements h5
+    lappend safe_elements h6
+    lappend safe_elements h7
+    lappend safe_elements h8
+    lappend safe_elements hr
+    lappend safe_elements i
+    lappend safe_elements img
+    lappend safe_elements ins
+    lappend safe_elements kbd
+    lappend safe_elements li
+    lappend safe_elements ol
+    lappend safe_elements p
+    lappend safe_elements pre
+    lappend safe_elements q
+    lappend safe_elements ruby
+    lappend safe_elements rt
+    lappend safe_elements rp
+    lappend safe_elements samp
+    lappend safe_elements strong
+    lappend safe_elements sub
+    lappend safe_elements sup
+    lappend safe_elements table
+    lappend safe_elements tbody
+    lappend safe_elements td
+    lappend safe_elements tfoot
+    lappend safe_elements th
+    lappend safe_elements thead
+    lappend safe_elements tr
+    lappend safe_elements tt
+    lappend safe_elements ul
+    lappend safe_elements var
+    lappend safe_elements root
+
+    return $safe_elements
+}
+
+proc qc::safe_attributes {} {
+    #| Returns a dict of {element, attributes} where attributes is a list of safe attributes for the given element.
+    #| Includes element 'all' that applies to all elements.
+    set list {}
+    lappend list abbr
+    lappend list accept
+    lappend list accept-charset
+    lappend list accesskey
+    lappend list action
+    lappend list align
+    lappend list alt
+    lappend list axis
+    lappend list border
+    lappend list cellpadding
+    lappend list cellspacing
+    lappend list char
+    lappend list charoff
+    lappend list charset
+    lappend list checked
+    lappend list cite
+    lappend list class
+    lappend list clear
+    lappend list cols
+    lappend list colspan
+    lappend list color
+    lappend list compact
+    lappend list coords
+    lappend list datetime
+    lappend list dir
+    lappend list disabled
+    lappend list enctype
+    lappend list for
+    lappend list frame
+    lappend list headers
+    lappend list height
+    lappend list hreflang
+    lappend list hspace
+    lappend list ismap
+    lappend list label
+    lappend list lang
+    lappend list longdesc
+    lappend list maxlength
+    lappend list media
+    lappend list method
+    lappend list multiple
+    lappend list name
+    lappend list nohref
+    lappend list noshade
+    lappend list nowrap
+    lappend list prompt
+    lappend list readonly
+    lappend list rel
+    lappend list rev
+    lappend list rows
+    lappend list rowspan
+    lappend list rules
+    lappend list scope
+    lappend list selected
+    lappend list shape
+    lappend list size
+    lappend list span
+    lappend list start
+    lappend list summary
+    lappend list tabindex
+    lappend list target
+    lappend list title
+    lappend list type
+    lappend list usemap
+    lappend list valign
+    lappend list value
+    lappend list vspace
+    lappend list width
+    lappend list itemprop
+
+    set safe_attributes [dict create]
+    dict append safe_attributes a [list href]
+    dict append safe_attributes img [list src]
+    dict append safe_attributes div [list itemscope itemtype]
+    dict append safe_attributes code [list class]
+    dict append safe_attributes all $list
+
+    return $safe_attributes
+}
