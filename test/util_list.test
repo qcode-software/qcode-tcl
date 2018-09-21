@@ -213,6 +213,38 @@ namespace eval ::qcode::test {
         lunique [list 1 1 1 1 1 1 1]
     } -cleanup {} -result {1}
 
+    # lequal
+    test lequal-1.0 {lequal true} -setup {
+    } -body {
+        lequal [list a b c] [list a b c]
+    } -cleanup {} -result {1}
+
+    test lequal-1.1 {lequal false} -setup {
+    } -body {
+        lequal [list a b c] [list c b a]
+    } -cleanup {} -result {0}
+
+    test lequal-1.2 {lequal different lengths} -setup {
+    } -body {
+        lequal [list a b c ""] [list a b c]
+    } -cleanup {} -result {0}
+
+    test lequal-1.3 {lequal nested} -setup {
+    } -body {
+        lequal [list [list a b] [list c d]] [list [list a b] [list c d]]
+    } -cleanup {} -result {1}
+
+    test lequal-1.4 {lequal non-list-parseable} -setup {
+    } -body {
+        lequal [list {"}] [list {"}]
+    } -cleanup {} -result {1}
+
+    test lequal-1.5 {lequal nested non-equal} -setup {
+    } -body {
+        lequal [list [list b a] [list d c]] [list [list a b] [list c d]]
+    } -cleanup {} -result {0}
+
+    # lsort
     test lsort_using-1.0 {lsort_using } -setup {
     } -body {
         lsort_using [list T W E Q] {Q W E R T Y}
@@ -439,35 +471,35 @@ namespace eval ::qcode::test {
     } -cleanup {} -result {}
 
     test lapply-1.0 {lapply } -setup {
-        proc ::qcode::test::employee_get { id } {
-            set employee_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
-            return [dict get $employee_dict $id]
+        proc ::qcode::test::user_get { id } {
+            set user_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
+            return [dict get $user_dict $id]
         }
     } -body {
-        lapply ::qcode::test::employee_get [list 1 2 5] 
-    } -cleanup {rename employee_get ""} -result {Kagan Boot Sagan}
+        lapply ::qcode::test::user_get [list 1 2 5] 
+    } -cleanup {rename user_get ""} -result {Kagan Boot Sagan}
 
     test lapply-1.1 {lapply empty} -setup {
-        proc ::qcode::test::employee_get { id } {
-            set employee_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
-            return [dict get $employee_dict $id]
+        proc ::qcode::test::user_get { id } {
+            set user_dict [dict create 1 Kagan 2 Boot 3 Bolton 4 Scheunemann 5 Sagan]
+            return [dict get $user_dict $id]
         }
     } -body {
-        lapply ::qcode::test::employee_get [list] 
-    } -cleanup {rename ::qcode::test::employee_get ""} -result {}
+        lapply ::qcode::test::user_get [list] 
+    } -cleanup {rename ::qcode::test::user_get ""} -result {}
 
     test lapply-1.2 {lapply error from proc} -setup {
-        proc ::qcode::test::employee_get { id } {
+        proc ::qcode::test::user_get { id } {
             error "Something bad happened"
         }
     } -body {
-        lapply ::qcode::test::employee_get [list 1 2 5] 
-    } -returnCodes 1 -cleanup {rename ::qcode::test::employee_get ""} -result {Something bad happened}
+        lapply ::qcode::test::user_get [list 1 2 5] 
+    } -returnCodes 1 -cleanup {rename ::qcode::test::user_get ""} -result {Something bad happened}
 
     test lapply-1.3 {lapply proc does not exist} -setup {
     } -body {
-        lapply ::qcode::test::employee_get [list 1 2 5] 
-    } -returnCodes 1 -cleanup {} -result {invalid command name "::qcode::test::employee_get"}
+        lapply ::qcode::test::user_get [list 1 2 5] 
+    } -returnCodes 1 -cleanup {} -result {invalid command name "::qcode::test::user_get"}
 
     cleanupTests
 }
