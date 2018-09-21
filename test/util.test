@@ -762,6 +762,21 @@ namespace eval ::qcode::test {
         which tclsh 
     } -cleanup {} -result {/usr/bin/tclsh}
 
+    # postcode_parse
+    test postcode_parse-1.0 {postcode_parse1} -setup {
+    } -body {
+        dict values [postcode_parse "W1A 2QQ"]
+    } -cleanup {} -result [list W 1A " " 2 QQ]
+
+    test postcode_parse-1.1 {postcode_parse2} -setup {
+    } -body {
+        dict values [postcode_parse "EH11 5DD"]
+    } -cleanup {} -result [list EH 11 " " 5 DD]
+
+    test postcode_parse-1.2 {postcode_parse3} -setup {
+    } -body {
+        dict values [postcode_parse "XXX"]
+    } -cleanup {} -returnCodes 1 -result {Unable to parse postcode "XXX"}
 
     cleanupTests
 }
