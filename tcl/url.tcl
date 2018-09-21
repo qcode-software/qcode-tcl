@@ -3,40 +3,74 @@ namespace eval qc {
 }
 
 proc qc::url { url args } {
-    #| Take an url with or without url encoded vars and insert or replace vars based on 
-    #| the supplied pairs of var & value.
-    # TODO Aolserver only
-    if { ![qc::is_uri_valid $url] } {
-        error "\"$url\" is not a valid URI."
-    }    
-    # Are there existing encoded vars path?var1=name1...
-    set dict [args2dict $args]
-    if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
-	foreach {name value} [split $query_string &=] {
-	    set this([qc::url_decode $name]) [qc::url_decode $value]
-	}
-    } else {
-	error "\"$url\" is not a valid URL."
+    #| Builds a URL from a given base and name value pairs.
+    #| Substitutes and encodes any colon variables from the name value pairs into the path and fragment
+    #| with any remaining name value pairs treated as parameters for the query string.
+    #| NOTE: Only supports root-relative URLs.
+    # TODO: Support escape sequences for fragments or paths beginning with colons.
+    set dict [qc::args2dict $args]
+
+    qc::dict2vars [qc::url_parts $url] params hash protocol domain port segments
+
+    # decode params, segments, and hash
+    set params [qc::lapply url_decode $params]
+    set segments [qc::lapply url_decode $segments]
+    set hash [url_decode $hash]
+
+    # look for colon vars in the URL path segments and substitute the matching value given in the args
+    set substituted_segments [list]
+    foreach segment $segments {
+        if { [string index $segment 0] eq ":" } {
+            # remove the colon
+            set segment [string range $segment 1 end]
+            # check if caller has provided a substitution for the segment
+            if { [dict exists $dict $segment] } {
+                set value [dict get $dict $segment]
+                if { [string index $value 0] eq ":" } {
+                    return -code error "The substitute value \"$value\" for colon variable \"$segment\" begins with a colon."
+                }
+                lappend substituted_segments $value
+                # remove the dict entry so that it isn't reused
+                set dict [dict remove $dict $segment]
+            } else {
+                return -code error "Key \"$segment\" not found in args."
+            }
+        } else {
+            lappend substituted_segments $segment
+        }
     }
-    # Reset required values overwriting old values
-    array set this $dict
-    # Recontruct the query string
-    set pairs {}
-    foreach {name value} [array get this] {
-	lappend pairs "[url_encode $name]=[url_encode $value]"
+
+    # check if the fragment identifier requires substitution
+    if { [string index $hash 0] eq ":" } {
+        # remove the colon
+        set temp [string range $hash 1 end]
+        if { [dict exists $dict $temp] } {
+            set value [dict get $dict $temp]
+            if { [string index $value 0] eq ":" } {
+                return -code error "The substitute value \"$value\" for colon variable \"$temp\" begins with a colon."
+            }
+            set hash $value
+            # remove the dict entry so that it isn't reused
+            set dict [dict remove $dict $temp]
+        } else {
+            return -code error "Key \"$temp\" not found in args."
+        }
     }
-    if { [llength $pairs] != 0 } {
-	return "$path?[join $pairs &]$fragment"
-    } else {
-	return ${path}${fragment}
+
+    # rest of args are form vars
+    dict for {key value} $dict {
+        # overwrite any existing form vars
+        dict set params $key $value
     }
+    
+    return [qc::url_make [dict create protocol $protocol domain $domain port $port segments $substituted_segments params $params hash $hash]]
 }
 
 proc qc::url_unset { url var_name } {
     #| Unset a url encoded variable in url
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     if { [regexp {([^\?\#]+)(?:\?([^\#]*))?(\#.*)?} $url -> path query_string fragment] } {
 	foreach {name value} [split $query_string &=] {
 	    set this([qc::url_decode $name]) [qc::url_decode $value]
@@ -62,9 +96,9 @@ proc qc::url_unset { url var_name } {
 
 proc qc::url_to_html_hidden { url } {
     #| Convert a url with form vars into html hidden input tags
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     set html ""
     if { [regexp {([^\?\#]+)(?:\?([^\#]*))?} $url -> path query_string] } {
 	foreach {name value} [split $query_string &=] {
@@ -81,9 +115,9 @@ proc qc::url_back { url args } {
     #| Creates a link to url with a formvar next_url which links back to the current page.
     #| Preserve vars passed in via GET or POST
     # TODO Aolserver only
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     foreach name $args {
 	set value($name) [upset 1 $name]
     }
@@ -110,7 +144,7 @@ proc qc::url_encoding_init {} {
         }
         # Decode any percent hex encoded characters
         lappend url_decode_map $hex $char
-    }    
+    }
     # Decode + char as a space
     lappend url_decode_map + " " 
 }
@@ -137,9 +171,9 @@ proc qc::url_decode {string {charset utf-8}} {
 
 proc qc::url_path {url} {
     # Return just the url path
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     if { [regexp {^https?://[a-z0-9_]+(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
 	return $path
     } elseif { [regexp {^(/?[^\?]*)} $url -> path] } {
@@ -151,9 +185,9 @@ proc qc::url_path {url} {
 
 proc qc::url_root {url} {
     # Return the root of an url without GET string or anchor
-    if { ![qc::is_uri_valid $url] } {
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     if { [regexp {^https?://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?\#]*)?} $url root] } {
 	return $root
     } else {
@@ -199,10 +233,11 @@ proc qc::url_match {canonical_url test_url} {
 
 proc qc::url_parts {url} {
     #| Return a dict containing the base, params (as a multimap), hash, protocol, domain, port,
-    # and path of url
-    if { ![qc::is_uri_valid $url] } {
+    #| and path of url.
+    #| qc::url_parts is not responsible for decoding any url part.
+    if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
-    }
+    }  
     set pchar {[a-zA-Z0-9\-._~]|%[0-9a-fA-F]{2}|[!$&'()*+,;=:@]}
     set query_char "(?:${pchar}|/|\\?)"
     set hash_char "(?:${pchar}|/|\\?)"
@@ -218,31 +253,43 @@ proc qc::url_parts {url} {
          )
         
         # query (optional)
-        (?:\?(${query_char}+))?
+        (?:\?(${query_char}*))?
         
         # hash (optional)
-        (?:\#(${hash_char}+))?
+        (?:\#(${hash_char}*))?
         $}]
     if { [regexp -expanded $pattern $url -> base protocol domain port path query hash] } {
-        set params [split $query &=]
-        return [qc::dict_from base params hash protocol domain port path]
+        set pairs [split $query &]
+        set params [list]
+        foreach pair $pairs {
+            set list [split $pair =]
+            lappend params [lindex $list 0] [lindex $list 1]
+        }
+        set segments [split [string trimleft $path "/"] "/"]
+        return [qc::dict_from base params hash protocol domain port path segments]
     }
 
     set pattern [subst -nocommands -nobackslashes {^
         # base with path (abs or rel) only
-        (${path_char}+)
+        (${path_char}*)
         
         # query (optional)
-        (?:\?(${query_char}+))?
+        (?:\?(${query_char}*))?
         
         # hash (optional)
-        (?:\#(${hash_char}+))?
+        (?:\#(${hash_char}*))?
         $}]
     if { [regexp -expanded $pattern $url -> path query hash] } {
         lassign [list "" "" ""] protocol domain port
         set base $path
-        set params [split $query &=]
-        return [qc::dict_from base params hash protocol domain port path]
+        set pairs [split $query &]
+        set params [list]
+        foreach pair $pairs {
+            set list [split $pair =]
+            lappend params [lindex $list 0] [lindex $list 1]
+        }
+        set segments [split [string trimleft $path "/"] "/"]
+        return [qc::dict_from base params hash protocol domain port path segments]
     }
 
     error "Unable to parse url $url"
@@ -355,4 +402,109 @@ proc qc::url_make {dict} {
     }
 
     return $url
+}
+
+proc qc::url_maker {args} {
+    #| Deprecated - see qc::url
+    # Usage url_maker [$base] [: $port] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]]
+    qc::args $args -multimap_form_vars -- args
+    default multimap_form_vars false
+    set usage_error {Usage: url_maker [$base [: $port]] [/ [segment ...]] [? [param_name param_value ...]] [# [hash]] }
+    set url_dict [dict create]
+    set section "base"
+    set sections [list "base" "port" "segments" "params" "hash"]
+    set delimiters {
+        ":" "port"
+        "/" "segments"
+        "?" "params"
+        "#" "hash"
+    }
+    set end_of_section false
+    set arg_is_param_value false
+    set current_param_name ""
+    foreach arg $args {
+        if { [dict exists $delimiters $arg] } {
+            if { $arg_is_param_value } {
+                error $usage_error
+            }
+            set section [dict get $delimiters $arg]
+            switch $section {
+                "port" {
+                    dict set url_dict port ""
+                    set delimiters {
+                        "/" "segments"
+                        "?" "params"
+                        "#" "hash"
+                    }
+                }
+                "segments" {
+                    dict_default url_dict segments [list]
+                    set delimiters {
+                        "?" "params"
+                        "#" "hash"
+                    }
+                }
+                "params" {
+                    if { $multimap_form_vars } {
+                        dict_default url_dict params [list]
+                    } else {
+                        dict_default url_dict params [dict create]
+                    }
+                    set delimiters {
+                        "#" "hash"
+                    }
+                }
+                "hash" {
+                    dict set url_dict hash ""
+                    set delimiters {}
+                }
+            }
+            set end_of_section false
+        } else {
+            if { $end_of_section } {
+                error $usage_error
+            }
+            if { [string index $arg 0] eq ":" } {
+                set value [uplevel set [string range $arg 1 end]]
+            } else {
+                set value $arg
+            }
+            switch $section {
+                "base" {
+                    if { $value ne "" } {
+                        set url_dict [qc::url_parts $value]
+                    }
+                    set end_of_section true
+                }
+                "port" {
+                    dict set url_dict port $value
+                    set end_of_section true
+                }
+                "segments" {
+                    dict lappend url_dict segments $value
+                }
+                "params" {
+                    if { $multimap_form_vars } {
+                        dict lappend url_dict params $value
+                    } else {
+                        if { $arg_is_param_value } {
+                            dict set url_dict params $current_param_name $value
+                            set arg_is_param_value false
+                        } else {
+                            set current_param_name $value
+                            set arg_is_param_value true
+                        }
+                    }
+                }
+                "hash" {
+                    dict set url_dict hash $value
+                    set end_of_section true
+                }
+            }
+        }
+    }
+    if { $arg_is_param_value } {
+        error $usage_error
+    }
+    return [qc::url_make $url_dict]
 }
