@@ -21,7 +21,7 @@ proc qc::tson_boolean {value} {
     if { [string tolower $value] in [list "" "null"] } {
         return "null"
     }
-    return [list boolean [qc::cast_boolean $value true false]]
+    return [list boolean [qc::cast boolean $value true false]]
 }
 
 proc qc::tson_array {args} {
@@ -37,7 +37,7 @@ proc qc::tson_array {args} {
              && [lindex $value 0] in [list object array string number boolean]
          } {
             lappend tson $value
-        } elseif { ([qc::is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+        } elseif { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
             lappend tson [list number $value]
         } elseif { $value in [list true false] } {
             lappend tson [list boolean $value]
@@ -68,7 +68,7 @@ proc qc::tson_object { args } {
              && [lindex $value 0] in [list object array string number boolean] } {
             lappend tson $name $value
         } else {
-            if { ([qc::is_decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
+            if { ([qc::is decimal $value] && [qc::upper $value] ni [list NAN INF]) } {
                 lappend tson $name [list number $value]
             } elseif { $value in [list true false] } {
                 lappend tson $name [list boolean $value]
@@ -268,7 +268,7 @@ proc qc::tson_type {tson args} {
 
     if { $value_tson in [list "true" "false"] } {
         return "boolean"
-    } elseif { [qc::is_decimal $value_tson] } {
+    } elseif { [qc::is decimal $value_tson] } {
         return "number"
     } elseif { $value_tson eq "null" } {
         return "null"
