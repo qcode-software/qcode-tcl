@@ -1,4 +1,3 @@
-package provide qcode 5.45.0
 namespace eval qc {
     namespace export error_handler error_report error_report_*
 }
