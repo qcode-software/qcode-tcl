@@ -29,7 +29,7 @@ proc qc::db_qry_parse {qry {level 0} } {
         # Offset the start of the next iteration by the increase in string length
 	set start [expr {[lindex $right 1]+1+$offset}]
     }
-  
+    
     ## SQL Arrays ##
     # May be multi-dimensional, indexed or slices, with numbers, $variables, :variables, or sql_functions()
     # If sliced with the upper bound being a :variable, \: must be used - eg my_array[2\::index] or my_array[:from_index\::to_index]
@@ -37,19 +37,19 @@ proc qc::db_qry_parse {qry {level 0} } {
     set start 0
     while { $start<[string length $qry] \
 		&& [regexp -indices -nocase -expanded -start $start -- {[a-z_][a-z0-9_]*(
-									       (?:\[
-										(?: '?[0-9]+'?
-										 | [:$][a-z_][a-z0-9_]*
-										 | [a-z_]+\([^\)]*\)
-										 )
-										(?:
-										 :'?[0-9]+'?
-										 | :\$[a-z_][a-z0-9_]*
-										 | \\::[a-z_][a-z0-9_]*
-										 | :[a-z_]+\([^\)]*\)
-										 )?
-										\])+
-									       )} $qry -> match] } {
+                                                                                         (?:\[
+                                                                                          (?: '?[0-9]+'?
+                                                                                           | [:$][a-z_][a-z0-9_]*
+                                                                                           | [a-z_]+\([^\)]*\)
+                                                                                           )
+                                                                                          (?:
+                                                                                           :'?[0-9]+'?
+                                                                                           | :\$[a-z_][a-z0-9_]*
+                                                                                           | \\::[a-z_][a-z0-9_]*
+                                                                                           | :[a-z_]+\([^\)]*\)
+                                                                                           )?
+                                                                                          \])+
+                                                                                         )} $qry -> match] } {
 	set qry [string replace $qry [lindex $match 0] [lindex $match 1] [string map {\[ \\[ \] \\]} [string range $qry [lindex $match 0] [lindex $match 1]]]]
 	set start [expr {[lindex $match 1]+1}]
     }
@@ -121,7 +121,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 
     # Escaped \:colon
     set qry [string map {\\: \0} $qry]
-  
+    
     # Colon variable substitution
     set type_re {
 	(::(
@@ -181,7 +181,7 @@ proc qc::db_qry_parse {qry {level 0} } {
 	    |uuid
 	    |xml	  
 	    )(?=[^a-z0-9]|$)
-	    )?
+         )?
     }
     set re {
 	([^:\\]):
@@ -207,7 +207,7 @@ proc qc::db_quote { value {type ""}} {
     #| quotes SQL values by escaping single quotes with \'
     #| leaves integers and doubles alone
     #| Empty strings are converted to NULL
-     if { $type eq ""} {
+    if { $type eq ""} {
 	set sql_cast ""
     } else {
 	set sql_cast "::$type"
@@ -220,49 +220,49 @@ proc qc::db_quote { value {type ""}} {
     if { [in [list current_time current_timestamp] $value ] } {
 	return "${value}${sql_cast}"
     }
-     
-     
-     set re_numeric_types {
-         ^(
-         bigint
-         |int8
-         |bigserial
-         |serial8
-         |double\s+precision
-         |float8
-         |integer
-         |int
-         |int4
-         |numeric(\([^,]+,[^\)]+\))?
-         |decimal(\([^,]+,[^\)]+\))?
-         |real
-         |float4
-         |smallint
-         |int2
-         |serial
-         |serial4
-         |money
-         )$
-     }
+    
+    
+    set re_numeric_types {
+        ^(
+          bigint
+          |int8
+          |bigserial
+          |serial8
+          |double\s+precision
+          |float8
+          |integer
+          |int
+          |int4
+          |numeric(\([^,]+,[^\)]+\))?
+          |decimal(\([^,]+,[^\)]+\))?
+          |real
+          |float4
+          |smallint
+          |int2
+          |serial
+          |serial4
+          |money
+          )$
+    }
 
     if { [regexp -nocase -expanded $re_numeric_types $type] } {
         # integer no leading zeros
         # -123456
         if { [regexp {^-?[1-9][0-9]*$} $value] || [string equal $value 0] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
         # double greater than 1
         if { [regexp {^-?[1-9][0-9]*\.[0-9]+$} $value] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
         # decimal less than 1
         # in form .23 or 0.23
         if { [regexp {^(-)?0?\.([0-9]+)$} $value -> sign tail] } {
-         return "${sign}0.${tail}${sql_cast}"
+            return "${sign}0.${tail}${sql_cast}"
         }
         # scientific notation        
         if { [regexp {^-?[1-9][0-9]*(\.[0-9]+)?(e|E)(\+|-)?[0-9]{1,2}$} $value] } {
-         return "${value}${sql_cast}"
+            return "${value}${sql_cast}"
         }
     } 
 
@@ -274,6 +274,11 @@ proc qc::db_quote { value {type ""}} {
     } else {
 	return "E'[string map {' '' \\ \\\\} $value]'${sql_cast}"
     }
+}
+
+proc qc::db_quote_identifier {value} {
+    #| Quote a sql identifier (eg. a table or column name)
+    return "\"[string map {\" \"\"} $value]\""
 }
 
 proc qc::db_escape_regexp { string } {
