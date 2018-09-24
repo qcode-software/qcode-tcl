@@ -9,9 +9,17 @@ proc qc::sql_set {args} {
     return [join $set_list ,]
 }
 
-proc qc::sql_set_varchars_truncate {table args} {
+proc qc::sql_set_varchars_truncate {args} {
+    qc::args $args -schema ? -- table args
+    if { ! [info exists schema] } {
+        lassign [qc::db_qualify_table $table] {*}{
+            schema
+            table
+        }
+    }
     foreach name $args {
-        lappend set_list "${name}=:${name}::varchar([db_col_varchar_length $table $name])"
+        set length [db_col_varchar_length $schema $table $name]
+        lappend set_list "${name}=:${name}::varchar($length)"
     }
     return [join $set_list ,]
 }
@@ -52,18 +60,36 @@ proc qc::sql_sort { args } {
     if { [form_var_exists sortCols] } {
         set string [form_var_get sortCols]
     } else {
-        set string $args
+        set string [join $args " "]
     } 
 
-    if { [regexp , $string] } {
-	set list [split $string ","]
-    } else {
-	set list $string
-    }
+    # collapse consequetive spaces and commas down to a single space
+    set string [regsub -all {[\s,]+} $string " "]
+
+    set list [split $string " "]
     set order_by_list {}
     for {set i 0} {$i<[llength $list]} {incr i} {
+
 	set this_item [lindex $list $i]
+        set this_item [string trim $this_item]
+        set parts [split $this_item "."]
+        switch [llength $parts] {
+            1 {
+                set this_item [qc::db_quote_identifier $this_item]                
+            }
+            2 {
+                set table [qc::db_quote_identifier [lindex $parts 0]]
+                set column [qc::db_quote_identifier [lindex $parts 1]]
+                set this_item "${table}.${column}"
+            }
+            default {
+                error "Unable to parse identifier \"$this_item\""
+            }
+        }
+
 	set next_item [lindex $list [expr {$i+1}]]
+        set next_item [string trim $next_item]
+
 	switch -nocase $next_item {
 	    ASC {
 		if { [string toupper $nulls] eq "FIRST" } {
@@ -106,7 +132,7 @@ proc qc::sql_sort { args } {
     # Paging
     if { [info exists limit] || [info exists paging] } {
         # We are paging
-        if { [form_var_exists limit] && [is_integer [form_var_get limit]] } {
+        if { [form_var_exists limit] && [qc::is integer [form_var_get limit]] } {
             #formvar trumps everything
             set limit [form_var_get limit]
         } elseif { [info exists limit] } {
@@ -122,14 +148,14 @@ proc qc::sql_sort { args } {
         # make sure it's set in caller's namespace
         upset 1 limit $limit
 
-        if { [form_var_exists offset] && [is_integer [form_var_get offset]]} {
+        if { [form_var_exists offset] && [qc::is integer [form_var_get offset]]} {
             set offset [form_var_get offset]
         } else {
             set offset 0
         }
         upset 1 offset $offset
 
-        return "$sql limit $limit offset $offset"
+        return "$sql limit [qc::db_quote $limit] offset [qc::db_quote $offset]"
     } else {
 	return $sql
     }
@@ -164,7 +190,7 @@ proc qc::sql_array2list {array} {
 }
 
 proc qc::sql_list2array { args } {
-    #| Convert a list into a PostgrSQL array literal.
+    #| Convert a list into a PostgrSQL array constructor.
     qc::args $args -type "" -- list
     foreach item $list {
 	lappend lquoted [db_quote $item $type]
