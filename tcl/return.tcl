@@ -152,13 +152,13 @@ proc qc::return_next { next_url } {
             } 
 
             # check for malicious mal-formed url
-            if { ![is_url $next_url] } {
+            if { ![qc::is url $next_url] } {
                 error "\"[html_escape $next_url]\" is not a valid url."
             }
          
         } else {
             # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
-            if { ! [is_url -relative $next_url] } {
+            if { ! [qc::is url -relative $next_url] } {
                 error "\"[html_escape $next_url]\" is not a valid url."
             }
         }
@@ -170,7 +170,7 @@ proc qc::return_next { next_url } {
             error "Will not redirect to a different domain. Host $host. Redirect to $next_url"
         }
         # check for malicious mal-formed url
-        if { ![is_url $next_url] } {
+        if { ![qc::is url $next_url] } {
             error "\"[html_escape $next_url]\" is not a valid url."
         }
     }
@@ -190,4 +190,34 @@ proc ns_returnmoved {url} {
   <A HREF="$url">The requested URL has moved here.</A>
   <P ALIGN=RIGHT><SMALL><I>[ns_info name]/[ns_info patchlevel] on [ns_conn location]</I></SMALL></P>
   </BODY></HTML>}]
+}
+
+proc qc::return_response {args} {
+    #| Returns the global data structure to the client.
+    #| Content negotiates to try and find a suitable content type.
+    qc::args $args -code 200 -response2html qc::response2html -- args
+    
+    set mime_types [list "text/html" "application/json" "application/xml" "text/xml"]
+    set mime_type [qc::http_accept_header_best_mime_type $mime_types]
+    set media_type [lindex [split $mime_type "/"] 1]
+    if { $media_type eq "" } {
+        # Couldn't negotiate an acceptable response type.
+        return [qc::return2client code 406 text "Couldn't respond with an acceptable content type. Available content types: [join $mime_types ", "]"]
+    }
+    
+    switch -nocase -- $media_type {
+        xml {
+            set response [qc::response2xml]
+        }
+        json {
+            set response [qc::response2json]
+        }
+        * -
+        html {
+            set media_type html
+            set response [$response2html]           
+        }
+    }
+
+    qc::return2client code $code $media_type $response
 }
