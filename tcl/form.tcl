@@ -31,15 +31,23 @@ proc qc::form_var_get { var_name } {
     }
     if { [ns_set find $set_id $var_name] != -1 } {
 	if { [ns_set unique $set_id $var_name] } {
-	    return [ns_set get $set_id $var_name]
+	    return [string trim [ns_set get $set_id $var_name]]
 	} else {
-	    return [qc::ns_set_getall $set_id $var_name]
+            set values [list]
+	    foreach raw_value [qc::ns_set_getall $set_id $var_name] {
+                lappend values [string trim $raw_value]
+            }
+            return $values
 	}	
     }
     # Look for PHP style repeated form variables
     set array_name "${var_name}\[\]";
     if { [ns_set find $set_id $array_name] != -1 } {
-	return [qc::ns_set_getall $set_id $array_name]
+        set values [list]
+        foreach raw_value [qc::ns_set_getall $set_id $array_name] {
+            lappend values [string trim $raw_value]
+        }
+        return $values
     }
     error "No such form variable \"$var_name\""
 }
