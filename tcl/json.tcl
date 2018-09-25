@@ -283,3 +283,9 @@ proc qc::json::parseValue {tokens nrTokens tokenCursorName} {
         }
     }
 }
+
+proc qc::data2json {} {
+    #| Deprecated
+    return [qc::response2json]
+}
+
