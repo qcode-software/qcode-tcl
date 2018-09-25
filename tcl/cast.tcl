@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export cast_*
+    namespace export cast_* data_type_error_check
 }
 
 proc qc::cast_integer {string} {
@@ -96,6 +96,188 @@ proc qc::is_period {string} {
     #| Test if string can be casted to a pair of dates defining a period.
     return [qc::is period $string]
 }
+
+proc qc::cast_value2model {name value} {
+    #| Return the value cast to the data model.
+    #| Name can be a partial or fully qualified column identifier.
+    
+    # Resolve name to column, table, and schema
+    lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+        schema
+        table
+        column
+    }
+
+    set data_type [qc::memoize qc::db_column_type \
+                       -qualified -- $schema $table $column]
+    set nullable [qc::memoize qc::db_column_nullable $schema $table $column]
+
+    # Check if nullable
+    if {! $nullable && $value eq ""} {
+        error "$column cannot be empty."
+    } elseif {$nullable && $value eq ""} {
+        return $value
+    }
+
+    # Check value against data type
+    if {[qc::castable $data_type $value]} {
+        return [qc::cast $data_type $value]
+    } else {
+        error [qc::data_type_error_check $data_type $value]
+    }
+}
+
+proc qc::cast_values2model {args} {
+    #| Check the data types of the values against the definitions for these names.
+    #| Returns a new list of values after casting to appropriate type.
+    #| Throws an error if type-checking fails.
+    if { [llength $args]%2 != 0 } {
+        return -code error "usage cast_values2model name value ?name value?"
+    }
+    set casted_dict {}
+    set errors {}
+    
+    dict for {name value} $args {
+
+        # Resolve name to column, table, and schema
+        lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
+            schema
+            table
+            column
+        }
+        
+        set data_type [qc::memoize qc::db_column_type \
+                           -qualified -- $schema $table $column]
+        set nullable [qc::memoize qc::db_column_nullable $schema $table $column]
+
+        # Check if nullable
+        if {! $nullable && $value eq ""} {
+            lappend errors "$column cannot be empty."
+            continue
+        } elseif {$nullable && $value eq ""} {
+            lappend casted_dict $name $value
+            continue
+        }
+
+        # Check value against data type
+        if {[qc::castable $data_type $value]} {
+            lappend casted_dict $name [qc::cast $data_type $value]
+        } else {           
+            lappend errors [qc::html_escape [qc::data_type_error_check $data_type $value]]
+        }
+    }
+    
+    if {[llength $errors] > 0} {
+        return -code error -errorcode USER [qc::html_list $errors]
+    } else {
+        return $casted_dict
+    }
+}
+
+proc qc::data_type_error_check {data_type value} {
+    #| Checks the given value against the data type and reports any error.
+    switch -regexp -matchvar matches -- $data_type {
+        {^varchar(\(([0-9]+)\))?$} {
+            set length [string range [lindex $matches 1] 1 [expr {[string length [lindex $matches 1]] - 2}]]              
+            if {! [qc::is varchar $length $value]} {
+                return "\"[qc::trunc $value 100]...\" is too long. Must be $length characters or less."
+            }
+        }
+        {^char(\(([0-9]+)\))?$} {
+            set length [string range [lindex $matches 1] 1 [expr {[string length [lindex $matches 1]] - 2}]]
+            set chars "characters"
+            if {$length eq ""} {
+                set length 1
+                set chars "character"
+            }
+            if {! [qc::is char $length $value]} {
+                if {[string length $value] < $length} {
+                    return "\"$value\" is too short. Must be exactly $length $chars."
+                } elseif {[string length $value] > $length} {
+                    return "\"[qc::trunc $value 100]...\" is too long. Must be exactly $length $chars."
+                }
+            }
+        }
+        ^int4$ {
+            if {! [qc::is integer $value] && ! [qc::castable integer $value]} {
+                return "\"$value\" is not a valid integer. It must be a number between -2147483648 and 2147483647."
+            }
+        }
+        ^int8$ {
+            if {! [qc::is bigint $value] && ! [qc::castable bigint $value]} {
+                return "\"$value\"is not a valid big int. It must be a number between -9223372036854775808 and 9223372036854775807."
+            } 
+        }
+        ^int2$ {
+            if {! [qc::is smallint $value] && ![qc::castable smallint $value]} {
+                return "\"$value\"is not a valid small int. It must be a number between -32768 and 32767."
+            }  
+        }
+        ^bool$ {
+            if {! [qc::is boolean $value] && ! [qc::castable boolean $value]} {
+                return "\"$value\"is not a valid boolean value."
+            }
+        }
+        ^timestamp$ {
+            if {! [qc::is timestamp $value] && ! [qc::castable timestamp $value]} {
+                return "\"$value\"is not a valid timestamp."
+            }
+            
+        }
+        ^timestamptz$ {
+            if {! [qc::is timestamptz $value] && ! [qc::castable timestamptz $value]} {
+                return "\"$value\"is not a valid timestamptz."
+            }           
+        }
+        {^(numeric|decimal)$} {
+            if {! [qc::is decimal $value] && ! [qc::castable decimal $value]} {
+                return "\"$value\"is not a valid decimal."
+            }
+        }
+        ^text$ {
+            return
+        }
+        ^safe_html$ {
+            if {! [qc::is safe_html $value]} {
+                return "\"[qc::trunc $value 50]...\" contains invalid or unsafe HTML."
+            }
+        }
+        ^safe_markdown$ {
+            if {! [qc::is safe_markdown $value]} {
+                return "\"[qc::trunc $value 50]...\" contains invalid or unsafe HTML."
+            }
+        }
+        default {
+            # might be an enumeration or domain
+            if {[qc::memoize qc::db_enum_exists $data_type]} {
+                if {! [qc::castable enumeration $data_type $value]} {
+                    return "\"$value\" is not a valid value for enum \"$data_type\"."
+                }
+            } elseif {[qc::memoize qc::db_domain_exists $data_type]} {
+                set base_type [qc::memoize qc::db_domain_base_type $data_type]
+                set constraints [qc::memoize qc::db_domain_constraints $data_type]
+                set is_base_type [qc::is $base_type $value]
+                set failed_constraints [list]
+                dict for {constraint_name check_clause} $constraints {
+                    if { ! [qc::db_eval_domain_constraint $value $base_type $check_clause] } {
+                        lappend failed_constraints $constraint_name
+                    }
+                }
+                if { ! $is_base_type && [llength $failed_constraints] > 0 } {
+                    return "[data_type_error_check $base_type $value] and failed to meet the constraint(s) [join $failed_constraints ", "]"
+                } elseif { ! $is_base_type } {
+                    return [qc::data_type_error_check $base_type $value]
+                } elseif { [llength $failed_constraints] > 0 } {
+                    return "\"[qc::trunc $value 100]...\" failed to meet the constraint(s) [join $failed_constraints ", "]"
+                }
+            } else {
+                return -code error "Unrecognised data type \"$data_type\""
+            }
+        }
+    }
+    return
+}
+
 
 namespace eval qc::cast {
     
