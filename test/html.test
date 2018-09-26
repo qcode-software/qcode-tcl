@@ -213,6 +213,70 @@ namespace eval ::qcode::test {
 </body>
 </html>}
 
+    test html_styles2inline-1.2 {html_styles2inline ID Selector} -body {
+        html_styles2inline {
+            <html>
+                <head>
+                    <style type="text/css">
+                        #table_1 > * > tr > td:nth-child(1) {
+                            text-align:left;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <table id="table_1">
+                        <tbody>
+                            <tr>
+                                <td>Table entry</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table id="table_10">
+                        <tbody>
+                            <tr>
+                                <td>Table entry</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+                        #table_1 > * > tr > td:nth-child(1) {
+                            text-align:left;
+                        }
+                    </style></head><body>
+<table id="table_1"><tbody><tr><td style="text-align:left">Table entry</td></tr></tbody></table><table id="table_10"><tbody><tr><td>Table entry</td></tr></tbody></table>
+</body>
+</html>}
+
+    test html_styles2inline-1.3 {html_styles2inline Class Selector} -body {
+        html_styles2inline {
+            <html>
+                <head>
+                    <style type="text/css">
+                        .flex {
+                            color:red;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <p class="flex">Foo</p>
+                    <p class="flexi">Bar</p>
+                    <p class="flexible">Baz</p>
+                </body>
+            </html>
+        }
+    }  -result {<html>
+<head><style type="text/css">
+                        .flex {
+                            color:red;
+                        }
+                    </style></head><body>
+<p class="flex" style="color:red">Foo</p><p class="flexi">Bar</p><p class="flexible">Baz</p>
+</body>
+</html>}
 
     test html_col_styles_apply2td-1.0 {html_col_styles_apply2td } -body {
         html_col_styles_apply2td {

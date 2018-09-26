@@ -31,29 +31,27 @@ proc qc::db_cache_0or1row { args } {
 
     if {$db_nrows==0} {
 	# no rows
-	set code [ catch { uplevel 1 $no_rows_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        # Preserve TCL_RETURN
+	if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } elseif { $db_nrows==1 } { 
 	# 1 row
 	foreach key [lindex $table 0] value [lindex $table 1] { upset 1 $key $value }
-	set code [ catch { uplevel 1 $one_row_code } result ]
-	switch $code {
-	    1 { 
-		global errorCode errorInfo
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $code $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $one_row_code } result options ]
+        # Preserve TCL_RETURN
+        if { $return_code == 2 && [dict get $options -code] == 0 } {
+            dict set options -code return
+        } else {
+            # Return in parent stack frame instead of here
+            dict incr options -level
+        }
+        return -options $options $result
     } else {
 	# more than 1 row
 	error "The qry <code>[db_qry_parse $qry 1]</code> returned $db_nrows rows"
@@ -63,9 +61,8 @@ proc qc::db_cache_0or1row { args } {
 proc qc::db_cache_foreach { args } {
     # Cached equivalent of db_foreach
     args $args -ttl ? -- qry foreach_code { no_rows_code ""}
-    global errorCode errorInfo
 
-     # save special db variables
+    # save special db variables
     qc::upcopy 1 db_nrows      saved_db_nrows
     qc::upcopy 1 db_row_number saved_db_row_number
 
@@ -80,18 +77,24 @@ proc qc::db_cache_foreach { args } {
     if { $db_nrows == 0 } {
 	upset 1 db_nrows 0
 	upset 1 db_row_number 0
-	set returnCode [ catch { uplevel 1 $no_rows_code } result ]
-	switch $returnCode {
-	    0 {
-		# normal
-	    }
-	    1 { 
-		return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-	    }
-	    default {
-		return -code $returnCode $result
-	    }
-	}
+	set return_code [ catch { uplevel 1 $no_rows_code } result options ]
+        switch $return_code {
+            0 {
+                # ok
+            }
+            default {
+                # error, return
+
+                # Preserve TCL_RETURN
+                if { $return_code == 2 && [dict get $options -code] == 0 } {
+                    dict set options -code return
+                } else {
+                    # Return in parent stack frame instead of here
+                    dict incr options -level
+                }
+                return -options $options $result
+            }
+        }
     } else {
 	set masterkey [lindex $table 0]
 	foreach list [lrange $table 1 end] {
@@ -100,25 +103,30 @@ proc qc::db_cache_foreach { args } {
 	    foreach key $masterkey value $list {
 		upset 1 $key $value
 	    }
-	    set returnCode [ catch { uplevel 1 $foreach_code } result ]
-	    switch $returnCode {
-		0 {
-		    # Normal
-		}
-		1 { 
-		    return -code error -errorcode $errorCode -errorinfo $errorInfo $result 
-		}
-		2 {
-		    return -code return $result
-		}
-		3 {
-		    break
-		}
-		4 {
-		    continue
-		}
-	    }
-            
+            set return_code [ catch { uplevel 1 $foreach_code } result options ]
+            switch $return_code {
+                0 {
+                    # ok
+                }
+                3 -
+                4 {
+                    # break, continue
+                    return -options $options $result
+                }
+                default {
+                    # error, return
+
+                    # Preserve TCL_RETURN
+                    if { $return_code == 2 && [dict get $options -code] == 0 } {
+                        dict set options -code return
+                    } else {
+                        # Return in parent stack frame instead of here
+                        dict incr options -level
+                    }
+                    return -options $options $result
+                }
+            }
+
             # Clean up the result variable to prevent Tcl's Copy on Write
             # process from adversely affecting performance
             unset result
@@ -141,7 +149,7 @@ proc qc::db_cache_select_table { args } {
     set hash [qc::md5 [db_qry_parse $qry $level]]
 
     # Use global array or ns_cache with ttl?
-    if { [info exists ttl] } {
+    if { [info exists ttl] && [info procs ::ns_cache] ne "" } {
         # Use ns_cache
         # Create the cache if it doesn't exist yet
         if { ! [in [ns_cache_names] db] } {
