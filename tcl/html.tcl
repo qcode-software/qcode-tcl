@@ -1,5 +1,7 @@
 namespace eval qc {
-    namespace export html2* html html_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html
+    package require try
+    package require tdom
+    namespace export html2* html html_tag h h_tag html_escape html_unescape html_hidden html_hidden_set html_list html_a html_a_replace html_id html_menu html_paragraph_layout html_info_tables html_styles2inline html_style2inline html_col_styles_apply2td html_clean strip_html html2tcl tcl_escape tdom_node2tcl html_sanitize element_sanitize attribute_sanitize safe_elements_check safe_attributes_check safe_html_error_report safe_elements_error_report safe_attributes_error_report safe_elements safe_attributes response2html
 }
 
 proc qc::html2pdf { args } {
@@ -7,7 +9,14 @@ proc qc::html2pdf { args } {
     # | Requires wkhtmltopdf 0.12.2.1 (with patched qt)
     # Adds pagesize and margin arguments for label printing.
     # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? ?-nomargin boolean? ?-pagesize size? html
-    args $args -encoding base64 -pagesize A4 -timeout 20 -nomargin false -- html
+    args $args \
+        -encoding base64 \
+        -pagesize A4 \
+        -timeout 20 \
+        -nomargin false \
+        -orientation portrait \
+        -- html
+    
     if { ![in {base64 binary} $encoding] } {
         error "HTML2PDF: Unknown encoding $encoding"
     }
@@ -21,7 +30,18 @@ proc qc::html2pdf { args } {
     } else {
         set margin_switches {}
     }
-    qc::exec_proxy -timeout [expr {$timeout * 1000}] << $html $wkhtmltopdf {*}$margin_switches --page-size $pagesize --encoding UTF-8 --print-media-type -q - $filename
+    qc::exec_proxy \
+        -timeout [expr {$timeout * 1000}] \
+        << $html \
+        $wkhtmltopdf \
+        {*}$margin_switches \
+        --page-size $pagesize \
+        --orientation $orientation \
+        --encoding UTF-8 \
+        --print-media-type \
+        -q \
+        - $filename
+    
     set pdf [read $fh]
     close $fh
     file delete $filename
@@ -33,11 +53,13 @@ proc qc::html2pdf { args } {
 }
 
 proc qc::html {tagName nodeValue args} {
+    #| Deprecated - use qc::h instead.
     #| Generate an html node
     return "[html_tag $tagName {*}$args]$nodeValue</$tagName>"
 }
 
 proc qc::html_tag { tagName args } {
+    #| Deprecated - use qc::h_tag instead.
     #| Generate just the opening html tag
     set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize]
     set attributes {}
@@ -53,6 +75,50 @@ proc qc::html_tag { tagName args } {
 	return "<$tagName>"
     } else {
 	return "<$tagName [join $attributes]>"
+    }
+}
+
+proc qc::h_tag { tag_name args } {
+    #| Generate just the opening html tag
+    set singleton_tags [list area base br col command embed hr img input link meta param source]
+    set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize novalidate]
+    set attributes {}
+   
+    foreach {name value} [qc::dict_exclude $args {*}$minimized] {
+        if { $name eq "classes" } {
+            lappend attributes "class=\"[string map {< &lt; > &gt; & &amp; \" &#34;} [join $value]]\""
+        } else {
+            lappend attributes "$name=\"[string map {< &lt; > &gt; & &amp; \" &#34;} $value]\""
+        }
+    }
+    foreach {name value} [qc::dict_subset $args {*}$minimized] {
+	if { [string is true $value] } {
+	    lappend attributes "$name=\"$name\""
+	}
+    }
+
+    if { $tag_name in $singleton_tags && [llength $attributes]==0 } { 
+	return "<$tag_name/>"
+    } elseif { $tag_name in $singleton_tags } { 
+        return "<$tag_name [join $attributes]/>"
+    } elseif { [llength $attributes]==0 } {
+	return "<$tag_name>"
+    } else {
+	return "<$tag_name [join $attributes]>"
+    }
+}
+
+proc qc::h {tag_name args} {
+    #| Generate an html node
+    set singleton_tags [list area base br col command embed hr img input link meta param source]
+    if { $tag_name in $singleton_tags } {
+        return "[qc::h_tag $tag_name {*}$args]"
+    } else {
+        if { [llength $args]%2 == 0 } {
+            return "[qc::h_tag $tag_name {*}$args]</$tag_name>"
+        } else {
+            return "[qc::h_tag $tag_name {*}[lrange $args 0 end-1]][lindex $args end]</$tag_name>"
+        }
     }
 }
 
@@ -180,50 +246,18 @@ proc qc::html_style2inline {html style} {
     package require tdom
     dom parse -html $html doc
     foreach {selector styles} $data {
-      	set nodes {}
-	set xpath ""
-	foreach part $selector {
-	    if { [regexp {^[a-zA-Z][a-zA-Z0-9]*$} $part] } {
-		# HTML element
-		append xpath //$part
-	    }  elseif { [regexp {^\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> classes] } {
-		# .class.other-class selector
-		append xpath //*
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
-                }
-	    }  elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> tag classes] } {
-		# tag.class.other-class selector
-		append xpath //$tag
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
-                }
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> id] } {
-		# #id selector
-                append xpath //*\[contains(@id,\"$id\")\]
-	    } elseif { [regexp {^#([a-zA-Z][a-zA-Z0-9\-\_]*)\.([a-zA-Z][a-zA-Z0-9\-]*(?:\.[a-zA-Z][a-zA-Z0-9\-]*)*)$} $part -> id classes] } {
-		# #id.class.otherclass selector
-                append xpath //*\[contains(@id,\"$id\")\]
-                foreach class [split $classes "."] {
-                    append xpath \[contains(@class,\"$class\")\]
-                }
-	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*)#([a-zA-Z][a-zA-Z0-9\-\_]*)$} $part -> tag id] } {
-		# tag#id selector
-		append xpath //$tag\[contains(@id,\"$id\")\]
-	    } elseif { [regexp {^([a-zA-Z][a-zA-Z0-9]*):nth-child\(([0-9]+)\)$} $part -> tag nth_child] } {
-		# tag:nth-child() selector
-		append xpath //$tag\[position()=$nth_child\]
-	    }
-	}
-        set nodes [$doc selectNodes $xpath]
+        foreach item [split $selector ","] {
+            set xpath [qc::css_selector2xpath [string trim $item]]
+            set nodes [$doc selectNodes $xpath]
 
-	foreach node $nodes {
-	    if { [$node hasAttribute style] } {
-		$node setAttribute style [style_set [$node getAttribute style] {*}$styles]
-	    } else {
-		$node setAttribute style [style_set "" {*}$styles]
-	    }
-	}
+            foreach node $nodes {
+                if { [$node hasAttribute style] } {
+                    $node setAttribute style [style_set [$node getAttribute style] {*}$styles]
+                } else {
+                    $node setAttribute style [style_set "" {*}$styles]
+                }
+            }
+        }
     }
     set html [$doc asHTML  -escapeNonASCII -htmlEntities]
     $doc delete
@@ -340,47 +374,153 @@ proc qc::strip_html {html} {
     return [regsub -all -- {<[^>]+>} $html ""]
 }
 
-proc qc::h {tag_name args} {
-    #| Generate an html node
+proc qc::tcl_escape {string} {
+    #| Escape special tcl characters
+    set map  {\" \\\" $ \\$ \\ \\\\ [ \\[ ] \\]}
+    return [string map $map $string]
+}
+
+proc qc::tdom_node2tcl {node} {
+    #| Convert tdom node to tcl 
     set singleton_tags [list area base br col command embed hr img input link meta param source]
-    if { $tag_name in $singleton_tags } {
-        return "[qc::h_tag $tag_name {*}$args]"
+    # Node Name
+    set command {}
+    lappend command h [qc::tcl_escape [$node nodeName]]
+    # Node Attributes
+    foreach attribute_name [$node attributes] {
+        lappend command [qc::tcl_escape $attribute_name] \"[qc::tcl_escape [$node getAttribute $attribute_name]]\"
+    }
+    # Node Value
+    if { [$node nodeName] ni $singleton_tags } {
+        set list {}
+        foreach child_node [$node childNodes] {
+            if { [$child_node nodeName] eq "#text" } {
+                lappend list [qc::tcl_escape [$child_node asXML]]
+            } else {
+                lappend list [qc::tdom_node2tcl $child_node]
+            }
+        } 
+        lappend command \"[join $list ""]\"
+    }
+    return "\[[join $command]\]"
+}
+
+proc qc::html2tcl {html} {
+    #| Convert HTML to tcl 
+    dom parse -html $html doc    
+    if { [llength [$doc childNodes]] > 0 } {
+        return [qc::tdom_node2tcl [$doc firstChild]]
     } else {
-        if { [llength $args]%2 == 0 } {
-            return "[qc::h_tag $tag_name {*}$args]</$tag_name>"
+        return ""
+    }         
+}
+
+proc qc::html_sanitize {text} {
+    #| Sanitizes the given text by removing any html and attributes that are not whitelisted.
+    ::try {
+        # wrap the text up in <root> to preserve text outwith the html
+        set text [h root $text]
+        set doc [dom parse -html $text]
+        set root [$doc documentElement]
+        
+        if {$root eq ""} {
+            return $text
         } else {
-            return "[qc::h_tag $tag_name {*}[lrange $args 0 end-1]][lindex $args end]</$tag_name>"
+            qc::element_sanitize $root
+            qc::attribute_sanitize $root
         }
+
+        set html [$doc asHTML -escapeNonASCII -htmlEntities]
+        $doc delete
+        # remove the <div> tags we added earlier
+        if { [regexp {^<root>(.*)</root>$} $html -> html_fragment]} {
+            return $html_fragment
+        } else {
+            return -code error "The html returned by tDom was not what we expected."
+        }
+    } on error [list error_message options] {
+        return -code error -errorcode HTML_PARSE $error_message
     }
 }
 
-proc qc::h_tag { tag_name args } {
-    #| Generate just the opening html tag
-    set singleton_tags [list area base br col command embed hr img input link meta param source]
-    set minimized [list compact checked declare readonly disabled selected defer ismap nohref noshade nowrap multiple noresize novalidate]
-    set attributes {}
-   
-    foreach {name value} [qc::dict_exclude $args {*}$minimized] {
-        if { $name eq "classes" } {
-            lappend attributes "class=\"[string map {< &lt; > &gt; & &amp; \" &#34;} [join $value]]\""
-        } else {
-            lappend attributes "$name=\"[string map {< &lt; > &gt; & &amp; \" &#34;} $value]\""
+proc qc::element_sanitize {node} {
+    #| Checks the node and all of it's children for safe html elements removing those that are unsafe.
+    if {[$node nodeType] eq "ELEMENT_NODE"} {
+        set element [$node nodeName]
+        set table_elements [list thead tbody tfoot tr td th]
+        if {$element ni [safe_elements]} {
+            $node delete
+            return
+        } elseif {$element eq "li"} {
+            # top-level <li> elements are removed because they can break out of containing markup
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "ul" || [$ancestor nodeName] eq "ol"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                $node delete
+                return
+            }
+            
+        } elseif {$element in $table_elements} {
+            # remove any table elements that are not contained in a table
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "table"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                $node delete
+                return
+            }
         }
     }
-    foreach {name value} [qc::dict_subset $args {*}$minimized] {
-	if { [string is true $value] } {
-	    lappend attributes "$name=\"$name\""
-	}
+    
+    foreach child [$node childNodes] {
+        qc::element_sanitize $child
     }
+}
 
-    if { $tag_name in $singleton_tags && [llength $attributes]==0 } { 
-	return "<$tag_name/>"
-    } elseif { $tag_name in $singleton_tags } { 
-        return "<$tag_name [join $attributes]/>"
-    } elseif { [llength $attributes]==0 } {
-	return "<$tag_name>"
-    } else {
-	return "<$tag_name [join $attributes]>"
+proc qc::attribute_sanitize {node} {
+    #| Checks the node and all of it's children for safe attributes removing those that are unsafe.
+    set safe_attributes [dict get [safe_attributes] all]
+    set nodeName [$node nodeName]
+    # add a, img, or div attributes to the whitelist if the node is one of them
+    if {[dict exists [safe_attributes] $nodeName]} {
+        lappend safe_attributes {*}[dict get [safe_attributes] $nodeName]
+    }
+    # sanitize attributes of this node
+    set attributes [$node attributes]
+    foreach attribute $attributes {
+        if {$attribute ni $safe_attributes} {
+            $node removeAttribute $attribute
+        } elseif {$attribute eq "href"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https|mailto):\/\/" $value]} {
+                $node removeAttribute $attribute
+            }
+        } elseif {$attribute eq "src"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https):\/\/" $value]} {
+                $node removeAttribute $attribute
+            }
+        } elseif {$attribute eq "class"} {
+            set value [$node getAttribute $attribute]
+            if {! [regexp {^language-} $value]} {
+                $node removeAttribute $attribute
+            }
+        }
+    }
+    
+    foreach child [$node childNodes] {
+        qc::attribute_sanitize $child
     }
 }
 
@@ -405,6 +545,7 @@ proc qc::safe_elements_check {node} {
             if {! $found} {
                 return false
             }
+            
         } elseif {$element in $table_elements} {
             # check for any table elements that are not contained in a table
             set ancestors [$node ancestor all]
@@ -466,6 +607,112 @@ proc qc::safe_attributes_check {node} {
     return true
 }
 
+
+proc qc::safe_html_error_report {text} {
+    #| Reports all occurrences of unsafe html in the given text.
+    ::try {
+        # wrap the text up in <root> to preserve text outwith the html
+        set text [qc::h root $text]
+        set doc [dom parse -html $text]
+        set root [$doc documentElement]
+        if {$root eq ""} {
+            $doc delete
+            return {}
+        } else {
+            set unsafe_elements [qc::safe_elements_error_report $root]
+            set unsafe_attributes [qc::safe_attributes_error_report $root]
+            $doc delete
+            return [lappend unsafe_elements {*}$unsafe_attributes]
+        }
+    } on error [list error_message options] {
+        return [list [dict create node_value $text reason "Content could not be parsed. Check for unbalanced tags or quotations."]]
+    }
+}
+
+proc qc::safe_elements_error_report {node} {
+    #| Checks the node and all of it's children for unsafe html elements.
+    #| Returns a list of dictionaries that specify unsafe elements.
+    set unsafe {}
+    if {[$node nodeType] eq "ELEMENT_NODE"} {
+        set element [$node nodeName]
+        set table_elements [list thead tbody tfoot tr td th]
+        if {$element ni [qc::safe_elements]} {
+            lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "Unsafe element: $element"]
+        } elseif {$element eq "li"} {
+            # top-level <li> elements are considered unsafe because they can break out of containing markup
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "ul" || [$ancestor nodeName] eq "ol"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "List element without \"<ul>\" or \"<ol>\" ancestor"]
+            }
+            
+        } elseif {$element in $table_elements} {
+            # check for any table elements that are not contained in a table
+            set ancestors [$node ancestor all]
+            set found false
+            foreach ancestor $ancestors {
+                if {[$ancestor nodeName] eq "table"} {
+                    set found true
+                    break
+                }
+            }
+            if {! $found} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element reason "Table element without \"<table>\" ancestor"]
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        foreach item [qc::safe_elements_error_report $child] {
+            lappend unsafe $item
+        }
+    }
+    return $unsafe
+}
+
+proc qc::safe_attributes_error_report {node} {
+    #| Checks the node and all of it's children for unsafe attributes and values.
+    #| Returns a list of dictionaries that specify unsafe items.
+    set safe_attributes [dict get [qc::safe_attributes] all]
+    set element [$node nodeName]
+    # add specific element attributes to the whitelist if the node is one of them
+    if {[dict exists [qc::safe_attributes] $element]} {
+        lappend safe_attributes {*}[dict get [qc::safe_attributes] $element]
+    }
+    set attributes [$node attributes]
+    set unsafe {}
+    foreach attribute $attributes {
+        if {$attribute ni $safe_attributes} {
+            lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute reason "Unsafe attribute: $attribute"]
+        } elseif {$attribute eq "href"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https|mailto):\/\/" $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        } elseif {$attribute eq "src"} {
+            set value [$node getAttribute $attribute]
+            if {[regexp {^(.+):\/\/} $value] && ! [regexp "^(http|https):\/\/" $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        } elseif {$attribute eq "class"} {
+            set value [$node getAttribute $attribute]
+            if {! [regexp {^language-} $value]} {
+                lappend unsafe [dict create node_value [$node asHTML -escapeNonASCII] element $element attribute $attribute attribute_value $value reason "Unsafe value \"$value\" for attribute \"$attribute\""]
+            }
+        }
+    }
+    foreach child [$node childNodes] {
+        foreach item [qc::safe_attributes_error_report $child] {
+            lappend unsafe $item
+        }
+    }
+    return $unsafe
+}
 
 proc qc::safe_elements {} {
     #| Returns a list of safe html elements.
