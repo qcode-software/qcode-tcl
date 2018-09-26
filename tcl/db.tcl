@@ -617,13 +617,19 @@ proc qc::db_select_dict { qry } {
     return $dict
 }
 
-proc qc::db_row_exists {table args} {
+proc qc::db_row_exists {args} {
     #| Check for existance of 1 or more rows in $table
     #| Matching name/value pairs in $args
+    qc::args $args -schema "" -- table args
     set dict [qc::args2dict $args]
+    if { $schema ne "" } {
+        set sql_from [db_quote_identifier $schema].[db_quote_identifier $table]
+    } else {
+        set sql_from [db_quote_identifier $table]
+    }
     db_0or1row {
         select true as exists
-        from [db_quote_identifier $table]
+        from $sql_from
         where [sql_where {*}$dict]
         limit 1
     } {
