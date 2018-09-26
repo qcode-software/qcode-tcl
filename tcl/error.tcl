@@ -66,15 +66,17 @@ proc qc::error_handler { } {
     }
 }
 
-proc qc::error_report {} {
+proc qc::error_report {{error_message "NULL"} {error_info "NULL"} {error_code "NULL"}} {
     #| Return html error report. If there was a http connection when error occurred report any 
     #| relevant information about http request.
-    
-    global errorMessage errorInfo errorCode
-    # Copy error globals in case they are clobbered before we report them
-    set error_message $errorMessage
-    set error_info $errorInfo
-    set error_code $errorCode
+    # Pass in error message, info and code if available
+    # Otherwise will take a copy of the global error* variables for backward compatiblity
+    foreach {local_var global_var} [list error_message errorMessage error_info errorInfo error_code errorCode ] {
+        if { [set $local_var] eq "NULL" } {
+            global $global_var
+            set $local_var [set $global_var]
+        }
+    }
     if { [ns_conn isconnected] } {
 	sset html {
 	    <html>
