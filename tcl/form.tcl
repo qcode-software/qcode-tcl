@@ -75,8 +75,8 @@ proc qc::form2dict {args}  {
     }
     # set vars
     foreach name $args {
-	if { [form_var_exists $name] } {
-	    lappend dict $name [form_var_get $name]
+        if { [form_var_exists $name] } {
+	    dict set dict $name [form_var_get $name]
 	}
     }
     return $dict
@@ -84,6 +84,9 @@ proc qc::form2dict {args}  {
 
 proc qc::form2url { url } {
     #| Encode the names and values of a form in an url
+
+    # Currently qc::args2dict will throw an error where duplicate args are passed
+    # so we protect against that with the "dict create"
     return [qc::url $url {*}[dict create {*}[qc::ns_set_to_multimap [ns_getform]]]]
 }
 
