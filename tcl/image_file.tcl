@@ -8,10 +8,10 @@ proc qc::image_file_meta_strip {file} {
         -timeout 20000 \
         -ignorestderr \
         convert \
-        $file
-        -quiet
-        -strip
-        -density 0
+        $file \
+        -quiet \
+        -strip \
+        -density 0 \
         $file
     
     return $file
