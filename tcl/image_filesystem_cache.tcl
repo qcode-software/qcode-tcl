@@ -276,6 +276,8 @@ proc qc::image_filesystem_cache_original_create {args} {
     set cache_file ${cache_dir}/${cache_file_relative}
     if { ! [file exists $cache_file] } {
         set file [qc::db_file_export $file_id]
+        qc::image_file_meta_strip $file
+        
         file mkdir [file dirname $cache_file]
         file rename -force $file $cache_file
     }

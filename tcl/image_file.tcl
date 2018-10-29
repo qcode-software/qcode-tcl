@@ -2,6 +2,21 @@ namespace eval qc {
     namespace export file_is_valid_image image_file_info image_resize image_file_autocrop image_file_resize
 }
 
+proc qc::image_file_meta_strip {file} {
+    #| Strip metadata from a file
+    exec_proxy \
+        -timeout 20000 \
+        -ignorestderr \
+        convert \
+        $file \
+        -quiet \
+        -strip \
+        -density 0 \
+        $file
+    
+    return $file
+}
+
 proc qc::image_file_autocrop {old_file {crop_colour white}} {
     #| Autocrop image by trimming white border from jpgs,
     #| and transparent and white borders from pngs.
