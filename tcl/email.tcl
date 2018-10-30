@@ -392,7 +392,8 @@ proc qc::email_header_values {key value} {
     # parameters
     foreach part [lrange $list 1 end] {
 	lassign [split_pair $part =] key value
-	lappend dict [string tolower $key] [string trim $value \"']
+        set value [qc::email_header_value_decode [string trim $value \"']]
+	lappend dict [string tolower $key] $value
     }
     return $dict
 }
