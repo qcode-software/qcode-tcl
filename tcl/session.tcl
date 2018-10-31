@@ -128,7 +128,10 @@ proc qc::session_sudo {session_id effective_user_id} {
 proc qc::session_purge { {timeout_secs 0 } } {
     #| Purge all sessions older than time_out_secs
     log Notice "session purge older than $timeout_secs secs"
-    db_dml "delete from session where extract(seconds from current_timestamp-time_modified)>:timeout_secs"
+    db_dml {
+        delete from session
+        where extract(epoch from current_timestamp-time_modified) > :timeout_secs
+    }
 }
 
 proc qc::session_id {} {
