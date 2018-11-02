@@ -4,10 +4,10 @@ namespace eval qc {
 
 proc qc::db_file_insert {args} {
     #| Insert a file into the file db table
-    args $args -employee_id ? -filename ? -mime_type ? -- file_path
+    args $args -user_id ? -filename ? -mime_type ? -- file_path
 
-    if { ![info exists employee_id] } {
-        set employee_id [auth]
+    if { ![info exists user_id] } {
+        set user_id [auth]
     }
     default filename [file tail $file_path]
 
@@ -23,9 +23,9 @@ proc qc::db_file_insert {args} {
     set file_id [db_seq file_id_seq]
     set qry {
 	insert into file 
-	(file_id,employee_id,filename,data,mime_type)
+	(file_id,user_id,filename,data,mime_type)
 	values 
-	(:file_id,:employee_id,:filename,decode(:data, 'base64'),:mime_type)
+	(:file_id,:user_id,:filename,decode(:data, 'base64'),:mime_type)
     }
     db_dml $qry
     return $file_id
@@ -37,8 +37,8 @@ proc qc::db_file_copy {file_id} {
     set new_file_id [db_seq file_id_seq]
     db_dml {
         insert into file 
-        (file_id,employee_id,filename,data,mime_type)
-	select :new_file_id,employee_id,filename,data,mime_type
+        (file_id,user_id,filename,data,mime_type)
+	select :new_file_id,user_id,filename,data,mime_type
         from file where file_id=:file_id
     }
     return $new_file_id
@@ -68,7 +68,7 @@ proc qc::db_file_upload {name chunk chunks file {filename ""} {mime_type ""}} {
         set filename $file
     }
     set flags [dict create -filename $filename]
-    dict set flags -employee_id [qc::auth]
+    dict set flags -user_id [qc::auth]
     if { $mime_type ne "" } {
         dict set flags -mime_type $mime_type
     }
