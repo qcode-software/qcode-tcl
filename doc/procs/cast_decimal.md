@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::cast decimal]
 Try to cast given string into a decimal value
 
 Examples
@@ -30,3 +31,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::cast decimal]: cast-decimal.md

@@ -5,11 +5,11 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::error_handler `
+`qc::error_handler ?error_message? ?error_info? ?error_code?`
 
 Description
 -----------
-Return custom error responses depending value of errorCode.
+Return custom error responses depending upon value of errorCode.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

@@ -9,13 +9,13 @@ Usage
 
 Description
 -----------
-Try to authenticate the current employee/user<br/>If successful cache the result in global<br/>On failure throw AUTH error
+Try to authenticate the current user<br/>If successful cache the result in global<br/>On failure throw AUTH error
 
 Examples
 --------
 ```tcl
 
-% set employee_id [auth]
+% set user_id [auth]
 23
 
 ```

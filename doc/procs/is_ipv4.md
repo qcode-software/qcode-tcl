@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::is ipv4]
 
 Examples
 --------
@@ -27,3 +27,4 @@ true
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is ipv4]: is-ipv4.md

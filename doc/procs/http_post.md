@@ -15,7 +15,8 @@ Examples
 --------
 ```tcl
 
-% qc::http_post -timeout 30 -content-type "text/plain; charset=utf-8" -accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"
+% qc::http_post -timeout 30 -content-type "text/plain; charset=utf-8" \
+-accept "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"
 {
     "files": {},
     "form": {},
@@ -32,7 +33,13 @@ Examples
 "data": "data=Here%27s+the+POST+data"
 }
 % 
-% lappend data [list name "firstName" contents "Andres" contenttype "text/plain" contentheader [list "adios: goodbye"]]                                        % lappend data [list name "lastName"  contents "Garcia"]                           % lappend data [list name "file" file "httpPost.tcl" file "basico.tcl" contenttype text/plain filename "c:\\basico.tcl"]                             % lappend data  [list name "AnotherFile" filecontent "httpBufferPost.tcl"]          % lappend data  [list name "submit" contents "send"]
+% lappend data [list name "firstName" contents "Andres" contenttype "text/plain" \
+contentheader [list "adios: goodbye"]]
+% lappend data [list name "lastName"  contents "Garcia"]
+% lappend data [list name "file" file "httpPost.tcl" file "basico.tcl" contenttype \
+text/plain filename "c:\\basico.tcl"]
+% lappend data  [list name "AnotherFile" filecontent "httpBufferPost.tcl"]
+% lappend data  [list name "submit" contents "send"]
 
 % http_post -headers [list Authorization "OAuth $token"] -data $data -content-type "multipart/form-data" https://httpbin.org/post
 

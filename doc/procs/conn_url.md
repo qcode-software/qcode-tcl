@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
- Try to construct the full url of this request (uses the encoded version of the path unless the -decoded flag is present).
+Try to construct the full url of this request (uses the encoded version of the path unless the -decoded flag is present).
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

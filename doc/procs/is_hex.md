@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::is hex]
 Does the input look like a hex number?
 
 Examples
@@ -29,3 +30,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is hex]: is-hex.md

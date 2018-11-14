@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::h_tag]
 Generate just the opening html tag
 
 Examples
@@ -30,3 +31,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::h_tag]: h_tag.md
