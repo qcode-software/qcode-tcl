@@ -11,47 +11,32 @@ proc qc::K {a b} {set a}
 proc qc::try { try_code { catch_code ""} } {
     #| Try to execute the code try_code and catch any error. 
     #| If an error occurs then run catch_code.
-    global errorMessage errorCode errorInfo
-    switch -- [ catch { uplevel 1 $try_code } result ] {
-        0 {
-	    # Normal completion
+    set return_code [ catch { uplevel 1 $try_code } result options]
+    switch $return_code {
+        1 {
+            # Error
+            set return_code [ catch { uplevel 1 $catch_code } catch_result options]
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $catch_result
 	}
-        2 {
-	    return -code return $result
-	    # return from procedure
-	}
-	3 {
-	    return -code break
-	    # break out of loop
-	}
-	4 {
-	    return -code continue
-	    # continue loop
-	}
-	default {
-            set errorMessage $result
-	    switch -- [ catch { uplevel 1 $catch_code } catch_result ] {
-		0 {
-		    # Normal completion
-		}
-		2 {
-		    return -code return $catch_result
-		    # return from procedure
-		}
-		3 {
-		    return -code break
-		    # break out of loop
-		}
-		4 {
-		    return -code continue
-		    # continue loop
-		}
-		default {
-		    # Error in catch
-		    return -code error -errorcode $errorCode $catch_result
-		}
-	    }
-	}
+        default {
+            # ok, return, break, continue
+
+            # Preserve TCL_RETURN
+            if { $return_code == 2 && [dict get $options -code] == 0 } {
+                dict set options -code return
+            } else {
+                # Return in parent stack frame instead of here
+                dict incr options -level
+            }
+            return -options $options $result
+        }
     }
 }
 
