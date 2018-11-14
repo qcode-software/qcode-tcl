@@ -1,15 +1,24 @@
-qc::session_employee_id
-=======================
+qc::file_alias_path2file_id
+===============
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_employee_id session_id`
+`file_alias_path2file_id path`
 
 Description
 -----------
-Return the employee_id owner of this session
+Convert the alias path to file_id.
+
+Examples
+--------
+```tcl
+
+% qc::file_alias_path2file_id /foo
+44
+
+```
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

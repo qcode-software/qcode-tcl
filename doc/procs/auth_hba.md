@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-Try to authenticate who the current employee is<br/>based on ip address<br/>On failure throw AUTH error
+Try to authenticate who the current user is<br/>based on ip address<br/>On failure throw AUTH error
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

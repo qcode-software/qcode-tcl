@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - see [qc::is url]
 This is a more restrictive subset of all legal uri's defined by RFC 3986<br/>Relax as needed
 
 Examples
@@ -27,3 +28,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is url]: is-url.md

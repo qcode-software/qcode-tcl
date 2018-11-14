@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::is decimal]
 
 Examples
 --------
@@ -25,3 +25,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is decimal]: is-decimal.md

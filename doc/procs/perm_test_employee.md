@@ -1,11 +1,11 @@
-qc::perm_test_employee
+qc::perm_test_user
 ======================
 
 part of [Docs](../index.md)
 
 Usage
 -----
-`qc::perm_test_employee employee_id perm_name method`
+`qc::perm_test_user user_id perm_name method`
 
 Description
 -----------

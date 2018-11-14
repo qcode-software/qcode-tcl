@@ -9,7 +9,7 @@ Usage
 
 Description
 -----------
-
+Deprecated - see [qc::is mobile_number]
 
 Examples
 --------
@@ -29,3 +29,4 @@ true
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::is mobile_number]: is-mobile_number.md

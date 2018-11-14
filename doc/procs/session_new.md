@@ -5,11 +5,11 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::session_new employee_id`
+`qc::session_new user_id`
 
 Description
 -----------
-Create a new session
+Create a new session with an authenticity token.
 
 ----------------------------------
 *[Qcode Software Limited] [qcode]*

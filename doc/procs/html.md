@@ -9,6 +9,7 @@ Usage
 
 Description
 -----------
+Deprecated - use [qc::h] instead.
 Generate an html node
 
 Examples
@@ -36,3 +37,4 @@ Examples
 *[Qcode Software Limited] [qcode]*
 
 [qcode]: http://www.qcode.co.uk "Qcode Software"
+[qc::h]: h.md
