@@ -1,6 +1,7 @@
 namespace eval qc::oauth2 {
 
     namespace export \
+        authorize_code_link
         token_request
     namespace ensemble create
 
@@ -9,6 +10,27 @@ namespace eval qc::oauth2 {
     variable password_grant_type           "password"
     variable client_credentials_grant_type "client_credentials"
     variable refresh_grant_type            "refresh_token"
+
+    proc authorize_code_uri {args} {
+        #| Returns a link to seek authorization code from a service.
+
+        qc::args \
+            $args \
+            -state ? \
+            -scope ? \
+            -redirect_uri ? \
+            server_url \
+            client_id
+
+        return [qc::url \
+                    $server_url \
+                    ~ \
+                    client_id \
+                    redirect_uri \
+                    scope \
+                    state \
+                   ]
+    }
 
     ############################################################################
     #
@@ -24,29 +46,69 @@ namespace eval qc::oauth2 {
             refresh
         namespace ensemble create
 
-        proc authorization_code {
-            server_url
-            client_id
-            {redirect_uri ""}
-            {scope ""}
-            {state ""}
-        } {
+        proc authorization_code {args} {
             #| Request authorisation using the Authorization Code grant type.
+
+            qc::args \
+                $args \
+                -client_secret ? \
+                -redirect_uri ? \
+                -basic_auth false \
+                server_url \
+                client_id \
+                code
+
             variable authorization_code_grant_type
 
-            error "Not yet implemented."
+            set http_post_flags [dict create \
+                                    -accept "application/json; charset=utf-8" \
+                                    ]
+            set data [dict create \
+                          grant_type $authorization_code_grant_type \
+                          code $code \
+                          ]
+
+            if { [info exists client_secret] } {
+                if { !$basic_auth } {
+                    dict set data \
+                        client_id $client_id \
+                        client_secret $client_secret
+                } else {
+                    set encoded_credentials [base64::encode "${client_id}:${client_secret}"]
+                    dict set http_post_flags -authorization "Basic $encoded_credentials"
+                }
+            } else {
+                dict set data \
+                    client_id $client_id
+            }
+
+            if { [info exists redirect_uri] } {
+                dict set data \
+                    redirect_uri $redirect_uri
+            }
+
+            set response [qc::http_post \
+                              {*}$http_post_flags \
+                              $server_url \
+                              {*}$data \
+                             ]
+
+            return $response
         }
 
-        proc password {
-            server_url
-            username
-            password
-            {client_id ""}
-            {client_secret ""}
-            {basic_auth false}
-            {scope ""}
-        } {
+        proc password {args} {
             #| Request authorisation using the Password grant type.
+
+            qc::args \
+                $args \
+                -client_id ? \
+                -client_secret ? \
+                -basic_auth false \
+                -scope ? \
+                server_url \
+                username \
+                password
+
             variable password_grant_type
 
             set http_post_flags [dict create \
@@ -56,8 +118,8 @@ namespace eval qc::oauth2 {
                           grant_type $password_grant_type \
                           ]
 
-            if { $client_id ne ""
-                 && $client_secret ne "" } {
+            if { [info exists client_id]
+                 && [info exists client_secret] } {
                 if { !$basic_auth } {
                     dict set data \
                         client_id $client_id \
@@ -68,7 +130,7 @@ namespace eval qc::oauth2 {
                 }
             }
 
-            if { $scope ne "" } {
+            if { [info exists $scope] } {
                 dict set data scope $scope
             }
 
@@ -77,18 +139,21 @@ namespace eval qc::oauth2 {
                               $server_url \
                               {*}$data \
                              ]
-            
+
             return $response
         }
 
-        proc client_credentials {
-            server_url
-            client_id
-            client_secret
-            {basic_auth false}
-            {scope ""}
-        } {
+        proc client_credentials {args} {
             #| Request authorisation using the Client Credentials grant type.
+
+            qc::args \
+                $args \
+                -basic_auth false \
+                -scope ? \
+                server_url \
+                client_id \
+                client_secret
+
             variable client_credentials_grant_type
 
             set http_post_flags [dict create \
@@ -107,7 +172,7 @@ namespace eval qc::oauth2 {
                 dict set http_post_flags -authorization "Basic $encoded_credentials"
             }
 
-            if { $scope ne "" } {
+            if { [info exists scope] } {
                 dict set data scope $scope
             }
 
@@ -116,19 +181,22 @@ namespace eval qc::oauth2 {
                               $server_url \
                               {*}$data \
                              ]
-            
+
             return $response
         }
 
-        proc refresh {
-            server_url
-            refresh_token
-            {client_id ""}
-            {client_secret ""}
-            {basic_auth false}
-            {scope ""}
-        } {
+        proc refresh {args} {
             #| Request authorisation using the Refresh Token grant type.
+
+            qc::args \
+                $args \
+                -client_id ? \
+                -client_secret ? \
+                -basic_auth false \
+                -scope ? \
+                server_url \
+                refresh_token
+
             variable refresh_grant_type
 
             set http_post_flags [dict create \
@@ -138,8 +206,8 @@ namespace eval qc::oauth2 {
                           grant_type $refresh_grant_type \
                           ]
 
-            if { $client_id ne ""
-                 && $client_secret ne "" } {
+            if { [info exists client_id]
+                 && [info exists client_secret] } {
                 if { !$basic_auth } {
                     dict set data \
                         client_id $client_id \
@@ -150,7 +218,7 @@ namespace eval qc::oauth2 {
                 }
             }
 
-            if { $scope ne "" } {
+            if { [info exists scope] } {
                 dict set data scope $scope
             }
 
