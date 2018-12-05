@@ -438,6 +438,8 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
 
         "ibm866" -
         "csibm866"    {return cp866}
+
+        "gbk" {return cp936}
         
         default {
             error "Unrecognized encoding name '$IANAName'"
