@@ -1,15 +1,9 @@
 namespace eval qc::oauth2 {
 
     namespace export \
-        authorize_code_url
+        authorize_code_url \
         token_request
     namespace ensemble create
-
-    # Grant Types
-    variable authorization_code_grant_type "authorization_code"
-    variable password_grant_type           "password"
-    variable client_credentials_grant_type "client_credentials"
-    variable refresh_grant_type            "refresh_token"
 
     proc authorize_code_url {args} {
         #| Returns a link to seek authorization code from a service.
@@ -22,10 +16,13 @@ namespace eval qc::oauth2 {
             server_url \
             client_id
 
+        set response_type "code"
+
         return [qc::url \
                     $server_url \
                     ~ \
                     client_id \
+                    response_type \
                     redirect_uri \
                     scope \
                     state \
@@ -46,6 +43,12 @@ namespace eval qc::oauth2 {
             refresh
         namespace ensemble create
 
+        # Grant Types
+        variable authorization_code_grant_type "authorization_code"
+        variable password_grant_type           "password"
+        variable client_credentials_grant_type "client_credentials"
+        variable refresh_grant_type            "refresh_token"
+
         proc authorization_code {args} {
             #| Request authorisation using the Authorization Code grant type.
 
@@ -53,7 +56,7 @@ namespace eval qc::oauth2 {
                 $args \
                 -client_secret ? \
                 -redirect_uri ? \
-                -basic_auth false \
+                -basic_auth true \
                 server_url \
                 client_id \
                 code
@@ -74,7 +77,9 @@ namespace eval qc::oauth2 {
                         client_id $client_id \
                         client_secret $client_secret
                 } else {
-                    set encoded_credentials [base64::encode "${client_id}:${client_secret}"]
+                    set encoded_credentials [base64::encode \
+                                                 -wrapchar "" \
+                                                 "${client_id}:${client_secret}"]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             } else {
@@ -87,11 +92,7 @@ namespace eval qc::oauth2 {
                     redirect_uri $redirect_uri
             }
 
-            set response [qc::http_post \
-                              {*}$http_post_flags \
-                              $server_url \
-                              {*}$data \
-                             ]
+            set response [qc::http_post {*}$http_post_flags $server_url {*}$data]
 
             return $response
         }
@@ -103,7 +104,7 @@ namespace eval qc::oauth2 {
                 $args \
                 -client_id ? \
                 -client_secret ? \
-                -basic_auth false \
+                -basic_auth true \
                 -scope ? \
                 server_url \
                 username \
@@ -125,12 +126,14 @@ namespace eval qc::oauth2 {
                         client_id $client_id \
                         client_secret $client_secret
                 } else {
-                    set encoded_credentials [base64::encode "${client_id}:${client_secret}"]
+                    set encoded_credentials [base64::encode \
+                                                 -wrapchar "" \
+                                                 "${client_id}:${client_secret}"]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             }
 
-            if { [info exists $scope] } {
+            if { [info exists scope] } {
                 dict set data scope $scope
             }
 
@@ -148,7 +151,7 @@ namespace eval qc::oauth2 {
 
             qc::args \
                 $args \
-                -basic_auth false \
+                -basic_auth true \
                 -scope ? \
                 server_url \
                 client_id \
@@ -168,7 +171,9 @@ namespace eval qc::oauth2 {
                     client_id $client_id \
                     client_secret $client_secret
             } else {
-                set encoded_credentials [base64::encode "${client_id}:${client_secret}"]
+                set encoded_credentials [base64::encode \
+                                             -wrapchar "" \
+                                             "${client_id}:${client_secret}"]
                 dict set http_post_flags -authorization "Basic $encoded_credentials"
             }
 
@@ -192,7 +197,7 @@ namespace eval qc::oauth2 {
                 $args \
                 -client_id ? \
                 -client_secret ? \
-                -basic_auth false \
+                -basic_auth true \
                 -scope ? \
                 server_url \
                 refresh_token
@@ -204,6 +209,7 @@ namespace eval qc::oauth2 {
                                     ]
             set data [dict create \
                           grant_type $refresh_grant_type \
+                          refresh_token $refresh_token \
                           ]
 
             if { [info exists client_id]
@@ -213,7 +219,9 @@ namespace eval qc::oauth2 {
                         client_id $client_id \
                         client_secret $client_secret
                 } else {
-                    set encoded_credentials [base64::encode "${client_id}:${client_secret}"]
+                    set encoded_credentials [base64::encode \
+                                                 -wrapchar "" \
+                                                 "${client_id}:${client_secret}"]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             }
