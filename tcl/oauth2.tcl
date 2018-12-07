@@ -1,7 +1,7 @@
 namespace eval qc::oauth2 {
 
     namespace export \
-        authorize_code_link
+        authorize_code_url
         token_request
     namespace ensemble create
 
@@ -11,7 +11,7 @@ namespace eval qc::oauth2 {
     variable client_credentials_grant_type "client_credentials"
     variable refresh_grant_type            "refresh_token"
 
-    proc authorize_code_uri {args} {
+    proc authorize_code_url {args} {
         #| Returns a link to seek authorization code from a service.
 
         qc::args \
