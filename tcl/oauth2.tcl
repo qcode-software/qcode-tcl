@@ -77,26 +77,28 @@ namespace eval qc::oauth2 {
 
             if { [info exists client_secret] } {
                 if { !$basic_auth } {
-                    dict set data \
-                        client_id $client_id \
-                        client_secret $client_secret
+                    dict set data client_id $client_id
+                    dict set data client_secret $client_secret
                 } else {
                     set encoded_credentials [base64::encode \
                                                  -wrapchar "" \
-                                                 "${client_id}:${client_secret}"]
+                                                 "${client_id}:${client_secret}" \
+                                                ]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             } else {
-                dict set data \
-                    client_id $client_id
+                dict set data client_id $client_id
             }
 
             if { [info exists redirect_uri] } {
-                dict set data \
-                    redirect_uri $redirect_uri
+                dict set data redirect_uri $redirect_uri
             }
 
-            set response [qc::http_post {*}$http_post_flags $server_url {*}$data]
+            set response [qc::http_post \
+                              {*}$http_post_flags \
+                              $server_url \
+                              {*}$data \
+                             ]
 
             return $response
         }
@@ -130,13 +132,13 @@ namespace eval qc::oauth2 {
             if { [info exists client_id]
                  && [info exists client_secret] } {
                 if { !$basic_auth } {
-                    dict set data \
-                        client_id $client_id \
-                        client_secret $client_secret
+                    dict set data client_id $client_id
+                    dict set data client_secret $client_secret
                 } else {
                     set encoded_credentials [base64::encode \
                                                  -wrapchar "" \
-                                                 "${client_id}:${client_secret}"]
+                                                 "${client_id}:${client_secret}" \
+                                                ]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             }
@@ -179,13 +181,13 @@ namespace eval qc::oauth2 {
                           ]
 
             if { !$basic_auth } {
-                dict set data \
-                    client_id $client_id \
-                    client_secret $client_secret
+                dict set data client_id $client_id
+                dict set data client_secret $client_secret
             } else {
                 set encoded_credentials [base64::encode \
                                              -wrapchar "" \
-                                             "${client_id}:${client_secret}"]
+                                             "${client_id}:${client_secret}" \
+                                            ]
                 dict set http_post_flags -authorization "Basic $encoded_credentials"
             }
 
@@ -231,13 +233,13 @@ namespace eval qc::oauth2 {
             if { [info exists client_id]
                  && [info exists client_secret] } {
                 if { !$basic_auth } {
-                    dict set data \
-                        client_id $client_id \
-                        client_secret $client_secret
+                    dict set data client_id $client_id
+                    dict set data client_secret $client_secret
                 } else {
                     set encoded_credentials [base64::encode \
                                                  -wrapchar "" \
-                                                 "${client_id}:${client_secret}"]
+                                                 "${client_id}:${client_secret}" \
+                                                ]
                     dict set http_post_flags -authorization "Basic $encoded_credentials"
                 }
             }
