@@ -88,6 +88,8 @@ proc qc::http_post {args} {
         -data ? \
         -filename ? \
         -valid_response_codes [list 100 200] \
+        -response_headers false \
+        -response_code false \
         url \
         args
 
@@ -152,7 +154,26 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
-		return [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+		set response_body [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                if { !$response_headers && !$response_code } {
+                    # Only return the response body.
+                    return $response_body
+                } else {
+                    # User has requested response headers and/or code alongside the response body.
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
 	    } else {
 		# raise an error
 		switch $responsecode {

@@ -58,16 +58,19 @@ namespace eval qc::oauth2 {
                 -redirect_uri ? \
                 -basic_auth true \
                 -accept "application/json; charset=utf-8" \
+                -valid_response_codes [list 200 400 401] \
                 server_url \
                 client_id \
                 code
 
             variable authorization_code_grant_type
 
+            set http_post_flags [dict create \
+                                     -valid_response_codes $valid_response_codes \
+                                    ]
+
             if { $accept ne "" } {
-                set http_post_flags [dict create \
-                                         -accept $accept \
-                                        ]
+                dict set http_post_flags -accept $accept
             }
 
             set data [dict create \
@@ -94,13 +97,13 @@ namespace eval qc::oauth2 {
                 dict set data redirect_uri $redirect_uri
             }
 
-            set response [qc::http_post \
-                              {*}$http_post_flags \
-                              $server_url \
-                              {*}$data \
-                             ]
-
-            return $response
+            return [qc::http_post \
+                        -response_headers true \
+                        -response_code true \
+                        {*}$http_post_flags \
+                        $server_url \
+                        {*}$data \
+                       ]
         }
 
         proc password {args} {
@@ -113,16 +116,19 @@ namespace eval qc::oauth2 {
                 -basic_auth true \
                 -scope ? \
                 -accept "application/json; charset=utf-8" \
+                -valid_response_codes [list 200 400 401] \
                 server_url \
                 username \
                 password
 
             variable password_grant_type
 
+            set http_post_flags [dict create \
+                                     -valid_response_codes $valid_response_codes \
+                                    ]
+
             if { $accept ne "" } {
-                set http_post_flags [dict create \
-                                         -accept $accept \
-                                        ]
+                dict set http_post_flags -accept $accept
             }
 
             set data [dict create \
@@ -147,13 +153,13 @@ namespace eval qc::oauth2 {
                 dict set data scope $scope
             }
 
-            set response [qc::http_post \
-                              {*}$http_post_flags \
-                              $server_url \
-                              {*}$data \
-                             ]
-
-            return $response
+            return [qc::http_post \
+                        -response_headers true \
+                        -response_code true \
+                        {*}$http_post_flags \
+                        $server_url \
+                        {*}$data \
+                       ]
         }
 
         proc client_credentials {args} {
@@ -164,16 +170,19 @@ namespace eval qc::oauth2 {
                 -basic_auth true \
                 -scope ? \
                 -accept "application/json; charset=utf-8" \
+                -valid_response_codes [list 200 400 401] \
                 server_url \
                 client_id \
                 client_secret
 
             variable client_credentials_grant_type
 
+            set http_post_flags [dict create \
+                                     -valid_response_codes $valid_response_codes \
+                                    ]
+
             if { $accept ne "" } {
-                set http_post_flags [dict create \
-                                         -accept $accept \
-                                        ]
+                dict set http_post_flags -accept $accept
             }
 
             set data [dict create \
@@ -195,13 +204,13 @@ namespace eval qc::oauth2 {
                 dict set data scope $scope
             }
 
-            set response [qc::http_post \
-                              {*}$http_post_flags \
-                              $server_url \
-                              {*}$data \
-                             ]
-
-            return $response
+            return [qc::http_post \
+                        -response_headers true \
+                        -response_code true \
+                        {*}$http_post_flags \
+                        $server_url \
+                        {*}$data \
+                       ]
         }
 
         proc refresh {args} {
@@ -214,15 +223,18 @@ namespace eval qc::oauth2 {
                 -basic_auth true \
                 -scope ? \
                 -accept "application/json; charset=utf-8" \
+                -valid_response_codes [list 200 400 401] \
                 server_url \
                 refresh_token
 
             variable refresh_grant_type
 
+            set http_post_flags [dict create \
+                                     -valid_response_codes $valid_response_codes \
+                                    ]
+
             if { $accept ne "" } {
-                set http_post_flags [dict create \
-                                         -accept $accept \
-                                        ]
+                dict set http_post_flags -accept $accept
             }
 
             set data [dict create \
@@ -248,13 +260,13 @@ namespace eval qc::oauth2 {
                 dict set data scope $scope
             }
 
-            set response [qc::http_post \
-                              {*}$http_post_flags \
-                              $server_url \
-                              {*}$data \
-                             ]
-
-            return $response
+            return [qc::http_post \
+                        -response_headers true \
+                        -response_code true \
+                        {*}$http_post_flags \
+                        $server_url \
+                        {*}$data \
+                       ]
         }
     }
 }
