@@ -6,7 +6,7 @@ namespace eval qc::oauth2 {
     namespace ensemble create
 
     proc authorize_code_url {args} {
-        #| Returns a link to seek authorization code from a service.
+        #| Returns a URL to seek authorization code from a service.
 
         qc::args \
             $args \
@@ -57,15 +57,19 @@ namespace eval qc::oauth2 {
                 -client_secret ? \
                 -redirect_uri ? \
                 -basic_auth true \
+                -accept "application/json; charset=utf-8" \
                 server_url \
                 client_id \
                 code
 
             variable authorization_code_grant_type
 
-            set http_post_flags [dict create \
-                                    -accept "application/json; charset=utf-8" \
-                                    ]
+            if { $accept ne "" } {
+                set http_post_flags [dict create \
+                                         -accept $accept \
+                                        ]
+            }
+
             set data [dict create \
                           grant_type $authorization_code_grant_type \
                           code $code \
@@ -106,15 +110,19 @@ namespace eval qc::oauth2 {
                 -client_secret ? \
                 -basic_auth true \
                 -scope ? \
+                -accept "application/json; charset=utf-8" \
                 server_url \
                 username \
                 password
 
             variable password_grant_type
 
-            set http_post_flags [dict create \
-                                    -accept "application/json; charset=utf-8" \
-                                    ]
+            if { $accept ne "" } {
+                set http_post_flags [dict create \
+                                         -accept $accept \
+                                        ]
+            }
+
             set data [dict create \
                           grant_type $password_grant_type \
                           ]
@@ -153,15 +161,19 @@ namespace eval qc::oauth2 {
                 $args \
                 -basic_auth true \
                 -scope ? \
+                -accept "application/json; charset=utf-8" \
                 server_url \
                 client_id \
                 client_secret
 
             variable client_credentials_grant_type
 
-            set http_post_flags [dict create \
-                                    -accept "application/json; charset=utf-8" \
-                                    ]
+            if { $accept ne "" } {
+                set http_post_flags [dict create \
+                                         -accept $accept \
+                                        ]
+            }
+
             set data [dict create \
                           grant_type $client_credentials_grant_type \
                           ]
@@ -199,14 +211,18 @@ namespace eval qc::oauth2 {
                 -client_secret ? \
                 -basic_auth true \
                 -scope ? \
+                -accept "application/json; charset=utf-8" \
                 server_url \
                 refresh_token
 
             variable refresh_grant_type
 
-            set http_post_flags [dict create \
-                                    -accept "application/json; charset=utf-8" \
-                                    ]
+            if { $accept ne "" } {
+                set http_post_flags [dict create \
+                                         -accept $accept \
+                                        ]
+            }
+
             set data [dict create \
                           grant_type $refresh_grant_type \
                           refresh_token $refresh_token \
