@@ -133,6 +133,8 @@ namespace eval qc::oauth2 {
 
             set data [dict create \
                           grant_type $password_grant_type \
+                          username $username \
+                          password $password \
                           ]
 
             if { [info exists client_id]
