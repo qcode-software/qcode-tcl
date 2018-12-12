@@ -194,7 +194,17 @@ proc qc::http_post {args} {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
-    args $args -timeout 60 -sslversion tlsv1 -headers {} -valid_response_codes {200} -noproxy -- url
+    args \
+        $args \
+        -timeout 60 \
+        -sslversion tlsv1 \
+        -headers {} \
+        -valid_response_codes {200} \
+        -noproxy \
+        -response_headers false \
+        -response_code false \
+        -- \
+        url
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -206,7 +216,26 @@ proc qc::http_get {args} {
 	0 {
             if { [in $valid_response_codes $responsecode] } {
                 # OK
-                return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
+                set response_body [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                if { !$response_headers && !$response_code } {
+                    # Only return the response body.
+                    return $response_body
+                } else {
+                    # User has requested response headers and/or code alongside the response body.
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
             } else {
                 switch $responsecode {                    
                     404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
