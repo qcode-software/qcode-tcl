@@ -461,6 +461,13 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
         "csibm866"    {return cp866}
 
         "gbk" {return cp936}
+
+        "iso-ir-149" -
+        "ks_c_5601-1987" -
+        "ks_c_5601-1989" -
+        "ks_c_5601" -
+        "korean" -
+        "csksc56011987" {return ksc5601}
         
         default {
             error "Unrecognized encoding name '$IANAName'"
