@@ -2,9 +2,12 @@ NAME=qcode
 RELEASE=0
 DPKG_NAME=qcode-tcl-$(VERSION)
 MAINTAINER=hackers@qcode.co.uk
-REMOTEUSER=debian.qcode.co.uk
-REMOTEHOST=debian.qcode.co.uk
-REMOTEDIR=debian.qcode.co.uk
+REMOTEUSER_LEGACY=debian.qcode.co.uk
+REMOTEHOST_LEGACY=debian.qcode.co.uk
+REMOTEDIR_LEGACY=debian.qcode.co.uk
+REMOTEUSER=deb
+REMOTEHOST=deb.qcode.co.uk
+REMOTEDIR=deb.qcode.co.uk
 
 .PHONY: all test
 
@@ -39,8 +42,9 @@ local-install:
 	rm -rf package
 
 upload: check-version
+	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER_LEGACY)@$(REMOTEHOST_LEGACY):$(REMOTEDIR_LEGACY)/debs"
+	ssh $(REMOTEUSER_LEGACY)@$(REMOTEHOST_LEGACY) reprepro -b $(REMOTEDIR_LEGACY) includedeb jessie $(REMOTEDIR_LEGACY)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
-	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb jessie $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb stretch $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 clean: check-version
