@@ -370,6 +370,30 @@ namespace eval ::qcode::test {
     test castable-time-1.8 {qc::castable time "12:59"} -body {
         qc::castable time "12:59"
     } -result true
+
+    test castable-interval-1.0 {qc::castable interval "1 year"} -body {
+        qc::castable interval "1 year"
+    } -result 1
+
+    test castable-interval-1.1 {qc::castable interval "3 months -2 days"} -body {
+        qc::castable interval "3 months -2 days"
+    } -result 1
+    
+    test castable-interval-1.2 {qc::castable interval "-5 weeks"} -body {
+        qc::castable interval "-5 weeks"
+    } -result 1
+
+    test castable-interval-1.3 {qc::castable interval "7"} -body {
+        qc::castable interval "7"
+    } -result 0
+
+    test castable-interval-1.4 {qc::castable interval "last week"} -body {
+        qc::castable interval "last week"
+    } -result 0
+
+    test castable-interval-1.5 {qc::castable interval "year"} -body {
+        qc::castable interval "year"
+    } -result 0
     
     cleanupTests
 }

@@ -132,6 +132,18 @@ namespace eval ::qcode::test {
         qc::cast time "12:59"
     } -result "12:59:00"
 
+    test cast-interval-1.0 {qc::cast interval "1 year"} -body {
+        qc::cast interval "1 year"
+    } -result "1 year"
+
+    test cast-interval-1.1 {qc::cast interval "3 months -2 days"} -body {
+        qc::cast interval "3 months -2 days"
+    } -result "3 months -2 days"
+    
+    test cast-interval-1.2 {qc::cast interval "-5 weeks"} -body {
+        qc::cast interval "-5 weeks"
+    } -result "-5 weeks"
+
     cleanupTests
 }
 namespace delete ::qcode::test
