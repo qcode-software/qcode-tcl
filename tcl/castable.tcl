@@ -1,6 +1,6 @@
 namespace eval qc::castable {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path time
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -216,5 +216,15 @@ namespace eval qc::castable {
 	} on error [list error_message options] {
 	    return false
 	}
+    }
+
+    proc interval {string} {
+        #| Test if the given string can be cast to an interval
+	try {
+	    qc::cast interval $string
+	    return true
+	} on error [list error_message options] {
+	    return false
+	}        
     }
 }

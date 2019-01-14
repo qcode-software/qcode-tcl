@@ -281,7 +281,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path time
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -828,5 +828,12 @@ namespace eval qc::cast {
 	    return "/${lower}"
 	}
 	return -code error -errorcode CAST "Could not cast $string to an url path"
+    }
+
+    proc interval {string} {
+        #| Cast string to interval
+        if { [qc::is interval $string] } {
+            return [string tolower $string]
+        }
     }
 }
