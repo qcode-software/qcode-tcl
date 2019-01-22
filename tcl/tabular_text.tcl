@@ -2,7 +2,7 @@ namespace eval qc {
     namespace export tabular_text_parse
 }
 
-proc qc::tabular_text_parse  {text columns_conf} {
+proc qc::tabular_text_parse  {args} {
     #| Parse text tabular data and return TCL table data structure
     # Example:
     #     % set lines {}
@@ -16,6 +16,7 @@ proc qc::tabular_text_parse  {text columns_conf} {
     #
     #     % return [tabular_text_parse $text $conf]
     #     {{col1 col2} {a b}}
+    qc::args $args -ignore_empty_rows -- text columns_conf
     
     # convert text to list of lines of required min width (determined by line for table header)
     set temp {}
@@ -95,26 +96,21 @@ proc qc::tabular_text_parse  {text columns_conf} {
     set last_heading_end [lindex $result 0 0]
     foreach column_separator $column_separators {
         lassign $column_separator column_separator_start column_separator_end
-
         if { $column_separator_end <= $first_heading_start || $column_separator_start >= $last_heading_end } {
             # discard column separators
             set column_separators [lexclude $column_separators $column_separator]
         }
     }
-
     # ignore multiple column separators between table headings (just keep the last one)
     set result [regexp -all -inline -indices {\s+} $table_header_line]
     foreach header_whitespace $result {
         lassign $header_whitespace header_whitespace_start header_whitespace_end
-
         set i 0 
         foreach column_separator [lreverse $column_separators] {
             lassign $column_separator column_separator_start column_separator_end
-
             if { $column_separator_start >= $header_whitespace_start && $column_separator_end <= $header_whitespace_end && $i == 0 } {
                 # keep last column separator
                 incr i
-
             } elseif { $column_separator_start >= $header_whitespace_start && $column_separator_end <= $header_whitespace_end } {
                 # discard other column separators
                 set column_separators [lexclude $column_separators $column_separator]
@@ -127,7 +123,11 @@ proc qc::tabular_text_parse  {text columns_conf} {
     set i 0
     foreach line $lines {
         incr i
-
+        if { [info exists ignore_empty_rows] && [trim $line] eq "" } {
+            # ignore blank rows
+            continue
+        }
+        
         # split lines on column separators and trim whitespace from values
         foreach separator [lreverse $column_separators] {
             lassign $separator start end
@@ -138,7 +138,7 @@ proc qc::tabular_text_parse  {text columns_conf} {
             foreach conf $columns_conf {
                 dict2vars $conf label var_name
                 set new_label [regsub -all {\s} $label "_"]
-                if { ! [regsub "(^|\\0)[regexp_escape $new_label](\\0|$)" $line "\\1${var_name}\\2" line] } {
+                if { ! [regsub "(^|\\0|\\s)[regexp_escape $new_label](\\0|\\s|$)" $line "\\1${var_name}\\2" line] } {
                     error "Unable to locate column heading \"$label\""
                 }
             }
@@ -155,8 +155,5 @@ proc qc::tabular_text_parse  {text columns_conf} {
         
         lappend table $row
     }
-
     return $table
 }
-
-
