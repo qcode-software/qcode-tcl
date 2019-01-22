@@ -144,6 +144,18 @@ namespace eval ::qcode::test {
         qc::cast interval "-5 weeks"
     } -result "-5 weeks"
 
+    test cast-interval-1.3 {qc::cast interval "7"} -body {
+        qc::cast interval "7"
+    } -returnCodes error -result "Could not cast 7 to an interval"
+
+    test cast-interval-1.4 {qc::cast interval "last week"} -body {
+        qc::cast interval "last week"
+    } -returnCodes error -result "Could not cast last week to an interval"
+
+    test cast-interval-1.5 {qc::cast interval "year"} -body {
+        qc::cast interval "year"
+    } -returnCodes error -result "Could not cast year to an interval"
+
     cleanupTests
 }
 namespace delete ::qcode::test

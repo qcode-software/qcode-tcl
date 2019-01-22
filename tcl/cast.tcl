@@ -835,5 +835,6 @@ namespace eval qc::cast {
         if { [qc::is interval $string] } {
             return [string tolower $string]
         }
+	return -code error -errorcode CAST "Could not cast $string to an interval"
     }
 }
