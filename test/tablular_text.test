@@ -65,6 +65,67 @@ namespace eval ::qcode::test {
         return [qc::tabular_text_parse $text $conf]
     } -cleanup {} -result {{item_number ext_price total} {1 1.20 140} {{} 1.30 150}}
 
+    test tablular_text_parse-5.0 {tablular_text_parse - don't ignore empty rows } -setup {
+    } -body {
+        set lines {}
+        lappend lines {ITEM NO.         EXT. PRICE   TOTAL}
+        lappend lines {1                1.20         140}
+        lappend lines {}
+        lappend lines {2                1.40         160}
+        lappend lines {}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "ITEM NO." var_name "item_number"]
+        lappend conf [list label "EXT. PRICE" var_name "ext_price"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{item_number ext_price total} {1 1.20 140} {{} {} {}} {2 1.40 160} {{} {} {}}}
+    
+    test tablular_text_parse-6.0 {tablular_text_parse - ignore empty rows } -setup {
+    } -body {
+        set lines {}
+        lappend lines {ITEM NO.         EXT. PRICE   TOTAL}
+        lappend lines {1                1.20         140}
+        lappend lines {}
+        lappend lines {2                1.40         160}
+        lappend lines {}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "ITEM NO." var_name "item_number"]
+        lappend conf [list label "EXT. PRICE" var_name "ext_price"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse -ignore_empty_rows $text $conf]
+    } -cleanup {} -result {{item_number ext_price total} {1 1.20 140} {2 1.40 160}}
+
+    test tablular_text_parse-7.0 {tablular_text_parse - ignore empty rows } -setup {
+    } -body {
+        set lines {}
+        lappend lines {Code         Qty   TOTAL}
+        lappend lines {ABCDEF       1     1.10}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "Code" var_name "code"]
+        lappend conf [list label "Qty" var_name "qty"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{code qty total} {ABCDEF 1 1.10}}
+
+    test tablular_text_parse-8.0 {tablular_text_parse - unable to find locate column error } -setup {
+    } -body {
+        set lines {}
+        lappend lines {Code         Qty   TOTAL}
+        lappend lines {1            1     1.10}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "OrderCode" var_name "code"]
+        lappend conf [list label "Qty" var_name "qty"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {Unable to locate column heading "OrderCode"} -returnCodes error 
 
     cleanupTests
 }
