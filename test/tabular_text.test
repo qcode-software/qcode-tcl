@@ -1,0 +1,39 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    test tablular_text_parse-1.0 {tablular_text_parse - basic } -setup {
+    } -body {
+        set lines {}
+        lappend lines "Column 1 Column 2"
+        lappend lines "a        b      "
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "Column 1" var_name "col1"]
+        lappend conf [list label "Column 2" var_name "col2"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{col1 col2} {a b}}
+
+        test tablular_text_parse-2.0 {tablular_text_parse - column name ending with % } -setup {
+    } -body {
+        set lines {}
+        lappend lines "Column 1% Column 2"
+        lappend lines "a         b      "
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "Column 1%" var_name "col1"]
+        lappend conf [list label "Column 2" var_name "col2"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{col1 col2} {a b}}
+
+    cleanupTests
+}
+namespace delete ::qcode::test
