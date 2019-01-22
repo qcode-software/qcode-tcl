@@ -778,6 +778,11 @@ namespace eval ::qcode::test {
         dict values [postcode_parse "XXX"]
     } -cleanup {} -returnCodes 1 -result {Unable to parse postcode "XXX"}
 
+    # regexp_escape
+    test regexp_escape-1.0 {regexp_escape} -body {
+        qc::regexp_escape "*fi+sh(es)?"
+    } -result {\*fi\+sh\(es\)\?}
+
     cleanupTests
 }
 namespace delete ::qcode::test

@@ -692,3 +692,25 @@ proc qc::postcode_parse { postcode } {
     }
     return [qc::dict_from area district space sector unit]
 }
+
+proc qc::regexp_escape {string} {
+    #| Escape string for use inside TCL regular expression
+     set list {
+	\\ \\\\ 
+	^ \\^ 
+	. \\. 
+	\[ \\\[ 
+	\] \\\] 
+	\$ \\\$ 
+	\( \\\( 
+	\) \\\) 
+	| \\| 
+	* \\* 
+	+ \\+ 
+	? \\? 
+	\{ \\\{
+	\} \\\}
+    } 
+
+    return [string map $list $string]
+}
