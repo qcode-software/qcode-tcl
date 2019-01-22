@@ -11,17 +11,18 @@ namespace eval ::qcode::test {
     test tablular_text_parse-1.0 {tablular_text_parse - basic } -setup {
     } -body {
         set lines {}
-        lappend lines "Column 1 Column 2"
+        lappend lines "Column 1 Col2"
         lappend lines "a        b      "
+        lappend lines "c        d      "
         set text [join $lines \n]
 
         set conf {}
         lappend conf [list label "Column 1" var_name "col1"]
-        lappend conf [list label "Column 2" var_name "col2"]
+        lappend conf [list label "Col2" var_name "column_2"]
         return [qc::tabular_text_parse $text $conf]
-    } -cleanup {} -result {{col1 col2} {a b}}
+    } -cleanup {} -result {{col1 column_2} {a b} {c d}}
 
-        test tablular_text_parse-2.0 {tablular_text_parse - column name ending with % } -setup {
+    test tablular_text_parse-2.0 {tablular_text_parse - column name ending with % } -setup {
     } -body {
         set lines {}
         lappend lines "Column 1% Column 2"
@@ -33,6 +34,37 @@ namespace eval ::qcode::test {
         lappend conf [list label "Column 2" var_name "col2"]
         return [qc::tabular_text_parse $text $conf]
     } -cleanup {} -result {{col1 col2} {a b}}
+
+
+    test tablular_text_parse-3.0 {tablular_text_parse - column name ending with . } -setup {
+    } -body {
+        set lines {}
+        lappend lines {ITEM NO.         EXT. PRICE   TOTAL}
+        lappend lines {000200           1.20         140}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "ITEM NO." var_name "item_number"]
+        lappend conf [list label "EXT. PRICE" var_name "ext_price"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{item_number ext_price total} {000200 1.20 140}}
+
+    test tablular_text_parse-4.0 {tablular_text_parse - optional first column } -setup {
+    } -body {
+        set lines {}
+        lappend lines {ITEM NO.         EXT. PRICE   TOTAL}
+        lappend lines {1                1.20         140}
+        lappend lines {                 1.30         150}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "ITEM NO." var_name "item_number"]
+        lappend conf [list label "EXT. PRICE" var_name "ext_price"]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{item_number ext_price total} {1 1.20 140} {{} 1.30 150}}
+
 
     cleanupTests
 }
