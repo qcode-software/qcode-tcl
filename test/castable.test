@@ -385,15 +385,15 @@ namespace eval ::qcode::test {
 
     test castable-interval-1.3 {qc::castable interval "7"} -body {
         qc::castable interval "7"
-    } -result 0
+    } -result false
 
     test castable-interval-1.4 {qc::castable interval "last week"} -body {
         qc::castable interval "last week"
-    } -result 0
+    } -result false
 
     test castable-interval-1.5 {qc::castable interval "year"} -body {
         qc::castable interval "year"
-    } -result 0
+    } -result false
     
     cleanupTests
 }
