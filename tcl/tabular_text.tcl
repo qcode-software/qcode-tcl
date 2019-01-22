@@ -2,7 +2,7 @@ namespace eval qc {
     namespace export tabular_text_parse
 }
 
-proc qc::tabular_text_parse  {text columns_conf} {
+proc qc::tabular_text_parse  {args} {
     #| Parse text tabular data and return TCL table data structure
     # Example:
     #     % set lines {}
@@ -16,6 +16,7 @@ proc qc::tabular_text_parse  {text columns_conf} {
     #
     #     % return [tabular_text_parse $text $conf]
     #     {{col1 col2} {a b}}
+    qc::args $args -ignore_empty_rows -- text columns_conf
     
     # convert text to list of lines of required min width (determined by line for table header)
     set temp {}
@@ -128,6 +129,11 @@ proc qc::tabular_text_parse  {text columns_conf} {
     foreach line $lines {
         incr i
 
+        if { [info exists ignore_empty_rows] && [trim $line] eq "" } {
+            # ignore blank rows
+            continue
+        }
+        
         # split lines on column separators and trim whitespace from values
         foreach separator [lreverse $column_separators] {
             lassign $separator start end
@@ -138,7 +144,7 @@ proc qc::tabular_text_parse  {text columns_conf} {
             foreach conf $columns_conf {
                 dict2vars $conf label var_name
                 set new_label [regsub -all {\s} $label "_"]
-                if { ! [regsub "(^|\\0)[regexp_escape $new_label](\\0|$)" $line "\\1${var_name}\\2" line] } {
+                if { ! [regsub "(^|\\0|\\s)[regexp_escape $new_label](\\0|\\s|$)" $line "\\1${var_name}\\2" line] } {
                     error "Unable to locate column heading \"$label\""
                 }
             }
@@ -158,5 +164,3 @@ proc qc::tabular_text_parse  {text columns_conf} {
 
     return $table
 }
-
-
