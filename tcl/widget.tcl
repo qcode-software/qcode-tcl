@@ -343,7 +343,10 @@ proc qc::widget_radiogroup { args } {
 	set id ${group_name}${option_value}
 	set widget [qc::widget_radio name $group_name value $option_value checked [eq $option_value $group_value] id $id {*}[dict_subset [array get this] title tooltip]]
 	set label [qc::widget_label label $option_name name $id {*}[dict_subset [array get this] title tooltip]]
-	lappend buttons "$widget&nbsp;$label"
+	lappend buttons \
+            [h span \
+                 style "display:inline-block" \
+                 "$widget&nbsp;$label"]
     }
     return [html div [join $buttons "&nbsp; &nbsp;"] class "radio-group" name $group_name id $group_name]
 }

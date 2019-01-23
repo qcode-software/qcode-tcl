@@ -362,22 +362,22 @@ namespace eval ::qcode::test {
     test widget_radiogroup-1.0 {widget_radiogroup  } -setup {
     } -body {
         widget_radiogroup  name sex value M options {Male M Female F}
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></div>}
+    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
 
     test widget_radiogroup-1.1 {widget_radiogroup tooltip } -setup {
     } -body {
         widget_radiogroup  name sex value M options {Male M Female F} tooltip "This is a tooltip"
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><input id="sexM" value="M" name="sex" title="This is a tooltip" type="radio" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" title="This is a tooltip" type="radio">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></div>}
+    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" title="This is a tooltip" type="radio" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" title="This is a tooltip" type="radio">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
 
     test widget_radiogroup-1.2 {widget_radiogroup title } -setup {
     } -body {
         widget_radiogroup  name sex value M options {Male M Female F} title "This is a tooltip"
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><input id="sexM" value="M" name="sex" type="radio" title="This is a tooltip" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" type="radio" title="This is a tooltip">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></div>}
+    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" title="This is a tooltip" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio" title="This is a tooltip">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
 
     test widget-2.3 {widget radiogroup } -setup {
     } -body {
         widget type radiogroup name sex value M options {Male M Female F}
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label>&nbsp; &nbsp;<input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></div>}
+    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
 
     test widget-2.4 {widget unknown } -setup {
     } -body {
