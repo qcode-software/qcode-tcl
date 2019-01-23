@@ -3,7 +3,7 @@ namespace eval qc {
     namespace import ::tcl::mathop::eq
     namespace import ::tcl::mathop::ne
 
-    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne commonmark2html
+    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne commonmark2html regexp_escape
 }
 
 proc qc::K {a b} {set a}
@@ -691,4 +691,26 @@ proc qc::postcode_parse { postcode } {
         error "Unable to parse postcode \"$postcode\""
     }
     return [qc::dict_from area district space sector unit]
+}
+
+proc qc::regexp_escape {string} {
+    #| Escape string for use inside TCL regular expression
+     set list {
+	\\ \\\\ 
+	^ \\^ 
+	. \\. 
+	\[ \\\[ 
+	\] \\\] 
+	\$ \\\$ 
+	\( \\\( 
+	\) \\\) 
+	| \\| 
+	* \\* 
+	+ \\+ 
+	? \\? 
+	\{ \\\{
+	\} \\\}
+    } 
+
+    return [string map $list $string]
 }
