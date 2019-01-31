@@ -426,7 +426,7 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
         "us" -
         "ibm367" -
         "cp367" -
-        "csASCII" - {return ascii}
+        "csASCII" {return ascii}
         "utf-8"       {return utf-8}
         "utf-16"      {return unicode; # not sure about this}
         "iso-8859-1"  {return iso8859-1}
