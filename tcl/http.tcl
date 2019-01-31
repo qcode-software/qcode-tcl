@@ -417,8 +417,16 @@ proc qc::http_header_encoding {dict} {
 proc qc::IANAEncoding2TclEncoding {IANAName} {
     
     switch [string tolower $IANAName] {
-        "ascii"       {return ascii; # non-standard}
-        "us-ascii"    {return ascii}
+        "iso-ir-6" -
+        "ansi_x3.4-1986" -
+        "iso_646.irv:1991" -
+        "ascii" -
+        "iso646-us" -
+        "us-ascii" -
+        "us" -
+        "ibm367" -
+        "cp367" -
+        "csASCII" - {return ascii}
         "utf-8"       {return utf-8}
         "utf-16"      {return unicode; # not sure about this}
         "iso-8859-1"  {return iso8859-1}
