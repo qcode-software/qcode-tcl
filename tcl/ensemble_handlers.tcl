@@ -41,10 +41,18 @@ proc data_type_parser {args} {
             return [list $namespace decimal]
         }
         default {
-            if { [qc::memoize qc::db_domain_exists $data_type] } {
+            if { [regexp {\.([^\.]+)$} $data_type -> qc_data_type] && [info commands "${namespace}::${qc_data_type}"] ne "" } {
+                # qcode-tcl data type prefixed by db schema - cast/validate using qcode-tcl 
+                return [list $namespace $qc_data_type]
+                
+            } elseif { [qc::memoize qc::db_domain_exists $data_type] } {
+                # db domain
                 return [list $namespace domain $data_type]
+                
             } elseif { [qc::memoize qc::db_enum_exists $data_type] } {
+                # db enumerated type
                 return [list $namespace enumeration $data_type]
+                
             }
         }
     }
