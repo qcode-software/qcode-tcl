@@ -6,8 +6,9 @@ namespace eval qc {
 
 proc qc::html2pdf { args } {
     # | Looks for wkhtmltopdf binary to generate PDF.
-    # | Requires wkhtmltopdf 0.12.2.1 (with patched qt)
+    # | Requires wkhtmltopdf 0.12.5 (with patched qt)
     # Adds pagesize and margin arguments for label printing.
+    # zoom and dpi arguments added for consistency between 0.12.2.1 -> 0.12.5
     # usage html2pdf ?-encoding encoding? ?-timeout timeout(secs)? ?-nomargin boolean? ?-pagesize size? html
     args $args \
         -encoding base64 \
@@ -15,6 +16,8 @@ proc qc::html2pdf { args } {
         -timeout 20 \
         -nomargin false \
         -orientation portrait \
+        -dpi 75 \
+        -zoom 1 \
         -- html
     
     if { ![in {base64 binary} $encoding] } {
@@ -37,6 +40,8 @@ proc qc::html2pdf { args } {
         {*}$margin_switches \
         --page-size $pagesize \
         --orientation $orientation \
+        --dpi $dpi \
+        --zoom $zoom \
         --encoding UTF-8 \
         --print-media-type \
         -q \
