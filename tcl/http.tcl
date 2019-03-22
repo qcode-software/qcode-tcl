@@ -418,6 +418,7 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
     
     switch [string tolower $IANAName] {
         "iso-ir-6" -
+        "ansi_x3.4-1968" -
         "ansi_x3.4-1986" -
         "iso_646.irv:1991" -
         "ascii" -
@@ -459,6 +460,8 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
 
         "windows-1256" -
         "cp1256"      {return cp1256}
+
+        "windows-1257" -
         "cp1257"      {return cp1257}
 
         "windows-1251" -
