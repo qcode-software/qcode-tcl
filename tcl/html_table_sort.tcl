@@ -83,7 +83,7 @@ proc qc::html_table_sort_header { cols sortCols } {
 		if { [eq $sort_order ASC] } {
 		    if { "rank" in $class } {
 			set indicator "Sorted Top to Bottom"
-		    } elseif { "number" in $class || "money" in $class } {
+		    } elseif { "number" in $class || "money" in $class || "perct" in $class } {
 			set indicator "Sorted Low to High"
 		    } elseif { "date" in $class } {
 			set indicator "Sorted Old to New"
@@ -94,7 +94,7 @@ proc qc::html_table_sort_header { cols sortCols } {
 		} else {
 		    if { "rank" in $class } {
 			set indicator "Sorted Bottom to Top"
-		    } elseif { "number" in $class || "money" in $class } {
+		    } elseif { "number" in $class || "money" in $class || "perct" in $class } {
 			set indicator "Sorted High to Low"
 		    } elseif { "date" in $class } {
 			set indicator "Sorted New to Old"
