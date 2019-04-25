@@ -101,7 +101,7 @@ proc qc::validate {method path proc_args proc_body} {
     
     # Update the handlers nsv array.
     nsv_lappend "handlers.VALIDATE.patterns" $method $path
-    nsv_set "handlers.VALIDATE.${method}.proc_name" $path $proc_name
+    nsv_set "handlers.VALIDATE.${method}.proc_names" $path $proc_name
     nsv_set "handlers.VALIDATE.${method}.args" $path $arg_names
     nsv_set "handlers.VALIDATE.${method}.defaults" $path $defaults
 }

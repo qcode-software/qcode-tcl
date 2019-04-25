@@ -58,7 +58,7 @@ namespace eval qc::handlers {
         if { $method ne "" } {
             return [nsv_get "handlers.patterns" $method]
         } else {
-            return [dict values [nsv_array get "handlers.patterns"]]
+            return [concat {*}[dict values [nsv_array get "handlers.patterns"]]]
         }
     }
     
@@ -164,7 +164,7 @@ namespace eval qc::handlers {
             if { $method ne "" } {
                 return [nsv_get "handlers.VALIDATE.patterns" $method]
             } else {
-                return [dict values [nsv_array get "handlers.VALIDATE.patterns"]]
+                return [concat {*}[dict values [nsv_array get "handlers.VALIDATE.patterns"]]]
             }
         }
         
