@@ -73,10 +73,10 @@ proc qc::register {args} {
         {*}[list proc $proc_name $proc_args $proc_body]
 
         # Update the handlers nsv dict
-        qc::nsv_dict set handlers $method $path proc_name $proc_name
-        qc::nsv_dict set handlers $method $path args $arg_names
-        qc::nsv_dict set handlers $method $path body $proc_body
-        qc::nsv_dict set handlers $method $path defaults $defaults  
+        nsv_lappend "handlers.patterns" $method $path
+        nsv_set "handlers.${method}.proc_names" $path $proc_name
+        nsv_set "handlers.${method}.args" $path $arg_names
+        nsv_set "handlers.${method}.defaults" $path $defaults
     }
 }
 
@@ -100,10 +100,10 @@ proc qc::validate {method path proc_args proc_body} {
     }
     
     # Update the handlers nsv array.
-    qc::nsv_dict set handlers VALIDATE $method $path proc_name $proc_name
-    qc::nsv_dict set handlers VALIDATE $method $path args $arg_names
-    qc::nsv_dict set handlers VALIDATE $method $path body $proc_body 
-    qc::nsv_dict set handlers VALIDATE $method $path defaults $defaults
+    nsv_lappend "handlers.VALIDATE.patterns" $method $path
+    nsv_set "handlers.VALIDATE.${method}.proc_name" $path $proc_name
+    nsv_set "handlers.VALIDATE.${method}.args" $path $arg_names
+    nsv_set "handlers.VALIDATE.${method}.defaults" $path $defaults
 }
 
 proc qc::registered {args} {

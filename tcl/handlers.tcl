@@ -55,35 +55,31 @@ namespace eval qc::handlers {
     proc get {{method ""}} {
         #| Get all patterns.
         #| If method has been given then return only patterns that match the given method.
-        set temp {}
-        if { $method eq "" && [nsv_exists handlers] } {
-            dict for {method handlers} [nsv_get handlers] {
-                lappend temp {*}[dict keys $handlers]
-            }
-        } elseif { $method ne "" && [qc::nsv_dict exists handlers [string toupper $method]] } {
-            lappend temp {*}[dict keys [qc::nsv_dict get handlers [string toupper $method]]]
+        if { $method ne "" } {
+            return [nsv_get "handlers.patterns" $method]
+        } else {
+            return [dict values [nsv_array get "handlers.patterns"]]
         }
-        return $temp
     }
     
     proc proc_name {method pattern} {
         #| Get the proc name for the handler identified by $method $pattern.
-        return [qc::nsv_dict get handlers $method $pattern proc_name]
+        return [nsv_get "handlers.${method}.proc_names" $pattern]
     }
 
     proc args {method pattern} {
         #| Get all arguments for the given handler identified by $method $pattern.
-        return [qc::nsv_dict get handlers $method $pattern args]
+        return [nsv_get "handlers.${method}.args" $pattern]
     }
 
     proc default {method pattern arg} {
         #| Get the default value of the given arg for the handler identified by $method $pattern.
-        return [qc::nsv_dict get handlers $method $pattern defaults $arg]
+        return [qc::nsv_dict get "handlers.${method}.defaults" $pattern $arg]
     }
 
     proc default_exists {method pattern arg} {
         #| Check if a default argument exists for the given argument for handler identified by $method $pattern.
-        return [qc::nsv_dict exists handlers $method $pattern defaults $arg]
+        return [qc::nsv_dict exists "handlers.${method}.defaults" $pattern $arg]
     }
 
     proc data {form method pattern} {
@@ -165,35 +161,31 @@ namespace eval qc::handlers {
         proc get {{method ""}} {
             #| Get all the validation handler paths.
             #| If method has been given then return only handlers that match method.
-            set temp {}
-            if { $method eq "" && [qc::nsv_dict exists handlers VALIDATE] } {
-                dict for {method handlers} [qc::nsv_dict get handlers VALIDATE] {
-                    lappend temp {*}[dict keys $handlers]
-                }
-            } elseif { $method ne "" && [qc::nsv_dict exists handlers VALIDATE [string toupper $method]] } {
-                lappend temp {*}[dict keys [qc::nsv_dict get handlers VALIDATE [string toupper $method]]]
+            if { $method ne "" } {
+                return [nsv_get "handlers.VALIDATE.patterns" $method]
+            } else {
+                return [dict values [nsv_array get "handlers.VALIDATE.patterns"]]
             }
-            return $temp
         }
         
         proc proc_name {method pattern} {
             #| Get the validation proc_name for the handler identified by $method $pattern.
-            return [qc::nsv_dict get handlers VALIDATE $method $pattern proc_name]
+            return [nsv_get "handlers.VALIDATE.${method}.proc_names" $pattern]
         }
 
         proc args {method pattern} {
             #| Get all arguments for the handler identified by $method $pattern.
-            return [qc::nsv_dict get handlers VALIDATE $method $pattern args]
+            return [nsv_get "handlers.VALIDATE.${method}.args" $pattern]
         }
 
         proc default {method pattern arg} {
             #| Get the default value of the given arg for the handler identified by $method $pattern.
-            return [qc::nsv_dict get handlers VALIDATE $method $pattern defaults $arg]
+            return [qc::nsv_dict get "handlers.VALIDATE.${method}.defaults" $pattern $arg]
         }
 
         proc default_exists {method pattern arg} {
             #| Check if a default argument exists for the given argument for handler identified by $method $pattern.
-            return [qc::nsv_dict exists handlers VALIDATE $method $pattern defaults $arg]
+            return [qc::nsv_dict exists "handlers.VALIDATE.${method}.defaults" $pattern $arg]
         }
 
         proc data {form method pattern} {
