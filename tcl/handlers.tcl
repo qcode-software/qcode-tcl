@@ -55,8 +55,14 @@ namespace eval qc::handlers {
     proc get {{method ""}} {
         #| Get all patterns.
         #| If method has been given then return only patterns that match the given method.
-        if { $method ne "" } {
-            return [nsv_get "handlers.patterns" $method]
+        if { ! [nsv_array exists "handlers.patterns"] } {
+            return [list]
+        } elseif { $method ne "" } {
+            if { [nsv_exists "handlers.patterns" $method] } {
+                return [nsv_get "handlers.patterns" $method]
+            } else {
+                return [list]
+            }
         } else {
             return [concat {*}[dict values [nsv_array get "handlers.patterns"]]]
         }
@@ -161,8 +167,14 @@ namespace eval qc::handlers {
         proc get {{method ""}} {
             #| Get all the validation handler paths.
             #| If method has been given then return only handlers that match method.
-            if { $method ne "" } {
-                return [nsv_get "handlers.VALIDATE.patterns" $method]
+            if { ! [nsv_array exists "handlers.VALIDATE.patterns"] } {
+                return [list]
+            } elseif { $method ne "" } {
+                if { [nsv_exists "handlers.VALIDATE.patterns" $method] } {
+                    return [nsv_get "handlers.VALIDATE.patterns" $method]
+                } else {
+                    return [list]
+                }
             } else {
                 return [concat {*}[dict values [nsv_array get "handlers.VALIDATE.patterns"]]]
             }
