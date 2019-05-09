@@ -127,6 +127,20 @@ namespace eval ::qcode::test {
         return [qc::tabular_text_parse $text $conf]
     } -cleanup {} -result {Unable to locate column heading "OrderCode"} -returnCodes error 
 
+    test tabular_text_parse-9.0 {tabular_text_parse - disable auto trim} -setup {
+    } -body {
+        set lines {}
+        lappend lines {Code         Qty   TOTAL}
+        lappend lines { 1           1     1.10}
+        set text [join $lines \n]
+
+        set conf {}
+        lappend conf [list label "Code" var_name "code" trim false]
+        lappend conf [list label "Qty" var_name "qty" trim true]
+        lappend conf [list label "TOTAL" var_name "total"]
+        return [qc::tabular_text_parse $text $conf]
+    } -cleanup {} -result {{code qty total} {{ 1  } 1 1.10}}
+    
     cleanupTests
 }
 namespace delete ::qcode::test
