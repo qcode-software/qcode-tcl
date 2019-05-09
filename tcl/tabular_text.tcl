@@ -15,7 +15,7 @@ proc qc::tabular_text_parse  {args} {
     #     % lappend conf [list label "Column 2" var_name "col2"]
     #
     #     % return [tabular_text_parse $text $conf]
-    #     {{col1 col2} {" a      " b}}
+    #     {col1 col2} {{ a      } b}
     qc::args $args -ignore_empty_rows -- text columns_conf
     
     # convert text to list of lines of required min width (determined by line for table header)
