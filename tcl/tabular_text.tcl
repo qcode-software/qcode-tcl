@@ -7,15 +7,15 @@ proc qc::tabular_text_parse  {args} {
     # Example:
     #     % set lines {}
     #     % lappend lines "Column 1 Column 2"
-    #     % lappend lines "a        b      "
+    #     % lappend lines " a        b      "
     #     % set text [join $lines \n]
     #
     #     % set conf {}
-    #     % lappend conf [list label "Column 1" var_name "col1"]
+    #     % lappend conf [list label "Column 1" var_name "col1" trim false]
     #     % lappend conf [list label "Column 2" var_name "col2"]
     #
     #     % return [tabular_text_parse $text $conf]
-    #     {{col1 col2} {a b}}
+    #     {col1 col2} {{ a      } b}
     qc::args $args -ignore_empty_rows -- text columns_conf
     
     # convert text to list of lines of required min width (determined by line for table header)
@@ -128,7 +128,7 @@ proc qc::tabular_text_parse  {args} {
             continue
         }
         
-        # split lines on column separators and trim whitespace from values
+        # split lines on column separators and optionally trim whitespace from values
         foreach separator [lreverse $column_separators] {
             lassign $separator start end
             set line [string replace $line $start $end \0]
@@ -142,15 +142,21 @@ proc qc::tabular_text_parse  {args} {
                     error "Unable to locate column heading \"$label\""
                 }
             }
-        } 
-        set row {}
-        foreach value [split $line \0] {
-            lappend row [trim $value]
         }
-        
         # raise error if we have too many/little columns
-        if { [llength $row] != [llength $columns_conf] } {
+        if { [llength [split $line \0]] != [llength $columns_conf] } {
             error "Found [llength $row] columns, expected [llength $columns_conf] for line \"$line\""
+        }        
+        set row {}        
+        foreach conf $columns_conf value [split $line \0] {
+            dict2vars $conf trim
+            default trim true
+
+            if { $i == 1 || $trim } {
+                lappend row [trim $value]
+            } else {
+                lappend row $value
+            }
         }
         
         lappend table $row
