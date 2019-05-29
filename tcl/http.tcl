@@ -88,6 +88,8 @@ proc qc::http_post {args} {
         -data ? \
         -filename ? \
         -valid_response_codes [list 100 200] \
+        -response_headers false \
+        -response_code false \
         url \
         args
 
@@ -152,7 +154,26 @@ proc qc::http_post {args} {
     switch $curlErrorNumber {
 	0 {
 	    if { [in $valid_response_codes $responsecode] } {
-		return [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+		set response_body [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                if { !$response_headers && !$response_code } {
+                    # Only return the response body.
+                    return $response_body
+                } else {
+                    # User has requested response headers and/or code alongside the response body.
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
 	    } else {
 		# raise an error
 		switch $responsecode {
@@ -173,7 +194,17 @@ proc qc::http_post {args} {
 
 proc qc::http_get {args} {
     # usage http_get ?-timeout timeout? ?-headers {name value name value ...}? ?-noproxy? url
-    args $args -timeout 60 -sslversion tlsv1 -headers {} -valid_response_codes {200} -noproxy -- url
+    args \
+        $args \
+        -timeout 60 \
+        -sslversion tlsv1 \
+        -headers {} \
+        -valid_response_codes {200} \
+        -noproxy \
+        -response_headers false \
+        -response_code false \
+        -- \
+        url
 
     set httpheaders {}
     foreach {name value} $headers {
@@ -185,7 +216,26 @@ proc qc::http_get {args} {
 	0 {
             if { [in $valid_response_codes $responsecode] } {
                 # OK
-                return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
+                set response_body [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                if { !$response_headers && !$response_code } {
+                    # Only return the response body.
+                    return $response_body
+                } else {
+                    # User has requested response headers and/or code alongside the response body.
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
             } else {
                 switch $responsecode {                    
                     404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
@@ -367,8 +417,17 @@ proc qc::http_header_encoding {dict} {
 proc qc::IANAEncoding2TclEncoding {IANAName} {
     
     switch [string tolower $IANAName] {
-        "ascii"       {return ascii; # non-standard}
-        "us-ascii"    {return ascii}
+        "iso-ir-6" -
+        "ansi_x3.4-1968" -
+        "ansi_x3.4-1986" -
+        "iso_646.irv:1991" -
+        "ascii" -
+        "iso646-us" -
+        "us-ascii" -
+        "us" -
+        "ibm367" -
+        "cp367" -
+        "csASCII" {return ascii}
         "utf-8"       {return utf-8}
         "utf-16"      {return unicode; # not sure about this}
         "iso-8859-1"  {return iso8859-1}
@@ -398,7 +457,11 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
         "cp1253"      {return cp1253}
         "cp1254"      {return cp1254}
         "cp1255"      {return cp1255}
+
+        "windows-1256" -
         "cp1256"      {return cp1256}
+
+        "windows-1257" -
         "cp1257"      {return cp1257}
 
         "windows-1251" -
@@ -438,6 +501,15 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
 
         "ibm866" -
         "csibm866"    {return cp866}
+
+        "gbk" {return cp936}
+
+        "iso-ir-149" -
+        "ks_c_5601-1987" -
+        "ks_c_5601-1989" -
+        "ks_c_5601" -
+        "korean" -
+        "csksc56011987" {return ksc5601}
         
         default {
             error "Unrecognized encoding name '$IANAName'"
