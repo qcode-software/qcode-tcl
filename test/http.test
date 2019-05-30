@@ -158,8 +158,8 @@ namespace eval ::qcode::test {
 
     test http_head-1.0 {http_head} -body {
         set response [qc::http_head -timeout 30 http://httpbin.org/response-headers?test=hello]
-        if { [dict exists $response Test] } {
-            return [dict get $response Test]
+        if { [dict exists $response test] } {
+            return [dict get $response test]
         } else {
             return ""
         }
