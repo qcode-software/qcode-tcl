@@ -229,7 +229,7 @@ proc qc::is_uri_valid {uri} {
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path time
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -848,6 +848,15 @@ namespace eval qc::is {
         } else {
             return 0
         }
+    }
+
+    proc interval {text} {
+        #| Checks if given text is an interval
+        # (more restrictive than postgres, relax as needed)
+        return \
+            [regexp \
+                 {((^| +)(\+|-)?[0-9]+ +(year|month|week|day|hour|minute|second)s?)+$} \
+                 [string tolower $text]]
     }
 }
 

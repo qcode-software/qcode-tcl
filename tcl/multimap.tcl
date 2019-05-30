@@ -68,9 +68,25 @@ proc qc::multimap_unset_first { multimapVariable key args } {
     }
 }
 
-proc qc::multimap_exists { multimap key } {
+proc qc::multimap_exists { args } {
     #| Check if a value exists for this key
-    if { [lsearch [multimap_keys $multimap] $key] > -1 } {
+    args $args \
+        -nocase \
+        -glob \
+        -regexp \
+        -- \
+        multimap \
+        key
+
+    set switches [list]
+
+    foreach switch {nocase glob regexp} {
+        if { [info exists $switch] } {
+            lappend switches -${switch}
+        }
+    }
+
+    if { [lsearch {*}$switches [multimap_keys $multimap] $key] > -1 } {
 	return 1
     } else {
 	return 0

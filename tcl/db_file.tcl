@@ -52,7 +52,7 @@ proc qc::db_file_export {args} {
     db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
     set id [open $tmp_file w]
     fconfigure $id -translation binary
-    puts $id [base64::decode $base64]
+    puts -nonewline $id [base64::decode $base64]
     close $id
     return $tmp_file
 }
