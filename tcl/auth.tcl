@@ -23,7 +23,11 @@ proc qc::auth {} {
     
     # HBA
     if { [qc::auth_hba_check] } {
-        return [set current_user_id [qc::auth_hba]]
+        # HBA user without a session, create a session for HBA user.
+        set current_user_id [qc::auth_hba]
+        set session_id [qc::session_new $current_user_id]
+        cookie_set session_id $session_id expires [ns_httptime [clock scan "+365 days"]]
+        return $current_user_id
     }
     
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
