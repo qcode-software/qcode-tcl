@@ -10,7 +10,7 @@ proc qc::auth {} {
     if { [info exists current_user_id] } {
         return $current_user_id
     }
-    
+
     # Try session based auth
     if { [info exists ::session_id] || [qc::cookie_exists session_id] } {
         set session_id [qc::session_id]
@@ -20,7 +20,7 @@ proc qc::auth {} {
             return $current_user_id
         }
     }
-    
+
     # HBA
     if { [qc::auth_hba_check] } {
         # HBA user without a session, create a session for HBA user.
@@ -29,7 +29,7 @@ proc qc::auth {} {
         cookie_set session_id $session_id expires [ns_httptime [clock scan "+365 days"]]
         return $current_user_id
     }
-    
+
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
