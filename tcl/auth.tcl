@@ -6,11 +6,11 @@ proc qc::auth {} {
     #| Try to authenticate the current user
     #| If successful cache the result in global
     #| On failure throw AUTH error
-    global current_user_id
+    global current_user_id session_id
     if { [info exists current_user_id] } {
         return $current_user_id
     }
-    
+
     # Try session based auth
     if { [info exists ::session_id] || [qc::cookie_exists session_id] } {
         set session_id [qc::session_id]
@@ -20,12 +20,16 @@ proc qc::auth {} {
             return $current_user_id
         }
     }
-    
+
     # HBA
     if { [qc::auth_hba_check] } {
-        return [set current_user_id [qc::auth_hba]]
+        # HBA user without a session, create a session for HBA user.
+        set current_user_id [qc::auth_hba]
+        set session_id [qc::session_new $current_user_id]
+        cookie_set session_id $session_id expires [ns_httptime [clock scan "+365 days"]]
+        return $current_user_id
     }
-    
+
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
