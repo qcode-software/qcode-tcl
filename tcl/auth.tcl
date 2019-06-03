@@ -6,7 +6,7 @@ proc qc::auth {} {
     #| Try to authenticate the current user
     #| If successful cache the result in global
     #| On failure throw AUTH error
-    global current_user_id
+    global current_user_id session_id
     if { [info exists current_user_id] } {
         return $current_user_id
     }
