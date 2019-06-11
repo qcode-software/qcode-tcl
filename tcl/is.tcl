@@ -586,7 +586,7 @@ namespace eval qc::is {
     proc mobile_number {string} {
         #| Checks if the given string is of the form of a UK mobile telephone number.
         regsub -all {[^0-9]} $string {} tel_no
-        if {  [regexp {^07(5|7|8|9)[0-9]{8}$} $tel_no] } {
+        if {  [regexp {(^07(1|2|3|4|5|7|8|9)[0-9]{8}$)|(^07624[0-9]{6}$)} $tel_no] || } {
             return 1
         } else {
             return 0
