@@ -15,8 +15,6 @@ proc qc::soap_template {xml method {namespace ""} } {
 	</soap:Body>
 	</soap:Envelope>
     }
-    # Namespace prefix binding may not be empty.
-    # If no namespace, do not use prefix
     set ns_prefix ""
     if { $namespace ne "" } {
         set namespace " xmlns:ns=\"$namespace\""
