@@ -15,6 +15,7 @@ proc qc::soap_template {xml method {namespace ""} } {
 	</soap:Body>
 	</soap:Envelope>
     }
+    # Only define namespace prefix if a namespace has been passed
     set ns_prefix ""
     if { $namespace ne "" } {
         set namespace " xmlns:ns=\"$namespace\""
