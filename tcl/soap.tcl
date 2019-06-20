@@ -5,14 +5,13 @@ namespace eval qc {
 proc qc::soap_template {xml method {namespace ""} } {
     #| SOAP template
     set soap {<?xml version="1.0"?>
-	<soap:Envelope
-	xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
-	soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
-	<soap:Body>
-	${request_xml}
-	</soap:Body>
-	</soap:Envelope>
-    }
+<soap:Envelope
+xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
+soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+<soap:Body>
+${request_xml}
+</soap:Body>
+</soap:Envelope>}
     # Only define namespace prefix if a namespace has been passed
 
     if { $namespace ne "" } {
