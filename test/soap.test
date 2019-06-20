@@ -1,0 +1,35 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    # soap template
+    test soaptemplate-1.0 {soap_tempate no namespace} -body {
+        set xml {<test_request>value</test_request>}
+        return [soap_template $xml my_method]
+    } -result {<?xml version="1.0"?>
+<soap:Envelope
+xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
+soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+<soap:Body>
+<my_method><test_request>value</test_request></my_method>
+</soap:Body>
+</soap:Envelope>}
+
+    test soaptemplate-1.1 {soap_tempate w/ namespace} -body {
+        set xml {<test_request>value</test_request>}
+        return [soap_template $xml my_method http://www.w3.org/1999/xhtml]
+    } -result {<?xml version="1.0"?>
+<soap:Envelope
+xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
+soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+<soap:Body>
+<ns:my_method xmlns:ns="http://www.w3.org/1999/xhtml"><test_request>value</test_request></ns:my_method>
+</soap:Body>
+</soap:Envelope>}
+}
