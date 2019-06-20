@@ -9,24 +9,21 @@ proc qc::soap_template {xml method {namespace ""} } {
 	xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
 	soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
 	<soap:Body>
-	<${ns_prefix}${method}${namespace}>
-	$xml
-	</${ns_prefix}${method}>
+	${request_xml}
 	</soap:Body>
 	</soap:Envelope>
     }
     # Only define namespace prefix if a namespace has been passed
-    set ns_prefix ""
+
     if { $namespace ne "" } {
-        set namespace " xmlns:ns=\"$namespace\""
-        set ns_prefix "ns:"
+        set request_xml [qc::xml "ns:$method" \$xml [dict create xmlns:ns $namespace]]
+    } else {
+         set request_xml [qc::xml $method \$xml]
     }
+    set request_xml [string map [list \$xml $xml] $request_xml]
+      
     set soap [string map \
-                    [list \${method}       $method \
-                          \$xml            $xml \
-                          \${namespace}    $namespace \
-                          \${ns_prefix}    $ns_prefix \
-                    ] \
+                    [list \${request_xml}  $request_xml] \
                     $soap \
              ]
     return $soap
