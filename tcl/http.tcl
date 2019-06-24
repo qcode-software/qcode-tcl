@@ -456,6 +456,8 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
         "cp1250"      {return cp1250}
         "cp1253"      {return cp1253}
         "cp1254"      {return cp1254}
+
+        "windows-1255" -
         "cp1255"      {return cp1255}
 
         "windows-1256" -
