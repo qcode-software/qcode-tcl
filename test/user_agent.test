@@ -8,43 +8,66 @@ namespace eval ::qcode::test {
     namespace import ::tcltest::*
     namespace path ::qc
 
-    set test_uas [list \
-                      {Apple iPhone XR (Safari)} \
-                      {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1} \
-                      {device Mobile os iOS browser Safari} \
-                      {Apple iPhone XS (Chrome)} \
-                      {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1} \
-                      {device Mobile os iOS browser Chrome} \
-                      {Apple iPhone XS Max (Firefox)} \
-                      {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15} \
-                      {device Mobile os iOS browser Firefox} \
-                      {Microsoft Lumia 950} \
-                      {Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.1058} \
-                      {device Mobile os {Windows Phone} browser {Microsoft Edge}} \
-                      {Windows 10-based PC using Edge browser} \
-                      {Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246} \
-                      {device PC os Windows browser {Microsoft Edge}} \
-                      {Chrome OS-based laptop using Chrome browser (Chromebook)} \
-                      {Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36} \
-                      {device PC os ChromeOS browser Chrome} \
-                      {Mac OS X-based computer using a Safari browser} \
-                      {Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9} \
-                      {device PC os MacOS browser Safari} \
-                      {Windows 7-based PC using a Chrome browser} \
-                      {Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36} \
-                      {device PC os Windows browser Chrome} \
-                      {Linux-based PC using a Firefox browser} \
-                      {Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1} \
-                      {device PC os Linux browser Firefox} \
-                      {Chrome on ChromeOS} \
-                      {Mozilla/5.0 (X11; CrOS x86_64 10176.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36} \
-                      {device PC os ChromeOS browser Chrome} \
-                      {Chrome on Linux} \
-                      {Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36} \
-                      {device PC os Linux browser Chrome} \
-                     ]
+    set test_uas_table [list \
+                            [list description user_agent result] \
+                            [list \
+                                 {Apple iPhone XR (Safari)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1} \
+                                 {device Mobile os iOS browser Safari} \
+                                ] \
+                            [list \
+                                 {Apple iPhone XS (Chrome)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1} \
+                                 {device Mobile os iOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Apple iPhone XS Max (Firefox)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15} \
+                                 {device Mobile os iOS browser Firefox} \
+                                ] \
+                            [list \
+                                 {Microsoft Lumia 950} \
+                                 {Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.1058} \
+                                 {device Mobile os {Windows Phone} browser {Microsoft Edge}} \
+                                ] \
+                            [list \
+                                 {Windows 10-based PC using Edge browser} \
+                                 {Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246} \
+                                 {device PC os Windows browser {Microsoft Edge}} \
+                                ] \
+                            [list \
+                                 {Chrome OS-based laptop using Chrome browser (Chromebook)} \
+                                 {Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36} \
+                                 {device PC os ChromeOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Mac OS X-based computer using a Safari browser} \
+                                 {Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9} \
+                                 {device PC os MacOS browser Safari} \
+                                ] \
+                            [list \
+                                 {Windows 7-based PC using a Chrome browser} \
+                                 {Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36} \
+                                 {device PC os Windows browser Chrome} \
+                                ] \
+                            [list \
+                                 {Linux-based PC using a Firefox browser} \
+                                 {Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1} \
+                                 {device PC os Linux browser Firefox} \
+                                ] \
+                            [list \
+                                 {Chrome on ChromeOS} \
+                                 {Mozilla/5.0 (X11; CrOS x86_64 10176.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36} \
+                                 {device PC os ChromeOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Chrome on Linux} \
+                                 {Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36} \
+                                 {device PC os Linux browser Chrome} \
+                                ] \
+                           ]
     set count 0
-    foreach {description user_agent result} $test_uas {
+    table_foreach $test_uas_table {
         incr count
         test user_agent_parse-${count} "user_agent_parse - $description" -body {
             return [qc::user_agent_parse $user_agent]
