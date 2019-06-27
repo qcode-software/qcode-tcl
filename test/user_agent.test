@@ -50,5 +50,7 @@ namespace eval ::qcode::test {
             return [qc::user_agent_parse $user_agent]
         } -result $result
     }
+
+    cleanupTests
 }
 namespace delete ::qcode::test

@@ -13,50 +13,52 @@ proc qc::user_agent_parse { user_agent } {
 
     # Device
     set device "Unknown"
-    if {
-        [regexp {(:?windows nt|macintosh|linux| cros )} $user_agent]
-    } {
+    if { [regexp {\y(windows nt|macintosh|linux|cros)\y} $user_agent] } {
         set device "PC"
-        
-    } elseif {
-          ([regexp {windows} $user_agent] &&
-           [regexp {phone} $user_agent])
-          ||
-          ([regexp {android} $user_agent] &&
-           [regexp {mobile} $user_agent])
-          ||
-          [regexp {ip(:?hone|od)} $user_agent]
-      } {
+    }
+
+    if { [regexp {windows} $user_agent] &&
+         [regexp {phone} $user_agent] } {
         set device "Mobile"
-    } elseif {
-              ([regexp {windows} $user_agent] &&
-               [regexp {touch} $user_agent] &&
-               [regexp {tablet pc} $user_agent])
-              ||
-              ([regexp {android} $user_agent] &&
-               [regexp {mobile} $user_agent])
-              ||
-              [regexp {ipad} $user_agent]
-          } {
+    } elseif { [regexp {android} $user_agent] &&
+                [regexp {mobile} $user_agent] } {
+        set device "Mobile"
+    } elseif { [regexp {ip(hone|od)} $user_agent] } {
+        set device "Mobile"
+    }
+
+    if { [regexp {windows} $user_agent] &&
+         [regexp {touch} $user_agent] &&
+         [regexp {tablet pc} $user_agent] } {
         set device "Tablet"
-        
+    } elseif { [regexp {android} $user_agent] &&
+               [regexp {mobile} $user_agent] } {
+        set device "Tablet"
+    } elseif { [regexp {ipad} $user_agent] } {
+        set device "Tablet"
     }
 
     # OS
     set os "Unknown"
     if { [regexp {windows nt} $user_agent] } {
         set os "Windows"
-    } elseif { [regexp {macintosh} $user_agent] } {
+    }
+    if { [regexp {macintosh} $user_agent] } {
         set os "MacOS"
-    } elseif { [regexp { cros } $user_agent] } {
+    }
+    if { [regexp {\ycros\y} $user_agent] } {
         set os "ChromeOS"
-    } elseif { [regexp {linux} $user_agent] } {
+    }
+    if { [regexp {linux} $user_agent] } {
         set os "Linux"
-    } elseif { [regexp {windows phone} $user_agent] } {
-        set os "Windows Phone"
-    } elseif { [regexp {android} $user_agent] } {
+    }
+    if { [regexp {android} $user_agent] } {
         set os "Android"
-    } elseif { [regexp {ip(:?hone|ad|od)} $user_agent] } {
+    }
+    if { [regexp {windows phone} $user_agent] } {
+        set os "Windows Phone"
+    }
+    if { [regexp {ip(hone|ad|od)} $user_agent] } {
         set os "iOS"
     }
 
@@ -64,27 +66,27 @@ proc qc::user_agent_parse { user_agent } {
     set browser "Unknown"
     if { [regexp {trident/7} $user_agent] } {
         set browser "Internet Explorer"
-        
-    } elseif { [regexp {edg} $user_agent] } {
-        set browser "Microsoft Edge"
-        
-    } elseif {
-              ([regexp {chrome} $user_agent] &&
-               ! [regexp {(:?edge|opr)} $user_agent])
-              ||
-              [regexp {crios} $user_agent]
-          } {
-        set browser "Chrome"
-        
-    } elseif { [regexp {(:?firefox|fxios)} $user_agent] } {
-        set browser "Firefox"
-        
-    } elseif {
-              [regexp {safari} $user_agent] &&
-              ! [regexp {(:?opr|chrome|presto)} $user_agent]
-          } {
+    }
+    
+    if { [regexp {safari} $user_agent] &&
+         ! [regexp {(opr|chrome|presto)} $user_agent] } {
         set browser "Safari"
-    } 
+    }
+    
+    if { [regexp {chrome} $user_agent] &&
+         ! [regexp {(edge|opr)} $user_agent] } {
+        set browser "Chrome"
+    } elseif { [regexp {crios} $user_agent] } {
+        set browser "Chrome"
+    }
+    
+    if { [regexp {(firefox|fxios)} $user_agent] } {
+        set browser "Firefox"
+    }
+    
+    if { [regexp {edg} $user_agent] } {
+        set browser "Microsoft Edge"
+    }
 
     return [dict create \
                 device $device \
