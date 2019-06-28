@@ -19,10 +19,10 @@ proc qc::user_agent_parse { user_agent } {
     
     if { [regexp {windows} $user_agent] &&
          [regexp {touch} $user_agent] &&
-         [regexp {tablet pc} $user_agent] } {
+         ! [regexp {tablet pc} $user_agent] } {
         set device "Tablet"
     } elseif { [regexp {android} $user_agent] &&
-               [regexp {mobile} $user_agent] } {
+               ! [regexp {mobile} $user_agent] } {
         set device "Tablet"
     } elseif { [regexp {ipad} $user_agent] } {
         set device "Tablet"
@@ -44,7 +44,7 @@ proc qc::user_agent_parse { user_agent } {
         set os "Windows"
     }
     if { [regexp {macintosh} $user_agent] } {
-        set os "MacOS"
+        set os "macOS"
     }
     if { [regexp {\ycros\y} $user_agent] } {
         set os "ChromeOS"
