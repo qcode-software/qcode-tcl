@@ -1,0 +1,104 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    set test_uas_table [list \
+                            [list description user_agent result] \
+                            [list \
+                                 {Apple iPhone XR (Safari)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1} \
+                                 {device Mobile os iOS browser Safari} \
+                                ] \
+                            [list \
+                                 {Apple iPhone XS (Chrome)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1} \
+                                 {device Mobile os iOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Apple iPhone XS Max (Firefox)} \
+                                 {Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15} \
+                                 {device Mobile os iOS browser Firefox} \
+                                ] \
+                            [list \
+                                 {Microsoft Lumia 950} \
+                                 {Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/13.1058} \
+                                 {device Mobile os {Windows Phone} browser {Microsoft Edge}} \
+                                ] \
+                            [list \
+                                 {Android Mobile running Chrome 74} \
+                                 {Mozilla/5.0 (Linux; Android 9; SM-G965F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36} \
+                                 {device Mobile os Android browser Chrome} \
+                                ] \
+                            [list \
+                                 {Windows 10-based PC using Edge browser} \
+                                 {Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246} \
+                                 {device PC os Windows browser {Microsoft Edge}} \
+                                ] \
+                            [list \
+                                 {Chrome OS-based laptop using Chrome browser (Chromebook)} \
+                                 {Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36} \
+                                 {device PC os ChromeOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Mac OS X-based computer using a Safari browser} \
+                                 {Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9} \
+                                 {device PC os macOS browser Safari} \
+                                ] \
+                            [list \
+                                 {Windows 7-based PC using a Chrome browser} \
+                                 {Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36} \
+                                 {device PC os Windows browser Chrome} \
+                                ] \
+                            [list \
+                                 {Linux-based PC using a Firefox browser} \
+                                 {Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1} \
+                                 {device PC os Linux browser Firefox} \
+                                ] \
+                            [list \
+                                 {Chrome on ChromeOS} \
+                                 {Mozilla/5.0 (X11; CrOS x86_64 10176.72.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36} \
+                                 {device PC os ChromeOS browser Chrome} \
+                                ] \
+                            [list \
+                                 {Chrome on Linux} \
+                                 {Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36} \
+                                 {device PC os Linux browser Chrome} \
+                                ] \
+                            [list \
+                                 {iPad tablet using Safari} \
+                                 {Mozilla/5.0 (iPad; CPU OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53} \
+                                 {device Tablet os iOS browser Safari} \
+                                ] \
+                            [list \
+                                 {Galaxy Tab running Chrome 70} \
+                                 {Mozilla/5.0 (Linux; Android 8.1.0; SM-T580) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.80 Safari/537.36} \
+                                 {device Tablet os Android browser Chrome} \
+                                ] \
+                            [list \
+                                 {Firefox 40 on Android} \
+                                 {Mozilla/5.0 (Android; Tablet; rv:40.0) Gecko/40.0 Firefox/40.0} \
+                                 {device Tablet os Android browser Firefox} \
+                                ] \
+                            [list \
+                                 {MS Edge running on macOS X} \
+                                 {Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.0 Safari/537.36 Edg/77.0.200.1} \
+                                 {device PC os macOS browser {Microsoft Edge}} \
+                                ] \
+                           ]
+    set count 0
+    table_foreach $test_uas_table {
+        incr count
+        test user_agent_parse-${count} "user_agent_parse - $description" -body {
+            return [qc::user_agent_parse $user_agent]
+        } -result $result
+    }
+
+    cleanupTests
+}
+namespace delete ::qcode::test
