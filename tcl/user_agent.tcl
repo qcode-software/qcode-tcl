@@ -12,27 +12,30 @@ proc qc::user_agent_parse { user_agent } {
     set user_agent [lower $user_agent]
 
     # Device
-    set device "Unknown"
+    set device "Unknown"    
+    # PC
     if { [regexp {\y(windows nt|macintosh|linux|cros)\y} $user_agent] } {
         set device "PC"
     }
-    
-    if { [regexp {\ywindows\y} $user_agent] &&
-         [regexp {\ytouch\y} $user_agent] &&
-         ! [regexp {\ytablet pc\y} $user_agent] } {
+
+    # Tablet
+    if { [regexp {\ywindows\y} $user_agent]
+         && [regexp {\ytouch\y} $user_agent]
+         && ! [regexp {\ytablet pc\y} $user_agent] } {
         set device "Tablet"
-    } elseif { [regexp {\yandroid\y} $user_agent] &&
-               ! [regexp {\ymobile\y} $user_agent] } {
+    } elseif { [regexp {\yandroid\y} $user_agent]
+               && ! [regexp {\ymobile\y} $user_agent] } {
         set device "Tablet"
     } elseif { [regexp {\yipad\y} $user_agent] } {
         set device "Tablet"
     }
 
-    if { [regexp {\ywindows\y} $user_agent] &&
-         [regexp {\yphone\y} $user_agent] } {
+    # Mobile
+    if { [regexp {\ywindows\y} $user_agent]
+         && [regexp {\yphone\y} $user_agent] } {
         set device "Mobile"
-    } elseif { [regexp {\yandroid\y} $user_agent] &&
-                [regexp {\ymobile\y} $user_agent] } {
+    } elseif { [regexp {\yandroid\y} $user_agent]
+               && [regexp {\ymobile\y} $user_agent] } {
         set device "Mobile"
     } elseif { [regexp {\yip(hone|od)\y} $user_agent] } {
         set device "Mobile"
@@ -40,50 +43,62 @@ proc qc::user_agent_parse { user_agent } {
 
     # OS
     set os "Unknown"
+    # Windows
     if { [regexp {\ywindows nt\y} $user_agent] } {
         set os "Windows"
     }
+    # macOS
     if { [regexp {\ymacintosh\y} $user_agent] } {
         set os "macOS"
     }
+    # ChromeOS
     if { [regexp {\ycros\y} $user_agent] } {
         set os "ChromeOS"
     }
+    # Linux
     if { [regexp {\ylinux\y} $user_agent] } {
         set os "Linux"
     }
+    # Android
     if { [regexp {\yandroid\y} $user_agent] } {
         set os "Android"
     }
+    # Windows Phone
     if { [regexp {\ywindows phone\y} $user_agent] } {
         set os "Windows Phone"
     }
+    # iOS
     if { [regexp {\yip(hone|ad|od)\y} $user_agent] } {
         set os "iOS"
     }
 
     # Browser
     set browser "Unknown"
+    # Internet Explorer
     if { [regexp {\ytrident/7\y} $user_agent] } {
         set browser "Internet Explorer"
     }
-    
-    if { [regexp {\ysafari\y} $user_agent] &&
-         ! [regexp {(opr|chrome|presto)} $user_agent] } {
+
+    # Safari
+    if { [regexp {\ysafari\y} $user_agent]
+         && ! [regexp {\y(opr|chrome|presto)\y} $user_agent] } {
         set browser "Safari"
     }
-    
-    if { [regexp {\ychrome\y} $user_agent] &&
-         ! [regexp {\y(edge|opr)\y} $user_agent] } {
+
+    # Chrome
+    if { [regexp {\ychrome\y} $user_agent]
+         && ! [regexp {\y(edge|opr)\y} $user_agent] } {
         set browser "Chrome"
     } elseif { [regexp {\ycrios\y} $user_agent] } {
         set browser "Chrome"
     }
-    
+
+    # Firefox
     if { [regexp {\y(firefox|fxios)\y} $user_agent] } {
         set browser "Firefox"
     }
-    
+
+    # Microsoft Edge
     if { [regexp {\yedge?\y} $user_agent] } {
         set browser "Microsoft Edge"
     }

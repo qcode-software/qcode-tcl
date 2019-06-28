@@ -85,6 +85,11 @@ namespace eval ::qcode::test {
                                  {Mozilla/5.0 (Android; Tablet; rv:40.0) Gecko/40.0 Firefox/40.0} \
                                  {device Tablet os Android browser Firefox} \
                                 ] \
+                            [list \
+                                 {MS Edge running on macOS X} \
+                                 {Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3831.0 Safari/537.36 Edg/77.0.200.1} \
+                                 {device PC os macOS browser {Microsoft Edge}} \
+                                ] \
                            ]
     set count 0
     table_foreach $test_uas_table {
