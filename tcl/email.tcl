@@ -384,16 +384,96 @@ proc qc::email_header_values {key value} {
     # Convert
     # Content-Type: multipart/report; report-type=delivery-status; boundary="=_ventus"
     # to dict
-    # $key multipart/report report-type delivery-status boundary =_ventus
+    # $key {Content-Type: multipart/report} report-type delivery-status boundary =_ventus
     # lower case parameter attribute names to allow case insensitive matching
     set dict {}
-    set list [split [string trimright $value ";"] ";"]
-    lappend dict $key [lindex $list 0]
-    # parameters
-    foreach part [lrange $list 1 end] {
-	lassign [split_pair $part =] key value
-        set value [qc::email_header_value_decode [string trim $value \"']]
+    set remainder [string trimright $value ";"]
+
+    # Get first value
+    set index [string first ";" $value]    
+    if { $index == -1 } {
+        dict set dict $key $remainder
+        return $dict
+    }
+    dict set dict $key [string range $remainder 0 ${index}-1]
+    set remainder [string range $remainder ${index}+1 end]
+    set remainder [string trimleft $remainder]
+
+    # Loop until entire string is parsed, limit to string length as sanity check
+    foreach saftey [.. 0 [string length $remainder]] {
+
+        # Remove key from start of remainder
+        set index [string first "=" $remainder]
+        if { $index == -1 } {
+            error "Missing value for key \"$remainder\""
+        }
+        set key [string range $remainder 0 ${index}-1]
+        set remainder [string range $remainder ${index}+1 end]
+
+        set remainder [string trimleft $remainder]
+
+        # Remove value from start of remainder
+        set first_char [string index $remainder 0]
+        switch $first_char {
+            ' -
+            \" {
+                # Value begins with quote, search for next matching quote
+                # (excluding escaped quotes)
+                set index 0
+                foreach saftey2 [.. 0 [string length $remainder]] {
+                    set index [string first $first_char $remainder ${index}+1]
+                    if { $index == -1 } {
+                        error "Unbalanced quotes in \"$remainder\""
+                    }
+                    set preceding_backslashes 0
+                    foreach index2 [.. $index 1 -1] {
+                        if { [string index $remainder ${index2}-1] eq "\\" } {
+                            incr preceding_backslashes
+                        } else {
+                            break
+                        }
+                    }
+                    if { $preceding_backslashes % 2 == 0 } {
+                        break
+                    }
+                }
+                set value [string range $remainder 1 ${index}-1]
+
+                # Un-escape escaped characters
+                set value [regsub -all {\\(.)} $value {\1}]
+                
+                set remainder [string range $remainder ${index}+1 end]
+                
+                set remainder [string trimleft $remainder]
+
+                if { [string length $remainder] > 0
+                     &&
+                     [string index $remainder 0] ne ";"
+                 } {
+                    error "Invalid characters after close-quote ($remainder)"
+                }
+
+                set remainder [string range $remainder 1 end]
+            }
+            default {
+                # Value is all remaining string up to the first ;
+                set index [string first ";" $remainder]
+                if { $index == -1 } {
+                    set value $remainder
+                    set remainder ""
+                } else {
+                    set value [string range $remainder 0 ${index}-1]
+                    set remainder [string range $remainder ${index}+1 end]
+                }
+            }
+        }
+        set remainder [string trimleft $remainder]
+        
+        set value [qc::email_header_value_decode $value]
 	lappend dict [string tolower $key] $value
+        if { $remainder eq "" } {
+            break
+        }
     }
     return $dict
 }
