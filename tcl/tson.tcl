@@ -286,3 +286,50 @@ proc qc::tson_array_foreach {varName tson code} {
         uplevel 1 $code
     }
 }
+
+proc qc::tson_object_get {tson args} {
+    #| Get named property of a TSON object node,
+    #| optionally nested
+    set value [dict get [lrange $tson 1 end] [lindex $args 0]]
+    if { [llength $args] > 1 } {
+        return [tson_object_get \
+                    $value \
+                    {*}[lrange $args 1 end]]
+    }
+    return $value
+}
+
+proc qc::tson_object_exists {tson args} {
+    #| Check if named property of a TSON object node exists
+    if { ! [dict exists [lrange $tson 1 end] [lindex $args 0]] } {
+        return false
+    }
+    if { [llength $args] > 1 } {
+        return [tson_object_exists \
+                    [tson_object_get $tson [lindex $args 0]] \
+                    {*}[lrange $args 1 end]]
+    }
+    return true
+}
+
+proc qc::tson_value {tson} {
+    #| Get tson value
+    if { [llength $tson] != 2 } {
+        return $tson
+    }
+    switch [lindex $tson 0] {
+        "string" -
+        "number" -
+        "boolean" {
+            return [lindex $tson 1]
+        }
+        default {
+            return $tson
+        }
+    }
+}
+
+proc qc::tson_object_get_value {tson args} {
+    #| Get named property of a TSON object node as a flat value
+    return [tson_value [tson_object_get $tson {*}$args]]
+}
