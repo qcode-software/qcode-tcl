@@ -328,7 +328,7 @@ proc qc::email2multimap {text} {
         # MIME message
 	set bodies {}
 	array set header [email_header_values Content-Type [multimap_get_first $email Content-Type]]
-	if { [string match multipart/* $header(Content-Type)] } {
+	if { [string match -nocase multipart/* $header(Content-Type)] } {
             # Multi-part MIME
 	    foreach part [lrange [mcsplit $body "--$header(boundary)"] 1 end-1] {
                 lappend bodies [qc::email2multimap $part]
