@@ -487,14 +487,9 @@ proc qc::log {args} {
 proc qc::exec_proxy {args} {
     #| Execute the given command.
     #| If running on aolserver will use ns_proxy, otherwise the command is executed directly.
-    if {[lindex $args 0] eq "-timeout"} {
-	set timeout [lindex $args 1]
-	set args [lrange $args 2 end]
-    } else {
-	set timeout 1000
-    }
+    qc::args $args -timeout 1000 -pool exec -- args
     if { [info commands ns_proxy] eq "ns_proxy" } {
-	set handle [ns_proxy get exec]
+	set handle [ns_proxy get $pool]
 	::try {
 	    set result [ns_proxy eval $handle [list exec {*}$args] $timeout]
 	    ns_proxy release $handle
