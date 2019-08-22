@@ -13,7 +13,7 @@ A list of data model dependencies can be viewed [here](/doc/data-model-dependenc
 -----
 ### Prerequisites
 
-After installing and configuring [Postgresql](/doc/postgresql-setup.md) install postgres-contrib:
+After installing and configuring [Postgresql database and users](/doc/postgresql-setup.md), install postgres-contrib:
 
 ```
 apt-get install postgresql-contrib-9.4
