@@ -23,6 +23,12 @@ Create a blank database called `test`.
 
 #### Set postgresql and controlport
 Now we need to modify your Naviserver config to set the parameters for postgresql and the controlport. 
+
+Ensure you have installed the naviserver DB drivers by this point:
+```
+sudo apt-get install naviserver-nsdbpg
+```
+
 To make sure it all works replace your full config file with [full config](/doc/qc-config.tcl)
 
 You can find more about the configurations at the bottom of your new file.
