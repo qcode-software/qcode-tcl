@@ -36,6 +36,7 @@ OPTS="-b 127.0.0.1:80"
 
 ## Initialising the database
 Use either telnet or nc(netcat) to your control port.
+(netcat handles cutting and pasting of line continuation characters better than telnet)
 ```
 #| Telnet
 telnet 127.0.0.1 9980
