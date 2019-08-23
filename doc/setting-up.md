@@ -4,7 +4,9 @@ part of [Qcode Documentation](index.md)
 
 * * *
 
-This guide will demonstrate how to use the qcode-tcl library with Naviserver to handle incoming requests, perform validation of user input, and perform user authentication. Create a new file called `zz.tcl` for this.
+This guide will demonstrate how to use the qcode-tcl library with Naviserver to handle incoming requests, perform validation of user input, and perform user authentication. Create a new file called `zz.tcl` in the same directory as the init.tcl file.
+
+**Note:** Naviserver first finds a file called init.tcl and loads it, and then loads all other `*.tcl` files in the same directory alphabetically.
 
 ### Naviserver Initialization
 Firstly, we'll need to register filters and procs and ensure that the anonymous session has been created. There are a few filters provided by the library and here we will use three of them:
