@@ -5,7 +5,7 @@ Where possible define data types within the data model, so that PostgreSQL can p
 New data types can be defined in Postgresql using domains and enumerations.
 
 The ensembles [is, cast and castable](https://github.com/qcode-software/qcode-tcl/blob/master/doc/data-types.md) will automatically
-check the data model against the model.
+check the data against the model.
 So for example, the command ``` qc::is plain_text ``` can only exist if the domain plain_text has been defined in the data model. 
 
 Because validation of the data model is ultimately handled by the castable ensemble, no additional tcl code needs to be written to 
