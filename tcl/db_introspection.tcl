@@ -74,7 +74,7 @@ proc qc::db_qualify_column {args} {
 
             # Still no tables found
             if { [llength $data] == 0 } {
-                error "No table containing column \"$column\""
+                error "No table containing column \"$column_name\""
             }
 
             # Exactly one table found
