@@ -20,7 +20,7 @@ For more information on filters see [Filters].
 **Note:** if registering filters at the same stage it would seem that Naviserver calls them in the order that they were registered. This does not matter for the order of `qc::filter_validate` and `qc:filter_authenticate` as neither depends on the other. However, if registering another filter on `preauth` then we suggest that `qc::filter_http_request_validate` be registered first as there is little point in doing much work if the HTTP request is invalid.
 
 ```tcl
-# use naviserver arrays to track initialising of server
+# This ensures this only runs once - see the final line of code, where the variable is set.
 if {![nsv_exists . init]} {
 
     # import the qcode-tcl library
@@ -42,7 +42,8 @@ if {![nsv_exists . init]} {
     # Create anonymous session
     qc::anonymous_session_id
     
-    # update the naviserver array to show to initialisation has completed
+    # Flag that initialisation has completed.
+    # The first line will see this variable, and will not repeat initialisation.
     nsv_set . init done
 }
 
