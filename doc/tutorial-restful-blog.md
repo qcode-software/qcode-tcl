@@ -121,7 +121,7 @@ register GET /entries/:entry_id {entry_id} {
 }
 ```
 
-By putting a colon at the start of `:entry_id`, we instruct the handler to treat it as a variable name and pass its value to `entry_id` to be used in the function body. For more detail on the register proc, [see its documentation](registration.md).
+By putting a colon at the start of `:entry_id`, we instruct the handler to treat it as a variable name and pass its value to `entry_id` to be used in the function body. For more detail, [see documentation on the register proc](registration.md).
 
 When constructing our form (and later in the `entry_get` proc), we used the `h` proc to generate html elements for us. The first argument you pass it is the type of html element you want. After specifying the type, any additional elements will be interpreted as alternating key value pairs. If the final argument is unpaired, it is placed in the body of the element. Consider this example:
 
@@ -129,7 +129,7 @@ When constructing our form (and later in the `entry_get` proc), we used the `h` 
 h a href "http://localhost/entries/new" "Submit another blog"
 ```
 
-This will return a string containing the HTML for an `<a>` element that reads "Submit another blog" and links back to the new entry form. It is preferable to use the `h` proc instead of writing strings of raw HTML yourself, and essential for anything that involves variable substitution - aside from making construction of HTML easier, it also takes care of sanitising your input data and preventing critical security vulnerabilities such as [injection attacks](https://en.wikipedia.org/wiki/Code_injection#Examples). Additional examples can be found in [its documentation](procs/h.md).
+This will return a string containing the HTML for an `<a>` element that reads "Submit another blog" and links back to the new entry form. It is preferable to use the `h` proc instead of writing strings of raw HTML yourself, and essential for anything that involves variable substitution - aside from making construction of HTML easier, it also takes care of sanitising your input data and preventing critical security vulnerabilities such as [injection attacks](https://en.wikipedia.org/wiki/Code_injection#Examples). Additional examples can be found in [the qc::h documentation](procs/h.md).
 
 We also used the `form` proc to construct the form you passed to the user. It will return a form element, using the arguments you pass it as key-value pairs and the final unpaired argument you pass it (if applicable) placed in the body of the element. See our example:
 
@@ -137,7 +137,7 @@ We also used the `form` proc to construct the form you passed to the user. It wi
 return [qc::form method POST action /entries $form]
 ```
 
-Here, it returns a `<form>` element with `method="POST"` and `action="/entries"`, and then places the html we have stored in the `form` string variable inside the body of the form. Use this proc when you are constructing forms - aside from not having to write out the full HTML, it also takes care of attaching a hidden authenticity token - if you see an error that refers to there being no authenticity token, you should check to see if you have skipped over using this proc (or a similar one), which would have taken care of it for you. See its [full documentation](procs/form.md).
+Here, it returns a `<form>` element with `method="POST"` and `action="/entries"`, and then places the html we have stored in the `form` string variable inside the body of the form. Use this proc when you are constructing forms - aside from not having to write out the full HTML, it also takes care of attaching a hidden authenticity token - if you see an error that refers to there being no authenticity token, you should check to see if you have skipped over using this proc (or a similar one), which would have taken care of it for you. See the [full qc::form documentation](procs/form.md).
 
 ## Index and navigation
 
