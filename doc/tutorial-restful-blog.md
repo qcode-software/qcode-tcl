@@ -311,4 +311,4 @@ Similarly, when we use the `form` proc to create our "Delete" button, we use a h
 		     [h input type submit name submit value "Delete this blog"]]
 ```
 
-If you refer back to the `form` proc's [documentation](procs/form.md), you will see in the second example how the proc inserts the hidden input for us (in addition to the authenticity token).
+If you refer back to the [`form` proc's documentation](procs/form.md), you will see in the second example how the proc inserts the hidden input for us (in addition to the authenticity token).
