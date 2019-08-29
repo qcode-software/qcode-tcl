@@ -18,6 +18,7 @@ A library for building Tcl Web Apps running on Naviserver.
 * [Filter Validate][24]
 * [Storing User Input in the Database][25]
 * [Setting Up a Connection Marshal and Request Handlers][18]
+* [Creating a CRUD blog site with RESTful endpoints][26]
 * [How to Define a New Data Type (Domain)][19]
 
 ## 2. [Handler and Path Registration][12]
@@ -121,3 +122,4 @@ A library for building Tcl Web Apps running on Naviserver.
 [23]: doc/tutorial-4-validation.md
 [24]: doc/tutorial-5-filter-validate.md
 [25]: doc/tutorial-6-database.md
+[26]: doc/tutorial-restful-blog.md
