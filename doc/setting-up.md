@@ -109,7 +109,7 @@ register POST /entry {entry_title entry_content} {
     # we don't need to validate the data because by the time this request handler is called qc::filter_validate has done the validation for us
     set entry_id [entry_create $post_title $entry_content]
     # use the Connection Response API to redirect the client to the new entry URL.
-    qc::actions redirect [url "/entry/$entry_id"]
+    qc::response action redirect [url "/entry/$entry_id"]
 }
 ```
 
