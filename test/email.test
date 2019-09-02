@@ -108,6 +108,9 @@ Lg==
     test email_header_values-1.1 {email_header_values success} -body {
         email_header_values Content-Type {Content-Type: multipart/report; report-type=delivery-status; boundary="=_pluto"; filename="awkward; file's \"name\".pdf"}
     } -result {Content-Type {Content-Type: multipart/report} report-type delivery-status boundary =_pluto filename {awkward; file's "name".pdf}}
+    test email_header_values-1.2 {email_header_values success} -body {
+        email_header_values Content-Type {Content-Type: multipart/report; }
+    } -result {Content-Type {Content-Type: multipart/report}}
     
     test email_header_fold-1.0 {email_header_fold non ascii} -body {
         email_header_fold "Non ASCII treated llike this pound sign £"

@@ -387,10 +387,10 @@ proc qc::email_header_values {key value} {
     # $key {Content-Type: multipart/report} report-type delivery-status boundary =_ventus
     # lower case parameter attribute names to allow case insensitive matching
     set dict {}
-    set remainder [string trimright $value ";"]
+    set remainder [string trimright [string trimright $value] ";"]
 
     # Get first value
-    set index [string first ";" $value]    
+    set index [string first ";" $remainder]    
     if { $index == -1 } {
         dict set dict $key $remainder
         return $dict
