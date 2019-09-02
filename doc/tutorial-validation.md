@@ -1,4 +1,4 @@
-Tutorial: Validation
+Blog Tutorial: Validation
 ========
 
 ### Introduction
