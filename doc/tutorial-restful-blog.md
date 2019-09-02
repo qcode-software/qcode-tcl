@@ -1,9 +1,9 @@
-Tutorial: Restful Blog
+Blog Tutorial: RESTful and CRUD
 ========
 
 ### Introduction
 
-This tutorial will guide you through building a simple blog site with RESTful endpoints, where you can create new blog posts and read, update, or delete existing ones. This assumes you have a `zz.tcl` as outlined in the [request handler tutorial](setting-up.md) - if not, complete that first.
+This is the first in a series of tutorials in which you will create a website using the qcode-tcl library and gradually add functionality to it. This first tutorial will guide you through building a simple blog site with RESTful endpoints, where you can create new blog posts and read, update, or delete existing ones. This assumes you have a `zz.tcl` as outlined in the [request handler tutorial](setting-up.md) - if not, complete that first.
 
 If you encounter unexpected errors or have difficulty in getting things to work, start by checking your logs - you may find you can find and correct the problem yourself. The command `less /var/log/naviserver/qcode.log` (replacing "qcode.log" with whatever name you chose for your [full config file](qc-config.tcl)) will show you the server's logs - the End key will take you straight to the bottom, where you will find your error. You can also search the logs using `/` followed by the pattern you wish to search for.
 
@@ -312,3 +312,4 @@ Similarly, when we use the `form` proc to create our "Delete" button, we use a h
 ```
 
 If you refer back to the [`form` proc's documentation](procs/form.md), you will see in the second example how the proc inserts the hidden input for us (in addition to the authenticity token).
+
