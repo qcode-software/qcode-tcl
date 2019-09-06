@@ -106,5 +106,5 @@ public | validation_messages | table | web
 As Postgres superuser lower privileges for user web.
 
 ```sql
-postgres=# alter role "web2" with nosuperuser;
+postgres=# alter role "web" with nosuperuser;
 ```
