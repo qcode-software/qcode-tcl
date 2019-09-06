@@ -19,7 +19,18 @@ After installing and configuring [Postgresql database and users](/doc/postgresql
 apt-get install postgresql-contrib-9.4
 ```
 
-Create a blank database called `test`.
+Connect to Postgresql as superuser
+```
+$ sudo su - postgres
+$ psql
+```
+
+Create a new database called "test" for the user "web".
+```sql
+postgres=# create role "web" with superuser login password 'pass123';
+postgres=# create database "test" owner "web";
+```
+
 
 #### Set postgresql and controlport
 Now we need to modify your Naviserver config to set the parameters for postgresql and the controlport. 
@@ -62,19 +73,11 @@ Telnet to your control port. Type the following commands:
 > qc::db_init
 ```
 
-The final command should return a empty string indicating that the data structure has been successfully set up.
-
-You may receive an error message from the module PgCrypto stating that the database user "www-data" is not superuser. 
-
-To correct this:
-
-* 1) switch to the postgres user `sudo su - postgres`
-* 2) Assign the user "www-data" superuser privilidges `ALTER USER "www-data" WITH SUPERUSER;`
-* 3) Run the above `db_init` code.
-* 4) Remove superuser priviledges from "www-data" user `ALTER USER "www-data" WITH NOSUPERUSER;`
-
-From a psql shell you will see the following tables created:
-by using the command ```\dt ```
+Connect to the database as user "web" using psql
+```
+$ psql -U web -h localhost test
+```
+Check that the following tables have been created using the psql command `\dt`
 
 ```
 Schema |        Name         | Type  |  Owner
@@ -95,4 +98,10 @@ public | sticky              | table | www-data
 public | user_perm           | table | www-data
 public | users               | table | www-data
 public | validation_messages | table | www-data
+```
+
+As Postgres superuser lower privileges for user web.
+
+```sql
+postgres=# alter role "web2" with nosuperuser;
 ```
