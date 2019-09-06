@@ -77,6 +77,10 @@ Connect to the database as user "web" using psql
 ```
 $ psql -U web -h localhost test
 ```
+
+This is the command you should use whenever you wish to access this database with psql.
+
+
 Check that the following tables have been created using the psql command `\dt`
 
 ```
