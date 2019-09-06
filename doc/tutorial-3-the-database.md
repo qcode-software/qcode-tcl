@@ -82,22 +82,21 @@ Check that the following tables have been created using the psql command `\dt`
 ```
 Schema |        Name         | Type  |  Owner
 --------+---------------------+-------+----------
-public | file                | table | www-data
-public | file_alias_path     | table | www-data
-public | form                | table | www-data
-public | image               | table | www-data
-public | optional            | table | www-data
-public | param               | table | www-data
-public | perm                | table | www-data
-public | perm_category       | table | www-data
-public | perm_class          | table | www-data
-public | required            | table | www-data
-public | schema              | table | www-data
-public | session             | table | www-data
-public | sticky              | table | www-data
-public | user_perm           | table | www-data
-public | users               | table | www-data
-public | validation_messages | table | www-data
+public | file                | table | web
+public | file_alias_path     | table | web
+public | image               | table | web
+public | optional            | table | web
+public | param               | table | web
+public | perm                | table | web
+public | perm_category       | table | web
+public | perm_class          | table | web
+public | required            | table | web
+public | schema              | table | web
+public | session             | table | web
+public | sticky              | table | web
+public | user_perm           | table | web
+public | users               | table | web
+public | validation_messages | table | web
 ```
 
 As Postgres superuser lower privileges for user web.
