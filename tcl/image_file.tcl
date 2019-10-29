@@ -242,7 +242,10 @@ proc qc::image_handler {
         if { $autocrop } {
             lappend cache_args -autocrop
         }
+        lappend cache_args -mime-type [qc::mime_type_guess $filename]
         lappend cache_args $cache_dir $file_id $max_width $max_height
+
+        
 
         # Canonical URL
         if { ! [qc::image_cache_exists {*}$cache_args] } {

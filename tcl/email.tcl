@@ -1057,6 +1057,9 @@ proc qc::mime_type_guess { filename } {
         ".wbmp" {
             return "image/vnd.wap.wbmp"
         }
+        ".webp" {
+            return "image/webp"
+        }
         ".wkb" {
             return "application/vnd.ms-excel"
         }

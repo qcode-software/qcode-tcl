@@ -20,7 +20,7 @@ proc qc::image_data {args} {
 proc qc::image_cache_exists {args} {
     #| Return true if a cached version of the image exists
     #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    qc::args $args -autocrop -- cache_dir file_id max_width max_height mime-type
     default autocrop false
 
     if { [qc::image_nsv_cache_exists ~ {*}{
@@ -28,6 +28,7 @@ proc qc::image_cache_exists {args} {
         max_width
         max_height
         autocrop
+        mime-type
     }] } {
         return true
     }
@@ -38,7 +39,7 @@ proc qc::image_cache_exists {args} {
         max_width
         max_height
         autocrop
-        
+        mime-type
     }] } {
         return true
     }
