@@ -7,8 +7,8 @@ namespace eval qc {
     }
 }
 proc qc::image_data {args} {
-    #| Return dict of width, height, & url of an image
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
+    #| Return dict of width, height, & url of an image. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
     if { ! [qc::image_cache_exists {*}$args] } {
         qc::image_cache_create {*}$args
     }
@@ -18,13 +18,22 @@ proc qc::image_data {args} {
 }
 
 proc qc::image_cache_exists {args} {
-    #| Return true if a cached version of the image exists
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    #| Return true if a cached version of the image exists. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
+        cache_dir
+        file_id
+        max_width
+        max_height
+    }
     default autocrop false
 
     if { [qc::image_nsv_cache_exists ~ {*}{
         file_id
+        mime_type
         max_width
         max_height
         autocrop
@@ -35,6 +44,7 @@ proc qc::image_cache_exists {args} {
     if { [qc::image_filesystem_cache_exists ~ {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
@@ -46,15 +56,24 @@ proc qc::image_cache_exists {args} {
 }
 
 proc qc::image_cache_data {args} {
-    #| Return dict of width, height & url of an image from cache
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    #| Return dict of width, height & url of an image from cache. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
+        cache_dir
+        file_id
+        max_width
+        max_height
+    }
     default autocrop false
 
     # Get data from nsv cache if possible
     set nsv_args [dict_from {*}{
         autocrop
         file_id
+        mime_type
         max_width
         max_height
     }]
@@ -68,6 +87,7 @@ proc qc::image_cache_data {args} {
         autocrop
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
     }]
@@ -76,9 +96,17 @@ proc qc::image_cache_data {args} {
 }
 
 proc qc::image_cache_create {args} {
-    #| Create a cache of an image
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
+    #| Create a cache of an image. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
+        cache_dir
+        file_id
+        max_width
+        max_height
+    }
     default autocrop false
 
     qc::image_filesystem_cache_create ~ {*}{

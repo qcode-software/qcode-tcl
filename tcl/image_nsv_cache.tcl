@@ -23,10 +23,12 @@ proc qc::image_nsv_cache_exists {args} {
     #| args: dict-style of file_id, width, height, autocrop
     qc::args2vars $args {*}{
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     # Requested size matches or exceeds full-sized image in cache
     if { [qc::image_nsv_cache_smaller_biggest_exists {*}$args] } {
@@ -34,11 +36,27 @@ proc qc::image_nsv_cache_exists {args} {
     }
 
     # NSV cache key
-    set nsv_key "$file_id $autocrop"
+    set nsv_pattern "$file_id $mime_type $autocrop"
+    set names [nsv_array names image_cache_data $nsv_pattern]
 
     # No cache exists yet for this image with this autocrop flag
-    if { ! [nsv_exists image_cache_data $nsv_key] } {
+    if { [llength $names] == 0 } {
         return false
+    }
+
+    # Prefer non-webp mime_type
+    if { $mime_type eq "*/*" } {
+        foreach mime_type {
+            "image/png"
+            "image/gif"
+            "image/jpeg"
+            "image/webp"
+        } {
+            set nsv_key "$file_id $mime_type $autocrop"
+            if { [lsearch -exact $names $nsv_key] > -1 } {
+                break
+            }
+        }
     }
 
     # Cache is a dict with width-height pairs for keys,
@@ -66,24 +84,42 @@ proc qc::image_nsv_cache_data {args} {
     #| args: dict-style of file_id, width, height, autocrop
     qc::args2vars $args {*}{
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     # Requested size matches or exceeds full-sized image in cache,
     # return full-sized image
     if { [qc::image_nsv_cache_smaller_biggest_exists {*}$args] } {
         if { $autocrop } {
-            return [qc::image_nsv_cache_autocrop_data $file_id]
+            return [qc::image_nsv_cache_autocrop_data $file_id $mime_type]
         } else {
-            return [qc::image_nsv_cache_original_data $file_id]
+            return [qc::image_nsv_cache_original_data $file_id $mime_type]
         }
     }
 
     # Cache is a dict with width-height pairs for keys,
     # Find one that matches the given constraints
-    set nsv_key "$file_id $autocrop"
+    set nsv_pattern "$file_id $mime_type $autocrop"
+    set names [nsv_array names image_cache_data $nsv_pattern]
+    
+    # Prefer non-webp mime_type
+    if { $mime_type eq "*/*" } {
+        foreach mime_type {
+            "image/png"
+            "image/gif"
+            "image/jpeg"
+            "image/webp"
+        } {
+            set nsv_key "$file_id $mime_type $autocrop"
+            if { [lsearch -exact $names $nsv_key] > -1 } {
+                break
+            }
+        }
+    }
     dict for {key value} [nsv_get image_cache_data $nsv_key] {
         lassign $key width height
 
@@ -108,10 +144,11 @@ proc qc::image_nsv_cache_set {args} {
     qc::args2vars $args {*}{
         autocrop
         file_id
+        mime_type
         data
     }
     dict2vars $data width height
-    set nsv_key "$file_id $autocrop"
+    set nsv_key "$file_id $mime_type $autocrop"
     if { [nsv_exists image_cache_data $nsv_key] } {
         set cache [nsv_get image_cache_data $nsv_key]
     } else {

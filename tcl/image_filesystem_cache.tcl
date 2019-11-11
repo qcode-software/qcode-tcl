@@ -19,15 +19,17 @@ namespace eval qc {
 # Filesystem Cache of Image
 
 proc qc::image_filesystem_cache_exists {args} {
-    #| Test whether a filesystem cache of an image exists
-    #| args: dict-style of cache_dir, file_id, width, height, autocrop
+    #| Test whether a filesystem cache of an image exists. args:
+    #| dict-style of cache_dir, file_id, mime_type, width, height, autocrop
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     # Requested size matches or exceeds full-sized image in cache
     if { [qc::image_filesystem_cache_smaller_biggest_exists {*}$args] } {
@@ -55,32 +57,54 @@ proc qc::image_filesystem_cache_exists {args} {
 }
 
 proc qc::image_filesystem_cache_data {args} {
-    #| Return filesystem cache data
-    #| args: dict-style of cache_dir, file_id, width, height, autocrop
+    #| Return filesystem cache data. args:
+    #| dict-style of cache_dir, file_id, mime_type, width, height, autocrop
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     # Requested size matches or exceeds full-sized image in cache
     if { [qc::image_filesystem_cache_smaller_biggest_exists {*}$args] } {
         if { $autocrop } {
             set data [qc::image_filesystem_cache_autocrop_data \
-                        ~ file_id cache_dir]
-            qc::image_nsv_cache_autocrop_set $file_id $data
+                        ~ file_id mime_type cache_dir]
+            qc::image_nsv_cache_autocrop_set $file_id $mime_type $data
 
         } else {
             set data [qc::image_filesystem_cache_original_data \
-                        ~ file_id cache_dir]
-            qc::image_nsv_cache_original_set $file_id $data
+                        ~ file_id mime_type cache_dir]
+            qc::image_nsv_cache_original_set $file_id $mime_type $data
         }
         return $data
     }
+    set file_list [qc::image_filesystem_cache_glob {*}$args]
 
-    foreach file [qc::image_filesystem_cache_glob {*}$args] {
+    # Sort files by extension so that non-webp are favoured
+    if { $mime_type eq "*/*" } {
+        set tmp [list]
+        foreach ext {
+            .png
+            .gif
+            .jpg
+            .jpeg
+            .webp
+        } {
+            foreach file $file_list {
+                if { $ext eq [file extension $file] } {
+                    lappend tmp $file
+                }
+            }
+        }
+        set file_list $tmp
+    }
+    
+    foreach file $file_list {
         lassign \
             [qc::image_filesystem_cache_file2dimensions $file] \
             width height
@@ -112,16 +136,18 @@ proc qc::image_filesystem_cache_create {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     if { $autocrop } {
-        dict2vars [qc::image_autocrop_data $cache_dir $file_id] \
+        dict2vars [qc::image_autocrop_data $cache_dir $file_id $mime_type] \
             file width height
     } else {
-        dict2vars [qc::image_original_data $cache_dir $file_id] \
+        dict2vars [qc::image_original_data $cache_dir $file_id $mime_type] \
             file width height
     }
     set ext [file extension $file]
@@ -157,6 +183,7 @@ proc qc::image_filesystem_cache_smaller_biggest_exists {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
@@ -167,10 +194,9 @@ proc qc::image_filesystem_cache_smaller_biggest_exists {args} {
     } else {
         set command_prefix "qc::image_filesystem_cache_original"
     }
-
-    if { [${command_prefix}_exists ~ cache_dir file_id]
-     } {
-        dict2vars [${command_prefix}_data ~ cache_dir file_id] \
+    
+    if { [${command_prefix}_exists ~ cache_dir file_id mime_type] } {
+        dict2vars [${command_prefix}_data ~ cache_dir file_id mime_type] \
             width height
         
         if { $width <= $max_width
@@ -188,21 +214,28 @@ proc qc::image_filesystem_cache_glob {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
         autocrop
     }
+    default mime_type "*/*"
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }
     if { $autocrop } {
         set glob_patterns \
             [list \
-                 "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
-                 "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
+                 "${file_id}/autocrop/${max_width}x*/${file_id}${ext}" \
+                 "${file_id}/autocrop/*x${max_height}/${file_id}${ext}"]
 
     } else {
         set glob_patterns \
             [list \
-                 "${file_id}-${max_width}x*/${file_id}.*" \
-                 "${file_id}-*x${max_height}/${file_id}.*"]
+                 "${file_id}-${max_width}x*/${file_id}${ext}" \
+                 "${file_id}-*x${max_height}/${file_id}${ext}"]
     }
     
     set data [list]
@@ -226,9 +259,15 @@ proc qc::image_filesystem_cache_original_exists {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
-    
-    set glob_pattern "${file_id}.*"
+    default mime_type "*/*"
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }    
+    set glob_pattern "${file_id}${ext}"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
         return true
@@ -242,10 +281,38 @@ proc qc::image_filesystem_cache_original_data {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
-    set glob_pattern "${file_id}.*"
+    default mime_type "*/*"
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }
+    set glob_pattern "${file_id}${ext}"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set link [lindex [glob {*}$glob_options {*}$glob_pattern] 0]
+    set file_list [glob {*}$glob_options {*}$glob_pattern]
+
+    # Sort files by extension so that non-webp are favoured
+    if { $mime_type eq "*/*" } {
+        set tmp [list]
+        foreach ext {
+            .png
+            .gif
+            .jpg
+            .jpeg
+            .webp
+        } {
+            foreach file $file_list {
+                if { $ext eq [file extension $file] } {
+                    lappend tmp $file
+                }
+            }
+        }
+        set file_list $tmp
+    }
+    
+    set link [lindex $file_list 0]
 
     set file_relative [file link $link]
     set file ${cache_dir}/${file_relative}
@@ -264,22 +331,47 @@ proc qc::image_filesystem_cache_original_create {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
+    default mime_type "*/*"
     db_1row {
-        select filename, mime_type, width, height
+        select
+        filename,
+        mime_type as db_mime_type,
+        width,
+        height
+        
         from file
         join image using(file_id)
+        
         where file_id=:file_id
     }
-    set ext [file extension $filename]
-    set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
-    set cache_file ${cache_dir}/${cache_file_relative}
-    if { ! [file exists $cache_file] } {
-        set file [qc::db_file_export $file_id]
-        qc::image_file_meta_strip $file
+    if { $mime_type ne "*/*"
+         && $mime_type ne $db_mime_type
+     } {
+        set original_typed_file \
+            [dict get \
+                 [qc::image_cache_original_data \
+                      $cache_dir \
+                      $file_id \
+                      $db_mime_type] \
+                 file]
+        set cache_file \
+            [qc::image_file_convert $original_typed_file $mime_type]
+        set ext [file extension $cache_file]
+        set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
         
-        file mkdir [file dirname $cache_file]
-        file rename -force $file $cache_file
+    } else {
+        set ext [file extension $filename]
+        set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
+        set cache_file ${cache_dir}/${cache_file_relative}
+        if { ! [file exists $cache_file] } {
+            set file [qc::db_file_export $file_id]
+            qc::image_file_meta_strip $file
+            
+            file mkdir [file dirname $cache_file]
+            file rename -force $file $cache_file
+        }
     }
     file link ${cache_dir}/${file_id}${ext} $cache_file_relative
 }
@@ -292,9 +384,15 @@ proc qc::image_filesystem_cache_autocrop_exists {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
-    
-    set glob_pattern "autocrop/${file_id}.*"
+    default mime_type "*/*"
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }    
+    set glob_pattern "autocrop/${file_id}${ext}"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
         return true
@@ -308,10 +406,38 @@ proc qc::image_filesystem_cache_autocrop_data {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
-    set glob_pattern "autocrop/${file_id}.*"
+    default mime_type "*/*"
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }    
+    set glob_pattern "autocrop/${file_id}${ext}"
     set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set link [lindex [glob {*}$glob_options {*}$glob_pattern] 0]
+    set file_list [glob {*}$glob_options {*}$glob_pattern]
+
+    # Sort files by extension so that non-webp are favoured
+    if { $mime_type eq "*/*" } {
+        set tmp [list]
+        foreach ext {
+            .png
+            .gif
+            .jpg
+            .jpeg
+            .webp
+        } {
+            foreach file $file_list {
+                if { $ext eq [file extension $file] } {
+                    lappend tmp $file
+                }
+            }
+        }
+        set file_list $tmp
+    }
+    
+    set link [lindex $file_list 0]
 
     set file_relative [file link $link]
     set file_root_relative [string range $file_relative 3 end]
@@ -331,9 +457,10 @@ proc qc::image_filesystem_cache_autocrop_create {args} {
     qc::args2vars $args {*}{
         cache_dir
         file_id
+        mime_type
     }
 
-    set original [qc::image_original_data $cache_dir $file_id]
+    set original [qc::image_original_data $cache_dir $file_id $mime_type]
     set original_file [dict get $original file]
     set ext [file extension $original_file]
 
