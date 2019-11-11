@@ -1117,6 +1117,9 @@ proc qc::mime_type_guess { filename } {
         ".zip" {
             return "application/zip"
         }
+        "webp" {
+            return "image/webp"
+        }
         default {
             return $default_type
         }
@@ -1299,6 +1302,7 @@ proc qc::mime_file_extension { mime_type } {
         "image/x-xwindowdump" ".xwd"
         "application/x-compress" ".z"
         "application/zip" ".zip"
+        "image/webp" ".webp"
     }
     if { [dict exists $map $mime_type] } {
         return [dict get $map $mime_type]

@@ -316,3 +316,27 @@ proc qc::image_redirect_handler {cache_dir}  {
     # Catch All - redirect to Canonical URL
     return [ns_returnredirect $canonical_url]      
 }
+
+proc qc::image_file_convert {old_file mime_type} {
+    #| Convert an image to a new format, return file path of new image
+    set ext [qc::mime_file_extension $mime_type]
+    set file "[file rootname $old_file]$ext"
+    set exec_proxy_flags {
+        -timeout 30000
+    }
+    set exec_flags {
+        -ignorestderr
+    }
+    set convert_flags [subst {
+        -quiet
+    }]
+    exec_proxy \
+        {*}$exec_proxy_flags \
+        {*}$exec_flags \
+        convert \
+        {*}$convert_flags \
+        $old_file \
+        $file
+
+    return $file
+}
