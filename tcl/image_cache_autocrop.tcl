@@ -7,20 +7,21 @@ namespace eval qc {
     }
 }
 
-proc qc::image_autocrop_data {cache_dir file_id} {
+proc qc::image_autocrop_data {cache_dir file_id mime_type} {
     #| Dict of autocropped image cache data at original dimensions,
     #| create if needed
     #| (file, width, height, url, timestamp)
-    if { ! [qc::image_cache_autocrop_exists $cache_dir $file_id] } {
-        qc::image_cache_autocrop_create $cache_dir $file_id
+    if { ! [qc::image_cache_autocrop_exists $cache_dir $file_id $mime_type] } {
+        qc::image_cache_autocrop_create $cache_dir $file_id $mime_type
     }
-    return [qc::image_cache_autocrop_data $cache_dir $file_id]
+    return [qc::image_cache_autocrop_data $cache_dir $file_id $mime_type]
 }
 
-proc qc::image_cache_autocrop_exists {cache_dir file_id} {
+proc qc::image_cache_autocrop_exists {cache_dir file_id mime_type} {
     #| Check if cache exists of autocropped image at original dimensions
-    set nsv_key "$file_id original autocrop"
-    if { [nsv_exists image_cache_data $nsv_key] } {
+    set pattern "$file_id $mime_type original autocrop"
+    set keys [nsv_array names image_cache_data $pattern]
+    if { [llength $keys] > 0 } {
         return true
     }
     set glob_pattern "autocrop/${file_id}.*"
@@ -32,20 +33,69 @@ proc qc::image_cache_autocrop_exists {cache_dir file_id} {
     }
 }
 
-proc qc::image_cache_autocrop_data {cache_dir file_id} {
+proc qc::image_cache_autocrop_data {cache_dir file_id mime_type} {
     #| Dict of autocropped image cache data at original dimensions
     #| (file, width, height, url, timestamp)
     #| (empty list if cache does not exist)
-    set nsv_key "$file_id original autocrop"
-    if { [nsv_exists image_cache_data $nsv_key] } {
+    set pattern "$file_id $mime_type original autocrop"
+    set keys [nsv_array names image_cache_data $pattern]
+    
+    if { [llength $keys] > 0 } {
+        # Prefer non-webp mime_type
+        if { $mime_type eq "*/*" } {
+            foreach mime_type {
+                "image/png"
+                "image/gif"
+                "image/jpeg"
+                "image/webp"
+            } {
+                set nsv_key "$file_id $mime_type original autocrop"
+                if { [lsearch -exact $keys $nsv_key] > -1 } {
+                    break
+                }
+            }
+        } else {
+            set nsv_key [lindex $keys 0]
+        }
         return [nsv_get image_cache_data $nsv_key]
     }
-    set glob_pattern "autocrop/${file_id}.*"
+    
+    if { $mime_type eq "*/*" } {
+        set ext ".*"
+    } else {
+        set ext [qc::mime_file_extension $mime_type]
+    }    
+    set glob_pattern "autocrop/${file_id}${ext}"
+    
     set glob_options [list -nocomplain -types f -directory $cache_dir]
     set links [glob {*}$glob_options {*}$glob_pattern]
+    
+    # Sort files by extension so that non-webp are favoured
+    if { $mime_type eq "*/*" } {
+        set tmp [list]
+        foreach ext {
+            .png
+            .gif
+            .jpg
+            .jpeg
+            .webp
+        } {
+            foreach link $links {
+                if { $ext eq [file extension $link] } {
+                    lappend tmp $link
+                }
+            }
+        }
+        set links $tmp
+    }
+    
     set file_relative [file link [lindex $links 0]]
     set file_root_relative [string range $file_relative 3 end]
     set file ${cache_dir}/$file_root_relative
+
+    set mime_type [qc::mime_type_guess $file]
+    
+    set nsv_key "$file_id $mime_type original autocrop"
 
     set expression {^/image/[0-9]+/autocrop/([0-9]+)x([0-9]+)/}
     set url [qc::file2url $file]
@@ -56,10 +106,10 @@ proc qc::image_cache_autocrop_data {cache_dir file_id} {
     return $data
 }
 
-proc qc::image_cache_autocrop_create {cache_dir file_id} {
+proc qc::image_cache_autocrop_create {cache_dir file_id mime_type} {
     #| Create image cache, autocropped, from original dimensions
     #| Create symbolic link to cached image
-    set original [qc::image_original_data $cache_dir $file_id]
+    set original [qc::image_original_data $cache_dir $file_id $mime_type]
     set original_file [dict get $original file]
     set ext [file extension $original_file]
     set file [qc::image_file_autocrop $original_file]

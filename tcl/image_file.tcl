@@ -238,11 +238,15 @@ proc qc::image_handler {
             return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
         }
 
+        set mime_type [qc::mime_type_guess $filename]
+
         set cache_args [list]
         if { $autocrop } {
             lappend cache_args -autocrop
         }
-        lappend cache_args $cache_dir $file_id $max_width $max_height
+        lappend cache_args \
+            -mime_type $mime_type \
+            -- $cache_dir $file_id $max_width $max_height
 
         # Canonical URL
         if { ! [qc::image_cache_exists {*}$cache_args] } {
@@ -293,14 +297,20 @@ proc qc::image_redirect_handler {cache_dir}  {
         set autocrop true
     }
 
+    set mime_type [qc::mime_type_guess $filename]
+
     if { $autocrop } {
         dict2vars \
             [qc::image_cache_data \
-                 -autocrop $cache_dir $file_id $max_width $max_height] \
+                 -autocrop \
+                 -mime_type $mime_type \
+                 -- $cache_dir $file_id $max_width $max_height] \
             width height url
     } else {
         dict2vars \
-            [qc::image_cache_data $cache_dir $file_id $max_width $max_height] \
+            [qc::image_cache_data \
+                 -mime_type $mime_type \
+                 -- $cache_dir $file_id $max_width $max_height] \
             width height url
     }
     set canonical_url $url

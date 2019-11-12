@@ -73,12 +73,14 @@ proc qc::image_filesystem_cache_data {args} {
     if { [qc::image_filesystem_cache_smaller_biggest_exists {*}$args] } {
         if { $autocrop } {
             set data [qc::image_filesystem_cache_autocrop_data \
-                        ~ file_id mime_type cache_dir]
+                          ~ file_id mime_type cache_dir]
+            set mime_type [qc::mime_type_guess [dict get $data file]]
             qc::image_nsv_cache_autocrop_set $file_id $mime_type $data
 
         } else {
             set data [qc::image_filesystem_cache_original_data \
                         ~ file_id mime_type cache_dir]
+            set mime_type [qc::mime_type_guess [dict get $data file]]
             qc::image_nsv_cache_original_set $file_id $mime_type $data
         }
         return $data
@@ -120,8 +122,14 @@ proc qc::image_filesystem_cache_data {args} {
             set url [qc::file2url $file]
             set timestamp [qc::cast timestamp [file mtime $file]]
             set data [dict_from width height url timestamp]
+            set mime_type [qc::mime_type_guess $file]
 
-            qc::image_nsv_cache_set ~ autocrop file_id data
+            qc::image_nsv_cache_set ~ {*}{
+                autocrop
+                file_id
+                mime_type
+                data
+            }
             return $data
         }
     }
@@ -188,6 +196,7 @@ proc qc::image_filesystem_cache_smaller_biggest_exists {args} {
         max_height
         autocrop
     }
+    default mime_type "*/*"
 
     if { $autocrop } {
         set command_prefix "qc::image_filesystem_cache_autocrop"
@@ -210,7 +219,7 @@ proc qc::image_filesystem_cache_smaller_biggest_exists {args} {
 
 proc qc::image_filesystem_cache_glob {args} {
     #| Return a list of files on the filesystem cache that match the given
-    #| file_id, and match at least one size contraint exactly
+    #| file_id, and match at least one size constraint exactly
     qc::args2vars $args {*}{
         cache_dir
         file_id
@@ -459,6 +468,7 @@ proc qc::image_filesystem_cache_autocrop_create {args} {
         file_id
         mime_type
     }
+    default mime_type "*/*"
 
     set original [qc::image_original_data $cache_dir $file_id $mime_type]
     set original_file [dict get $original file]

@@ -47,8 +47,7 @@ proc qc::image_cache_exists {args} {
         mime_type
         max_width
         max_height
-        autocrop
-        
+        autocrop        
     }] } {
         return true
     }
@@ -113,6 +112,7 @@ proc qc::image_cache_create {args} {
         autocrop
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
     }
