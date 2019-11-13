@@ -327,25 +327,45 @@ proc qc::image_redirect_handler {cache_dir}  {
     return [ns_returnredirect $canonical_url]      
 }
 
-proc qc::image_file_convert {old_file mime_type} {
-    #| Convert an image to a new format, return file path of new image
+proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
+    #| Convert an image, return file path of new image
     set ext [qc::mime_file_extension $mime_type]
-    set file "[file rootname $old_file]$ext"
+    set file /tmp/[uuid::uuid generate]${ext}
     set exec_proxy_flags {
         -timeout 30000
     }
     set exec_flags {
         -ignorestderr
     }
-    set convert_flags [subst {
+    set convert_flags {
         -quiet
-    }]
+        -strip
+        -density 0
+        -quality 75%
+    }
+    lappend convert_flags \
+        -thumbnail ${max_width}x${max_height}
+    
+    if { $autocrop } {
+        set crop_info \
+            [exec_proxy \
+                 {*}$exec_proxy_flags \
+                 {*}$exec_flags \
+                 convert \
+                 $old_file \
+                 {*}$convert_flags \
+                 -trim \
+                 -format %wx%h%O info:]
+        lappend convert_flags \
+            -crop $crop_info \
+            +repage
+    }
     exec_proxy \
         {*}$exec_proxy_flags \
         {*}$exec_flags \
         convert \
-        {*}$convert_flags \
         $old_file \
+        {*}$convert_flags \
         $file
 
     return $file
