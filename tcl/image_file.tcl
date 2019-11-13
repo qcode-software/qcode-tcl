@@ -254,24 +254,8 @@ proc qc::image_handler {
         lappend cache_args \
             -mime_type $mime_type \
             -- $cache_dir $file_id $max_width $max_height
-
-        # Canonical URL
-        if { ! [qc::image_cache_exists {*}$cache_args] } {
-            # Create cache for canonical url
-            
-            # Check file exists
-            db_0or1row {
-                select 
-                file_id
-                from file
-                join image using (file_id)
-                where file_id=:file_id
-            } {
-                return [ns_returnnotfound]
-            } 
-            qc::image_cache_create {*}$cache_args
-        }
-        dict2vars [qc::image_cache_data {*}$cache_args] width height url
+        
+        dict2vars [qc::image_data {*}$cache_args] width height url
         set canonical_url $url
         set canonical_file [ns_pagepath]$url
 
@@ -338,6 +322,11 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
     #| Convert an image, return file path of new image
     set ext [qc::mime_file_extension $mime_type]
     set file /tmp/[uuid::uuid generate]${ext}
+
+    if { $autocrop } {
+        set old_file [qc::image_file_autocrop $old_file]
+    }
+    
     set exec_proxy_flags {
         -timeout 30000
     }
@@ -347,26 +336,11 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
     set convert_flags {
         -quiet
         -strip
-        -density 0
         -quality 75%
     }
     lappend convert_flags \
         -thumbnail ${max_width}x${max_height}
     
-    if { $autocrop } {
-        set crop_info \
-            [exec_proxy \
-                 {*}$exec_proxy_flags \
-                 {*}$exec_flags \
-                 convert \
-                 $old_file \
-                 {*}$convert_flags \
-                 -trim \
-                 -format %wx%h%O info:]
-        lappend convert_flags \
-            -crop $crop_info \
-            +repage
-    }
     exec_proxy \
         {*}$exec_proxy_flags \
         {*}$exec_flags \
@@ -374,6 +348,10 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
         $old_file \
         {*}$convert_flags \
         $file
+    
+    if { $autocrop } {
+        file delete $old_file
+    }
 
     return $file
 }
