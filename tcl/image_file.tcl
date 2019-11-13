@@ -1,5 +1,12 @@
 namespace eval qc {
-    namespace export file_is_valid_image image_file_info image_resize image_file_autocrop image_file_resize
+    namespace export {*}{
+        file_is_valid_image
+        image_file_info
+        image_resize
+        image_file_autocrop
+        image_file_resize
+        image_file_convert
+    }
 }
 
 proc qc::image_file_meta_strip {file} {
