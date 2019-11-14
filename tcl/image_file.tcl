@@ -138,7 +138,11 @@ proc qc::file_is_valid_image {file} {
     package require jpeg
     package require png
 
-    return [expr {[jpeg::isJPEG $file] || [png::isPNG $file] || [qc::is_gif $file]}]
+    return [expr {
+                  [jpeg::isJPEG $file]
+                  || [png::isPNG $file]
+                  || [qc::is_gif $file]
+                  || [qc::is_webp $file]}]
 }
 
 proc qc::image_file_info {file} {
@@ -155,14 +159,17 @@ proc qc::image_file_info {file} {
     } elseif { [qc::is_gif $file] } {
         lassign [qc::gif_dimensions $file] width height
         set mime_type "image/gif"
+    } elseif { [qc::is_webp $file] } {
+        lassign [qc::webpsize $file] width height
+        set mime_type "image/webp"
     } else {
         error "Unrecognised image type"
     }
     return [qc::dict_from width height mime_type]
 }
 
-proc qc::is_gif {name} {
-    set f [open $name r]
+proc qc::is_gif {file} {
+    set f [open $file r]
     fconfigure $f -translation binary
     # read GIF signature -- check that this is
     # either GIF87a or GIF89a

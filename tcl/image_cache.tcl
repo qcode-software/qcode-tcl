@@ -4,6 +4,7 @@ namespace eval qc {
         image_cache_exists
     }
 }
+
 proc qc::image_data {args} {
     #| Return dict of width, height, & url of an image. Usage:
     #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
@@ -51,6 +52,30 @@ proc qc::image_data {args} {
     return $cache_data
 }
 
+proc qc::image_data2 {args} {
+    #| Return dict of width, height, & url of an image. Usage:
+    #| ?-autocrop? -- cache_dir file_id mime_type max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        --
+        cache_dir
+        file_id
+        mime_type
+        max_width
+        max_height
+    }
+    default autocrop false
+    if { ! [qc::image_cache_exists2 {*}$caller_args] } {
+        qc::_image_cache_create \
+            $cache_dir $file_id $mime_type $max_width $max_height $autocrop
+    }
+    set cache_data \
+        [qc::_image_cache_data \
+             $cache_dir $file_id $mime_type $max_width $max_height $autocrop]
+    return $cache_data
+}
+
 proc qc::image_cache_exists {args} {
     #| Return true if a cached version of the image exists. Usage:
     #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
@@ -67,6 +92,40 @@ proc qc::image_cache_exists {args} {
     default autocrop false
     
     foreach file [qc::_image_filesystem_cache_glob {*}$caller_args] {
+        lassign \
+            [qc::_image_filesystem_cache_file2dimensions $file] \
+            width height
+
+        if { ( $width == $max_width
+               &&
+               $height <= $max_height )
+             ||
+             ( $height == $max_height
+               &&
+               $width <= $max_width )
+         } {
+            return true
+        }
+    }
+    return false
+}
+
+proc qc::image_cache_exists2 {args} {
+    #| Return true if a cached version of the image exists. Usage:
+    #| ?-autocrop? -- cache_dir file_id mime_type max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        --
+        cache_dir
+        file_id
+        mime_type
+        max_width
+        max_height
+    }
+    default autocrop false
+    
+    foreach file [qc::_image_filesystem_cache_glob2 {*}$caller_args] {
         lassign \
             [qc::_image_filesystem_cache_file2dimensions $file] \
             width height
@@ -188,95 +247,4 @@ proc qc::_image_cache_create {
 
     file mkdir [file dirname $cache_file]
     file rename -force $file $cache_file
-}
-
-proc qc::_image_cache_original_exists {
-    cache_dir file_id
-} {
-    #| Test whether a filesystem cache of the original image file exists
-    set glob_pattern "${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    if { [llength [glob {*}$glob_options {*}$glob_pattern]] == 1 } {
-        return true
-    } else {
-        return false
-    }
-}
-
-proc qc::_image_cache_original_file {
-    cache_dir file_id
-} {
-    #| Test whether a filesystem cache of the original image file exists
-    set glob_pattern "${file_id}.*"
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set matches [glob {*}$glob_options {*}$glob_pattern]
-    return [lindex $matches 0]
-}
-
-proc qc::_image_cache_original_create {
-    cache_dir file_id
-} {
-    #| Create a cache of an image in original form, in cache_dir
-    #| Create symbolic link to cached image
-    db_1row {
-        select
-        filename,
-        width,
-        height
-        
-        from file
-        join image using(file_id)
-        
-        where file_id=:file_id
-    }
-    set ext [file extension $filename]
-    set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
-    set cache_file ${cache_dir}/${cache_file_relative}
-    if { ! [file exists $cache_file] } {
-        set file [qc::db_file_export $file_id]
-        qc::image_file_meta_strip $file
-        
-        file mkdir [file dirname $cache_file]
-        file rename -force $file $cache_file
-    }
-    file link ${cache_dir}/${file_id}${ext} $cache_file_relative
-}
-
-proc qc::_image_filesystem_cache_glob {args} {
-    #| Return a list of files on the filesystem cache that match the given
-    #| file_id, and match at least one size contraint exactly
-    qc::args $args {*}{
-        -autocrop
-        -mime_type */*
-        --
-        cache_dir
-        file_id
-        max_width
-        max_height
-    }
-    default autocrop false
-    if { $autocrop } {
-        set glob_patterns \
-            [list \
-                 "${file_id}/autocrop/${max_width}x*/${file_id}.*" \
-                 "${file_id}/autocrop/*x${max_height}/${file_id}.*"]
-
-    } else {
-        set glob_patterns \
-            [list \
-                 "${file_id}-${max_width}x*/${file_id}.*" \
-                 "${file_id}-*x${max_height}/${file_id}.*"]
-    }
-    
-    set data [list]
-    set glob_options [list -nocomplain -types f -directory $cache_dir]
-    set return_data [list]
-    return [glob {*}$glob_options {*}$glob_patterns]
-}
-
-proc qc::_image_filesystem_cache_file2dimensions {file} {
-    #| Extract the width and height from a filesystem cache path
-    set expression {[^0-9]([0-9]+)x([0-9]+)[^0-9]}
-    regexp $expression $file -> width height
-    return [list $width $height]
 }
