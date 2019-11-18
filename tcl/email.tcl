@@ -1117,7 +1117,7 @@ proc qc::mime_type_guess { filename } {
         ".zip" {
             return "application/zip"
         }
-        "webp" {
+        ".webp" {
             return "image/webp"
         }
         default {
