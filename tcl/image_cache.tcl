@@ -2,90 +2,249 @@ namespace eval qc {
     namespace export {*}{
         image_data
         image_cache_exists
-        image_cache_data
-        image_cache_create
     }
 }
+
 proc qc::image_data {args} {
-    #| Return dict of width, height, & url of an image
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    if { ! [qc::image_cache_exists {*}$args] } {
-        qc::image_cache_create {*}$args
-    }
-    set cache_data [qc::image_cache_data {*}$args]
-
-    return [dict_subset $cache_data url width height]
-}
-
-proc qc::image_cache_exists {args} {
-    #| Return true if a cached version of the image exists
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    if { [qc::image_nsv_cache_exists ~ {*}{
-        file_id
-        max_width
-        max_height
-        autocrop
-    }] } {
-        return true
-    }
-
-    if { [qc::image_filesystem_cache_exists ~ {*}{
+    #| Return dict of width, height, & url of an image. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
         cache_dir
         file_id
         max_width
         max_height
-        autocrop
+    }
+    default autocrop false
+    if { ! [qc::image_cache_exists {*}$caller_args] } {
+        if { $mime_type eq "*/*" } {
+            if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
+                qc::_image_cache_original_create $cache_dir $file_id
+            }
+            set mime_type [qc::mime_type_guess \
+                               [qc::_image_cache_original_file \
+                                    $cache_dir $file_id]]
+        }
+        qc::_image_cache_create \
+            $cache_dir $file_id $mime_type $max_width $max_height $autocrop
         
-    }] } {
-        return true
+    } elseif { $mime_type eq "*/*" } {
+        set available_types \
+            [qc::_image_cache_available_mime_types {*}$caller_args]
+        foreach preference {
+            "image/png"
+            "image/gif"
+            "image/jpeg"
+            "image/webp"
+        } {
+            if { [lsearch -exact $available_types $preference] > -1 } {
+                set mime_type $preference
+                break
+            }
+        }
+    }
+    set cache_data \
+        [qc::_image_cache_data \
+             $cache_dir $file_id $mime_type $max_width $max_height $autocrop]
+    return $cache_data
+}
+
+proc qc::image_data2 {args} {
+    #| Return dict of width, height, & url of an image. Usage:
+    #| ?-autocrop? -- cache_dir file_id mime_type max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        --
+        cache_dir
+        file_id
+        mime_type
+        max_width
+        max_height
+    }
+    default autocrop false
+    if { ! [qc::image_cache_exists2 {*}$caller_args] } {
+        qc::_image_cache_create \
+            $cache_dir $file_id $mime_type $max_width $max_height $autocrop
+    }
+    set cache_data \
+        [qc::_image_cache_data \
+             $cache_dir $file_id $mime_type $max_width $max_height $autocrop]
+    return $cache_data
+}
+
+proc qc::image_cache_exists {args} {
+    #| Return true if a cached version of the image exists. Usage:
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
+        cache_dir
+        file_id
+        max_width
+        max_height
+    }
+    default autocrop false
+    
+    foreach file [qc::_image_filesystem_cache_glob {*}$caller_args] {
+        lassign \
+            [qc::_image_filesystem_cache_file2dimensions $file] \
+            width height
+
+        if { ( $width == $max_width
+               &&
+               $height <= $max_height )
+             ||
+             ( $height == $max_height
+               &&
+               $width <= $max_width )
+         } {
+            return true
+        }
     }
     return false
 }
 
-proc qc::image_cache_data {args} {
-    #| Return dict of width, height & url of an image from cache
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    # Get data from nsv cache if possible
-    set nsv_args [dict_from {*}{
-        autocrop
-        file_id
-        max_width
-        max_height
-    }]
-    if { [qc::image_nsv_cache_exists {*}$nsv_args] } {
-        return [qc::image_nsv_cache_data {*}$nsv_args]
-    }
-
-    # Otherwise get data from filesystem cache,
-    # and set nsv cache
-    set data [qc::image_filesystem_cache_data ~ {*}{
-        autocrop
+proc qc::image_cache_exists2 {args} {
+    #| Return true if a cached version of the image exists. Usage:
+    #| ?-autocrop? -- cache_dir file_id mime_type max_width max_height
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        --
         cache_dir
         file_id
+        mime_type
         max_width
         max_height
-    }]
+    }
+    default autocrop false
+    
+    foreach file [qc::_image_filesystem_cache_glob2 {*}$caller_args] {
+        lassign \
+            [qc::_image_filesystem_cache_file2dimensions $file] \
+            width height
 
-    return $data
+        if { ( $width == $max_width
+               &&
+               $height <= $max_height )
+             ||
+             ( $height == $max_height
+               &&
+               $width <= $max_width )
+         } {
+            return true
+        }
+    }
+    return false
 }
 
-proc qc::image_cache_create {args} {
-    #| Create a cache of an image
-    #| args: ?-autocrop? -- cache_dir file_id max_width max_height
-    qc::args $args -autocrop -- cache_dir file_id max_width max_height
-    default autocrop false
-
-    qc::image_filesystem_cache_create ~ {*}{
-        autocrop
+proc qc::_image_cache_available_mime_types {args} {
+    #| Return a list of mime types for matching cache entries
+    set caller_args $args
+    qc::args $args {*}{
+        -autocrop
+        -mime_type */*
+        --
         cache_dir
         file_id
         max_width
         max_height
     }
+    default autocrop false
+
+    set mime_type_flags [dict create]
+    
+    foreach file [qc::_image_filesystem_cache_glob {*}$caller_args] {
+        lassign \
+            [qc::_image_filesystem_cache_file2dimensions $file] \
+            width height
+
+        if { ( $width == $max_width
+               &&
+               $height <= $max_height )
+             ||
+             ( $height == $max_height
+               &&
+               $width <= $max_width )
+         } {
+            dict set mime_type_flags [qc::mime_type_guess $file] true
+        }
+    }
+    return [dict keys $mime_type_flags]
+}
+
+proc qc::_image_cache_data {
+    cache_dir file_id mime_type max_width max_height autocrop
+} {
+    #| Return dict of width, height & url of an image from cache.
+    set glob_args [list]
+    if { $autocrop } {
+        lappend glob_args -autocrop
+    }
+    lappend glob_args \
+        -mime_type $mime_type \
+        -- \
+        $cache_dir \
+        $file_id \
+        $max_width \
+        $max_height
+    
+    foreach file [qc::_image_filesystem_cache_glob {*}$glob_args] {
+        lassign \
+            [qc::_image_filesystem_cache_file2dimensions $file] \
+            width height
+
+        if { ( $width == $max_width
+               &&
+               $height <= $max_height )
+             ||
+             ( $height == $max_height
+               &&
+               $width <= $max_width )
+         } {
+            set url [qc::file2url $file]
+            set data [dict_from width height url]
+            return $data
+        }
+    }
+    error "No cache for $cache_dir $file_id $mime_type $max_width $max_height $autocrop"
+}
+
+proc qc::_image_cache_create {
+    cache_dir file_id mime_type max_width max_height autocrop
+} {
+    #| Create a cache of an image with the given requirements
+    if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
+        qc::_image_cache_original_create $cache_dir $file_id
+    }
+    set original [qc::_image_cache_original_file $cache_dir $file_id]
+    
+    set file [qc::image_file_convert \
+                 $original $mime_type $max_width $max_height $autocrop]
+    
+    dict2vars [qc::image_file_info $file] width height
+
+    set ext [qc::mime_file_extension $mime_type]
+    set file_path_parts [list $cache_dir]
+    if { $autocrop } {
+        lappend file_path_parts \
+            $file_id \
+            autocrop \
+            ${width}x${height}
+    } else {
+        lappend file_path_parts \
+            ${file_id}-${width}x${height}
+    }
+    lappend file_path_parts ${file_id}${ext}
+
+    set cache_file [join $file_path_parts "/"]
+
+    file mkdir [file dirname $cache_file]
+    file rename -force $file $cache_file
 }

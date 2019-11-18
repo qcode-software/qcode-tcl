@@ -1,5 +1,12 @@
 namespace eval qc {
-    namespace export file_is_valid_image image_file_info image_resize image_file_autocrop image_file_resize
+    namespace export {*}{
+        file_is_valid_image
+        image_file_info
+        image_resize
+        image_file_autocrop
+        image_file_resize
+        image_file_convert
+    }
 }
 
 proc qc::image_file_meta_strip {file} {
@@ -131,7 +138,11 @@ proc qc::file_is_valid_image {file} {
     package require jpeg
     package require png
 
-    return [expr {[jpeg::isJPEG $file] || [png::isPNG $file] || [qc::is_gif $file]}]
+    return [expr {
+                  [jpeg::isJPEG $file]
+                  || [png::isPNG $file]
+                  || [qc::is_gif $file]
+                  || [qc::is_webp $file]}]
 }
 
 proc qc::image_file_info {file} {
@@ -148,14 +159,17 @@ proc qc::image_file_info {file} {
     } elseif { [qc::is_gif $file] } {
         lassign [qc::gif_dimensions $file] width height
         set mime_type "image/gif"
+    } elseif { [qc::is_webp $file] } {
+        lassign [qc::webpsize $file] width height
+        set mime_type "image/webp"
     } else {
         error "Unrecognised image type"
     }
     return [qc::dict_from width height mime_type]
 }
 
-proc qc::is_gif {name} {
-    set f [open $name r]
+proc qc::is_gif {file} {
+    set f [open $file r]
     fconfigure $f -translation binary
     # read GIF signature -- check that this is
     # either GIF87a or GIF89a
@@ -238,29 +252,17 @@ proc qc::image_handler {
             return [ns_returnbadrequest "The requested image (${max_width}x${max_height}) exceeds the maximum width and height permitted (${allowed_max_width}x${allowed_max_height})."]
         }
 
+        set mime_type [qc::mime_type_guess $filename]
+
         set cache_args [list]
         if { $autocrop } {
             lappend cache_args -autocrop
         }
-        lappend cache_args $cache_dir $file_id $max_width $max_height
-
-        # Canonical URL
-        if { ! [qc::image_cache_exists {*}$cache_args] } {
-            # Create cache for canonical url
-            
-            # Check file exists
-            db_0or1row {
-                select 
-                file_id
-                from file
-                join image using (file_id)
-                where file_id=:file_id
-            } {
-                return [ns_returnnotfound]
-            } 
-            qc::image_cache_create {*}$cache_args
-        }
-        dict2vars [qc::image_cache_data {*}$cache_args] width height url
+        lappend cache_args \
+            -mime_type $mime_type \
+            -- $cache_dir $file_id $max_width $max_height
+        
+        dict2vars [qc::image_data {*}$cache_args] width height url
         set canonical_url $url
         set canonical_file [ns_pagepath]$url
 
@@ -293,14 +295,20 @@ proc qc::image_redirect_handler {cache_dir}  {
         set autocrop true
     }
 
+    set mime_type [qc::mime_type_guess $filename]
+
     if { $autocrop } {
         dict2vars \
             [qc::image_cache_data \
-                 -autocrop $cache_dir $file_id $max_width $max_height] \
+                 -autocrop \
+                 -mime_type $mime_type \
+                 -- $cache_dir $file_id $max_width $max_height] \
             width height url
     } else {
         dict2vars \
-            [qc::image_cache_data $cache_dir $file_id $max_width $max_height] \
+            [qc::image_cache_data \
+                 -mime_type $mime_type \
+                 -- $cache_dir $file_id $max_width $max_height] \
             width height url
     }
     set canonical_url $url
@@ -317,26 +325,40 @@ proc qc::image_redirect_handler {cache_dir}  {
     return [ns_returnredirect $canonical_url]      
 }
 
-proc qc::image_file_convert {old_file mime_type} {
-    #| Convert an image to a new format, return file path of new image
+proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
+    #| Convert an image, return file path of new image
     set ext [qc::mime_file_extension $mime_type]
-    set file "[file rootname $old_file]$ext"
+    set file /tmp/[uuid::uuid generate]${ext}
+
+    if { $autocrop } {
+        set old_file [qc::image_file_autocrop $old_file]
+    }
+    
     set exec_proxy_flags {
         -timeout 30000
     }
     set exec_flags {
         -ignorestderr
     }
-    set convert_flags [subst {
+    set convert_flags {
         -quiet
-    }]
+        -strip
+        -quality 75%
+    }
+    lappend convert_flags \
+        -thumbnail ${max_width}x${max_height}
+    
     exec_proxy \
         {*}$exec_proxy_flags \
         {*}$exec_flags \
         convert \
-        {*}$convert_flags \
         $old_file \
+        {*}$convert_flags \
         $file
+    
+    if { $autocrop } {
+        file delete $old_file
+    }
 
     return $file
 }
