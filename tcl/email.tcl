@@ -315,10 +315,10 @@ proc qc::email2multimap {text} {
 
     set email {}
     regsub -all {\r\n} $text \n text
-    lassign [split_pair $text "\n\n"] head body
+    lassign [qc::split_pair2 $text "\n\n"] head body
     # remove line breaks from header values
     regsub -all {\n[ \t]+} $head { } head
-    foreach line [split $head \n] {
+    foreach line [qc::split2 $head \n] {
 	lassign [split_pair $line :] key value
 	# Check if value is encoded
 	lappend email $key [qc::email_header_value_decode $value]
