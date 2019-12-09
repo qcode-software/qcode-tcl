@@ -3,7 +3,49 @@ namespace eval qc {
     namespace import ::tcl::mathop::eq
     namespace import ::tcl::mathop::ne
 
-    namespace export K default setif sset sappend coalesce incr0 call margin breakpoint trunc iif ? true false escapeHTML unescapeHTML xsplit mcsplit perct subsets permutations split_pair min_nz max_nz key_gen .. debug log exec_proxy info_proc which string2hex not_null eq ne commonmark2html regexp_escape
+    namespace export {*}{
+        K
+        default
+        setif
+        sset
+        sappend
+        coalesce
+        incr0
+        call
+        margin
+        breakpoint
+        trunc
+        iif
+        ?
+        true
+        false
+        escapeHTML
+        unescapeHTML
+        xsplit
+        mcsplit
+        perct
+        subsets
+        permutations
+        split_pair
+        min_nz
+        max_nz
+        key_gen
+        ..
+        debug
+        log
+        exec_proxy
+        info_proc
+        which
+        string2hex
+        not_null
+        eq
+        ne
+        commonmark2html
+        regexp_escape
+        split2
+        split_pair2
+        string_is_escaped
+    }
 }
 
 proc qc::K {a b} {set a}
@@ -690,7 +732,7 @@ proc qc::postcode_parse { postcode } {
 
 proc qc::regexp_escape {string} {
     #| Escape string for use inside TCL regular expression
-     set list {
+    set list {
 	\\ \\\\ 
 	^ \\^ 
 	. \\. 
@@ -708,4 +750,22 @@ proc qc::regexp_escape {string} {
     } 
 
     return [string map $list $string]
+}
+
+proc qc::string_is_escaped {string index escape} {
+    #| Check if char at index of string is preceded by an odd number of escapes
+    set preceding_escapes 0
+    incr index -1
+    foreach index [.. $index 0 -1] {
+        if { [string index $string $index] eq $escape } {
+            incr preceding_escapes
+        } else {
+            break
+        }
+    }
+    if { $preceding_escapes % 2 == 1 } {
+        return true
+    } else {
+        return false
+    }
 }
