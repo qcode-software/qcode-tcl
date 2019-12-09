@@ -732,7 +732,7 @@ proc qc::postcode_parse { postcode } {
 
 proc qc::regexp_escape {string} {
     #| Escape string for use inside TCL regular expression
-     set list {
+    set list {
 	\\ \\\\ 
 	^ \\^ 
 	. \\. 
@@ -750,117 +750,6 @@ proc qc::regexp_escape {string} {
     } 
 
     return [string map $list $string]
- }
-
-proc qc::split2 {args} {
-    #| Split a string into a list, ignoring quoted or escaped delimiters
-    qc::args $args -escape \\ -quote \" -- string delimiter
-    set length [string length $string]
-    set list {}
-    
-    # Loop with safety limit
-    for {set i $length} {$i>0} {incr i -1} {
-        set pair [qc::split_pair2 \
-                      -nocomplain \
-                      -escape $escape \
-                      -quote $quote \
-                      $string $delimiter]
-        if { [llength $pair] == 1 } {
-            lappend list [lindex $pair 0]
-            break
-        } else {
-            lappend list [lindex $pair 0]
-            set string [lindex $pair 1]
-        }
-    }
-    return $list
-}
-
-proc qc::split_pair2 {args} {
-    #| Split a string into 2 parts at the first occurence of the delimiter,
-    #| ignoring quoted or escaped delimiters
-    qc::args $args -nocomplain -escape \\ -quote \" -- string delimiter
-    default nocomplain false
-    set delimiter_index -1
-    set quote_index -1
-    set length [string length $string]
-
-    # Loop with safety limit
-    for {set i $length} {$i>0} {incr i -1} {
-
-        # Find first instance of delimiter
-        set delimiter_index [string first \
-                                 $delimiter $string ${delimiter_index}+1]        
-        if { $delimiter_index == -1 } {
-            if { $nocomplain } {
-                return [list $string]
-            } else {
-                error "Delimiter \"$delimiter\" was not found in the string \"$string\""
-            }
-        }
-        if { [qc::string_is_escaped $string $delimiter_index $escape] } {
-            # Proceed to next iteration, to find next instance of delimiter
-            continue
-        }
-        
-        set in_quotes false
-        
-        # Loop with safety limit
-        for {set j $length} {$j>0} {incr j -1} {
-            
-            # Find opening quote
-            set quote_index [string first $quote $string ${quote_index}+1]
-
-            # Delimiter is not inside quotes
-            if { $quote_index > $delimiter_index
-                 || $quote_index == -1 } {
-                break
-            }
-
-            if { [qc::string_is_escaped $string $quote_index $escape] } {
-                # Find next opening quote
-                continue
-            }
-
-            # Loop with safety limit
-            for {set k $length} {$k>0} {incr k -1} {
-
-                # Find closing quote
-                set quote_index [string first $quote $string ${quote_index}+1]
-                if { $quote_index == -1 } {
-                    error "Mismatched parenthesis in \"$string\""
-                }
-                if { ! [qc::string_is_escaped $string $quote_index $escape] } {
-                    break
-                }
-            }
-            if { $quote_index > $delimiter_index } {
-                set in_quotes true
-                break
-            }
-        }
-
-        if { ! $in_quotes } {
-            break
-        }
-    }
-
-    # Delimiter is found, split string on delimiter
-    set list {}
-    lappend list \
-        [string trim \
-             [string range \
-                  $string \
-                  0 \
-                  [expr {$delimiter_index-1}]]]
-    lappend list \
-        [string trim \
-             [string range \
-                  $string \
-                  [expr {$delimiter_index+[string length $delimiter]}] \
-                  end]]
-    
-    return $list
 }
 
 proc qc::string_is_escaped {string index escape} {

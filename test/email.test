@@ -633,6 +633,44 @@ set rcpts [list to@test.com]
     }
     test email_send-1.14 {email_send sender} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
+    # Email header split
+    test email_header_split-1.0 {email_header_split} -body {
+        qc::email_header_split {Test filename is hello.png} " "
+    } -result [list Test filename is hello.png]
+    
+    test email_header_split-1.1 {email_header_split with quotes} -body {
+        qc::email_header_split {Test filename is "hello world.png"} " "
+    } -result [list Test filename is {"hello world.png"}]
+    
+    test email_header_split-1.2 {email_header_split more quotes} -body {
+        qc::email_header_split {Test filename is "hello world.png" and "another test"} " "
+    } -result [list Test filename is {"hello world.png"} and {"another test"}]
+    
+    test email_header_split-1.3 {email_header_split escaped quotes} -body {
+        qc::email_header_split {Test filename is "hello \"world\".png" and "another test\\"} " "
+    } -result [list Test filename is {"hello \"world\".png"} and {"another test\\"}]
+
+    test email_header_split-1.4 {email_header_split newlines} -body {
+        qc::email_header_split {Test
+filename is
+ "hello \"world\".png" and "another
+test\\"} " "
+    } -result [list {Test
+filename} is {"hello \"world\".png"} and {"another
+test\\"}]
+
+    test email_header_split-1.5 {email_header_split on newlines} -body {
+        qc::email_header_split {This
+is
+a
+"test, hello
+world"} \n
+    } -result [list This is a {"test, hello
+world"}]
+
+    test email_header_split-1.6 {email_header_split escapes} -body {
+        qc::email_header_split {Test filename\ is\\ not\\\ hello.png} " "
+    } -result [list Test {filename\ is\\} {not\\\ hello.png}]
 
     cleanupTests
 
