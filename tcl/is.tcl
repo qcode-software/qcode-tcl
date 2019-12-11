@@ -445,7 +445,7 @@ namespace eval qc::is {
 
     proc email {email} {
         #| Checks if the given string follows the form of an email address.
-        return [regexp {^[a-zA-Z0-9_\-]+([\.\+][a-zA-Z0-9_\-]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
+        return [regexp {^[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+(\.[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
     }
 
     proc postcode {postcode} {

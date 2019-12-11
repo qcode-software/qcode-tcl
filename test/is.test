@@ -339,6 +339,11 @@ namespace eval ::qcode::test {
         is email dave.smith_2-2+1@gmail.com
     } -result {1}
 
+    test is_email-1.5 {is email valid} -setup {
+    } -body {
+        is email dave.o'brien@gmail.com
+    } -result {1}
+
     test is-postcode-1.0 {is postcode partial} -setup {
     } -body {
         is postcode EH3
