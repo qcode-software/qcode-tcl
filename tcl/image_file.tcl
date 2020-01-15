@@ -343,7 +343,13 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
     set convert_flags {
         -quiet
         -strip
-        -quality 75%
+    }
+    if { $mime_type eq "image/webp" } {
+        lappend convert_flags \
+            -quality 100%            
+    } else {
+        lappend convert_flags \
+            -quality 75%
     }
     lappend convert_flags \
         -thumbnail ${max_width}x${max_height}
