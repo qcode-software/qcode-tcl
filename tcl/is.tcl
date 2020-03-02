@@ -417,7 +417,7 @@ namespace eval qc::is {
         #| Checks if the given string is a date.
         #| Dates are expected to be in ISO format.
         if { [regexp {^\d{4}-\d{2}-\d{2}$} $string]
-             && $string eq [clock format [epoch $string] -format "%Y-%m-%d"]
+             && $string eq [qc::cast date $string]
          } {
             return true
         } else {
