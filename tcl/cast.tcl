@@ -740,9 +740,9 @@ namespace eval qc::cast {
             lassign [period $period1] from_date .
             lassign [period $period2] . to_date
 
-        } elseif { [qc::is date $string] } {
+        } elseif { [regexp {^\d{4}-\d{2}-\d{2}$} $string] } {
             # String is an iso date eg "2014-01-01"
-            set from_date $string
+            set from_date [qc::cast date $string]
             set to_date $from_date
 
         } elseif { [regexp {^([12]\d{3})$} $string -> year] } {

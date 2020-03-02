@@ -51,6 +51,9 @@ namespace eval ::qcode::test {
     test cast-date-1.5 {cast date dd-mm-yyyy} {
         qc::cast date 12-04-2018
     } 2018-04-12
+    test cast-date-1.6 {cast date too many days} {
+        qc::cast date 2012-11-31
+    } 2012-12-01
 
     test cast-timestamp-1.0 {cast timestamp relative time} -body {
         qc::cast timestamp tomorrow

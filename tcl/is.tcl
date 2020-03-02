@@ -416,7 +416,13 @@ namespace eval qc::is {
     proc date {string} {
         #| Checks if the given string is a date.
         #| Dates are expected to be in ISO format.
-        return [regexp {^\d{4}-\d{2}-\d{2}$} $string]
+        if { [regexp {^\d{4}-\d{2}-\d{2}$} $string]
+             && $string eq [clock format [epoch $string] -format "%Y-%m-%d"]
+         } {
+            return true
+        } else {
+            return false
+        }
     }
 
     proc timestamp_http {date} {

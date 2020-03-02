@@ -253,6 +253,11 @@ namespace eval ::qcode::test {
         castable date Xmas
     } -result false
 
+    test castable-date-1.5 {castable date too many days} -setup {
+    } -body {
+        castable 2012-11-31
+    } -result true
+
     test castable-postcode-1.0 {castable postcode partial} -setup {
     } -body {
         castable postcode EH3
