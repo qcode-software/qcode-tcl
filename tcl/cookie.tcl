@@ -93,8 +93,17 @@ proc qc::cookie_set {name value args} {
     # http_only means cookie is not available to JavaScript.
     default option(http_only) true
     default option(path) /
+    if { [string is true $option(secure)] } {
+        # Chome 80 defaults cookie SameSite option to Lax.
+        # This default preserves existing behaviour.
+        default option(same_site) "None"
+    }
     set headers [ns_conn outputheaders]
     set cookie "[url_encode $name]=[url_encode $value]"
+
+    if { [info exists option(same_site)] } {
+        append cookie "; SameSite=$option(same_site)"
+    }
 
     if { [info exists option(path)] } {
         append cookie "; path=$option(path)"
