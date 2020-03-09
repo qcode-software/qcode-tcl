@@ -81,6 +81,19 @@ namespace eval ::qcode::test {
 
     test time_hour-1.0 {time_hour success} {qc::time_hour "2011-02-25 16:42:12"} 16
 
+    test date_year_is_leap-1.0 {date_year_is_leap 1999} {
+        qc::date_year_is_leap 1999
+    } false
+    test date_year_is_leap-1.1 {date_year_is_leap 1996} {
+        qc::date_year_is_leap 1996
+    } true
+    test date_year_is_leap-1.1 {date_year_is_leap 1900} {
+        qc::date_year_is_leap 1900
+    } false
+    test date_year_is_leap-1.1 {date_year_is_leap 2000} {
+        qc::date_year_is_leap 2000
+    } true
+
     cleanupTests
 
 }
