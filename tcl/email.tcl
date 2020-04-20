@@ -668,7 +668,7 @@ proc qc::mime_type_guess { filename } {
             return "text/plain"
         }
         ".eml" {
-            return "text/plain"
+            return "message/rfc822"
         }
         ".etx" {
             return "text/x-setext"
