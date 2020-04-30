@@ -769,3 +769,28 @@ proc qc::string_is_escaped {string index escape} {
         return false
     }
 }
+
+proc qc::uuid {} {
+    #| Generate type 4 UUID
+    #| Tcllib's uuid liable to collisions if used under NaviServer so
+    #| use a native implementation if ns_crypto is available.
+    if { [info commands "::ns_crypto::randombytes"] eq "::ns_crypto::randombytes" } {
+        # Use Naviserver implementation
+        set b [ns_crypto::randombytes 16]
+        set time_hi_and_version [string replace [string range $b 12 15] 0 0 4]
+        set clk_seq_hi_res      [string range $b 16 17]
+        set clk_seq_hi_res2     [format %2x [expr {("0x$clk_seq_hi_res" & 0x3f) | 0x80}]]
+        return [format %s-%s-%s-%s%s-%s \
+                    [string range $b 0 7] \
+                    [string range $b 8 11] \
+                    $time_hi_and_version \
+                    $clk_seq_hi_res2 \
+                    [string range $b 18 19] \
+                    [string range $b 20 31] \
+                ]
+    } else {
+        # Use tcllib implementation
+        package require uuid
+        return [uuid::uuid generate]
+    }
+}
