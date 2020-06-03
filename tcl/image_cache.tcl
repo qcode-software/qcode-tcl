@@ -20,21 +20,24 @@ proc qc::image_data {args} {
     }
     default autocrop false
     if { ! [qc::image_cache_exists {*}$caller_args] } {
+        if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
+            qc::_image_cache_original_create $cache_dir $file_id
+        }
         if { $mime_type eq "*/*" } {
-            if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
-                qc::_image_cache_original_create $cache_dir $file_id
-            }
             set mime_type [qc::mime_type_guess \
                                [qc::_image_cache_original_file \
                                     $cache_dir $file_id]]
         }
-        qc::_image_cache_create \
-            $cache_dir $file_id $mime_type $max_width $max_height $autocrop
+        if { $mime_type ne "image/svg+xml" } {
+            qc::_image_cache_create \
+                $cache_dir $file_id $mime_type $max_width $max_height $autocrop
+        }
         
     } elseif { $mime_type eq "*/*" } {
         set available_types \
             [qc::_image_cache_available_mime_types {*}$caller_args]
         foreach preference {
+            "image/svg+xml"
             "image/png"
             "image/gif"
             "image/jpeg"
@@ -90,6 +93,14 @@ proc qc::image_cache_exists {args} {
         max_height
     }
     default autocrop false
+
+    if { $mime_type in [list "*/*" "image/svg+xml"]
+         && [qc::_image_cache_original_exists $cache_dir $file_id]
+             && [qc::mime_type_guess \
+                     [qc::_image_cache_original_file $cache_dir $file_id]] \
+             eq "image/svg+xml" } {
+        return true
+    }
     
     foreach file [qc::_image_filesystem_cache_glob {*}$caller_args] {
         lassign \
@@ -124,6 +135,14 @@ proc qc::image_cache_exists2 {args} {
         max_height
     }
     default autocrop false
+
+    if { $mime_type eq "image/svg+xml"
+         && [qc::_image_cache_original_exists $cache_dir $file_id]
+             && [qc::mime_type_guess \
+                     [qc::_image_cache_original_file $cache_dir $file_id]] \
+             eq "image/svg+xml" } {
+        return true
+    }
     
     foreach file [qc::_image_filesystem_cache_glob2 {*}$caller_args] {
         lassign \
@@ -159,6 +178,14 @@ proc qc::_image_cache_available_mime_types {args} {
     default autocrop false
 
     set mime_type_flags [dict create]
+
+    if { $mime_type eq "image/svg+xml"
+         && [qc::_image_cache_original_exists $cache_dir $file_id]
+         && [qc::mime_type_guess \
+                 [qc::_image_cache_original_file $cache_dir $file_id]] \
+             eq "image/svg+xml" } {
+        dict set mime_type_flags "image/svg+xml" true
+    }
     
     foreach file [qc::_image_filesystem_cache_glob {*}$caller_args] {
         lassign \
@@ -194,6 +221,28 @@ proc qc::_image_cache_data {
         $file_id \
         $max_width \
         $max_height
+
+    if { $mime_type in [list "*/*" "image/svg+xml"]
+         && [qc::_image_cache_original_exists $cache_dir $file_id]
+         && [qc::mime_type_guess \
+                 [qc::_image_cache_original_file $cache_dir $file_id]] \
+             eq "image/svg+xml" } {
+        set file [qc::_image_cache_original_file $cache_dir $file_id]
+        lassign [qc::svg_dimensions $file] width height
+        if { $width > $max_width
+             ||
+             $height > $max_height } {
+            set scale [expr {min(
+                                 1.0 * $max_width / $width,
+                                 1.0 * $max_height / $height
+                                 )}]
+            set width [qc::round [expr {$scale * $width}] 0]
+            set height [qc::round [expr {$scale * $height}] 0]
+        }        
+        set url [qc::file2url $file]
+        set data [dict_from width height url]
+        return $data
+    }
     
     foreach file [qc::_image_filesystem_cache_glob {*}$glob_args] {
         lassign \
@@ -222,6 +271,9 @@ proc qc::_image_cache_create {
     #| Create a cache of an image with the given requirements
     if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
         qc::_image_cache_original_create $cache_dir $file_id
+    }
+    if { $mime_type eq "image/svg+xml" } {
+        return
     }
     set original [qc::_image_cache_original_file $cache_dir $file_id]
     
