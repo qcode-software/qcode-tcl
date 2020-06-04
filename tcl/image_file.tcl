@@ -434,7 +434,9 @@ proc qc::svg_dimensions {file} {
             set width [qc::round [expr {$height * $ratio}] 0]
             return [list $width $height]
         }
-        return [list $box_width $box_height]
+        return [list \
+                    [qc::round $box_width 0] \
+                    [qc::round $box_height 0]]
     }
 
     # Most browsers now use 300x150 as the default
