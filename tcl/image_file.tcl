@@ -142,7 +142,8 @@ proc qc::file_is_valid_image {file} {
                   [jpeg::isJPEG $file]
                   || [png::isPNG $file]
                   || [qc::is_gif $file]
-                  || [qc::is_webp $file]}]
+                  || [qc::is_webp $file]
+                  || [qc::is_svg $file]}]
 }
 
 proc qc::image_file_info {file} {
@@ -162,6 +163,9 @@ proc qc::image_file_info {file} {
     } elseif { [qc::is_webp $file] } {
         lassign [qc::webpsize $file] width height
         set mime_type "image/webp"
+    } elseif { [qc::is_svg $file] } {
+        lassign [qc::svg_dimensions $file] width height
+        set mime_type "image/svg+xml"
     } else {
         error "Unrecognised image type"
     }
@@ -240,6 +244,19 @@ proc qc::image_handler {
                         $request_path -> file_id max_width max_height filename]
                } {
             set autocrop true
+        } elseif { [regexp {^/image/([0-9]+)\.svg$} \
+                        $request_path -> file_id] } {
+            # SVG images
+            dict2vars [qc::image_data \
+                           -mime_type "image/svg+xml" \
+                           $cache_dir \
+                           $file_id \
+                           $allowed_max_width \
+                           $allowed_max_height] url
+            set file [ns_pagepath]$url
+            ns_register_fastpath GET $url
+            ns_register_fastpath HEAD $url
+            return [ns_returnfile 200 "image/svg+xml" $file]
         } else {
             # Invalid image url
             return [ns_returnnotfound]
@@ -367,4 +384,97 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
     }
 
     return $file
+}
+
+proc qc::is_svg {file} {
+    #| Test if file is an SVG file
+    set f [open $file r]
+    if { [read $f 5] eq "<svg " } {
+        close $f
+        return true
+    } else {
+        close $f
+        return false
+    }
+}
+
+proc qc::svg_dimensions {file} {
+    #| Get the preferred dimensions of an SVG file
+    package require tdom
+    set f [open $file r]
+    set svg [read $f]
+    dom parse $svg doc
+    set root [$doc documentElement]
+
+    # Check for width and/or height attributes
+    if { [$root hasAttribute "width"] } {
+        set width [$root getAttribute "width"]
+        set width [qc::svg_units2pixels $width]
+    }
+    
+    if { [$root hasAttribute "height"] } {
+        set height [$root getAttribute "height"]
+        set height [qc::svg_units2pixels $height]
+    }
+    
+    if { [info exists width] && [info exists height] } {
+        return [list $width $height]
+    }
+
+    # Check for viewbox attribute
+    if { [$root hasAttribute "viewBox"] } {
+        set viewBox [$root getAttribute "viewBox"]
+        lassign [split $viewBox] min_x min_y box_width box_height
+        if { [info exists width] } {
+            set ratio [expr {1.0 * $box_height / $box_width}]
+            set height [qc::round [expr {$width * $ratio}] 0]
+            return [list $width $height]
+        }
+        if { [info exists height] } {
+            set ratio [expr {1.0 * $box_width / $box_height}]
+            set width [qc::round [expr {$height * $ratio}] 0]
+            return [list $width $height]
+        }
+        return [list \
+                    [qc::round $box_width 0] \
+                    [qc::round $box_height 0]]
+    }
+
+    # Most browsers now use 300x150 as the default
+    return [list 300 150]
+}
+
+proc qc::svg_units2pixels {length} {
+    #| Convert supported svg distance units to pixels
+    if { ! [regexp \
+                {^([0-9]+(?:\.[0-9]+))([a-zA-Z]*)$} \
+                $length \
+                -- number units] } {
+        error "Unable to parse length \"$length\""
+    }
+    switch [string tolower $units] {
+        "" -
+        "px" {
+            set pixels $number
+        }
+        "in" {
+            set pixels [expr {$number * 96}]
+        }
+        "cm" {
+            set pixels [expr {$number * 37.795}]
+        }
+        "mm" {
+            set pixels [expr {$number * 3.7795}]
+        }
+        "pt" {
+            set pixels [expr {$number * 1.3333}]
+        }
+        "pc" {
+            set pixels [expr {$number * 16}]
+        }
+        default {
+            error "Unrecognized units \"$units\""
+        }
+    }
+    return [qc::round $pixels 0]
 }

@@ -33,13 +33,21 @@ proc qc::_image_cache_original_create {
         select
         filename,
         width,
-        height
+        height,
+        mime_type
         
         from file
         join image using(file_id)
         
         where file_id=:file_id
     }
+    # Only one canonical file required for svg
+    if { $mime_type eq "image/svg+xml" } {
+        set file [qc::db_file_export $file_id]
+        file rename -force $file ${cache_dir}/${file_id}.svg
+        return
+    }
+    
     set ext [file extension $filename]
     set cache_file_relative ${file_id}-${width}x${height}/${file_id}${ext}
     set cache_file ${cache_dir}/${cache_file_relative}
