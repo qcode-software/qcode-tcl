@@ -41,6 +41,7 @@ proc qc::_image_cache_original_create {
         
         where file_id=:file_id
     }
+    # Only one canonical file required for svg
     if { $mime_type eq "image/svg+xml" } {
         set file [qc::db_file_export $file_id]
         file rename -force $file ${cache_dir}/${file_id}.svg

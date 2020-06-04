@@ -246,6 +246,7 @@ proc qc::image_handler {
             set autocrop true
         } elseif { [regexp {^/image/([0-9]+)\.svg$} \
                         $request_path -> file_id] } {
+            # SVG images
             dict2vars [qc::image_data \
                            -mime_type "image/svg+xml" \
                            $cache_dir \
