@@ -2,9 +2,6 @@ NAME=qcode
 RELEASE=0
 DPKG_NAME=qcode-tcl-$(VERSION)
 MAINTAINER=hackers@qcode.co.uk
-REMOTEUSER_LEGACY=debian.qcode.co.uk
-REMOTEHOST_LEGACY=debian.qcode.co.uk
-REMOTEDIR_LEGACY=debian.qcode.co.uk
 REMOTEUSER=deb
 REMOTEHOST=deb.qcode.co.uk
 REMOTEDIR=deb.qcode.co.uk
@@ -21,7 +18,7 @@ package: check-version
 	./package.tcl tcl package ${NAME} ${VERSION}
 	./pkg_mkIndex package
 	# checkinstall
-	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.5,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make local-install
+	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl8.6,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make local-install
 
 tcl-package : check-version
 	rm -rf package
@@ -42,10 +39,8 @@ local-install:
 	rm -rf package
 
 upload: check-version
-	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER_LEGACY)@$(REMOTEHOST_LEGACY):$(REMOTEDIR_LEGACY)/debs"	
-	ssh $(REMOTEUSER_LEGACY)@$(REMOTEHOST_LEGACY) reprepro -b $(REMOTEDIR_LEGACY) includedeb jessie $(REMOTEDIR_LEGACY)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
-	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb stretch $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 clean: check-version
 	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
