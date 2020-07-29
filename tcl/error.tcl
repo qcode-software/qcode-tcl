@@ -208,6 +208,8 @@ proc qc::error_report {{error_message "NULL"} {error_info "NULL"} {error_code "N
 	    [qc::error_report_form_vars]
 	    <h3>Cookies</h3>
 	    [qc::error_report_cookies]
+            <h3>HTTP Headers</h3>
+            [qc::error_report_headers]
 	    </html>
 	}
     } else {
@@ -302,6 +304,15 @@ proc qc::error_report_cookies {} {
 	set value [string trimright $value "; "]
 	set value [qc::url_decode $value]
 	append report "<b>$name</b> $value <br>"
+    }
+    return $report
+}
+
+proc qc::error_report_headers {} {
+    set headers [ns_conn headers]
+    set report {}
+    foreach {name value} [ns_set array $headers] {
+	append report "[h b $name]: [h span $value]<br>"
     }
     return $report
 }
