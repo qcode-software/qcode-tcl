@@ -245,9 +245,18 @@ proc qc::s3 { args } {
             if { [llength $args] < 3 || [llength $args] > 4 } {
                 error "Wrong number of arguments. Usage: qc::s3 get mybucket remote_filename {local_filename}"
             } elseif { [llength $args] == 3 } {
-                # No local filename, assume same as remote_filename in current directory
-                lassign $args -> bucket remote_filename 
-                set local_filename "./[file tail $remote_filename]"
+                # Test if args are $bucket and $remote_filename or $s3_url and $local_filename
+                lassign $args -> temp0 temp1
+                if { [qc::is s3_url $temp0] } {
+                    set s3_url $temp0
+                    lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
+                    set local_filename $temp1
+                } else {
+                    set bucket $temp0
+                    set remote_filename $temp1
+                    # No local filename, assume same as remote_filename
+                    set local_filename "./[file tail $remote_filename]"
+                }
             } else {
                 lassign $args -> bucket remote_filename local_filename
             }
@@ -271,12 +280,39 @@ proc qc::s3 { args } {
             }
         }
         head {
-            # usage: s3 head bucket remote_path
-            qc::s3_head {*}[lrange $args 1 end]
+            # usage:
+            # qc::s3 head bucket remote_path
+            # qc::s3 head s3_url
+
+            if { [llength $args] == 3 } {
+                lassign $args -> bucket object_key
+            } elseif { [llength $args] == 2 } {
+                set s3_url [qc::cast s3_url [lindex $args 1]]
+                lassign [qc::s3_url_bucket_object_key $s3_url] bucket object_key
+            } else {
+                error "qc::s3 head: Wrong number of args. Usage \"qc::s3 head bucket remote_path\" or \"qc::s3 head s3_url\"."
+            }
+
+           qc::s3_head $bucket $object_key
         }       
         copy {
-            # usage: s3 copy bucket bucket/remote_filename_to_copy remote_filename_copy
-            lassign $args -> bucket remote_filename remote_filename_copy
+            # usage:
+            # qc::s3 copy bucket remote_filename_to_copy remote_filename_copy
+            # qc::s3 copy s3_url_to_copy s3_url_copy
+
+            if {[llength $args] == 4} {
+                lassign $args -> bucket remote_filename remote_filename_copy
+            } elseif {[llength $args] == 3} {
+                lassign $args -> s3_url_to_copy s3_url_copy
+                lassign [qc::s3_url_bucket_object_key $s3_url_to_copy] bucket_from remote_filename
+                lassign [qc::s3_url_bucket_object_key $s3_url_copy] bucket_to remote_filename_copy
+                if { $bucket_from ne $bucket_to } {
+                    error "qc::s3 copy: The s3_url to copy to must be in the same bucket as the s3_url to copy from."
+                }
+            } else {
+                error "qc::s3 copy: Wrong number of args. Usage \"qc::s3 copy bucket remote_filename_to_copy remote_filename_copy\" or \"qc::s3 copy s3_url_to_copy s3_url_copy\"."
+            }
+            
             qc::s3_put -s3_copy $remote_filename $bucket $remote_filename_copy
         }
         put {
@@ -285,9 +321,18 @@ proc qc::s3 { args } {
             if { [llength $args] < 3 || [llength $args] > 4 } {
                 error "Wrong number of arguments. Usage: qc::s3 put mybucket local_filename {remote_filename}"
             } elseif { [llength $args] == 3 } {
-                # No remote filename, assume same as local_filename
-                lassign $args -> bucket local_filename 
-                set remote_filename "/[file tail $local_filename]"
+                # Test if args are $bucket and $remote_filename or $s3_url and $local_filename
+                lassign $args -> temp0 temp1
+                if { [qc::castable s3_url $temp0] } {
+                    set s3_url [qc::cast s3_url $temp0]
+                    lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
+                    set local_filename $temp1
+                } else {
+                    set bucket $temp0
+                    set local_filename $temp1
+                    # No remote filename, assume same as local_filename
+                    set remote_filename "./[file tail $local_filename]"
+                }
             } else {
                 lassign $args -> bucket local_filename remote_filename
             }
@@ -300,11 +345,18 @@ proc qc::s3 { args } {
             }
         }
         restore {
-            # usage: s3 restore bucket remote_path days
+            # usage:
+            # qc::s3 restore bucket remote_path days
+            # qc::s3 restore s3_url Days
             # Requests restore of object from Glacier storage to S3 storage for $days days
             lassign $args -> bucket remote_path Days
-            if { [llength $args] != 4  } {
-                error "Invalid number of arguments. Usage: muppet s3 restore bucket remote_path days"
+            if { [llength $args] == 4  } {
+                lassign $args -> bucket remote_path Days
+            } elseif { [llength $args] == 3 } {
+                lassign $args -> s3_url Days
+                lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
+            } else {
+                error "Invalid number of arguments. Usage: \"qc::s3 restore bucket remote_path days\" or \"qc::s3 restore s3_url days\"."
             }
             set data "<RestoreRequest>[qc::xml_from Days]</RestoreRequest>"
             qc::s3_post $bucket ${remote_path}?restore $data
@@ -312,8 +364,30 @@ proc qc::s3 { args } {
         upload {
             switch [lindex $args 1] {
                 init {
-                    # s3 upload init bucket local_file remote_file
-                    lassign $args -> -> bucket local_file remote_file content_type
+                    # Usage:
+                    # qc::s3 upload init bucket local_file remote_file {content_type}
+                    # qc::s3 upload init s3_url local_file {content_type}
+
+                    set content_type ""
+                    if { [llength $args] == 6 } {
+                        lassign $args -> -> bucket local_file remote_file content_type
+                    } elseif { [llength $args] == 5 } {
+                        lassign $args -> -> temp0 local_file temp1
+                        if { [qc::is s3_url $temp0] } {
+                            set s3_url $temp0
+                            lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
+                            set content_type $temp1
+                        } else {
+                            set bucket $temp0
+                            set remote_file $temp1
+                        }
+                    } elseif { [llength $args] == 4 } {
+                        lassign $args -> -> s3_url local_file
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload init bucket local_file remote_file {content_type}\" or \"qc::s3 upload init s3_url local_file {content_type}\"."
+                    }
+                    
                     set content_md5 [qc::s3_base64_md5 -file $local_file]
                     if {$content_type eq ""} {
                         set content_type [qc::mime_type_guess $local_file]
@@ -325,8 +399,17 @@ proc qc::s3 { args } {
                     return $upload_id
                 }
                 abort {
-                    # s3 upload abort bucket remote_path upload_id
-                    lassign $args -> -> bucket remote_path upload_id
+                    # Usage:
+                    # qc::s3 upload abort bucket remote_path upload_id
+                    # qc::s3 upload abort s3_url upload_id
+                    if {[llength $args] == 5 } {
+                        lassign $args -> -> bucket remote_path upload_id
+                    } elseif {[llength $args] == 4 } {
+                        lassign $args -> -> s3_url upload_id
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_path
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload abort bucket remote_path upload_id\" or \"qc::s3 upload abort s3_url upload_id\"."
+                    }
                     return [s3_delete $bucket ${remote_path}?uploadId=$upload_id]
                 }
                 ls {
@@ -335,8 +418,18 @@ proc qc::s3 { args } {
                     return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_get $bucket /?uploads] {/ns:ListMultipartUploadsResult/ns:Upload}]]
                 }
                 lsparts {
-                    # usage: s3 upload lsparts bucket remote_path upload_id
-                    lassign $args -> -> bucket remote_path upload_id
+                    # usage:
+                    # qc::s3 upload lsparts bucket remote_path upload_id
+                    # qc::s3 upload lsparts s3_url upload_id
+                    if {[llength $args] == 5 } {
+                        lassign $args -> -> bucket remote_path upload_id
+                    } elseif {[llength $args] == 4 } {
+                        lassign $args -> -> s3_url upload_id
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_path
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload lsparts bucket remote_path upload_id\" or \"qc::s3 upload lsparts s3_url upload_id\"."
+                    }
+                    
                     return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::s3_get $bucket ${remote_path}?uploadId=$upload_id] {/ns:ListPartsResult/ns:Part}]]
                 }
                 cleanup {
@@ -348,8 +441,17 @@ proc qc::s3 { args } {
                     }
                 }
                 complete {
-                    # usage: s3 upload complete bucket remote_path upload_id etag_dict
-                    lassign $args -> -> bucket remote_path upload_id etag_dict
+                    # usage:
+                    # qc::s3 upload complete bucket remote_path upload_id etag_dict
+                    # qc::s3 upload complete s3_url upload_id etag_dict
+                    if {[llength $args] == 6} {
+                        lassign $args -> -> bucket remote_path upload_id etag_dict
+                    } elseif {[llength $args] == 5} {
+                        lassign $args -> -> s3_url upload_id etag_dict
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_path
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload complete bucket remote_path upload_id etag_dict\" or \"qc::s3 upload complete s3_url upload_id etag_dict\"."
+                    }
                     set xml {<CompleteMultipartUpload>}
                     foreach PartNumber [dict keys $etag_dict] {
                         set ETag [dict get $etag_dict $PartNumber]
@@ -361,8 +463,18 @@ proc qc::s3 { args } {
                 }
                 send {
                     # Perform upload
-                    # usage: s3 upload send bucket local_path remote_path upload_id
-                    lassign $args -> -> bucket local_path remote_path upload_id
+                    # usage:
+                    # qc::s3 upload send bucket local_path remote_path upload_id
+                    # qc::s3 upload send s3_url local_path upload_id
+                    if {[llength $args] == 6} {
+                        lassign $args -> -> bucket local_path remote_path upload_id
+                    } elseif {[llength $args] == 5} {
+                        lassign $args -> -> s3_url local_path upload_id
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_path
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload send bucket local_path remote_path upload_id\" or \"qc::s3 upload send s3_url local_path upload_id\"."
+                    }
+                    
                     # bytes
                     set part_size [expr {1024*1024*5}]
                     set part_index 1
@@ -435,9 +547,30 @@ proc qc::s3 { args } {
                 }
                 default {
                     # Top level multipart upload
-                    # usage: s3 upload bucket local_path remote_path {content_type}
+                    # usage:
+                    # qc::s3 upload bucket local_file remote_file {content_type}
+                    # qc::s3 upload s3_url local_file {content_type}
                     # TODO could be extended to retry upload part failures
-                    lassign $args -> bucket local_file remote_file content_type
+                    set content_type ""
+                    if {[llength $args] == 5} {
+                        lassign $args -> bucket local_file remote_file content_type
+                    } elseif {[llength $args] == 4} {
+                        lassign $args -> temp0 local_file temp1
+                        if { [qc::is s3_url $temp0] } {
+                            set s3_url $temp0
+                            lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
+                            set content_type $temp1
+                        } else {
+                            set bucket $temp0
+                            set remote_filename $temp1
+                        }
+                    } elseif {[llength $args] == 3} {
+                        lassign $args -> s3_url local_file
+                        lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
+                    } else {
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload bucket local_file remote_file {content_type}\" or \"qc::s3 upload s3_url local_file {content_type}\"."
+                    }
+                    
                     set upload_id [qc::s3 upload init $bucket $local_file $remote_file $content_type]
                     set etag_dict [qc::s3 upload send $bucket $local_file $remote_file $upload_id]
                     qc::s3 upload complete $bucket $remote_file $upload_id $etag_dict
@@ -445,13 +578,46 @@ proc qc::s3 { args } {
             }
         }
         delete {
-            # usage: s3 delete bucket remote_filename
-            qc::s3_delete {*}[lrange $args 1 end]
+            # usage:
+            # qc::s3 delete bucket remote_filename
+            # qc::s3 delete s3_url
+            if {[llength $args] == 3} {
+                lassign $args -> bucket remote_filename
+            } elseif {[llength $args] == 2} {
+                lassign $args -> s3_url
+                lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
+            } else {
+                error "Invalid number of arguments. Usage: \"qc::s3 delete bucket remote_filename\" or \"qc::s3 delete s3_url\"."
+            }
+            
+            qc::s3_delete $bucket $remote_filename
         }
         default {
             error "Unknown s3 command."
         }
     }
+}
+
+proc qc::s3_url_bucket_object_key {s3_url} {
+    #| Return a list of the bucket and object key for the given s3_url
+
+    # Strip a leading "s3://" or "/"
+    if {[regexp {^[sS]3://(.*)$} $s3_url -> temp]} {
+        set s3_url $temp
+    }  elseif {[regexp {^/(.*)$} $s3_url -> temp]} {
+        set s3_url $temp
+    }
+
+    set separator_index [string first / $s3_url]
+    if { $separator_index == -1 } {
+        set bucket $s3_url
+        set object_key ""
+    } else {
+        set bucket [string range $s3_url 0 $separator_index-1]
+        set object_key [string range $s3_url $separator_index+1 end]
+    }
+
+    return [list $bucket $object_key]
 }
 
 proc qc::s3_xml_select { xmlDoc xpath} {
