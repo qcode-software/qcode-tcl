@@ -598,7 +598,7 @@ proc qc::s3 { args } {
     }
 }
 
-proc qc::s3_url_bucket_object_key_v1 {s3_url} {
+proc qc::s3_url_bucket_object_key {s3_url} {
     #| Return a list of the bucket and object key for the given s3_url
 
     # Original solution
