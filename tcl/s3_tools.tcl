@@ -614,7 +614,7 @@ proc qc::s3_url_bucket_object_key {s3_url} {
         set object_key ""
     } else {
         set bucket [string range $s3_url 0 $separator_index-1]
-        set object_key [string range $s3_url $separator_index+1 end]
+        set object_key [string range $s3_url $separator_index end]
     }
 
     return [list $bucket $object_key]

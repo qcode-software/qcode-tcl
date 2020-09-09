@@ -917,13 +917,18 @@ namespace eval qc::is {
         #| Limits characters to those defined as safe:
         #| https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-keys
 
-        # Restrict to safe characters 
-        if { [regexp {[^a-zA-Z0-9/!-_.*'()]} $s3_object_key] } {
+        # Starts with "/"
+        if { [string index $s3_object_key 0] ne "/" } {
+            return 0
+        }
+        
+        # Restrict to safe characters (excluding the starting "/")
+        if { [regexp {[^-a-zA-Z0-9/!_.*'()]} [string range $s3_object_key 1 end]] } {
             return 0
         }
 
         # Object keys ending in "." can cause issues
-        if { [string index $s3_object end] eq "." } {
+        if { [string index $s3_object_key end] eq "." } {
             return 0
         }
 
