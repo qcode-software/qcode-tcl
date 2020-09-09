@@ -598,13 +598,15 @@ proc qc::s3 { args } {
     }
 }
 
-proc qc::s3_url_bucket_object_key {s3_url} {
+proc qc::s3_url_bucket_object_key_v1 {s3_url} {
     #| Return a list of the bucket and object key for the given s3_url
 
+    # Original solution
+    
     # Strip a leading "s3://" or "/"
     if {[regexp {^[sS]3://(.*)$} $s3_url -> temp]} {
         set s3_url $temp
-    }  elseif {[regexp {^/(.*)$} $s3_url -> temp]} {
+    } elseif {[regexp {^/(.*)$} $s3_url -> temp]} {
         set s3_url $temp
     }
 
@@ -616,6 +618,31 @@ proc qc::s3_url_bucket_object_key {s3_url} {
         set bucket [string range $s3_url 0 $separator_index-1]
         set object_key [string range $s3_url $separator_index end]
     }
+
+    return [list $bucket $object_key]
+}
+
+proc qc::s3_url_bucket_object_key_v2 {s3_url} {
+    #| Return a list of the bucket and object key for the given s3_url
+
+    # Pure regexp solution
+    regexp {^(?:[sS]3://|/)?([^/]+)(/?.*)} $s3_url -> bucket object_key
+    return [list $bucket $object_key]
+}
+
+proc qc::s3_url_bucket_object_key_v3 {s3_url} {
+    #| Return a list of the bucket and object key for the given s3_url
+
+    # Regexp free solution
+    if { [string first "s3://" [lower $s3_url]] == 0 } {
+        set s3_url [string range $s3_url 5 end]
+    } elseif { [string first "/" $s3_url] == 0 } {
+        set s3_url [string range $s3_url 1 end]
+    }
+
+    set uri_split [split $s3_url "/"]
+    set bucket [qc::lshift uri_split]
+    set object_key [join $uri_split "/"]
 
     return [list $bucket $object_key]
 }

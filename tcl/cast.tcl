@@ -851,7 +851,7 @@ namespace eval qc::cast {
             set s3_url $temp
         }
         
-        return "S3://${$bucket}/{$object_key}"
+        return "s3://${$bucket}/{$object_key}"
     }
 
     proc interval {string} {
