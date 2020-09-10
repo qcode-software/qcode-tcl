@@ -1,0 +1,61 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+package require json
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    # Bucket to runs tests against
+    set bucket "qcodetcl-tcltest-s3"
+    
+    # Set true once s3 credentials and region are set
+    testConstraint requires_s3 false
+    set role_name [qc::aws_metadata iam/security-credentials/]
+    if { $role_name ne "" } {
+        qc::aws_region_set "eu-west-1"
+        set role_credentials [::json::json2dict [qc::aws_metadata iam/security-credentials/${role_name}]]
+        set access_key [dict get $role_credentials AccessKeyId]
+        set secret_key [dict get $role_credentials SecretAccessKey]
+        set token [dict get $role_credentials Token]
+        qc::aws_credentials_set $access_key $secret_key $token
+
+        testConstraint requires_s3 true
+    }
+
+    set result [qc::s3 lsbucket $bucket]
+
+    # md5
+    test s3-md5-1.0 {qc::s3 md5: Test} -body {
+        ::try {
+            set filepath [qc::temp_file "123456789"]
+            set md5 [qc::s3 md5 $filepath]
+        } finally {
+            file delete $filepath
+        }
+        return $md5
+    } -result {test}
+
+    # Some tests require other s3 procs to be working
+    # Tests are ordered so if a test fails, other test dependent on the failing proc will be skipped
+    
+    # ls
+    # lsbucket
+    # get
+    # head
+    # copy
+    # put
+    # restore
+    # upload
+    # delete
+    
+    #test s3-put-1.0 {qc::s3 put: }
+
+    
+    cleanupTests
+}
+namespace delete ::qcode::test
+

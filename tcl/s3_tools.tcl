@@ -246,14 +246,14 @@ proc qc::s3 { args } {
                 error "Wrong number of arguments. Usage: qc::s3 get mybucket remote_filename {local_filename}"
             } elseif { [llength $args] == 3 } {
                 # Test if args are $bucket and $remote_filename or $s3_url and $local_filename
-                lassign $args -> temp0 temp1
-                if { [qc::is s3_url $temp0] } {
-                    set s3_url $temp0
+                lassign $args -> arg0 arg1
+                if { [qc::is s3_url $arg0] } {
+                    set s3_url $arg0
                     lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
-                    set local_filename $temp1
+                    set local_filename $arg1
                 } else {
-                    set bucket $temp0
-                    set remote_filename $temp1
+                    set bucket $arg0
+                    set remote_filename $arg1
                     # No local filename, assume same as remote_filename
                     set local_filename "./[file tail $remote_filename]"
                 }
@@ -322,14 +322,14 @@ proc qc::s3 { args } {
                 error "Wrong number of arguments. Usage: qc::s3 put mybucket local_filename {remote_filename}"
             } elseif { [llength $args] == 3 } {
                 # Test if args are $bucket and $remote_filename or $s3_url and $local_filename
-                lassign $args -> temp0 temp1
-                if { [qc::castable s3_url $temp0] } {
-                    set s3_url [qc::cast s3_url $temp0]
+                lassign $args -> arg0 arg1
+                if { [qc::castable s3_url $arg0] } {
+                    set s3_url [qc::cast s3_url $arg0]
                     lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_filename
-                    set local_filename $temp1
+                    set local_filename $arg1
                 } else {
-                    set bucket $temp0
-                    set local_filename $temp1
+                    set bucket $arg0
+                    set local_filename $arg1
                     # No remote filename, assume same as local_filename
                     set remote_filename "./[file tail $local_filename]"
                 }
@@ -372,14 +372,14 @@ proc qc::s3 { args } {
                     if { [llength $args] == 6 } {
                         lassign $args -> -> bucket local_file remote_file content_type
                     } elseif { [llength $args] == 5 } {
-                        lassign $args -> -> temp0 local_file temp1
-                        if { [qc::is s3_url $temp0] } {
-                            set s3_url $temp0
+                        lassign $args -> -> arg0 local_file arg1
+                        if { [qc::is s3_url $arg0] } {
+                            set s3_url $arg0
                             lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
-                            set content_type $temp1
+                            set content_type $arg1
                         } else {
-                            set bucket $temp0
-                            set remote_file $temp1
+                            set bucket $arg0
+                            set remote_file $arg1
                         }
                     } elseif { [llength $args] == 4 } {
                         lassign $args -> -> s3_url local_file
@@ -555,14 +555,14 @@ proc qc::s3 { args } {
                     if {[llength $args] == 5} {
                         lassign $args -> bucket local_file remote_file content_type
                     } elseif {[llength $args] == 4} {
-                        lassign $args -> temp0 local_file temp1
-                        if { [qc::is s3_url $temp0] } {
-                            set s3_url $temp0
+                        lassign $args -> arg0 local_file arg1
+                        if { [qc::is s3_url $arg0] } {
+                            set s3_url $arg0
                             lassign [qc::s3_url_bucket_object_key $s3_url] bucket remote_file
-                            set content_type $temp1
+                            set content_type $arg1
                         } else {
-                            set bucket $temp0
-                            set remote_filename $temp1
+                            set bucket $arg0
+                            set remote_filename $arg1
                         }
                     } elseif {[llength $args] == 3} {
                         lassign $args -> s3_url local_file
