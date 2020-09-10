@@ -835,7 +835,7 @@ namespace eval qc::cast {
         #| (See also qc::is s3_url)
 
         # Split the string into bucket and object key
-        lassign [qc::s3_url_bucket_object_key $s3_url] bucket object_key
+        lassign [qc::s3_url_bucket_object_key $string] bucket object_key
         if { ![qc::is s3_bucket $bucket] } {
             return -code error -errorcode CAST "Could not cast $string to an s3_url"
         }
@@ -851,7 +851,7 @@ namespace eval qc::cast {
             set s3_url $temp
         }
         
-        return "s3://${$bucket}/{$object_key}"
+        return "s3://${bucket}/${object_key}"
     }
 
     proc interval {string} {

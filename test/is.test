@@ -3033,11 +3033,10 @@ bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
     test is-s3_bucket-1.7     {qc::is s3_bucket: Invalid end character}       {qc::is s3_bucket "my-bucket."}             0
     test is-s3_bucket-1.8     {qc::is s3_bucket: IP Address}                  {qc::is s3_bucket "1.2.3.4"}                0
 
-    test is-s3_object_key-1.0 {qc::is s3_object_key: Invalid characters 1}    {qc::is s3_object_key "/my/file&name"}       0
-    test is-s3_object_key-1.1 {qc::is s3_object_key: Invalid characters 2}    {qc::is s3_object_key "/file name"}          0
-    test is-s3_object_key-1.2 {qc::is s3_object_key: Valid key}               {qc::is s3_object_key "/obj/k!_t/Y*f).png"}  1
-    test is-s3_object_key-1.3 {qc::is s3_object_key: Ending in "."}           {qc::is s3_object_key "/name."}              0
-    test is-s3_object_key-1.4 {qc::is s3_object_key: Not starting with "/"}   {qc::is s3_object_key "test"}                0
+    test is-s3_object_key-1.0 {qc::is s3_object_key: Invalid characters 1}    {qc::is s3_object_key "my/file&name"}       0
+    test is-s3_object_key-1.1 {qc::is s3_object_key: Invalid characters 2}    {qc::is s3_object_key "file name"}          0
+    test is-s3_object_key-1.2 {qc::is s3_object_key: Valid key}               {qc::is s3_object_key "/obj/k!_t/Y*f).png"} 1
+    test is-s3_object_key-1.3 {qc::is s3_object_key: Ending in "."}           {qc::is s3_object_key "name."}              0
     
     cleanupTests
 }

@@ -916,11 +916,6 @@ namespace eval qc::is {
         #| Checks if the given string is a valid s3 object key
         #| Limits characters to those defined as safe:
         #| https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-keys
-
-        # Starts with "/"
-        if { [string index $s3_object_key 0] ne "/" } {
-            return 0
-        }
         
         # Restrict to safe characters (excluding the starting "/")
         if { [regexp {[^-a-zA-Z0-9/!_.*'()]} [string range $s3_object_key 1 end]] } {
