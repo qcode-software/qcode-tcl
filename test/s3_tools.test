@@ -365,10 +365,13 @@ namespace eval ::qcode::test {
         return 0
     } -result {1}
     
-    # restore
-    
-    
     # upload
+    test s3-upload-1.0 {qc::s3 upload: Using separate bucket and remote_filename} -constraints {
+        requires_s3
+        requires_test_bucket
+    } -body {
+        return 1
+    } -result {1}
     
     cleanupTests
 }

@@ -159,6 +159,14 @@ namespace eval ::qcode::test {
         qc::cast interval "year"
     } -returnCodes error -result "Could not cast year to an interval"
 
+    test cast-s3_url-1.0 {qc::cast s3_url: Missing Protocol 1}  {qc::cast s3_url "bucket/object_key"}      {s3://bucket/object_key}
+    test cast-s3_url-1.1 {qc::cast s3_url: Missing Protocol 2}  {qc::cast s3_url "/bucket/object_key"}     {s3://bucket/object_key}
+    test cast-s3_url-1.2 {qc::cast s3_url: Upper Case Protocol} {qc::cast s3_url "S3://bucket/object_key"} {s3://bucket/object_key}
+    test cast-s3_url-1.3 {qc::cast s3_url: No object_key}       {qc::cast s3_url "bucket"}                 {s3://bucket/}
+    test cast-s3_url-1.4 {qc::cast s3_url: Invalid bucket}     -body {qc::cast s3_url "%%%%%%%%/object_key"} -returnCodes error -result {Could not cast "%%%%%%%%/object_key" to an s3_url}
+    test cast-s3_url-1.5 {qc::cast s3_url: Invalid object_key} -body {qc::cast s3_url "bucket/invalid."}     -returnCodes error -result {Could not cast "bucket/invalid." to an s3_url}
+    
+        
     cleanupTests
 }
 namespace delete ::qcode::test

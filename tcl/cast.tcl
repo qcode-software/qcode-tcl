@@ -837,10 +837,10 @@ namespace eval qc::cast {
         # Split the string into bucket and object key
         lassign [qc::s3_url_bucket_object_key $string] bucket object_key
         if { ![qc::is s3_bucket $bucket] } {
-            return -code error -errorcode CAST "Could not cast $string to an s3_url"
+            return -code error -errorcode CAST "Could not cast \"$string\" to an s3_url"
         }
         if { $object_key ne "" && ![qc::is s3_object_key $object_key] } {
-            return -code error -errorcode CAST "Could not cast $string to an s3_url"
+            return -code error -errorcode CAST "Could not cast \"$string\" to an s3_url"
         }
         
         # Force the url to start "S3://"
