@@ -38,33 +38,33 @@ namespace eval ::qcode::test {
     # Some tests require other s3 procs to be working
     # Tests are ordered so if a test fails, other test dependent on the failing proc will be skipped
 
-    # s3_url_bucket_object_key
-    test s3_url_bucket_object_key-1.0 {qc::s3_url_bucket_object_key: Protocol 1} -body {
-        qc::s3_url_bucket_object_key "S3://bucket/object_key"
+    # s3_uri_bucket_object_key
+    test s3-uri_bucket_object_key-1.0 {qc::s3 uri_bucket_object_key: Protocol 1} -body {
+        qc::s3 uri_bucket_object_key "S3://bucket/object_key"
     } -result {bucket object_key}
 
-    test s3_url_bucket_object_key-1.1 {qc::s3_url_bucket_object_key: Protocol 2} -body {
-        qc::s3_url_bucket_object_key "s3://bucket/object_key"
+    test s3-uri_bucket_object_key-1.1 {qc::s3 uri_bucket_object_key: Protocol 2} -body {
+        qc::s3 uri_bucket_object_key "s3://bucket/object_key"
     } -result {bucket object_key}
 
-    test s3_url_bucket_object_key-1.2 {qc::s3_url_bucket_object_key: Protocol 3} -body {
-        qc::s3_url_bucket_object_key "/bucket/object_key"
+    test s3-uri_bucket_object_key-1.2 {qc::s3 uri_bucket_object_key: Protocol 3} -body {
+        qc::s3 uri_bucket_object_key "/bucket/object_key"
     } -result {bucket object_key}
 
-    test s3_url_bucket_object_key-1.3 {qc::s3_url_bucket_object_key: Protocol 4} -body {
-        qc::s3_url_bucket_object_key "bucket/object_key"
+    test s3-uri_bucket_object_key-1.3 {qc::s3 uri_bucket_object_key: Protocol 4} -body {
+        qc::s3 uri_bucket_object_key "bucket/object_key"
     } -result {bucket object_key}
     
-    test s3_url_bucket_object_key-1.4 {qc::s3_url_bucket_object_key: No object key 1} -body {
-        qc::s3_url_bucket_object_key "abcd:1234 £A12 ab1 a"
+    test s3-uri_bucket_object_key-1.4 {qc::s3 uri_bucket_object_key: No object key 1} -body {
+        qc::s3 uri_bucket_object_key "abcd:1234 £A12 ab1 a"
     } -result {{abcd:1234 £A12 ab1 a} {}}
 
-    test s3_url_bucket_object_key-1.5 {qc::s3_url_bucket_object_key: No object key 2} -body {
-        qc::s3_url_bucket_object_key "/abcdef/"
+    test s3-uri_bucket_object_key-1.5 {qc::s3 uri_bucket_object_key: No object key 2} -body {
+        qc::s3 uri_bucket_object_key "/abcdef/"
     } -result {abcdef {}}
 
-    test s3_url_bucket_object_key-1.6 {qc::s3_url_bucket_object_key: Long object key} -body {
-        qc::s3_url_bucket_object_key "/abcdef/acb/123/xyz.png"
+    test s3-uri_bucket_object_key-1.6 {qc::s3 uri_bucket_object_key: Long object key} -body {
+        qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
     } -result {abcdef acb/123/xyz.png}
     
     # md5 - Get MD5 of a local file
@@ -200,7 +200,7 @@ namespace eval ::qcode::test {
         qc::s3 delete $s3_url
 
         # Confirm deleted
-        lassign [qc::s3_url_bucket_object_key $s3_url] . object_key
+        lassign [qc::s3 uri_bucket_object_key $s3_url] . object_key
         set results [qc::s3 lsbucket $bucket $object_key]
         if { $object_key in [ldict_values results Key] } {
             return 0
@@ -325,9 +325,8 @@ namespace eval ::qcode::test {
         }
 
         # qc::s3 copy
-        set object_to_copy "${bucket}/${object_key}"
         set object_copy "${object_key}_copy"
-        qc::s3 copy $bucket $object_to_copy "/${object_copy}"
+        qc::s3 copy $bucket "/${object_key}" "/${object_copy}"
 
         # Check result
         set results [qc::s3 lsbucket $bucket $object_copy]
@@ -357,7 +356,7 @@ namespace eval ::qcode::test {
         qc::s3 copy $s3_url_to_copy $s3_url_copy
 
         # Check result
-        lassign [qc::s3_url_bucket_object_key $s3_url_copy] . object_key
+        lassign [qc::s3 uri_bucket_object_key $s3_url_copy] . object_key
         set results [qc::s3 lsbucket $bucket $object_copy]
         if { $object_copy in [ldict_values results Key] } {
             return 1

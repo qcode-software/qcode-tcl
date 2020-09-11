@@ -229,7 +229,7 @@ proc qc::is_uri_valid {uri} {
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_url s3_bucket s3_object_key time interval
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -930,20 +930,20 @@ namespace eval qc::is {
         return 1
     }
     
-    proc s3_url {s3_url} {
-        #| Checks if the given string is a valid s3 URL
+    proc s3_uri {s3_uri} {
+        #| Checks if the given string is a valid s3 URI
         # Valid Examples:
         # s3://bucket/location.png
         # S3://test/location/foo/bar
         # s3://bucket
 
         # Check for protocol 
-        if { ![regexp {^[sS]3://} $s3_url]} {
+        if { ![regexp {^[sS]3://} $s3_uri]} {
             return 0
         }
 
         # Check the bucket and key are valid
-        lassign [qc::s3_url_bucket_object_key $s3_url] bucket object_key
+        lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
         if { ![qc::is s3_bucket $bucket] } {
             return 0
         }
