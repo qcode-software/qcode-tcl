@@ -22,6 +22,10 @@ namespace eval ::qcode::test {
     testConstraint requires_s3_put false
     # Set true once `qc::s3 delete` passes its test
     testConstraint requires_s3_delete false
+    # Set true once `qc::s3 upload abort` passes its test
+    testConstraint requires_s3_upload_abort false
+    # Set true once `qc::s3 upload lsparts` passes its test
+    testConstraint requires_s3_upload_lsparts false
     
     set role_name [qc::aws_metadata iam/security-credentials/]
     if { $role_name ne "" } {
@@ -375,16 +379,161 @@ namespace eval ::qcode::test {
         return 0
     } -result {1}
     
-    # upload
-    test s3-upload-1.0 {qc::s3 upload: Using separate bucket and remote_filename} -constraints {
+    # upload - Multipart uploads
+    test s3-upload-1.0 {qc::s3 upload: Testing `init`, `send`, and `complete` v1} -constraints {
         requires_s3
         requires_test_bucket
+        requires_s3_lsbucket
     } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.0-test"
+        ::try {
+            qc::s3 upload $bucket $local_filename "/${object_key}"
+        } finally {
+            file delete $local_filename
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+    
+    test s3-upload-1.1 {qc::s3 upload: Testing `init`, `send`, and `complete` v2} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.0-test"
+        set s3_uri [qc::s3 uri $bucket $object_key]
+        ::try {
+            qc::s3 upload $s3_uri $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-upload-1.2 {qc::s3 upload: Testing `abort` v1} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.2-test"
+        set s3_uri [qc::s3 uri $bucket $object_key]
+        ::try {
+            set upload_id [qc::s3 upload init $s3_uri $local_filename]
+        } finally {
+            file delete $local_filename
+        }
+
+        qc::s3 upload abort $s3_uri $upload_id
+        
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
         return 1
     } -result {1}
 
+    test s3-upload-1.3 {qc::s3 upload: Testing `abort` v2} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.3-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+        } finally {
+            file delete $local_filename
+        }
+
+        qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
+        testConstraint requires_s3_upload_abort true
+        return 1
+    } -result {1}
+
+    test s3-upload-1.4 {qc::s3 upload: Testing `ls`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.4-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            set result [qc::s3 upload ls $bucket]
+        } finally {
+            file delete $local_filename
+            qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        }
+
+        return $result
+    } -result {1}
     
-    
+    test s3-upload-1.5 {qc::s3 upload: Testing `lsparts`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.5-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
+            set result [qc::s3 upload lsparts $bucket "/${object_key}" $upload_id]
+        } finally {
+            file delete $local_filename
+            qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        }
+
+        if { "\"[dict get $etag_dict 1]\"" in [ldict_values result ETag] } {
+            testConstraint requires_s3_upload_lsparts true
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-upload-1.6 {qc::s3 upload: Testing `cleanup`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+        requires_s3_upload_lsparts
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.6-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
+
+            qc::s3 upload cleanup $bucket
+
+            set result [qc::s3 upload lsparts $bucket "/${object_key}" $upload_id]
+        } finally {
+            file delete $local_filename
+        }
+
+        if { [llength $result] == 0 } {
+            return 1
+        }
+        
+        return 0
+    } -result {1}
+
     # Cleanup
     test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
         requires_s3

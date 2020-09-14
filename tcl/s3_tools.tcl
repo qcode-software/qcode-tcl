@@ -509,7 +509,7 @@ proc qc::s3 { args } {
                         lappend xml "<Part>[qc::xml_from PartNumber ETag]</Part>"
                     }
                     lappend xml {</CompleteMultipartUpload>}
-                    log Debug "Completing Upload to $remote_path in $bucket."
+                    log Debug "Completing Upload to $object_key in $bucket."
                     return [qc::_s3_post $bucket "${object_key}?uploadId=$upload_id" [join $xml \n]]
                 }
                 send {
@@ -617,17 +617,19 @@ proc qc::s3 { args } {
                             set bucket $arg0
                             set remote_file $arg1
                             set object_key [string range $remote_file 1 end]
+                            set content_type ""
                         }
                     } elseif {[llength $args] == 3} {
                         lassign $args -> s3_uri local_file
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                        set content_type ""
                     } else {
                         error "Invalid number of arguments. Usage: \"qc::s3 upload bucket local_file remote_file {content_type}\" or \"qc::s3 upload s3_uri local_file {content_type}\"."
                     }
                     
-                    set upload_id [qc::s3 upload init $bucket $local_file $object_key $content_type]
-                    set etag_dict [qc::s3 upload send $bucket $local_file $object_key $upload_id]
-                    qc::s3 upload complete $bucket $object_key $upload_id $etag_dict
+                    set upload_id [qc::s3 upload init [qc::s3 uri $bucket $object_key] $local_file $content_type]
+                    set etag_dict [qc::s3 upload send [qc::s3 uri $bucket $object_key] $local_file $upload_id]
+                    qc::s3 upload complete [qc::s3 uri $bucket $object_key] $upload_id $etag_dict
                 }
             }
         }
