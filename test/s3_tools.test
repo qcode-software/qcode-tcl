@@ -66,7 +66,7 @@ namespace eval ::qcode::test {
     test s3-uri_bucket_object_key-1.6 {qc::s3 uri_bucket_object_key: Long object key} -body {
         qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
     } -result {abcdef acb/123/xyz.png}
-    
+
     # md5 - Get MD5 of a local file
     test s3-md5-1.0 {qc::s3 md5: Test} -body {
         set filepath [qc::file_temp "123456789"]
@@ -113,7 +113,7 @@ namespace eval ::qcode::test {
         requires_test_bucket
         requires_s3_lsbucket
     } -body {
-        set object_key "s3-put-1.0-test"
+        set object_key "s3_tools_test-put-1.0-test"
         set remote_filename "/${object_key}"
         set local_filepath [qc::file_temp "1234"]
         ::try {
@@ -135,7 +135,7 @@ namespace eval ::qcode::test {
         requires_test_bucket
         requires_s3_lsbucket
     } -body {
-        set object_key "s3-put-1.1-test"
+        set object_key "s3_tools_test-put-1.1-test"
         set s3_url "s3://${bucket}/${object_key}"
         
         set local_filepath [qc::file_temp "1234"]
@@ -161,7 +161,7 @@ namespace eval ::qcode::test {
         requires_s3_lsbucket
         requires_s3_put
     } -body {
-        set object_key "s3-delete-1.0-test"
+        set object_key "s3_tools_test-delete-1.0-test"
         set remote_filename "/${object_key}"
         set local_filename [qc::file_temp "1234"]
         ::try {
@@ -188,7 +188,7 @@ namespace eval ::qcode::test {
         requires_s3_lsbucket
         requires_s3_put
     } -body {
-        set s3_url "s3://${bucket}/s3-delete-1.1-test"
+        set s3_url "s3://${bucket}/s3_tools_test-delete-1.1-test"
         set local_filename [qc::file_temp "1234"]
         ::try {
             qc::s3 put $s3_url $local_filename
@@ -206,6 +206,7 @@ namespace eval ::qcode::test {
             return 0
         }
 
+        testConstraint requires_s3_delete true
         return 1
     } -result {1}
     
@@ -217,7 +218,7 @@ namespace eval ::qcode::test {
     } -body {
         set file_string "Test file contents"
         set local_filename [qc::file_temp $file_string]
-        set remote_filename "/s3-get-1.0-test"
+        set remote_filename "/s3_tools_test-get-1.0-test"
         ::try {
             qc::s3 put $bucket $local_filename $remote_filename
         } finally {
@@ -247,7 +248,7 @@ namespace eval ::qcode::test {
     } -body {
         set file_string "Test file contents"
         set local_filename [qc::file_temp $file_string]
-        set s3_url "s3://${bucket}/s3-get-1.0-test"
+        set s3_url "s3://${bucket}/s3_tools_test-get-1.0-test"
         ::try {
             qc::s3 put $s3_url $local_filename
         } finally {
@@ -277,7 +278,7 @@ namespace eval ::qcode::test {
         requires_s3_put
     } -body {
         set local_filename [qc::file_temp "1234"]
-        set remote_path "/s3-head-1.0-test"
+        set remote_path "/s3_tools_test-head-1.0-test"
         
         ::try {
             qc::s3 put $bucket $local_filename $remote_path
@@ -296,7 +297,7 @@ namespace eval ::qcode::test {
         requires_s3_put
     } -body {
         set local_filename [qc::file_temp "1234"]
-        set s3_url "s3://${bucket}/s3-head-1.1-test"
+        set s3_url "s3://${bucket}/s3_tools_test-head-1.1-test"
         ::try {
             qc::s3 put $s3_url $local_filename
         } finally {
@@ -316,7 +317,7 @@ namespace eval ::qcode::test {
         requires_s3_lsbucket
     } -body {
         set local_filename [qc::file_temp "abcdefg"]
-        set object_key "s3-copy-1.0-test"
+        set object_key "s3_tools_test-copy-1.0-test"
         set s3_url "s3://${bucket}/${object_key}"
         ::try {
             qc::s3 put $s3_url $local_filename
@@ -343,6 +344,7 @@ namespace eval ::qcode::test {
         requires_s3_lsbucket
     } -body {
         set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-copy-1.1-test"
         set s3_url "s3://${bucket}/${object_key}"
         ::try {
             qc::s3 put $s3_url $local_filename
@@ -369,6 +371,20 @@ namespace eval ::qcode::test {
         requires_s3
         requires_test_bucket
     } -body {
+        return 1
+    } -result {1}
+
+    # Cleanup
+    test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+        requires_s3_delete
+    } -body {
+        set result [qc::s3 lsbucket $bucket "s3_tools_test-"]
+        foreach object_key [ldict_values result Key] {
+            qc::s3 delete $bucket $object_key
+        }
         return 1
     } -result {1}
     

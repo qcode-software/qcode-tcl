@@ -400,7 +400,37 @@ namespace eval ::qcode::test {
         qc::castable interval "year"
     } -result false
 
-    
+    test castable-s3_uri-1.0 {qc::castable s3_uri "bucket"} -body {
+        qc::castable s3_uri "bucket"
+    } -result true
+
+    test castable-s3_uri-1.1 {qc::castable s3_uri "bucket"} -body {
+        qc::castable s3_uri "bucket"
+    } -result true
+
+    test castable-s3_uri-1.2 {qc::castable s3_uri "bucket/key"} -body {
+        qc::castable s3_uri "bucket/key"
+    } -result true
+
+    test castable-s3_uri-1.3 {qc::castable s3_uri "Invalid@Bucket/key"} -body {
+        qc::castable s3_uri "invalid@bucket/key"
+    } -result false
+
+    test castable-s3_uri-1.4 {qc::castable s3_uri "bucket/invalid_key."} -body {
+        qc::castable s3_uri "bucket/invalid_key."
+    } -result false
+
+    test castable-s3_uri-1.5 {qc::castable s3_uri "/leading/slash"} -body {
+        qc::castable s3_uri "/leading/slash"
+    } -result true
+
+    test castable-s3_uri-1.6 {qc::castable s3_uri "s3://lower-case/protocol"} -body {
+        qc::castable s3_uri "s3://lower-case/protocol"
+    } -result true
+
+    test castable-s3_uri-1.7 {qc::castable s3_uri "S3://upper-case/protocol"} -body {
+        qc::castable s3_uri "S3://upper-case/protocol"
+    } -result true
     
     cleanupTests
 }

@@ -1,6 +1,6 @@
 namespace eval qc::castable {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path s3_url time interval
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path s3_uri time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -218,11 +218,11 @@ namespace eval qc::castable {
 	}
     }
 
-    proc s3_url {string} {
-        #| Test if the given string can be cast to an s3 url
-        #| (See also qc::is s3_url)
+    proc s3_uri {string} {
+        #| Test if the given string can be cast to an s3 uri
+        #| (See also qc::is s3_uri)
         try {
-	    qc::cast s3_url $string
+	    qc::cast s3_uri $string
 	    return true
 	} on error [list error_message options] {
 	    return false
