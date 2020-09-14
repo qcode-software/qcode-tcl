@@ -67,6 +67,15 @@ namespace eval ::qcode::test {
         qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
     } -result {abcdef acb/123/xyz.png}
 
+    # uri - create an S3 URI from a bucket and object_key
+    test s3-uri-1.0 {qc::s3 uri: bucket and key} -body {
+        qc::s3 uri "bucket" "key"
+    } -result {s3://bucket/key}
+
+    test s3-uri-1.1 {qc::s3 uri: bucket only} -body {
+        qc::s3 uri "bucket"
+    }  -result {s3://bucket/}
+
     # md5 - Get MD5 of a local file
     test s3-md5-1.0 {qc::s3 md5: Test} -body {
         set filepath [qc::file_temp "123456789"]
