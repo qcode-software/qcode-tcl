@@ -30,18 +30,19 @@ proc qc::_s3_endpoint { args } {
     #| Usage:
     #| qc::_s3_endpoint bucket object_key
     #| qc::_s3_endpoint s3_uri
+    #| qc::_s3_endpoint bucket
     
     if { [llength $args] == 1 } {
         if { [qc::is s3_uri [lindex $args 0]] } {
             lassign [qc::s3 uri_bucket_object_key [lindex $args 0]] bucket object_key
-            if { $object_key eq "" } {
-                unset object_key
-            }
+            set append_key true
         } else {
             set bucket [lindex $args 0]
+            set append_key false
         }
     } elseif { [llength $args] == 2 } {
         lassign $args bucket object_key
+        set append_key true
     } else {
         error "Invalid number of arguments: Usage: \"qc::_s3_endpoint bucket object_key\" or \"qc::_s3_endpoint s3_uri\"."
     } 
@@ -50,7 +51,7 @@ proc qc::_s3_endpoint { args } {
     if { $bucket ne "" } {
         set endpoint [join [list $bucket $endpoint] .]
     }
-    if { [info exists object_key] } {
+    if { $append_key } {
         append endpoint / $object_key
     }
     return $endpoint

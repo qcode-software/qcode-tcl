@@ -831,8 +831,8 @@ namespace eval qc::cast {
     }
 
     proc s3_uri {string} {
-        #| Cast the given string to an s3 url
-        #| (See also qc::is s3_url)
+        #| Cast the given string to an s3 uri
+        #| (See also qc::is s3_uri)
 
         # Split the string into bucket and object key
         lassign [qc::s3 uri_bucket_object_key $string] bucket object_key
