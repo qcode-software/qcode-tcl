@@ -71,6 +71,31 @@ namespace eval ::qcode::test {
         qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
     } -result {abcdef acb/123/xyz.png}
 
+    # _s3_endpoint - test for the private proc qc::_s3_endpoint
+    test s3-endpoint-1.0 {qc::_s3_endpoint: bucket} -body {
+        qc::_s3_endpoint bucket
+    } -result {bucket.s3.amazonaws.com}
+
+    test s3-endpoint-1.1 {qc::_s3_endpoint: bucket and key 1} -body {
+        qc::_s3_endpoint bucket ""
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.2 {qc::_s3_endpoint: bucket and key 2} -body {
+        qc::_s3_endpoint bucket key
+    } -result {bucket.s3.amazonaws.com/key}
+    
+    test s3-endpoint-1.3 {qc::_s3_endpoint: s3_uri 1} -body {
+        qc::_s3_endpoint "s3://bucket"
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.4 {qc::_s3_endpoint: s3_uri 2} -body {
+        qc::_s3_endpoint "s3://bucket/"
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.5 {qc::_s3_endpoint: s3_uri 3} -body {
+        qc::_s3_endpoint "s3://bucket/key"
+    } -result {bucket.s3.amazonaws.com/key}
+    
     # uri - create an S3 URI from a bucket and object_key
     test s3-uri-1.0 {qc::s3 uri: bucket and key} -body {
         qc::s3 uri "bucket" "key"
