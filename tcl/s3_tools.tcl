@@ -487,7 +487,7 @@ proc qc::s3 { args } {
                     # aborts any unfinished uploads for bucket
                     lassign $args -> -> bucket 
                     foreach dict [qc::s3 upload ls $bucket] {
-                        qc::s3 upload abort $bucket "[dict get $dict Key]" [dict get $dict UploadId]
+                        qc::s3 upload abort $bucket "/[dict get $dict Key]" [dict get $dict UploadId]
                     }
                 }
                 complete {

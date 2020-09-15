@@ -522,7 +522,7 @@ namespace eval ::qcode::test {
         set object_key "s3_tools_test-upload-1.6-test"
         ::try {
             set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
-            set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
+            #set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
 
             qc::s3 upload cleanup $bucket
 
