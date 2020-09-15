@@ -482,7 +482,11 @@ namespace eval ::qcode::test {
             qc::s3 upload abort $bucket "/${object_key}" $upload_id
         }
 
-        return $result
+        # Confirm `qc::s3 upload ls` found the partially uploaded object
+        if { $object_key in [ldict_values result Key] } {
+            return 1
+        }
+        return 0
     } -result {1}
     
     test s3-upload-1.5 {qc::s3 upload: Testing `lsparts`} -constraints {
