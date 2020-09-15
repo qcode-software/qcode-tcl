@@ -74,7 +74,7 @@ proc qc::_s3_auth_headers { args } {
     if { $bucket ne "" } {
         # Is there a subresource specified?
         set subresources [list "acl" "lifecycle" "location" "logging" "notification" "partNumber" "policy" "requestPayment" "torrent" "uploadId" "uploads" "versionId" "versioning" "versions" "website" "restore"]
-        if { [regexp {^[^\?]+\?([A-Za-z]+).*$} $object_key -> resource] && [qc::in $subresources $resource] } {
+        if { [regexp {^[^\?]*\?([A-Za-z]+).*$} $object_key -> resource] && [qc::in $subresources $resource] } {
             set canonicalized_resource "/${bucket}/${object_key}"
         } else {
             # otherwise, drop the query part
