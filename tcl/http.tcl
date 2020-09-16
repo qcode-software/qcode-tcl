@@ -179,7 +179,7 @@ proc qc::http_post {args} {
 		switch $responsecode {
 		    404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
 		    500 {return -code error -errorcode CURL "SERVER ERROR $url $html"}
-		    default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url $html"}
+		    default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
 		}
 	    }
 	}

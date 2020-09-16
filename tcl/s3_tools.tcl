@@ -34,15 +34,18 @@ proc qc::_s3_endpoint { args } {
     
     if { [llength $args] == 1 } {
         if { [qc::is s3_uri [lindex $args 0]] } {
+            # qc::_s3_endpoint s3_uri
             lassign [qc::s3 uri_bucket_object_key [lindex $args 0]] bucket object_key
-            set append_key true
+            set object_key_exists true
         } else {
+            # qc::_s3_endpoint bucket
             set bucket [lindex $args 0]
-            set append_key false
+            set object_key_exists false
         }
     } elseif { [llength $args] == 2 } {
+        # qc::_s3_endpoint bucket object_key
         lassign $args bucket object_key
-        set append_key true
+        set object_key_exists true
     } else {
         error "Invalid number of arguments: Usage: \"qc::_s3_endpoint bucket object_key\" or \"qc::_s3_endpoint s3_uri\"."
     } 
@@ -51,7 +54,7 @@ proc qc::_s3_endpoint { args } {
     if { $bucket ne "" } {
         set endpoint [join [list $bucket $endpoint] .]
     }
-    if { $append_key } {
+    if { $object_key_exists } {
         append endpoint / $object_key
     }
     return $endpoint
@@ -278,13 +281,15 @@ proc qc::s3 { args } {
             if { [llength $args] < 3 || [llength $args] > 4 } {
                 error "Wrong number of arguments. Usage: \"qc::s3 get mybucket remote_filename ?local_filename?\" or \"qc::s3 get s3_uri local_filename\"."
             } elseif { [llength $args] == 3 } {
-                # Test if args are $bucket and $remote_filename or $s3_uil and $local_filename
+                # Test if args are $bucket and $remote_filename or $s3_uri and $local_filename
                 lassign $args -> arg0 arg1
                 if { [qc::is s3_uri $arg0] } {
+                    # qc::s3 get s3_uri local_filename
                     set s3_uri $arg0
                     lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     set local_filename $arg1
                 } else {
+                    # qc::s3 get bucket remote_filename
                     set bucket $arg0
                     # Strip the starting "/" from the remote_filename
                     set object_key [string range $arg1 1 end]
@@ -293,6 +298,7 @@ proc qc::s3 { args } {
                     set local_filename "./[file tail $remote_filename]"
                 }
             } else {
+                # qc::s3 get bucket remote_filename {local_filename}
                 lassign $args -> bucket remote_filename local_filename
                 set object_key [string range $remote_filename 1 end]
                 set s3_uri [qc::s3 uri $bucket $object_key]
@@ -322,9 +328,11 @@ proc qc::s3 { args } {
             # qc::s3 head s3_uri
 
             if { [llength $args] == 3 } {
+                # qc::s3 head bucket remote_path
                 lassign $args -> bucket remote_path
                 set object_key [string range $remote_path 1 end]
             } elseif { [llength $args] == 2 } {
+                # qc::s3 head s3_uri
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
@@ -340,10 +348,12 @@ proc qc::s3 { args } {
             # qc::s3 copy s3_uri_to_copy s3_uri_copy
 
             if {[llength $args] == 4} {
+                # qc::s3 copy bucket remote_filename_to_copy remote_filename_copy
                 lassign $args -> bucket remote_filename remote_filename_copy
                 set file_to_copy "${bucket}${remote_filename}"
                 set object_key_copy [string range $remote_filename_copy 1 end]
             } elseif {[llength $args] == 3} {
+                # qc::s3 copy s3_uri_to_copy s3_uri_copy
                 lassign $args -> s3_uri_to_copy s3_uri_copy
                 lassign [qc::s3 uri_bucket_object_key $s3_uri_to_copy] bucket object_key
                 set file_to_copy "${bucket}/${object_key}"
@@ -368,16 +378,19 @@ proc qc::s3 { args } {
                 # Test if args are $bucket and $remote_filename or $s3_uri and $local_filename
                 lassign $args -> arg0 arg1
                 if { [qc::is s3_uri $arg0] } {
+                    # qc::s3 put s3_uri local_filename
                     set s3_uri $arg0
                     lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     set local_filename $arg1
                 } else {
+                    # qc::s3 put bucket local_path
                     set bucket $arg0
                     set local_filename $arg1
                     # No remote filename, assume same as local_filename
                     set object_key [file tail $local_filename]
                 }
             } else {
+                # qc::s3 put bucket local_path remote_filename
                 lassign $args -> bucket local_filename remote_filename
                 set object_key [string range $remote_filename 1 end]
             }
@@ -396,9 +409,11 @@ proc qc::s3 { args } {
             # Requests restore of object from Glacier storage to S3 storage for $days days
             lassign $args -> bucket remote_path Days
             if { [llength $args] == 4  } {
+                 # qc::s3 restore bucket remote_path days
                 lassign $args -> bucket remote_path Days
                 set object_key [string range $remote_path 1 end]
             } elseif { [llength $args] == 3 } {
+                # qc::s3 restore s3_uri Days
                 lassign $args -> s3_uri Days
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
@@ -416,20 +431,24 @@ proc qc::s3 { args } {
 
                     set content_type ""
                     if { [llength $args] == 6 } {
+                        # qc::s3 upload init bucket local_file remote_file content_type
                         lassign $args -> -> bucket local_file remote_file content_type
                         set object_key [string range $remote_file 1 end]
                     } elseif { [llength $args] == 5 } {
                         lassign $args -> -> arg0 local_file arg1
                         if { [qc::is s3_uri $arg0] } {
+                            # qc::s3 upload init s3_uri local_file content_type
                             set s3_uri $arg0
                             lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                             set content_type $arg1
                         } else {
+                            # qc::s3 upload init bucket local_file remote_file
                             set bucket $arg0
                             set remote_file $arg1
                             set object_key [string range $remote_file 1 end]
                         }
                     } elseif { [llength $args] == 4 } {
+                        # qc::s3 upload init s3_uri local_file
                         lassign $args -> -> s3_uri local_file
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
@@ -451,9 +470,11 @@ proc qc::s3 { args } {
                     # qc::s3 upload abort bucket remote_path upload_id
                     # qc::s3 upload abort s3_uri upload_id
                     if {[llength $args] == 5 } {
+                        # qc::s3 upload abort bucket remote_path upload_id
                         lassign $args -> -> bucket remote_path upload_id
                         set object_key [string range $remote_path 1 end]
                     } elseif {[llength $args] == 4 } {
+                        # qc::s3 upload abort s3_uri upload_id
                         lassign $args -> -> s3_uri upload_id
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
@@ -471,9 +492,11 @@ proc qc::s3 { args } {
                     # qc::s3 upload lsparts bucket remote_path upload_id
                     # qc::s3 upload lsparts s3_uri upload_id
                     if {[llength $args] == 5 } {
+                        # qc::s3 upload lsparts bucket remote_path upload_id
                         lassign $args -> -> bucket remote_path upload_id
                         set object_key [string range $remote_path 1 end]
                     } elseif {[llength $args] == 4 } {
+                        # qc::s3 upload lsparts s3_uri upload_id
                         lassign $args -> -> s3_uri upload_id
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
@@ -495,9 +518,11 @@ proc qc::s3 { args } {
                     # qc::s3 upload complete bucket remote_path upload_id etag_dict
                     # qc::s3 upload complete s3_uri upload_id etag_dict
                     if {[llength $args] == 6} {
+                        # qc::s3 upload complete bucket remote_path upload_id etag_dict
                         lassign $args -> -> bucket remote_path upload_id etag_dict
                         set object_key [string range $remote_path 1 end]
                     } elseif {[llength $args] == 5} {
+                        # qc::s3 upload complete s3_uri upload_id etag_dict
                         lassign $args -> -> s3_uri upload_id etag_dict
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
@@ -518,9 +543,11 @@ proc qc::s3 { args } {
                     # qc::s3 upload send bucket local_path remote_path upload_id
                     # qc::s3 upload send s3_uri local_path upload_id
                     if {[llength $args] == 6} {
+                        # qc::s3 upload send bucket local_path remote_path upload_id
                         lassign $args -> -> bucket local_path remote_path upload_id
                         set object_key [string range $remote_path 1 end]
                     } elseif {[llength $args] == 5} {
+                        # qc::s3 upload send s3_uri local_path upload_id
                         lassign $args -> -> s3_uri local_path upload_id
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
@@ -605,21 +632,25 @@ proc qc::s3 { args } {
                     # TODO could be extended to retry upload part failures
                     set content_type ""
                     if {[llength $args] == 5} {
+                        # qc::s3 upload bucket local_file remote_file content_type
                         lassign $args -> bucket local_file remote_file content_type
                         set object_key [string range $remote_file 1 end]
                     } elseif {[llength $args] == 4} {
                         lassign $args -> arg0 local_file arg1
                         if { [qc::is s3_uri $arg0] } {
+                            # qc::s3 upload s3_uri local_file content_type
                             set s3_uri $arg0
                             lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                             set content_type $arg1
                         } else {
+                            # qc::s3 upload bucket local_file remote_file
                             set bucket $arg0
                             set remote_file $arg1
                             set object_key [string range $remote_file 1 end]
                             set content_type ""
                         }
                     } elseif {[llength $args] == 3} {
+                        # qc::s3 upload s3_uri local_file
                         lassign $args -> s3_uri local_file
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                         set content_type ""
@@ -638,9 +669,11 @@ proc qc::s3 { args } {
             # qc::s3 delete bucket remote_file
             # qc::s3 delete s3_uri
             if {[llength $args] == 3} {
+                # qc::s3 delete bucket remote_file
                 lassign $args -> bucket remote_file
                 set object_key [string range $remote_file 1 end]
             } elseif {[llength $args] == 2} {
+                # qc::s3 delete s3_uri
                 lassign $args -> s3_uri
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
