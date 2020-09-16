@@ -281,7 +281,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path time interval
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path s3_uri time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -828,6 +828,22 @@ namespace eval qc::cast {
 	    return "/${lower}"
 	}
 	return -code error -errorcode CAST "Could not cast $string to an url path"
+    }
+
+    proc s3_uri {string} {
+        #| Cast the given string to an s3 uri
+        #| (See also qc::is s3_uri)
+
+        # Split the string into bucket and object key
+        lassign [qc::s3 uri_bucket_object_key $string] bucket object_key
+        if { ![qc::is s3_bucket $bucket] } {
+            return -code error -errorcode CAST "Could not cast \"$string\" to an s3_uri"
+        }
+        if { $object_key ne "" && ![qc::is s3_object_key $object_key] } {
+            return -code error -errorcode CAST "Could not cast \"$string\" to an s3_uri"
+        }
+        
+        return "s3://${bucket}/${object_key}"
     }
 
     proc interval {string} {

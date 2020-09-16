@@ -1,0 +1,583 @@
+package require tcltest
+eval ::tcltest::configure $argv
+# Ensure package is loaded from ./package rather than /usr/lib/tcltk
+set auto_path [linsert $auto_path 0 ./package]
+package require -exact qcode $::env(VERSION)
+package require json
+
+namespace eval ::qcode::test {
+    namespace import ::tcltest::*
+    namespace path ::qc
+
+    # Bucket to runs tests against
+    set bucket "qcodetcl-tcltest-s3"
+
+    # Set true once s3 credentials and region are set
+    testConstraint requires_s3 false
+    # Set true once $bucket is confirmed as available by `qc::s3 ls`
+    testConstraint requires_test_bucket false
+    # Set true once `qc::s3 lsbucket` passes its test
+    testConstraint requires_s3_lsbucket false
+    # Set true once `qc::s3 put` passes its test
+    testConstraint requires_s3_put false
+    # Set true once `qc::s3 delete` passes its test
+    testConstraint requires_s3_delete false
+    # Set true once `qc::s3 upload abort` passes its test
+    testConstraint requires_s3_upload_abort false
+    # Set true once `qc::s3 upload ls` passes its test
+    testConstraint requires_s3_upload_ls false
+    
+    set role_name [qc::aws_metadata iam/security-credentials/]
+    if { $role_name ne "" } {
+        qc::aws_region_set "eu-west-1"
+        set role_credentials [::json::json2dict [qc::aws_metadata iam/security-credentials/${role_name}]]
+        set access_key [dict get $role_credentials AccessKeyId]
+        set secret_key [dict get $role_credentials SecretAccessKey]
+        set token [dict get $role_credentials Token]
+        qc::aws_credentials_set $access_key $secret_key $token
+
+        testConstraint requires_s3 true
+    }
+
+    # Some tests require other s3 procs to be working
+    # Tests are ordered so if a test fails, other test dependent on the failing proc will be skipped
+
+    # s3_uri_bucket_object_key
+    test s3-uri_bucket_object_key-1.0 {qc::s3 uri_bucket_object_key: Protocol 1} -body {
+        qc::s3 uri_bucket_object_key "S3://bucket/object_key"
+    } -result {bucket object_key}
+
+    test s3-uri_bucket_object_key-1.1 {qc::s3 uri_bucket_object_key: Protocol 2} -body {
+        qc::s3 uri_bucket_object_key "s3://bucket/object_key"
+    } -result {bucket object_key}
+
+    test s3-uri_bucket_object_key-1.2 {qc::s3 uri_bucket_object_key: Protocol 3} -body {
+        qc::s3 uri_bucket_object_key "/bucket/object_key"
+    } -result {bucket object_key}
+
+    test s3-uri_bucket_object_key-1.3 {qc::s3 uri_bucket_object_key: Protocol 4} -body {
+        qc::s3 uri_bucket_object_key "bucket/object_key"
+    } -result {bucket object_key}
+    
+    test s3-uri_bucket_object_key-1.4 {qc::s3 uri_bucket_object_key: No object key 1} -body {
+        qc::s3 uri_bucket_object_key "abcd:1234 £A12 ab1 a"
+    } -result {{abcd:1234 £A12 ab1 a} {}}
+
+    test s3-uri_bucket_object_key-1.5 {qc::s3 uri_bucket_object_key: No object key 2} -body {
+        qc::s3 uri_bucket_object_key "/abcdef/"
+    } -result {abcdef {}}
+
+    test s3-uri_bucket_object_key-1.6 {qc::s3 uri_bucket_object_key: Long object key} -body {
+        qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
+    } -result {abcdef acb/123/xyz.png}
+
+    # _s3_endpoint - test for the private proc qc::_s3_endpoint
+    test s3-endpoint-1.0 {qc::_s3_endpoint: bucket} -body {
+        qc::_s3_endpoint bucket
+    } -result {bucket.s3.amazonaws.com}
+
+    test s3-endpoint-1.1 {qc::_s3_endpoint: bucket and key 1} -body {
+        qc::_s3_endpoint bucket ""
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.2 {qc::_s3_endpoint: bucket and key 2} -body {
+        qc::_s3_endpoint bucket key
+    } -result {bucket.s3.amazonaws.com/key}
+    
+    test s3-endpoint-1.3 {qc::_s3_endpoint: s3_uri 1} -body {
+        qc::_s3_endpoint "s3://bucket"
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.4 {qc::_s3_endpoint: s3_uri 2} -body {
+        qc::_s3_endpoint "s3://bucket/"
+    } -result {bucket.s3.amazonaws.com/}
+
+    test s3-endpoint-1.5 {qc::_s3_endpoint: s3_uri 3} -body {
+        qc::_s3_endpoint "s3://bucket/key"
+    } -result {bucket.s3.amazonaws.com/key}
+    
+    # uri - create an S3 URI from a bucket and object_key
+    test s3-uri-1.0 {qc::s3 uri: bucket and key} -body {
+        qc::s3 uri "bucket" "key"
+    } -result {s3://bucket/key}
+
+    test s3-uri-1.1 {qc::s3 uri: bucket only} -body {
+        qc::s3 uri "bucket"
+    }  -result {s3://bucket/}
+
+    # md5 - Get MD5 of a local file
+    test s3-md5-1.0 {qc::s3 md5: Test} -body {
+        set filepath [qc::file_temp "123456789"]
+        ::try {
+            set md5 [qc::s3 md5 $filepath]
+        } finally {
+            file delete $filepath
+        }
+        return $md5
+    } -result {JfnnlDI7RTiF9RgfG2JNCw==}
+
+    # ls - List all available buckets
+    test s3-ls-1.0 {qc::s3 ls: List available buckets} -constraints {
+        requires_s3
+    } -body {
+        set results [qc::s3 ls]
+        if { $bucket in [ldict_values results Name] } {
+            testConstraint requires_test_bucket true
+        }
+        return 1
+    } -result {1}
+        
+    # lsbucket - List all objects in a bucket
+    test s3-lsbucket-1.0 {qc::s3 lsbucket: List files in a bucket} -constraints {
+        requires_s3
+        requires_test_bucket
+    } -body {
+        qc::s3 lsbucket $bucket
+        return 1
+    } -result {1}
+
+    test s3-lsbucket-1.1 {qc::s3 lsbucket: List files in a bucket with prefix} -constraints {
+        requires_s3
+        requires_test_bucket
+    } -body {
+        qc::s3 lsbucket $bucket "test"
+        testConstraint requires_s3_lsbucket true
+        return 1
+    } -result {1}
+
+    # put - Upload a file to s3
+    test s3-put-1.0 {qc::s3 put: bucket local_path remote_filename} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set object_key "s3_tools_test-put-1.0-test"
+        set remote_filename "/${object_key}"
+        set local_filepath [qc::file_temp "1234"]
+        ::try {
+            qc::s3 put $bucket $local_filepath $remote_filename
+        } finally {
+            file delete  $local_filepath
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            # Put was successful
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-put-1.1 {qc::s3 put: s3_url local_filename } -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set object_key "s3_tools_test-put-1.1-test"
+        set s3_url "s3://${bucket}/${object_key}"
+        
+        set local_filepath [qc::file_temp "1234"]
+        ::try {
+            qc::s3 put $s3_url $local_filepath
+        } finally {
+            file delete $local_filepath
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            # Put was successful
+            testConstraint requires_s3_put true
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    # delete - Delete an object from s3
+    test s3-delete-1.0 {qc::s3 delete: bucket remote_filename} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+        requires_s3_put
+    } -body {
+        set object_key "s3_tools_test-delete-1.0-test"
+        set remote_filename "/${object_key}"
+        set local_filename [qc::file_temp "1234"]
+        ::try {
+            qc::s3 put $bucket $local_filename $remote_filename 
+        } finally {
+            file delete $local_filename
+        }
+        
+        # Delete
+        qc::s3 delete $bucket $remote_filename
+
+        # Confirm deleted
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
+
+        return 1
+    } -result {1}
+
+    test s3-delete-1.1 {qc::s3 delete: s3_url} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+        requires_s3_put
+    } -body {
+        set s3_url "s3://${bucket}/s3_tools_test-delete-1.1-test"
+        set local_filename [qc::file_temp "1234"]
+        ::try {
+            qc::s3 put $s3_url $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # Delete
+        qc::s3 delete $s3_url
+
+        # Confirm deleted
+        lassign [qc::s3 uri_bucket_object_key $s3_url] . object_key
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
+
+        testConstraint requires_s3_delete true
+        return 1
+    } -result {1}
+    
+    # get - Get an object from s3
+    test s3-get-1.0 {qc::s3 get: bucket remote_filename local_filename} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+    } -body {
+        set file_string "Test file contents"
+        set local_filename [qc::file_temp $file_string]
+        set remote_filename "/s3_tools_test-get-1.0-test"
+        ::try {
+            qc::s3 put $bucket $local_filename $remote_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # Get file
+        set local_filename [join [list "/tmp/" [uuid::uuid generate]] ""]
+        set get_file_string ""
+        ::try {
+            qc::s3 get $bucket $remote_filename $local_filename
+            set get_file_string [qc::cat $local_filename]
+        } finally {
+            file delete $local_filename
+        }
+        
+        if { $file_string ne $get_file_string } {
+            return 0
+        }
+        return 1
+    } -result {1}
+
+    test s3-get-1.1 {qc::s3 get: s3_url local_filename} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+    } -body {
+        set file_string "Test file contents"
+        set local_filename [qc::file_temp $file_string]
+        set s3_url "s3://${bucket}/s3_tools_test-get-1.0-test"
+        ::try {
+            qc::s3 put $s3_url $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # Get file
+        set local_filename [join [list "/tmp/" [uuid::uuid generate]] ""]
+        set get_file_string ""
+        ::try {
+            qc::s3 get $s3_url $local_filename
+            set get_file_string [qc::cat $local_filename]
+        } finally {
+            file delete $local_filename
+        }
+        
+        if { $file_string ne $get_file_string } {
+            return 0
+        }
+        return 1
+    } -result {1}
+    
+    # head - Get 
+    test s3-head-1.0 {qc::s3 head: bucket remote_path} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+    } -body {
+        set local_filename [qc::file_temp "1234"]
+        set remote_path "/s3_tools_test-head-1.0-test"
+        
+        ::try {
+            qc::s3 put $bucket $local_filename $remote_path
+        } finally {
+            file delete $local_filename
+        }
+
+        # qc::head
+        set result [qc::s3 head $bucket $remote_path]
+        return [regexp {200 OK$} [dict get $result http]]
+    } -result {1}
+
+    test s3-head-1.1 {qc::s3 head: s3_url} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+    } -body {
+        set local_filename [qc::file_temp "1234"]
+        set s3_url "s3://${bucket}/s3_tools_test-head-1.1-test"
+        ::try {
+            qc::s3 put $s3_url $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # qc::s3 head
+        set result [qc::s3 head $s3_url]
+        return [regexp {200 OK$} [dict get $result http]]
+    } -result {1}
+    
+    # copy
+    test s3-copy-1.0 {qc::s3 copy: bucket remote_filename_to_copy_with_bucket remote_filename_copy} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-copy-1.0-test"
+        set s3_url "s3://${bucket}/${object_key}"
+        ::try {
+            qc::s3 put $s3_url $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # qc::s3 copy
+        set object_copy "${object_key}_copy"
+        qc::s3 copy $bucket "/${object_key}" "/${object_copy}"
+
+        # Check result
+        set results [qc::s3 lsbucket $bucket $object_copy]
+        if { $object_copy in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-copy-1.1 {qc::s3 copy: s3_url_to_copy s3_url_copy} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_put
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-copy-1.1-test"
+        set s3_url "s3://${bucket}/${object_key}"
+        ::try {
+            qc::s3 put $s3_url $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        # qc::s3 copy
+        set s3_url_to_copy $s3_url
+        set s3_url_copy "${s3_url}_copy"
+        qc::s3 copy $s3_url_to_copy $s3_url_copy
+
+        # Check result
+        lassign [qc::s3 uri_bucket_object_key $s3_url_copy] . object_key
+        set results [qc::s3 lsbucket $bucket $object_copy]
+        if { $object_copy in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+    
+    # upload - Multipart uploads
+    test s3-upload-1.0 {qc::s3 upload: Testing `init`, `send`, and `complete` v1} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.0-test"
+        ::try {
+            qc::s3 upload $bucket $local_filename "/${object_key}"
+        } finally {
+            file delete $local_filename
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+    
+    test s3-upload-1.1 {qc::s3 upload: Testing `init`, `send`, and `complete` v2} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.0-test"
+        set s3_uri [qc::s3 uri $bucket $object_key]
+        ::try {
+            qc::s3 upload $s3_uri $local_filename
+        } finally {
+            file delete $local_filename
+        }
+
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-upload-1.2 {qc::s3 upload: Testing `abort` v1} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.2-test"
+        set s3_uri [qc::s3 uri $bucket $object_key]
+        ::try {
+            set upload_id [qc::s3 upload init $s3_uri $local_filename]
+        } finally {
+            file delete $local_filename
+        }
+
+        qc::s3 upload abort $s3_uri $upload_id
+        
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
+        return 1
+    } -result {1}
+
+    test s3-upload-1.3 {qc::s3 upload: Testing `abort` v2} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.3-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+        } finally {
+            file delete $local_filename
+        }
+
+        qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        
+        set results [qc::s3 lsbucket $bucket $object_key]
+        if { $object_key in [ldict_values results Key] } {
+            return 0
+        }
+        testConstraint requires_s3_upload_abort true
+        return 1
+    } -result {1}
+
+    test s3-upload-1.4 {qc::s3 upload: Testing `ls`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.4-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            set result [qc::s3 upload ls $bucket]
+        } finally {
+            file delete $local_filename
+            qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        }
+
+        # Confirm `qc::s3 upload ls` found the partially uploaded object
+        if { $object_key in [ldict_values result Key] } {
+            testConstraint requires_s3_upload_ls true
+            return 1
+        }
+        return 0
+    } -result {1}
+    
+    test s3-upload-1.5 {qc::s3 upload: Testing `lsparts`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.5-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
+            set result [qc::s3 upload lsparts $bucket "/${object_key}" $upload_id]
+        } finally {
+            file delete $local_filename
+            qc::s3 upload abort $bucket "/${object_key}" $upload_id
+        }
+
+        if { "\"[dict get $etag_dict 1]\"" in [ldict_values result ETag] } {
+            return 1
+        }
+        return 0
+    } -result {1}
+
+    test s3-upload-1.6 {qc::s3 upload: Testing `cleanup`} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_upload_abort
+        requires_s3_upload_ls
+    } -body {
+        set local_filename [qc::file_temp "abcdefg"]
+        set object_key "s3_tools_test-upload-1.6-test"
+        ::try {
+            set upload_id [qc::s3 upload init $bucket $local_filename "/${object_key}"]
+            #set etag_dict [qc::s3 upload send $bucket $local_filename "/${object_key}" $upload_id]
+
+            qc::s3 upload cleanup $bucket
+
+            set result [qc::s3 upload ls $bucket]
+        } finally {
+            file delete $local_filename
+        }
+
+        if { [llength $result] == 0 } {
+            return 1
+        }
+        
+        return 0
+    } -result {1}
+
+    # Cleanup
+    test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
+        requires_s3
+        requires_test_bucket
+        requires_s3_lsbucket
+        requires_s3_delete
+    } -body {
+        set result [qc::s3 lsbucket $bucket "s3_tools_test-"]
+        foreach object_key [ldict_values result Key] {
+            qc::s3 delete $bucket $object_key
+        }
+        return 1
+    } -result {1}
+    
+    cleanupTests
+}
+namespace delete ::qcode::test
+
