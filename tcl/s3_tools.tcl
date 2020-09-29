@@ -388,16 +388,18 @@ proc qc::s3 { args } {
                     set local_filename $arg1
                     # No remote filename, assume same as local_filename
                     set object_key [file tail $local_filename]
+                    set s3_uri [qc::s3 uri $bucket $object_key]
                 }
             } else {
                 # qc::s3 put bucket local_path remote_filename
                 lassign $args -> bucket local_filename remote_filename
                 set object_key [string range $remote_filename 1 end]
+                set s3_uri [qc::s3 uri $bucket $object_key]
             }
 
             if { [file size $local_filename] > [expr {1024*1024*5}]} { 
                 # Use multipart upload
-                qc::s3 upload $bucket $local_filename $object_key
+                qc::s3 upload $s3_uri $local_filename
             } else {
                 qc::_s3_put -infile $local_filename $bucket $object_key
             }
