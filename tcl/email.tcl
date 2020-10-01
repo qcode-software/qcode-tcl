@@ -3,7 +3,6 @@ namespace eval qc {
 }
 package require mime
 package require base64 
-package require uuid
 
 proc qc::email_send {args} {
     set argnames [qc::args2vars $args]
@@ -63,7 +62,7 @@ proc qc::email_send {args} {
     # MIME
     lappend headers MIME-Version 1.0
     # Message-ID
-    #lappend headers Message-ID "<[::uuid::uuid generate]>"
+    #lappend headers Message-ID "<[qc::uuid]>"
 
     default attachments [list]
     # Single attachment
@@ -94,7 +93,7 @@ proc qc::email_send {args} {
 
     if { [info exists html] } {
         # HTML with text alternative
-        set alternative_boundary [uuid::uuid generate]
+        set alternative_boundary [qc::uuid]
         if { [string first "data:image/" $html]!=-1 } {
             # Embedded image data
             lassign [qc::email_html_embedded_images2attachments $html] html generated_attachments
@@ -110,7 +109,7 @@ proc qc::email_send {args} {
     
     if { [llength $related_attachments] } {
         # Related attachments have a cid that can be referenced in email's html
-        set related_boundary [uuid::uuid generate]
+        set related_boundary [qc::uuid]
         set related_parts [list [list headers $mime_headers body $mime_body]]
         foreach attachment $related_attachments {
 	    lappend related_parts [qc::email_mime_attachment $attachment]
@@ -121,7 +120,7 @@ proc qc::email_send {args} {
     }
     if { [llength $mixed_attachments] } {
         # Mixed attachments (standard attachments)
-        set mixed_boundary [uuid::uuid generate]
+        set mixed_boundary [qc::uuid]
         set mixed_parts [list [list headers $mime_headers body $mime_body]]
         foreach attachment $mixed_attachments {
 	    lappend mixed_parts [qc::email_mime_attachment $attachment]
@@ -1386,7 +1385,7 @@ proc qc::email_html_embedded_images2attachments {html} {
     foreach node $nodes {
         set src [$node getAttribute src]
         regexp {^data:image/([a-z]+);base64,(.*)$} $src -> file_type base64
-        set filename [uuid::uuid generate].${file_type}
+        set filename [qc::uuid].${file_type}
         set cid ${filename}@[clock seconds]
         lappend attachments [dict create encoding base64 data $base64 filename $filename cid $cid]
         $node setAttribute src "cid:${cid}"
