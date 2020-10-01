@@ -72,6 +72,6 @@ ns_section      "ns/server/${server_name}/module/nscgi"
 # Interpreter
 ns_section      "ns/interps/CGIinterps"
    # Path to interpreter
-   ns_param     .tcl            "/usr/bin/tclsh8.5"
+   ns_param     .tcl            "/usr/bin/tclsh"
    
 ```

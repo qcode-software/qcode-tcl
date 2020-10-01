@@ -204,7 +204,7 @@ ns_section      "ns/server/${server_name}/module/nscgi"
 
 # Interpreter
 ns_section      "ns/interps/CGIinterps"
-    ns_param    .tcl            "/usr/bin/tclsh8.5"
+    ns_param    .tcl            "/usr/bin/tclsh"
 ```
 
 These lines tell naviserver what action to carry out when receiving GET and POST requests, and which interpreter to use to decipher those requests, in this case tcl 8.5

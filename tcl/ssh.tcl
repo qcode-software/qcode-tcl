@@ -28,7 +28,7 @@ proc qc::ssh_call_proc {args} {
     set filename [qc::file_temp $script]
     qc::try {
 	scp $filename ${username}@${host}:$filename
-	set out [ssh ${username}@${host} /usr/bin/tclsh8.5 $filename]
+	set out [ssh ${username}@${host} /usr/bin/tclsh $filename]
 	ssh ${username}@${host} rm $filename    
     } {
 	ssh ${username}@${host} rm -f $filename    
