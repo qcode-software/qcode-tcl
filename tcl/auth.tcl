@@ -38,6 +38,9 @@ proc qc::auth_check {} {
     #| Return true or false
     # session based auth
     global current_user_id session_id
+    if { [info exists current_user_id] } {
+        return true
+    }
     if { [qc::cookie_exists session_id] || [info exists session_id] } {
 	set session_id [qc::session_id]
 	if { [qc::session_exists $session_id] } {
