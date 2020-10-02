@@ -264,7 +264,7 @@ namespace eval ::qcode::test {
         }
 
         # Get file
-        set local_filename [join [list "/tmp/" [uuid::uuid generate]] ""]
+        set local_filename [join [list "/tmp/" [qc::uuid]] ""]
         set get_file_string ""
         ::try {
             qc::s3 get $bucket $remote_filename $local_filename
@@ -294,7 +294,7 @@ namespace eval ::qcode::test {
         }
 
         # Get file
-        set local_filename [join [list "/tmp/" [uuid::uuid generate]] ""]
+        set local_filename [join [list "/tmp/" [qc::uuid]] ""]
         set get_file_string ""
         ::try {
             qc::s3 get $s3_url $local_filename
