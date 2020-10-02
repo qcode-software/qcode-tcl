@@ -48,7 +48,7 @@ proc qc::db_file_export {args} {
     # Export a file in the db file table to a tmp local file
     args $args -tmp_file ? -- file_id
 
-    default tmp_file /tmp/[uuid::uuid generate]
+    default tmp_file /tmp/[qc::uuid]
     db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
     set id [open $tmp_file w]
     fconfigure $id -translation binary

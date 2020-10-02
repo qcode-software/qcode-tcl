@@ -28,7 +28,7 @@ proc qc::image_file_autocrop {old_file {crop_colour white}} {
     #| Autocrop image by trimming white border from jpgs,
     #| and transparent and white borders from pngs.
     #| Create a new file with the results and return the file path
-    set file /tmp/[uuid::uuid generate]
+    set file /tmp/[qc::uuid]
     set exec_proxy_flags {
         -timeout 20000
     }
@@ -72,7 +72,7 @@ proc qc::image_file_autocrop {old_file {crop_colour white}} {
 proc qc::image_file_resize {old_file max_width max_height} {
     #| Resize an image to fit within max_width/height constraint.
     #| Create a new file with the results and return the file path
-    set file /tmp/[uuid::uuid generate]
+    set file /tmp/[qc::uuid]
     set exec_proxy_flags {
         -timeout 30000
     }
@@ -345,7 +345,7 @@ proc qc::image_redirect_handler {cache_dir}  {
 proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
     #| Convert an image, return file path of new image
     set ext [qc::mime_file_extension $mime_type]
-    set file /tmp/[uuid::uuid generate]${ext}
+    set file /tmp/[qc::uuid]${ext}
 
     if { $autocrop } {
         set old_file [qc::image_file_autocrop $old_file]

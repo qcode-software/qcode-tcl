@@ -2,7 +2,6 @@ namespace eval qc {
     namespace export session_* anonymous_session_id anonymous_user_id
 }
 
-package require uuid
 proc qc::session_new { user_id } {
     #| Create a new session
     # Grab some random entropy
@@ -11,7 +10,7 @@ proc qc::session_new { user_id } {
     set entropy1 [read $file 50]
     set entropy2 [read $file 50]
     close $file
-    set uuid [uuid::uuid generate]
+    set uuid [qc::uuid]
     set session_id [qc::sha1 "$uuid $entropy1"]
     set authenticity_token [qc::sha1 $entropy2]
     if { [qc::conn_open]} {
