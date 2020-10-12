@@ -145,7 +145,7 @@ proc qc::tabular_text_parse  {args} {
         }
         # raise error if we have too many/little columns
         if { [llength [split $line \0]] != [llength $columns_conf] } {
-            error "Found [llength $row] columns, expected [llength $columns_conf] for line \"$line\""
+            error "Found [llength [split $line \0]] columns, expected [llength $columns_conf] for line \"$line\""
         }        
         set row {}        
         foreach conf $columns_conf value [split $line \0] {
