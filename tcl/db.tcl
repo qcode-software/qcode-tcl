@@ -643,7 +643,7 @@ proc qc::db_connect {args} {
     #| Connect to a postgresql database
     global _db
     ::try {
-        package require Pgtcl 1.5
+        package require Pgtcl
         set _db [pg_connect -connlist $args]
     } on error {error_message options} {
         error "Could not connect to database. $error_message" [dict get $options -errorinfo] [dict get $options -errorcode]
