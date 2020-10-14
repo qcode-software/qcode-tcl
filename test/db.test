@@ -1,23 +1,37 @@
 package require tcltest
-eval ::tcltest::configure $argv
-# Ensure package is loaded from ./package rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./package]
-package require -exact qcode $::env(VERSION)
 package require Pgtcl
+eval ::tcltest::configure $argv
 
-source ../tcl/db.tcl
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
 
-# Request a username/password in order to set up test environment
-# User must have sufficient privileges (create user, create db)
-#puts "Enter database superuser:"
-#set ::conn_info_superuser(user) [gets stdin]
-set ::conn_info_superuser(user) priyank
-#puts "Enter password:"
-#exec stty -echo
-#set ::conn_info_superuser(password) [gets stdin]
-set ::conn_info_superuser(password) qcode2020
-#exec stty echo
+set pgpass_filename $::env(HOME)/.pgpass
+if { [file exists $pgpass_filename] } {
+    set ldict [qc::pgpass2ldict $pgpass_filename]
+    set index [qc::ldict_search ldict database template1]
+    if { $index >= 0 } {
+        set ::conn_info_superuser(user) [dict get [lindex $ldict $index] username]
+        set ::conn_info_superuser(password) [dict get [lindex $ldict $index] password]
+    }
+}
 
+if { ![info exists ::conn_info_superuser(user)]
+     && ![info exists ::conn_info_superuser(password)]
+ } {
+    # Request a username/password in order to set up test environment
+    # User must have sufficient privileges (create user, create db)
+    puts "Enter database superuser:"
+    set ::conn_info_superuser(user) [gets stdin]
+    #set ::conn_info_superuser(user) priyank
+    puts "Enter password:"
+    exec stty -echo
+    set ::conn_info_superuser(password) [gets stdin]
+    #set ::conn_info_superuser(password) qcode2020
+    exec stty echo
+}
 
 # db credentials
 array set ::conn_info_superuser {
@@ -41,7 +55,6 @@ namespace eval ::qcode::test {
     set setup {
         # The test user configuration.
         set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
-        puts "Create database"
         pg_execute $conn_superuser {CREATE DATABASE test_database}
         pg_execute $conn_superuser {
             CREATE USER test_user WITH PASSWORD 'test_password';
@@ -49,7 +62,6 @@ namespace eval ::qcode::test {
         }
         pg_disconnect $conn_superuser
         
-        puts "Create tables"
         # Establish a connection the qc::db way
         set conn [qc::db_connect {*}[array get ::conn_info_test]]
         pg_execute $conn {
@@ -76,16 +88,17 @@ namespace eval ::qcode::test {
             (007123, 'Max', 'Power', '1989-08-09', 1);
             CREATE SEQUENCE course_id_sequence START 3;
         }
-    }
+
+   }
     set cleanup {
         # Cleanup the qc::db connection
-        #set conn [qc::db_connect {*}[array get ::conn_info_test]]
-        pg_execute $conn {drop schema public cascade;CREATE SCHEMA public;}
-        global _db
-        if { [info exists _db] } {
-            pg_disconnect $_db
-            unset _db
+        set conn [qc::db_connect {*}[array get ::conn_info_test]]
+        pg_execute $conn {
+            drop table students cascade;
+            drop table courses cascade;
+            drop sequence course_id_sequence;
         }
+        qc::db_disconnect
         
         # Cleanup 
         set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
@@ -156,259 +169,259 @@ namespace eval ::qcode::test {
         }
     } -result 1
 
-    # # db_select_table
-    # test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -body {
-    #     db_select_table {select * from students order by surname}
-    # } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 0}}
+    # db_select_table
+    test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -body {
+        db_select_table {select * from students order by surname}
+    } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 0}}
 
-    # test db_select_table-1.1 {db_select_table 0 rows} -setup $setup -cleanup $cleanup -constraints {knownBug requires_database} -body {
-    #     # Pgtcl doesn't report the column names of an empty table
-    #     db_select_table {select * from students where firsname='Adam'}
-    # } -result {{student_id firstname surname dob course_id}}
+    test db_select_table-1.1 {db_select_table 0 rows} -setup $setup -cleanup $cleanup -constraints {knownBug} -body {
+        # Pgtcl doesn't report the column names of an empty table
+        db_select_table {select * from students where firsname='Adam'}
+    } -result {{student_id firstname surname dob course_id}}
 
-    # # db_dml
-    # test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $cleanup -body {
-    #     db_dml {update students set course_id=1 where student_id=12345}
-    #     db_select_table {select * from students order by surname}
-    # } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
+    # db_dml
+    test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $cleanup -body {
+        db_dml {update students set course_id=1 where student_id=12345}
+        db_select_table {select * from students order by surname}
+    } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
 
-    # test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -body {
-    #     db_dml {not a query}
-    # } -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
+    test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -body {
+        db_dml {not a query}
+    } -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
 
-    # # db_select_csv
-    # test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -body {
-    #     db_select_csv {select * from students order by surname}
-    # } -result "student_id,firstname,surname,dob,course_id\r\n246810,Sam,Brown,1985-05-15,1\r\n192837,Jane,Doe,1990-03-31,2\r\n7123,Max,Power,1989-08-09,1\r\n12345,John,Smith,1980-01-01,0"
+    # db_select_csv
+    test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -body {
+        db_select_csv {select * from students order by surname}
+    } -result "student_id,firstname,surname,dob,course_id\r\n246810,Sam,Brown,1985-05-15,1\r\n192837,Jane,Doe,1990-03-31,2\r\n7123,Max,Power,1989-08-09,1\r\n12345,John,Smith,1980-01-01,0"
 
-    # # db_select_ldict
-    # test db_select_ldict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
-    #     db_select_ldict {select * from students order by surname}
-    # } -result {{student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1} {student_id 192837 firstname Jane surname Doe dob 1990-03-31 course_id 2} {student_id 7123 firstname Max surname Power dob 1989-08-09 course_id 1} {student_id 12345 firstname John surname Smith dob 1980-01-01 course_id 0}}
+    # db_select_ldict
+    test db_select_ldict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
+        db_select_ldict {select * from students order by surname}
+    } -result {{student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1} {student_id 192837 firstname Jane surname Doe dob 1990-03-31 course_id 2} {student_id 7123 firstname Max surname Power dob 1989-08-09 course_id 1} {student_id 12345 firstname John surname Smith dob 1980-01-01 course_id 0}}
 
-    # # db_select_dict
-    # test db_select_dict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
-    #     db_select_dict {select * from students where student_id=246810}
-    # } -result {student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1}
+    # db_select_dict
+    test db_select_dict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
+        db_select_dict {select * from students where student_id=246810}
+    } -result {student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1}
 
-    # # db_1row
-    # test db_1row-1.0 {db_1row} -setup $setup -cleanup $cleanup -body {
-    #     db_1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345}
-    #     return "${surname}, $firstname - studying $course"
-    # } -result {Smith, John - studying Computer Science}
+    # db_1row
+    test db_1row-1.0 {db_1row} -setup $setup -cleanup $cleanup -body {
+        db_1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345}
+        return "${surname}, $firstname - studying $course"
+    } -result {Smith, John - studying Computer Science}
 
-    # # db_0or1row
-    # test db_0or1row-1.0 {db_0or1row (1 row)} -setup $setup -cleanup $cleanup -body {
-    #     db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345} {
-    #         return "No student with that ID"
-    #     } {
-    #         return "${surname}, $firstname - studying $course"
-    #     }
-    # } -result {Smith, John - studying Computer Science}
-    # test db_0or1row-1.1 {db_0or1row (0 rows)} -setup $setup -cleanup $cleanup -body {
-    #     db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=987654} {
-    #         return "No student with that ID"
-    #     } {
-    #         return "${surname}, $firstname - studying $course"
-    #     }
-    # } -result {No student with that ID}
+    # db_0or1row
+    test db_0or1row-1.0 {db_0or1row (1 row)} -setup $setup -cleanup $cleanup -body {
+        db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345} {
+            return "No student with that ID"
+        } {
+            return "${surname}, $firstname - studying $course"
+        }
+    } -result {Smith, John - studying Computer Science}
+    test db_0or1row-1.1 {db_0or1row (0 rows)} -setup $setup -cleanup $cleanup -body {
+        db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=987654} {
+            return "No student with that ID"
+        } {
+            return "${surname}, $firstname - studying $course"
+        }
+    } -result {No student with that ID}
 
-    # # db_foreach
-    # test db_foreach-1.0 {db_foreach} -setup $setup -cleanup $cleanup -body {
-    #     set results {}
-    #     db_foreach {select firstname, surname, title as course from students join courses using(course_id) order by student_id} {
-    #         lappend results "${surname}, $firstname - studying $course"
-    #     }
-    #     return $results
-    # } -result {{Power, Max - studying Art & Design} {Smith, John - studying Computer Science} {Doe, Jane - studying International Copyright Law} {Brown, Sam - studying Art & Design}}
+    # db_foreach
+    test db_foreach-1.0 {db_foreach} -setup $setup -cleanup $cleanup -body {
+        set results {}
+        db_foreach {select firstname, surname, title as course from students join courses using(course_id) order by student_id} {
+            lappend results "${surname}, $firstname - studying $course"
+        }
+        return $results
+    } -result {{Power, Max - studying Art & Design} {Smith, John - studying Computer Science} {Doe, Jane - studying International Copyright Law} {Brown, Sam - studying Art & Design}}
 
-    # # db_seq
-    # test db_seq-1.0 {db_seq} -setup $setup -cleanup $cleanup -body {
-    #     set results {}
-    #     foreach i {1 2 3 4 5} {
-    #         lappend results [db_seq course_id_sequence]
-    #     }
-    #     return $results
-    # } -result {3 4 5 6 7}
+    # db_seq
+    test db_seq-1.0 {db_seq} -setup $setup -cleanup $cleanup -body {
+        set results {}
+        foreach i {1 2 3 4 5} {
+            lappend results [db_seq course_id_sequence]
+        }
+        return $results
+    } -result {3 4 5 6 7}
 
-    # # db_col_varchar_length
-    # test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $cleanup -body {
-    #     db_col_varchar_length courses title
-    # } -result 40
+    # db_col_varchar_length
+    test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $cleanup -body {
+        db_col_varchar_length courses title
+    } -result 40
 
-    # # db_trans
-    # test db_trans-1.0 {db_trans rollback on error} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #             db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #             if { $name ne "John Smithe" } {
-    #                 return "Name update failed"
-    #             }
-    #             db_dml {update students set firstname='ridiculously long first name string that doesn''t fit' where student_id=12345}
-    #         }
-    #     } {
-    #         db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #         return $name
-    #     }
-    # } -result "John Smith"
+    # db_trans
+    test db_trans-1.0 {db_trans rollback on error} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+                db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+                if { $name ne "John Smithe" } {
+                    return "Name update failed"
+                }
+                db_dml {update students set firstname='ridiculously long first name string that doesn''t fit' where student_id=12345}
+            }
+        } {
+            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+            return $name
+        }
+    } -result "John Smith"
 
-    # test db_trans-1.1 {db_trans nested with try, both with errors} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             try {
-    #                 db_trans {
-    #                     db_dml {update students set surname='Smithe' where student_id=12345}
-    #                     error "Something went wrong"
-    #                 }
-    #             }
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #             error "Something else went wrong"
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smith"
+    test db_trans-1.1 {db_trans nested with try, both with errors} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                try {
+                    db_trans {
+                        db_dml {update students set surname='Smithe' where student_id=12345}
+                        error "Something went wrong"
+                    }
+                }
+                db_dml {update students set firstname='Jane' where student_id=12345}
+                error "Something else went wrong"
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smith"
 
-    # test db_trans-1.2 {db_trans nested with try, inner with error} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             try {
-    #                 db_trans {
-    #                     db_dml {update students set surname='Smithe' where student_id=12345}
-    #                     error "Something went wrong"
-    #                 }
-    #             }
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "Jane Smith"
+    test db_trans-1.2 {db_trans nested with try, inner with error} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                try {
+                    db_trans {
+                        db_dml {update students set surname='Smithe' where student_id=12345}
+                        error "Something went wrong"
+                    }
+                }
+                db_dml {update students set firstname='Jane' where student_id=12345}
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "Jane Smith"
 
-    # test db_trans-1.3 {db_trans nested with try, outer with error} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             try {
-    #                 db_trans {
-    #                     db_dml {update students set surname='Smithe' where student_id=12345}
-    #                 }
-    #             }
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smith"
+    test db_trans-1.3 {db_trans nested with try, outer with error} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                try {
+                    db_trans {
+                        db_dml {update students set surname='Smithe' where student_id=12345}
+                    }
+                }
+                db_dml {update students set firstname='Jane' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smith"
 
-    # test db_trans-1.4 {db_trans nested with try, both succesfull} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             try {
-    #                 db_trans {
-    #                     db_dml {update students set surname='Smithe' where student_id=12345}
-    #                 }
-    #             }
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "Jane Smithe"
+    test db_trans-1.4 {db_trans nested with try, both succesfull} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                try {
+                    db_trans {
+                        db_dml {update students set surname='Smithe' where student_id=12345}
+                    }
+                }
+                db_dml {update students set firstname='Jane' where student_id=12345}
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "Jane Smithe"
 
-    # test db_trans-1.5 {db_trans sibling, both sucessfull} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans { 
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #         }
-    #     }
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "Jane Smithe"
+    test db_trans-1.5 {db_trans sibling, both sucessfull} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans { 
+                db_dml {update students set firstname='Jane' where student_id=12345}
+            }
+        }
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "Jane Smithe"
 
-    # test db_trans-1.6 {db_trans sibling, error on first} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans { 
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smithe"
+    test db_trans-1.6 {db_trans sibling, error on first} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans { 
+                db_dml {update students set firstname='Jane' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smithe"
 
-    # test db_trans-1.7 {db_trans sibling, error on second} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans { 
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #         }
-    #     }
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "Jane Smith"
+    test db_trans-1.7 {db_trans sibling, error on second} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans { 
+                db_dml {update students set firstname='Jane' where student_id=12345}
+            }
+        }
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "Jane Smith"
 
-    # test db_trans-1.7 {db_trans sibling, errors on both} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans { 
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smith"
+    test db_trans-1.7 {db_trans sibling, errors on both} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans { 
+                db_dml {update students set firstname='Jane' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smith"
 
-    # test db_trans-1.8 {db_trans success} -setup $setup -cleanup $cleanup -body {
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set surname='Smithe' where student_id=12345}
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smithe"
+    test db_trans-1.8 {db_trans success} -setup $setup -cleanup $cleanup -body {
+        try {
+            db_trans {
+                db_dml {update students set surname='Smithe' where student_id=12345}
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smithe"
 
-    # test db_trans-1.9 {db_trans nested with try, followed by sibling, both with errors} -setup $setup -cleanup $cleanup -body {
-    #     db_trans {
-    #         try {
-    #             db_trans {
-    #                 db_dml {update students set surname='Smithe' where student_id=12345}
-    #                 error "Something went wrong"
-    #             }
-    #         }
-    #     }
-    #     try {
-    #         db_trans {
-    #             db_dml {update students set firstname='Jane' where student_id=12345}
-    #             error "Something went wrong"
-    #         }
-    #     }
-    #     db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-    #     return $name
-    # } -result "John Smith"
+    test db_trans-1.9 {db_trans nested with try, followed by sibling, both with errors} -setup $setup -cleanup $cleanup -body {
+        db_trans {
+            try {
+                db_trans {
+                    db_dml {update students set surname='Smithe' where student_id=12345}
+                    error "Something went wrong"
+                }
+            }
+        }
+        try {
+            db_trans {
+                db_dml {update students set firstname='Jane' where student_id=12345}
+                error "Something went wrong"
+            }
+        }
+        db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
+        return $name
+    } -result "John Smith"
 
     cleanupTests
 }

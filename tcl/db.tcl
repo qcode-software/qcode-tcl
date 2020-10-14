@@ -641,13 +641,12 @@ proc qc::db_row_exists {args} {
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database
+    package require Pgtcl
     global _db
-    ::try {
-        package require Pgtcl
+    if { ![info exists _db] } {
         set _db [pg_connect -connlist $args]
-    } on error {error_message options} {
-        error "Could not connect to database. $error_message" [dict get $options -errorinfo] [dict get $options -errorcode]
     }
+    return $_db
 }
 
 proc qc::db_pg_copy_load { args } {
@@ -678,4 +677,11 @@ proc qc::db_pg_copy_load { args } {
     set ::env(PGPASSWORD) $password 
     set psql [qc::which psql]
     exec cat $filename | $psql -w -U $user -h $host $database -c $qry
+}
+
+proc qc::db_disconnect {} {
+    #| Disconect the global handle
+    global _db
+    pg_disconnect $_db
+    unset _db
 }
