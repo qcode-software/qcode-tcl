@@ -105,3 +105,25 @@ proc qc::ldict2tbody {ldict colnames} {
     return $tbody
 }
 
+proc qc::ldict_mappings_equal {ldict1 ldict2} {
+    #| Compare 2 ldicts, for dicts with same mappings
+    # (independant of key ordering, but dependant on ldict ordering)
+    
+    if { ! [string is list $ldict1]
+         || ! [string is list $ldict2]
+     } {
+        return false
+    }
+
+    if { [llength $ldict1] != [llength $ldict2] } {
+        return false
+    }
+
+    # compare each element
+    foreach dict1 $ldict1 dict2 $ldict2 {
+        if { ! [qc::dict_mappings_equal $dict1 $dict2] } {
+            return false
+        }
+    }
+    return true
+}
