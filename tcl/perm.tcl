@@ -2,27 +2,32 @@ namespace eval qc {
     namespace export perm_set perm_test_user perm_test perm perms perm_if
 }
 
-proc qc::perm_set {user_id perm_name args} {
+proc qc::perm_set {args} {
     #| Configure user permissions
     #| Usage: perm_set user_id perm_name ?method? ?method?
+    qc::args $args -schema "" -- user_id perm_name args
     set methods [string toupper $args]
+    if { $schema eq "" } {
+        lassign [qc::db_qualify_table $schema "perm"] schema
+    }
     db_dml {
         -- Revoke any existing permissions on perm_name
-        delete from user_perm
+        delete from [db_quote_identifier $schema].user_perm
         where user_id=:user_id 
-        and perm_id in (
-                        select
-                        perm_id
-                        from perm
-                        join perm_class using (perm_class_id)
-                        where perm_name=:perm_name
-                        );
+        and perm_id in
+        (
+         select
+         perm_id
+         from [db_quote_identifier $schema].perm
+         join [db_quote_identifier $schema].perm_class using (perm_class_id)
+         where perm_name=:perm_name
+         );
         
         -- Grant the specified method permissions on perm_name
         insert into user_perm (user_id, perm_id)
         select :user_id, perm_id
-        from perm 
-        join perm_class using(perm_class_id)
+        from [db_quote_identifier $schema].perm 
+        join [db_quote_identifier $schema].perm_class using(perm_class_id)
         where perm_name=:perm_name
         and [qc::sql_where_in method $methods false];
     }
