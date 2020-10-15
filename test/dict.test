@@ -100,6 +100,29 @@ namespace eval ::qcode::test {
         unset a; unset b; unset test_dict
     } -returnCodes error -result {can't read "c": no such variable}
 
+    test dict_mappings_equal-1.0 {dict_mappings_equal success} -body {
+        return [dict_mappings_equal \
+                    {apples green tomatoes red carrots orange} \
+                    {carrots orange apples green tomatoes red}]
+    } -result true
+    test dict_mappings_equal-1.1 {dict_mappings_equal a < b} -body {
+        return [dict_mappings_equal \
+                    {apples green tomatoes red} \
+                    {carrots orange apples green tomatoes red}]
+    } -result false
+    test dict_mappings_equal-1.2 {dict_mappings_equal a > b} -body {
+        return [dict_mappings_equal \
+                    {apples green tomatoes red carrots orange} \
+                    {tomatoes red apples green}]
+    } -result false
+    test dict_mappings_equal-1.3 {dict_mappings_equal a != b} -body {
+        return [dict_mappings_equal \
+                    {apples green tomatoes red carrots orange} \
+                    {carrots orange apples yellow tomatoes red}]
+    } -result false
+    test dict_mappings_equal-1.4 {empty strings} -body {
+        return [dict_mappings_equal "" ""]
+    } -result true
 
     cleanupTests
 

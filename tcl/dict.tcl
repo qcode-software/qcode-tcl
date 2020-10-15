@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default
+    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default dict_mappings_equal
 }
 
 proc qc::dict_exists { args } {
