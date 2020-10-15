@@ -89,7 +89,7 @@ namespace eval ::qcode::test {
             CREATE SEQUENCE course_id_sequence START 3;
         }
 
-   }
+    }
     set cleanup {
         # Cleanup the qc::db connection
         set conn [qc::db_connect {*}[array get ::conn_info_test]]
