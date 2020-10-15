@@ -34,7 +34,7 @@ tcl-package: check-version
 	./pkg_mkIndex package
 
 test: tcl-package 
-	tclsh $(TEMP_PATH)/test/all.tcl
+	tclsh $(TEMP_PATH)/test/all.tcl -testdir $(TEMP_PATH)/test
 
 
 install: tcl-package 
