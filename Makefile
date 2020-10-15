@@ -17,7 +17,7 @@ package: check-version
 	rm -rf package
 	mkdir package
 	curl --fail -K ~/.curlrc_github -L -o v$(VERSION).tar.gz https://api.github.com/repos/qcode-software/qcode-tcl/tarball/v$(VERSION)
-	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl --exclude test --exclude test_all.tcl -xzvf v$(VERSION).tar.gz -C package
+	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl -xzvf v$(VERSION).tar.gz -C package
 	./package.tcl tcl package ${NAME} ${VERSION}
 	./pkg_mkIndex package
 	# checkinstall
@@ -30,7 +30,7 @@ tcl-package : check-version
 	./pkg_mkIndex package
 
 test: tcl-package 
-	tclsh ./test_all.tcl -testdir test
+	tclsh ./package/test/all.tcl
 	rm -rf package
 
 install: tcl-package local-install
