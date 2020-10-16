@@ -1,6 +1,6 @@
 package require tcltest
 package require Pgtcl
-eval ::tcltest::configure $argv
+
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
