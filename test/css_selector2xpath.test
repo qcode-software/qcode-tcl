@@ -153,9 +153,9 @@ namespace eval ::qcode::test {
         }
     } -body {
         foreach {selector xpath} $samples {
-            qc::try {
+            ::try {
                 set returned [css_selector2xpath $selector]
-            } {
+            } on error {} {
                 global errorMessage
                 return "Error: \"$errorMessage\" while parsing $selector, expected $xpath"
             }

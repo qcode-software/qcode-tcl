@@ -108,23 +108,25 @@ proc qc::check {args} {
 	# Try to cast to the type specified if a proc exists
 	if { [in {POS NZ} $TYPE] && ![is_decimal $varValue] } {
 	    # Implied cast
-	    qc::try {set varValue [qc::cast_decimal $varValue]}
+	    ::try {
+                set varValue [qc::cast_decimal $varValue]
+            } on error {} {} 
 	} elseif { [info commands "::qc::cast_$type"] ne "" } {
-	    qc::try {
+	    ::try {
 		if { [info exists type_args($TYPE)] } {
 		    set varValue ["qc::cast_$type" $varValue {*}$type_args($TYPE)]
 		} else {
 		    set varValue ["qc::cast_$type" $varValue]
 		}
-	    }
+	    } on error {} {}
 	} elseif { [info commands cast_$type] ne "" } {
-	    qc::try {
+	    ::try {
 		if { [info exists type_args($TYPE)] } {
 		    set varValue [cast_$type $varValue {*}$type_args($TYPE)]
 		} else {
 		    set varValue [cast_$type $varValue]
 		}
-	    }
+	    } on error {} {}
 	}
 	# Check
 	if {!([info exists type_args($TYPE)] && [info commands "::qc::is_$type"] ne "" && [qc::is_$type $varValue {*}$type_args($TYPE)])
