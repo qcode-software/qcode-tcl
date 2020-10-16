@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export pgpass2ldict
+    namespace export pgpass*
 }
 
 
@@ -18,7 +18,7 @@ proc qc::pgpass2ldict {filename} {
     return $ldict
 }
 
-proc pgpass_credentials_exist {pgpass_filename db_name} {
+proc qc::pgpass_credentials_exist {pgpass_filename db_name} {
     #| Check if credentials for this db_name exist in the users ~/.pgpass file
     if { [file exists $pgpass_filename] } {
         set ldict [qc::pgpass2ldict $pgpass_filename]
@@ -29,7 +29,7 @@ proc pgpass_credentials_exist {pgpass_filename db_name} {
     }
     return false
 }
-proc pgpass_credentials {pgpass_filename db_name} {
+proc qc::pgpass_credentials {pgpass_filename db_name} {
     #| Return the access credentials for this database in the pgpass file.
     set ldict [qc::pgpass2ldict $pgpass_filename]
     set index [qc::ldict_search ldict database $db_name]
