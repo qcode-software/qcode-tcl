@@ -30,7 +30,7 @@ package: check-version
 test: package
 	cd $(TEMP_PATH)/test && tclsh all.tcl
 
-install: package 
+install:  
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
 	cp package/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
