@@ -137,18 +137,22 @@ proc qc::dict_zipper {keys values} {
     return $zipped
 }
 
-proc qc::dict_mappings_equal {dict1 dict2} {
-    #| Compare 2 dicts for same key/value mappings (without checking order)
+proc qc::dicts_equal {dict1 dict2} {
+    #| Compare 2 dicts for equivalence
     if { [dict size $dict1] != [dict size $dict2] } {
         return false
     }
-    dict for {key value} $dict1 {
-        if { ! [dict exists $dict2 $key] } {
-            return false
-        }
-        if { [dict get $dict2 $key] ne $value } {
+    foreach {key1 value1} $dict1 {key2 value2} $dict2 {
+        if { $key1 ne $key2
+             ||
+             $value1 ne $value2 } {
             return false
         }
     }
     return true
+}
+
+proc qc::dict_mappings_equal {dict1 dict2} {
+    #| Compare 2 dicts for same key/value mappings (without checking order)
+    return [dicts_equal [dict_sort dict1] [dict_sort dict2]]
 }
