@@ -1,0 +1,46 @@
+package require tcltest
+namespace import ::tcltest::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+# TESTS
+
+set setup {
+    set data "localhost:5432:test1:myuser:mypassword
+localhost:*:test2:user2:str0ngpassword
+# A sample comment
+*:*:test3:user3:mypetdog
+*:*:*:*:Abc@123"
+    
+    configure -tmpdir /tmp/qcode-tcl-test
+
+    set filename [makeFile $data .pgpass]
+}
+
+set cleanup {
+    removeFile .pgpass
+    removeDirectory /tmp/qcode-tcl-test
+}
+
+test pgpass2ldict-1.0 {Test parsing of .pgpass file contents} -setup $setup -cleanup $cleanup -body {
+    qc::pgpass2ldict $filename
+} -result {{hostname localhost port 5432 database test1 username myuser password mypassword} {hostname localhost port * database test2 username user2 password str0ngpassword} {hostname * port * database test3 username user3 password mypetdog} {hostname * port * database * username * password Abc@123}}
+
+test pgpass_credentials_exist-1.0 {pgpass credentials exists} -setup $setup -cleanup $cleanup -body {
+    qc::pgpass_credentials_exist $filename test1
+} -result {true}
+
+test pgpass_credentials_exist-1.1 {pgpass credentials does not exists} -setup $setup -cleanup $cleanup -body {
+    qc::pgpass_credentials_exist $filename test5
+} -result {false}
+
+test pgpass_credentials-1.0 {get credentials from pgpass for a database} -setup $setup -cleanup $cleanup -body {
+    qc::pgpass_credentials $filename test1
+} -result {myuser mypassword}
+
+cleanupTests
+
+

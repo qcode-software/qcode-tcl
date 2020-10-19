@@ -1,8 +1,11 @@
 package require tcltest
-eval ::tcltest::configure $argv
-# Ensure package is loaded from ./package rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./package]
-package require -exact qcode $::env(VERSION)
+
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
@@ -171,7 +174,7 @@ namespace eval ::qcode::test {
         set test_list [list 2007 2008 2009 2012]
     } -body {
         ldelete test_list 5
-    } -returnCodes 1 -cleanup {unset test_list} -result {list doesn't contain element 5}
+    } -returnCodes 0 -cleanup {unset test_list} -result {2007 2008 2009 2012}
 
     test lmove-1.0 {lmove to end} -setup {
     } -body {

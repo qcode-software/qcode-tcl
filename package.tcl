@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh8.5
+#!/usr/bin/tclsh
 #| Copy tcl files into package directory and add package provide statements
 
 # Parse args

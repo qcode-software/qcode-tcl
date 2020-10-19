@@ -1,8 +1,11 @@
 package require tcltest
-eval ::tcltest::configure $argv
-# Ensure package is loaded from ./package rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./package]
-package require -exact qcode $::env(VERSION)
+
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
@@ -32,4 +35,7 @@ soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
 <ns:my_method xmlns:ns="http://www.w3.org/1999/xhtml"><test_request>value</test_request></ns:my_method>
 </soap:Body>
 </soap:Envelope>}
+
+    cleanupTests
 }
+namespace delete ::qcode::test

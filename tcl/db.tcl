@@ -312,7 +312,7 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
     # Keep one handle per pool for current thread.
     global _db
     if { [info commands ns_db] eq "ns_db" } {
-        # AOL Server
+        # Naviserver
         if { $poolname eq "DEFAULT" } {
 	    set poolname [ns_config ns/server/[ns_info server]/db defaultpool]  
 	} 
@@ -335,7 +335,7 @@ proc qc::db_dml { args } {
     set db [db_get_handle $db]
     set qry [db_qry_parse $qry 1]
     if { [info commands ns_db] eq "ns_db" } {
-        # AOL Server
+        # Naviserver
         ::try {
             ns_db dml $db $qry
         } on error {error_message options} {
@@ -559,16 +559,16 @@ proc qc::db_select_table {args} {
     set table {}
     set db [db_get_handle $db]
     if { [info commands ns_db] eq "ns_db" } {
-        # AOL Server
-        qc::try {
+        # Naviserver
+        ::try {
             set row [ns_db select $db $qry]
             lappend table [ns_set_keys $row]
             while { [ns_db getrow $db $row] } {
                 lappend table [ns_set_values $row]
             }
             return $table
-        } {
-            error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]"
+        } on error {error_message options} {
+            error "Failed to execute qry <code>$qry</code><br>[ns_db exception $db]" [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     } else {
         # Connected with db_connect
@@ -641,13 +641,12 @@ proc qc::db_row_exists {args} {
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database
+    package require Pgtcl
     global _db
-    ::try {
-        package require Pgtcl 1.5
+    if { ![info exists _db] } {
         set _db [pg_connect -connlist $args]
-    } on error {error_message options} {
-        error "Could not connect to database. $error_message" [dict get $options -errorinfo] [dict get $options -errorcode]
     }
+    return $_db
 }
 
 proc qc::db_pg_copy_load { args } {
@@ -678,4 +677,22 @@ proc qc::db_pg_copy_load { args } {
     set ::env(PGPASSWORD) $password 
     set psql [qc::which psql]
     exec cat $filename | $psql -w -U $user -h $host $database -c $qry
+}
+
+proc qc::db_disconnect {} {
+    #| Disconect the global handle
+    global _db
+    pg_disconnect $_db
+    unset _db
+}
+
+proc qc::db_ask_for_credentials {db_name} {
+    #| Request a database  username/password
+    puts "Enter the user to access the database \"$db_name\":"
+    set user [gets stdin]
+    puts "Enter password:"
+    exec stty -echo
+    set password [gets stdin]
+    exec stty echo
+    return [list $user $password]
 }
