@@ -121,7 +121,7 @@ proc qc::ldict_mappings_equal {ldict1 ldict2} {
 
     # compare each element
     foreach dict1 $ldict1 dict2 $ldict2 {
-        if { ! [qc::dict_mappings_equal $dict1 $dict2] } {
+        if { ! [qc::dicts_equal [dict_sort dict1] [dict_sort dict2]] } {
             return false
         }
     }

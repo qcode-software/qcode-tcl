@@ -151,8 +151,3 @@ proc qc::dicts_equal {dict1 dict2} {
     }
     return true
 }
-
-proc qc::dict_mappings_equal {dict1 dict2} {
-    #| Compare 2 dicts for same key/value mappings (without checking order)
-    return [dicts_equal [dict_sort dict1] [dict_sort dict2]]
-}
