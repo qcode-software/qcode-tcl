@@ -27,13 +27,20 @@ package: check-version
 	# checkinstall
 	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make install
 
+tcl-package: check-version
+	rm -rf package
+	mkdir package
+	./package.tcl tcl package ${NAME} ${VERSION}
+	./pkg_mkIndex package
+
 test: package
 	cd $(TEMP_PATH)/test && tclsh all.tcl
 
-install:  
+install: tcl-package
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
 	cp package/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
+	rm -rf package
 
 upload: check-version
 	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER_LEGACY)@$(REMOTEHOST_LEGACY):$(REMOTEDIR_LEGACY)/debs"
