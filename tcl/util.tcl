@@ -803,7 +803,6 @@ proc qc::control_port_source {filename} {
     rename ::puts ::_puts
     proc puts { args } {
         global stdout
-        #ns_log Error "ARGS: $args"
         if { [llength $args ] == 1 || ([llength $args]==2 && [lindex $args 0] eq "stdout") } {           
             append stdout [lindex $args end]\n
         } elseif {
