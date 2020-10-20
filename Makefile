@@ -21,11 +21,14 @@ package: check-version
 	rm -rf package
 	mkdir package
 	curl --fail -K ~/.curlrc_github -L -o v$(VERSION).tar.gz https://api.github.com/repos/qcode-software/qcode-tcl/tarball/v$(VERSION)
-	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl -xzvf v$(VERSION).tar.gz -C $(TEMP_PATH)
+	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl \
+	-xzvf v$(VERSION).tar.gz -C $(TEMP_PATH)
 	./package.tcl $(TEMP_PATH)/tcl package ${NAME} ${VERSION}
 	./pkg_mkIndex package
 	# checkinstall
-	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) -A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl,tcllib,html2text,curl,tclcurl" --replaces none --conflicts none make install
+	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) \
+	-A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl,tcllib,html2text,curl,tclcurl" \
+	--replaces none --conflicts none make install
 
 test: package
 	cd $(TEMP_PATH)/test && tclsh all.tcl
