@@ -33,7 +33,5 @@ proc qc::pgpass_credentials {pgpass_filename db_name} {
     #| Return the access credentials for this database in the pgpass file.
     set ldict [qc::pgpass2ldict $pgpass_filename]
     set index [qc::ldict_search ldict database $db_name]
-    set user [dict get [lindex $ldict $index] username]
-    set password [dict get [lindex $ldict $index] password]
-    return [list $user $password]
+    return [lindex $ldict $index]
 }   

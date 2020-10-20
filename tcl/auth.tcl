@@ -33,6 +33,18 @@ proc qc::auth {} {
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
+proc qc::auth_as_user {user_id} {
+    #| Set the authenticated user
+    global current_user_id
+    set current_user_id $user_id
+}
+
+proc qc::auth_logout {} {
+    #| Logout the current user
+    global current_user_id
+    unset current_user_id
+}
+
 proc qc::auth_check {} {
     #| Check if we can authenticate the user
     #| Return true or false

@@ -627,14 +627,3 @@ proc qc::db_disconnect {} {
     pg_disconnect $_db
     unset _db
 }
-
-proc qc::db_ask_for_credentials {db_name} {
-    #| Request a database  username/password
-    puts "Enter the user to access the database \"$db_name\":"
-    set user [gets stdin]
-    puts "Enter password:"
-    exec stty -echo
-    set password [gets stdin]
-    exec stty echo
-    return [list $user $password]
-}
