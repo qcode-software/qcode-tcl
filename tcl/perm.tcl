@@ -8,7 +8,7 @@ proc qc::perm_set {args} {
     qc::args $args -schema "" -- user_id perm_name args
     set methods [string toupper $args]
     if { $schema eq "" } {
-        lassign [qc::db_qualify_table $schema "perm"] schema
+        lassign [qc::db_qualify_table "perm"] schema
     }
     db_dml {
         -- Revoke any existing permissions on perm_name
@@ -24,7 +24,7 @@ proc qc::perm_set {args} {
          );
         
         -- Grant the specified method permissions on perm_name
-        insert into user_perm (user_id, perm_id)
+        insert into [db_quote_identifier $schema].user_perm (user_id, perm_id)
         select :user_id, perm_id
         from [db_quote_identifier $schema].perm 
         join [db_quote_identifier $schema].perm_class using(perm_class_id)
