@@ -26,11 +26,11 @@ proc qc::ssh_call_proc {args} {
     set script [qc::info_proc $proc_name]
     append script \n "puts \[$proc_name $args\]"
     set filename [qc::file_temp $script]
-    qc::try {
+    ::try {
 	scp $filename ${username}@${host}:$filename
 	set out [ssh ${username}@${host} /usr/bin/tclsh8.5 $filename]
 	ssh ${username}@${host} rm $filename    
-    } {
+    } on error {} {
 	ssh ${username}@${host} rm -f $filename    
     }
     file delete $filename
