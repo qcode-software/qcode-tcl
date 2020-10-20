@@ -351,64 +351,6 @@ proc qc::db_dml { args } {
     }
 }
 
-proc qc::db_trans {args} {
-    #| Execute code within a transaction
-    #| Rollback on database or tcl error
-    #| Nested db_trans structures do not
-    #| emulate postgres nested transactions but simply
-    #| ensure code is executed in a transaction by
-    #| maintaining a global db_trans_level
-    args $args -db DEFAULT -- code {error_code ""}
-    global db_trans_level
-
-    if { ![info exists db_trans_level] } {
-	set db_trans_level($db) 0
-    }
-    incr db_trans_level($db)
-
-    set savepoint "db_trans_level_$db_trans_level($db)"
-
-    if { $db_trans_level($db) == 1 } {
-	db_dml -db $db "BEGIN WORK"
-    } else {
-        db_dml -db $db "SAVEPOINT $savepoint"
-    }
-    
-    set return_code [ catch { uplevel 1 $code } result options ]
-    switch $return_code {
-	1 {
-	    # Error
-	    if { $db_trans_level($db) > 1 } {
-                db_dml -db $db "ROLLBACK TO SAVEPOINT $savepoint"
-            } else {
-		db_dml -db $db "ROLLBACK WORK"
-	    }
-
-	    uplevel 1 $error_code
-            # Return in parent stack frame instead of here
-            dict incr options -level
-	}
-	default {
-	    # ok, return, break, continue
-	    if { $db_trans_level($db) > 1 } {
-                db_dml -db $db "RELEASE SAVEPOINT $savepoint"
-            } else {
-                db_dml "COMMIT WORK"
-	    }
-
-            # Preserve TCL_RETURN
-            if { $return_code == 2 && [dict get $options -code] == 0 } {
-                dict set options -code return
-            } else {
-                # Return in parent stack frame instead of here
-                dict incr options -level
-            }
-	}
-    }
-    incr db_trans_level($db) -1
-    return -options $options $result
-}
-
 proc qc::db_1row { args } {
     # Select 1 row from the database using the qry.
     # Place variables corresponding to column names in the caller's namespace
