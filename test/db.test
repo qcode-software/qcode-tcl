@@ -2,10 +2,7 @@ package require tcltest
 package require Pgtcl
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
-if { [info commands ns_db] eq "ns_db" } {
-    testConstraint inside_naviserver true
-    testConstraint outside_naviserver false
-} else {
+if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
     set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
     foreach file $files {
@@ -37,9 +34,6 @@ if { [info commands ns_db] eq "ns_db" } {
         user test_user
         password test_password
     }
-
-    testConstraint inside_naviserver false
-    testConstraint outside_naviserver true
 } 
 
 set setup_qry {
@@ -124,6 +118,10 @@ if { [info commands ns_db] eq "ns_db" } {
     set cleanup $cleanup_outside_naviserver
 }
 
+################################################################################
+###   TESTS
+################################################################################
+
 # db_qry_parse
 test db_qry_parse-1.0 {db_qry_parse} -body {
     set foo hello
@@ -173,12 +171,16 @@ test db_escape_regexp-1.0 {db_escape_regexp} -body {
 } -result {\*fi\+sh\(es\)\?}
 
 # db_get_handle
-test db_get_handle-1.0 {db_get_handle} -setup $setup -cleanup $cleanup -constraints {outside_naviserver} -body {
+test db_get_handle-1.0 {db_get_handle} -setup $setup -cleanup $cleanup -body {
     set handle [db_get_handle]
-    if { [lsearch [pg_dbinfo connections] $handle] == -1 } {
-        return "handle: $handle connections: [pg_dbinfo connections]"
-    } else {
+    if { [info commands ns_db] eq "ns_db" && [ns_db poolname $handle] in [ns_db pools] } {
         return 1
+    } else {
+        if { [lsearch [pg_dbinfo connections] $handle] == -1 } {
+            return "handle: $handle connections: [pg_dbinfo connections]"
+        } else {
+            return 1
+        }
     }
 } -result 1
 
@@ -187,6 +189,7 @@ test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -body
     db_select_table {select * from students order by surname}
 } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 0}}
 
+# db_select_table
 test db_select_table-1.1 {db_select_table 0 rows} -setup $setup -cleanup $cleanup -constraints {knownBug} -body {
     # Pgtcl doesn't report the column names of an empty table
     db_select_table {select * from students where firsname='Adam'}
@@ -198,16 +201,10 @@ test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $
     db_select_table {select * from students order by surname}
 } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
 
-test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -constraints {outside_naviserver} -body {
+# db_dml
+test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -body {
     db_dml {not a query}
-} -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
-
-test db_dml-1.2 {db_dml error test} -setup $setup -cleanup $cleanup -constraints {inside_naviserver} -body {
-    db_dml {not a query}
-} -returnCodes {error} -result {Failed to execute dml <code>not a query</code>.<br>ERROR {ERROR:  syntax error at or near "not"
-LINE 1: not a query;
-        ^
-}}
+} -returnCodes {error} -match regexp -result "Failed to execute dml <code>not a query</code>."
 
 # db_select_csv
 test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -body {
