@@ -167,15 +167,15 @@ test perm_set-1.0 {
     Test giving user new permissions
 } -setup $setup -cleanup $cleanup -body {
     perm_set 0 products READ WRITE APPEND
-
+    
     if { ! [perm_test_user 0 products READ] } {
-        error "User 0 did not receive products READ permission"
+        return "User 0 did not receive products READ permission"
     }
     if { ! [perm_test_user 0 products WRITE] } {
-        error "User 0 did not receive products WRITE permission"
+        return "User 0 did not receive products WRITE permission"
     }
     if { ! [perm_test_user 0 products APPEND] } {
-        error "User 0 did not receive products APPEND permission"
+        return "User 0 did not receive products APPEND permission"
     }
     
     return true
@@ -187,13 +187,13 @@ test perm_set-1.1 {
     perm_set -schema public 0 products READ WRITE APPEND
 
     if { ! [perm_test_user 0 products READ] } {
-        error "User 0 did not receive products READ permission"
+        return "User 0 did not receive products READ permission"
     }
     if { ! [perm_test_user 0 products WRITE] } {
-        error "User 0 did not receive products WRITE permission"
+        return "User 0 did not receive products WRITE permission"
     }
     if { ! [perm_test_user 0 products APPEND] } {
-        error "User 0 did not receive products APPEND permission"
+        return "User 0 did not receive products APPEND permission"
     }
     
     return true
@@ -204,22 +204,23 @@ test perm_set-1.2 {
 } -setup $setup -cleanup $cleanup -body {
     perm_set 2 products READ
     if { ! [perm_test_user 2 products READ] } {
-        error "User 2 did not receive products READ permission"
+        return "User 2 did not receive products READ permission"
     }
     if { [perm_test_user 2 products WRITE] } {
-        error "User 2 has products WRITE permission"
+        return "User 2 has products WRITE permission"
     }
     if { ! [perm_test_user 1 products READ] } {
-        error "User 1 is missing products READ permission"
+        return "User 1 is missing products READ permission"
     }
     if { ! [perm_test_user 1 products WRITE] } {
-        error "User 1 is missing products WRITE permission"
+        return "User 1 is missing products WRITE permission"
     }
     if { ! [perm_test_user 1 products APPEND] } {
-        error "User 1 is missing products APPEND permission"
+        return "User 1 is missing products APPEND permission"
     }
 
     return true
 } -result true
 
 cleanupTests
+
