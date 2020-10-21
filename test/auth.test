@@ -1,0 +1,23 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+
+test auth_as_user-1.0 {set current user to 0} -body {
+    qc::auth_as_user 0
+    return [qc::auth]
+} -result 0
+
+test auth_logout-1.0 {login and logout} -body {
+    qc::auth_as_user 0
+    qc::auth_logout
+    qc::auth
+} -returnCodes {
+    error
+} -result "Cannot authenticate you using either session_id or ip address. Please log in."
+
+cleanupTests
