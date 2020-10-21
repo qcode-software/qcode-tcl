@@ -175,6 +175,47 @@ namespace eval ::qcode::test {
         unset dict_list
     } -result {{widget_a {Widget Type A} 9.99} {widget_b {Widget Type B} 8.99} {widget_c {Widget Type C} 7.99}}
 
+    test ldict_mappings_equal-1.0 {ldict_mappings_equal success} -body {
+        return [ldict_mappings_equal {
+            {apples green oranges orange bananas yellow}
+            {cars 4 bicycles 2 unicycles 1}
+        } {
+            {bananas yellow oranges orange apples green}
+            {unicycles 1 bicycles 2 cars 4}
+        }]
+    } -result true
+    test ldict_mappings_equal-1.1 {ldict_mappings_equal wrong order} -body {
+        return [ldict_mappings_equal {
+            {apples green oranges orange bananas yellow}
+            {cars 4 bicycles 2 unicycles 1}
+        } {
+            {unicycles 1 bicycles 2 cars 4}
+            {bananas yellow oranges orange apples green}
+        }]
+    } -result false
+    test ldict_mappings_equal-1.2 {ldict_mappings_equal a < b} -body {
+        return [ldict_mappings_equal {
+            {apples green oranges orange bananas yellow}
+            {cars 4 bicycles 2 unicycles 1}
+        } {
+            {bananas yellow oranges orange apples green}
+            {unicycles 1 bicycles 2 cars 4}
+            {roses red violets purple bluebells blue}
+        }]
+    } -result false
+    test ldict_mappings_equal-1.3 {ldict_mappings_equal a > b} -body {
+        return [ldict_mappings_equal {
+            {apples green oranges orange bananas yellow}
+            {cars 4 bicycles 2 unicycles 1}
+            {roses red violets purple bluebells blue}
+        } {
+            {bananas yellow oranges orange apples green}
+            {unicycles 1 bicycles 2 cars 4}
+        }]
+    } -result false
+    test ldict_mappings_equal-1.4 {ldict_mappings_equal empty} -body {
+        return [ldict_mappings_equal {} {}]
+    } -result true
 
     cleanupTests
 }

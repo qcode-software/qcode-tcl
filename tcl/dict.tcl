@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default
+    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default dicts_equal
 }
 
 proc qc::dict_exists { args } {
@@ -135,4 +135,19 @@ proc qc::dict_zipper {keys values} {
         dict set zipped $key $value
     }
     return $zipped
+}
+
+proc qc::dicts_equal {dict1 dict2} {
+    #| Compare 2 dicts for equivalence
+    if { [dict size $dict1] != [dict size $dict2] } {
+        return false
+    }
+    foreach {key1 value1} $dict1 {key2 value2} $dict2 {
+        if { $key1 ne $key2
+             ||
+             $value1 ne $value2 } {
+            return false
+        }
+    }
+    return true
 }
