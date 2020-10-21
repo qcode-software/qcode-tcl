@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export auth auth_check auth_hba auth_hba_check auth_session
+    namespace export auth auth_check auth_hba auth_hba_check auth_session auth_as_user auth_logout
 }
 
 proc qc::auth {} {
