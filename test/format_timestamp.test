@@ -1,53 +1,136 @@
 package require tcltest
-eval ::tcltest::configure $argv
-# Ensure package is loaded from ./package rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./package]
-package require -exact qcode $::env(VERSION)
+
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
 
 namespace eval ::qcode::test {
     namespace import ::tcltest::*
     namespace path ::qc
 
-    test format_timestamp_iso-1.0 {format_timestamp_iso relative} -body {
-        format_timestamp_iso now
-    } -result [string map [list - "&#8209;"] [clock format [clock scan now] -format "%Y-%m-%d %H:%M:%S"]]
-    test format_timestamp_iso-1.1 {format_timestamp_iso uk} {format_timestamp_iso "23/5/12 11:11:11"} "2012&#8209;05&#8209;23 11:11:11"
-    test format_timestamp_iso-1.2 {format_timestamp_iso long} {format_timestamp_iso "23rd May 2012 11:11:11"} "2012&#8209;05&#8209;23 11:11:11"
+    test format_timestamp_iso-1.0 {
+        format_timestamp_iso relative
+    } -body {
+        format_timestamp_iso 1603277566
+    } -result "2020&#8209;10&#8209;21 11:52:46"
 
-    test format_timestamp_http-1.0 {format_timestamp_http relative} {format_timestamp_http now} [string map [list - "&#8209;"] [clock format [clock scan now] -timezone :GMT -format "%a, %d %b %Y %H:%M:%S %Z"]]
-    test format_timestamp_http-1.1 {format_timestamp_http uk} {format_timestamp_http "23/5/12 11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
-    test format_timestamp_http-1.2 {format_timestamp_http iso} {format_timestamp_http "2012-05-23 11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
-    test format_timestamp_http-1.3 {format_timestamp_http iso2} {format_timestamp_http "2012-05-23T11:11:11"} {Wed, 23 May 2012 10:11:11 GMT}
+    test format_timestamp_iso-1.1 {
+        format_timestamp_iso uk
+    } -body {
+        format_timestamp_iso "23/5/12 11:11:11"
+    } -result "2012&#8209;05&#8209;23 11:11:11"
+    
+    test format_timestamp_iso-1.2 {
+        format_timestamp_iso long
+    } -body {
+        format_timestamp_iso "23rd May 2012 11:11:11"
+    } -result "2012&#8209;05&#8209;23 11:11:11"
+    
 
-    test format_timestamp_rel-1.0 {format_timestamp_rel now } {format_timestamp_rel now} [clock format [clock scan now] -format "%H:%M"]
-    test format_timestamp_rel-1.1 {format_timestamp_rel tomorrow } {format_timestamp_rel tomorrow} [clock format [clock scan tomorrow] -format "%a %H:%M"]
-    test format_timestamp_rel-1.2 {format_timestamp_rel next year } {format_timestamp_rel "next year"} [clock format [clock scan "next year"] -format "%Y-%m-%d"]
+    test format_timestamp_http-1.0 {
+        format_timestamp_http relative
+    } -body {
+        format_timestamp_http 1603277566
+    } -result "Wed, 21 Oct 2020 10:52:46 GMT"
 
-    test format_timestamp2hour-1.0 {format_timestamp2hour now } {format_timestamp2hour now} [string map [list - "&#8209;"] [clock format [clock scan now] -format "%Y-%m-%d %H:%M"]]
+    test format_timestamp_http-1.1 {
+        format_timestamp_http uk
+    } -body {
+        format_timestamp_http "23/5/12 11:11:11"
+    } -result "Wed, 23 May 2012 10:11:11 GMT"
+    
+    test format_timestamp_http-1.2 {
+        format_timestamp_http iso
+    } -body {
+        format_timestamp_http "2012-05-23 11:11:11"
+    } -result "Wed, 23 May 2012 10:11:11 GMT"
+    
+    test format_timestamp_http-1.3 {
+        format_timestamp_http iso2
+    } -body {
+        format_timestamp_http "2012-05-23T11:11:11"
+    } -result "Wed, 23 May 2012 10:11:11 GMT"
 
-    test format_timestamp_rel_age-1.0 {format_timestamp_rel_age years } -body {
-        format_timestamp_rel_age [clock format [cast epoch "3 years ago"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative-1.0 {
+        format_timestamp_relative same-day
+    } -body {
+        format_timestamp_relative "2020-10-21 12:21" "2020-10-21 21:21"
+    } -result "21:21"
+    
+    test format_timestamp_relative-1.1 {
+        format_timestamp_relative tomorrow
+    } -body {
+        format_timestamp_relative "2020-10-21 12:21" "2020-10-22 21:21"
+    } -result "Thu 21:21"
+    
+    test format_timestamp_relative-1.2 {
+        format_timestamp_relative next year
+    } -body {
+        format_timestamp_relative "2020-10-21 12:21" "2021-10-22 21:21"
+    } -result "2021-10-22"
+
+    test format_timestamp2hour-1.0 {
+        format_timestamp2hour 
+    } -body {
+        format_timestamp2hour "2020-10-21 12:21:34"
+    } -result "2020&#8209;10&#8209;21 12:21"
+
+    test format_timestamp2hour-1.1 {
+        format_timestamp2hour -text
+    } -body {
+        format_timestamp2hour -text "2020-10-21 12:21:34"
+    } -result "2020-10-21 12:21"
+    
+    test format_timestamp_relative_age-1.0 {
+        format_timestamp_relative_age years
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2017-07-22"
     } -result "3 years"
-    test format_timestamp_rel_age-1.1 {format_timestamp_rel_age months } -body {
-        format_timestamp_rel_age [clock format [cast epoch "3 months ago"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.1 {
+        format_timestamp_relative_age months
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-04-22"
     } -result "3 months"
-    test format_timestamp_rel_age-1.2 {format_timestamp_rel_age month } -body {
-        format_timestamp_rel_age [clock format [cast epoch "30 days ago"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.2 {
+        format_timestamp_relative_age month
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-06-22"
     } -result "1 month"
-    test format_timestamp_rel_age-1.3 {format_timestamp_rel_age weeks } -body {
-        format_timestamp_rel_age [clock format [cast epoch "3 weeks ago"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.3 {
+        format_timestamp_relative_age weeks
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-07-01"
     } -result "3 weeks"
-    test format_timestamp_rel_age-1.4 {format_timestamp_rel_age week } -body {
-        format_timestamp_rel_age [clock format [cast epoch "1 week ago"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.4 {
+        format_timestamp_relative_age week
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-07-15"
     } -result "1 week"
-    test format_timestamp_rel_age-1.5 {format_timestamp_rel_age days } -body {
-        format_timestamp_rel_age [clock format [cast epoch "-3 days 09:00:00"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.5 {
+        format_timestamp_relative_age days
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-07-19"
     } -result "3 days"
-    test format_timestamp_rel_age-1.6 {format_timestamp_rel_age day } -body {
-        format_timestamp_rel_age [clock format [cast epoch "-1 day 09:00:00"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.6 {
+        format_timestamp_relative_age day
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-07-21"
     } -result "1 day"
-    test format_timestamp_rel_age-1.7 {format_timestamp_rel_age future } -body {
-        format_timestamp_rel_age [clock format [cast epoch "tomorrow 09:00:00"] -format "%Y-%m-%d %H:%M:%S"]
+    
+    test format_timestamp_relative_age-1.7 {
+        format_timestamp_relative_age future
+    } -body {
+        format_timestamp_relative_age "2020-07-22" "2020-07-23"
     } -result "-1 days"
 
 

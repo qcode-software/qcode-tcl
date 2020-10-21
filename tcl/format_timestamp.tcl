@@ -29,8 +29,13 @@ proc qc::format_timestamp_http { string } {
 
 proc qc::format_timestamp_rel { string } {
     #| Format relative to age with date and time
-    set epoch [cast epoch $string]
-    set epoch_now [clock seconds]
+    return [qc::format_timestamp_relative now $string]
+}
+
+proc qc::format_timestamp_relative { timestamp_now timestamp } {
+    #| Format relative to age with date and time
+    set epoch [cast epoch $timestamp]
+    set epoch_now [cast epoch $timestamp_now]
     # Today return time
     if { [string equal [cast date $epoch_now] [cast date $epoch]] } {
         return [clock format $epoch -format "%H:%M"]
@@ -63,9 +68,14 @@ proc qc::format_timestamp { args } {
 
 proc qc::format_timestamp_rel_age {args} {
     #| Return the approximate relative age of a timestamp
-    qc::args $args -long -- timestamp
+    return [qc::format_timestamp_relative_age {*}[linsert $args end-1 now]]
+}
+
+proc qc::format_timestamp_relative_age {args} {
+    #| Return the approximate relative age of a timestamp
+    qc::args $args -long -- timestamp_now timestamp
     
-    set days [qc::date_days $timestamp now]
+    set days [qc::date_days $timestamp $timestamp_now]
     if { $days == 0 } {
         return "today"
     }

@@ -45,6 +45,7 @@ namespace eval qc {
         split2
         split_pair2
         string_is_escaped
+        control_port_source
     }
 }
 
@@ -793,4 +794,28 @@ proc qc::uuid {} {
         package require uuid
         return [uuid::uuid generate]
     }
+}
+
+proc qc::control_port_source {filename} {
+    #| Capture and return stdout while sourcing filename
+    global stdout
+    set stdout ""
+    rename ::puts ::_puts
+    proc puts { args } {
+        global stdout
+        if { [llength $args ] == 1 || ([llength $args]==2 && [lindex $args 0] eq "stdout") } {           
+            append stdout [lindex $args end]\n
+        } elseif {
+                  ([llength $args] == 2 && [lindex $args 0] eq "-nonewline")
+                  || ([llength $args ]== 3 && [lindex $args 0] eq "-nonewline" && [lindex $args 1] eq "stdout")
+              } {
+            append stdout [lindex $args end]
+        } else {
+            ::_puts {*}$args
+        }
+    }      
+    source $filename
+    rename ::puts {}
+    rename ::_puts ::puts
+    return $stdout
 }
