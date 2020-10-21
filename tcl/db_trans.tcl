@@ -40,7 +40,7 @@ proc qc::db_trans {args} {
     return -options $options $result
 }
 
-proc db_trans_start {{db DEFAULT}} {
+proc qc::db_trans_start {{db DEFAULT}} {
     #| Start a database transaction or add a savepoint
     global db_trans_level
     if { ![info exists db_trans_level] } {
@@ -57,7 +57,7 @@ proc db_trans_start {{db DEFAULT}} {
     }
 }
 
-proc db_trans_end {{db DEFAULT}} {
+proc qc::db_trans_end {{db DEFAULT}} {
     #| Release a savepoint or commit current transaction
     global db_trans_level
     
@@ -71,7 +71,7 @@ proc db_trans_end {{db DEFAULT}} {
     incr db_trans_level($db) -1
 }
 
-proc db_trans_abort {{db DEFAULT}} {
+proc qc::db_trans_abort {{db DEFAULT}} {
     #| Rollback to latest savepoint or out of transaction
     global db_trans_level
     
