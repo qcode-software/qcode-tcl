@@ -198,9 +198,9 @@ proc qc::html_paragraph_layout {args} {
 proc qc::html2text { html } {
     #| Wrapper for html2text. Input encoding UTF-8, Output encoding UTF-8
     set html [string map [list "&#8209;" -] $html] 
-    qc::try {
+    ::try {
 	return [encoding convertfrom utf-8 [exec_proxy [qc::which html2text] -utf8 -nobs << [encoding convertto utf-8 $html]]]
-    } {
+    } on error {} {
 	# html2text unable to convert (possibly invalid html).
 	# Return text by removing all html tags and any style and script elements.
 	if { [regexp -nocase {<body>.*</body>} $html body] } {

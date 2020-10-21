@@ -33,6 +33,18 @@ proc qc::auth {} {
     error "Cannot authenticate you using either session_id or ip address. Please log in." {} AUTH
 }
 
+proc qc::auth_as_user {user_id} {
+    #| Set the authenticated user
+    global current_user_id
+    set current_user_id $user_id
+}
+
+proc qc::auth_logout {} {
+    #| Logout the current user
+    global current_user_id
+    unset current_user_id
+}
+
 proc qc::auth_check {} {
     #| Check if we can authenticate the user
     #| Return true or false
@@ -72,6 +84,9 @@ proc qc::auth_hba {} {
 proc qc::auth_hba_check {} {
     #| Check if the current user can be authenticated
     #| based on ip address
+    if { [info command ns_conn] ne "ns_conn" } {
+        return false
+    }
     set ip [qc::conn_remote_ip]
     set qry "select user_id from users where ip=:ip"
     db_cache_0or1row $qry { 

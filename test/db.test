@@ -1,457 +1,156 @@
 package require tcltest
-eval ::tcltest::configure $argv
-# Ensure package is loaded from ./package rather than /usr/lib/tcltk
-set auto_path [linsert $auto_path 0 ./package]
-package require -exact qcode $::env(VERSION)
 package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-    testConstraint requires_database true
+# Load common definitions of setup and cleanup
+source ./db_setup.tcl
 
-    # The test user configuration.
-    set test_conf {
-        host localhost
-        port 5432
-        dbname test_database
-        user test_user
-        password test_password
-    }
+################################################################################
+###   TESTS
+################################################################################
 
-    # Request a username/password in order to set up test environment
-    # User must have sufficient privileges (create user, create db)
-    puts "Enter username for database:"
-    set user [gets stdin]
-    puts "Enter password for database:"
-    exec stty -echo
-    set password [gets stdin]
-    exec stty echo
+# db_qry_parse
+test db_qry_parse-1.0 {db_qry_parse} -body {
+    set foo hello
+    set bar {it's "fun" to use quotes}
+    db_qry_parse {update nosuchtable set message=:bar where title=:foo}
+} -result {update nosuchtable set message='it''s "fun" to use quotes' where title='hello'}
 
-    # Attempt to setup a database and user for testing
-    set conn [pg_connect -connlist "
-        host localhost
-        port 5432
-        dbname template1
-        user $user
-        password $password
-    "]
-    set failed [catch {
-        pg_execute $conn {CREATE DATABASE test_database}
-        pg_execute $conn {
-            CREATE USER test_user WITH PASSWORD 'test_password';
-            GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
-        }
-    } results options]
-    pg_disconnect $conn
-    if { $failed } {
-        return -options $options $results
-    }
+# db_qry_parse
+test db_qry_parse-1.1 {db_qry_parse null} -body {
+    set foo ""
+    set bar "hello"
+    db_qry_parse {select * from nosuchtable where title=:foo and message=:bar}
+} -result {select * from nosuchtable where title IS NULL and message='hello'}
 
-    # Create setup and cleanup scripts for tests
-    set setup {
-        # Attempt to setup some tables for testing
-        set conn [pg_connect -connlist $test_conf]
-        set failed [catch {
-            pg_execute $conn {
-                SET client_min_messages = WARNING;
-                CREATE TABLE courses (
-                                      course_id    int PRIMARY KEY,
-                                      title        varchar(40)
-                                      );
-                INSERT INTO courses VALUES
-                (0, 'Computer Science'),
-                (1, 'Art & Design'),
-                (2, 'International Copyright Law');
-                CREATE TABLE students (
-                                       student_id   int PRIMARY KEY,
-                                       firstname    varchar(30) NOT NULL,
-                                       surname      varchar(30) NOT NULL,
-                                       dob          date,
-                                       course_id    int REFERENCES courses
-                                       );
-                INSERT INTO students VALUES
-                (012345, 'John', 'Smith', '1980-01-01', 0),
-                (192837, 'Jane', 'Doe', '1990-03-31', 2),
-                (246810, 'Sam', 'Brown', '1985-05-15', 1),
-                (007123, 'Max', 'Power', '1989-08-09', 1);
-                CREATE SEQUENCE course_id_sequence START 3;
-            }
-        } results options]
-        pg_disconnect $conn
-        if { $failed } {
-            return -options $options $results
-        }
+# db_qry_parse
+test db_qry_parse-1.2 {db_qry_parse type} -body {
+    set foo ""
+    set bar "1234"
+    db_qry_parse {select * from nosuchtable where title=:foo::text and message=:bar::character varying}
+} -result {select * from nosuchtable where title IS NULL and message='1234'::character varying}
 
-        # Establish a connection the qc::db way
-        db_connect {*}$test_conf
-    }
-    set cleanup {
-        # Cleanup the qc::db connection
-        pg_disconnect $_db
-        unset _db
+# db_qry_parse
+test db_qry_parse-1.3 {db_qry_parse lots of quoting} -body {
+    set bar "barr"
+    db_qry_parse {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message=:bar::character varying}
+} -result {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message='barr'::character varying}
 
-        # Cleanup the testing tables
-        set conn [pg_connect -connlist $test_conf]
-        set failed [catch {
-            pg_execute $conn {
-                DROP SEQUENCE course_id_sequence;
-                DROP TABLE students;
-                DROP TABLE courses;
-            }
-        } results options]
-        pg_disconnect $conn
-        if { $failed } {
-            return -options $options $results
+# db_qry_parse
+test db_qry_parse-1.4 {db_qry_parse multiple quoting} -body {
+    set bar "barr"
+    db_qry_parse {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email=:bar::character varying}
+} -result {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email='barr'::character varying}
+
+# db_quote
+test db_quote-1.0 {db_quote} -body {
+    set foo 1
+    set bar one
+    set baz {backslash\\}
+    set thud {don't "forget" quotes}
+    set fred 999
+    return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud] [db_quote $fred text] [db_quote $fred]"
+} -result {'1' 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text '999'}
+
+# db_escape_regexp
+test db_escape_regexp-1.0 {db_escape_regexp} -body {
+    db_escape_regexp "*fi+sh(es)?"
+} -result {\*fi\+sh\(es\)\?}
+
+# db_get_handle
+test db_get_handle-1.0 {db_get_handle} -setup $setup -cleanup $cleanup -body {
+    set handle [db_get_handle]
+    if { [info commands ns_db] eq "ns_db" && [ns_db poolname $handle] in [ns_db pools] } {
+        return 1
+    } else {
+        if { [lsearch [pg_dbinfo connections] $handle] == -1 } {
+            return "handle: $handle connections: [pg_dbinfo connections]"
+        } else {
+            return 1
         }
     }
+} -result 1
 
-    # Catch errors in testing so that the database can always be cleaned up after
-    set testing_failed [catch {
-        # ========================================
-        # Begin the actual testing
-        # ========================================
-        # db_qry_parse
-        test db_qry_parse-1.0 {db_qry_parse} -body {
-            set foo hello
-            set bar {it's "fun" to use quotes}
-            db_qry_parse {update nosuchtable set message=:bar where title=:foo}
-        } -result {update nosuchtable set message='it''s "fun" to use quotes' where title='hello'}
+# db_select_table
+test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -body {
+    db_select_table {select * from students order by surname}
+} -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 0}}
 
-        # db_qry_parse
-        test db_qry_parse-1.1 {db_qry_parse null} -body {
-            set foo ""
-            set bar "hello"
-            db_qry_parse {select * from nosuchtable where title=:foo and message=:bar}
-        } -result {select * from nosuchtable where title IS NULL and message='hello'}
+# db_select_table
+test db_select_table-1.1 {db_select_table 0 rows} -setup $setup -cleanup $cleanup -constraints {knownBug} -body {
+    # Pgtcl doesn't report the column names of an empty table
+    db_select_table {select * from students where firsname='Adam'}
+} -result {{student_id firstname surname dob course_id}}
 
-        # db_qry_parse
-        test db_qry_parse-1.2 {db_qry_parse type} -body {
-            set foo ""
-            set bar "1234"
-            db_qry_parse {select * from nosuchtable where title=:foo::text and message=:bar::character varying}
-        } -result {select * from nosuchtable where title IS NULL and message='1234'::character varying}
+# db_dml
+test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $cleanup -body {
+    db_dml {update students set course_id=1 where student_id=12345}
+    db_select_table {select * from students order by surname}
+} -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
 
-        # db_qry_parse
-        test db_qry_parse-1.3 {db_qry_parse lots of quoting} -body {
-            set bar "barr"
-            db_qry_parse {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message=:bar::character varying}
-        } -result {select * from nosuchtable where title=$$ $not_a_var \u0001 [not_a_command]$$ and message='barr'::character varying}
+# db_dml
+test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -body {
+    db_dml {not a query}
+} -returnCodes {error} -match regexp -result "Failed to execute dml <code>not a query</code>."
 
-        # db_qry_parse
-        test db_qry_parse-1.4 {db_qry_parse multiple quoting} -body {
-            set bar "barr"
-            db_qry_parse {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email=:bar::character varying}
-        } -result {select * from nosuchtable where title=' $not_a_var \u0001 [not_a_command]' and message='more [things] not $to \resolve' and email='barr'::character varying}
+# db_select_csv
+test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -body {
+    db_select_csv {select * from students order by surname}
+} -result "student_id,firstname,surname,dob,course_id\r\n246810,Sam,Brown,1985-05-15,1\r\n192837,Jane,Doe,1990-03-31,2\r\n7123,Max,Power,1989-08-09,1\r\n12345,John,Smith,1980-01-01,0"
 
-        # db_quote
-        test db_quote-1.0 {db_quote} -body {
-            set foo 1
-            set bar one
-            set baz {backslash\\}
-            set thud {don't "forget" quotes}
-            set fred 999
-            return "[db_quote $foo] [db_quote $bar] [db_quote $baz] [db_quote $thud] [db_quote $fred text] [db_quote $fred]"
-        } -result {'1' 'one' E'backslash\\\\' 'don''t "forget" quotes' '999'::text '999'}
+# db_select_ldict
+test db_select_ldict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
+    db_select_ldict {select * from students order by surname}
+} -result {{student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1} {student_id 192837 firstname Jane surname Doe dob 1990-03-31 course_id 2} {student_id 7123 firstname Max surname Power dob 1989-08-09 course_id 1} {student_id 12345 firstname John surname Smith dob 1980-01-01 course_id 0}}
 
-        # db_escape_regexp
-        test db_escape_regexp-1.0 {db_escape_regexp} -body {
-            db_escape_regexp "*fi+sh(es)?"
-        } -result {\*fi\+sh\(es\)\?}
+# db_select_dict
+test db_select_dict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -body {
+    db_select_dict {select * from students where student_id=246810}
+} -result {student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1}
 
-        # db_get_handle
-        test db_get_handle-1.0 {db_get_handle} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            set handle [db_get_handle]
-            if { [lsearch [pg_dbinfo connections] $handle] == -1 } {
-                return "handle: $handle connections: [pg_dbinfo connections]"
-            } else {
-                return 1
-            }
-        } -result 1
+# db_1row
+test db_1row-1.0 {db_1row} -setup $setup -cleanup $cleanup -body {
+    db_1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345}
+    return "${surname}, $firstname - studying $course"
+} -result {Smith, John - studying Computer Science}
 
-        # db_select_table
-        test db_select_table-1.0 {db_select_table} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_select_table {select * from students order by surname}
-        } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 0}}
-
-        test db_select_table-1.1 {db_select_table 0 rows} -setup $setup -cleanup $cleanup -constraints {knownBug requires_database} -body {
-            # Pgtcl doesn't report the column names of an empty table
-            db_select_table {select * from students where firsname='Adam'}
-        } -result {{student_id firstname surname dob course_id}}
-
-        # db_dml
-        test db_dml-1.0 {db_dml test, requires db_select_table} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_dml {update students set course_id=1 where student_id=12345}
-            db_select_table {select * from students order by surname}
-        } -result {{student_id firstname surname dob course_id} {246810 Sam Brown 1985-05-15 1} {192837 Jane Doe 1990-03-31 2} {7123 Max Power 1989-08-09 1} {12345 John Smith 1980-01-01 1}}
-
-        test db_dml-1.1 {db_dml error test} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_dml {not a query}
-        } -returnCodes {error} -result "Failed to execute dml <code>not a query</code>."
-
-        # db_select_csv
-        test db_select_csv-1.0 {db_select_csv} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_select_csv {select * from students order by surname}
-        } -result "student_id,firstname,surname,dob,course_id\r\n246810,Sam,Brown,1985-05-15,1\r\n192837,Jane,Doe,1990-03-31,2\r\n7123,Max,Power,1989-08-09,1\r\n12345,John,Smith,1980-01-01,0"
-
-        # db_select_ldict
-        test db_select_ldict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_select_ldict {select * from students order by surname}
-        } -result {{student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1} {student_id 192837 firstname Jane surname Doe dob 1990-03-31 course_id 2} {student_id 7123 firstname Max surname Power dob 1989-08-09 course_id 1} {student_id 12345 firstname John surname Smith dob 1980-01-01 course_id 0}}
-
-        # db_select_dict
-        test db_select_dict-1.0 {db_select_ldict} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_select_dict {select * from students where student_id=246810}
-        } -result {student_id 246810 firstname Sam surname Brown dob 1985-05-15 course_id 1}
-
-        # db_1row
-        test db_1row-1.0 {db_1row} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345}
-            return "${surname}, $firstname - studying $course"
-        } -result {Smith, John - studying Computer Science}
-
-        # db_0or1row
-        test db_0or1row-1.0 {db_0or1row (1 row)} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345} {
-                return "No student with that ID"
-            } {
-                return "${surname}, $firstname - studying $course"
-            }
-        } -result {Smith, John - studying Computer Science}
-        test db_0or1row-1.1 {db_0or1row (0 rows)} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=987654} {
-                return "No student with that ID"
-            } {
-                return "${surname}, $firstname - studying $course"
-            }
-        } -result {No student with that ID}
-
-        # db_foreach
-        test db_foreach-1.0 {db_foreach} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            set results {}
-            db_foreach {select firstname, surname, title as course from students join courses using(course_id) order by student_id} {
-                lappend results "${surname}, $firstname - studying $course"
-            }
-            return $results
-        } -result {{Power, Max - studying Art & Design} {Smith, John - studying Computer Science} {Doe, Jane - studying International Copyright Law} {Brown, Sam - studying Art & Design}}
-
-        # db_seq
-        test db_seq-1.0 {db_seq} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            set results {}
-            foreach i {1 2 3 4 5} {
-                lappend results [db_seq course_id_sequence]
-            }
-            return $results
-        } -result {3 4 5 6 7}
-
-        # db_col_varchar_length
-        test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_col_varchar_length courses title
-        } -result 40
-
-        # db_trans
-        test db_trans-1.0 {db_trans rollback on error} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                    db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-                    if { $name ne "John Smithe" } {
-                        return "Name update failed"
-                    }
-                    db_dml {update students set firstname='ridiculously long first name string that doesn''t fit' where student_id=12345}
-                }
-            } {
-                db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-                return $name
-            }
-        } -result "John Smith"
-
-        test db_trans-1.1 {db_trans nested with try, both with errors} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    try {
-                        db_trans {
-                            db_dml {update students set surname='Smithe' where student_id=12345}
-                            error "Something went wrong"
-                        }
-                    }
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                    error "Something else went wrong"
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smith"
-
-        test db_trans-1.2 {db_trans nested with try, inner with error} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    try {
-                        db_trans {
-                            db_dml {update students set surname='Smithe' where student_id=12345}
-                            error "Something went wrong"
-                        }
-                    }
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "Jane Smith"
-
-        test db_trans-1.3 {db_trans nested with try, outer with error} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    try {
-                        db_trans {
-                            db_dml {update students set surname='Smithe' where student_id=12345}
-                        }
-                    }
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smith"
-
-        test db_trans-1.4 {db_trans nested with try, both succesfull} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    try {
-                        db_trans {
-                            db_dml {update students set surname='Smithe' where student_id=12345}
-                        }
-                    }
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "Jane Smithe"
-
-        test db_trans-1.5 {db_trans sibling, both sucessfull} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans { 
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                }
-            }
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "Jane Smithe"
-
-        test db_trans-1.6 {db_trans sibling, error on first} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans { 
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smithe"
-
-        test db_trans-1.7 {db_trans sibling, error on second} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans { 
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                }
-            }
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "Jane Smith"
-
-        test db_trans-1.7 {db_trans sibling, errors on both} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans { 
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smith"
-
-        test db_trans-1.8 {db_trans success} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            try {
-                db_trans {
-                    db_dml {update students set surname='Smithe' where student_id=12345}
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smithe"
-
-        test db_trans-1.9 {db_trans nested with try, followed by sibling, both with errors} -setup $setup -cleanup $cleanup -constraints {requires_database} -body {
-            db_trans {
-                try {
-                    db_trans {
-                        db_dml {update students set surname='Smithe' where student_id=12345}
-                        error "Something went wrong"
-                    }
-                }
-            }
-            try {
-                db_trans {
-                    db_dml {update students set firstname='Jane' where student_id=12345}
-                    error "Something went wrong"
-                }
-            }
-            db_1row {select firstname || ' ' || surname as name from students where student_id=12345}
-            return $name
-        } -result "John Smith"
-
-        # ========================================
-        # End of testing - now do cleanup
-        # ========================================
-    } testing_fail_results testing_fail_options]
-
-    # Attempt to drop the database and user that were created for testing
-    set conn [pg_connect -connlist "
-        host localhost
-        port 5432
-        dbname template1
-        user $user
-        password $password
-    "]
-    set database_cleanup_failed [catch {
-        pg_execute $conn {DROP DATABASE IF EXISTS test_database}
-        pg_execute $conn {
-            DROP ROLE IF EXISTS test_user;
-        }
-    } database_cleanup_results database_cleanup_options]
-    pg_disconnect $conn
-
-    if { $testing_failed } {
-        return -options $testing_fail_options $testing_fail_results
+# db_0or1row
+test db_0or1row-1.0 {db_0or1row (1 row)} -setup $setup -cleanup $cleanup -body {
+    db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=12345} {
+        return "No student with that ID"
+    } {
+        return "${surname}, $firstname - studying $course"
     }
-
-    if { $database_cleanup_failed } {
-        return -options $database_cleanup_options $database_cleanup_results
+} -result {Smith, John - studying Computer Science}
+test db_0or1row-1.1 {db_0or1row (0 rows)} -setup $setup -cleanup $cleanup -body {
+    db_0or1row {select firstname, surname, title as course from students join courses using(course_id) where student_id=987654} {
+        return "No student with that ID"
+    } {
+        return "${surname}, $firstname - studying $course"
     }
+} -result {No student with that ID}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+# db_foreach
+test db_foreach-1.0 {db_foreach} -setup $setup -cleanup $cleanup -body {
+    set results {}
+    db_foreach {select firstname, surname, title as course from students join courses using(course_id) order by student_id} {
+        lappend results "${surname}, $firstname - studying $course"
+    }
+    return $results
+} -result {{Power, Max - studying Art & Design} {Smith, John - studying Computer Science} {Doe, Jane - studying International Copyright Law} {Brown, Sam - studying Art & Design}}
+
+# db_seq
+test db_seq-1.0 {db_seq} -setup $setup -cleanup $cleanup -body {
+    set results {}
+    foreach i {1 2 3 4 5} {
+        lappend results [db_seq course_id_sequence]
+    }
+    return $results
+} -result {3 4 5 6 7}
+
+# db_col_varchar_length
+test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $cleanup -body {
+    db_col_varchar_length courses title
+} -result 40
+
+cleanupTests
