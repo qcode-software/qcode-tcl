@@ -69,8 +69,11 @@ proc qc::cookie_get { search_name } {
 
 proc qc::cookie_exists { name } {
     #| Test if the cookie exists
+    if { [info command ns_conn] ne "ns_conn" } {
+       return false
+    }
     if { ![ns_conn isconnected] } {
-	return false
+        return false
     }
     set headers [ns_conn headers]
     set cookie_string [ns_set iget $headers Cookie]

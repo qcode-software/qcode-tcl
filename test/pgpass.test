@@ -39,7 +39,7 @@ test pgpass_credentials_exist-1.1 {pgpass credentials does not exists} -setup $s
 
 test pgpass_credentials-1.0 {get credentials from pgpass for a database} -setup $setup -cleanup $cleanup -body {
     qc::pgpass_credentials $filename test1
-} -result {myuser mypassword}
+} -result {hostname localhost port 5432 database test1 username myuser password mypassword}
 
 cleanupTests
 

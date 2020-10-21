@@ -84,6 +84,9 @@ proc qc::auth_hba {} {
 proc qc::auth_hba_check {} {
     #| Check if the current user can be authenticated
     #| based on ip address
+    if { [info command ns_conn] ne "ns_conn" } {
+        return false
+    }
     set ip [qc::conn_remote_ip]
     set qry "select user_id from users where ip=:ip"
     db_cache_0or1row $qry { 
