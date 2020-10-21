@@ -1,0 +1,225 @@
+package require tcltest
+package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+if { [info commands ns_db] ne "ns_db" } {
+    # Load all .tcl files
+    set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+    foreach file $files {
+        source $file
+    }
+    namespace import ::qc::*
+
+    # Superuser credentials
+    set pgpass_filename $::env(HOME)/.pgpass
+    if { [pgpass_credentials_exist $pgpass_filename template1] } {
+        dict2vars [pgpass_credentials $pgpass_filename template1] {*}{
+            hostname
+            database
+            port
+            username
+            password
+        }
+    } else {
+        error "Missing pgpass entry for db template1"        
+    }
+    set ::conn_info_superuser(host) $hostname
+    set ::conn_info_superuser(dbname) $database
+    set ::conn_info_superuser(port) $port
+    set ::conn_info_superuser(user) $username
+    set ::conn_info_superuser(password) $password
+
+    # initialise db credentials
+
+    set ::conn_info_test(host) $hostname
+    set ::conn_info_test(port) $port
+    array set ::conn_info_test {
+        dbname test_database
+        user test_user
+        password test_password
+    }
+}
+
+set setup_qry {
+    SET client_min_messages = WARNING;
+    
+    CREATE TYPE perm_method as enum
+    (
+     'READ',
+     'WRITE',
+     'APPEND'
+     );
+    
+    CREATE TABLE perm_class
+    (
+     perm_class_id int primary key,
+     perm_name varchar(50) not null unique
+     );
+    
+    INSERT INTO perm_class
+    (perm_class_id, perm_name)
+    VALUES
+    (0, 'products'),
+    (1, 'sales_orders'),
+    (2, 'purchase_orders');
+    
+    CREATE TABLE perm
+    (
+     perm_id int primary key,
+     perm_class_id int not null references perm_class(perm_class_id),
+     method perm_method not null
+     );
+    INSERT INTO perm
+    (perm_id, perm_class_id, method)
+    VALUES
+    (0, 0, 'READ'),
+    (1, 0, 'WRITE'),
+    (2, 0, 'APPEND'),
+    (3, 1, 'READ'),
+    (4, 1, 'WRITE'),
+    (5, 2, 'READ'),
+    (6, 2, 'WRITE');
+    
+    CREATE TABLE user_perm
+    (
+     user_id int not null,
+     perm_id int not null references perm(perm_id)
+     );
+    INSERT INTO user_perm
+    (user_id, perm_id)
+    VALUES
+    (1, 0),
+    (1, 1),
+    (1, 2),
+    (2, 0),
+    (2, 1),
+    (3, 3),
+    (3, 4),
+    (3, 5),
+    (3, 6),
+    (4, 5),
+    (4, 6);
+}
+
+set cleanup_qry {
+    drop table user_perm;
+    drop table perm;
+    drop table perm_class;
+    drop type perm_method;
+}
+
+set setup_inside_naviserver {
+    # The test user configuration.
+    set db [qc::db_get_handle]
+    ns_db dml $db $setup_qry
+}
+
+set setup_outside_naviserver {
+    # The test user configuration.
+    set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
+    pg_execute $conn_superuser {CREATE DATABASE test_database}
+    pg_execute $conn_superuser {
+        CREATE USER test_user WITH PASSWORD 'test_password';
+        GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
+    }
+    pg_disconnect $conn_superuser
+    
+    # Establish a connection the qc::db way
+    set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn $setup_qry
+}
+
+set cleanup_inside_naviserver {
+    # Cleanup the qc::db connection
+    set db [qc::db_get_handle]
+    ns_db dml $db $cleanup_qry 
+}
+
+set cleanup_outside_naviserver {
+    # Cleanup the qc::db connection
+    set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn $cleanup_qry
+    qc::db_disconnect
+    
+    # Cleanup 
+    set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
+    pg_execute $conn_superuser {DROP DATABASE IF EXISTS test_database}
+    pg_execute $conn_superuser {
+        DROP ROLE IF EXISTS test_user;
+    }
+    pg_disconnect $conn_superuser
+    
+}
+
+if { [info commands ns_db] eq "ns_db" } {
+    set setup $setup_inside_naviserver
+    set cleanup $cleanup_inside_naviserver
+} else {
+    set setup $setup_outside_naviserver
+    set cleanup $cleanup_outside_naviserver
+}
+
+################################################################################
+###   TESTS
+################################################################################
+
+test perm_set-1.0 {
+    Test giving user new permissions
+} -setup $setup -cleanup $cleanup -body {
+    perm_set 0 products READ WRITE APPEND
+
+    if { ! [perm_test_user 0 products READ] } {
+        error "User 0 did not receive products READ permission"
+    }
+    if { ! [perm_test_user 0 products WRITE] } {
+        error "User 0 did not receive products WRITE permission"
+    }
+    if { ! [perm_test_user 0 products APPEND] } {
+        error "User 0 did not receive products APPEND permission"
+    }
+    
+    return true
+} -result true
+
+test perm_set-1.1 {
+    Test giving user new permissions with specified schema
+} -setup $setup -cleanup $cleanup -body {
+    perm_set -schema public 0 products READ WRITE APPEND
+
+    if { ! [perm_test_user 0 products READ] } {
+        error "User 0 did not receive products READ permission"
+    }
+    if { ! [perm_test_user 0 products WRITE] } {
+        error "User 0 did not receive products WRITE permission"
+    }
+    if { ! [perm_test_user 0 products APPEND] } {
+        error "User 0 did not receive products APPEND permission"
+    }
+    
+    return true
+} -result true
+
+
+test perm_set-1.2 {
+} -setup $setup -cleanup $cleanup -body {
+    perm_set 2 products READ
+    if { ! [perm_test_user 2 products READ] } {
+        error "User 2 did not receive products READ permission"
+    }
+    if { [perm_test_user 2 products WRITE] } {
+        error "User 2 has products WRITE permission"
+    }
+    if { ! [perm_test_user 1 products READ] } {
+        error "User 1 is missing products READ permission"
+    }
+    if { ! [perm_test_user 1 products WRITE] } {
+        error "User 1 is missing products WRITE permission"
+    }
+    if { ! [perm_test_user 1 products APPEND] } {
+        error "User 1 is missing products APPEND permission"
+    }
+
+    return true
+} -result true
+
+cleanupTests

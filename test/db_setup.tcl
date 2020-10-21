@@ -16,7 +16,7 @@ if { [info commands ns_db] ne "ns_db" } {
             database
             port
             username
-            password            
+            password
         }
     } else {
         error "Missing pgpass entry for db template1"        
