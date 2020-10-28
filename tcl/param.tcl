@@ -10,8 +10,7 @@ proc qc::param_get { args } {
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
     } else {
-        if { [info commands ns_db] eq "ns_db" } {
-	    # Naviserver
+        if { [qc::db_connected] } {
             # DB param
             set qry {select param_value from param where param_name=:param_name}
             db_cache_0or1row -ttl $ttl $qry {
@@ -27,8 +26,6 @@ proc qc::param_get { args } {
 	    }
 
         } else {
-
-            # Non-Naviserver env
 	    qc::param_datastore_load
 	    # Check the datastore
 	    if { [info exists ::qc::param::db] && [qc::in [array names ::qc::param::db] $param_name] } {

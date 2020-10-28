@@ -591,6 +591,16 @@ proc qc::db_connect {args} {
     return $_db
 }
 
+proc qc::db_connected {} {
+    #| Is there a database connected?
+    global _db
+    if { [info exists _db] } {
+        return true
+    } else {
+        return false
+    }
+}
+
 proc qc::db_pg_copy_load { args } {
     #| Will load a file of data in pg copy format to the specified database table.
     #| $columns is the list of column names to insert the corresponding column 
