@@ -307,12 +307,13 @@ proc qc::db_escape_regexp { string } {
     return [string map $list $string]
 }
 
-proc qc::db_get_handle {{poolname DEFAULT}} {
-    # Return db handle 
-    # Keep one handle per pool for current thread.
+proc qc::db_connect {args} {
+    #| Connect to a postgresql database
     global _db
     if { [info commands ns_db] eq "ns_db" } {
         # Naviserver
+        qc::args2vars $args poolname
+        default poolname DEFAULT
         if { $poolname eq "DEFAULT" } {
 	    set poolname [ns_config ns/server/[ns_info server]/db defaultpool]  
 	} 
@@ -321,30 +322,54 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
 	}
         return $_db($poolname)
     } else {
-        # Should be connected with db_connect
+        package require Pgtcl
         if { ![info exists _db] } {
-            error "No database connection"
+            set _db [pg_connect -connlist $args]
         }
         return $_db
     }
 }
 
-proc qc::db_dml { args } {
-    args $args -db DEFAULT -- qry
+proc qc::db_connected {} {
+    #| Is there a database connected?
+    global _db
+    if { [info exists _db] } {
+        return true
+    } else {
+        return false
+    }
+}
+
+proc qc::db_get_handle {{poolname DEFAULT}} {
+    global _db
+    if { [info commands ns_db] eq "ns_db" } {
+        if { ![info exists _db($poolname)] } {
+            return [qc::db_connect poolname $poolname]
+        } else {
+            return $_db($poolname)
+        }
+    } else {
+        # PgTcl conn
+        return _db
+    }
+}
+
+proc qc::db_dml { qry } {
     #| Execute a SQL dml statement
-    set db [db_get_handle $db]
     set qry [db_qry_parse $qry 1]
     if { [info commands ns_db] eq "ns_db" } {
         # Naviserver
+        set handle [db_get_handle]
         ::try {
-            ns_db dml $db $qry
+            ns_db dml $handle $qry
         } on error {error_message options} {
-            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $db]" [dict get $options -errorinfo] [dict get $options -errorcode]
+            error "Failed to execute dml <code>$qry</code>.<br>[ns_db exception $handle]" [dict get $options -errorinfo] [dict get $options -errorcode]
         }
     } else {
         # Connected with db_connect
         ::try {
-            pg_execute $db $qry
+            set handle [db_get_handle]
+            pg_execute $handle $qry
         } on error {error_message options} {
             error "Failed to execute dml <code>$qry</code>." [dict get $options -errorinfo] [dict get $options -errorcode]
         }
@@ -499,7 +524,7 @@ proc qc::db_select_table {args} {
     incr level
     set qry [db_qry_parse $qry $level]
     set table {}
-    set db [db_get_handle $db]
+    set db [db_connect $db]
     if { [info commands ns_db] eq "ns_db" } {
         # Naviserver
         ::try {
@@ -581,25 +606,7 @@ proc qc::db_row_exists {args} {
     }
 }
 
-proc qc::db_connect {args} {
-    #| Connect to a postgresql database
-    package require Pgtcl
-    global _db
-    if { ![info exists _db] } {
-        set _db [pg_connect -connlist $args]
-    }
-    return $_db
-}
 
-proc qc::db_connected {} {
-    #| Is there a database connected?
-    global _db
-    if { [info exists _db] } {
-        return true
-    } else {
-        return false
-    }
-}
 
 proc qc::db_pg_copy_load { args } {
     #| Will load a file of data in pg copy format to the specified database table.
