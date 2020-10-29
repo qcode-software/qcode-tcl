@@ -1,254 +1,159 @@
 package require tcltest
 package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+source ./crypt_setup.tcl
 
-
-# Load all .tcl files
-set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
-foreach file $files {
-    source $file
-}
-
-set pgpass_filename $::env(HOME)/.pgpass
-if { [file exists $pgpass_filename] } {
-    set ldict [qc::pgpass2ldict $pgpass_filename]
-    set index [qc::ldict_search ldict database template1]
-    if { $index >= 0 } {
-        set ::conn_info_superuser(user) [dict get [lindex $ldict $index] username]
-        set ::conn_info_superuser(password) [dict get [lindex $ldict $index] password]
+# pkcs_padding_append
+test pkcs_padding_append-1.0 {pkcs_padding_append - 1 byte unicode} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set list [list \
+                  [string repeat [format %c 0] 0] \
+                  [string repeat [format %c 0] 1] \
+                  [string repeat [format %c 0] 2] \
+                  [string repeat [format %c 0] 3] \
+                  [string repeat [format %c 0] 4] \
+                  [string repeat [format %c 0] 5] \
+                  [string repeat [format %c 0] 6] \
+                  [string repeat [format %c 0] 7] \
+                  [string repeat [format %c 0] 8] \
+                 ]
+    set results {}
+    foreach string $list {
+        lappend results [pkcs_padding_append $string]
     }
-}
+    return $results
+} -result [list \
+               [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
+               [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
+               [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
+               [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
+               [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
+               [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
+               [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
+               [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
+               [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
+              ]
 
-if { ![info exists ::conn_info_superuser(user)]
-     && ![info exists ::conn_info_superuser(password)]
- } {
-    # Request a username/password in order to set up test environment
-    # User must have sufficient privileges (create user, create db)
-    puts "Enter database superuser:"
-    set ::conn_info_superuser(user) [gets stdin]
-    #set ::conn_info_superuser(user) priyank
-    puts "Enter password:"
-    exec stty -echo
-    set ::conn_info_superuser(password) [gets stdin]
-    #set ::conn_info_superuser(password) qcode2020
-    exec stty echo
-}
-
-# db credentials
-array set ::conn_info_superuser {
-    host localhost
-    port 5432
-    dbname template1
-}
-
-array set ::conn_info_test {
-    host localhost
-    port 5432
-    dbname test_database
-    user test_user
-    password test_password
-}
-
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-    set conn ""
-    set setup {
-        # The test user configuration.
-        set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
-        pg_execute $conn_superuser {CREATE DATABASE test_database}
-        pg_execute $conn_superuser {
-            CREATE USER test_user WITH PASSWORD 'test_password';
-            GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
-        }
-        pg_disconnect $conn_superuser
-
-        # load pgcrypto.sql for test_database (must be done as superuser)
-        regexp {PostgreSQL\s+([0-9]+\.[0-9]+)} [exec pg_config --version] -> major_version minor_version
-        if { $major_version >= 9.1 } {
-            set pgcrypto "CREATE EXTENSION pgcrypto"
-        } else {
-            set pgcrypto [read [open [exec pg_config --sharedir]/contrib/pgcrypto.sql r]]
-        }
-        
-        # Establish a connection the qc::db way
-        set conn [qc::db_connect {*}[array get ::conn_info_test]]
-        pg_execute $conn $pgcrypto
-
-         # Encryption key for testing
-        set key secretkey
-
+test pkcs_padding_append-1.1 {pkcs_padding_append - 2 byte unicode} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set list [list \
+                  [string repeat [format %c 256] 0] \
+                  [string repeat [format %c 256] 1] \
+                  [string repeat [format %c 256] 2] \
+                  [string repeat [format %c 256] 3] \
+                  [string repeat [format %c 256] 4] \
+                  [string repeat [format %c 256] 5] \
+                  [string repeat [format %c 256] 6] \
+                  [string repeat [format %c 256] 7] \
+                  [string repeat [format %c 256] 8] \
+                 ]
+    set results {}
+    foreach string $list {
+        lappend results [pkcs_padding_append $string]
     }
-    set cleanup {
-        # Cleanup the qc::db connection
-        qc::db_disconnect
-        
-        # Cleanup 
-        set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
-        pg_execute $conn_superuser {DROP DATABASE IF EXISTS test_database}
-        pg_execute $conn_superuser {
-            DROP ROLE IF EXISTS test_user;
-        }
-        pg_disconnect $conn_superuser
+    return $results
+} -result [list \
+               [string repeat [format %c 256] 0][string repeat [format %c 8] 8] \
+               [string repeat [format %c 256] 1][string repeat [format %c 7] 7] \
+               [string repeat [format %c 256] 2][string repeat [format %c 6] 6] \
+               [string repeat [format %c 256] 3][string repeat [format %c 5] 5] \
+               [string repeat [format %c 256] 4][string repeat [format %c 4] 4] \
+               [string repeat [format %c 256] 5][string repeat [format %c 3] 3] \
+               [string repeat [format %c 256] 6][string repeat [format %c 2] 2] \
+               [string repeat [format %c 256] 7][string repeat [format %c 1] 1] \
+               [string repeat [format %c 256] 8][string repeat [format %c 8] 8] \
+              ]
 
-        # Cleanup vars
-        unset key
+# pkcs_padding_strip
+test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set list [list \
+                  [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
+                  [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
+                  [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
+                  [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
+                  [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
+                  [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
+                  [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
+                  [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
+                  [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
+                 ]
+    set results {}
+    foreach string $list {
+        lappend results [pkcs_padding_strip $string]
     }
+    return $results
+} -result [list \
+               [string repeat [format %c 0] 0] \
+               [string repeat [format %c 0] 1] \
+               [string repeat [format %c 0] 2] \
+               [string repeat [format %c 0] 3] \
+               [string repeat [format %c 0] 4] \
+               [string repeat [format %c 0] 5] \
+               [string repeat [format %c 0] 6] \
+               [string repeat [format %c 0] 7] \
+               [string repeat [format %c 0] 8] \
+              ]
 
-    
-    # pkcs_padding_append
-    test pkcs_padding_append-1.0 {pkcs_padding_append - 1 byte unicode} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set list [list \
-                      [string repeat [format %c 0] 0] \
-                      [string repeat [format %c 0] 1] \
-                      [string repeat [format %c 0] 2] \
-                      [string repeat [format %c 0] 3] \
-                      [string repeat [format %c 0] 4] \
-                      [string repeat [format %c 0] 5] \
-                      [string repeat [format %c 0] 6] \
-                      [string repeat [format %c 0] 7] \
-                      [string repeat [format %c 0] 8] \
-                     ]
-        set results {}
-        foreach string $list {
-            lappend results [pkcs_padding_append $string]   
-        }
-        return $results
-    } -result [list \
-                   [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
-                   [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
-                   [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
-                   [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
-                   [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
-                   [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
-                   [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
-                   [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
-                   [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
-                  ]
-    
-    test pkcs_padding_append-1.1 {pkcs_padding_append - 2 byte unicode} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set list [list \
-                      [string repeat [format %c 256] 0] \
-                      [string repeat [format %c 256] 1] \
-                      [string repeat [format %c 256] 2] \
-                      [string repeat [format %c 256] 3] \
-                      [string repeat [format %c 256] 4] \
-                      [string repeat [format %c 256] 5] \
-                      [string repeat [format %c 256] 6] \
-                      [string repeat [format %c 256] 7] \
-                      [string repeat [format %c 256] 8] \
-                     ]
-        set results {}
-        foreach string $list {
-            lappend results [pkcs_padding_append $string]   
-        } 
-        return $results
-    } -result [list \
-                   [string repeat [format %c 256] 0][string repeat [format %c 8] 8] \
-                   [string repeat [format %c 256] 1][string repeat [format %c 7] 7] \
-                   [string repeat [format %c 256] 2][string repeat [format %c 6] 6] \
-                   [string repeat [format %c 256] 3][string repeat [format %c 5] 5] \
-                   [string repeat [format %c 256] 4][string repeat [format %c 4] 4] \
-                   [string repeat [format %c 256] 5][string repeat [format %c 3] 3] \
-                   [string repeat [format %c 256] 6][string repeat [format %c 2] 2] \
-                   [string repeat [format %c 256] 7][string repeat [format %c 1] 1] \
-                   [string repeat [format %c 256] 8][string repeat [format %c 8] 8] \
-                  ]
+# encrypt_bf_db
+test encrypt_bf_db-1.0 {encrypt_bf_db - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
+    encrypt_bf_db $key ""
+} -result {}
 
-    # pkcs_padding_strip            
-    test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set list [list \
-                      [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
-                      [string repeat [format %c 0] 1][string repeat [format %c 7] 7] \
-                      [string repeat [format %c 0] 2][string repeat [format %c 6] 6] \
-                      [string repeat [format %c 0] 3][string repeat [format %c 5] 5] \
-                      [string repeat [format %c 0] 4][string repeat [format %c 4] 4] \
-                      [string repeat [format %c 0] 5][string repeat [format %c 3] 3] \
-                      [string repeat [format %c 0] 6][string repeat [format %c 2] 2] \
-                      [string repeat [format %c 0] 7][string repeat [format %c 1] 1] \
-                      [string repeat [format %c 0] 8][string repeat [format %c 8] 8] \
-                     ]
-        set results {}
-        foreach string $list {
-            lappend results [pkcs_padding_strip $string]   
-        }
-        return $results
-    } -result [list \
-                   [string repeat [format %c 0] 0] \
-                   [string repeat [format %c 0] 1] \
-                   [string repeat [format %c 0] 2] \
-                   [string repeat [format %c 0] 3] \
-                   [string repeat [format %c 0] 4] \
-                   [string repeat [format %c 0] 5] \
-                   [string repeat [format %c 0] 6] \
-                   [string repeat [format %c 0] 7] \
-                   [string repeat [format %c 0] 8] \
-                  ]
-
-    # encrypt_bf_db
-    test encrypt_bf_db-1.0 {encrypt_bf_db - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
-        encrypt_bf_db $key ""
-    } -result {}
-
-    test encrypt_bf_db-1.1 {encrypt_bf_db - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set i 0
-        set string ""
-        while { $i <= 300 } {
-            append string [format %c $i]   
-            if { $i % 10 == 0 } {
-                set r1 [encrypt_bf_db $key $string]
-                set r2 [decrypt_bf_db $key $r1]
-                if { $r2 ne $string } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+test encrypt_bf_db-1.1 {encrypt_bf_db - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        append string [format %c $i]
+        if { $i % 10 == 0 } {
+            set r1 [encrypt_bf_db $key $string]
+            set r2 [decrypt_bf_db $key $r1]
+            if { $r2 ne $string } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
             }
-            incr i
         }
-        return ""
-    } -result {}
-    
+        incr i
+    }
+    return ""
+} -result {}
 
-    # encrypt_bf_tcl
-    test encrypt_bf_tcl-1.0 {encrypt_bf_tcl - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
-        encrypt_bf_tcl $key ""
-    } -result {}
+# encrypt_bf_tcl
+test encrypt_bf_tcl-1.0 {encrypt_bf_tcl - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
+    encrypt_bf_tcl $key ""
+} -result {}
 
-    test encrypt_bf_tcl-1.1 {encrypt_bf_tcl - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set i 0
-        set string ""
-        while { $i <= 300 } {
-            append string [format %c $i]  
-            if { $i % 10 == 0 } { 
-                set r1 [encrypt_bf_tcl $key $string]
-                set r2 [decrypt_bf_tcl $key $r1]
-                if { $r2 ne $string } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+test encrypt_bf_tcl-1.1 {encrypt_bf_tcl - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        append string [format %c $i]
+        if { $i % 10 == 0 } {
+            set r1 [encrypt_bf_tcl $key $string]
+            set r2 [decrypt_bf_tcl $key $r1]
+            if { $r2 ne $string } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
             }
-            incr i
         }
-        return ""
-    } -result {}
+        incr i
+    }
+    return ""
+} -result {}
 
-    test encrypt_bf_tcl-1.2 {encrypt_bf-tcl - check compatibility with encrypt_bf_db} -setup $setup -cleanup $cleanup -constraints {} -body {
-        set i 0
-        set string ""
-        while { $i <= 300 } {
-            if { $i % 10 == 0 } {
-                append string [format %c $i]   
-                set r1 [encrypt_bf_tcl $key $string]
-                set r2 [encrypt_bf_db $key $string]
-                if { [trim $r1] ne [trim $r2] } {
-                    # Return after first error
-                    return "Unable to successfully encrypt and decrypt \"$string\""
-                }                
+test encrypt_bf_tcl-1.2 {encrypt_bf-tcl - check compatibility with encrypt_bf_db} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        if { $i % 10 == 0 } {
+            append string [format %c $i]
+            set r1 [encrypt_bf_tcl $key $string]
+            set r2 [encrypt_bf_db $key $string]
+            if { [trim $r1] ne [trim $r2] } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
             }
-            incr i
         }
-        return ""
-    } -result {}
+        incr i
+    }
+    return ""
+} -result {}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests
