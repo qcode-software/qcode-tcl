@@ -127,3 +127,12 @@ proc qc::ldict_mappings_equal {ldict1 ldict2} {
     }
     return true
 }
+
+proc qc::ldict_subsets {ldict args} {
+    #| Return subsets of the given dicts
+    set result {}
+    foreach dict $ldict {
+        lappend result [qc::dict_subset $dict {*}$args]
+    }
+    return $result
+}

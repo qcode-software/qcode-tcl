@@ -217,6 +217,13 @@ namespace eval ::qcode::test {
         return [ldict_mappings_equal {} {}]
     } -result true
 
+    test ldict_subsets-1.0 {ldict_subsets} -body {
+        return [ldict_subsets {
+            {a 1 b 2 c 3}
+            {b 4 d 4 a 1}
+        } a b]
+    } -result {{a 1 b 2} {a 1 b 4}}
+
     cleanupTests
 }
 namespace delete ::qcode::test

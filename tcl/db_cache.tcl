@@ -201,12 +201,14 @@ proc qc::db_cache_clear { {qry ""} } {
     set hash [qc::md5 [db_qry_parse $qry 1]]
 
     # ns_cache cache
-    if { [in [ns_cache_names] db] } {
-	foreach key [ns_cache names db] {
-	    if { $qry eq "" || $key eq $hash } {
-		ns_cache flush db $key
-	    }
-	}
+    if { [info procs ::ns_cache] ne "" } {
+        if { [in [ns_cache_names] db] } {
+            foreach key [ns_cache names db] {
+                if { $qry eq "" || $key eq $hash } {
+                    ns_cache flush db $key
+                }
+            }
+        }
     }
 
     # Thread cache
