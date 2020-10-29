@@ -45,22 +45,19 @@ proc qc::encrypt_bf_db {key plaintext} {
     set plaintext_base64 [base64::encode [encoding convertto utf-8 $plaintext]]
 
     # Try clause to prevent disclosure of encryption key by error Handler
-    ::try {
-        db_1row {
-            select 
-            encode(
-                   encrypt_iv(
-                              decode(:plaintext_base64,'base64'),
-                              decode(:key_base64,'base64'),
-                              repeat(E'\\000',8)::bytea,
-                              'bf-cbc/pad:pkcs'
-                              )
-                   ,'base64'
-                   ) as ciphertext
-        }
-    } on error {} {
-        error "Unable to encrypt string"
+    db_1row {
+        select 
+        encode(
+               encrypt_iv(
+                          decode(:plaintext_base64,'base64'),
+                          decode(:key_base64,'base64'),
+                          repeat(E'\\000',8)::bytea,
+                          'bf-cbc/pad:pkcs'
+                          )
+               ,'base64'
+               ) as ciphertext
     }
+
     return $ciphertext
 }
 
