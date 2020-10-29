@@ -55,10 +55,11 @@ set setup_outside_naviserver {
         CREATE USER test_user WITH PASSWORD 'test_password';
         GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
     }
-    pg_execute $conn_superuser {CREATE EXTENSION pgcrypto}
     pg_disconnect $conn_superuser
 
     set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn {create extension pgcrypto}
+
     set key secretkey
 }
 
@@ -72,11 +73,12 @@ set cleanup_inside_naviserver {
 
 set cleanup_outside_naviserver {
     # Cleanup the qc::db connection
+    set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn {drop extension pgcrypto}
     qc::db_disconnect
     
     # Cleanup 
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
-    pg_execute $conn_superuser {drop extension pgcrypto} 
     pg_execute $conn_superuser {DROP DATABASE IF EXISTS test_database}
     pg_execute $conn_superuser {
         DROP ROLE IF EXISTS test_user;

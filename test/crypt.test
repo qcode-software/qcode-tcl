@@ -18,7 +18,7 @@ test pkcs_padding_append-1.0 {pkcs_padding_append - 1 byte unicode} -setup $setu
                  ]
     set results {}
     foreach string $list {
-        lappend results [pkcs_padding_append $string]   
+        lappend results [pkcs_padding_append $string]
     }
     return $results
 } -result [list \
@@ -47,8 +47,8 @@ test pkcs_padding_append-1.1 {pkcs_padding_append - 2 byte unicode} -setup $setu
                  ]
     set results {}
     foreach string $list {
-        lappend results [pkcs_padding_append $string]   
-    } 
+        lappend results [pkcs_padding_append $string]
+    }
     return $results
 } -result [list \
                [string repeat [format %c 256] 0][string repeat [format %c 8] 8] \
@@ -62,7 +62,7 @@ test pkcs_padding_append-1.1 {pkcs_padding_append - 2 byte unicode} -setup $setu
                [string repeat [format %c 256] 8][string repeat [format %c 8] 8] \
               ]
 
-# pkcs_padding_strip            
+# pkcs_padding_strip
 test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanup -constraints {} -body {
     set list [list \
                   [string repeat [format %c 0] 0][string repeat [format %c 8] 8] \
@@ -77,7 +77,7 @@ test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanu
                  ]
     set results {}
     foreach string $list {
-        lappend results [pkcs_padding_strip $string]   
+        lappend results [pkcs_padding_strip $string]
     }
     return $results
 } -result [list \
@@ -94,67 +94,66 @@ test pkcs_padding_strip-1.0 {pkcs_padding_append} -setup $setup -cleanup $cleanu
 
 # encrypt_bf_db
 test encrypt_bf_db-1.0 {encrypt_bf_db - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
-    encrypt_bf_db $key "foo"
+    encrypt_bf_db $key ""
 } -result {}
 
-# test encrypt_bf_db-1.1 {encrypt_bf_db - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
-#     set i 0
-#     set string ""
-#     while { $i <= 300 } {
-#         append string [format %c $i]   
-#         if { $i % 10 == 0 } {
-#             set r1 [encrypt_bf_db $key $string]
-#             set r2 [decrypt_bf_db $key $r1]
-#             if { $r2 ne $string } {
-#                 # Return after first error
-#                 return "Unable to successfully encrypt and decrypt \"$string\""
-#             }                
-#         }
-#         incr i
-#     }
-#     return ""
-# } -result {}
+test encrypt_bf_db-1.1 {encrypt_bf_db - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        append string [format %c $i]
+        if { $i % 10 == 0 } {
+            set r1 [encrypt_bf_db $key $string]
+            set r2 [decrypt_bf_db $key $r1]
+            if { $r2 ne $string } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
+            }
+        }
+        incr i
+    }
+    return ""
+} -result {}
 
+# encrypt_bf_tcl
+test encrypt_bf_tcl-1.0 {encrypt_bf_tcl - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
+    encrypt_bf_tcl $key ""
+} -result {}
 
-# # encrypt_bf_tcl
-# test encrypt_bf_tcl-1.0 {encrypt_bf_tcl - encrypt empty string} -setup $setup -cleanup $cleanup -constraints {} -body {
-#     encrypt_bf_tcl $key ""
-# } -result {}
+test encrypt_bf_tcl-1.1 {encrypt_bf_tcl - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        append string [format %c $i]
+        if { $i % 10 == 0 } {
+            set r1 [encrypt_bf_tcl $key $string]
+            set r2 [decrypt_bf_tcl $key $r1]
+            if { $r2 ne $string } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
+            }
+        }
+        incr i
+    }
+    return ""
+} -result {}
 
-# test encrypt_bf_tcl-1.1 {encrypt_bf_tcl - plaintext -> ciphertext -> plaintext} -setup $setup -cleanup $cleanup -constraints {} -body {
-#     set i 0
-#     set string ""
-#     while { $i <= 300 } {
-#         append string [format %c $i]  
-#         if { $i % 10 == 0 } { 
-#             set r1 [encrypt_bf_tcl $key $string]
-#             set r2 [decrypt_bf_tcl $key $r1]
-#             if { $r2 ne $string } {
-#                 # Return after first error
-#                 return "Unable to successfully encrypt and decrypt \"$string\""
-#             }                
-#         }
-#         incr i
-#     }
-#     return ""
-# } -result {}
-
-# test encrypt_bf_tcl-1.2 {encrypt_bf-tcl - check compatibility with encrypt_bf_db} -setup $setup -cleanup $cleanup -constraints {} -body {
-#     set i 0
-#     set string ""
-#     while { $i <= 300 } {
-#         if { $i % 10 == 0 } {
-#             append string [format %c $i]   
-#             set r1 [encrypt_bf_tcl $key $string]
-#             set r2 [encrypt_bf_db $key $string]
-#             if { [trim $r1] ne [trim $r2] } {
-#                 # Return after first error
-#                 return "Unable to successfully encrypt and decrypt \"$string\""
-#             }                
-#         }
-#         incr i
-#     }
-#     return ""
-# } -result {}
+test encrypt_bf_tcl-1.2 {encrypt_bf-tcl - check compatibility with encrypt_bf_db} -setup $setup -cleanup $cleanup -constraints {} -body {
+    set i 0
+    set string ""
+    while { $i <= 300 } {
+        if { $i % 10 == 0 } {
+            append string [format %c $i]
+            set r1 [encrypt_bf_tcl $key $string]
+            set r2 [encrypt_bf_db $key $string]
+            if { [trim $r1] ne [trim $r2] } {
+                # Return after first error
+                return "Unable to successfully encrypt and decrypt \"$string\""
+            }
+        }
+        incr i
+    }
+    return ""
+} -result {}
 
 cleanupTests
