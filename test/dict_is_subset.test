@@ -1,0 +1,39 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+package require qcode
+namespace import qc::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+
+set setup {
+    set dict1 [dict create a 1 b 2 c 3]
+    set dict2 [dict create a 1 b 2]
+    set dict3 [dict create x 9 y 8 z 7]
+}
+set cleanup {
+    unset dict1
+    unset dict2
+    unset dict3
+}
+
+test dict_is_subset-1.0 { dict_is_subset success} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::dict_is_subset $dict2 $dict1]
+    } \
+    -result true
+
+test dict_is_subset-1.1 { dict_is_subset failure} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::dict_is_subset $dict1 $dict2]
+    } \
+    -result false
+
+cleanupTests

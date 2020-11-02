@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default dicts_equal
+    namespace export dict_exists dict_subset dict_exclude dict_sort dict2xml dict_from dict2vars dict_default dicts_equal dict_intersect
 }
 
 proc qc::dict_exists { args } {
@@ -150,4 +150,23 @@ proc qc::dicts_equal {dict1 dict2} {
         }
     }
     return true
+}
+
+proc qc::dict_intersect {dict1 dict2} {
+    #| Returns a dict with key value pairs that
+    # are present in both dict1 and dict2
+    set result [dict create]
+
+    foreach {key value} $dict1 {
+        if { [dict exists $dict2 $key] && [dict get $dict2 $key] eq $value } {
+            dict set result $key $value
+        }
+    }
+
+    return $result    
+}
+
+proc qc::dict_is_subset {dict1 dict2} {
+    #| Check if dict1 is a subset of dict2
+    return [dicts_equal [dict_intersect $dict1 $dict2] $dict1]
 }
