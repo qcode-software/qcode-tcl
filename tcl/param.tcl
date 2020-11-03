@@ -10,7 +10,7 @@ proc qc::param_get { args } {
     if { [llength $args] > 0 } {
         return [dict get [qc::param_get $param_name] {*}$args]
     } else {
-        if { [qc::db_connected] } {
+        if { [qc::db_connected] || [info commands ns_db] eq "ns_db" } {
             # DB param
             set qry {select param_value from param where param_name=:param_name}
             db_cache_0or1row -ttl $ttl $qry {
