@@ -1,56 +1,51 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test ll2csv-1.0 {ll2csv default delimiter } -setup {
+    set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}] 
+} -body {
+    ll2csv $llist
+} -cleanup {
+    unset llist
+} -match regexp -result {widget_a,9\.99,19\r\nwidget_b,8\.99,19\r\nwidget_c,7\.99,1}
 
-    test ll2csv-1.0 {ll2csv default delimiter } -setup {
-        set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}] 
-    } -body {
-        ll2csv $llist
-    } -cleanup {
-        unset llist
-    } -match regexp -result {widget_a,9\.99,19\r\nwidget_b,8\.99,19\r\nwidget_c,7\.99,1}
+test ll2csv-1.1 {ll2csv custom delimiter } -setup {
+    set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}] 
+} -body {
+    ll2csv $llist |
+} -cleanup {
+    unset llist
+} -match regexp -result {widget_a\|9\.99\|19\r\nwidget_b\|8\.99\|19\r\nwidget_c\|7\.99\|1}
 
-    test ll2csv-1.1 {ll2csv custom delimiter } -setup {
-        set llist [list {widget_a 9.99 19} {widget_b 8.99 19} {widget_c 7.99 1}] 
-    } -body {
-        ll2csv $llist |
-    } -cleanup {
-        unset llist
-    } -match regexp -result {widget_a\|9\.99\|19\r\nwidget_b\|8\.99\|19\r\nwidget_c\|7\.99\|1}
+test ll2csv-1.2 {ll2csv single item lists } -setup {
+    set llist [list {widget_a} {widget_b} {widget_c}] 
+} -body {
+    ll2csv $llist 
+} -cleanup {
+    unset llist
+} -match regexp -result {widget_a\r\nwidget_b\r\nwidget_c}
 
-    test ll2csv-1.2 {ll2csv single item lists } -setup {
-        set llist [list {widget_a} {widget_b} {widget_c}] 
-    } -body {
-        ll2csv $llist 
-    } -cleanup {
-        unset llist
-    } -match regexp -result {widget_a\r\nwidget_b\r\nwidget_c}
+test ll2csv-1.3 {ll2csv empty } -setup {
+    set llist [list [list]] 
+} -body {
+    ll2csv $llist 
+} -cleanup {
+    unset llist
+} -result {}
 
-    test ll2csv-1.3 {ll2csv empty } -setup {
-        set llist [list [list]] 
-    } -body {
-        ll2csv $llist 
-    } -cleanup {
-        unset llist
-    } -result {}
+test ll2pg_copy-1.0 {ll2pg_copy} -setup {} -body {
+    qc::ll2pg_copy [list [list Daniel Clark daniel@qcode.co.uk] [list Bernhard "van Woerden" bernhard@qcode.co.uk] [list David Osborne david@qcode.co.uk]]
+} -cleanup {} -result "Daniel\tClark\tdaniel@qcode.co.uk\nBernhard\tvan Woerden\tbernhard@qcode.co.uk\nDavid\tOsborne\tdavid@qcode.co.uk\n"
 
-    test ll2pg_copy-1.0 {ll2pg_copy} -setup {} -body {
-        qc::ll2pg_copy [list [list Daniel Clark daniel@qcode.co.uk] [list Bernhard "van Woerden" bernhard@qcode.co.uk] [list David Osborne david@qcode.co.uk]]
-    } -cleanup {} -result "Daniel\tClark\tdaniel@qcode.co.uk\nBernhard\tvan Woerden\tbernhard@qcode.co.uk\nDavid\tOsborne\tdavid@qcode.co.uk\n"
+test ll2pg_copy-1.1 {ll2pg_copy} -setup {} -body {
+    qc::ll2pg_copy [list [list Daniel Clark ""] [list Bernhard\r\n "van\tWoerden" bernhard@qcode.co.uk] [list David\\ Osborne david@qcode.co.uk]]
+} -cleanup {} -result "Daniel\tClark\t\\N\nBernhard\\r\\n\tvan\\tWoerden\tbernhard@qcode.co.uk\nDavid\\\\\tOsborne\tdavid@qcode.co.uk\n"
 
-    test ll2pg_copy-1.1 {ll2pg_copy} -setup {} -body {
-        qc::ll2pg_copy [list [list Daniel Clark ""] [list Bernhard\r\n "van\tWoerden" bernhard@qcode.co.uk] [list David\\ Osborne david@qcode.co.uk]]
-    } -cleanup {} -result "Daniel\tClark\t\\N\nBernhard\\r\\n\tvan\\tWoerden\tbernhard@qcode.co.uk\nDavid\\\\\tOsborne\tdavid@qcode.co.uk\n"
-
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

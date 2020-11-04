@@ -1,470 +1,467 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
-
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test is-boolean-1.0 {is boolean true } -setup {
-    } -body {
-        is boolean true
-    } -result {1}
-
-    test is-boolean-1.1 {is boolean false } -setup {
-    } -body {
-        is boolean false
-    } -result {1}
-
-    test is-boolean-1.2 {is boolean yes lower } -setup {
-    } -body {
-        is boolean yes
-    } -result {1}
-
-    test is-boolean-1.3 {is boolean no lower } -setup {
-    } -body {
-        is boolean no
-    } -result {1}
-
-    test is-boolean-1.4 {is boolean non-boolean } -setup {
-    } -body {
-        is boolean theremin
-    } -result {0}
-
-    test is-boolean-1.5 {is boolean non-boolean 2 } -setup {
-    } -body {
-        is boolean 999
-    } -result {0}
-
-    test is-integer-1.0 {is integer 999 } -setup {
-    } -body {
-        is integer 999
-    } -result {1}
-
-    test is-integer-1.1 {is integer 0.1 } -setup {
-    } -body {
-        is integer 0.1
-    } -result {0}
-
-    test is-integer-1.2 {is integer 0 } -setup {
-    } -body {
-        is integer 0
-    } -result {1}
-
-    test is-integer-1.3 {is integer true } -setup {
-    } -body {
-        is integer true
-    } -result {0}
-
-    test is-integer-1.4 {is integer upper limit} {qc::is integer "2147483647"} 1
-    test is-integer-1.5 {is integer outside integer range} {qc::is integer "2147483648"} 0
-    test is-integer-1.6 {is integer outside integer range} {qc::is integer "2e100"} 0
-    test is-integer-1.7 {is integer lower limit} {qc::is integer "-2147483648"} 1
-    test is-integer-1.8 {is integer outside integer range} {qc::is integer "-2147483649"} 0
-
-    test is_pos-1.0 {is_pos -1 } -setup {
-    } -body {
-        is_pos -1
-    } -result {0}
-
-    test is_pos-1.1 {is_pos 0 } -setup {
-    } -body {
-        is_pos 0
-    } -result {1}
-
-    test is_pos-1.2 {is_pos 999 } -setup {
-    } -body {
-        is_pos 999
-    } -result {1}
-
-    test is_pos-1.3 {is_pos string } -setup {
-    } -body {
-        is_pos lizaveta
-    } -result {0}
-
-    test is_pnz-1.0 {is_pnz -1 } -setup {
-    } -body {
-        is_pnz -1
-    } -result {0}
-
-    test is_pnz-1.1 {is_pnz 0 } -setup {
-    } -body {
-        is_pnz 0 
-    } -result {0}
-
-    test is_pnz-1.2 {is_pnz 999 } -setup {
-    } -body {
-        is_pnz 999
-    } -result {1}
-
-    test is_non_zero_integer-1.0 {is_non_zero_integer 0} -setup {
-    } -body {
-        is_non_zero_integer 0
-    } -result {0}
-
-    test is_non_zero_integer-1.1 {is_non_zero_integer -24} -setup {
-    } -body {
-        is_non_zero_integer -24
-    } -result {1}
-
-    test is_non_zero-1.0 {is_non_zero 0} -setup {
-    } -body {
-        is_non_zero 0
-    } -result {0}
-
-    test is_non_zero-1.1 {is_non_zero 999} -setup {
-    } -body {
-        is_non_zero 999
-    } -result {1}
-
-    test is_pnz_int-1.0 {is_pnz_int 0} -setup {
-    } -body {
-        is_pnz_int 0
-    } -result {0}
-
-    test is_pnz_int-1.1 {is_pnz_int 10} -setup {
-    } -body {
-        is_pnz_int 10
-    } -result {1}
-
-    test is_pnz_int-1.2 {is_pnz_int 10.5} -setup {
-    } -body {
-        is_pnz_int 10.5
-    } -result {0}
-
-    test is_pnz_int-1.3 {is_pnz_int -10} -setup {
-    } -body {
-        is_pnz_int -10
-    } -result {0}
-
-    test is-decimal-1.0 {is decimal 1A} -setup {
-    } -body {
-        is decimal 1A
-    } -result {0}
-
-    test is-decimal-1.1 {is decimal 9.99999} -setup {
-    } -body {
-        is decimal 9.99999
-    } -result {1}
-
-    test is-decimal-1.2 {is decimal -precision 5 123} -setup {
-    } -body {
-        is decimal -precision 5 123
-    } -result {1}
-
-    test is-decimal-1.3 {is decimal -precision 3 123.45} -setup {
-    } -body {
-        is decimal -precision 3 123.45
-    } -result {0}
-
-    test is-decimal-1.4 {is decimal -scale 3 123.45} -setup {
-    } -body {
-        is decimal -scale 3 123.45
-    } -result "Precision must be provided with scale." -returnCodes error
-
-    test is-decimal-1.5 {is decimal -precision 4 -scale 1 123.4} -setup {
-    } -body {
-        is decimal -precision 4 -scale 1 123.4
-    } -result {1}
-
-    test is-decimal-1.6 {is decimal -precision 4 -scale 3 123.4} -setup {
-    } -body {
-        is decimal -precision 4 -scale 3 123.4
-    } -result {0}
-
-    test is-decimal-1.7 {is decimal 1.5e3} -setup {
-    } -body {
-        is decimal 1.5e3
-    } -result {1}
-    
-    test is-decimal-1.8 {is decimal -precision 4 1.5e3} -setup {
-    } -body {
-        is decimal -precision 4 1.5e3
-    } -result {1}
-
-    test is-decimal-1.9 {is decimal -precision 3 1.5e3} -setup {
-    } -body {
-        is decimal -precision 3 1.5e3
-    } -result {0}
-
-    test is-decimal-1.10 {is decimal 1,100} -setup {
-    } -body {
-        is decimal 1,100
-    } -result {0}
-    
-    test is_positive_decimal-1.0 {is_positive_decimal -99.9999} -setup {
-    } -body {
-        is_positive_decimal -99.9999
-    } -result {0}
-
-    test is_positive_decimal-1.1 {is_positive_decimal 0.000001} -setup {
-    } -body {
-        is_positive_decimal 0.000001
-    } -result {1}
-
-    test is_non_zero_decimal-1.0 {is_non_zero_decimal -99.9999} -setup {
-    } -body {
-        is_non_zero_decimal -99.9999
-    } -result {1}
-
-    test is_non_zero_decimal-1.1 {is_non_zero_decimal 0} -setup {
-    } -body {
-        is_non_zero_decimal 0
-    } -result {0}
-
-    test is_pnz_decimal-1.0 {is_pnz_decimal 0} -setup {
-    } -body {
-        is_pnz_decimal 0
-    } -result {0}
-
-    test is_pnz_decimal-1.1 {is_pnz_decimal -9.99} -setup {
-    } -body {
-        is_pnz_decimal -9.99
-    } -result {0}
-
-    test is_pnz_decimal-1.2 {is_pnz_decimal 1} -setup {
-    } -body {
-        is_pnz_decimal 1
-    } -result {1}
-
-    test is_pnz_decimal-1.3 {is_pnz_decimal 0.01} -setup {
-    } -body {
-        is_pnz_decimal 0.01
-    } -result {1}
-
-    test is-date-1.0 {is date 12/12/12} -setup {
-    } -body {
-        is date 12/12/12
-    } -result {false}
-
-    test is-date-1.1 {is date 12:38:00} -setup {
-    } -body {
-        is date 12:38:00
-    } -result {false}
-
-    test is-date-1.2 {is date 2012-08-23} -setup {
-    } -body {
-        is date 2012-08-23
-    } -result {true}
-
-    test is-date-1.3 {is date 2012-11-31} -setup {
-    } -body {
-        is date 2012-11-31
-    } -result {false}
-
-    test is-timestamp-1.0 {is timestamp 12/12/12} -setup {
-    } -body {
-        is timestamp 12/12/12
-    } -result {0}
-
-    test is-timestamp-1.1 {is timestamp 12:38:00} -setup {
-    } -body {
-        is timestamp 12:38:00
-    } -result {0}
-
-    test is-timestamp-1.2 {is timestamp 2012-01-01 12:38:00} -setup {
-    } -body {
-        is timestamp "2012-01-01 12:38:00"
-    } -result {1}
-
-    test is-timestamp-1.3 {is timestamp 2012-01-01 } -setup {
-    } -body {
-        is timestamp "2012-01-01"
-    } -result {0}
-
-    test is-timestamp_http-1.0 {is timestamp_http 12/12/12} -setup {
-    } -body {
-        is timestamp_http 12/12/12
-    } -result {0}
-
-    test is-timestamp_http-1.1 {is timestamp_http RFC 1123} -setup {
-    } -body {
-        is timestamp_http "Sun, 06 Nov 1994 08:49:37 GMT"
-    } -result {1}
-
-    test is-timestamp_http-1.2 {is timestamp_http RFC 1123 neg} -setup {
-    } -body {
-        is timestamp_http "Sunday, 06 Nov 1994 08:49:37 GMT"
-    } -result {0}
-
-    test is-timestamp_http-1.3 {is timestamp_http RFC 850 } -setup {
-    } -body {
-        is timestamp_http "Sunday, 06-Nov-94 08:49:37 GMT"
-    } -result {1}
-
-    test is-timestamp_http-1.4 {is timestamp_http RFC 850 neg} -setup {
-    } -body {
-        is timestamp_http "Sunday, 06-Nov-1994 08:49:37 GMT"
-    } -result {0}
-
-    test is-timestamp_http-1.5 {is timestamp_http ANSI C} -setup {
-    } -body {
-        is timestamp_http "Sun Nov  6 08:49:37 1994"
-    } -result {1}
-
-    test is-timestamp_http-1.6 {is timestamp_http ANSI C 2 digit} -setup {
-    } -body {
-        is timestamp_http "Sun Nov 16 08:49:37 1994"
-    } -result {1}
-
-    test is-timestamp_http-1.7 {is timestamp_http ANSI C neg} -setup {
-    } -body {
-        is timestamp_http "Sun Nov 6 08:49:37 1994"
-    } -result {0}
-
-    test is-timestamp_http-1.8 {is timestamp_http ANSI C neg2} -setup {
-    } -body {
-        is timestamp_http "2013-05-24 10:17:01"
-    } -result {0}
-
-    test is-email-1.0 {is email partial email} -setup {
-    } -body {
-        is email @gmail.com
-    } -result {0}
-
-    test is-email-1.1 {is email invalid format} -setup {
-    } -body {
-        is email dave.@gmail.com
-    } -result {0}
-
-    test is-email-1.2 {is email incomplete domain } -setup {
-    } -body {
-        is email dave@gmail
-    } -result {0}
-
-    test is-email-1.3 {is email valid} -setup {
-    } -body {
-        is email dave.smith_2-2@gmail.com
-    } -result {1}
-
-    test is-email-1.4 {is email valid} -setup {
-    } -body {
-        is email dave.smith_2-2+1@gmail.com
-    } -result {1}
-
-    test is_email-1.5 {is email valid} -setup {
-    } -body {
-        is email dave.o'brien@gmail.com
-    } -result {1}
-
-    test is-postcode-1.0 {is postcode partial} -setup {
-    } -body {
-        is postcode EH3
-    } -result {0}
-
-    test is-postcode-1.1 {is postcode BFPO} -setup {
-    } -body {
-        is postcode "BFPO 61"
-    } -result 1
-
-    test is-postcode-1.2 {is postcode standard} -setup {
-    } -body {
-        is postcode "EH2 9EE"
-    } -result 1
-
-    test is-postcode-1.3 {is postcode high density district} -setup {
-    } -body {
-        is postcode "W1P 2BB"
-    } -result 1
-
-    test is-postcode-1.4 {is postcode no space} -setup {
-    } -body {
-        is postcode "W1P2BB"
-    } -result 0
-
-    test is-creditcard-1.0 {is creditcard valid} -setup {
-    } -body {
-        is creditcard 4111111111111111
-    } -result 1
-
-    test is-creditcard-1.1 {is creditcard invalid} -setup {
-    } -body {
-        is creditcard 4111111111111112
-    } -result 0
-
-    test is-creditcard-1.2 {is creditcard too short} -setup {
-    } -body {
-        is creditcard 4111111111111
-    } -result 0
-
-    test is-creditcard-1.3 {is creditcard masked} -setup {
-    } -body {
-        is creditcard 411111******1111
-    } -result 0
-
-    test is-creditcard_masked-1.0 {is creditcard_masked unmasked number} -setup {
-    } -body {
-        is creditcard_masked 4111111111111111
-    } -result 0
-
-    test is-creditcard_masked-1.1 {is creditcard_masked too few masked digits} -setup {
-    } -body {
-        is creditcard_masked 41111111****1111
-    } -result 0
-
-    test is-creditcard_masked-1.2 {is creditcard_masked min masked} -setup {
-    } -body {
-        is creditcard_masked 411111******1111
-    } -result 1
-
-    test is-creditcard_masked-1.3 {is creditcard_masked more masked} -setup {
-    } -body {
-        is creditcard_masked 411111**********
-    } -result 1
-
-    test is-creditcard_masked-1.4 {is creditcard_masked all masked} -setup {
-    } -body {
-        is creditcard_masked ****************
-    } -result 1
-
-    test is-creditcard_masked-1.4 {is creditcard_masked dashes valid} -setup {
-    } -body {
-        is creditcard_masked 4111-11**-****-1111
-    } -result 1
-
-    test is-varchar-1.0 {is varchar too long} -setup {
-    } -body {
-        is varchar 12 "Too long a string"
-    } -result 0
-
-    test is-varchar-1.1 {is varchar OK} -setup {
-    } -body {
-        is varchar 12 "Short enough"
-    } -result 1
-
-    test is-varchar-1.2 {is varchar empty} -setup {
-    } -body {
-        is varchar 12 {}
-    } -result 1
-
-    test is-base64-1.0 {is base64 invalid} -setup {
-    } -body {
-        is base64 10.0.0.1
-    } -result 0
-
-    test is-base64-1.1 {is base64 valid} -setup {
-    } -body {
-        is base64 RG9sbHkgUGFydG9uCg==
-    } -result 1
-
-    test is-base64-1.2 {is base64 truncated} -setup {
-    } -body {
-        is base64 RG9sbHkgUGFydG9uCg
-    } -result 0
-
-    test is-base64-1.3 {is base64 empty} -setup {
-    } -body {
-        is base64 {}
-    } -result 0
-
-    test is-base64-1.4 {is base64 long} -setup {
-    } -body {
-        is base64 {JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/AFEAYwBvAGQAZQAgAFMAbwBmAHQAdwBhAHIA
+namespace import ::qc::*
+
+test is-boolean-1.0 {is boolean true } -setup {
+} -body {
+    qc::is boolean true
+} -result {1}
+
+test is-boolean-1.1 {is boolean false } -setup {
+} -body {
+    qc::is boolean false
+} -result {1}
+
+test is-boolean-1.2 {is boolean yes lower } -setup {
+} -body {
+    qc::is boolean yes
+} -result {1}
+
+test is-boolean-1.3 {is boolean no lower } -setup {
+} -body {
+    qc::is boolean no
+} -result {1}
+
+test is-boolean-1.4 {is boolean non-boolean } -setup {
+} -body {
+    qc::is boolean theremin
+} -result {0}
+
+test is-boolean-1.5 {is boolean non-boolean 2 } -setup {
+} -body {
+    qc::is boolean 999
+} -result {0}
+
+test is-integer-1.0 {is integer 999 } -setup {
+} -body {
+    qc::is integer 999
+} -result {1}
+
+test is-integer-1.1 {is integer 0.1 } -setup {
+} -body {
+    qc::is integer 0.1
+} -result {0}
+
+test is-integer-1.2 {is integer 0 } -setup {
+} -body {
+    qc::is integer 0
+} -result {1}
+
+test is-integer-1.3 {is integer true } -setup {
+} -body {
+    qc::is integer true
+} -result {0}
+
+test is-integer-1.4 {is integer upper limit} {qc::is integer "2147483647"} 1
+test is-integer-1.5 {is integer outside integer range} {qc::is integer "2147483648"} 0
+test is-integer-1.6 {is integer outside integer range} {qc::is integer "2e100"} 0
+test is-integer-1.7 {is integer lower limit} {qc::is integer "-2147483648"} 1
+test is-integer-1.8 {is integer outside integer range} {qc::is integer "-2147483649"} 0
+
+test is_pos-1.0 {is_pos -1 } -setup {
+} -body {
+    is_pos -1
+} -result {0}
+
+test is_pos-1.1 {is_pos 0 } -setup {
+} -body {
+    is_pos 0
+} -result {1}
+
+test is_pos-1.2 {is_pos 999 } -setup {
+} -body {
+    is_pos 999
+} -result {1}
+
+test is_pos-1.3 {is_pos string } -setup {
+} -body {
+    is_pos lizaveta
+} -result {0}
+
+test is_pnz-1.0 {is_pnz -1 } -setup {
+} -body {
+    is_pnz -1
+} -result {0}
+
+test is_pnz-1.1 {is_pnz 0 } -setup {
+} -body {
+    is_pnz 0 
+} -result {0}
+
+test is_pnz-1.2 {is_pnz 999 } -setup {
+} -body {
+    is_pnz 999
+} -result {1}
+
+test is_non_zero_integer-1.0 {is_non_zero_integer 0} -setup {
+} -body {
+    is_non_zero_integer 0
+} -result {0}
+
+test is_non_zero_integer-1.1 {is_non_zero_integer -24} -setup {
+} -body {
+    is_non_zero_integer -24
+} -result {1}
+
+test is_non_zero-1.0 {is_non_zero 0} -setup {
+} -body {
+    is_non_zero 0
+} -result {0}
+
+test is_non_zero-1.1 {is_non_zero 999} -setup {
+} -body {
+    is_non_zero 999
+} -result {1}
+
+test is_pnz_int-1.0 {is_pnz_int 0} -setup {
+} -body {
+    is_pnz_int 0
+} -result {0}
+
+test is_pnz_int-1.1 {is_pnz_int 10} -setup {
+} -body {
+    is_pnz_int 10
+} -result {1}
+
+test is_pnz_int-1.2 {is_pnz_int 10.5} -setup {
+} -body {
+    is_pnz_int 10.5
+} -result {0}
+
+test is_pnz_int-1.3 {is_pnz_int -10} -setup {
+} -body {
+    is_pnz_int -10
+} -result {0}
+
+test is-decimal-1.0 {is decimal 1A} -setup {
+} -body {
+    qc::is decimal 1A
+} -result {0}
+
+test is-decimal-1.1 {is decimal 9.99999} -setup {
+} -body {
+    qc::is decimal 9.99999
+} -result {1}
+
+test is-decimal-1.2 {is decimal -precision 5 123} -setup {
+} -body {
+    qc::is decimal -precision 5 123
+} -result {1}
+
+test is-decimal-1.3 {is decimal -precision 3 123.45} -setup {
+} -body {
+    qc::is decimal -precision 3 123.45
+} -result {0}
+
+test is-decimal-1.4 {is decimal -scale 3 123.45} -setup {
+} -body {
+    qc::is decimal -scale 3 123.45
+} -result "Precision must be provided with scale." -returnCodes error
+
+test is-decimal-1.5 {is decimal -precision 4 -scale 1 123.4} -setup {
+} -body {
+    qc::is decimal -precision 4 -scale 1 123.4
+} -result {1}
+
+test is-decimal-1.6 {is decimal -precision 4 -scale 3 123.4} -setup {
+} -body {
+    qc::is decimal -precision 4 -scale 3 123.4
+} -result {0}
+
+test is-decimal-1.7 {is decimal 1.5e3} -setup {
+} -body {
+    qc::is decimal 1.5e3
+} -result {1}
+
+test is-decimal-1.8 {is decimal -precision 4 1.5e3} -setup {
+} -body {
+    qc::is decimal -precision 4 1.5e3
+} -result {1}
+
+test is-decimal-1.9 {is decimal -precision 3 1.5e3} -setup {
+} -body {
+    qc::is decimal -precision 3 1.5e3
+} -result {0}
+
+test is-decimal-1.10 {is decimal 1,100} -setup {
+} -body {
+    qc::is decimal 1,100
+} -result {0}
+
+test is_positive_decimal-1.0 {is_positive_decimal -99.9999} -setup {
+} -body {
+    is_positive_decimal -99.9999
+} -result {0}
+
+test is_positive_decimal-1.1 {is_positive_decimal 0.000001} -setup {
+} -body {
+    is_positive_decimal 0.000001
+} -result {1}
+
+test is_non_zero_decimal-1.0 {is_non_zero_decimal -99.9999} -setup {
+} -body {
+    is_non_zero_decimal -99.9999
+} -result {1}
+
+test is_non_zero_decimal-1.1 {is_non_zero_decimal 0} -setup {
+} -body {
+    is_non_zero_decimal 0
+} -result {0}
+
+test is_pnz_decimal-1.0 {is_pnz_decimal 0} -setup {
+} -body {
+    is_pnz_decimal 0
+} -result {0}
+
+test is_pnz_decimal-1.1 {is_pnz_decimal -9.99} -setup {
+} -body {
+    is_pnz_decimal -9.99
+} -result {0}
+
+test is_pnz_decimal-1.2 {is_pnz_decimal 1} -setup {
+} -body {
+    is_pnz_decimal 1
+} -result {1}
+
+test is_pnz_decimal-1.3 {is_pnz_decimal 0.01} -setup {
+} -body {
+    is_pnz_decimal 0.01
+} -result {1}
+
+test is-date-1.0 {is date 12/12/12} -setup {
+} -body {
+    qc::is date 12/12/12
+} -result {false}
+
+test is-date-1.1 {is date 12:38:00} -setup {
+} -body {
+    qc::is date 12:38:00
+} -result {false}
+
+test is-date-1.2 {is date 2012-08-23} -setup {
+} -body {
+    qc::is date 2012-08-23
+} -result {true}
+
+test is-date-1.3 {is date 2012-11-31} -setup {
+} -body {
+    qc::is date 2012-11-31
+} -result {false}
+
+test is-timestamp-1.0 {is timestamp 12/12/12} -setup {
+} -body {
+    qc::is timestamp 12/12/12
+} -result {0}
+
+test is-timestamp-1.1 {is timestamp 12:38:00} -setup {
+} -body {
+    qc::is timestamp 12:38:00
+} -result {0}
+
+test is-timestamp-1.2 {is timestamp 2012-01-01 12:38:00} -setup {
+} -body {
+    qc::is timestamp "2012-01-01 12:38:00"
+} -result {1}
+
+test is-timestamp-1.3 {is timestamp 2012-01-01 } -setup {
+} -body {
+    qc::is timestamp "2012-01-01"
+} -result {0}
+
+test is-timestamp_http-1.0 {is timestamp_http 12/12/12} -setup {
+} -body {
+    qc::is timestamp_http 12/12/12
+} -result {0}
+
+test is-timestamp_http-1.1 {is timestamp_http RFC 1123} -setup {
+} -body {
+    qc::is timestamp_http "Sun, 06 Nov 1994 08:49:37 GMT"
+} -result {1}
+
+test is-timestamp_http-1.2 {is timestamp_http RFC 1123 neg} -setup {
+} -body {
+    qc::is timestamp_http "Sunday, 06 Nov 1994 08:49:37 GMT"
+} -result {0}
+
+test is-timestamp_http-1.3 {is timestamp_http RFC 850 } -setup {
+} -body {
+    qc::is timestamp_http "Sunday, 06-Nov-94 08:49:37 GMT"
+} -result {1}
+
+test is-timestamp_http-1.4 {is timestamp_http RFC 850 neg} -setup {
+} -body {
+    qc::is timestamp_http "Sunday, 06-Nov-1994 08:49:37 GMT"
+} -result {0}
+
+test is-timestamp_http-1.5 {is timestamp_http ANSI C} -setup {
+} -body {
+    qc::is timestamp_http "Sun Nov  6 08:49:37 1994"
+} -result {1}
+
+test is-timestamp_http-1.6 {is timestamp_http ANSI C 2 digit} -setup {
+} -body {
+    qc::is timestamp_http "Sun Nov 16 08:49:37 1994"
+} -result {1}
+
+test is-timestamp_http-1.7 {is timestamp_http ANSI C neg} -setup {
+} -body {
+    qc::is timestamp_http "Sun Nov 6 08:49:37 1994"
+} -result {0}
+
+test is-timestamp_http-1.8 {is timestamp_http ANSI C neg2} -setup {
+} -body {
+    qc::is timestamp_http "2013-05-24 10:17:01"
+} -result {0}
+
+test is-email-1.0 {is email partial email} -setup {
+} -body {
+    qc::is email @gmail.com
+} -result {0}
+
+test is-email-1.1 {is email invalid format} -setup {
+} -body {
+    qc::is email dave.@gmail.com
+} -result {0}
+
+test is-email-1.2 {is email incomplete domain } -setup {
+} -body {
+    qc::is email dave@gmail
+} -result {0}
+
+test is-email-1.3 {is email valid} -setup {
+} -body {
+    qc::is email dave.smith_2-2@gmail.com
+} -result {1}
+
+test is-email-1.4 {is email valid} -setup {
+} -body {
+    qc::is email dave.smith_2-2+1@gmail.com
+} -result {1}
+
+test is_email-1.5 {is email valid} -setup {
+} -body {
+    qc::is email dave.o'brien@gmail.com
+} -result {1}
+
+test is-postcode-1.0 {is postcode partial} -setup {
+} -body {
+    qc::is postcode EH3
+} -result {0}
+
+test is-postcode-1.1 {is postcode BFPO} -setup {
+} -body {
+    qc::is postcode "BFPO 61"
+} -result 1
+
+test is-postcode-1.2 {is postcode standard} -setup {
+} -body {
+    qc::is postcode "EH2 9EE"
+} -result 1
+
+test is-postcode-1.3 {is postcode high density district} -setup {
+} -body {
+    qc::is postcode "W1P 2BB"
+} -result 1
+
+test is-postcode-1.4 {is postcode no space} -setup {
+} -body {
+    qc::is postcode "W1P2BB"
+} -result 0
+
+test is-creditcard-1.0 {is creditcard valid} -setup {
+} -body {
+    qc::is creditcard 4111111111111111
+} -result 1
+
+test is-creditcard-1.1 {is creditcard invalid} -setup {
+} -body {
+    qc::is creditcard 4111111111111112
+} -result 0
+
+test is-creditcard-1.2 {is creditcard too short} -setup {
+} -body {
+    qc::is creditcard 4111111111111
+} -result 0
+
+test is-creditcard-1.3 {is creditcard masked} -setup {
+} -body {
+    qc::is creditcard 411111******1111
+} -result 0
+
+test is-creditcard_masked-1.0 {is creditcard_masked unmasked number} -setup {
+} -body {
+    qc::is creditcard_masked 4111111111111111
+} -result 0
+
+test is-creditcard_masked-1.1 {is creditcard_masked too few masked digits} -setup {
+} -body {
+    qc::is creditcard_masked 41111111****1111
+} -result 0
+
+test is-creditcard_masked-1.2 {is creditcard_masked min masked} -setup {
+} -body {
+    qc::is creditcard_masked 411111******1111
+} -result 1
+
+test is-creditcard_masked-1.3 {is creditcard_masked more masked} -setup {
+} -body {
+    qc::is creditcard_masked 411111**********
+} -result 1
+
+test is-creditcard_masked-1.4 {is creditcard_masked all masked} -setup {
+} -body {
+    qc::is creditcard_masked ****************
+} -result 1
+
+test is-creditcard_masked-1.4 {is creditcard_masked dashes valid} -setup {
+} -body {
+    qc::is creditcard_masked 4111-11**-****-1111
+} -result 1
+
+test is-varchar-1.0 {is varchar too long} -setup {
+} -body {
+    qc::is varchar 12 "Too long a string"
+} -result 0
+
+test is-varchar-1.1 {is varchar OK} -setup {
+} -body {
+    qc::is varchar 12 "Short enough"
+} -result 1
+
+test is-varchar-1.2 {is varchar empty} -setup {
+} -body {
+    qc::is varchar 12 {}
+} -result 1
+
+test is-base64-1.0 {is base64 invalid} -setup {
+} -body {
+    qc::is base64 10.0.0.1
+} -result 0
+
+test is-base64-1.1 {is base64 valid} -setup {
+} -body {
+    qc::is base64 RG9sbHkgUGFydG9uCg==
+} -result 1
+
+test is-base64-1.2 {is base64 truncated} -setup {
+} -body {
+    qc::is base64 RG9sbHkgUGFydG9uCg
+} -result 0
+
+test is-base64-1.3 {is base64 empty} -setup {
+} -body {
+    qc::is base64 {}
+} -result 0
+
+test is-base64-1.4 {is base64 long} -setup {
+} -body {
+    qc::is base64 {JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/AFEAYwBvAGQAZQAgAFMAbwBmAHQAdwBhAHIA
 ZSkKL1Byb2R1Y2VyICh3a2h0bWx0b3BkZikKL0NyZWF0aW9uRGF0ZSAoRDoyMDEyMDkwMzEzMzMw
 NCkKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0V4dEdTdGF0ZQovU0EgdHJ1ZQovU00gMC4w
 MgovY2EgMS4wCi9DQSAxLjAKL0FJUyBmYWxzZQovU01hc2sgL05vbmU+PgplbmRvYmoKNSAwIG9i
@@ -2610,441 +2607,439 @@ MDAwMCBuIAowMDAwMTE0MjgzIDAwMDAwIG4gCjAwMDAxMTQwMDUgMDAwMDAgbiAKMDAwMDExNDkw
 MiAwMDAwMCBuIAowMDAwMTE1MTc0IDAwMDAwIG4gCjAwMDAxMTc3NjAgMDAwMDAgbiAKMDAwMDEx
 ODA0MiAwMDAwMCBuIAowMDAwMTE3NzM4IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMTcxCi9J
 bmZvIDEgMCBSCi9Sb290IDEzNiAwIFIKPj4Kc3RhcnR4cmVmCjExODgxMQolJUVPRgo=}
-    } -result 1
-
-
-    test is-mobile_number-1.0 {is mobile_number valid} -setup {
-    } -body {
-        is mobile_number 07768777777
-    } -result 1
-
-    test is-mobile_number-1.1 {is mobile_number exta chars} -setup {
-    } -body {
-        is mobile_number "07768 - 777-777 "
-    } -result 1
-
-    test is-mobile_number-1.2 {is mobile_number invalid} -setup {
-    } -body {
-        is mobile_number 09768777777
-    } -result 0
-
-    test is-mobile_number-1.3 {is mobile_number too short} -setup {
-    } -body {
-        is mobile_number 0751111111
-    } -result 0
-
-    test is-mobile_number-1.4 {is mobile_number empty} -setup {
-    } -body {
-        is mobile_number {}
-    } -result 0
-
-    test contains_creditcard-1.0 {contains_creditcard cc no only} -setup {
-    } -body {
-        contains_creditcard 4111111111111111
-    } -result true
-
-    test contains_creditcard-1.1 {contains_creditcard cc no in string end} -setup {
-    } -body {
-        contains_creditcard "This string contains 4111111111111111"
-    } -result true
-
-    test contains_creditcard-1.2 {contains_creditcard cc no in string beginning} -setup {
-    } -body {
-        contains_creditcard "4111111111111111 is in this string."
-    } -result true
-
-    test contains_creditcard-1.3 {contains_creditcard cc no in string middle} -setup {
-    } -body {
-        contains_creditcard "The cc number 4111111111111111 is in the middle of this string."
-    } -result true
-
-    test contains_creditcard-1.4 {contains_creditcard invalid cc no} -setup {
-    } -body {
-        contains_creditcard "The cc number 4111111111111112 is in the middle of this string."
-    } -result false
-
-    test contains_creditcard-1.5 {contains_creditcard masked} -setup {
-    } -body {
-        contains_creditcard "The cc number 411111******1111 is in the middle of this string."
-    } -result false
-
-    test is-hex-1.0 {is hex valid} -setup {
-    } -body {
-        is hex 9F
-    } -result 1
-
-    test is-hex-1.1 {is hex valid lower} -setup {
-    } -body {
-        is hex 1a
-    } -result 1
-
-    test is-hex-1.2 {is hex invalid} -setup {
-    } -body {
-        is hex 9G
-    } -result 0
-
-    test is-hex-1.3 {is hex longer} -setup {
-    } -body {
-        is hex 2F57B7A02180369
-    } -result 1
-
-    test is-url-1.0 {is url valid brief} -setup {
-    } -body {
-        is url www.domain.com
-    } -result 0
-
-    test is-url-1.1 {is url valid full uk} -setup {
-    } -body {
-        is url https://www.domain.co.uk
-    } -result 1
-
-    test is-url-1.2 {is url valid full uk with port & form vars} -setup {
-    } -body {
-        is url https://www.domain.co.uk:433/subdir?formvar1=foo&formvar2=bar#anchor
-    } -result 1
-
-    test is-url-1.3 {is url long formvar } -setup {
-    } -body {
-        is url "https://www.domain.co.uk/subdir?formvar1=MDgzNjIgMDAwMDAgbiAKMDAwMDExODU1NiAwMDAwMCBuIAowMDAwMDAyODM5IDAwMDAwIG4gCjAwMDAwMDMwMjUgMDAwMDAgbiAKMDAwMDAwMzA0NCAwMDAwMCBuIAowMDAwMDAzODc1IDAwMDAwIG4gCjAwMDAwMDM4OTUgMDAwMDAgbiAKMDAwMDExNDc1NSAwMDAwMCBuIAowMDAwMDA0MTc2IDAwMDAwIG4gCjAwMDAwMDUyNzQgMDAwMDAgbiAKMDAwMDAwNTI5NCAwMDAwMCBuIAowMDAwMDExMzA0IDAwMDAwIG4gCjAwMDAwMTEzMjUgMDAwMDAgbiAKMDAwMDAxMjQ2MSAwMDAwMCBuIAowMDAwMDEyNDgxIDAwMDAwIG4gCjAwMDAwMTc2MTAgMDAwMDAgbiAKMDAwMDAxNzYzMSAwMDAwMCBuIAowMDAwMDE4ODA0IDAwMDAwIG4gCjAwMDAwMTg4MjUgMDAwMDAgbiAKMDAwMDAyNDc3OSAwMDAwMCBuIAowMDAwMDI0ODAwIDAwMDAwIG4gCjAwMDAwMjU4ODAgMDAwMDAgbiAKMDAwMDAyNTkwMCAwMDAwMCBuIAowMDAwMDMwODY2IDAwMDAwIG4gCjAwMDAwMzA4ODcgMDAwMDAgbiAKMDAwMDAzMTIwOSAwMDAwMCBuIAowMDAwMDMxMjI5IDAwMDAwIG4gCjAwMDAwMzIyNDggMDAwMDAgbiAKMDAwMDAzMjI2OCAwMDAwMCBuIAowMDAwMDMyNDQ3IDAwMDAwIG4gCjAwMDAwMzI0NjYgMDAwMDAgbiAKMDAwMDAzMzI5NyAwMDAwMCBuIAowMDAwMDMzMzE3IDAwMDAwIG4gCjAwMDAwMzM1OTggMDAwMDAgbiAKMDAwMDAzODUyNiAwMDAwMCBuIAowMDAwMDM4NTQ3IDAwMDAwIG4gCjAwMDAwNDM2NzEgMDAwMDAgbiAKMDAwMDA0MzY5MiAwMDAwMCBuIAowMDAwMDQzNzI4IDAwMDAwIG4gCjAwMDAwNDczMTMgMDAwMDAgbiAKMDAwMDA0NzMzNCAwMDAwMCBuIAowMDAwMDU2MTQwIDAwMDAwIG4gCjAwMDAwNTYxNjEgMDAwMDAgbiAKMDAwMDA1NjQ1OSAwMDAwMCBuIAowMDAwMDU2NDc5IDAwMDAwIG4gCjAwMDAwNTc1MDQgMDAwMDAgbiAKMDAwMDA1NzUyNCAwMDAwMCBuIAowMDAwMDU3ODUwIDAwMDAwIG4gCjAwMDAwNTc4NzAgMDAwMDAgbiAKMDAwMDA1ODkwMSAwMDAwMCBuIAowMDAwMDU4OTIxIDAwMDAwIG4gCjAwMDAwNTkxMDQgMDAwMDAgbiAKMDAwMDA1OTEyMyAwMDAwMCBuIAowMDAwMDU5OTUzIDAwMDAwIG4gCjAwMDAwNTk5NzMgMDAwMDAgbiAKMDAwMDA5NjUyNyAwMDAwMCBuIAowMDAwMDYwMjU0IDAwMDAwIG4gCjAwMDAwNjA0MjcgMDAwMDAgbiAKMDAwMDA2MDQ0NiAwMDAwMCBuIAowMDAwMDYxMzI1IDAwMDAwIG4gCjAwMDAwNjEzNDUgMDAwMDAgbiAKMDAwMDA2MTM5NyAwMDAwMCBuIAowMDAwMDYxNDQ5IDAwMDAwIG4gCjAwMDAwNjE1MDEgMDAwMDAgbiAKMDAwMDA2MTU1MyAwMDAwMCBuIAowMDAwMDYxNjA1IDAwMDAwIG4gCjAwMDAwNjE2NTcgMDAwMDAgbiAKMDAwMDA2MTcwOSAwMDAwMCBuIAowMDAwMDYxNzYxIDAwMDAwIG4gCjAwMDAwNjE5NDQgMDAwMDAgbiAKMDAwMDA2MjE1OSAwMDAwMCBuIAowMDAwMDYyMzQzIDAwMDAwIG4gCjAwMDAwNjI1MzYgMDAwMDAgbiAKMDAwMDA2MjcxOSAwMDAwMCBuIAowMDAwMDYyOTA4IDAwMDAwIG4gCjAwMDAwNjMwOTggMDAwMDAgbiAKMDAwMDA2MzI4NiAwMDAwMCBuIAowMDAwMDYzNDc4IDAwMDAwIG4gCjAwMDAwNjM2NjMgMDAwMDAgbiAKMDAwMDA2Mzg1OSAwMDAwMCBuIAowMDAwMDY0MDM4IDAwMDAwIG4gCjAwMDAwNjQyMTcgMDAwMDAgbiAKMDAwMDA2NDM4OSAwMDAwMCBuIAowMDAwMDY0NTYyIDAwMDAwIG4gCjAwMDAwNjQ3NDAgMDAwMDAgbiAKMDAwMDA2NDkxMSAwMDAwMCBuIAowMDAwMDY1MTM0IDAwMDAwIG4gCjAwMDAwNjUzNDQgMDAwMDAgbiAKMDAwMDA2NTU1NCAwMDAwMCBuIAowMDAwMDY1NzY0IDAwMDAwIG4gCjAwMDAwNjY3MzggMDAwMDAgbiAKMDAwMDA3MTE5NyAwMDAwMCBuIAowMDAwMDY2MDk3IDAwMDAwIG4gCjAwMDAwNjY1NTUgMDAwMDAgbiAKMDAwMDA3NzA3OCAwMDAwMCBuIAowMDAwMDcxMjE5IDAwMDAwIG4gCjAwMDAwNzE1MDEgMDAwMDAgbiAKMDAwMDA3MTc4MyAwMDAwMCBuIAowMDAwMDcxOTk5IDAwMDAwIG4gCjAwMDAwNzIwMTkgMDAwMDAgbiAKMDAwMDA3MjkzMSAwMDAwMCBuIAowMDAwMDcyOTUyIDAwMDAwIG4gCjAwMDAwNzMyMzQgMDAwMDAgbiAKMDAwMDA3MzUxNiAwMDAwMCBuIAowMDAwMDczNzk4IDAwMDAwIG4gCjAwMDAwNzQwODAgMDAwMDAgbiAKMDAwMDA3NDM2MiAwMDAwMCBuIAowMDAwMDc0NjQ0IDAwMDAwIG4gCjAwMDAwNz"
-        } -result 1
-
-    test is-url-1.4 {is url many formvars} -setup {
-    } -body {
-        is url https://www.domain.co.uk?formvar1=foo&formvar2=foo&formvar3=foo&formvar4=foo&formvar5=foo&formvar6=foo&formvar7=foo&formvar8=foo&formvar9=foo&formvar10=foo&formvar11=foo&formvar12=foo&formvar13=foo&formvar13=foo&formvar14=foo&formvar15=foo&formvar16=foo&formvar17=foo&formvar18=foo&formvar19=foo&formvar20=foo&formvar21=foo&formvar22=foo&formvar23=foo&formvar24=foo&formvar25=foo&formvar26=foo&formvar27=foo&formvar28=foo&formvar29=foo&formvar30=foo&formvar31=foo&formvar32=foo&formvar33=foo&formvar34=foo&formvar35=foo&formvar35=foo&formvar36=foo&formvar37=foo&formvar38=foo&formvar39=foo&formvar40=foo&formvar41=foo&formvar42=foo&formvar43=foo&formvar44=foo&formvar45=foo&formvar46=foo&formvar47=foo&formvar48=foo&formvar49=foo&formvar50=foo&formvar51=foo&formvar52=foo&formvar53=foo&formvar54=foo
-    } -result 1
-
-    test is-url-1.5 {is url ftp} -setup {
-    } -body {
-        is url ftp://www.domain.com
-    } -result 0
-
-    test is-url-1.6 {is url -relative} -body {
-        is url -relative home.html
-    } -result 1
-
-    test is-url-1.7 {is url -relative} -body {
-        is url -relative /home.html
-    } -result 1
-
-    test is-url-1.8 {is url -relative} -body {
-        is url -relative http://www.domain.com
-    } -result 0
-
-    test is-url-1.9 {is url -relative} -body {
-        is url -relative page.html?foo=bar&test=baz
-    } -result 1
-
-
-    test is-url-1.10 {is url -relative} -body {
-        is url -relative index.tcl#here
-    } -result 1
-
-    test is-url-1.11 {is url -relative} -body {
-        is url -relative /folder/page.html
-    } -result 1
-
-    test is-url-1.12 {is url -relative} -body {
-        is url -relative /folder/page.html?form=variable&and=another&and=#anchor
-    } -result 1
-
-    test is-url-1.13 {is url -relative} -body {
-        is url -relative index.html?foo=bar?test=broken
-    } -result 0
-
-    test is-url-1.14 {is url -relative} -body {
-        is url -relative a&b.html?foo=bar&fiz=baz
-    } -result 1
-
-    test is-url-1.15 {is url} -body {
-        is url https://www.domain.com/a&b.html?foo=bar&fiz=baz
-    } -result 1
-    
-    test is-url-1.16 {is url} -body {
-        is url https://www.domain.com/a&b.html?foo=bar@&fiz=baz:
-    } -result 1
-
-    test is-url-path-1.0 {is url_path} -body {
-	is url_path /home
-    } -result 1
-
-    test is-url-path-1.1 {is url_path} -body {
-	is url_path /home%
-    } -result 0
-    
-    test is-url-path-1.2 {is url_path} -body {
-	is url_path /home/one
-    } -result 1
-
-    test is-url-path-1.3 {is url_path} -body {
-	is url_path home
-    } -result 0
-
-    test is-url-path-1.4 {is url_path} -body {
-	is url_path /home%23
-    } -result 1
-
-    test is-url-path-1.5 {is url_path} -body {
-	is url_path /home%af
-    } -result 1
-
-    test is-url-path-1.6 {is url_path} -body {
-	is url_path /home%yx
-    } -result 0
-
-    test is-url-path-1.7 {is url_path} -body {
-	is url_path /
-    } -result 1
-
-    test is-ipv4-1.0 {is ipv4 ip6} -setup {
-    } -body {
-        is ipv4 2001:0db8:85a3:0042:0000:8a2e:0370:7334
-    } -result 0
-
-    test is-ipv4-1.1 {is ipv4 partial} -setup {
-    } -body {
-        is ipv4 192.168.1
-    } -result 0
-
-    test is-ipv4-1.2 {is ipv4 invalid but still true} -setup {
-    } -body {
-        is ipv4 192.168.1.354
-    } -result 1
-
-    test is-ipv4-1.3 {is ipv4 valid} -setup {
-    } -body {
-        is ipv4 192.168.1.1
-    } -result 1
-
-    test is-cidrnetv4-1.0 {is cidrnetv4 ip only} -setup {
-    } -body {
-        is cidrnetv4  192.168.1.20
-    } -result 0
-
-    test is-cidrnetv4-1.1 {is cidrnetv4 valid cidr} -setup {
-    } -body {
-        is cidrnetv4  192.168.1.0/24
-    } -result 1
-    
-    test is-uri-1.0 {is uri absolute} -setup {} -body {
-        qc::is uri http://test.com
-    } -result 1
-
-    test is-uri-1.1 {is uri absolute} -setup {} -body {
-        qc::is uri https://test.com:8443
-    } -result 1
-
-    test is-uri-1.2 {is uri absolute} -setup {} -body {
-        qc::is uri http://test.com/test.pdf
-    } -result 1
-
-    test is-uri-1.3 {is uri absolute} -setup {} -body {
-        qc::is uri https://test.com:8443/test.pdf
-    } -result 1
-
-    test is-uri-1.4 {is uri absolute} -setup {} -body {
-        qc::is uri http://test.com/test.pdf?a=1&b=2
-    } -result 1
-
-    test is-uri-1.5 {is uri absolute} -setup {} -body {
-        qc::is uri https://test.com:8443/test.pdf?a=1&b=2
-    } -result 1
-
-    test is-uri-1.6 {is uri absolute} -setup {} -body {
-        qc::is uri http://test.com/test.pdf#anchor1?a=1&b=2
-    } -result 1
-
-    test is-uri-1.7 {is uri absolute} -setup {} -body {
-        qc::is uri https://test.com:8443/test.pdf#anchor1?a=1&b=2
-    } -result 1
-
-    test is-uri-1.8 {is uri relative} -setup {} -body {
-        qc::is uri test.pdf
-    } -result 1
-
-    test is-uri-1.9 {is uri relative} -setup {} -body {
-        qc::is uri test.pdf#anchor1?a=1&b=2
-    } -result 1
-
-    test is-uri-1.10 {is uri root relative} -setup {} -body {
-        qc::is uri /test.pdf#anchor1?a=1&b=2
-    } -result 1
-
-    test is-uri-1.11 {is uri page relative} -setup {} -body {
-        qc::is uri #anchor1?a=1&b=2
-    } -result 1
-
-    test is-uri-1.12 {is uri page relative} -setup {} -body {
-        qc::is uri #anchor1
-    } -result 1
-
-    test is-uri-1.13 {is uri relative} -setup {} -body {
-        qc::is uri  "./../../test.pdf#anchor1?a=1&b=2"
-    } -result 1
-
-    test is-uri-1.14 {is uri scheme relative} -setup {} -body {
-        qc::is uri "//test.com/test/test.pdf#anchor1?a=1&b=2"
-    } -result 1
-
-    test is-uri-1.15 {is uri ipv6} -setup {} -body {
-        qc::is uri {http://[FE80:0000:0000:0000:0202:B3FF:FE1E:8329]}
-    } -result 1
-
-    test is-uri-1.16 {is uri collapsed ipv6} -setup {} -body {
-        qc::is uri {http://[::2001:db8:0:1]:80}
-    } -result 1
-
-    test is-uri-1.17 {is uri} -setup {} -body {
-        qc::is uri "urn:mpeg:mpeg7:schema:2001urn:isbn:0451450523"
-    } -result 1
-
-    test is-uri-1.18 {is uri} -setup {} -body {
-        qc::is uri "sip:gateway.com;user=phone"
-    } -result 1
-
-    test is-uri-1.19 {is uri} -setup {} -body {
-        qc::is uri "tel:+1-816-555-1212"
-    } -result 1
-
-    test is-uri-1.20 {is uri} -setup {} -body {
-        qc::is uri "mailto:John.Doe@example.com"
-    } -result 1
-
-    test is-uri1.21 {is uri invalid} -setup {} -body {
-        qc::is uri "htt$%://test.com"
-    } -result 0
-
-    test is-uri1.22 {is uri invalid} -setup {} -body {
-        qc::is uri "http://test.co$%^&m"
-    } -result 0
-
-    test is-uri1.23 {is uri invalid} -setup {} -body {
-        qc::is uri "http://test.com/$%^&m.pdf"
-    } -result 0
-
-    test is-uri1.23 {is uri invalid} -setup {} -body {
-        qc::is uri "///$%^&m.pdf"
-    } -result 0
-
-    test is-period-1.0 {qc::is period ""} -body {
-        qc::is period ""
-    } -result 0
-    
-    test is-period-1.1 {qc::is period "Jan"} -body {
-        qc::is period "Jan"
-    } -result 1
-    
-    test is-period-1.2 {qc::is period "January"} -body {
-        qc::is period "January"
-    } -result 1
-    
-    test is-period-1.3 {qc::is period "2014"} -body {
-        qc::is period "2014"
-    } -result 1
-    
-    test is-period-1.4 {qc::is period "Jan 2014"} -body {
-        qc::is period "Jan 2013"
-    } -result 1
-    
-    test is-period-1.5 {qc::is period "January 2014"} -body {
-        qc::is period "January 2014"
-    } -result 1
-    
-    test is-period-1.6 {qc::is period "Jan 2014 to March 2014"} -body {
-        qc::is period "Jan 2014 to March 2014"
-    } -result 1
-    
-    test is-period-1.7 {qc::is period "Febuary 2014"} -body {
-        qc::is period "Febuary 2014"
-    } -result 0
-    
-    test is-period-1.8 {qc::is period "1st February 2014 to 14th February 2014"} -body {
-        qc::is period "1st February 2014 to 14th February 2014"
-    } -result 1
-
-
-    test is-time-1.0 {qc::is time "00:00:00.000000"} -body {
-        qc::is time "00:00:00.000000"
-    } -result 1
-
-    test is-time-1.1 {qc::is time "00:00:00"} -body {
-        qc::is time "00:00:00"
-    } -result 1
-
-    test is-time-1.2 {qc::is time "24:00:00.000000"} -body {
-        qc::is time "24:00:00.000000"
-    } -result 1
-
-    test is-time-1.3 {qc::is time "24:00:00"} -body {
-        qc::is time "24:00:00"
-    } -result 1
-
-    test is-time-1.4 {qc::is time "12:34:56.789"} -body {
-        qc::is time "12:34:56.789"
-    } -result 1
-
-    test is-time-1.5 {qc::is time "12:34:56"} -body {
-        qc::is time "12:34:56"
-    } -result 1
-
-    test is-time-1.6 {qc::is time "24:00:01"} -body {
-        qc::is time "24:00:01"
-    } -result 0
-
-    test is-time-1.7 {qc::is time "98:76:54"} -body {
-        qc::is time "98:76:54"
-    } -result 0
-
-    test is-time-1.8 {qc::is time "12:59"} -body {
-        qc::is time "12:59"
-    } -result 0
-
-    test is-interval-1.0 {qc::is interval "1 year"} -body {
-        qc::is interval "1 year"
-    } -result 1
-
-    test is-interval-1.1 {qc::is interval "3 months -2 days"} -body {
-        qc::is interval "3 months -2 days"
-    } -result 1
-    
-    test is-interval-1.2 {qc::is interval "-5 weeks"} -body {
-        qc::is interval "-5 weeks"
-    } -result 1
-
-    test is-interval-1.3 {qc::is interval "7"} -body {
-        qc::is interval "7"
-    } -result 0
-
-    test is-interval-1.4 {qc::is interval "last week"} -body {
-        qc::is interval "last week"
-    } -result 0
-
-    test is-interval-1.5 {qc::is interval "year"} -body {
-        qc::is interval "year"
-    } -result 0
-
-    # S3 URL, Bucket, Object Key
-    # Test                    Description                                     Code                                        Result
-    test is-s3_uri-1.0        {qc::is s3_uri: S3 URI}                         {qc::is s3_uri "s3://string/st34.235"}      1
-    test is-s3_uri-1.1        {qc::is s3_uri: S3 URI without object key}      {qc::is s3_uri "S3://bucket"}               1
-    test is-s3_uri-1.2        {qc::is s3_uri: S3 URI with inferred hierarchy} {qc::is s3_uri "s3://bucket/2/3/4/5"}       1
-    test is-s3_uri-1.3        {qc::is s3_uri: Invalid S3 URI}                 {qc::is s3_uri "invalid s3 url"}            0
-    test is-s3_uri-1.4        {qc::is s3_uri: Missing protocol}               {qc::is s3_uri "/bucket/file"}              0         
-
-    test is-s3_bucket-1.0     {qc::is s3_bucket: Valid 1}                     {qc::is s3_bucket "test-name"}              1
-    test is-s3_bucket-1.1     {qc::is s3_bucket: Valid 2}                     {qc::is s3_bucket "1.test-name.6"}          1
-    test is-s3_bucket-1.2     {qc::is s3_bucket: Too few characters}          {qc::is s3_bucket "aa"}                     0
-    test is-s3_bucket-1.3     {qc::is s3_bucket: Too many characters}         {qc::is s3_bucket [join [lrepeat 70 a] ""]} 0
-    test is-s3_bucket-1.4     {qc::is s3_bucket: Invalid characters 1}        {qc::is s3_bucket "bucket_name"}            0
-    test is-s3_bucket-1.5     {qc::is s3_bucket: Invalid characters 2}        {qc::is s3_bucket "aaaAaaa"}                0
-    test is-s3_bucket-1.6     {qc::is s3_bucket: Invalid start character}     {qc::is s3_bucket "-bucket"}                0
-    test is-s3_bucket-1.7     {qc::is s3_bucket: Invalid end character}       {qc::is s3_bucket "my-bucket."}             0
-    test is-s3_bucket-1.8     {qc::is s3_bucket: IP Address}                  {qc::is s3_bucket "1.2.3.4"}                0
-
-    test is-s3_object_key-1.0 {qc::is s3_object_key: Invalid characters 1}    {qc::is s3_object_key "my/file&name"}       0
-    test is-s3_object_key-1.1 {qc::is s3_object_key: Invalid characters 2}    {qc::is s3_object_key "file name"}          0
-    test is-s3_object_key-1.2 {qc::is s3_object_key: Valid key}               {qc::is s3_object_key "/obj/k!_t/Y*f).png"} 1
-    test is-s3_object_key-1.3 {qc::is s3_object_key: Ending in "."}           {qc::is s3_object_key "name."}              0
-    
-    cleanupTests
-}
-namespace delete ::qcode::test
+} -result 1
+
+
+test is-mobile_number-1.0 {is mobile_number valid} -setup {
+} -body {
+    qc::is mobile_number 07768777777
+} -result 1
+
+test is-mobile_number-1.1 {is mobile_number exta chars} -setup {
+} -body {
+    qc::is mobile_number "07768 - 777-777 "
+} -result 1
+
+test is-mobile_number-1.2 {is mobile_number invalid} -setup {
+} -body {
+    qc::is mobile_number 09768777777
+} -result 0
+
+test is-mobile_number-1.3 {is mobile_number too short} -setup {
+} -body {
+    qc::is mobile_number 0751111111
+} -result 0
+
+test is-mobile_number-1.4 {is mobile_number empty} -setup {
+} -body {
+    qc::is mobile_number {}
+} -result 0
+
+test contains_creditcard-1.0 {contains_creditcard cc no only} -setup {
+} -body {
+    contains_creditcard 4111111111111111
+} -result true
+
+test contains_creditcard-1.1 {contains_creditcard cc no in string end} -setup {
+} -body {
+    contains_creditcard "This string contains 4111111111111111"
+} -result true
+
+test contains_creditcard-1.2 {contains_creditcard cc no in string beginning} -setup {
+} -body {
+    contains_creditcard "4111111111111111 is in this string."
+} -result true
+
+test contains_creditcard-1.3 {contains_creditcard cc no in string middle} -setup {
+} -body {
+    contains_creditcard "The cc number 4111111111111111 is in the middle of this string."
+} -result true
+
+test contains_creditcard-1.4 {contains_creditcard invalid cc no} -setup {
+} -body {
+    contains_creditcard "The cc number 4111111111111112 is in the middle of this string."
+} -result false
+
+test contains_creditcard-1.5 {contains_creditcard masked} -setup {
+} -body {
+    contains_creditcard "The cc number 411111******1111 is in the middle of this string."
+} -result false
+
+test is-hex-1.0 {is hex valid} -setup {
+} -body {
+    qc::is hex 9F
+} -result 1
+
+test is-hex-1.1 {is hex valid lower} -setup {
+} -body {
+    qc::is hex 1a
+} -result 1
+
+test is-hex-1.2 {is hex invalid} -setup {
+} -body {
+    qc::is hex 9G
+} -result 0
+
+test is-hex-1.3 {is hex longer} -setup {
+} -body {
+    qc::is hex 2F57B7A02180369
+} -result 1
+
+test is-url-1.0 {is url valid brief} -setup {
+} -body {
+    qc::is url www.domain.com
+} -result 0
+
+test is-url-1.1 {is url valid full uk} -setup {
+} -body {
+    qc::is url https://www.domain.co.uk
+} -result 1
+
+test is-url-1.2 {is url valid full uk with port & form vars} -setup {
+} -body {
+    qc::is url https://www.domain.co.uk:433/subdir?formvar1=foo&formvar2=bar#anchor
+} -result 1
+
+test is-url-1.3 {is url long formvar } -setup {
+} -body {
+    qc::is url "https://www.domain.co.uk/subdir?formvar1=MDgzNjIgMDAwMDAgbiAKMDAwMDExODU1NiAwMDAwMCBuIAowMDAwMDAyODM5IDAwMDAwIG4gCjAwMDAwMDMwMjUgMDAwMDAgbiAKMDAwMDAwMzA0NCAwMDAwMCBuIAowMDAwMDAzODc1IDAwMDAwIG4gCjAwMDAwMDM4OTUgMDAwMDAgbiAKMDAwMDExNDc1NSAwMDAwMCBuIAowMDAwMDA0MTc2IDAwMDAwIG4gCjAwMDAwMDUyNzQgMDAwMDAgbiAKMDAwMDAwNTI5NCAwMDAwMCBuIAowMDAwMDExMzA0IDAwMDAwIG4gCjAwMDAwMTEzMjUgMDAwMDAgbiAKMDAwMDAxMjQ2MSAwMDAwMCBuIAowMDAwMDEyNDgxIDAwMDAwIG4gCjAwMDAwMTc2MTAgMDAwMDAgbiAKMDAwMDAxNzYzMSAwMDAwMCBuIAowMDAwMDE4ODA0IDAwMDAwIG4gCjAwMDAwMTg4MjUgMDAwMDAgbiAKMDAwMDAyNDc3OSAwMDAwMCBuIAowMDAwMDI0ODAwIDAwMDAwIG4gCjAwMDAwMjU4ODAgMDAwMDAgbiAKMDAwMDAyNTkwMCAwMDAwMCBuIAowMDAwMDMwODY2IDAwMDAwIG4gCjAwMDAwMzA4ODcgMDAwMDAgbiAKMDAwMDAzMTIwOSAwMDAwMCBuIAowMDAwMDMxMjI5IDAwMDAwIG4gCjAwMDAwMzIyNDggMDAwMDAgbiAKMDAwMDAzMjI2OCAwMDAwMCBuIAowMDAwMDMyNDQ3IDAwMDAwIG4gCjAwMDAwMzI0NjYgMDAwMDAgbiAKMDAwMDAzMzI5NyAwMDAwMCBuIAowMDAwMDMzMzE3IDAwMDAwIG4gCjAwMDAwMzM1OTggMDAwMDAgbiAKMDAwMDAzODUyNiAwMDAwMCBuIAowMDAwMDM4NTQ3IDAwMDAwIG4gCjAwMDAwNDM2NzEgMDAwMDAgbiAKMDAwMDA0MzY5MiAwMDAwMCBuIAowMDAwMDQzNzI4IDAwMDAwIG4gCjAwMDAwNDczMTMgMDAwMDAgbiAKMDAwMDA0NzMzNCAwMDAwMCBuIAowMDAwMDU2MTQwIDAwMDAwIG4gCjAwMDAwNTYxNjEgMDAwMDAgbiAKMDAwMDA1NjQ1OSAwMDAwMCBuIAowMDAwMDU2NDc5IDAwMDAwIG4gCjAwMDAwNTc1MDQgMDAwMDAgbiAKMDAwMDA1NzUyNCAwMDAwMCBuIAowMDAwMDU3ODUwIDAwMDAwIG4gCjAwMDAwNTc4NzAgMDAwMDAgbiAKMDAwMDA1ODkwMSAwMDAwMCBuIAowMDAwMDU4OTIxIDAwMDAwIG4gCjAwMDAwNTkxMDQgMDAwMDAgbiAKMDAwMDA1OTEyMyAwMDAwMCBuIAowMDAwMDU5OTUzIDAwMDAwIG4gCjAwMDAwNTk5NzMgMDAwMDAgbiAKMDAwMDA5NjUyNyAwMDAwMCBuIAowMDAwMDYwMjU0IDAwMDAwIG4gCjAwMDAwNjA0MjcgMDAwMDAgbiAKMDAwMDA2MDQ0NiAwMDAwMCBuIAowMDAwMDYxMzI1IDAwMDAwIG4gCjAwMDAwNjEzNDUgMDAwMDAgbiAKMDAwMDA2MTM5NyAwMDAwMCBuIAowMDAwMDYxNDQ5IDAwMDAwIG4gCjAwMDAwNjE1MDEgMDAwMDAgbiAKMDAwMDA2MTU1MyAwMDAwMCBuIAowMDAwMDYxNjA1IDAwMDAwIG4gCjAwMDAwNjE2NTcgMDAwMDAgbiAKMDAwMDA2MTcwOSAwMDAwMCBuIAowMDAwMDYxNzYxIDAwMDAwIG4gCjAwMDAwNjE5NDQgMDAwMDAgbiAKMDAwMDA2MjE1OSAwMDAwMCBuIAowMDAwMDYyMzQzIDAwMDAwIG4gCjAwMDAwNjI1MzYgMDAwMDAgbiAKMDAwMDA2MjcxOSAwMDAwMCBuIAowMDAwMDYyOTA4IDAwMDAwIG4gCjAwMDAwNjMwOTggMDAwMDAgbiAKMDAwMDA2MzI4NiAwMDAwMCBuIAowMDAwMDYzNDc4IDAwMDAwIG4gCjAwMDAwNjM2NjMgMDAwMDAgbiAKMDAwMDA2Mzg1OSAwMDAwMCBuIAowMDAwMDY0MDM4IDAwMDAwIG4gCjAwMDAwNjQyMTcgMDAwMDAgbiAKMDAwMDA2NDM4OSAwMDAwMCBuIAowMDAwMDY0NTYyIDAwMDAwIG4gCjAwMDAwNjQ3NDAgMDAwMDAgbiAKMDAwMDA2NDkxMSAwMDAwMCBuIAowMDAwMDY1MTM0IDAwMDAwIG4gCjAwMDAwNjUzNDQgMDAwMDAgbiAKMDAwMDA2NTU1NCAwMDAwMCBuIAowMDAwMDY1NzY0IDAwMDAwIG4gCjAwMDAwNjY3MzggMDAwMDAgbiAKMDAwMDA3MTE5NyAwMDAwMCBuIAowMDAwMDY2MDk3IDAwMDAwIG4gCjAwMDAwNjY1NTUgMDAwMDAgbiAKMDAwMDA3NzA3OCAwMDAwMCBuIAowMDAwMDcxMjE5IDAwMDAwIG4gCjAwMDAwNzE1MDEgMDAwMDAgbiAKMDAwMDA3MTc4MyAwMDAwMCBuIAowMDAwMDcxOTk5IDAwMDAwIG4gCjAwMDAwNzIwMTkgMDAwMDAgbiAKMDAwMDA3MjkzMSAwMDAwMCBuIAowMDAwMDcyOTUyIDAwMDAwIG4gCjAwMDAwNzMyMzQgMDAwMDAgbiAKMDAwMDA3MzUxNiAwMDAwMCBuIAowMDAwMDczNzk4IDAwMDAwIG4gCjAwMDAwNzQwODAgMDAwMDAgbiAKMDAwMDA3NDM2MiAwMDAwMCBuIAowMDAwMDc0NjQ0IDAwMDAwIG4gCjAwMDAwNz"
+} -result 1
+
+test is-url-1.4 {is url many formvars} -setup {
+} -body {
+    qc::is url https://www.domain.co.uk?formvar1=foo&formvar2=foo&formvar3=foo&formvar4=foo&formvar5=foo&formvar6=foo&formvar7=foo&formvar8=foo&formvar9=foo&formvar10=foo&formvar11=foo&formvar12=foo&formvar13=foo&formvar13=foo&formvar14=foo&formvar15=foo&formvar16=foo&formvar17=foo&formvar18=foo&formvar19=foo&formvar20=foo&formvar21=foo&formvar22=foo&formvar23=foo&formvar24=foo&formvar25=foo&formvar26=foo&formvar27=foo&formvar28=foo&formvar29=foo&formvar30=foo&formvar31=foo&formvar32=foo&formvar33=foo&formvar34=foo&formvar35=foo&formvar35=foo&formvar36=foo&formvar37=foo&formvar38=foo&formvar39=foo&formvar40=foo&formvar41=foo&formvar42=foo&formvar43=foo&formvar44=foo&formvar45=foo&formvar46=foo&formvar47=foo&formvar48=foo&formvar49=foo&formvar50=foo&formvar51=foo&formvar52=foo&formvar53=foo&formvar54=foo
+} -result 1
+
+test is-url-1.5 {is url ftp} -setup {
+} -body {
+    qc::is url ftp://www.domain.com
+} -result 0
+
+test is-url-1.6 {is url -relative} -body {
+    qc::is url -relative home.html
+} -result 1
+
+test is-url-1.7 {is url -relative} -body {
+    qc::is url -relative /home.html
+} -result 1
+
+test is-url-1.8 {is url -relative} -body {
+    qc::is url -relative http://www.domain.com
+} -result 0
+
+test is-url-1.9 {is url -relative} -body {
+    qc::is url -relative page.html?foo=bar&test=baz
+} -result 1
+
+
+test is-url-1.10 {is url -relative} -body {
+    qc::is url -relative index.tcl#here
+} -result 1
+
+test is-url-1.11 {is url -relative} -body {
+    qc::is url -relative /folder/page.html
+} -result 1
+
+test is-url-1.12 {is url -relative} -body {
+    qc::is url -relative /folder/page.html?form=variable&and=another&and=#anchor
+} -result 1
+
+test is-url-1.13 {is url -relative} -body {
+    qc::is url -relative index.html?foo=bar?test=broken
+} -result 0
+
+test is-url-1.14 {is url -relative} -body {
+    qc::is url -relative a&b.html?foo=bar&fiz=baz
+} -result 1
+
+test is-url-1.15 {is url} -body {
+    qc::is url https://www.domain.com/a&b.html?foo=bar&fiz=baz
+} -result 1
+
+test is-url-1.16 {is url} -body {
+    qc::is url https://www.domain.com/a&b.html?foo=bar@&fiz=baz:
+} -result 1
+
+test is-url-path-1.0 {is url_path} -body {
+    qc::is url_path /home
+} -result 1
+
+test is-url-path-1.1 {is url_path} -body {
+    qc::is url_path /home%
+} -result 0
+
+test is-url-path-1.2 {is url_path} -body {
+    qc::is url_path /home/one
+} -result 1
+
+test is-url-path-1.3 {is url_path} -body {
+    qc::is url_path home
+} -result 0
+
+test is-url-path-1.4 {is url_path} -body {
+    qc::is url_path /home%23
+} -result 1
+
+test is-url-path-1.5 {is url_path} -body {
+    qc::is url_path /home%af
+} -result 1
+
+test is-url-path-1.6 {is url_path} -body {
+    qc::is url_path /home%yx
+} -result 0
+
+test is-url-path-1.7 {is url_path} -body {
+    qc::is url_path /
+} -result 1
+
+test is-ipv4-1.0 {is ipv4 ip6} -setup {
+} -body {
+    qc::is ipv4 2001:0db8:85a3:0042:0000:8a2e:0370:7334
+} -result 0
+
+test is-ipv4-1.1 {is ipv4 partial} -setup {
+} -body {
+    qc::is ipv4 192.168.1
+} -result 0
+
+test is-ipv4-1.2 {is ipv4 invalid but still true} -setup {
+} -body {
+    qc::is ipv4 192.168.1.354
+} -result 1
+
+test is-ipv4-1.3 {is ipv4 valid} -setup {
+} -body {
+    qc::is ipv4 192.168.1.1
+} -result 1
+
+test is-cidrnetv4-1.0 {is cidrnetv4 ip only} -setup {
+} -body {
+    qc::is cidrnetv4  192.168.1.20
+} -result 0
+
+test is-cidrnetv4-1.1 {is cidrnetv4 valid cidr} -setup {
+} -body {
+    qc::is cidrnetv4  192.168.1.0/24
+} -result 1
+
+test is-uri-1.0 {is uri absolute} -setup {} -body {
+    qc::is uri http://test.com
+} -result 1
+
+test is-uri-1.1 {is uri absolute} -setup {} -body {
+    qc::is uri https://test.com:8443
+} -result 1
+
+test is-uri-1.2 {is uri absolute} -setup {} -body {
+    qc::is uri http://test.com/test.pdf
+} -result 1
+
+test is-uri-1.3 {is uri absolute} -setup {} -body {
+    qc::is uri https://test.com:8443/test.pdf
+} -result 1
+
+test is-uri-1.4 {is uri absolute} -setup {} -body {
+    qc::is uri http://test.com/test.pdf?a=1&b=2
+} -result 1
+
+test is-uri-1.5 {is uri absolute} -setup {} -body {
+    qc::is uri https://test.com:8443/test.pdf?a=1&b=2
+} -result 1
+
+test is-uri-1.6 {is uri absolute} -setup {} -body {
+    qc::is uri http://test.com/test.pdf#anchor1?a=1&b=2
+} -result 1
+
+test is-uri-1.7 {is uri absolute} -setup {} -body {
+    qc::is uri https://test.com:8443/test.pdf#anchor1?a=1&b=2
+} -result 1
+
+test is-uri-1.8 {is uri relative} -setup {} -body {
+    qc::is uri test.pdf
+} -result 1
+
+test is-uri-1.9 {is uri relative} -setup {} -body {
+    qc::is uri test.pdf#anchor1?a=1&b=2
+} -result 1
+
+test is-uri-1.10 {is uri root relative} -setup {} -body {
+    qc::is uri /test.pdf#anchor1?a=1&b=2
+} -result 1
+
+test is-uri-1.11 {is uri page relative} -setup {} -body {
+    qc::is uri #anchor1?a=1&b=2
+} -result 1
+
+test is-uri-1.12 {is uri page relative} -setup {} -body {
+    qc::is uri #anchor1
+} -result 1
+
+test is-uri-1.13 {is uri relative} -setup {} -body {
+    qc::is uri  "./../../test.pdf#anchor1?a=1&b=2"
+} -result 1
+
+test is-uri-1.14 {is uri scheme relative} -setup {} -body {
+    qc::is uri "//test.com/test/test.pdf#anchor1?a=1&b=2"
+} -result 1
+
+test is-uri-1.15 {is uri ipv6} -setup {} -body {
+    qc::is uri {http://[FE80:0000:0000:0000:0202:B3FF:FE1E:8329]}
+} -result 1
+
+test is-uri-1.16 {is uri collapsed ipv6} -setup {} -body {
+    qc::is uri {http://[::2001:db8:0:1]:80}
+} -result 1
+
+test is-uri-1.17 {is uri} -setup {} -body {
+    qc::is uri "urn:mpeg:mpeg7:schema:2001urn:isbn:0451450523"
+} -result 1
+
+test is-uri-1.18 {is uri} -setup {} -body {
+    qc::is uri "sip:gateway.com;user=phone"
+} -result 1
+
+test is-uri-1.19 {is uri} -setup {} -body {
+    qc::is uri "tel:+1-816-555-1212"
+} -result 1
+
+test is-uri-1.20 {is uri} -setup {} -body {
+    qc::is uri "mailto:John.Doe@example.com"
+} -result 1
+
+test is-uri1.21 {is uri invalid} -setup {} -body {
+    qc::is uri "htt$%://test.com"
+} -result 0
+
+test is-uri1.22 {is uri invalid} -setup {} -body {
+    qc::is uri "http://test.co$%^&m"
+} -result 0
+
+test is-uri1.23 {is uri invalid} -setup {} -body {
+    qc::is uri "http://test.com/$%^&m.pdf"
+} -result 0
+
+test is-uri1.23 {is uri invalid} -setup {} -body {
+    qc::is uri "///$%^&m.pdf"
+} -result 0
+
+test is-period-1.0 {qc::is period ""} -body {
+    qc::is period ""
+} -result 0
+
+test is-period-1.1 {qc::is period "Jan"} -body {
+    qc::is period "Jan"
+} -result 1
+
+test is-period-1.2 {qc::is period "January"} -body {
+    qc::is period "January"
+} -result 1
+
+test is-period-1.3 {qc::is period "2014"} -body {
+    qc::is period "2014"
+} -result 1
+
+test is-period-1.4 {qc::is period "Jan 2014"} -body {
+    qc::is period "Jan 2013"
+} -result 1
+
+test is-period-1.5 {qc::is period "January 2014"} -body {
+    qc::is period "January 2014"
+} -result 1
+
+test is-period-1.6 {qc::is period "Jan 2014 to March 2014"} -body {
+    qc::is period "Jan 2014 to March 2014"
+} -result 1
+
+test is-period-1.7 {qc::is period "Febuary 2014"} -body {
+    qc::is period "Febuary 2014"
+} -result 0
+
+test is-period-1.8 {qc::is period "1st February 2014 to 14th February 2014"} -body {
+    qc::is period "1st February 2014 to 14th February 2014"
+} -result 1
+
+
+test is-time-1.0 {qc::is time "00:00:00.000000"} -body {
+    qc::is time "00:00:00.000000"
+} -result 1
+
+test is-time-1.1 {qc::is time "00:00:00"} -body {
+    qc::is time "00:00:00"
+} -result 1
+
+test is-time-1.2 {qc::is time "24:00:00.000000"} -body {
+    qc::is time "24:00:00.000000"
+} -result 1
+
+test is-time-1.3 {qc::is time "24:00:00"} -body {
+    qc::is time "24:00:00"
+} -result 1
+
+test is-time-1.4 {qc::is time "12:34:56.789"} -body {
+    qc::is time "12:34:56.789"
+} -result 1
+
+test is-time-1.5 {qc::is time "12:34:56"} -body {
+    qc::is time "12:34:56"
+} -result 1
+
+test is-time-1.6 {qc::is time "24:00:01"} -body {
+    qc::is time "24:00:01"
+} -result 0
+
+test is-time-1.7 {qc::is time "98:76:54"} -body {
+    qc::is time "98:76:54"
+} -result 0
+
+test is-time-1.8 {qc::is time "12:59"} -body {
+    qc::is time "12:59"
+} -result 0
+
+test is-interval-1.0 {qc::is interval "1 year"} -body {
+    qc::is interval "1 year"
+} -result 1
+
+test is-interval-1.1 {qc::is interval "3 months -2 days"} -body {
+    qc::is interval "3 months -2 days"
+} -result 1
+
+test is-interval-1.2 {qc::is interval "-5 weeks"} -body {
+    qc::is interval "-5 weeks"
+} -result 1
+
+test is-interval-1.3 {qc::is interval "7"} -body {
+    qc::is interval "7"
+} -result 0
+
+test is-interval-1.4 {qc::is interval "last week"} -body {
+    qc::is interval "last week"
+} -result 0
+
+test is-interval-1.5 {qc::is interval "year"} -body {
+    qc::is interval "year"
+} -result 0
+
+# S3 URL, Bucket, Object Key
+# Test                    Description                                     Code                                        Result
+test is-s3_uri-1.0        {qc::is s3_uri: S3 URI}                         {qc::is s3_uri "s3://string/st34.235"}      1
+test is-s3_uri-1.1        {qc::is s3_uri: S3 URI without object key}      {qc::is s3_uri "S3://bucket"}               1
+test is-s3_uri-1.2        {qc::is s3_uri: S3 URI with inferred hierarchy} {qc::is s3_uri "s3://bucket/2/3/4/5"}       1
+test is-s3_uri-1.3        {qc::is s3_uri: Invalid S3 URI}                 {qc::is s3_uri "invalid s3 url"}            0
+test is-s3_uri-1.4        {qc::is s3_uri: Missing protocol}               {qc::is s3_uri "/bucket/file"}              0         
+
+test is-s3_bucket-1.0     {qc::is s3_bucket: Valid 1}                     {qc::is s3_bucket "test-name"}              1
+test is-s3_bucket-1.1     {qc::is s3_bucket: Valid 2}                     {qc::is s3_bucket "1.test-name.6"}          1
+test is-s3_bucket-1.2     {qc::is s3_bucket: Too few characters}          {qc::is s3_bucket "aa"}                     0
+test is-s3_bucket-1.3     {qc::is s3_bucket: Too many characters}         {qc::is s3_bucket [join [lrepeat 70 a] ""]} 0
+test is-s3_bucket-1.4     {qc::is s3_bucket: Invalid characters 1}        {qc::is s3_bucket "bucket_name"}            0
+test is-s3_bucket-1.5     {qc::is s3_bucket: Invalid characters 2}        {qc::is s3_bucket "aaaAaaa"}                0
+test is-s3_bucket-1.6     {qc::is s3_bucket: Invalid start character}     {qc::is s3_bucket "-bucket"}                0
+test is-s3_bucket-1.7     {qc::is s3_bucket: Invalid end character}       {qc::is s3_bucket "my-bucket."}             0
+test is-s3_bucket-1.8     {qc::is s3_bucket: IP Address}                  {qc::is s3_bucket "1.2.3.4"}                0
+
+test is-s3_object_key-1.0 {qc::is s3_object_key: Invalid characters 1}    {qc::is s3_object_key "my/file&name"}       0
+test is-s3_object_key-1.1 {qc::is s3_object_key: Invalid characters 2}    {qc::is s3_object_key "file name"}          0
+test is-s3_object_key-1.2 {qc::is s3_object_key: Valid key}               {qc::is s3_object_key "/obj/k!_t/Y*f).png"} 1
+test is-s3_object_key-1.3 {qc::is s3_object_key: Ending in "."}           {qc::is s3_object_key "name."}              0
+
+cleanupTests

@@ -1,747 +1,744 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test try-1.0 {try break} -setup {
+} -body {
+    qc::try {
+        break
+    } {
+        return 99
+    }
+} -returnCodes 3 -cleanup {} -result {}
 
-    test try-1.0 {try break} -setup {
-    } -body {
-        try {
-            break
-        } {
-            return 99
-        }
-    } -returnCodes 3 -cleanup {} -result {}
+test try-1.1 {try continue} -setup {
+} -body {
+    qc::try {
+        continue
+    } {
+        return 99
+    }
+} -returnCodes 4 -cleanup {} -result {}
 
-    test try-1.1 {try continue} -setup {
-    } -body {
-        try {
-            continue
-        } {
-            return 99
-        }
-    } -returnCodes 4 -cleanup {} -result {}
+test try-1.2 {try return} -setup {
+} -body {
+    qc::try {
+        return
+    } {
+        return 99
+    }
+} -returnCodes 2 -cleanup {} -result {}
 
-    test try-1.2 {try return} -setup {
-    } -body {
-        try {
-            return
-        } {
-            return 99
-        }
-    } -returnCodes 2 -cleanup {} -result {}
+test try-1.3 {try normal} -setup {
+} -body {
+    qc::try {
+    } {
+        return 99
+    }
+} -returnCodes 0 -cleanup {} -result {}
 
-    test try-1.3 {try normal} -setup {
-    } -body {
-        try {
-        } {
-            return 99
-        }
-    } -returnCodes 0 -cleanup {} -result {}
+test try-1.4 {try error catch return} -setup {
+} -body {
+    qc::try {
+        error "Try threw an error"
+    } {
+        return
+    }
+} -returnCodes 2 -cleanup {} -result {}
 
-    test try-1.4 {try error catch return} -setup {
-    } -body {
-        try {
-            error "Try threw an error"
-        } {
-            return
-        }
-    } -returnCodes 2 -cleanup {} -result {}
+test try-1.5 {try error catch continue} -setup {
+} -body {
+    qc::try {
+        error "Try threw an error"
+    } {
+        continue
+    }
+} -returnCodes 4 -cleanup {} -result {}
 
-    test try-1.5 {try error catch continue} -setup {
-    } -body {
-        try {
-            error "Try threw an error"
-        } {
-            continue
-        }
-    } -returnCodes 4 -cleanup {} -result {}
+test try-1.6 {try error catch break} -setup {
+} -body {
+    qc::try {
+        error "Try threw an error"
+    } {
+        break
+    }
+} -returnCodes 3 -cleanup {} -result {}
 
-    test try-1.6 {try error catch break} -setup {
-    } -body {
-        try {
-            error "Try threw an error"
-        } {
-            break
-        }
-    } -returnCodes 3 -cleanup {} -result {}
+test try-1.7 {try error catch normal} -setup {
+} -body {
+    qc::try {
+        error "Try threw an error"
+    } {
+    }
+} -returnCodes 0 -cleanup {} -result {}
 
-    test try-1.7 {try error catch normal} -setup {
-    } -body {
-        try {
-            error "Try threw an error"
-        } {
-        }
-    } -returnCodes 0 -cleanup {} -result {}
+test try-1.8 {try error catch error} -setup {
+} -body {
+    qc::try {
+        error "Try threw an error"
+    } {
+        error "So did catch"
+    }
+} -returnCodes 1 -cleanup {} -result {So did catch}
 
-    test try-1.8 {try error catch error} -setup {
-    } -body {
-        try {
-            error "Try threw an error"
-        } {
-            error "So did catch"
-        }
-    } -returnCodes 1 -cleanup {} -result {So did catch}
+test default-1.0 {default exists} -setup {
+    set test_var "Original Value"
+    default test_var "Default Value"
+} -body {
+    set test_var
+} -cleanup { unset test_var } -result {Original Value}
 
-    test default-1.0 {default exists} -setup {
-        set test_var "Original Value"
-        default test_var "Default Value"
-    } -body {
-        set test_var
-    } -cleanup { unset test_var } -result {Original Value}
+test default-1.1 {default does not exist} -setup {
+    default test_var "Default Value"
+} -body {
+    set test_var
+} -cleanup {unset test_var} -result {Default Value}
 
-    test default-1.1 {default does not exist} -setup {
-        default test_var "Default Value"
-    } -body {
-        set test_var
-    } -cleanup {unset test_var} -result {Default Value}
+test default-1.2 {default multiples} -setup {
+    default test_var1 1 test_var2 2 test_var3 3
+} -body {
+    set test_var3
+} -cleanup {
+    unset test_var1
+    unset test_var2
+    unset test_var3
+} -result {3}
 
-    test default-1.2 {default multiples} -setup {
-        default test_var1 1 test_var2 2 test_var3 3
-    } -body {
-        set test_var3
-    } -cleanup {
-        unset test_var1
-        unset test_var2
-        unset test_var3
-    } -result {3}
+test default-1.3 {default multiple with one existing} -setup {
+    set test_var2 "Original Value"
+    default test_var1 1 test_var2 2 test_var3 3
+} -body {
+    set test_var2
+} -cleanup {
+    unset test_var1
+    unset test_var2
+    unset test_var3
+} -result {Original Value}
 
-    test default-1.3 {default multiple with one existing} -setup {
-        set test_var2 "Original Value"
-        default test_var1 1 test_var2 2 test_var3 3
-    } -body {
-        set test_var2
-    } -cleanup {
-        unset test_var1
-        unset test_var2
-        unset test_var3
-    } -result {Original Value}
+test setif-1.0 {setif matches} -setup {
+    set test_var NULL
+    setif test_var NULL "NOT NULL"
+} -body {
+    set test_var
+} -cleanup {unset test_var} -result {NOT NULL}
 
-    test setif-1.0 {setif matches} -setup {
-        set test_var NULL
-        setif test_var NULL "NOT NULL"
-    } -body {
-        set test_var
-    } -cleanup {unset test_var} -result {NOT NULL}
+test setif-1.1 {setif does not exist} -setup {
+    setif test_var NULL "NOT NULL"
+} -body {
+    set test_var
+} -cleanup {unset test_var} -result {NOT NULL}
 
-    test setif-1.1 {setif does not exist} -setup {
-        setif test_var NULL "NOT NULL"
-    } -body {
-        set test_var
-    } -cleanup {unset test_var} -result {NOT NULL}
+test setif-1.2 {setif does not match} -setup {
+    set test_var "Something completely different"
+    setif test_var NULL "NOT NULL"
+} -body {
+    set test_var
+} -cleanup {unset test_var} -result {Something completely different}
 
-    test setif-1.2 {setif does not match} -setup {
-        set test_var "Something completely different"
-        setif test_var NULL "NOT NULL"
-    } -body {
-        set test_var
-    } -cleanup {unset test_var} -result {Something completely different}
-
-    test sset-1.0 {sset } -setup {
-        set test_var1 "AAA"
-        set test_var2 "BBB"
-        sset test_var3 {
-            test_var1 = $test_var1 test_var2 = $test_var2
-        }
-    } -body {
-        set test_var3
-    } -cleanup {
-        unset test_var1
-        unset test_var2
-        unset test_var3
-    } -result {test_var1 = AAA test_var2 = BBB
+test sset-1.0 {sset } -setup {
+    set test_var1 "AAA"
+    set test_var2 "BBB"
+    sset test_var3 {
+        test_var1 = $test_var1 test_var2 = $test_var2
+    }
+} -body {
+    set test_var3
+} -cleanup {
+    unset test_var1
+    unset test_var2
+    unset test_var3
+} -result {test_var1 = AAA test_var2 = BBB
 }
 
-    test sappend-1.0 {sappend to empty} -setup {
-        set test_var1 "AAA"
-        set test_var2 "BBB"
-        set result {}
-        sappend result {
-            result = $test_var1 test_var2 = $test_var2
-        }
-    } -body {
-        set result
-    } -cleanup {
-        unset test_var1
-        unset test_var2
-        unset result
-    } -result {result = AAA test_var2 = BBB
+test sappend-1.0 {sappend to empty} -setup {
+    set test_var1 "AAA"
+    set test_var2 "BBB"
+    set result {}
+    sappend result {
+        result = $test_var1 test_var2 = $test_var2
+    }
+} -body {
+    set result
+} -cleanup {
+    unset test_var1
+    unset test_var2
+    unset result
+} -result {result = AAA test_var2 = BBB
 }
 
-    test sappend-1.1 {sappend to existing} -setup {
-        set test_var1 "ZZZ"
-        set test_var2 "XXX"
-        set result {result = AAA test_var2 = BBB }
-        sappend result {
-            result = $test_var1 test_var2 = $test_var2
-        }
-    } -body {
-        set result
-    } -cleanup {
-        unset test_var1
-        unset test_var2
-        unset result
-    } -result {result = AAA test_var2 = BBB result = ZZZ test_var2 = XXX
+test sappend-1.1 {sappend to existing} -setup {
+    set test_var1 "ZZZ"
+    set test_var2 "XXX"
+    set result {result = AAA test_var2 = BBB }
+    sappend result {
+        result = $test_var1 test_var2 = $test_var2
+    }
+} -body {
+    set result
+} -cleanup {
+    unset test_var1
+    unset test_var2
+    unset result
+} -result {result = AAA test_var2 = BBB result = ZZZ test_var2 = XXX
 }
 
-    test coalesce-1.0 {coalesce exists} -setup {
-        set test_var "ZZZ"
-    } -body {
-        coalesce test_var XXX
-    } -cleanup {
-        unset test_var
-    } -result {ZZZ}
+test coalesce-1.0 {coalesce exists} -setup {
+    set test_var "ZZZ"
+} -body {
+    coalesce test_var XXX
+} -cleanup {
+    unset test_var
+} -result {ZZZ}
 
-    test coalesce-1.1 {coalesce doesnt exist} -setup {
-    } -body {
-        coalesce test_var XXX
-    } -cleanup {
-    } -result {XXX}
+test coalesce-1.1 {coalesce doesnt exist} -setup {
+} -body {
+    coalesce test_var XXX
+} -cleanup {
+} -result {XXX}
 
-    test incr0-1.0 {incr0 1} -setup {
-        set test_var 10
-    } -body {
-        incr0 test_var 1
-    } -cleanup {
-        unset test_var
-    } -result {11}
+test incr0-1.0 {incr0 1} -setup {
+    set test_var 10
+} -body {
+    incr0 test_var 1
+} -cleanup {
+    unset test_var
+} -result {11}
 
-    test incr0-1.1 {incr0 negative} -setup {
-        set test_var -10
-    } -body {
-        incr0 test_var 1
-    } -cleanup {
-        unset test_var
-    } -result {-9}
+test incr0-1.1 {incr0 negative} -setup {
+    set test_var -10
+} -body {
+    incr0 test_var 1
+} -cleanup {
+    unset test_var
+} -result {-9}
 
-    test incr0-1.2 {incr0 does not exist} -setup {
-    } -body {
-        incr0 test_var 10
-    } -cleanup {
-        unset test_var
-    } -result {10}
+test incr0-1.2 {incr0 does not exist} -setup {
+} -body {
+    incr0 test_var 10
+} -cleanup {
+    unset test_var
+} -result {10}
 
-    test incr0-1.3 {incr0 with negative} -setup {
-        set test_var 10
-    } -body {
-        incr0 test_var -5
-    } -cleanup {
-        unset test_var
-    } -result {5}
+test incr0-1.3 {incr0 with negative} -setup {
+    set test_var 10
+} -body {
+    incr0 test_var -5
+} -cleanup {
+    unset test_var
+} -result {5}
 
-    test call-1.0 {call } -setup {
-        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
-            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
-                return true
-            } else {
-                return false
-            }
+test call-1.0 {call } -setup {
+    proc call_test { aaa bbb ccc ddd eee fff } {
+        if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+            return true
+        } else {
+            return false
         }
-        set aaa true
-        set bbb true
-        set ccc true
-        set ddd true
-        set eee true
-        set fff true
-    } -body {
-        call ::qcode::test::check_all_vars
-    } -cleanup {
-        unset aaa 
-        unset bbb 
-        unset ccc 
-        unset ddd 
-        unset eee 
-        unset fff 
-        rename ::qcode::test::check_all_vars ""
-    } -result {true}
+    }
+    set aaa true
+    set bbb true
+    set ccc true
+    set ddd true
+    set eee true
+    set fff true
+} -body {
+    call call_test
+} -cleanup {
+    unset aaa 
+    unset bbb 
+    unset ccc 
+    unset ddd 
+    unset eee 
+    unset fff 
+    rename call_test ""
+} -result {true}
 
-    test call-1.1 {call missing var} -setup {
-        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
-            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
-                return true
-            } else {
-                return false
-            }
+test call-1.1 {call missing var} -setup {
+    proc call_test { aaa bbb ccc ddd eee fff } {
+        if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+            return true
+        } else {
+            return false
         }
-        set bbb true
-        set ccc true
-        set ddd true
-        set eee true
-        set fff true
-    } -body {
-        call ::qcode::test::check_all_vars
-    } -cleanup {
-        unset bbb 
-        unset ccc 
-        unset ddd 
-        unset eee 
-        unset fff 
-        rename ::qcode::test::check_all_vars ""
-    } -returnCodes 1 -result {Cannot use variable "aaa" to call proc qc::"::qcode::test::check_all_vars":no such variable "aaa"}
+    }
+    set bbb true
+    set ccc true
+    set ddd true
+    set eee true
+    set fff true
+} -body {
+    call call_test
+} -cleanup {
+    unset bbb 
+    unset ccc 
+    unset ddd 
+    unset eee 
+    unset fff 
+    rename call_test ""
+} -returnCodes 1 -result {Cannot use variable "aaa" to call proc qc::"call_test":no such variable "aaa"}
 
-    test call-1.0 {call functionality check} -setup {
-        proc ::qcode::test::check_all_vars { aaa bbb ccc ddd eee fff } {
-            if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
-                return true
-            } else {
-                return false
-            }
+test call-1.0 {call functionality check} -setup {
+    proc call_test { aaa bbb ccc ddd eee fff } {
+        if { $aaa && $bbb && $ccc && $ddd && $eee && $fff } {
+            return true
+        } else {
+            return false
         }
-        set aaa true
-        set bbb true
-        set ccc true
-        set ddd true
-        set eee true
-        set fff false
-    } -body {
-        call ::qcode::test::check_all_vars
-    } -cleanup {
-        unset aaa 
-        unset bbb 
-        unset ccc 
-        unset ddd 
-        unset eee 
-        unset fff 
-        rename ::qcode::test::check_all_vars ""
-    } -result {false}
-
-    test margin-1.0 {margin } -setup {
-    } -body {
-        margin 0.40 2.99
-    } -cleanup {
-    } -result {86.6}
-
-    test margin-1.1 {margin 3 decimal places} -setup {
-    } -body {
-        margin 0.40 2.99 3
-    } -cleanup {
-    } -result {86.622}
-
-    test margin-1.2 {margin zero} -setup {
-    } -body {
-        margin 0.40 0.40
-    } -cleanup {
-    } -result {0.0}
-
-    test margin-1.3 {margin loss} -setup {
-    } -body {
-        margin 40 1
-    } -cleanup {
-    } -result {-3900.0}
-
-    test margin-1.4 {margin zero} -setup {
-    } -body {
-        margin 40 0
-    } -cleanup {
-    } -result {}
-
-    test iif-1.0 {iif true} -setup {
-    } -body {
-        iif true AAA ZZZZ
-    } -cleanup {
-    } -result {AAA}
-
-    test iif-1.1 {iif false} -setup {
-    } -body {
-        iif false AAA ZZZ
-    } -cleanup {
-    } -result {ZZZ}
-
-    test iif-1.2 {iif numeric} -setup {
-    } -body {
-        iif 1 AAA ZZZ
-    } -cleanup {
-    } -result {AAA}
-
-    test iif-1.3 {iif numeric2} -setup {
-    } -body {
-        iif 0 AAA ZZZ
-    } -cleanup {
-    } -result {ZZZ}
-
-    test ?-1.0 {? true} -setup {
-    } -body {
-        ? true AAA ZZZZ
-    } -cleanup {
-    } -result {AAA}
-
-    test ?-1.1 {? false} -setup {
-    } -body {
-        ? false AAA ZZZ
-    } -cleanup {
-    } -result {ZZZ}
-
-    test ?-1.2 {? numeric} -setup {
-    } -body {
-        ? 1 AAA ZZZ
-    } -cleanup {
-    } -result {AAA}
-
-    test ?-1.3 {? numeric2} -setup {
-    } -body {
-        ? 0 AAA ZZZ
-    } -cleanup {
-    } -result {ZZZ}
-
-    test true-1.0 {true true} -setup {
-    } -body {
-        true true
-    } -cleanup {
-    } -result {true}
-
-    test true-1.1 {true yes} -setup {
-    } -body {
-        true yes
-    } -cleanup {
-    } -result {true}
-
-    test true-1.2 {true 1} -setup {
-    } -body {
-        true 1
-    } -cleanup {
-    } -result {true}
-
-    test true-1.3 {true false} -setup {
-    } -body {
-        true false
-    } -cleanup {
-    } -result {false}
-
-    test true-1.4 {true no} -setup {
-    } -body {
-        true no
-    } -cleanup {
-    } -result {false}
-
-    test true-1.5 {true 0} -setup {
-    } -body {
-        true 0
-    } -cleanup {
-    } -result {false}
-
-    test true-1.6 {true true custom} -setup {
-    } -body {
-        true true aye nae
-    } -cleanup {
-    } -result {aye}
-
-    test true-1.7 {true false custom} -setup {
-    } -body {
-        true false aye nae
-    } -cleanup {
-    } -result {nae}
-
-    test false-1.0 {false true} -setup {
-    } -body {
-        false true
-    } -cleanup {
-    } -result {false}
-
-    test false-1.1 {false yes} -setup {
-    } -body {
-        false yes
-    } -cleanup {
-    } -result {false}
-
-    test false-1.2 {false 1} -setup {
-    } -body {
-        false 1
-    } -cleanup {
-    } -result {false}
-
-    test false-1.3 {false false} -setup {
-    } -body {
-        false false
-    } -cleanup {
-    } -result {true}
-
-    test false-1.4 {false no} -setup {
-    } -body {
-        false no
-    } -cleanup {
-    } -result {true}
-
-    test false-1.5 {false 0} -setup {
-    } -body {
-        false 0
-    } -cleanup {
-    } -result {true}
-
-    test false-1.6 {false true custom} -setup {
-    } -body {
-        false true aye nae
-    } -cleanup {
-    } -result {nae}
-
-    test false-1.7 {false false custom} -setup {
-    } -body {
-        false false aye nae
-    } -cleanup {
-    } -result {aye}
-
-    test mcsplit-1.0 {mcsplit } -setup {
-    } -body {
-        mcsplit "this||is||a||delimited||string" {||}
-    } -cleanup {
-    } -result {this is a delimited string}
-
-    test mcsplit-1.1 {mcsplit single delimiter} -setup {
-    } -body {
-        mcsplit "this||is||a||delimited||string" {|}
-    } -cleanup {
-    } -result {this {} is {} a {} delimited {} string}
-
-    test mcsplit-1.2 {mcsplit nothing to do} -setup {
-    } -body {
-        mcsplit "this||is||a||delimited||string" {|||}
-    } -cleanup {
-    } -result {this||is||a||delimited||string}
-
-    test mcsplit-1.3 {mcsplit empty} -setup {
-    } -body {
-        mcsplit "" {||}
-    } -cleanup {
-    } -result {}
-
-    test cmplen-1.0 {cmplen bigger} -setup {
-    } -body {
-        cmplen "hippopotamus" "ox"
-    } -cleanup {
-    } -result {1}
-
-    test cmplen-1.1 {cmplen smaller} -setup {
-    } -body {
-        cmplen "ox" "hippopotamus"
-    } -cleanup {
-    } -result {-1}
-
-    test cmplen-1.2 {cmplen same} -setup {
-    } -body {
-        cmplen "ox" "ox"
-    } -cleanup {
-    } -result {0}
-
-    test cmplen-1.3 {cmplen compare to empty} -setup {
-    } -body {
-        cmplen "ox" ""
-    } -cleanup {
-    } -result {1}
-
-    test cmplen-1.3 {cmplen empty to empty} -setup {
-    } -body {
-        cmplen "" ""
-    } -cleanup {
-    } -result {0}
-
-    test subsets-1.0 {subsets 9} -setup {
-    } -body {
-        subsets [list a b c d e f g h i] 9
-    } -cleanup {
-    } -result {{a b c d e f g h i}}
-
-    test subsets-1.1 {subsets 8} -setup {
-    } -body {
-        subsets [list a b c d e f g h i] 8
-    } -cleanup {
-    } -result {{a b c d e f g h} {a b c d e f g i} {a b c d e f h i} {a b c d e g h i} {a b c d f g h i} {a b c e f g h i} {a b d e f g h i} {a c d e f g h i} {b c d e f g h i}}
-
-    test subsets-1.2 {subsets length 1} -setup {
-    } -body {
-        subsets [list a b c d e f g h i] 1
-    } -cleanup {
-    } -result {a b c d e f g h i}
-
-    test subsets-1.3 {subsets length 0} -setup {
-    } -body {
-        subsets [list a b c d e f g h i] 0
-    } -cleanup {
-    } -result {}
-
-    test subsets-1.4 {subsets list of lists } -setup {
-    } -body {
-        subsets [list [list 1 2 3] [list 4 5 6] [list 7 8 9] [list 10 11 12] [list 13 14 15]] 2
-    } -cleanup {
-    } -result {{{1 2 3} {4 5 6}} {{1 2 3} {7 8 9}} {{4 5 6} {7 8 9}} {{1 2 3} {10 11 12}} {{4 5 6} {10 11 12}} {{7 8 9} {10 11 12}} {{1 2 3} {13 14 15}} {{4 5 6} {13 14 15}} {{7 8 9} {13 14 15}} {{10 11 12} {13 14 15}}}
-
-    test permutations-1.0 {permutations } -setup {
-    } -body {
-        permutations [list a b c]
-    } -cleanup {
-    } -result {{c b a} {c a b} {b c a} {a c b} {b a c} {a b c}}
-
-    test permutations-1.1 {permutations single} -setup {
-    } -body {
-        permutations [list a]
-    } -cleanup {
-    } -result {a}
-
-    test permutations-1.2 {permutations empty} -setup {
-    } -body {
-        permutations [list]
-    } -cleanup {
-    } -result {{}}
-
-    test split_pair-1.0 {split_pair } -setup {
-    } -body {
-        split_pair "key=value" =
-    } -cleanup {
-    } -result {key value}
-
-    test split_pair-1.1 {split_pair not found} -setup {
-    } -body {
-        split_pair "key=value" |
-    } -cleanup {
-    } -returnCodes 1 -result {Delimiter "|" was not found in the string "key=value"}
-
-    test split_pair-1.2 {split_pair multiple} -setup {
-    } -body {
-        split_pair "key=value=value=value" =
-    } -cleanup {
-    } -result {key value=value=value}
-
-    test split_pair-1.3 {split_pair longer delimiter} -setup {
-    } -body {
-        split_pair "key/***/value" {/***/}
-    } -cleanup {
-    } -result {key value}
-
-    test max_nz-1.0 {max_nz single argument } -setup {
-    } -body {
-        max_nz 1
-    } -cleanup {} -result {1}
-
-    test max_nz-1.1 {max_nz non-numeric } -setup {
-    } -body {
-        max_nz "hunners"
-    } -cleanup {} -result {}
-
-    test max_nz-1.2 {max_nz negative max } -constraints knownBug -setup {
-    } -body {
-        max_nz -1 -94 -3 0 -2 -6 -100
-    } -cleanup {} -result {-1}
-
-    test max_nz-1.3 {max_nz floats } -setup {
-    } -body {
-        max_nz 99.9 4.4 0.0000001 63.3 0.0001 2 
-    } -cleanup {} -result {99.9}
-
-    test max_nz-1.4 {max_nz zeros } -setup {
-    } -body {
-        max_nz 0 0 0 0 0 0
-    } -cleanup {} -result {}
-
-    test ..-1.0 {.. months long} -setup {
-    } -body {
-        .. October February
-    } -cleanup {} -result {October November December January February}
-
-    test ..-1.11 {.. months short} -setup {
-    } -body {
-        .. Oct Feb
-    } -cleanup {} -result {Oct Nov Dec Jan Feb}
-
-    test ..-1.12 {.. days short} -setup {
-    } -body {
-        .. Fri Tue
-    } -cleanup {} -result {Fri Sat Sun Mon Tue}
-
-    test ..-1.13 {.. days long} -setup {
-    } -body {
-        .. Friday Tuesday
-    } -cleanup {} -result {Friday Saturday Sunday Monday Tuesday}
-
-    test ..-1.14 {.. months long upper} -setup {
-    } -body {
-        .. OCTOBER FEBRUARY
-    } -cleanup {} -result {OCTOBER NOVEMBER DECEMBER JANUARY FEBRUARY}
-
-    test ..-1.15 {.. months short lower} -setup {
-    } -body {
-        .. oct feb
-    } -cleanup {} -result {oct nov dec jan feb}
-
-    test ..-1.16 {.. days short upper} -setup {
-    } -body {
-        .. FRI TUE
-    } -cleanup {} -result {FRI SAT SUN MON TUE}
-
-    test ..-1.17 {.. days long lower} -setup {
-    } -body {
-        .. friday tuesday
-    } -cleanup {} -result {friday saturday sunday monday tuesday}
-
-    test ..-1.18 {.. days return one} -setup {
-    } -body {
-        .. friday friday
-    } -cleanup {} -result {friday}
-
-    test ..-1.19 {.. days step 2 } -setup {
-    } -body {
-        .. friday thursday 2
-    } -cleanup {} -result {friday sunday tuesday thursday}
-
-    #TODO is this a bug - it returns friday wednesday monday saturday thursday ?
-    test ..-1.20 {.. days step 5 } -constraints knownBug -setup {
-    } -body {
-        .. friday thursday 5
-    } -cleanup {} -result {friday wednesday}
-
-    test ..-1.21 {.. days step 2 limit 2 } -setup {
-    } -body {
-        .. FRIDAY THURSDAY 2 2
-    } -cleanup {} -result {FRIDAY SUNDAY}
-
-    test ..-1.22 {.. days step 2 limit 2 } -setup {
-    } -body {
-        .. FRIDAY THURSDAY 2 10
-    } -cleanup {} -result {FRIDAY SUNDAY TUESDAY THURSDAY SATURDAY MONDAY WEDNESDAY FRIDAY SUNDAY TUESDAY}
-
-    test ..-1.23 {.. dates leap year} -setup {
-    } -body {
-        .. 2012-02-25 2012-03-03
-    } -cleanup {} -result {2012-02-25 2012-02-26 2012-02-27 2012-02-28 2012-02-29 2012-03-01 2012-03-02 2012-03-03}
-
-    test ..-1.24 {.. dates backwards} -setup {
-    } -body {
-        .. 2012-01-03 2011-12-29
-    } -cleanup {} -result {}
-
-    test ..-1.25 {.. dates over year} -setup {
-    } -body {
-        ..  2011-12-29 2012-01-03
-    } -cleanup {} -result {2011-12-29 2011-12-30 2011-12-31 2012-01-01 2012-01-02 2012-01-03}
-
-    test ..-1.26 {.. dates step 2 days} -setup {
-    } -body {
-        ..  2011-12-29 2012-01-03 "2 days"
-    } -cleanup {} -result {2011-12-29 2011-12-31 2012-01-02}
-
-    test ..-1.27 {.. dates step 1 month} -setup {
-    } -body {
-        ..  2011-07-29 2012-01-03 "1 month"
-    } -cleanup {} -result {2011-07-29 2011-08-29 2011-09-29 2011-10-29 2011-11-29 2011-12-29}
-
-    test ..-1.28 {.. dates step 1 year} -setup {
-    } -body {
-        ..  2007-07-29 2012-01-03 "1 year"
-    } -cleanup {} -result {2007-07-29 2008-07-29 2009-07-29 2010-07-29 2011-07-29}
-
-    test ..-1.29 {.. integers} -setup {
-    } -body {
-        ..  1 10
-    } -cleanup {} -result {1 2 3 4 5 6 7 8 9 10}
-
-    test info_proc-1.0 {info_proc info_proc } -setup {
-    } -body {
-        info_proc info_proc 
-    } -cleanup {} -result {proc qc::info_proc {proc_name} {
+    }
+    set aaa true
+    set bbb true
+    set ccc true
+    set ddd true
+    set eee true
+    set fff false
+} -body {
+    call call_test
+} -cleanup {
+    unset aaa 
+    unset bbb 
+    unset ccc 
+    unset ddd 
+    unset eee 
+    unset fff 
+    rename call_test ""
+} -result {false}
+
+test margin-1.0 {margin } -setup {
+} -body {
+    margin 0.40 2.99
+} -cleanup {
+} -result {86.6}
+
+test margin-1.1 {margin 3 decimal places} -setup {
+} -body {
+    margin 0.40 2.99 3
+} -cleanup {
+} -result {86.622}
+
+test margin-1.2 {margin zero} -setup {
+} -body {
+    margin 0.40 0.40
+} -cleanup {
+} -result {0.0}
+
+test margin-1.3 {margin loss} -setup {
+} -body {
+    margin 40 1
+} -cleanup {
+} -result {-3900.0}
+
+test margin-1.4 {margin zero} -setup {
+} -body {
+    margin 40 0
+} -cleanup {
+} -result {}
+
+test iif-1.0 {iif true} -setup {
+} -body {
+    iif true AAA ZZZZ
+} -cleanup {
+} -result {AAA}
+
+test iif-1.1 {iif false} -setup {
+} -body {
+    iif false AAA ZZZ
+} -cleanup {
+} -result {ZZZ}
+
+test iif-1.2 {iif numeric} -setup {
+} -body {
+    iif 1 AAA ZZZ
+} -cleanup {
+} -result {AAA}
+
+test iif-1.3 {iif numeric2} -setup {
+} -body {
+    iif 0 AAA ZZZ
+} -cleanup {
+} -result {ZZZ}
+
+test ?-1.0 {? true} -setup {
+} -body {
+    ? true AAA ZZZZ
+} -cleanup {
+} -result {AAA}
+
+test ?-1.1 {? false} -setup {
+} -body {
+    ? false AAA ZZZ
+} -cleanup {
+} -result {ZZZ}
+
+test ?-1.2 {? numeric} -setup {
+} -body {
+    ? 1 AAA ZZZ
+} -cleanup {
+} -result {AAA}
+
+test ?-1.3 {? numeric2} -setup {
+} -body {
+    ? 0 AAA ZZZ
+} -cleanup {
+} -result {ZZZ}
+
+test true-1.0 {true true} -setup {
+} -body {
+    true true
+} -cleanup {
+} -result {true}
+
+test true-1.1 {true yes} -setup {
+} -body {
+    true yes
+} -cleanup {
+} -result {true}
+
+test true-1.2 {true 1} -setup {
+} -body {
+    true 1
+} -cleanup {
+} -result {true}
+
+test true-1.3 {true false} -setup {
+} -body {
+    true false
+} -cleanup {
+} -result {false}
+
+test true-1.4 {true no} -setup {
+} -body {
+    true no
+} -cleanup {
+} -result {false}
+
+test true-1.5 {true 0} -setup {
+} -body {
+    true 0
+} -cleanup {
+} -result {false}
+
+test true-1.6 {true true custom} -setup {
+} -body {
+    true true aye nae
+} -cleanup {
+} -result {aye}
+
+test true-1.7 {true false custom} -setup {
+} -body {
+    true false aye nae
+} -cleanup {
+} -result {nae}
+
+test false-1.0 {false true} -setup {
+} -body {
+    false true
+} -cleanup {
+} -result {false}
+
+test false-1.1 {false yes} -setup {
+} -body {
+    false yes
+} -cleanup {
+} -result {false}
+
+test false-1.2 {false 1} -setup {
+} -body {
+    false 1
+} -cleanup {
+} -result {false}
+
+test false-1.3 {false false} -setup {
+} -body {
+    false false
+} -cleanup {
+} -result {true}
+
+test false-1.4 {false no} -setup {
+} -body {
+    false no
+} -cleanup {
+} -result {true}
+
+test false-1.5 {false 0} -setup {
+} -body {
+    false 0
+} -cleanup {
+} -result {true}
+
+test false-1.6 {false true custom} -setup {
+} -body {
+    false true aye nae
+} -cleanup {
+} -result {nae}
+
+test false-1.7 {false false custom} -setup {
+} -body {
+    false false aye nae
+} -cleanup {
+} -result {aye}
+
+test mcsplit-1.0 {mcsplit } -setup {
+} -body {
+    mcsplit "this||is||a||delimited||string" {||}
+} -cleanup {
+} -result {this is a delimited string}
+
+test mcsplit-1.1 {mcsplit single delimiter} -setup {
+} -body {
+    mcsplit "this||is||a||delimited||string" {|}
+} -cleanup {
+} -result {this {} is {} a {} delimited {} string}
+
+test mcsplit-1.2 {mcsplit nothing to do} -setup {
+} -body {
+    mcsplit "this||is||a||delimited||string" {|||}
+} -cleanup {
+} -result {this||is||a||delimited||string}
+
+test mcsplit-1.3 {mcsplit empty} -setup {
+} -body {
+    mcsplit "" {||}
+} -cleanup {
+} -result {}
+
+test cmplen-1.0 {cmplen bigger} -setup {
+} -body {
+    cmplen "hippopotamus" "ox"
+} -cleanup {
+} -result {1}
+
+test cmplen-1.1 {cmplen smaller} -setup {
+} -body {
+    cmplen "ox" "hippopotamus"
+} -cleanup {
+} -result {-1}
+
+test cmplen-1.2 {cmplen same} -setup {
+} -body {
+    cmplen "ox" "ox"
+} -cleanup {
+} -result {0}
+
+test cmplen-1.3 {cmplen compare to empty} -setup {
+} -body {
+    cmplen "ox" ""
+} -cleanup {
+} -result {1}
+
+test cmplen-1.3 {cmplen empty to empty} -setup {
+} -body {
+    cmplen "" ""
+} -cleanup {
+} -result {0}
+
+test subsets-1.0 {subsets 9} -setup {
+} -body {
+    subsets [list a b c d e f g h i] 9
+} -cleanup {
+} -result {{a b c d e f g h i}}
+
+test subsets-1.1 {subsets 8} -setup {
+} -body {
+    subsets [list a b c d e f g h i] 8
+} -cleanup {
+} -result {{a b c d e f g h} {a b c d e f g i} {a b c d e f h i} {a b c d e g h i} {a b c d f g h i} {a b c e f g h i} {a b d e f g h i} {a c d e f g h i} {b c d e f g h i}}
+
+test subsets-1.2 {subsets length 1} -setup {
+} -body {
+    subsets [list a b c d e f g h i] 1
+} -cleanup {
+} -result {a b c d e f g h i}
+
+test subsets-1.3 {subsets length 0} -setup {
+} -body {
+    subsets [list a b c d e f g h i] 0
+} -cleanup {
+} -result {}
+
+test subsets-1.4 {subsets list of lists } -setup {
+} -body {
+    subsets [list [list 1 2 3] [list 4 5 6] [list 7 8 9] [list 10 11 12] [list 13 14 15]] 2
+} -cleanup {
+} -result {{{1 2 3} {4 5 6}} {{1 2 3} {7 8 9}} {{4 5 6} {7 8 9}} {{1 2 3} {10 11 12}} {{4 5 6} {10 11 12}} {{7 8 9} {10 11 12}} {{1 2 3} {13 14 15}} {{4 5 6} {13 14 15}} {{7 8 9} {13 14 15}} {{10 11 12} {13 14 15}}}
+
+test permutations-1.0 {permutations } -setup {
+} -body {
+    permutations [list a b c]
+} -cleanup {
+} -result {{c b a} {c a b} {b c a} {a c b} {b a c} {a b c}}
+
+test permutations-1.1 {permutations single} -setup {
+} -body {
+    permutations [list a]
+} -cleanup {
+} -result {a}
+
+test permutations-1.2 {permutations empty} -setup {
+} -body {
+    permutations [list]
+} -cleanup {
+} -result {{}}
+
+test split_pair-1.0 {split_pair } -setup {
+} -body {
+    split_pair "key=value" =
+} -cleanup {
+} -result {key value}
+
+test split_pair-1.1 {split_pair not found} -setup {
+} -body {
+    split_pair "key=value" |
+} -cleanup {
+} -returnCodes 1 -result {Delimiter "|" was not found in the string "key=value"}
+
+test split_pair-1.2 {split_pair multiple} -setup {
+} -body {
+    split_pair "key=value=value=value" =
+} -cleanup {
+} -result {key value=value=value}
+
+test split_pair-1.3 {split_pair longer delimiter} -setup {
+} -body {
+    split_pair "key/***/value" {/***/}
+} -cleanup {
+} -result {key value}
+
+test max_nz-1.0 {max_nz single argument } -setup {
+} -body {
+    max_nz 1
+} -cleanup {} -result {1}
+
+test max_nz-1.1 {max_nz non-numeric } -setup {
+} -body {
+    max_nz "hunners"
+} -cleanup {} -result {}
+
+test max_nz-1.2 {max_nz negative max } -constraints knownBug -setup {
+} -body {
+    max_nz -1 -94 -3 0 -2 -6 -100
+} -cleanup {} -result {-1}
+
+test max_nz-1.3 {max_nz floats } -setup {
+} -body {
+    max_nz 99.9 4.4 0.0000001 63.3 0.0001 2 
+} -cleanup {} -result {99.9}
+
+test max_nz-1.4 {max_nz zeros } -setup {
+} -body {
+    max_nz 0 0 0 0 0 0
+} -cleanup {} -result {}
+
+test ..-1.0 {.. months long} -setup {
+} -body {
+    .. October February
+} -cleanup {} -result {October November December January February}
+
+test ..-1.11 {.. months short} -setup {
+} -body {
+    .. Oct Feb
+} -cleanup {} -result {Oct Nov Dec Jan Feb}
+
+test ..-1.12 {.. days short} -setup {
+} -body {
+    .. Fri Tue
+} -cleanup {} -result {Fri Sat Sun Mon Tue}
+
+test ..-1.13 {.. days long} -setup {
+} -body {
+    .. Friday Tuesday
+} -cleanup {} -result {Friday Saturday Sunday Monday Tuesday}
+
+test ..-1.14 {.. months long upper} -setup {
+} -body {
+    .. OCTOBER FEBRUARY
+} -cleanup {} -result {OCTOBER NOVEMBER DECEMBER JANUARY FEBRUARY}
+
+test ..-1.15 {.. months short lower} -setup {
+} -body {
+    .. oct feb
+} -cleanup {} -result {oct nov dec jan feb}
+
+test ..-1.16 {.. days short upper} -setup {
+} -body {
+    .. FRI TUE
+} -cleanup {} -result {FRI SAT SUN MON TUE}
+
+test ..-1.17 {.. days long lower} -setup {
+} -body {
+    .. friday tuesday
+} -cleanup {} -result {friday saturday sunday monday tuesday}
+
+test ..-1.18 {.. days return one} -setup {
+} -body {
+    .. friday friday
+} -cleanup {} -result {friday}
+
+test ..-1.19 {.. days step 2 } -setup {
+} -body {
+    .. friday thursday 2
+} -cleanup {} -result {friday sunday tuesday thursday}
+
+#TODO is this a bug - it returns friday wednesday monday saturday thursday ?
+test ..-1.20 {.. days step 5 } -constraints knownBug -setup {
+} -body {
+    .. friday thursday 5
+} -cleanup {} -result {friday wednesday}
+
+test ..-1.21 {.. days step 2 limit 2 } -setup {
+} -body {
+    .. FRIDAY THURSDAY 2 2
+} -cleanup {} -result {FRIDAY SUNDAY}
+
+test ..-1.22 {.. days step 2 limit 2 } -setup {
+} -body {
+    .. FRIDAY THURSDAY 2 10
+} -cleanup {} -result {FRIDAY SUNDAY TUESDAY THURSDAY SATURDAY MONDAY WEDNESDAY FRIDAY SUNDAY TUESDAY}
+
+test ..-1.23 {.. dates leap year} -setup {
+} -body {
+    .. 2012-02-25 2012-03-03
+} -cleanup {} -result {2012-02-25 2012-02-26 2012-02-27 2012-02-28 2012-02-29 2012-03-01 2012-03-02 2012-03-03}
+
+test ..-1.24 {.. dates backwards} -setup {
+} -body {
+    .. 2012-01-03 2011-12-29
+} -cleanup {} -result {}
+
+test ..-1.25 {.. dates over year} -setup {
+} -body {
+    ..  2011-12-29 2012-01-03
+} -cleanup {} -result {2011-12-29 2011-12-30 2011-12-31 2012-01-01 2012-01-02 2012-01-03}
+
+test ..-1.26 {.. dates step 2 days} -setup {
+} -body {
+    ..  2011-12-29 2012-01-03 "2 days"
+} -cleanup {} -result {2011-12-29 2011-12-31 2012-01-02}
+
+test ..-1.27 {.. dates step 1 month} -setup {
+} -body {
+    ..  2011-07-29 2012-01-03 "1 month"
+} -cleanup {} -result {2011-07-29 2011-08-29 2011-09-29 2011-10-29 2011-11-29 2011-12-29}
+
+test ..-1.28 {.. dates step 1 year} -setup {
+} -body {
+    ..  2007-07-29 2012-01-03 "1 year"
+} -cleanup {} -result {2007-07-29 2008-07-29 2009-07-29 2010-07-29 2011-07-29}
+
+test ..-1.29 {.. integers} -setup {
+} -body {
+    ..  1 10
+} -cleanup {} -result {1 2 3 4 5 6 7 8 9 10}
+
+test info_proc-1.0 {info_proc info_proc } -setup {
+} -body {
+    info_proc info_proc 
+} -cleanup {} -result {proc qc::info_proc {proc_name} {
     #| Return the Tcl source code definition of a Tcl proc.
     if { [eq [info procs $proc_name] ""] && [eq [info procs ::$proc_name] ""] } {
 	error "The proc $proc_name does not exist"
@@ -760,32 +757,30 @@ namespace eval ::qcode::test {
     return "proc [string trimleft $proc_name :] \{$largs\} \{$body\}"
 }}
 
-    test which-1.0 {which tclsh } -setup {
-    } -body {
-        which tclsh 
-    } -cleanup {} -result {/usr/bin/tclsh}
+test which-1.0 {which tclsh } -setup {
+} -body {
+    which tclsh 
+} -cleanup {} -result {/usr/bin/tclsh}
 
-    # postcode_parse
-    test postcode_parse-1.0 {postcode_parse1} -setup {
-    } -body {
-        dict values [postcode_parse "W1A 2QQ"]
-    } -cleanup {} -result [list W 1A " " 2 QQ]
+# postcode_parse
+test postcode_parse-1.0 {postcode_parse1} -setup {
+} -body {
+    dict values [qc::postcode_parse "W1A 2QQ"]
+} -cleanup {} -result [list W 1A " " 2 QQ]
 
-    test postcode_parse-1.1 {postcode_parse2} -setup {
-    } -body {
-        dict values [postcode_parse "EH11 5DD"]
-    } -cleanup {} -result [list EH 11 " " 5 DD]
+test postcode_parse-1.1 {postcode_parse2} -setup {
+} -body {
+    dict values [qc::postcode_parse "EH11 5DD"]
+} -cleanup {} -result [list EH 11 " " 5 DD]
 
-    test postcode_parse-1.2 {postcode_parse3} -setup {
-    } -body {
-        dict values [postcode_parse "XXX"]
-    } -cleanup {} -returnCodes 1 -result {Unable to parse postcode "XXX"}
+test postcode_parse-1.2 {postcode_parse3} -setup {
+} -body {
+    dict values [qc::postcode_parse "XXX"]
+} -cleanup {} -returnCodes 1 -result {Unable to parse postcode "XXX"}
 
-    # regexp_escape
-    test regexp_escape-1.0 {regexp_escape} -body {
-        qc::regexp_escape "*fi+sh(es)?"
-    } -result {\*fi\+sh\(es\)\?}
+# regexp_escape
+test regexp_escape-1.0 {regexp_escape} -body {
+    qc::regexp_escape "*fi+sh(es)?"
+} -result {\*fi\+sh\(es\)\?}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

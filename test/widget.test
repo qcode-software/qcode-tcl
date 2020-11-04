@@ -1,393 +1,388 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test widget_label-1.0 {widget_label  } -setup {
+} -body {
+    widget_label  name firstname label Firstname
+} -cleanup {} -result {<label for="firstname">Firstname</label>}
 
-    test widget_label-1.0 {widget_label  } -setup {
-    } -body {
-        widget_label  name firstname label Firstname
-    } -cleanup {} -result {<label for="firstname">Firstname</label>}
+test widget-1.0 {widget label } -setup {
+} -body {
+    widget type label name firstname label Firstname
+} -cleanup {} -result {<label for="firstname">Firstname</label>}
 
-    test widget-1.0 {widget label } -setup {
-    } -body {
-        widget type label name firstname label Firstname
-    } -cleanup {} -result {<label for="firstname">Firstname</label>}
+test widget_label-1.1 {widget_label required } -setup {
+} -body {
+    widget_label  name firstname label Firstname required yes
+} -cleanup {} -result {<label for="firstname" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
 
-    test widget_label-1.1 {widget_label required } -setup {
-    } -body {
-        widget_label  name firstname label Firstname required yes
-    } -cleanup {} -result {<label for="firstname" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
+test widget_label-1.2 {widget_label error missing label} -setup {
+} -body {
+    widget_label name firstname required yes
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "label" when calling "widget_label name firstname required yes"}
 
-    test widget_label-1.2 {widget_label error missing label} -setup {
-    } -body {
-        widget_label name firstname required yes
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "label" when calling "widget_label name firstname required yes"}
+test widget_label-1.3 {widget_label tooltip } -setup {
+} -body {
+    widget_label  name firstname label Firstname required yes tooltip "This is a tooltip"
+} -cleanup {} -result {<label for="firstname" title="This is a tooltip" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
 
-    test widget_label-1.3 {widget_label tooltip } -setup {
-    } -body {
-        widget_label  name firstname label Firstname required yes tooltip "This is a tooltip"
-    } -cleanup {} -result {<label for="firstname" title="This is a tooltip" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
+test widget_label-1.3 {widget_label title } -setup {
+} -body {
+    widget_label  name firstname label Firstname required yes title "This is a tooltip"
+} -cleanup {} -result {<label for="firstname" title="This is a tooltip" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
 
-    test widget_label-1.3 {widget_label title } -setup {
-    } -body {
-        widget_label  name firstname label Firstname required yes title "This is a tooltip"
-    } -cleanup {} -result {<label for="firstname" title="This is a tooltip" class="required">Firstname<span style="color:#CC0000;">*</span></label>}
+test widget_text-1.0 {widget_text  } -setup {
+} -body {
+    widget_text name firstname value "" id firstname width 400
+} -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
 
-    test widget_text-1.0 {widget_text  } -setup {
-    } -body {
-        widget_text name firstname value "" id firstname width 400
-    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
+test widget-1.1 {widget text } -setup {
+} -body {
+    widget type text name firstname value "" id firstname width 400
+} -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
 
-    test widget-1.1 {widget text } -setup {
-    } -body {
-        widget type text name firstname value "" id firstname width 400
-    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" type="text">}
+test widget_text-1.1 {widget_text disabled } -setup {
+} -body {
+    widget_text name firstname value "Jimmy" id firstname disabled yes
+} -cleanup {} -result {<span>Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
 
-    test widget_text-1.1 {widget_text disabled } -setup {
-    } -body {
-        widget_text name firstname value "Jimmy" id firstname disabled yes
-    } -cleanup {} -result {<span>Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
+test widget_text-1.2 {widget_text error missing value } -setup {
+} -body {
+    widget_text name firstname id firstname disabled yes
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_text name firstname id firstname disabled yes"}
 
-    test widget_text-1.2 {widget_text error missing value } -setup {
-    } -body {
-        widget_text name firstname id firstname disabled yes
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_text name firstname id firstname disabled yes"}
+test widget_text-1.3 {widget_text error missing name } -setup {
+} -body {
+    widget_text value "" id firstname width 400
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "name" when calling "widget_text value {} id firstname width 400"}
 
-    test widget_text-1.3 {widget_text error missing name } -setup {
-    } -body {
-        widget_text value "" id firstname width 400
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "name" when calling "widget_text value {} id firstname width 400"}
+test widget_text-1.4 {widget tooltip } -setup {
+} -body {
+    widget type text name firstname value "" id firstname width 400 tooltip "This is a tooltip"
+} -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" title="This is a tooltip" type="text">}
 
-    test widget_text-1.4 {widget tooltip } -setup {
-    } -body {
-        widget type text name firstname value "" id firstname width 400 tooltip "This is a tooltip"
-    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" title="This is a tooltip" type="text">}
+test widget_text-1.5 {widget title } -setup {
+} -body {
+    widget type text name firstname value "" id firstname width 400 title "This is a tooltip"
+} -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" title="This is a tooltip" type="text">}
 
-    test widget_text-1.5 {widget title } -setup {
-    } -body {
-        widget type text name firstname value "" id firstname width 400 title "This is a tooltip"
-    } -cleanup {} -result {<input style="width:400px" id="firstname" value="" name="firstname" title="This is a tooltip" type="text">}
+test widget_text-1.6 {widget_text disabled tooltip} -setup {
+} -body {
+    widget_text name firstname value "Jimmy" id firstname disabled yes tooltip "This is a tooltip"
+} -cleanup {} -result {<span title="This is a tooltip">Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
 
-    test widget_text-1.6 {widget_text disabled tooltip} -setup {
-    } -body {
-        widget_text name firstname value "Jimmy" id firstname disabled yes tooltip "This is a tooltip"
-    } -cleanup {} -result {<span title="This is a tooltip">Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
-
-    test widget_text-1.7 {widget_text disabled title} -setup {
-    } -body {
-        widget_text name firstname value "Jimmy" id firstname disabled yes title "This is a tooltip"
-    } -cleanup {} -result {<span title="This is a tooltip">Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
+test widget_text-1.7 {widget_text disabled title} -setup {
+} -body {
+    widget_text name firstname value "Jimmy" id firstname disabled yes title "This is a tooltip"
+} -cleanup {} -result {<span title="This is a tooltip">Jimmy</span><input type="hidden" name="firstname" value="Jimmy" id="firstname">}
 
 
-    test widget_compare-1.0 {widget_compare  } -setup {
-    } -body {
-        widget_compare name price value 10 operator =
-    } -cleanup {} -result {<select id="price_op" name="price_op" sticky="no"><option value="&gt;">greater than</option>
+test widget_compare-1.0 {widget_compare  } -setup {
+} -body {
+    widget_compare name price value 10 operator =
+} -cleanup {} -result {<select id="price_op" name="price_op" sticky="no"><option value="&gt;">greater than</option>
 <option value="=" selected="selected">equals</option>
 <option value="&lt;">less than</option></select> <input style="width:160px" id="price" name="price" value="10" type="text">}
 
-    test widget_compare-1.1 {widget_compare tooltip} -setup {
-    } -body {
-        widget_compare name price value 10 operator = tooltip "This is a tooltip"
-    } -cleanup {} -result {<select id="price_op" name="price_op" title="This is a tooltip" sticky="no"><option value="&gt;">greater than</option>
+test widget_compare-1.1 {widget_compare tooltip} -setup {
+} -body {
+    widget_compare name price value 10 operator = tooltip "This is a tooltip"
+} -cleanup {} -result {<select id="price_op" name="price_op" title="This is a tooltip" sticky="no"><option value="&gt;">greater than</option>
 <option value="=" selected="selected">equals</option>
 <option value="&lt;">less than</option></select> <input style="width:160px" id="price" name="price" value="10" type="text" title="This is a tooltip">}
 
-    test widget_compare-1.2 {widget_compare title} -setup {
-    } -body {
-        widget_compare name price value 10 operator = title "This is a tooltip"
-    } -cleanup {} -result {<select id="price_op" name="price_op" title="This is a tooltip" sticky="no"><option value="&gt;">greater than</option>
+test widget_compare-1.2 {widget_compare title} -setup {
+} -body {
+    widget_compare name price value 10 operator = title "This is a tooltip"
+} -cleanup {} -result {<select id="price_op" name="price_op" title="This is a tooltip" sticky="no"><option value="&gt;">greater than</option>
 <option value="=" selected="selected">equals</option>
 <option value="&lt;">less than</option></select> <input style="width:160px" id="price" name="price" value="10" type="text" title="This is a tooltip">}
 
-    test widget-1.2 {widget compare } -setup {
-    } -body {
-        widget type compare name price value 10 operator =
-    } -cleanup {} -result {<select id="price_op" name="price_op" sticky="no"><option value="&gt;">greater than</option>
+test widget-1.2 {widget compare } -setup {
+} -body {
+    widget type compare name price value 10 operator =
+} -cleanup {} -result {<select id="price_op" name="price_op" sticky="no"><option value="&gt;">greater than</option>
 <option value="=" selected="selected">equals</option>
 <option value="&lt;">less than</option></select> <input style="width:160px" id="price" name="price" value="10" type="text">}
 
-    test widget_compare-1.3 {widget_compare error missing value } -setup {
-    } -body {
-        widget_compare name price operator =
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_compare name price operator ="}
+test widget_compare-1.3 {widget_compare error missing value } -setup {
+} -body {
+    widget_compare name price operator =
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_compare name price operator ="}
 
-    test widget_combo-1.0 {widget_combo  } -setup {
-    } -body {
-        widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
-    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
+test widget_combo-1.0 {widget_combo  } -setup {
+} -body {
+    widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
+} -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
 
-    test widget_combo-1.1 {widget_combo tooltip } -setup {
-    } -body {
-        widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml tooltip "This is a tooltip"
-    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" title="This is a tooltip" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
+test widget_combo-1.1 {widget_combo tooltip } -setup {
+} -body {
+    widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml tooltip "This is a tooltip"
+} -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" title="This is a tooltip" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
 
-    test widget_combo-1.2 {widget_combo title } -setup {
-    } -body {
-        widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml title "This is a tooltip"
-    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" title="This is a tooltip" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
+test widget_combo-1.2 {widget_combo title } -setup {
+} -body {
+    widget_combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml title "This is a tooltip"
+} -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" title="This is a tooltip" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
 
-    test widget-1.3 {widget combo } -setup {
-    } -body {
-        widget type combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
-    } -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
+test widget-1.3 {widget combo } -setup {
+} -body {
+    widget type combo name customer_code value FOO boundName customer_id boundValue 2343 searchURL customer_combo.xml
+} -cleanup {} -result {<input style="width:160px" searchURL="customer_combo.xml" type="text" id="customer_code" boundName="customer_id" name="customer_code" AUTOCOMPLETE="off" searchLimit="10" boundValue="2343" value="FOO" class="db-form-combo"><input type="hidden" name="customer_id" value="2343">}
 
-    test widget_textarea-1.0 {widget_textarea  } -setup {
-    } -body {
-        widget_textarea name notes value "Hi There"
-    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
+test widget_textarea-1.0 {widget_textarea  } -setup {
+} -body {
+    widget_textarea name notes value "Hi There"
+} -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
 
-    test widget_textarea-1.1 {widget_textarea tooltip } -setup {
-    } -body {
-        widget_textarea name notes value "Hi There" tooltip "This is a tooltip"
-    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes" title="This is a tooltip">Hi There</textarea>}
+test widget_textarea-1.1 {widget_textarea tooltip } -setup {
+} -body {
+    widget_textarea name notes value "Hi There" tooltip "This is a tooltip"
+} -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes" title="This is a tooltip">Hi There</textarea>}
 
-    test widget_textarea-1.2 {widget_textarea title } -setup {
-    } -body {
-        widget_textarea name notes value "Hi There" title "This is a tooltip"
-    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes" title="This is a tooltip">Hi There</textarea>}
+test widget_textarea-1.2 {widget_textarea title } -setup {
+} -body {
+    widget_textarea name notes value "Hi There" title "This is a tooltip"
+} -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes" title="This is a tooltip">Hi There</textarea>}
 
-    test widget_textarea-1.3 {widget_textarea error missing value } -setup {
-    } -body {
-        widget_textarea name notes 
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_textarea name notes"}
+test widget_textarea-1.3 {widget_textarea error missing value } -setup {
+} -body {
+    widget_textarea name notes 
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "value" when calling "widget_textarea name notes"}
 
-    test widget-1.4 {widget textarea } -setup {
-    } -body {
-        widget type textarea name notes value "Hi There"
-    } -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
+test widget-1.4 {widget textarea } -setup {
+} -body {
+    widget type textarea name notes value "Hi There"
+} -cleanup {} -result {<textarea id="notes" style="width:160px;height:100px" name="notes">Hi There</textarea>}
 
-    test widget_select-1.0 {widget_select  } -setup {
-    } -body {
-        widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
-    } -cleanup {} -result {<select id="letter" name="letter"><option value="">- Select -</option>
+test widget_select-1.0 {widget_select  } -setup {
+} -body {
+    widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
+} -cleanup {} -result {<select id="letter" name="letter"><option value="">- Select -</option>
 <option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></select>}
 
-    test widget_select-1.1 {widget_select tooltip } -setup {
-    } -body {
-        widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes tooltip "This is a tooltip"
-    } -cleanup {} -result {<select id="letter" name="letter" title="This is a tooltip"><option value="">- Select -</option>
+test widget_select-1.1 {widget_select tooltip } -setup {
+} -body {
+    widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes tooltip "This is a tooltip"
+} -cleanup {} -result {<select id="letter" name="letter" title="This is a tooltip"><option value="">- Select -</option>
 <option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></select>}
 
-    test widget_select-1.2 {widget_select title} -setup {
-    } -body {
-        widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes title "This is a tooltip"
-    } -cleanup {} -result {<select id="letter" name="letter" title="This is a tooltip"><option value="">- Select -</option>
+test widget_select-1.2 {widget_select title} -setup {
+} -body {
+    widget_select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes title "This is a tooltip"
+} -cleanup {} -result {<select id="letter" name="letter" title="This is a tooltip"><option value="">- Select -</option>
 <option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></select>}
 
-    test widget_select-1.3 {widget_select error missing options } -setup {
-    } -body {
-        widget_select name letter value "" null_option yes
-    } -returnCodes 1 -cleanup {} -result {Missing value for arg "options" when calling "widget_select name letter value {} null_option yes"}
+test widget_select-1.3 {widget_select error missing options } -setup {
+} -body {
+    widget_select name letter value "" null_option yes
+} -returnCodes 1 -cleanup {} -result {Missing value for arg "options" when calling "widget_select name letter value {} null_option yes"}
 
-    test widget-1.5 {widget select } -setup {
-    } -body {
-        widget type select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
-    } -cleanup {} -result {<select id="letter" name="letter"><option value="">- Select -</option>
+test widget-1.5 {widget select } -setup {
+} -body {
+    widget type select name letter value "" options {Alpha A Bravo B Charlie C} null_option yes
+} -cleanup {} -result {<select id="letter" name="letter"><option value="">- Select -</option>
 <option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></select>}   
 
-    test widget_span-1.0 {widget_span  } -setup {
-    } -body {
-        widget_span name foo value bar
-    } -cleanup {} -result {<span id="foo" name="foo">bar</span>}
+test widget_span-1.0 {widget_span  } -setup {
+} -body {
+    widget_span name foo value bar
+} -cleanup {} -result {<span id="foo" name="foo">bar</span>}
 
-    test widget-1.6 {widget span } -setup {
-    } -body {
-        widget type span  name foo value bar
-    } -cleanup {} -result {<span id="foo" name="foo">bar</span>}
+test widget-1.6 {widget span } -setup {
+} -body {
+    widget type span  name foo value bar
+} -cleanup {} -result {<span id="foo" name="foo">bar</span>}
 
-    test widget_span-1.1 {widget_span width height } -setup {
-    } -body {
-        widget_span name foo value bar width 100 height 100
-    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo">bar</span>}
+test widget_span-1.1 {widget_span width height } -setup {
+} -body {
+    widget_span name foo value bar width 100 height 100
+} -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo">bar</span>}
 
-    test widget_span-1.2 {widget_span tooltip } -setup {
-    } -body {
-        widget_span name foo value bar width 100 height 100 tooltip "This is a tooltip"
-    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo" title="This is a tooltip">bar</span>}
+test widget_span-1.2 {widget_span tooltip } -setup {
+} -body {
+    widget_span name foo value bar width 100 height 100 tooltip "This is a tooltip"
+} -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo" title="This is a tooltip">bar</span>}
 
-    test widget_span-1.3 {widget_span title } -setup {
-    } -body {
-        widget_span name foo value bar width 100 height 100 title "This is a tooltip"
-    } -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo" title="This is a tooltip">bar</span>}
+test widget_span-1.3 {widget_span title } -setup {
+} -body {
+    widget_span name foo value bar width 100 height 100 title "This is a tooltip"
+} -cleanup {} -result {<span style="width:100px;height:100px" id="foo" name="foo" title="This is a tooltip">bar</span>}
 
-    test widget_password-1.0 {widget_password  } -setup {
-    } -body {
-        widget_password name password value ""
-    } -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
+test widget_password-1.0 {widget_password  } -setup {
+} -body {
+    widget_password name password value ""
+} -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
 
-    test widget-1.7 {widget password } -setup {
-    } -body {
-        widget type password name password value ""
-    } -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
+test widget-1.7 {widget password } -setup {
+} -body {
+    widget type password name password value ""
+} -cleanup {} -result {<input style="width:160px" id="password" value="" name="password" type="password">}
 
-    test widget_password-1.1 {widget_password id width } -setup {
-    } -body {
-        widget_password name password value "" id pw width 100
-    } -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" type="password">}
+test widget_password-1.1 {widget_password id width } -setup {
+} -body {
+    widget_password name password value "" id pw width 100
+} -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" type="password">}
 
-    test widget_password-1.2 {widget_password tooltip } -setup {
-    } -body {
-        widget_password name password value "" id pw width 100 tooltip "This is a tooltip"
-    } -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" title="This is a tooltip" type="password">}
+test widget_password-1.2 {widget_password tooltip } -setup {
+} -body {
+    widget_password name password value "" id pw width 100 tooltip "This is a tooltip"
+} -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" title="This is a tooltip" type="password">}
 
-    test widget_password-1.3 {widget_password title } -setup {
-    } -body {
-        widget_password name password value "" id pw width 100 title "This is a tooltip"
-    } -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" type="password" title="This is a tooltip">}
+test widget_password-1.3 {widget_password title } -setup {
+} -body {
+    widget_password name password value "" id pw width 100 title "This is a tooltip"
+} -cleanup {} -result {<input style="width:100px" id="pw" value="" name="password" type="password" title="This is a tooltip">}
 
-    test widget_bool-1.0 {widget_bool no } -setup {
-    } -body {
-        widget_bool name spam value no
-    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
+test widget_bool-1.0 {widget_bool no } -setup {
+} -body {
+    widget_bool name spam value no
+} -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
 
-    test widget-1.8 {widget bool } -setup {
-    } -body {
-        widget type bool  name spam value no
-    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
+test widget-1.8 {widget bool } -setup {
+} -body {
+    widget type bool  name spam value no
+} -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox">}
 
-    test widget_bool-1.1 {widget_bool yes } -setup {
-    } -body {
-        widget_bool name spam value yes
-    } -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox" checked="checked">}
+test widget_bool-1.1 {widget_bool yes } -setup {
+} -body {
+    widget_bool name spam value yes
+} -cleanup {} -result {<input boolean="true" id="spam" value="true" name="spam" type="checkbox" checked="checked">}
 
-    test widget_bool-1.2 {widget_bool no id } -setup {
-    } -body {
-        widget_bool name spam value no id ham
-    } -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" type="checkbox">}
+test widget_bool-1.2 {widget_bool no id } -setup {
+} -body {
+    widget_bool name spam value no id ham
+} -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" type="checkbox">}
 
-    test widget_bool-1.3 {widget_bool tooltip } -setup {
-    } -body {
-        widget_bool name spam value no id ham tooltip "This is a tooltip"
-    } -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" title="This is a tooltip" type="checkbox">}
+test widget_bool-1.3 {widget_bool tooltip } -setup {
+} -body {
+    widget_bool name spam value no id ham tooltip "This is a tooltip"
+} -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" title="This is a tooltip" type="checkbox">}
 
-    test widget_bool-1.4 {widget_bool title } -setup {
-    } -body {
-        widget_bool name spam value no id ham title "This is a tooltip"
-    } -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" type="checkbox" title="This is a tooltip">}
+test widget_bool-1.4 {widget_bool title } -setup {
+} -body {
+    widget_bool name spam value no id ham title "This is a tooltip"
+} -cleanup {} -result {<input boolean="true" id="ham" value="true" name="spam" type="checkbox" title="This is a tooltip">}
 
-    test widget_checkbox-1.0 {widget_checkbox  } -setup {
-    } -body {
-        widget_checkbox name order_no value 3215 
-    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
+test widget_checkbox-1.0 {widget_checkbox  } -setup {
+} -body {
+    widget_checkbox name order_no value 3215 
+} -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
 
-    test widget_checkbox-1.1 {widget_checkbox tooltip } -setup {
-    } -body {
-        widget_checkbox name order_no value 3215 tooltip "This is a tooltip"
-    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" title="This is a tooltip" type="checkbox">}
+test widget_checkbox-1.1 {widget_checkbox tooltip } -setup {
+} -body {
+    widget_checkbox name order_no value 3215 tooltip "This is a tooltip"
+} -cleanup {} -result {<input id="order_no" value="3215" name="order_no" title="This is a tooltip" type="checkbox">}
 
-    test widget_checkbox-1.2 {widget_checkbox title } -setup {
-    } -body {
-        widget_checkbox name order_no value 3215 title "This is a tooltip"
-    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox" title="This is a tooltip">}
+test widget_checkbox-1.2 {widget_checkbox title } -setup {
+} -body {
+    widget_checkbox name order_no value 3215 title "This is a tooltip"
+} -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox" title="This is a tooltip">}
 
-    test widget-1.9 {widget checkbox } -setup {
-    } -body {
-        widget type checkbox name order_no value 3215
-    } -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
+test widget-1.9 {widget checkbox } -setup {
+} -body {
+    widget type checkbox name order_no value 3215
+} -cleanup {} -result {<input id="order_no" value="3215" name="order_no" type="checkbox">}
 
-    test widget_button-1.0 {widget_button  } -setup {
-    } -body {
-        widget_button name foo value "Click Me" onclick "alert('Hi');"
-    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
+test widget_button-1.0 {widget_button  } -setup {
+} -body {
+    widget_button name foo value "Click Me" onclick "alert('Hi');"
+} -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
 
-    test widget_button-1.1 {widget_button tooltip} -setup {
-    } -body {
-        widget_button name foo value "Click Me" onclick "alert('Hi');" tooltip "This is a tooltip"
-    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" title="This is a tooltip" type="button" onclick="alert('Hi');">}
+test widget_button-1.1 {widget_button tooltip} -setup {
+} -body {
+    widget_button name foo value "Click Me" onclick "alert('Hi');" tooltip "This is a tooltip"
+} -cleanup {} -result {<input id="foo" value="Click Me" name="foo" title="This is a tooltip" type="button" onclick="alert('Hi');">}
 
-    test widget_button-1.2 {widget_button title} -setup {
-    } -body {
-        widget_button name foo value "Click Me" onclick "alert('Hi');" title "This is a tooltip"
-    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" title="This is a tooltip" onclick="alert('Hi');">}
+test widget_button-1.2 {widget_button title} -setup {
+} -body {
+    widget_button name foo value "Click Me" onclick "alert('Hi');" title "This is a tooltip"
+} -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" title="This is a tooltip" onclick="alert('Hi');">}
 
-    test widget-2.0 {widget button } -setup {
-    } -body {
-        widget type button name foo value "Click Me" onclick "alert('Hi');"
-    } -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
+test widget-2.0 {widget button } -setup {
+} -body {
+    widget type button name foo value "Click Me" onclick "alert('Hi');"
+} -cleanup {} -result {<input id="foo" value="Click Me" name="foo" type="button" onclick="alert('Hi');">}
 
-    test widget_submit-1.0 {widget_submit  } -setup {
-    } -body {
-        widget_submit name foo value "Submit"
-    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
+test widget_submit-1.0 {widget_submit  } -setup {
+} -body {
+    widget_submit name foo value "Submit"
+} -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
 
-    test widget_submit-1.1 {widget_submit tooltip } -setup {
-    } -body {
-        widget_submit name foo value "Submit" tooltip "This is a tooltip"
-    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" title="This is a tooltip" type="submit">}
+test widget_submit-1.1 {widget_submit tooltip } -setup {
+} -body {
+    widget_submit name foo value "Submit" tooltip "This is a tooltip"
+} -cleanup {} -result {<input id="foo" value="Submit" name="foo" title="This is a tooltip" type="submit">}
 
-    test widget_submit-1.2 {widget_submit title } -setup {
-    } -body {
-        widget_submit name foo value "Submit" title "This is a tooltip"
-    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit" title="This is a tooltip">}
+test widget_submit-1.2 {widget_submit title } -setup {
+} -body {
+    widget_submit name foo value "Submit" title "This is a tooltip"
+} -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit" title="This is a tooltip">}
 
-    test widget-2.1 {widget submit } -setup {
-    } -body {
-        widget type submit name foo value "Submit"
-    } -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
+test widget-2.1 {widget submit } -setup {
+} -body {
+    widget type submit name foo value "Submit"
+} -cleanup {} -result {<input id="foo" value="Submit" name="foo" type="submit">}
 
-    test widget_radio-1.0 {widget_radio  } -setup {
-    } -body {
-        widget_radio name sex value male
-    } -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
+test widget_radio-1.0 {widget_radio  } -setup {
+} -body {
+    widget_radio name sex value male
+} -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
 
-    test widget_radio-1.1 {widget_radio tooltip} -setup {
-    } -body {
-        widget_radio name sex value male tooltip "This is a tooltip"
-    } -cleanup {} -result {<input id="sex" value="male" name="sex" title="This is a tooltip" type="radio">}
+test widget_radio-1.1 {widget_radio tooltip} -setup {
+} -body {
+    widget_radio name sex value male tooltip "This is a tooltip"
+} -cleanup {} -result {<input id="sex" value="male" name="sex" title="This is a tooltip" type="radio">}
 
-    test widget_radio-1.2 {widget_radio title } -setup {
-    } -body {
-        widget_radio name sex value male title "This is a tooltip"
-    } -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio" title="This is a tooltip">}
+test widget_radio-1.2 {widget_radio title } -setup {
+} -body {
+    widget_radio name sex value male title "This is a tooltip"
+} -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio" title="This is a tooltip">}
 
-    test widget-2.2 {widget radio } -setup {
-    } -body {
-        widget type radio name sex value male
-    } -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
+test widget-2.2 {widget radio } -setup {
+} -body {
+    widget type radio name sex value male
+} -cleanup {} -result {<input id="sex" value="male" name="sex" type="radio">}
 
-    test widget_radiogroup-1.0 {widget_radiogroup  } -setup {
-    } -body {
-        widget_radiogroup  name sex value M options {Male M Female F}
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
+test widget_radiogroup-1.0 {widget_radiogroup  } -setup {
+} -body {
+    widget_radiogroup  name sex value M options {Male M Female F}
+} -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
 
-    test widget_radiogroup-1.1 {widget_radiogroup tooltip } -setup {
-    } -body {
-        widget_radiogroup  name sex value M options {Male M Female F} tooltip "This is a tooltip"
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" title="This is a tooltip" type="radio" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" title="This is a tooltip" type="radio">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
+test widget_radiogroup-1.1 {widget_radiogroup tooltip } -setup {
+} -body {
+    widget_radiogroup  name sex value M options {Male M Female F} tooltip "This is a tooltip"
+} -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" title="This is a tooltip" type="radio" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" title="This is a tooltip" type="radio">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
 
-    test widget_radiogroup-1.2 {widget_radiogroup title } -setup {
-    } -body {
-        widget_radiogroup  name sex value M options {Male M Female F} title "This is a tooltip"
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" title="This is a tooltip" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio" title="This is a tooltip">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
+test widget_radiogroup-1.2 {widget_radiogroup title } -setup {
+} -body {
+    widget_radiogroup  name sex value M options {Male M Female F} title "This is a tooltip"
+} -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" title="This is a tooltip" checked="checked">&nbsp;<label for="sexM" title="This is a tooltip">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio" title="This is a tooltip">&nbsp;<label for="sexF" title="This is a tooltip">Female</label></span></div>}
 
-    test widget-2.3 {widget radiogroup } -setup {
-    } -body {
-        widget type radiogroup name sex value M options {Male M Female F}
-    } -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
+test widget-2.3 {widget radiogroup } -setup {
+} -body {
+    widget type radiogroup name sex value M options {Male M Female F}
+} -cleanup {} -result {<div class="radio-group" name="sex" id="sex"><span style="display:inline-block"><input id="sexM" value="M" name="sex" type="radio" checked="checked">&nbsp;<label for="sexM">Male</label></span>&nbsp; &nbsp;<span style="display:inline-block"><input id="sexF" value="F" name="sex" type="radio">&nbsp;<label for="sexF">Female</label></span></div>}
 
-    test widget-2.4 {widget unknown } -setup {
-    } -body {
-        widget type hadron_collider name sex value M options {Male M Female F}
-    } -returnCodes 1 -cleanup {} -result {No widget proc defined for hadron_collider}
+test widget-2.4 {widget unknown } -setup {
+} -body {
+    widget type hadron_collider name sex value M options {Male M Female F}
+} -returnCodes 1 -cleanup {} -result {No widget proc defined for hadron_collider}
 
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

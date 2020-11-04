@@ -27,6 +27,8 @@ if { [info commands ns_db] ne "ns_db" } {
     set ::conn_info_superuser(user) $username
     set ::conn_info_superuser(password) $password
 
+    set conn_info_superuser_test_database [dict create host $hostname dbname test_database port $port user $username password $password]
+
     # initialise db credentials
 
     set ::conn_info_test(host) $hostname
@@ -38,7 +40,7 @@ if { [info commands ns_db] ne "ns_db" } {
     }
 } 
 
-set cleanup_qry {drop extension pgcrypto} 
+set cleanup_qry {drop if exists extension pgcrypto} 
 
 set setup_inside_naviserver {
     # The test user configuration.
@@ -50,15 +52,29 @@ set setup_inside_naviserver {
 set setup_outside_naviserver {
     # The test user configuration.
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
-    pg_execute $conn_superuser {CREATE DATABASE test_database}
     pg_execute $conn_superuser {
-        CREATE USER test_user WITH PASSWORD 'test_password';
+        SET client_min_messages TO WARNING;
+    }
+    pg_execute $conn_superuser {
+        DROP database if exists test_database;
+    }
+    pg_execute $conn_superuser {
+	CREATE DATABASE test_database;
+    }
+    pg_execute $conn_superuser {
+        drop user if exists test_user;
+	CREATE USER test_user WITH PASSWORD 'test_password';
         GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
     }
     pg_disconnect $conn_superuser
 
-    set conn [qc::db_connect {*}[array get ::conn_info_test]]
-    pg_execute $conn {create extension pgcrypto}
+    set conn [qc::db_connect {*}$conn_info_superuser_test_database]
+    pg_execute $conn {
+        SET client_min_messages TO WARNING;
+    }
+    pg_execute $conn {
+        create extension if not exists pgcrypto
+    }
 
     set key secretkey
 }

@@ -1,30 +1,27 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test html_table_doc-1.0 {html_table_doc} -setup {
-        set cols {
-	    {label "Sales Quote No." name sales_quote_no}
-	    {label "Customer Order No." name customer_order_no}
-	}
-        set sales_quote_no 12343
-	set customer_order_no Tel/Bill
-    } -body {
-        html_table_doc cols $cols class document
-    }  -cleanup {
-        unset cols
-        unset sales_quote_no
-        unset customer_order_no
-    } -result {<table class="document">
+test html_table_doc-1.0 {html_table_doc} -setup {
+    set cols {
+        {label "Sales Quote No." name sales_quote_no}
+        {label "Customer Order No." name customer_order_no}
+    }
+    set sales_quote_no 12343
+    set customer_order_no Tel/Bill
+} -body {
+    html_table_doc cols $cols class document
+}  -cleanup {
+    unset cols
+    unset sales_quote_no
+    unset customer_order_no
+} -result {<table class="document">
 <colgroup>
 <col name="sales_quote_no">
 <col name="customer_order_no">
@@ -43,8 +40,6 @@ namespace eval ::qcode::test {
 </tbody>
 </table>
 }
-    
-    
-    cleanupTests
-} 
-namespace delete ::qcode::test
+
+
+cleanupTests

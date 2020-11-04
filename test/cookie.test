@@ -1,4 +1,5 @@
 package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 
 # Load all .tcl files
@@ -6,189 +7,184 @@ set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test cookie_string_is_valid-1.0 {cookie_string_is_valid empty string} -body {
+    if { [qc::cookie_string_is_valid ""] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.0 {cookie_string_is_valid empty string} -body {
-        if { [qc::cookie_string_is_valid ""] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.1 {cookie_string_is_valid whitespace} -body {
+    if { [qc::cookie_string_is_valid " "] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.1 {cookie_string_is_valid whitespace} -body {
-        if { [qc::cookie_string_is_valid " "] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.2 {cookie_string_is_valid name only} -body {
+    if { [qc::cookie_string_is_valid "foo"] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.2 {cookie_string_is_valid name only} -body {
-        if { [qc::cookie_string_is_valid "foo"] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.3 {cookie_string_is_valid one pair} -body {
+    if { [qc::cookie_string_is_valid "foo=bar"] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.3 {cookie_string_is_valid one pair} -body {
-        if { [qc::cookie_string_is_valid "foo=bar"] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.4 {cookie_string_is_valid two pairs} -body {
+    if { [qc::cookie_string_is_valid "foo=bar; quu=baz"] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.4 {cookie_string_is_valid two pairs} -body {
-        if { [qc::cookie_string_is_valid "foo=bar; quu=baz"] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.5 {cookie_string_is_valid two pairs quoted} -body {
+    if { [qc::cookie_string_is_valid {foo="bar"; quu="baz"}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.5 {cookie_string_is_valid two pairs quoted} -body {
-        if { [qc::cookie_string_is_valid {foo="bar"; quu="baz"}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.6 {cookie_string_is_valid url_encoded} -body {
+    if { [qc::cookie_string_is_valid {foo%20bar=bar; quu=bar%20baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.6 {cookie_string_is_valid url_encoded} -body {
-        if { [qc::cookie_string_is_valid {foo%20bar=bar; quu=bar%20baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.7 {cookie_string_is_valid empty first value} -body {
+    if { [qc::cookie_string_is_valid {foo=; quu=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.7 {cookie_string_is_valid empty first value} -body {
-        if { [qc::cookie_string_is_valid {foo=; quu=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.8 {cookie_string_is_valid empty later value} -body {
+    if { [qc::cookie_string_is_valid {foo=bar; quu=}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.8 {cookie_string_is_valid empty later value} -body {
-        if { [qc::cookie_string_is_valid {foo=bar; quu=}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.9 {cookie_string_is_valid quoted empty first value} -body {
+    if { [qc::cookie_string_is_valid {foo=""; quu=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.9 {cookie_string_is_valid quoted empty first value} -body {
-        if { [qc::cookie_string_is_valid {foo=""; quu=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.10 {cookie_string_is_valid quoted empty later value} -body {
+    if { [qc::cookie_string_is_valid {foo=bar; quu=""}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.10 {cookie_string_is_valid quoted empty later value} -body {
-        if { [qc::cookie_string_is_valid {foo=bar; quu=""}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.11 {cookie_string_is_valid with additional equals} -body {
+    if { [qc::cookie_string_is_valid {foo=bar=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {true}
 
-    test cookie_string_is_valid-1.11 {cookie_string_is_valid with additional equals} -body {
-        if { [qc::cookie_string_is_valid {foo=bar=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {true}
+test cookie_string_is_valid-1.12 {cookie_string_is_valid with spaces in name} -body {
+    if { [qc::cookie_string_is_valid {foo bar=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.12 {cookie_string_is_valid with spaces in name} -body {
-        if { [qc::cookie_string_is_valid {foo bar=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.13 {cookie_string_is_valid with additional spaces between pairs} -body {
+    if { [qc::cookie_string_is_valid {foo=bar;  quu=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.13 {cookie_string_is_valid with additional spaces between pairs} -body {
-        if { [qc::cookie_string_is_valid {foo=bar;  quu=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.14 {cookie_string_is_valid with leading spaces} -body {
+    if { [qc::cookie_string_is_valid { foo=bar; quu=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.14 {cookie_string_is_valid with leading spaces} -body {
-        if { [qc::cookie_string_is_valid { foo=bar; quu=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.15 {cookie_string_is_valid with trailing spaces} -body {
+    if { [qc::cookie_string_is_valid {foo=bar; quu=baz }] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.15 {cookie_string_is_valid with trailing spaces} -body {
-        if { [qc::cookie_string_is_valid {foo=bar; quu=baz }] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.16 {cookie_string_is_valid with missing} -body {
+    if { [qc::cookie_string_is_valid {foo=bar;quu=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.16 {cookie_string_is_valid with missing} -body {
-        if { [qc::cookie_string_is_valid {foo=bar;quu=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.17 {cookie_string_is_valid with empty name 1} -body {
+    if { [qc::cookie_string_is_valid {=bar; foo=baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
-    test cookie_string_is_valid-1.17 {cookie_string_is_valid with empty name 1} -body {
-        if { [qc::cookie_string_is_valid {=bar; foo=baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
-
-    test cookie_string_is_valid-1.18 {cookie_string_is_valid with empty name 2} -body {
-        if { [qc::cookie_string_is_valid {foo=bar; =baz}] } {
-            return true
-        } else {
-            return false
-        }
-    } -result {false}
+test cookie_string_is_valid-1.18 {cookie_string_is_valid with empty name 2} -body {
+    if { [qc::cookie_string_is_valid {foo=bar; =baz}] } {
+        return true
+    } else {
+        return false
+    }
+} -result {false}
 
 
-    test cookie_string2multimap-1.0 {cookie_string2multimap one pair} -body {
-        return [qc::cookie_string2multimap {foo=bar}]
-    } -result {foo bar}
+test cookie_string2multimap-1.0 {cookie_string2multimap one pair} -body {
+    return [qc::cookie_string2multimap {foo=bar}]
+} -result {foo bar}
 
-    test cookie_string2multimap-1.1 {cookie_string2multimap quoted} -body {
-        return [qc::cookie_string2multimap {foo=bar; qu="baz"}]
-    } -result {foo bar qu baz}
+test cookie_string2multimap-1.1 {cookie_string2multimap quoted} -body {
+    return [qc::cookie_string2multimap {foo=bar; qu="baz"}]
+} -result {foo bar qu baz}
 
-    test cookie_string2multimap-1.2 {cookie_string2multimap duplicate name} -body {
-        return [qc::cookie_string2multimap {foo=bar; qu="baz"; foo=apple}]
-    } -result {foo bar qu baz foo apple}
+test cookie_string2multimap-1.2 {cookie_string2multimap duplicate name} -body {
+    return [qc::cookie_string2multimap {foo=bar; qu="baz"; foo=apple}]
+} -result {foo bar qu baz foo apple}
 
-    test cookie_string2multimap-1.3 {cookie_string2multimap "=" in value} -body {
-        return [qc::cookie_string2multimap {foo=bar=baz; qu=test}]
-    } -result {foo bar=baz qu test}
+test cookie_string2multimap-1.3 {cookie_string2multimap "=" in value} -body {
+    return [qc::cookie_string2multimap {foo=bar=baz; qu=test}]
+} -result {foo bar=baz qu test}
 
-    test cookie_string2multimap-1.4 {cookie_string2multimap url_encoded} -body {
-        return [qc::cookie_string2multimap {foo%20bar=qu%20baz}]
-    } -result {{foo bar} {qu baz}}
+test cookie_string2multimap-1.4 {cookie_string2multimap url_encoded} -body {
+    return [qc::cookie_string2multimap {foo%20bar=qu%20baz}]
+} -result {{foo bar} {qu baz}}
 
-    test cookie_string2multimap-1.5 {cookie_string2multimap empty values} -body {
-        return [qc::cookie_string2multimap {foo=; bar=""}]
-    } -result {foo {} bar {}}
+test cookie_string2multimap-1.5 {cookie_string2multimap empty values} -body {
+    return [qc::cookie_string2multimap {foo=; bar=""}]
+} -result {foo {} bar {}}
 
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests
