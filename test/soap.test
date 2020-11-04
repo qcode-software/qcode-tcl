@@ -1,21 +1,18 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
-
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+namespace import ::qc::*
 
     # soap template
-    test soaptemplate-1.0 {soap_tempate no namespace} -body {
-        set xml {<test_request>value</test_request>}
-        return [soap_template $xml my_method]
-    } -result {<?xml version="1.0"?>
+test soaptemplate-1.0 {soap_tempate no namespace} -body {
+    set xml {<test_request>value</test_request>}
+    return [soap_template $xml my_method]
+} -result {<?xml version="1.0"?>
 <soap:Envelope
 xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
 soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
@@ -24,10 +21,10 @@ soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
 </soap:Body>
 </soap:Envelope>}
 
-    test soaptemplate-1.1 {soap_tempate w/ namespace} -body {
-        set xml {<test_request>value</test_request>}
-        return [soap_template $xml my_method http://www.w3.org/1999/xhtml]
-    } -result {<?xml version="1.0"?>
+test soaptemplate-1.1 {soap_tempate w/ namespace} -body {
+    set xml {<test_request>value</test_request>}
+    return [soap_template $xml my_method http://www.w3.org/1999/xhtml]
+} -result {<?xml version="1.0"?>
 <soap:Envelope
 xmlns:soap="http://www.w3.org/2001/12/soap-envelope"
 soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
@@ -36,6 +33,4 @@ soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding">
 </soap:Body>
 </soap:Envelope>}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

@@ -1,440 +1,435 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
-
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test castable-integer1.0 {castable integer already int} -setup {
-    } -body {
-        castable integer 1
-    } -result true
-
-    test castable-integer-1.1 {castable integer exponential} -setup {
-    } -body {
-        castable integer 42e2
-    } -result true
-
-    test castable-integer-1.2 {castable integer percent} -setup {
-    } -body {
-        castable integer 2.366%
-    } -result true
-
-    test castable-integer-1.3 {castable integer comma} -setup {
-    } -body {
-        castable integer 2,366
-    } -result true
-
-    test castable-integer-1.4 {castable integer invalid} -setup {
-    } -body {
-        castable integer 1A
-    } -result false
-
-    test castable-bigint1.0 {castable bigint already int} -setup {
-    } -body {
-        castable bigint 1
-    } -result true
-    
-    test castable-bigint1.1 {castable bigint exponential} -setup {
-    } -body {
-        castable bigint 3.14e6
-    } -result true
-    
-    test castable-bigint1.2 {castable bigint percent} -setup {
-    } -body {
-        castable bigint 3.14159%
-    } -result true
-    
-    test castable-bigint1.3 {castable bigint comma} -setup {
-    } -body {
-        castable bigint 3,1459
-    } -result true
-
-    test castable-bigint1.4 {castable bigint invalid} -setup {
-    } -body {
-        castable bigint foo
-    } -result false
-
-    test castable-bigint1.5 {castable bigint out of range upper} -setup {
-    } -body {
-        castable bigint 9223372036854775808
-    } -result false
-
-    test castable-bigint1.6 {castable bigint out of range lower} -setup {
-    } -body {
-        castable bigint -9223372036854775809
-    } -result false
-
-    test castable-bigint1.7 {castable bigint negative} -setup {
-    } -body {
-        castable bigint -31459
-    } -result true
-
-    test castable-smallint1.0 {castable smallint already int} -setup {
-    } -body {
-        castable smallint 1
-    } -result true
-    
-    test castable-smallint1.1 {castable smallint exponential} -setup {
-    } -body {
-        castable smallint 3.14e2
-    } -result true
-    
-    test castable-smallint1.2 {castable smallint percent} -setup {
-    } -body {
-        castable smallint 3.14159%
-    } -result true
-    
-    test castable-smallint1.3 {castable smallint comma} -setup {
-    } -body {
-        castable smallint 3,1459
-    } -result true
-
-    test castable-smallint1.4 {castable smallint invalid} -setup {
-    } -body {
-        castable smallint foo
-    } -result false
-
-    test castable-smallint1.5 {castable smallint out of range upper} -setup {
-    } -body {
-        castable smallint 35000
-    } -result false
-
-    test castable-smallint1.6 {castable smallint out of range lower} -setup {
-    } -body {
-        castable smallint -35000
-    } -result false
-
-    test castable-smallint1.7 {castable smallint negative} -setup {
-    } -body {
-        castable smallint -31459
-    } -result true
-
-    test castable-decimal-1.0 {castable decimal valid} -setup {
-    } -body {
-        castable decimal 2,305.25
-    } -result true
-
-    test castable-decimal-1.1 {castable decimal percent} -setup {
-    } -body {
-        castable decimal 2,305%
-    } -result true
-
-    test castable-decimal-1.2 {castable decimal invalid} -setup {
-    } -body {
-        castable decimal 1A
-    } -result false
-
-    test castable-decimal-1.3 {castable decimal long} -setup {
-    } -body {
-        castable decimal 1.123456789e9
-    } -result true
-
-    test castable-decimal-1.4 {castable decimal precision} -setup {
-    } -body {
-        castable decimal -precision 3 3.14159
-    } -result true
-
-    test castable-decimal-1.5 {castable decimal precision invalid} -setup {
-    } -body {
-        castable decimal -precision 1 314.159
-    } -result false
-
-    test castable-decimal-1.6 {castable decimal precision scale} -setup {
-    } -body {
-        castable decimal -precision 4  -scale 3 3.14159
-    } -result true
-
-    test castable-decimal-1.7 {castable decimal precision scale invalid} -setup {
-    } -body {
-        castable decimal -precision 4 -scale 4 314.15926
-    } -result false
-
-    test castable-decimal-1.8 {castable decimal precision scale invalid} -setup {
-    } -body {
-        castable decimal -precision 7 -scale 5 314.15926
-    } -result false
-
-    test castable-decimal-1.9 {castable decimal precision scale exponent} -setup {
-    } -body {
-        castable decimal -precision 7 -scale 2 3.14e4 
-    } -result true
-
-    test castable-boolean-1.0 {castable boolean already boolean} -setup {
-    } -body {
-        castable boolean true
-    } -result true
-
-    test castable-boolean-1.1 {castable boolean invalid} -setup {
-    } -body {
-        castable boolean foo
-    } -result false
-
-    test castable-timestamp-1.0 {castable timestamp relative} -setup {
-    } -body {
-        castable timestamp today
-    } -result true
-
-    test castable-timestamp-1.1 {castable timestamp uk format date only} -setup {
-    } -body {
-        castable timestamp 12/5/12
-    } -result true
-
-    test castable-timestamp-1.2 {castable timestamp illegal} -setup {
-    } -body {
-        castable timestamp "A moment ago"
-    } -result false
-
-    test castable-timestamptz-1.0 {castable timestamptz relative} -setup {
-    } -body {
-        castable timestamptz today
-    } -result true
-
-    test castable-timestamptz-1.1 {castable timestamptz uk format date only} -setup {
-    } -body {
-        castable timestamptz 12/5/12
-    } -result true
-
-    test castable-timestamptz-1.2 {castable timestamptz illegal} -setup {
-    } -body {
-        castable timestamptz "A moment ago"
-    } -result false
-
-    test castable-varchar-1.0 {castable varchar too long} -setup {
-    } -body {
-        castable varchar 12 "Too long a string"
-    } -result false
-
-    test castable-varchar-1.1 {castable varchar OK} -setup {
-    } -body {
-        castable varchar 12 "Short enough"
-    } -result true
-
-    test castable-char-1.0 {castable char too long} -setup {
-    } -body {
-        castable char 12 "Too long a string"
-    } -result false
-
-    test castable-char-1.1 {castable char exact} -setup {
-    } -body {
-        castable char 12 "Short enough"
-    } -result true
-
-    test castable-char-1.1 {castable char too short} -setup {
-    } -body {
-        castable char 12 "foo"
-    } -result false
-    
-    test castable-date-1.0 {castable date short} -setup {
-    } -body {
-        castable date 10
-    } -result true
-
-    test castable-date-1.1 {castable date long without year} -setup {
-    } -body {
-        castable date "June 20th"
-    } -result true
-
-    test castable-date-1.2 {castable date relative} -setup {
-    } -body {
-        castable date tomorrow
-    } -result true
-
-    test castable-date-1.3 {castable date month only} -setup {
-    } -body {
-        castable date May
-    } -result false
-
-    test castable-date-1.4 {castable date illegal} -setup {
-    } -body {
-        castable date Xmas
-    } -result false
-
-    test castable-date-1.5 {castable date too many days} -setup {
-    } -body {
-        castable date 2012-11-31
-    } -result true
-
-    test castable-postcode-1.0 {castable postcode partial} -setup {
-    } -body {
-        castable postcode EH3
-    } -result false
-
-    test castable-postcode-1.1 {castable postcode lowercase} -setup {
-    } -body {
-        castable postcode "eh2 9ee"
-    } -result true
-
-    test castable-postcode-1.2 {castable postcode already postcode} -setup {
-    } -body {
-        castable postcode "EH2 9EE"
-    } -result true
-
-    test castable-postcode-1.3 {castable postcode no space} -setup {
-    } -body {
-        castable postcode "W1P2BB"
-    } -result true
-
-    test castable-postcode-1.4 {castable postcode zero in place of capital 'o'} -setup {
-    } -body {
-        castable postcode "y023 5ng"
-    } -result true
-
-    test castable-creditcard-1.0 {castable creditcard with separators} -setup {
-    } -body {
-        castable creditcard "4111-1111+1111 1111"
-    } -result true
-
-    test castable-creditcard-1.1 {castable creditcard invalid} -setup {
-    } -body {
-        castable creditcard "4111 1111 1111 1112"
-    } -result false
-
-    test castable-creditcard-1.2 {castable creditcard too short} -setup {
-    } -body {
-        castable creditcard 4111111111111
-    } -result false
-
-    test castable-creditcard-1.3 {castable creditcard masked} -setup {
-    } -body {
-        castable creditcard 411111******1111
-    } -result false
-
-    test castable-period-1.0 {castable period empty} -body {
-        castable period ""
-    } -result false
-    
-    test castable-period-1.1 {castable period shorthand month} -body {
-        castable period "Jan"
-    } -result true
-    
-    test castable-period-1.2 {castable period full name month} -body {
-        castable period "January"
-    } -result true
-    
-    test castable-period-1.3 {castable period year} -body {
-        castable period "2014"
-    } -result true
-    
-    test castable-period-1.4 {castable period shorthand month with year} -body {
-        castable period "Jan 2014"
-    } -result true
-    
-    test castable-period-1.5 {castable period full name month with year} -body {
-        castable period "January 2014"
-    } -result true
-    
-    test castable-period-1.6 {castable period month year to month year} -body {
-        castable period "Jan 2014 to March 2014"
-    } -result true
-    
-    test castable-period-1.7 {castable period day month year to day month year} -body {
-        castable period "1st February 2014 to 14th February 2014"
-    } -result true
-
-    test castable-period-1.8 {castable period invalid} -body {
-        castable period "Foo 2000"
-    } -result false
-
-
-    test castable-time-1.0 {qc::castable time "00:00:00.000000"} -body {
-        qc::castable time "00:00:00.000000"
-    } -result true
-
-    test castable-time-1.1 {qc::castable time "00:00:00"} -body {
-        qc::castable time "00:00:00"
-    } -result true
-
-    test castable-time-1.2 {qc::castable time "24:00:00.000000"} -body {
-        qc::castable time "24:00:00.000000"
-    } -result true
-
-    test castable-time-1.3 {qc::castable time "24:00:00"} -body {
-        qc::castable time "24:00:00"
-    } -result true
-
-    test castable-time-1.4 {qc::castable time "12:34:56.789"} -body {
-        qc::castable time "12:34:56.789"
-    } -result true
-
-    test castable-time-1.5 {qc::castable time "12:34:56"} -body {
-        qc::castable time "12:34:56"
-    } -result true
-
-    test castable-time-1.6 {qc::castable time "24:00:01"} -body {
-        qc::castable time "24:00:01"
-    } -result false
-
-    test castable-time-1.7 {qc::castable time "98:76:54"} -body {
-        qc::castable time "98:76:54"
-    } -result false
-
-    test castable-time-1.8 {qc::castable time "12:59"} -body {
-        qc::castable time "12:59"
-    } -result true
-
-    test castable-interval-1.0 {qc::castable interval "1 year"} -body {
-        qc::castable interval "1 year"
-    } -result true
-
-    test castable-interval-1.1 {qc::castable interval "3 months -2 days"} -body {
-        qc::castable interval "3 months -2 days"
-    } -result true
-    
-    test castable-interval-1.2 {qc::castable interval "-5 weeks"} -body {
-        qc::castable interval "-5 weeks"
-    } -result true
-
-    test castable-interval-1.3 {qc::castable interval "7"} -body {
-        qc::castable interval "7"
-    } -result false
-
-    test castable-interval-1.4 {qc::castable interval "last week"} -body {
-        qc::castable interval "last week"
-    } -result false
-
-    test castable-interval-1.5 {qc::castable interval "year"} -body {
-        qc::castable interval "year"
-    } -result false
-
-    test castable-s3_uri-1.0 {qc::castable s3_uri "bucket"} -body {
-        qc::castable s3_uri "bucket"
-    } -result true
-
-    test castable-s3_uri-1.1 {qc::castable s3_uri "bucket"} -body {
-        qc::castable s3_uri "bucket"
-    } -result true
-
-    test castable-s3_uri-1.2 {qc::castable s3_uri "bucket/key"} -body {
-        qc::castable s3_uri "bucket/key"
-    } -result true
-
-    test castable-s3_uri-1.3 {qc::castable s3_uri "Invalid@Bucket/key"} -body {
-        qc::castable s3_uri "invalid@bucket/key"
-    } -result false
-
-    test castable-s3_uri-1.4 {qc::castable s3_uri "bucket/invalid_key."} -body {
-        qc::castable s3_uri "bucket/invalid_key."
-    } -result false
-
-    test castable-s3_uri-1.5 {qc::castable s3_uri "/leading/slash"} -body {
-        qc::castable s3_uri "/leading/slash"
-    } -result true
-
-    test castable-s3_uri-1.6 {qc::castable s3_uri "s3://lower-case/protocol"} -body {
-        qc::castable s3_uri "s3://lower-case/protocol"
-    } -result true
-
-    test castable-s3_uri-1.7 {qc::castable s3_uri "S3://upper-case/protocol"} -body {
-        qc::castable s3_uri "S3://upper-case/protocol"
-    } -result true
-    
-    cleanupTests
-}
-namespace delete ::qcode::test
+namespace import ::qc::*
+
+test castable-integer1.0 {castable integer already int} -setup {
+} -body {
+    qc::castable integer 1
+} -result true
+
+test castable-integer-1.1 {castable integer exponential} -setup {
+} -body {
+    qc::castable integer 42e2
+} -result true
+
+test castable-integer-1.2 {castable integer percent} -setup {
+} -body {
+    qc::castable integer 2.366%
+} -result true
+
+test castable-integer-1.3 {castable integer comma} -setup {
+} -body {
+    qc::castable integer 2,366
+} -result true
+
+test castable-integer-1.4 {castable integer invalid} -setup {
+} -body {
+    qc::castable integer 1A
+} -result false
+
+test castable-bigint1.0 {castable bigint already int} -setup {
+} -body {
+    qc::castable bigint 1
+} -result true
+
+test castable-bigint1.1 {castable bigint exponential} -setup {
+} -body {
+    qc::castable bigint 3.14e6
+} -result true
+
+test castable-bigint1.2 {castable bigint percent} -setup {
+} -body {
+    qc::castable bigint 3.14159%
+} -result true
+
+test castable-bigint1.3 {castable bigint comma} -setup {
+} -body {
+    qc::castable bigint 3,1459
+} -result true
+
+test castable-bigint1.4 {castable bigint invalid} -setup {
+} -body {
+    qc::castable bigint foo
+} -result false
+
+test castable-bigint1.5 {castable bigint out of range upper} -setup {
+} -body {
+    qc::castable bigint 9223372036854775808
+} -result false
+
+test castable-bigint1.6 {castable bigint out of range lower} -setup {
+} -body {
+    qc::castable bigint -9223372036854775809
+} -result false
+
+test castable-bigint1.7 {castable bigint negative} -setup {
+} -body {
+    qc::castable bigint -31459
+} -result true
+
+test castable-smallint1.0 {castable smallint already int} -setup {
+} -body {
+    qc::castable smallint 1
+} -result true
+
+test castable-smallint1.1 {castable smallint exponential} -setup {
+} -body {
+    qc::castable smallint 3.14e2
+} -result true
+
+test castable-smallint1.2 {castable smallint percent} -setup {
+} -body {
+    qc::castable smallint 3.14159%
+} -result true
+
+test castable-smallint1.3 {castable smallint comma} -setup {
+} -body {
+    qc::castable smallint 3,1459
+} -result true
+
+test castable-smallint1.4 {castable smallint invalid} -setup {
+} -body {
+    qc::castable smallint foo
+} -result false
+
+test castable-smallint1.5 {castable smallint out of range upper} -setup {
+} -body {
+    qc::castable smallint 35000
+} -result false
+
+test castable-smallint1.6 {castable smallint out of range lower} -setup {
+} -body {
+    qc::castable smallint -35000
+} -result false
+
+test castable-smallint1.7 {castable smallint negative} -setup {
+} -body {
+    qc::castable smallint -31459
+} -result true
+
+test castable-decimal-1.0 {castable decimal valid} -setup {
+} -body {
+    qc::castable decimal 2,305.25
+} -result true
+
+test castable-decimal-1.1 {castable decimal percent} -setup {
+} -body {
+    qc::castable decimal 2,305%
+} -result true
+
+test castable-decimal-1.2 {castable decimal invalid} -setup {
+} -body {
+    qc::castable decimal 1A
+} -result false
+
+test castable-decimal-1.3 {castable decimal long} -setup {
+} -body {
+    qc::castable decimal 1.123456789e9
+} -result true
+
+test castable-decimal-1.4 {castable decimal precision} -setup {
+} -body {
+    qc::castable decimal -precision 3 3.14159
+} -result true
+
+test castable-decimal-1.5 {castable decimal precision invalid} -setup {
+} -body {
+    qc::castable decimal -precision 1 314.159
+} -result false
+
+test castable-decimal-1.6 {castable decimal precision scale} -setup {
+} -body {
+    qc::castable decimal -precision 4  -scale 3 3.14159
+} -result true
+
+test castable-decimal-1.7 {castable decimal precision scale invalid} -setup {
+} -body {
+    qc::castable decimal -precision 4 -scale 4 314.15926
+} -result false
+
+test castable-decimal-1.8 {castable decimal precision scale invalid} -setup {
+} -body {
+    qc::castable decimal -precision 7 -scale 5 314.15926
+} -result false
+
+test castable-decimal-1.9 {castable decimal precision scale exponent} -setup {
+} -body {
+    qc::castable decimal -precision 7 -scale 2 3.14e4 
+} -result true
+
+test castable-boolean-1.0 {castable boolean already boolean} -setup {
+} -body {
+    qc::castable boolean true
+} -result true
+
+test castable-boolean-1.1 {castable boolean invalid} -setup {
+} -body {
+    qc::castable boolean foo
+} -result false
+
+test castable-timestamp-1.0 {castable timestamp relative} -setup {
+} -body {
+    qc::castable timestamp today
+} -result true
+
+test castable-timestamp-1.1 {castable timestamp uk format date only} -setup {
+} -body {
+    qc::castable timestamp 12/5/12
+} -result true
+
+test castable-timestamp-1.2 {castable timestamp illegal} -setup {
+} -body {
+    qc::castable timestamp "A moment ago"
+} -result false
+
+test castable-timestamptz-1.0 {castable timestamptz relative} -setup {
+} -body {
+    qc::castable timestamptz today
+} -result true
+
+test castable-timestamptz-1.1 {castable timestamptz uk format date only} -setup {
+} -body {
+    qc::castable timestamptz 12/5/12
+} -result true
+
+test castable-timestamptz-1.2 {castable timestamptz illegal} -setup {
+} -body {
+    qc::castable timestamptz "A moment ago"
+} -result false
+
+test castable-varchar-1.0 {castable varchar too long} -setup {
+} -body {
+    qc::castable varchar 12 "Too long a string"
+} -result false
+
+test castable-varchar-1.1 {castable varchar OK} -setup {
+} -body {
+    qc::castable varchar 12 "Short enough"
+} -result true
+
+test castable-char-1.0 {castable char too long} -setup {
+} -body {
+    qc::castable char 12 "Too long a string"
+} -result false
+
+test castable-char-1.1 {castable char exact} -setup {
+} -body {
+    qc::castable char 12 "Short enough"
+} -result true
+
+test castable-char-1.1 {castable char too short} -setup {
+} -body {
+    qc::castable char 12 "foo"
+} -result false
+
+test castable-date-1.0 {castable date short} -setup {
+} -body {
+    qc::castable date 10
+} -result true
+
+test castable-date-1.1 {castable date long without year} -setup {
+} -body {
+    qc::castable date "June 20th"
+} -result true
+
+test castable-date-1.2 {castable date relative} -setup {
+} -body {
+    qc::castable date tomorrow
+} -result true
+
+test castable-date-1.3 {castable date month only} -setup {
+} -body {
+    qc::castable date May
+} -result false
+
+test castable-date-1.4 {castable date illegal} -setup {
+} -body {
+    qc::castable date Xmas
+} -result false
+
+test castable-date-1.5 {castable date too many days} -setup {
+} -body {
+    qc::castable date 2012-11-31
+} -result true
+
+test castable-postcode-1.0 {castable postcode partial} -setup {
+} -body {
+    qc::castable postcode EH3
+} -result false
+
+test castable-postcode-1.1 {castable postcode lowercase} -setup {
+} -body {
+    qc::castable postcode "eh2 9ee"
+} -result true
+
+test castable-postcode-1.2 {castable postcode already postcode} -setup {
+} -body {
+    qc::castable postcode "EH2 9EE"
+} -result true
+
+test castable-postcode-1.3 {castable postcode no space} -setup {
+} -body {
+    qc::castable postcode "W1P2BB"
+} -result true
+
+test castable-postcode-1.4 {castable postcode zero in place of capital 'o'} -setup {
+} -body {
+    qc::castable postcode "y023 5ng"
+} -result true
+
+test castable-creditcard-1.0 {castable creditcard with separators} -setup {
+} -body {
+    qc::castable creditcard "4111-1111+1111 1111"
+} -result true
+
+test castable-creditcard-1.1 {castable creditcard invalid} -setup {
+} -body {
+    qc::castable creditcard "4111 1111 1111 1112"
+} -result false
+
+test castable-creditcard-1.2 {castable creditcard too short} -setup {
+} -body {
+    qc::castable creditcard 4111111111111
+} -result false
+
+test castable-creditcard-1.3 {castable creditcard masked} -setup {
+} -body {
+    qc::castable creditcard 411111******1111
+} -result false
+
+test castable-period-1.0 {castable period empty} -body {
+    qc::castable period ""
+} -result false
+
+test castable-period-1.1 {castable period shorthand month} -body {
+    qc::castable period "Jan"
+} -result true
+
+test castable-period-1.2 {castable period full name month} -body {
+    qc::castable period "January"
+} -result true
+
+test castable-period-1.3 {castable period year} -body {
+    qc::castable period "2014"
+} -result true
+
+test castable-period-1.4 {castable period shorthand month with year} -body {
+    qc::castable period "Jan 2014"
+} -result true
+
+test castable-period-1.5 {castable period full name month with year} -body {
+    qc::castable period "January 2014"
+} -result true
+
+test castable-period-1.6 {castable period month year to month year} -body {
+    qc::castable period "Jan 2014 to March 2014"
+} -result true
+
+test castable-period-1.7 {castable period day month year to day month year} -body {
+    qc::castable period "1st February 2014 to 14th February 2014"
+} -result true
+
+test castable-period-1.8 {castable period invalid} -body {
+    qc::castable period "Foo 2000"
+} -result false
+
+
+test castable-time-1.0 {qc::castable time "00:00:00.000000"} -body {
+    qc::castable time "00:00:00.000000"
+} -result true
+
+test castable-time-1.1 {qc::castable time "00:00:00"} -body {
+    qc::castable time "00:00:00"
+} -result true
+
+test castable-time-1.2 {qc::castable time "24:00:00.000000"} -body {
+    qc::castable time "24:00:00.000000"
+} -result true
+
+test castable-time-1.3 {qc::castable time "24:00:00"} -body {
+    qc::castable time "24:00:00"
+} -result true
+
+test castable-time-1.4 {qc::castable time "12:34:56.789"} -body {
+    qc::castable time "12:34:56.789"
+} -result true
+
+test castable-time-1.5 {qc::castable time "12:34:56"} -body {
+    qc::castable time "12:34:56"
+} -result true
+
+test castable-time-1.6 {qc::castable time "24:00:01"} -body {
+    qc::castable time "24:00:01"
+} -result false
+
+test castable-time-1.7 {qc::castable time "98:76:54"} -body {
+    qc::castable time "98:76:54"
+} -result false
+
+test castable-time-1.8 {qc::castable time "12:59"} -body {
+    qc::castable time "12:59"
+} -result true
+
+test castable-interval-1.0 {qc::castable interval "1 year"} -body {
+    qc::castable interval "1 year"
+} -result true
+
+test castable-interval-1.1 {qc::castable interval "3 months -2 days"} -body {
+    qc::castable interval "3 months -2 days"
+} -result true
+
+test castable-interval-1.2 {qc::castable interval "-5 weeks"} -body {
+    qc::castable interval "-5 weeks"
+} -result true
+
+test castable-interval-1.3 {qc::castable interval "7"} -body {
+    qc::castable interval "7"
+} -result false
+
+test castable-interval-1.4 {qc::castable interval "last week"} -body {
+    qc::castable interval "last week"
+} -result false
+
+test castable-interval-1.5 {qc::castable interval "year"} -body {
+    qc::castable interval "year"
+} -result false
+
+test castable-s3_uri-1.0 {qc::castable s3_uri "bucket"} -body {
+    qc::castable s3_uri "bucket"
+} -result true
+
+test castable-s3_uri-1.1 {qc::castable s3_uri "bucket"} -body {
+    qc::castable s3_uri "bucket"
+} -result true
+
+test castable-s3_uri-1.2 {qc::castable s3_uri "bucket/key"} -body {
+    qc::castable s3_uri "bucket/key"
+} -result true
+
+test castable-s3_uri-1.3 {qc::castable s3_uri "Invalid@Bucket/key"} -body {
+    qc::castable s3_uri "invalid@bucket/key"
+} -result false
+
+test castable-s3_uri-1.4 {qc::castable s3_uri "bucket/invalid_key."} -body {
+    qc::castable s3_uri "bucket/invalid_key."
+} -result false
+
+test castable-s3_uri-1.5 {qc::castable s3_uri "/leading/slash"} -body {
+    qc::castable s3_uri "/leading/slash"
+} -result true
+
+test castable-s3_uri-1.6 {qc::castable s3_uri "s3://lower-case/protocol"} -body {
+    qc::castable s3_uri "s3://lower-case/protocol"
+} -result true
+
+test castable-s3_uri-1.7 {qc::castable s3_uri "S3://upper-case/protocol"} -body {
+    qc::castable s3_uri "S3://upper-case/protocol"
+} -result true
+
+cleanupTests

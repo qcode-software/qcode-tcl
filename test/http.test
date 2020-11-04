@@ -1,174 +1,168 @@
 package require tcltest
-
+package require json
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-package require json
+test http_encoding-1.0 {http_encoding xml } -setup {
+} -body {
+    http_encoding {} {<?xml version="1.0" encoding="utf-8"?>
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <soap:Body>
+        <Response xmlns="https://www.example.com">
+        <Result>
+        <ClientHeader>
+        <PassKey>999</PassKey>
+        </ClientHeader>
+        <Type>TEST</Type>
+        <Data>Testing</Data
+        </Result>
+        </Response>
+        </soap:Body>
+        </soap:Envelope>}
+} -result {utf-8}
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test http_encoding-1.1 {http_encoding xml default} -setup {
+} -body {
+    http_encoding {} {<?xml version="1.0"?>
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <soap:Body>
+        <Response xmlns="https://www.example.com">
+        <Result>
+        <ClientHeader>
+        <PassKey>999</PassKey>
+        </ClientHeader>
+        <Type>TEST</Type>
+        <Data>Testing</Data
+        </Result>
+        </Response>
+        </soap:Body>
+        </soap:Envelope>}
+} -result {utf-8}
+
+test http_encoding-1.2 {http_encoding http charset} -setup {
+} -body {
+    http_encoding {Content-Type {text/html; charset=utf-8}} {}
+} -result {utf-8}
+
+test http_encoding-1.3 {http_encoding http charset not found} -setup {
+} -body {
+    http_encoding {Accept-Encoding gzip} {}
+} -result {iso8859-1}
+
+test http_encoding-1.4 {http_encoding http long headers } -setup {
+} -body {
+    http_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
+} -result {unicode}
+
+test http_encoding-1.5 {http_encoding http long headers no charset } -setup {
+} -body {
+    http_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
+} -result {iso8859-1}
+
+test http_header_encoding-1.0 {http_header_encoding no charset } -setup {
+} -body {
+    http_header_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
+} -result {}
+
+test http_header_encoding-1.1 {http_header_encoding charset } -setup {
+} -body {
+    http_header_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
+} -result {unicode}
+
+test http_header_encoding-1.2 {http_header_encoding empty headers } -setup {
+} -body {
+    http_header_encoding {}
+} -result {}
+
+test IANAEncoding2TclEncoding-1.0 {IANAEncoding2TclEncoding utf-8 upper} -setup {
+} -body {
+    IANAEncoding2TclEncoding {UTF-8}
+} -result {utf-8}
+
+test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding error} -setup {
+} -body {
+    IANAEncoding2TclEncoding {qwerty}
+} -returnCodes 1 -result {Unrecognized encoding name 'qwerty'}
+
+test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding latin} -setup {
+} -body {
+    IANAEncoding2TclEncoding {latin1}
+} -result {iso8859-1}
+
+test http_header-1.0 {http_header ok} -setup {} -body {
+    http_header Content-Type application/json
+} -result {Content-Type: application/json}
+test http_header-1.1 {http_header error} -setup {} -body {
+    http_header Rest-Sign "aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk"
+} -returnCodes 1 -result "The value of http header, \"Rest-Sign: aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk\", contains newline characters."
+
+test http_post-1.0 {http_post} -body {
+    set response [http_post -timeout 30 -content-type "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"]
+    set dict [::json::json2dict $response]
+    dict get $dict data
+} -result {data=Here%27s%20the%20POST%20data}
+
+test http_post-1.1 {http_post (multipart)} -setup {} -body {
+    set data [list {name foo contents Apples} {name bar contents Oranges}]
+    set response [http_post -content-type "multipart/form-data" -data $data http://httpbin.org/post]
+    set dict [::json::json2dict $response]
     
-    test http_encoding-1.0 {http_encoding xml } -setup {
-    } -body {
-        http_encoding {} {<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <soap:Body>
-    <Response xmlns="https://www.example.com">
-      <Result>
-        <ClientHeader>
-          <PassKey>999</PassKey>
-        </ClientHeader>
-        <Type>TEST</Type>
-        <Data>Testing</Data
-      </Result>
-    </Response>
-  </soap:Body>
-</soap:Envelope>}
-    } -result {utf-8}
+    # Check Content-Type
+    if { ! [string match {multipart/form-data; boundary=*} [dict get $dict headers Content-Type]] } {
+        error "Content-Type mismatch"
+    }
 
-    test http_encoding-1.1 {http_encoding xml default} -setup {
-    } -body {
-        http_encoding {} {<?xml version="1.0"?>
-<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <soap:Body>
-    <Response xmlns="https://www.example.com">
-      <Result>
-        <ClientHeader>
-          <PassKey>999</PassKey>
-        </ClientHeader>
-        <Type>TEST</Type>
-        <Data>Testing</Data
-      </Result>
-    </Response>
-  </soap:Body>
-</soap:Envelope>}
-    } -result {utf-8}
-
-    test http_encoding-1.2 {http_encoding http charset} -setup {
-    } -body {
-        http_encoding {Content-Type {text/html; charset=utf-8}} {}
-    } -result {utf-8}
-
-    test http_encoding-1.3 {http_encoding http charset not found} -setup {
-    } -body {
-        http_encoding {Accept-Encoding gzip} {}
-    } -result {iso8859-1}
-
-    test http_encoding-1.4 {http_encoding http long headers } -setup {
-    } -body {
-        http_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
-    } -result {unicode}
-
-    test http_encoding-1.5 {http_encoding http long headers no charset } -setup {
-    } -body {
-        http_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
-    } -result {iso8859-1}
-
-    test http_header_encoding-1.0 {http_header_encoding no charset } -setup {
-    } -body {
-        http_header_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
-    } -result {}
-
-    test http_header_encoding-1.1 {http_header_encoding charset } -setup {
-    } -body {
-        http_header_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
-    } -result {unicode}
-
-    test http_header_encoding-1.2 {http_header_encoding empty headers } -setup {
-    } -body {
-        http_header_encoding {}
-    } -result {}
-
-    test IANAEncoding2TclEncoding-1.0 {IANAEncoding2TclEncoding utf-8 upper} -setup {
-    } -body {
-         IANAEncoding2TclEncoding {UTF-8}
-    } -result {utf-8}
-
-    test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding error} -setup {
-    } -body {
-         IANAEncoding2TclEncoding {qwerty}
-    } -returnCodes 1 -result {Unrecognized encoding name 'qwerty'}
-
-    test IANAEncoding2TclEncoding-1.1 {IANAEncoding2TclEncoding latin} -setup {
-    } -body {
-         IANAEncoding2TclEncoding {latin1}
-    } -result {iso8859-1}
-
-    test http_header-1.0 {http_header ok} -setup {} -body {
-        http_header Content-Type application/json
-    } -result {Content-Type: application/json}
-    test http_header-1.1 {http_header error} -setup {} -body {
-        http_header Rest-Sign "aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk"
-    } -returnCodes 1 -result "The value of http header, \"Rest-Sign: aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk\", contains newline characters."
-
-    test http_post-1.0 {http_post} -body {
-        set response [http_post -timeout 30 -content-type "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"]
-        set dict [::json::json2dict $response]
-        dict get $dict data
-    } -result {data=Here%27s%20the%20POST%20data}
-
-    test http_post-1.1 {http_post (multipart)} -setup {} -body {
-        set data [list {name foo contents Apples} {name bar contents Oranges}]
-        set response [http_post -content-type "multipart/form-data" -data $data http://httpbin.org/post]
-        set dict [::json::json2dict $response]
-        
-        # Check Content-Type
-        if { ! [string match {multipart/form-data; boundary=*} [dict get $dict headers Content-Type]] } {
-            error "Content-Type mismatch"
+    # Check form data
+    foreach {name value} {
+        foo Apples
+        bar Oranges
+    } {
+        if { [dict get $dict form $name] ne $value } {
+            error "Data mismatch"
         }
+    }
 
-        # Check form data
-        foreach {name value} {
-            foo Apples
-            bar Oranges
-        } {
-            if { [dict get $dict form $name] ne $value } {
-                error "Data mismatch"
-            }
-        }
+    return true
+} -result true
 
-        return true
-    } -result true
+test http_header_parse-1.0 {http_header_parse simple} -setup {} -body {
+    return [qc::http_header_parse "Connection" "keep-alive"]
+} -result {{token keep-alive params {}}}
 
-    test http_header_parse-1.0 {http_header_parse simple} -setup {} -body {
-        return [qc::http_header_parse "Connection" "keep-alive"]
-    } -result {{token keep-alive params {}}}
+test http_header_parse-1.1 {http_header_parse complex} -setup {} -body {
+    return [qc::http_header_parse "Accept" "application/json;indent=4, text/xml;q=0.7,text/html;level=1;q=0.9,   */*;q=0.01"]
+} -result {{token application/json params {indent 4}} {token text/xml params {q 0.7}} {token text/html params {level 1 q 0.9}} {token */* params {q 0.01}}}
 
-    test http_header_parse-1.1 {http_header_parse complex} -setup {} -body {
-        return [qc::http_header_parse "Accept" "application/json;indent=4, text/xml;q=0.7,text/html;level=1;q=0.9,   */*;q=0.01"]
-    } -result {{token application/json params {indent 4}} {token text/xml params {q 0.7}} {token text/html params {level 1 q 0.9}} {token */* params {q 0.01}}}
+test http_header_parse-1.2 {http_header_parse header with no tokens} -setup {} -body {
+    return [qc::http_header_parse "Cookie" "sessionID=9b885685d094057a08e8a117f28a1f406d28bcb7;_gat=1;logged_in=yes;tz=Europe%2FLondon"]
+} -result {{token {} params {sessionID 9b885685d094057a08e8a117f28a1f406d28bcb7 _gat 1 logged_in yes tz Europe%2FLondon}}}
 
-    test http_header_parse-1.2 {http_header_parse header with no tokens} -setup {} -body {
-        return [qc::http_header_parse "Cookie" "sessionID=9b885685d094057a08e8a117f28a1f406d28bcb7;_gat=1;logged_in=yes;tz=Europe%2FLondon"]
-    } -result {{token {} params {sessionID 9b885685d094057a08e8a117f28a1f406d28bcb7 _gat 1 logged_in yes tz Europe%2FLondon}}}
+test http_header_sort_by_weight-1.0 {http_header_sort_values_by_weight OK} -setup {} -body {
+    set accept_header [qc::http_header_parse "Accept" "application/json;indent=4,text/xml;q=0.7,text/html;level=1;q=0.9,*/*;q=0.01"]
+    return [qc::http_header_sort_values_by_weight $accept_header]
+} -result {{token application/json params {indent 4}} {token text/html params {level 1 q 0.9}} {token text/xml params {q 0.7}} {token */* params {q 0.01}}}
 
-    test http_header_sort_by_weight-1.0 {http_header_sort_values_by_weight OK} -setup {} -body {
-        set accept_header [qc::http_header_parse "Accept" "application/json;indent=4,text/xml;q=0.7,text/html;level=1;q=0.9,*/*;q=0.01"]
-        return [qc::http_header_sort_values_by_weight $accept_header]
-    } -result {{token application/json params {indent 4}} {token text/html params {level 1 q 0.9}} {token text/xml params {q 0.7}} {token */* params {q 0.01}}}
+test http_exists-1.0 {http_exists true} -body {
+    http_exists -timeout 30 -- http://httpbin.org/
+} -result {true}
 
-    test http_exists-1.0 {http_exists true} -body {
-        http_exists -timeout 30 -- http://httpbin.org/
-    } -result {true}
+test http_exists-1.1 {http_exists false} -body {
+    http_exists -timeout 30 -- http://httpbin.org/idontexist
+} -result {false}
 
-    test http_exists-1.1 {http_exists false} -body {
-        http_exists -timeout 30 -- http://httpbin.org/idontexist
-    } -result {false}
+test http_head-1.0 {http_head} -body {
+    set response [qc::http_head -timeout 30 http://httpbin.org/response-headers?test=hello]
+    if { [dict exists $response test] } {
+        return [dict get $response test]
+    } else {
+        return ""
+    }
+} -result {hello}
 
-    test http_head-1.0 {http_head} -body {
-        set response [qc::http_head -timeout 30 http://httpbin.org/response-headers?test=hello]
-        if { [dict exists $response test] } {
-            return [dict get $response test]
-        } else {
-            return ""
-        }
-    } -result {hello}
-
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

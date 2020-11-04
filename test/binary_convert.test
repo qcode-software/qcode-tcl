@@ -1,136 +1,131 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test qc::binary_convert_unit_prefix2mult-1.0 {qc::binary_convert_unit_prefix2mult K} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult K
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.0 {qc::binary_convert_unit_prefix2mult K} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult K
-    } -cleanup {} -result {1024.0}
+test qc::binary_convert_unit_prefix2mult-1.1 {qc::binary_convert_unit_prefix2mult kilo} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult K
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.1 {qc::binary_convert_unit_prefix2mult kilo} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult K
-    } -cleanup {} -result {1024.0}
+test qc::binary_convert_unit_prefix2mult-1.2 {qc::binary_convert_unit_prefix2mult Kilo} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult Kilo
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.2 {qc::binary_convert_unit_prefix2mult Kilo} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult Kilo
-    } -cleanup {} -result {1024.0}
+test qc::binary_convert_unit_prefix2mult-1.3 {qc::binary_convert_unit_prefix2mult Ki} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult Ki
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.3 {qc::binary_convert_unit_prefix2mult Ki} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult Ki
-    } -cleanup {} -result {1024.0}
+test qc::binary_convert_unit_prefix2mult-1.4 {qc::binary_convert_unit_prefix2mult kibi} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult kibi
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.4 {qc::binary_convert_unit_prefix2mult kibi} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult kibi
-    } -cleanup {} -result {1024.0}
-    
-    test qc::binary_convert_unit_prefix2mult-1.5 {qc::binary_convert_unit_prefix2mult Kibi} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult Kibi
-    } -cleanup {} -result {1024.0}
+test qc::binary_convert_unit_prefix2mult-1.5 {qc::binary_convert_unit_prefix2mult Kibi} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult Kibi
+} -cleanup {} -result {1024.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.6 {qc::binary_convert_unit_prefix2mult M} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult M
-    } -cleanup {} -result {1048576.0}
+test qc::binary_convert_unit_prefix2mult-1.6 {qc::binary_convert_unit_prefix2mult M} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult M
+} -cleanup {} -result {1048576.0}
 
-    test qc::binary_convert_unit_prefix2mult-1.7 {qc::binary_convert_unit_prefix2mult G} -setup {
-    } -body {
-        qc::binary_convert_unit_prefix2mult G
-    } -cleanup {} -result {1073741824.0}
+test qc::binary_convert_unit_prefix2mult-1.7 {qc::binary_convert_unit_prefix2mult G} -setup {
+} -body {
+    qc::binary_convert_unit_prefix2mult G
+} -cleanup {} -result {1073741824.0}
 
-    test qc::binary_convert-1.0 {qc::binary_convert 2048 KB MB} -setup {
-    } -body {
-        qc::binary_convert 2048 KB MB
-    } -cleanup {} -result {2.0}
+test qc::binary_convert-1.0 {qc::binary_convert 2048 KB MB} -setup {
+} -body {
+    qc::binary_convert 2048 KB MB
+} -cleanup {} -result {2.0}
 
-    test qc::binary_convert-1.1 {qc::binary_convert "3072MB" GB} -setup {
-    } -body {
-        qc::binary_convert "3072MB" GB
-    } -cleanup {} -result {3.0}
+test qc::binary_convert-1.1 {qc::binary_convert "3072MB" GB} -setup {
+} -body {
+    qc::binary_convert "3072MB" GB
+} -cleanup {} -result {3.0}
 
-    test qc::binary_convert-1.2 {qc::binary_convert "3 GB" kilobyte} -setup {
-    } -body {
-        qc::binary_convert "3 GB" kilobyte
-    } -cleanup {} -result {3145728.0}
+test qc::binary_convert-1.2 {qc::binary_convert "3 GB" kilobyte} -setup {
+} -body {
+    qc::binary_convert "3 GB" kilobyte
+} -cleanup {} -result {3145728.0}
 
-    test qc::binary_convert-1.3 {qc::binary_convert "3 GibiByte" KibiB} -setup {
-    } -body {
-        qc::binary_convert "3 GibiByte" KibiB
-    } -cleanup {} -result {3145728.0}
+test qc::binary_convert-1.3 {qc::binary_convert "3 GibiByte" KibiB} -setup {
+} -body {
+    qc::binary_convert "3 GibiByte" KibiB
+} -cleanup {} -result {3145728.0}
 
-    test qc::binary_convert-1.4 {qc::binary_convert "3 GB" Gb} -setup {
-    } -body {
-        qc::binary_convert "3 GB" Gb
-    } -cleanup {} -result {24.0}
+test qc::binary_convert-1.4 {qc::binary_convert "3 GB" Gb} -setup {
+} -body {
+    qc::binary_convert "3 GB" Gb
+} -cleanup {} -result {24.0}
 
-    test qc::binary_format-1.0 {qc::binary_format 44444 MB} -setup {
-    } -body {
-        qc::binary_format 44444 MB
-    } -cleanup {} -result {43.4 GB}
+test qc::binary_format-1.0 {qc::binary_format 44444 MB} -setup {
+} -body {
+    qc::binary_format 44444 MB
+} -cleanup {} -result {43.4 GB}
 
-    test qc::binary_format-1.1 {qc::binary_format 44444 MBytes} -setup {
-    } -body {
-        qc::binary_format 44444 MBytes
-    } -cleanup {} -result {43.4 GB}
+test qc::binary_format-1.1 {qc::binary_format 44444 MBytes} -setup {
+} -body {
+    qc::binary_format 44444 MBytes
+} -cleanup {} -result {43.4 GB}
 
-    test qc::binary_format-1.2 {qc::binary_format 44444 megabytes} -setup {
-    } -body {
-        qc::binary_format 44444 megabytes
-    } -cleanup {} -result {43.4 GB}
+test qc::binary_format-1.2 {qc::binary_format 44444 megabytes} -setup {
+} -body {
+    qc::binary_format 44444 megabytes
+} -cleanup {} -result {43.4 GB}
 
-    test qc::binary_format-1.3 {qc::binary_format 44444 megabyte} -setup {
-    } -body {
-        qc::binary_format 44444 megabyte
-    } -cleanup {} -result {43.4 GB}
+test qc::binary_format-1.3 {qc::binary_format 44444 megabyte} -setup {
+} -body {
+    qc::binary_format 44444 megabyte
+} -cleanup {} -result {43.4 GB}
 
-    test qc::binary_format-1.4 {qc::binary_format "44444Mb"} -setup {
-    } -body {
-        qc::binary_format "44444Mb"
-    } -cleanup {} -result {43.4 Gb}
+test qc::binary_format-1.4 {qc::binary_format "44444Mb"} -setup {
+} -body {
+    qc::binary_format "44444Mb"
+} -cleanup {} -result {43.4 Gb}
 
-    test qc::binary_format-1.5 {qc::binary_format "44444Mbit"} -setup {
-    } -body {
-        qc::binary_format "44444Mbit"
-    } -cleanup {} -result {43.4 Gb}
+test qc::binary_format-1.5 {qc::binary_format "44444Mbit"} -setup {
+} -body {
+    qc::binary_format "44444Mbit"
+} -cleanup {} -result {43.4 Gb}
 
-    test qc::binary_format-1.6 {qc::binary_format "44444 megabit"} -setup {
-    } -body {
-        qc::binary_format "44444 megabit"
-    } -cleanup {} -result {43.4 Gb}
+test qc::binary_format-1.6 {qc::binary_format "44444 megabit"} -setup {
+} -body {
+    qc::binary_format "44444 megabit"
+} -cleanup {} -result {43.4 Gb}
 
-    test qc::binary_format-1.7 {qc::binary_format "44444 megabit"} -setup {
-    } -body {
-        qc::binary_format "44444 megabit"
-    } -cleanup {} -result {43.4 Gb}
+test qc::binary_format-1.7 {qc::binary_format "44444 megabit"} -setup {
+} -body {
+    qc::binary_format "44444 megabit"
+} -cleanup {} -result {43.4 Gb}
 
-    test qc::binary_format-1.8 {qc::binary_format -sigfigs 5 44444 Mb} -setup {
-    } -body {
-        qc::binary_format -sigfigs 5 44444 Mb
-    } -cleanup {} -result {43.402 Gb}
+test qc::binary_format-1.8 {qc::binary_format -sigfigs 5 44444 Mb} -setup {
+} -body {
+    qc::binary_format -sigfigs 5 44444 Mb
+} -cleanup {} -result {43.402 Gb}
 
-    test qc::binary_format-1.9 {qc::binary_format -sigfigs 2 1234B} -setup {
-    } -body {
-        qc::binary_format -sigfigs 2 1234B
-    } -cleanup {} -result {1.2 KB}
+test qc::binary_format-1.9 {qc::binary_format -sigfigs 2 1234B} -setup {
+} -body {
+    qc::binary_format -sigfigs 2 1234B
+} -cleanup {} -result {1.2 KB}
 
-    test qc::binary_format-1.10 {qc::binary_format -sigfigs 5 457744444 Mb} -setup {
-    } -body {
-        qc::binary_format -sigfigs 5 457744444 Mb
-    } -cleanup {} -result {436.54 Tb}
+test qc::binary_format-1.10 {qc::binary_format -sigfigs 5 457744444 Mb} -setup {
+} -body {
+    qc::binary_format -sigfigs 5 457744444 Mb
+} -cleanup {} -result {436.54 Tb}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

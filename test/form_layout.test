@@ -1,27 +1,24 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test form_layout_table-1.0 {form_layout_table} -setup {
-        set conf {
-            {name firstname value {} label Firstname width 200}
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-        }
-    } -body {
-        form_layout_table $conf
-    } -cleanup {unset conf} -result {<table class="form-layout-table">
+test form_layout_table-1.0 {form_layout_table} -setup {
+    set conf {
+        {name firstname value {} label Firstname width 200}
+        {name surname value {} label Surname width 250}
+        {name email value {} label Email id email_address}
+        {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
+        {name agree value no type checkbox label Agree}
+    }
+} -body {
+    form_layout_table $conf
+} -cleanup {unset conf} -result {<table class="form-layout-table">
 <colgroup>
 <col class="label">
 <col>
@@ -53,17 +50,17 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test form_layout_table-1.1 {form_layout_table class} -setup {
-        set conf {
-            {name firstname value {} label Firstname width 200}
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-        }
-    } -body {
-        form_layout_table -class clsOther $conf
-    } -cleanup {unset conf} -result {<table class="clsOther">
+test form_layout_table-1.1 {form_layout_table class} -setup {
+    set conf {
+        {name firstname value {} label Firstname width 200}
+        {name surname value {} label Surname width 250}
+        {name email value {} label Email id email_address}
+        {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
+        {name agree value no type checkbox label Agree}
+    }
+} -body {
+    form_layout_table -class clsOther $conf
+} -cleanup {unset conf} -result {<table class="clsOther">
 <colgroup>
 <col class="label">
 <col>
@@ -95,21 +92,21 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test form_layout_tables-1.0- {form_layout_tables } -setup {
-        set conf1 {
-            {name firstname value {} label Firstname width 200}
-        }
-        set conf2 {
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-        }
-        set conf3 {
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-        }
-    } -body {
-        form_layout_tables $conf1 $conf2 $conf3
-    } -cleanup {unset conf1;unset conf2;unset conf3} -result {<table class="columns-container">
+test form_layout_tables-1.0- {form_layout_tables } -setup {
+    set conf1 {
+        {name firstname value {} label Firstname width 200}
+    }
+    set conf2 {
+        {name surname value {} label Surname width 250}
+        {name email value {} label Email id email_address}
+    }
+    set conf3 {
+        {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
+        {name agree value no type checkbox label Agree}
+    }
+} -body {
+    form_layout_tables $conf1 $conf2 $conf3
+} -cleanup {unset conf1;unset conf2;unset conf3} -result {<table class="columns-container">
 <tbody>
 <tr>
 <td><table class="form-layout-table">
@@ -166,36 +163,34 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test form_layout_tbody-1.0 {form_layout_tbody} -setup {
-        set conf {
-            {label "Country" name country_code type select options {SCO Scotland ENG England NI {Northern Ireland} WAL Wales}}
-            {label "Postcode" name postcode value "" width 100 maxlength 10}
-            {label "House No/Name" name house_no value "" width 200 maxlength 25}
-        }
-    } -body {
-        form_layout_tbody $conf
-    } -cleanup {unset conf} -result {{{<label for="country_code">Country</label>} {<select id="country_code" name="country_code" sticky="no"><option value="Scotland">SCO</option>
+test form_layout_tbody-1.0 {form_layout_tbody} -setup {
+    set conf {
+        {label "Country" name country_code type select options {SCO Scotland ENG England NI {Northern Ireland} WAL Wales}}
+        {label "Postcode" name postcode value "" width 100 maxlength 10}
+        {label "House No/Name" name house_no value "" width 200 maxlength 25}
+    }
+} -body {
+    form_layout_tbody $conf
+} -cleanup {unset conf} -result {{{<label for="country_code">Country</label>} {<select id="country_code" name="country_code" sticky="no"><option value="Scotland">SCO</option>
 <option value="England">ENG</option>
 <option value="Northern Ireland">NI</option>
 <option value="Wales">WAL</option></select>}} {{<label for="postcode">Postcode</label>} {<input maxlength="10" style="width:100px" id="postcode" name="postcode" value="" type="text" sticky="no">}} {{<label for="house_no">House No/Name</label>} {<input maxlength="25" style="width:200px" id="house_no" name="house_no" value="" type="text" sticky="no">}}}
 
 
-    test form_layout_list-1.0 {form_layout_list} -setup {
-        set conf {
-            {name firstname value {} label Firstname width 200}
-	    {name surname value {} label Surname width 250}
-	    {name email value {} label Email id email_address}
-	    {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
-	    {name agree value no type checkbox label Agree}
-        }
-    } -body {
-        form_layout_list $conf
-    } -result {<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color"><option value="Red">1</option>
+test form_layout_list-1.0 {form_layout_list} -setup {
+    set conf {
+        {name firstname value {} label Firstname width 200}
+        {name surname value {} label Surname width 250}
+        {name email value {} label Email id email_address}
+        {name color value "" label Colour type select options {1 Red 2 Blue 3 Green}}
+        {name agree value no type checkbox label Agree}
+    }
+} -body {
+    form_layout_list $conf
+} -result {<div style="padding-bottom:1em;"><label for="firstname">Firstname</label><br><input style="width:200px" id="firstname" name="firstname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="surname">Surname</label><br><input style="width:250px" id="surname" name="surname" value="" type="text"></div><div style="padding-bottom:1em;"><label for="email_address">Email</label><br><input style="width:160px" name="email" value="" id="email_address" type="text"></div><div style="padding-bottom:1em;"><label for="color">Colour</label><br><select id="color" name="color"><option value="Red">1</option>
 <option value="Blue">2</option>
 <option value="Green">3</option></select></div><div style="padding-bottom:1em;"><input id="agree" name="agree" value="no" type="checkbox"> <label for="agree">Agree</label></div>}
 
 
 
-    cleanupTests
-} 
-namespace delete ::qcode::test
+cleanupTests

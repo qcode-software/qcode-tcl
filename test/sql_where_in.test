@@ -1,42 +1,37 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test sql_where_in-1.0 {sql_where_in } -setup {
+} -body {
+    sql_where_in name [list Beth Patti Brian]
+} -cleanup {} -result {name in ('Beth','Patti','Brian')}
 
-    test sql_where_in-1.0 {sql_where_in } -setup {
-    } -body {
-        sql_where_in name [list Beth Patti Brian]
-    } -cleanup {} -result {name in ('Beth','Patti','Brian')}
+test sql_where_in-1.1 {sql_where_in empty} -setup {
+} -body {
+    sql_where_in name [list]
+} -cleanup {} -result {false}
 
-    test sql_where_in-1.1 {sql_where_in empty} -setup {
-    } -body {
-        sql_where_in name [list]
-    } -cleanup {} -result {false}
+test sql_where_in-1.2 {sql_where_in type} -setup {
+} -body {
+    sql_where_in -type text name [list Beth 9999 Brian]
+} -cleanup {} -result {name in ('Beth'::text,'9999'::text,'Brian'::text)}
 
-    test sql_where_in-1.2 {sql_where_in type} -setup {
-    } -body {
-        sql_where_in -type text name [list Beth 9999 Brian]
-    } -cleanup {} -result {name in ('Beth'::text,'9999'::text,'Brian'::text)}
+test sql_where_in_not-1.0 {sql_where_in_not } -setup {
+} -body {
+    sql_where_in_not name [list Beth Patti Brian]
+} -cleanup {} -result {name not in ('Beth','Patti','Brian')}
 
-    test sql_where_in_not-1.0 {sql_where_in_not } -setup {
-    } -body {
-        sql_where_in_not name [list Beth Patti Brian]
-    } -cleanup {} -result {name not in ('Beth','Patti','Brian')}
-
-    test sql_where_in_not-1.1 {sql_where_in_not empty} -setup {
-    } -body {
-        sql_where_in_not name [list]
-    } -cleanup {} -result {true}
+test sql_where_in_not-1.1 {sql_where_in_not empty} -setup {
+} -body {
+    sql_where_in_not name [list]
+} -cleanup {} -result {true}
 
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

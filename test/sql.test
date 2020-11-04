@@ -1,157 +1,152 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test sql_set-1.0 {sql_set} -setup {
+} -body {
+    sql_set name email user_code
+} -cleanup {} -result {name=:name,email=:email,user_code=:user_code} 
 
-    test sql_set-1.0 {sql_set} -setup {
-    } -body {
-        sql_set name email user_code
-    } -cleanup {} -result {name=:name,email=:email,user_code=:user_code} 
+test sql_set_with-1.0 {sql_set_with} -setup {
+} -body {
+    sql_set_with name "Amadou" email "amadou@mali.com" user_code 911
+} -cleanup {} -result {"name"='Amadou',"email"='amadou@mali.com',"user_code"='911'}
 
-    test sql_set_with-1.0 {sql_set_with} -setup {
-    } -body {
-        sql_set_with name "Amadou" email "amadou@mali.com" user_code 911
-    } -cleanup {} -result {"name"='Amadou',"email"='amadou@mali.com',"user_code"='911'}
+test sql_set_with-1.1 {sql_set_with needs quoting} -setup {
+} -body {
+    sql_set_with name "" email "Amado'u <amadou@mali.com>" user_code 911
+} -cleanup {} -result {"name"=NULL,"email"='Amado''u <amadou@mali.com>',"user_code"='911'}
 
-    test sql_set_with-1.1 {sql_set_with needs quoting} -setup {
-    } -body {
-        sql_set_with name "" email "Amado'u <amadou@mali.com>" user_code 911
-    } -cleanup {} -result {"name"=NULL,"email"='Amado''u <amadou@mali.com>',"user_code"='911'}
+test sql_insert-1.0 {sql_insert} -setup {
+} -body {
+    sql_insert name email user_code 
+} -cleanup {} -result {( name,email,user_code ) values ( :name,:email,:user_code )}
 
-    test sql_insert-1.0 {sql_insert} -setup {
-    } -body {
-        sql_insert name email user_code 
-    } -cleanup {} -result {( name,email,user_code ) values ( :name,:email,:user_code )}
+test sql_insert_with-1.0 {sql_insert_with} -setup {
+} -body {
+    sql_insert_with name "Amadou" email "amadou@mali.com" user_code 911
+} -cleanup {} -result {( "name","email","user_code" ) values ( 'Amadou','amadou@mali.com','911' )}
 
-    test sql_insert_with-1.0 {sql_insert_with} -setup {
-    } -body {
-        sql_insert_with name "Amadou" email "amadou@mali.com" user_code 911
-    } -cleanup {} -result {( "name","email","user_code" ) values ( 'Amadou','amadou@mali.com','911' )}
+test sql_insert_with-1.1 {sql_insert_with needs quoting} -setup {
+} -body {
+    sql_insert_with name "" email "Amado'u <amadou@mali.com>" user_code 911
+} -cleanup {} -result {( "name","email","user_code" ) values ( NULL,'Amado''u <amadou@mali.com>','911' )}
 
-    test sql_insert_with-1.1 {sql_insert_with needs quoting} -setup {
-    } -body {
-        sql_insert_with name "" email "Amado'u <amadou@mali.com>" user_code 911
-    } -cleanup {} -result {( "name","email","user_code" ) values ( NULL,'Amado''u <amadou@mali.com>','911' )}
+test sql_sort-1.0 {sql_sort} -setup {
+} -body {
+    sql_sort name email user_code 
+} -cleanup {} -result {"name","email","user_code"}
 
-    test sql_sort-1.0 {sql_sort} -setup {
-    } -body {
-        sql_sort name email user_code 
-    } -cleanup {} -result {"name","email","user_code"}
+test sql_sort-1.1 {sql_sort with order} -setup {
+} -body {
+    sql_sort name DESC email user_code 
+} -cleanup {} -result {"name" DESC NULLS LAST,"email","user_code"}
 
-    test sql_sort-1.1 {sql_sort with order} -setup {
-    } -body {
-        sql_sort name DESC email user_code 
-    } -cleanup {} -result {"name" DESC NULLS LAST,"email","user_code"}
+test sql_sort-1.2 {sql_sort with paging} -setup {
+} -body {
+    sql_sort -paging name email user_code 
+} -cleanup {} -result {"name","email","user_code" limit '100' offset '0'}
 
-    test sql_sort-1.2 {sql_sort with paging} -setup {
-    } -body {
-        sql_sort -paging name email user_code 
-    } -cleanup {} -result {"name","email","user_code" limit '100' offset '0'}
+test sql_sort-1.3 {sql_sort with potential injection} -setup {
+} -body {
+    sql_sort {session_id"; delete from session;} {"username}
+} -cleanup {} -result {"session_id"";","delete","from","session;","""username"}
 
-    test sql_sort-1.3 {sql_sort with potential injection} -setup {
-    } -body {
-        sql_sort {session_id"; delete from session;} {"username}
-    } -cleanup {} -result {"session_id"";","delete","from","session;","""username"}
+test sql_sort-1.4 {sql_sort with potential limit-based injection} -setup {
+} -body {
+    sql_sort -limit {10'; delete from session;} username
+} -cleanup {} -result {"username" limit '10''; delete from session;' offset '0'}
 
-    test sql_sort-1.4 {sql_sort with potential limit-based injection} -setup {
-    } -body {
-        sql_sort -limit {10'; delete from session;} username
-    } -cleanup {} -result {"username" limit '10''; delete from session;' offset '0'}
+test sql_sort-1.5 {sql_sort with nulls option} -setup {
+} -body {
+    sql_sort -nulls first -- name ASC
+} -cleanup {} -result {"name" NULLS FIRST}
 
-    test sql_sort-1.5 {sql_sort with nulls option} -setup {
-    } -body {
-        sql_sort -nulls first -- name ASC
-    } -cleanup {} -result {"name" NULLS FIRST}
+test sql_sort-1.6 {sql_sort descending with nulls option} -setup {
+} -body {
+    sql_sort -nulls last -- name DESC
+} -cleanup {} -result {"name" DESC NULLS LAST}
 
-    test sql_sort-1.6 {sql_sort descending with nulls option} -setup {
-    } -body {
-        sql_sort -nulls last -- name DESC
-    } -cleanup {} -result {"name" DESC NULLS LAST}
+test sql_sort-1.7 {sql_sort with commas} -setup {
+} -body {
+    sql_sort name, email DESC, user_code
+} -cleanup {} -result {"name","email" DESC NULLS LAST,"user_code"}
 
-    test sql_sort-1.7 {sql_sort with commas} -setup {
-    } -body {
-        sql_sort name, email DESC, user_code
-    } -cleanup {} -result {"name","email" DESC NULLS LAST,"user_code"}
+test sql_sort-1.8 {sql_sort with qualified fields} -setup {
+} -body {
+    sql_sort user.name user.email session.session_id
+} -cleanup {} -result {"user"."name","user"."email","session"."session_id"}
 
-    test sql_sort-1.8 {sql_sort with qualified fields} -setup {
-    } -body {
-        sql_sort user.name user.email session.session_id
-    } -cleanup {} -result {"user"."name","user"."email","session"."session_id"}
+test sql_sort-1.9 {sql_sort from string} -setup {
+} -body {
+    set sort_order "name, date DESC"
+    sql_sort $sort_order
+} -cleanup {} -result {"name","date" DESC NULLS LAST}
 
-     test sql_sort-1.9 {sql_sort from string} -setup {
-     } -body {
-         set sort_order "name, date DESC"
-         sql_sort $sort_order
-    } -cleanup {} -result {"name","date" DESC NULLS LAST}
+test sql_in-1.0 {sql_in} -setup {
+} -body {
+    sql_in [list Antics Horses Rounds]
+} -cleanup {} -result {('Antics','Horses','Rounds')}
 
-    test sql_in-1.0 {sql_in} -setup {
-    } -body {
-        sql_in [list Antics Horses Rounds]
-    } -cleanup {} -result {('Antics','Horses','Rounds')}
+test sql_in-1.1 {sql_in empty} -setup {
+} -body {
+    sql_in [list]
+} -cleanup {} -result {(NULL)}
 
-    test sql_in-1.1 {sql_in empty} -setup {
-    } -body {
-        sql_in [list]
-    } -cleanup {} -result {(NULL)}
+test sql_array2list-1.0 {sql_array2list} -setup {
+} -body {
+    sql_array2list {"Four Tet","Sleigh Bells",Bauhaus}
+} -cleanup {} -result {{Four Tet} {Sleigh Bells} Bauhaus}
 
-    test sql_array2list-1.0 {sql_array2list} -setup {
-    } -body {
-        sql_array2list {"Four Tet","Sleigh Bells",Bauhaus}
-    } -cleanup {} -result {{Four Tet} {Sleigh Bells} Bauhaus}
+test sql_array2list-1.1 {sql_array2list empty} -setup {
+} -body {
+    sql_array2list {}
+} -cleanup {} -result {}
 
-    test sql_array2list-1.1 {sql_array2list empty} -setup {
-    } -body {
-        sql_array2list {}
-    } -cleanup {} -result {}
+test sql_list2array-1.0 {sql_list2array} -setup {
+} -body {
+    sql_list2array [list "Four 'Tet" "Sleigh Bells" Bauhaus]
+} -cleanup {} -result {array['Four ''Tet','Sleigh Bells','Bauhaus']}
 
-    test sql_list2array-1.0 {sql_list2array} -setup {
-    } -body {
-        sql_list2array [list "Four 'Tet" "Sleigh Bells" Bauhaus]
-    } -cleanup {} -result {array['Four ''Tet','Sleigh Bells','Bauhaus']}
+test sql_list2array-1.1 {sql_list2array empty} -setup {
+} -body {
+    sql_list2array [list]
+} -cleanup {} -result {array[]}
 
-    test sql_list2array-1.1 {sql_list2array empty} -setup {
-    } -body {
-        sql_list2array [list]
-    } -cleanup {} -result {array[]}
+test sql_where_postcode-1.0 {sql_where_postcode full} -setup {
+} -body {
+    sql_where_postcode "delivery_postcode" "IV2 5DZ"
+} -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5DZ$'}
 
-    test sql_where_postcode-1.0 {sql_where_postcode full} -setup {
-    } -body {
-        sql_where_postcode "delivery_postcode" "IV2 5DZ"
-    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5DZ$'}
+test sql_where_postcode-1.1 {sql_where_postcode partial-1} -setup {            
+} -body {
+    sql_where_postcode "delivery_postcode" "IV2 5"
+} -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5[A-Z]{2}$'}
 
-    test sql_where_postcode-1.1 {sql_where_postcode partial-1} -setup {            
-    } -body {
-        sql_where_postcode "delivery_postcode" "IV2 5"
-    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s5[A-Z]{2}$'}
-    
-    test sql_where_postcode-1.2 {sql_where_postcode partial-2} -setup {            
-    } -body {
-        sql_where_postcode "delivery_postcode" "IV2"
-    } -cleanup {} -result {delivery_postcode ~ E'^IV2\\s[0-9][A-Z]{2}$'}
+test sql_where_postcode-1.2 {sql_where_postcode partial-2} -setup {            
+} -body {
+    sql_where_postcode "delivery_postcode" "IV2"
+} -cleanup {} -result {delivery_postcode ~ E'^IV2\\s[0-9][A-Z]{2}$'}
 
-    test sql_where_postcode-1.3 {sql_where_postcode partial-3} -setup {
-    } -body {
-        sql_where_postcode "delivery_postcode" "IV"
-    } -cleanup {} -result {delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
+test sql_where_postcode-1.3 {sql_where_postcode partial-3} -setup {
+} -body {
+    sql_where_postcode "delivery_postcode" "IV"
+} -cleanup {} -result {delivery_postcode ~ E'^IV[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
 
-    test sql_where_postcode-1.4 {sql_where_postcode partial-4} -setup {
-    } -body {
-        sql_where_postcode "delivery_postcode" "I"
-    } -cleanup {} -result {delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
+test sql_where_postcode-1.4 {sql_where_postcode partial-4} -setup {
+} -body {
+    sql_where_postcode "delivery_postcode" "I"
+} -cleanup {} -result {delivery_postcode ~ E'^I[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
 
-    test sql_where_postcode-1.5 {sql_where_postcode empty} -setup {
-    } -body {
-        sql_where_postcode "delivery_postcode" ""
-    } -cleanup {} -result {delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
+test sql_where_postcode-1.5 {sql_where_postcode empty} -setup {
+} -body {
+    sql_where_postcode "delivery_postcode" ""
+} -cleanup {} -result {delivery_postcode ~ E'^[A-Z]{1,2}[0-9][0-9]?[A-Z]?\\s[0-9][A-Z]{2}$'}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

@@ -1,27 +1,24 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test html_table-1.0 {html_table tbody} -setup {
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-    } -body {
-        html_table tbody $tbody
-    }  -cleanup {
-        unset tbody
-    } -result  {<table>
+test html_table-1.0 {html_table tbody} -setup {
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+} -body {
+    html_table tbody $tbody
+}  -cleanup {
+    unset tbody
+} -result  {<table>
 <tbody>
 <tr>
 <td>Jimmy Tarbuck</td>
@@ -39,22 +36,22 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test html_table-1.1 {html_table tbody cols} -setup {
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-	set cols {
-	    {label Name width 200}
-	    {label Balance width 100 class money}
-	}
-    } -body {
-        html_table tbody $tbody cols $cols
-    }  -cleanup {
-        unset tbody
-        unset cols
-    } -result  {<table>
+test html_table-1.1 {html_table tbody cols} -setup {
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+    set cols {
+        {label Name width 200}
+        {label Balance width 100 class money}
+    }
+} -body {
+    html_table tbody $tbody cols $cols
+}  -cleanup {
+    unset tbody
+    unset cols
+} -result  {<table>
 <colgroup>
 <col style="width:200px;">
 <col class="money" style="width:100px;">
@@ -82,34 +79,34 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test html_table-1.2 {html_table 2} -setup {
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-	set cols {
-	    {label Name}
-	    {label Balance class money}
-	}
-        set width 400
-        set thClass someClass
-        set tfoot {
-            {Total 95.295}
-        }
-        set rowClasses someRowClass
-        set scrollHeight 1000
-    } -body {
-        html_table tbody $tbody cols $cols width $width thClass $thClass tfoot $tfoot rowClasses $rowClasses scrollHeight $scrollHeight
-    }  -cleanup {
-        unset tbody
-        unset cols
-        unset width
-        unset thClass
-        unset tfoot
-        unset rowClasses
-        unset scrollHeight
-    } -result  {<table width="400" thClass="someClass" scrollHeight="1000" class="scrollable">
+test html_table-1.2 {html_table 2} -setup {
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+    set cols {
+        {label Name}
+        {label Balance class money}
+    }
+    set width 400
+    set thClass someClass
+    set tfoot {
+        {Total 95.295}
+    }
+    set rowClasses someRowClass
+    set scrollHeight 1000
+} -body {
+    html_table tbody $tbody cols $cols width $width thClass $thClass tfoot $tfoot rowClasses $rowClasses scrollHeight $scrollHeight
+}  -cleanup {
+    unset tbody
+    unset cols
+    unset width
+    unset thClass
+    unset tfoot
+    unset rowClasses
+    unset scrollHeight
+} -result  {<table width="400" thClass="someClass" scrollHeight="1000" class="scrollable">
 <colgroup>
 <col>
 <col class="money">
@@ -143,21 +140,21 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test html_table-1.3 {html_table classes} -setup {
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-    } -body {
-        html_table tbody $tbody classes {
-            "grid"
-            "flex"
-            "big"
-        }
-    }  -cleanup {
-        unset tbody
-    } -result  {<table class="grid flex big">
+test html_table-1.3 {html_table classes} -setup {
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+} -body {
+    html_table tbody $tbody classes {
+        "grid"
+        "flex"
+        "big"
+    }
+}  -cleanup {
+    unset tbody
+} -result  {<table class="grid flex big">
 <tbody>
 <tr>
 <td>Jimmy Tarbuck</td>
@@ -175,17 +172,17 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test html_table-1.4 {html_table class} -setup {
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-    } -body {
-        html_table tbody $tbody class "important"
-    }  -cleanup {
-        unset tbody
-    } -result  {<table class="important">
+test html_table-1.4 {html_table class} -setup {
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+} -body {
+    html_table tbody $tbody class "important"
+}  -cleanup {
+    unset tbody
+} -result  {<table class="important">
 <tbody>
 <tr>
 <td>Jimmy Tarbuck</td>
@@ -203,27 +200,27 @@ namespace eval ::qcode::test {
 </table>
 }
 
-    test html_table-1.5 {html_table tfoot_data} -setup {
-        set cols {
-            {name name label Name}
-            {name balance label Balance}
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-        set tfoot_data {
-            {name Total balance 95.292}
-            {balance Debit}
-        }
-    } -body {
-        html_table ~ tbody cols tfoot_data
-    }  -cleanup {
-        unset tbody
-        unset cols
-        unset tfoot_data
-    } -result  {<table>
+test html_table-1.5 {html_table tfoot_data} -setup {
+    set cols {
+        {name name label Name}
+        {name balance label Balance}
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+    set tfoot_data {
+        {name Total balance 95.292}
+        {balance Debit}
+    }
+} -body {
+    html_table ~ tbody cols tfoot_data
+}  -cleanup {
+    unset tbody
+    unset cols
+    unset tfoot_data
+} -result  {<table>
 <colgroup>
 <col name="name">
 <col name="balance">
@@ -262,323 +259,321 @@ namespace eval ::qcode::test {
 }
 
 
-    test html_table_row-1.0 {html_table_row} -body {
-        html_table_row {Western Freeway}
-    } -result {<tr>
+test html_table_row-1.0 {html_table_row} -body {
+    html_table_row {Western Freeway}
+} -result {<tr>
 <td>Western</td>
 <td>Freeway</td>
 </tr>
 }
 
-    test html_table_row-1.1 {html_table_row with class} -body {
-        html_table_row {Western Freeway} Grandaddy
-    } -result {<tr class="Grandaddy">
+test html_table_row-1.1 {html_table_row with class} -body {
+    html_table_row {Western Freeway} Grandaddy
+} -result {<tr class="Grandaddy">
 <td>Western</td>
 <td>Freeway</td>
 </tr>
 }
 
-    test html_table_row_head-1.0 {html_table_row_head} -body {
-        html_table_row_head {Kish Kash} ""
-    } -result {<tr>
+test html_table_row_head-1.0 {html_table_row_head} -body {
+    html_table_row_head {Kish Kash} ""
+} -result {<tr>
 <th>Kish</th>
 <th>Kash</th>
 </tr>
 }
 
-    test html_table_row_head-1.1 {html_table_row_head thClass} -setup {
-	set cols {
-	    {label Name}
-	    {label Balance thClass money}
-	}
-    } -body {
-        html_table_row_head {Kish Kash} "" $cols
-    } -cleanup {unset cols} -result {<tr>
+test html_table_row_head-1.1 {html_table_row_head thClass} -setup {
+    set cols {
+        {label Name}
+        {label Balance thClass money}
+    }
+} -body {
+    html_table_row_head {Kish Kash} "" $cols
+} -cleanup {unset cols} -result {<tr>
 <th>Kish</th>
 <th class="money">Kash</th>
 </tr>
 }
 
-    test html_table_row_head-1.2 {html_table_row_head} -setup {
-	set cols {
-	    {label Name}
-	    {label Balance}
-	}
-    } -body {
-        html_table_row_head {Kish Kash} "someRowClass" $cols
-    } -result {<tr class="someRowClass">
+test html_table_row_head-1.2 {html_table_row_head} -setup {
+    set cols {
+        {label Name}
+        {label Balance}
+    }
+} -body {
+    html_table_row_head {Kish Kash} "someRowClass" $cols
+} -result {<tr class="someRowClass">
 <th>Kish</th>
 <th>Kash</th>
 </tr>
 }
 
-    test html_table_colgroup-1.0 {html_table_colgroup } -setup {
-    } -body {
-        html_table_colgroup {
-            {width 50 label Name}
-            {label Balance class money }
-        }
-    } -cleanup {} -result {<colgroup>
+test html_table_colgroup-1.0 {html_table_colgroup } -setup {
+} -body {
+    html_table_colgroup {
+        {width 50 label Name}
+        {label Balance class money }
+    }
+} -cleanup {} -result {<colgroup>
 <col style="width:50px;">
 <col class="money">
 </colgroup>
 }
 
-    test html_table_thead_from_cols-1.0 {html_table_thead_from_cols } -setup {
-    } -body {
-        html_table_thead_from_cols {
-            {width 50 label Name}
-            {label Balance class money }
-        }
-    } -cleanup {} -result {{Name Balance}}
+test html_table_thead_from_cols-1.0 {html_table_thead_from_cols } -setup {
+} -body {
+    html_table_thead_from_cols {
+        {width 50 label Name}
+        {label Balance class money }
+    }
+} -cleanup {} -result {{Name Balance}}
 
-    test html_table_tfoot_sums-1.0 {html_table_tfoot_sums } -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money tfoot 95.295 }
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 23.56}
-	    {"Des O'Conner"  15.632}
-	    {"Bob Monkhouse" 56.1}
-	}
-    } -body {
-        html_table_tfoot_sums $cols tbody
-    } -cleanup {
-        unset cols
-        unset tbody
-    } -result {{Total 95.295}}
+test html_table_tfoot_sums-1.0 {html_table_tfoot_sums } -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money tfoot 95.295 }
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 23.56}
+        {"Des O'Conner"  15.632}
+        {"Bob Monkhouse" 56.1}
+    }
+} -body {
+    html_table_tfoot_sums $cols tbody
+} -cleanup {
+    unset cols
+    unset tbody
+} -result {{Total 95.295}}
 
-    test html_table_wants_sum-1.0 {html_table_wants_sum true} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money sum yes }
-        }
-    } -body {
-        html_table_wants_sum $cols 
-    } -cleanup {
-        unset cols
-    } -result 1
+test html_table_wants_sum-1.0 {html_table_wants_sum true} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money sum yes }
+    }
+} -body {
+    html_table_wants_sum $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
-    test html_table_wants_sum-1.1 {html_table_wants_sum not present} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money }
-        }
-    } -body {
-        html_table_wants_sum $cols 
-    } -cleanup {
-        unset cols
-    } -result 0
+test html_table_wants_sum-1.1 {html_table_wants_sum not present} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money }
+    }
+} -body {
+    html_table_wants_sum $cols 
+} -cleanup {
+    unset cols
+} -result 0
 
-    test html_table_wants_sum-1.2 {html_table_wants_sum false} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money sum no }
-        }
-    } -body {
-        html_table_wants_sum $cols 
-    } -cleanup {
-        unset cols
-    } -result 0
+test html_table_wants_sum-1.2 {html_table_wants_sum false} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money sum no }
+    }
+} -body {
+    html_table_wants_sum $cols 
+} -cleanup {
+    unset cols
+} -result 0
 
-    test html_table_wants_col_labels-1.0 {html_table_wants_col_labels true} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money sum no }
-        }
-    } -body {
-        html_table_wants_col_labels $cols 
-    } -cleanup {
-        unset cols
-    } -result 1
+test html_table_wants_col_labels-1.0 {html_table_wants_col_labels true} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money sum no }
+    }
+} -body {
+    html_table_wants_col_labels $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
-    test html_table_wants_col_labels-1.1 {html_table_wants_col_labels false} -setup {
-        set cols {
-            {width 50 tfoot Total}
-            {class money sum no }
-        }
-    } -body {
-        html_table_wants_col_labels $cols 
-    } -cleanup {
-        unset cols
-    } -result 0
+test html_table_wants_col_labels-1.1 {html_table_wants_col_labels false} -setup {
+    set cols {
+        {width 50 tfoot Total}
+        {class money sum no }
+    }
+} -body {
+    html_table_wants_col_labels $cols 
+} -cleanup {
+    unset cols
+} -result 0
 
-    test html_table_wants_col_labels-1.1 {html_table_wants_col_labels partial} -setup {
-        set cols {
-            {width 50 tfoot Total}
-            {class money sum no label Balance}
-        }
-    } -body {
-        html_table_wants_col_labels $cols 
-    } -cleanup {
-        unset cols
-    } -result 1
+test html_table_wants_col_labels-1.1 {html_table_wants_col_labels partial} -setup {
+    set cols {
+        {width 50 tfoot Total}
+        {class money sum no label Balance}
+    }
+} -body {
+    html_table_wants_col_labels $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
-    test html_table_wants_format-1.0 {html_table_wants_format class} -setup {
-        set cols {
-            {label Name width 50 tfoot Total}
-            {class money sum no label Balance}
-        }
-    } -body {
-        html_table_wants_format $cols 
-    } -cleanup {
-        unset cols
-    } -result 1
+test html_table_wants_format-1.0 {html_table_wants_format class} -setup {
+    set cols {
+        {label Name width 50 tfoot Total}
+        {class money sum no label Balance}
+    }
+} -body {
+    html_table_wants_format $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
-    test html_table_wants_format-1.1 {html_table_wants_format format} -setup {
-        set cols {
-            {label Name width 50 tfoot Total}
-            {format money sum no label Balance}
-        }
-    } -body {
-        html_table_wants_format $cols 
-    } -cleanup {
-        unset cols
-    } -result 1
+test html_table_wants_format-1.1 {html_table_wants_format format} -setup {
+    set cols {
+        {label Name width 50 tfoot Total}
+        {format money sum no label Balance}
+    }
+} -body {
+    html_table_wants_format $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
-    test html_table_wants_format-1.2 {html_table_wants_format false} -setup {
-        set cols {
-            {label Name width 50 tfoot Total}
-            {sum no label Balance}
-        }
-    } -body {
-        html_table_wants_format $cols 
-    } -cleanup {
-        unset cols
-    } -result 0
+test html_table_wants_format-1.2 {html_table_wants_format false} -setup {
+    set cols {
+        {label Name width 50 tfoot Total}
+        {sum no label Balance}
+    }
+} -body {
+    html_table_wants_format $cols 
+} -cleanup {
+    unset cols
+} -result 0
 
-    test html_table_tbody_from_ldict-1.0 {html_table_tbody_from_ldict } -setup {
-        set cols {
-            {width 50 name Name tfoot Total}
-            {name Balance class money tfoot 95.295 }
-        }
-        set ldict {
-            {Name "Jimmy Tarbuck" Balance 23.56}
-	    {Name "Des O'Conner"  Balance 15.632}
-	    {Name "Bob Monkhouse" Balance 56.1}
-        }
-    } -body {
-        html_table_tbody_from_ldict $ldict $cols
-    } -cleanup {
-        unset cols
-        unset ldict
-    } -result {{{Jimmy Tarbuck} 23.56} {{Des O'Conner} 15.632} {{Bob Monkhouse} 56.1}}
+test html_table_tbody_from_ldict-1.0 {html_table_tbody_from_ldict } -setup {
+    set cols {
+        {width 50 name Name tfoot Total}
+        {name Balance class money tfoot 95.295 }
+    }
+    set ldict {
+        {Name "Jimmy Tarbuck" Balance 23.56}
+        {Name "Des O'Conner"  Balance 15.632}
+        {Name "Bob Monkhouse" Balance 56.1}
+    }
+} -body {
+    html_table_tbody_from_ldict $ldict $cols
+} -cleanup {
+    unset cols
+    unset ldict
+} -result {{{Jimmy Tarbuck} 23.56} {{Des O'Conner} 15.632} {{Bob Monkhouse} 56.1}}
 
-    test html_table_format-1.0 {html_table_format money} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class money tfoot 95.295 }
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 2323.56}
-	    {"Des O'Conner"  2315.632}
-	    {"Bob Monkhouse" 2356.1}
-        }
-    } -body {
-        html_table_format $tbody $cols
-    } -cleanup {
-        unset cols
-        unset tbody
-    } -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.63} {{Bob Monkhouse} 2,356.10}}
+test html_table_format-1.0 {html_table_format money} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money tfoot 95.295 }
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 2323.56}
+        {"Des O'Conner"  2315.632}
+        {"Bob Monkhouse" 2356.1}
+    }
+} -body {
+    html_table_format $tbody $cols
+} -cleanup {
+    unset cols
+    unset tbody
+} -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.63} {{Bob Monkhouse} 2,356.10}}
 
-    test html_table_format-1.1 {html_table_format integer} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class integer tfoot 95.295 }
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 2323.56}
-	    {"Des O'Conner"  2315.632}
-	    {"Bob Monkhouse" 2356.1}
-        }
-    } -body {
-        html_table_format $tbody $cols
-    } -cleanup {
-        unset cols
-        unset tbody
-    } -result {{{Jimmy Tarbuck} 2,324} {{Des O'Conner} 2,316} {{Bob Monkhouse} 2,356}} 
+test html_table_format-1.1 {html_table_format integer} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class integer tfoot 95.295 }
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 2323.56}
+        {"Des O'Conner"  2315.632}
+        {"Bob Monkhouse" 2356.1}
+    }
+} -body {
+    html_table_format $tbody $cols
+} -cleanup {
+    unset cols
+    unset tbody
+} -result {{{Jimmy Tarbuck} 2,324} {{Des O'Conner} 2,316} {{Bob Monkhouse} 2,356}} 
 
-    test html_table_format-1.2 {html_table_format number} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class number tfoot 95.295 }
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 2323.56}
-	    {"Des O'Conner"  2315.632}
-	    {"Bob Monkhouse" 2356.1}
-        }
-    } -body {
-        html_table_format $tbody $cols
-    } -cleanup {
-        unset cols
-        unset tbody
-    } -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.632} {{Bob Monkhouse} 2,356.1}}  
+test html_table_format-1.2 {html_table_format number} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class number tfoot 95.295 }
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 2323.56}
+        {"Des O'Conner"  2315.632}
+        {"Bob Monkhouse" 2356.1}
+    }
+} -body {
+    html_table_format $tbody $cols
+} -cleanup {
+    unset cols
+    unset tbody
+} -result {{{Jimmy Tarbuck} 2,323.56} {{Des O'Conner} 2,315.632} {{Bob Monkhouse} 2,356.1}}  
 
-    test html_table_format-1.3 {html_table_format perct} -setup {
-        set cols {
-            {width 50 label Name tfoot Total}
-            {label Balance class perct tfoot 95.295 }
-        }
-        set tbody {
-            {"Jimmy Tarbuck" 2323.56}
-	    {"Des O'Conner"  2315.632}
-	    {"Bob Monkhouse" 2356.1}
-        }
-    } -body {
-        html_table_format $tbody $cols
-    } -cleanup {
-        unset cols
-        unset tbody
-    } -result {{{Jimmy Tarbuck} 232,356.0%} {{Des O'Conner} 231,563.2%} {{Bob Monkhouse} 235,610.0%}}   
-
-
-    test html_table_format_if_number-1.0 {html_table_format_if_number not number} -setup {
-    } -body {
-        html_table_format_if_number Bjorn 2 {} {} true {}
-    } -result Bjorn
-    test html_table_format_if_number-1.1 {html_table_format_if_number dp} -setup {
-    } -body {
-        html_table_format_if_number 999.99999 2 {} yes no no
-    } -result 1000.00
-    test html_table_format_if_number-1.2 {html_table_format_if_number sigfigs} -setup {
-    } -body {
-        html_table_format_if_number 999.99999 {} 4 yes no no
-    } -result 1000.0
-    test html_table_format_if_number-1.3 {html_table_format_if_number commify} -setup {
-    } -body {
-        html_table_format_if_number 9999.99999 {} {} yes yes no
-    } -result 9,999.99999
-    test html_table_format_if_number-1.3 {html_table_format_if_number no zeros} -setup {
-    } -body {
-        html_table_format_if_number 00.00 {} {} no no no
-    } -result {}
-    test html_table_format_if_number-1.4 {html_table_format_if_number percentage} -setup {
-    } -body {
-        html_table_format_if_number 0.14 {} {} no no yes
-    } -result {14.000000000000002%}
-    test html_table_format_if_number-1.5 {html_table_format_if_number all} -setup {
-    } -body {
-        html_table_format_if_number 9999.1234567 3 5 yes yes yes
-    } -result {999,910.000%}
-
-    test html_tbody_row-1.0 {html_tbody_row } -setup {
-        set Name "Gil Scott-Heron"
-        set Balance 0.99
-        set cols {
-            {width 50 name Name tfoot Total}
-            {name Balance class perct tfoot 95.295 }
-        }
-    } -body {
-        html_tbody_row $cols
-    } -cleanup {
-        unset cols
-        unset Name
-        unset Balance
-    } -result {{Gil Scott-Heron} 0.99}   
+test html_table_format-1.3 {html_table_format perct} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class perct tfoot 95.295 }
+    }
+    set tbody {
+        {"Jimmy Tarbuck" 2323.56}
+        {"Des O'Conner"  2315.632}
+        {"Bob Monkhouse" 2356.1}
+    }
+} -body {
+    html_table_format $tbody $cols
+} -cleanup {
+    unset cols
+    unset tbody
+} -result {{{Jimmy Tarbuck} 232,356.0%} {{Des O'Conner} 231,563.2%} {{Bob Monkhouse} 235,610.0%}}   
 
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+test html_table_format_if_number-1.0 {html_table_format_if_number not number} -setup {
+} -body {
+    html_table_format_if_number Bjorn 2 {} {} true {}
+} -result Bjorn
+test html_table_format_if_number-1.1 {html_table_format_if_number dp} -setup {
+} -body {
+    html_table_format_if_number 999.99999 2 {} yes no no
+} -result 1000.00
+test html_table_format_if_number-1.2 {html_table_format_if_number sigfigs} -setup {
+} -body {
+    html_table_format_if_number 999.99999 {} 4 yes no no
+} -result 1000.0
+test html_table_format_if_number-1.3 {html_table_format_if_number commify} -setup {
+} -body {
+    html_table_format_if_number 9999.99999 {} {} yes yes no
+} -result 9,999.99999
+test html_table_format_if_number-1.3 {html_table_format_if_number no zeros} -setup {
+} -body {
+    html_table_format_if_number 00.00 {} {} no no no
+} -result {}
+test html_table_format_if_number-1.4 {html_table_format_if_number percentage} -setup {
+} -body {
+    html_table_format_if_number 0.14 {} {} no no yes
+} -result {14.000000000000002%}
+test html_table_format_if_number-1.5 {html_table_format_if_number all} -setup {
+} -body {
+    html_table_format_if_number 9999.1234567 3 5 yes yes yes
+} -result {999,910.000%}
+
+test html_tbody_row-1.0 {html_tbody_row } -setup {
+    set Name "Gil Scott-Heron"
+    set Balance 0.99
+    set cols {
+        {width 50 name Name tfoot Total}
+        {name Balance class perct tfoot 95.295 }
+    }
+} -body {
+    html_tbody_row $cols
+} -cleanup {
+    unset cols
+    unset Name
+    unset Balance
+} -result {{Gil Scott-Heron} 0.99}   
+
+
+cleanupTests

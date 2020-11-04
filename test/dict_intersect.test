@@ -1,13 +1,12 @@
 package require tcltest
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
-package require qcode
-namespace import qc::*
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import qc::*
 
 set setup {
     set dict1 [dict create a 1 b 2 c 3]

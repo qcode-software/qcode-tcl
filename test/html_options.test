@@ -1,21 +1,16 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test html_options_simple-1.0 {html_options_simple}  -body {
+    html_options_simple SCO ENG NI WAL
+}  -result {SCO SCO ENG ENG NI NI WAL WAL}
 
-    test html_options_simple-1.0 {html_options_simple}  -body {
-        html_options_simple SCO ENG NI WAL
-    }  -result {SCO SCO ENG ENG NI NI WAL WAL}
-    
-    
-    cleanupTests
-} 
-namespace delete ::qcode::test
+
+cleanupTests
