@@ -21,11 +21,15 @@ proc qc::db_file_insert {args} {
     close $id
 
     set file_id [db_seq file_id_seq]
+    set file_extension [file extension $file_path]
+    set s3_location "/${file_id}${file_extension}"
+    # upload file to amazon s3
+    qc::s3 put [qc::param_get s3_file_bucket] $file_path $s3_location
     set qry {
 	insert into file 
-	(file_id,user_id,filename,data,mime_type)
+	(file_id,user_id,filename,data,mime_type,s3_location)
 	values 
-	(:file_id,:user_id,:filename,decode(:data, 'base64'),:mime_type)
+	(:file_id,:user_id,:filename,decode(:data, 'base64'),:mime_type,s3_location)
     }
     db_dml $qry
     return $file_id
@@ -37,9 +41,16 @@ proc qc::db_file_copy {file_id} {
     set new_file_id [db_seq file_id_seq]
     db_dml {
         insert into file 
-        (file_id,user_id,filename,data,mime_type)
-	select :new_file_id,user_id,filename,data,mime_type
-        from file where file_id=:file_id
+        (file_id,user_id,filename,data,mime_type,s3_location)
+	select
+        :new_file_id,
+        user_id,
+        filename,
+        data,
+        mime_type,
+        s3_location
+        from file
+        where file_id=:file_id
     }
     return $new_file_id
 }
@@ -49,11 +60,25 @@ proc qc::db_file_export {args} {
     args $args -tmp_file ? -- file_id
 
     default tmp_file /tmp/[qc::uuid]
-    db_1row {select filename, encode(data,'base64') as base64 from file where file_id=:file_id}
-    set id [open $tmp_file w]
-    fconfigure $id -translation binary
-    puts -nonewline $id [base64::decode $base64]
-    close $id
+    db_1row {
+        select
+        filename,
+        encode(data,'base64') as base64,
+        s3_location
+        from file
+        where file_id=:file_id
+    }
+
+    if { $s3_location eq "" } {
+        # file does not exists on amazon s3
+        set id [open $tmp_file w]
+        fconfigure $id -translation binary
+        puts -nonewline $id [base64::decode $base64]
+        close $id
+    } else {
+        # file exists on amazon s3
+        qc::s3 get [qc::param_get s3_file_bucket] $s3_location $tmp_file
+    }
     return $tmp_file
 }
 
