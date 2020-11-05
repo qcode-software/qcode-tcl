@@ -890,7 +890,8 @@ proc qc::db_database_name {{poolname DEFAULT}} {
 
 proc qc::db_user {{poolname DEFAULT}} {
     #| Gets the user configured to connect to database using poolname
-    return [ns_db user [db_get_handle $poolname]]
+    db_1row {select current_user}
+    return $current_user
 }
 
 proc qc::db_extension_exists {extension_name} {
