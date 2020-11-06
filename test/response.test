@@ -1,37 +1,34 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
-
-    test response_data2json-1.0 {response data and response2json} -body {
-        response status valid
-        response data {object
-            firstname Robert
-            surname {string "O'Neil"}
-            age 22
-            height {number 180}
-            employed {boolean true}
-            commision false
-            emails {array
-                {string "boboneil@test.com"}
-                {object
-                    address {string "robertneil@test.com"}
-                    description business
-                }
+test response_data2json-1.0 {response data and response2json} -body {
+    qc::response status valid
+    qc::response data {object
+        firstname Robert
+        surname {string "O'Neil"}
+        age 22
+        height {number 180}
+        employed {boolean true}
+        commision false
+        emails {array
+            {string "boboneil@test.com"}
+            {object
+                address {string "robertneil@test.com"}
+                description business
             }
         }
-        response2json
-    } -cleanup {
-        unset ::data
-    } -result {{
+    }
+    qc::response2json
+} -cleanup {
+    unset ::data
+} -result {{
 "status": "valid",
 "record": {
 
@@ -56,27 +53,27 @@ namespace eval ::qcode::test {
 }
 }}
 
-    test response_data2html-1.0 {response data and response2html} -body {
-        response status valid
-        response data {object
-            firstname Robert
-            surname {string "O'Neil"}
-            age 22
-            height {number 180}
-            employed {boolean true}
-            commision false
-            emails {array
-                {string "boboneil@test.com"}
-                {object
-                    address {string "robertneil@test.com"}
-                    description business
-                }
+test response_data2html-1.0 {response data and response2html} -body {
+    qc::response status valid
+    qc::response data {object
+        firstname Robert
+        surname {string "O'Neil"}
+        age 22
+        height {number 180}
+        employed {boolean true}
+        commision false
+        emails {array
+            {string "boboneil@test.com"}
+            {object
+                address {string "robertneil@test.com"}
+                description business
             }
         }
-        response2html
-    } -cleanup {
-        unset ::data
-    } -result {<!doctype html><html lang="en"><head><title>Data Validation Passed</title>
+    }
+    response2html
+} -cleanup {
+    unset ::data
+} -result {<!doctype html><html lang="en"><head><title>Data Validation Passed</title>
 <style>
             .validation-response * {
                 display: none;
@@ -97,6 +94,4 @@ namespace eval ::qcode::test {
 <div class="object-property" data-name="description">business</div></div></div></div>
 <div class="extended"></div></div><div class="validation-response-advice">Please go back and try again.</div></body></html>}
 
-    cleanupTests
-}
-namespace delete ::qcode::test
+cleanupTests

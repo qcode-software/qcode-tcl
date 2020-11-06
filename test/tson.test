@@ -1,24 +1,21 @@
 package require tcltest
-
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
+namespace import ::qc::*
 
-namespace eval ::qcode::test {
-    namespace import ::tcltest::*
-    namespace path ::qc
+test tson_object-1.0 {tson_object } -setup {
+} -body {
+    tson_object legs 4 eyes NAN coat null call meow alive true
+} -cleanup {} -result {object legs {number 4} eyes {string NAN} coat null call {string meow} alive {boolean true}}
 
-    test tson_object-1.0 {tson_object } -setup {
-    } -body {
-        tson_object legs 4 eyes NAN coat null call meow alive true
-    } -cleanup {} -result {object legs {number 4} eyes {string NAN} coat null call {string meow} alive {boolean true}}
-
-    test json_quote-1.0 {json_quote } -setup {
-    } -body {
-        json_quote {This is the "test" string for chars and escapes like "\", "\s" and "\n".}
+test json_quote-1.0 {json_quote } -setup {
+} -body {
+    json_quote {This is the "test" string for chars and escapes like "\", "\s" and "\n".}
     } -cleanup {} -result {"This is the \"test\" string for chars and escapes like \"\\\", \"\\s\" and \"\\n\"."}
 
     test tson2json-1.0 {tson2json } -setup {
@@ -97,5 +94,3 @@ namespace eval ::qcode::test {
 
 
     cleanupTests
-}
-namespace delete ::qcode::test
