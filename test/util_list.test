@@ -171,7 +171,7 @@ test ldelete-1.1 {ldelete invalid index} -setup {
     set test_list [list 2007 2008 2009 2012]
 } -body {
     ldelete test_list 5
-} -returnCodes 1 -cleanup {unset test_list} -result {list doesn't contain element 5}
+} -cleanup {unset test_list} -result {2007 2008 2009 2012}
 
 test lmove-1.0 {lmove to end} -setup {
 } -body {
