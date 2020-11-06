@@ -521,7 +521,7 @@ test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constrain
     set result [qc::s3 lsbucket $bucket "s3_tools_test-"]
     
     foreach object_key [qc::ldict_values result Key] {
-        qc::s3 delete $bucket "/$object_key"
+        qc::s3 delete [qc::s3 uri $bucket $object_key]
     }
     return 1
 } -result {1}
