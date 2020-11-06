@@ -1,0 +1,48 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+
+# s3_uri_bucket_object_key
+test s3-uri_bucket_object_key-1.0 {qc::s3 uri_bucket_object_key: Protocol 1} -body {
+    qc::s3 uri_bucket_object_key "S3://bucket/object_key"
+} -result {bucket object_key}
+
+test s3-uri_bucket_object_key-1.1 {qc::s3 uri_bucket_object_key: Protocol 2} -body {
+    qc::s3 uri_bucket_object_key "s3://bucket/object_key"
+} -result {bucket object_key}
+
+test s3-uri_bucket_object_key-1.2 {qc::s3 uri_bucket_object_key: Protocol 3} -body {
+    qc::s3 uri_bucket_object_key "/bucket/object_key"
+} -result {bucket object_key}
+
+test s3-uri_bucket_object_key-1.3 {qc::s3 uri_bucket_object_key: Protocol 4} -body {
+    qc::s3 uri_bucket_object_key "bucket/object_key"
+} -result {bucket object_key}
+
+test s3-uri_bucket_object_key-1.4 {qc::s3 uri_bucket_object_key: No object key 1} -body {
+    qc::s3 uri_bucket_object_key "abcd:1234 £A12 ab1 a"
+} -result {{abcd:1234 £A12 ab1 a} {}}
+
+test s3-uri_bucket_object_key-1.5 {qc::s3 uri_bucket_object_key: No object key 2} -body {
+    qc::s3 uri_bucket_object_key "/abcdef/"
+} -result {abcdef {}}
+
+test s3-uri_bucket_object_key-1.6 {qc::s3 uri_bucket_object_key: Long object key} -body {
+    qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
+} -result {abcdef acb/123/xyz.png}
+
+# uri - create an S3 URI from a bucket and object_key
+test s3-uri-1.0 {qc::s3 uri: bucket and key} -body {
+    qc::s3 uri "bucket" "key"
+} -result {s3://bucket/key}
+
+test s3-uri-1.1 {qc::s3 uri: bucket only} -body {
+    qc::s3 uri "bucket"
+}  -result {s3://bucket/}
+
+cleanupTests
