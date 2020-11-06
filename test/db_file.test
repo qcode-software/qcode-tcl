@@ -5,6 +5,8 @@ namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstrai
 # Load common definitions of setup and cleanup
 source ./db_file_setup.tcl
 
+
+
 ################################################################################
 ###   TESTS
 ################################################################################
@@ -21,8 +23,86 @@ test db_file_insert-1.0 {Upload a file to s3 and record the file info in the dat
 
         set filepath [qc::db_file_export $file_id]
         set result [qc::cat $filepath]
-        file deleted $filepath
+        file delete $filepath
+        qc::db_file_delete $file_id
+        
+        return $result        
+    } \
+    -result "Hello World"
 
+
+test db_file_migrate-1.0 {Migrate a file from data to S3} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set filepath [qc::file_temp "Hello World"]
+        file rename $filepath ${filepath}.txt
+        set filepath ${filepath}.txt
+
+        set id [open $filepath r]
+        fconfigure $id -translation binary
+        set data [base64::encode [read $id]]
+        close $id
+
+        file delete $filepath
+        
+        set file_id [db_seq file_id_seq]
+        set filename [file tail $filepath]
+        set user_id 0
+        set mime_type [qc::mime_type_guess $filepath]
+        set qry {
+            insert into file
+            (file_id,user_id,filename,data,mime_type)
+            values
+            (:file_id,:user_id,:filename,decode(:data,'base64'),:mime_type)
+        }
+        db_dml $qry
+
+        set s3_location [qc::db_file_migrate_to_s3 $file_id]
+
+        set filepath [qc::db_file_export $file_id]
+        set result [qc::cat $filepath]
+        file delete $filepath
+
+        qc::db_file_delete $file_id
+        
+        return $result        
+    } \
+    -result "Hello World"
+
+test db_file_legacy_export {Export a file from data} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set filepath [qc::file_temp "Hello World"]
+        file rename $filepath ${filepath}.txt
+        set filepath ${filepath}.txt
+
+        set id [open $filepath r]
+        fconfigure $id -translation binary
+        set data [base64::encode [read $id]]
+        close $id
+
+        file delete $filepath
+        
+        set file_id [db_seq file_id_seq]
+        set filename [file tail $filepath]
+        set user_id 0
+        set mime_type [qc::mime_type_guess $filepath]
+        set qry {
+            insert into file
+            (file_id,user_id,filename,data,mime_type)
+            values
+            (:file_id,:user_id,:filename,decode(:data,'base64'),:mime_type)
+        }
+        db_dml $qry
+
+        set filepath [qc::db_file_export $file_id]
+        set result [qc::cat $filepath]
+        file delete $filepath
+
+        qc::db_file_delete $file_id
+        
         return $result        
     } \
     -result "Hello World"

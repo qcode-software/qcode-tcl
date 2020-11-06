@@ -132,7 +132,8 @@ proc qc::db_init {} {
 					 file_id integer PRIMARY KEY DEFAULT nextval('file_id_seq'::regclass),
 					 user_id integer NOT NULL REFERENCES users,
 					 filename text NOT NULL,
-					 data bytea NOT NULL,
+					 data bytea,
+                                         s3_location text,
 					 upload_date timestamp without time zone DEFAULT now(),
 					 mime_type text NOT NULL
 					 );

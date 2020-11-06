@@ -4,6 +4,8 @@ package require base64
 package require tdom
 package require fileutil
 
+namespace eval qc {}
+
 # Private S3 procs
 proc qc::_s3_endpoint { args } {
     #| Return an s3 endpoint

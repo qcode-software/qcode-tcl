@@ -18,7 +18,7 @@ proc qc::param_get { args } {
             } {
                 return $param_value
             } 
-
+            
 	    # Check for naviserver params
 	    if { [set param_value [ns_config ns/server/[ns_info server] $param_name]] ne "" } {
 	        # Naviserver param
@@ -47,9 +47,9 @@ proc qc::param_exists { param_name args } {
         }
     } else {
 
-        if { [info commands ns_config] eq "ns_config" } {
+        if { [qc::db_connected] || [info commands ns_config] eq "ns_config" } {
             # Naviserver
-            if { [info commands ns_db] eq "ns_db" } {
+            if { [qc::db_connected] || [info commands ns_db] eq "ns_db" } {
                 # DB param
                 set qry {select param_value from param where param_name=:param_name}
                 db_cache_0or1row -ttl 86400 $qry {
@@ -98,7 +98,7 @@ proc qc::param_set { param_name args } {
         error "Param $param_name is read-only" {} USER
     }
 
-    if { [info commands ns_db] eq "ns_db" } {
+    if { [qc::db_connected] || [info commands ns_db] eq "ns_db" } {
         # Check the DB table
         db_cache_clear [db_qry_parse "select param_value from param where param_name=:param_name"]
         db_0or1row { select param_value as existing_value from param where param_name=:param_name } {

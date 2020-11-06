@@ -24,7 +24,7 @@ proc qc::db_file_insert {args} {
 	insert into file 
 	(file_id,user_id,filename,mime_type,s3_location)
 	values 
-	(:file_id,:user_id,:filename,:mime_type,s3_location)
+	(:file_id,:user_id,:filename,:mime_type,:s3_location)
     }
     db_dml $qry
     return $file_id
@@ -125,4 +125,22 @@ proc qc::db_file_migrate_to_s3 {file_id} {
         where file_id=:file_id
     }
     db_dml $qry
+    
+    return $s3_location
+}
+
+proc qc::db_file_delete {file_id} {
+    #| Delete a file
+    db_1row {
+        select
+        s3_location
+        from file
+        where
+        file_id=:file_id
+    }
+
+    if { $s3_location ne "" } {
+        qc::s3 delete $s3_location
+    }
+    db_dml {delete from file where file_id=:file_id}
 }
