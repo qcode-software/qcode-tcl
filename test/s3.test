@@ -7,10 +7,20 @@ set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }
-namespace import ::qc::*
+
+# Local config
+if { [file exists ~/.qcode-tcl] } {
+    source ~/.qcode-tcl
+}
 
 # Bucket to runs tests against
-set bucket "qcodetcl-tcltest-s3"
+if { ![info exists ::env(aws_s3_test_bucket)] } {
+    puts "==========================================================================================="
+    puts "===== Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file ======="
+    puts "==========================================================================================="
+    error "Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file"
+}
+set bucket $::env(aws_s3_test_bucket)
 
 # Set true once s3 credentials and region are set
 testConstraint requires_s3 false
@@ -42,68 +52,6 @@ if { $role_name ne "" } {
 # Some tests require other s3 procs to be working
 # Tests are ordered so if a test fails, other test dependent on the failing proc will be skipped
 
-# s3_uri_bucket_object_key
-test s3-uri_bucket_object_key-1.0 {qc::s3 uri_bucket_object_key: Protocol 1} -body {
-    qc::s3 uri_bucket_object_key "S3://bucket/object_key"
-} -result {bucket object_key}
-
-test s3-uri_bucket_object_key-1.1 {qc::s3 uri_bucket_object_key: Protocol 2} -body {
-    qc::s3 uri_bucket_object_key "s3://bucket/object_key"
-} -result {bucket object_key}
-
-test s3-uri_bucket_object_key-1.2 {qc::s3 uri_bucket_object_key: Protocol 3} -body {
-    qc::s3 uri_bucket_object_key "/bucket/object_key"
-} -result {bucket object_key}
-
-test s3-uri_bucket_object_key-1.3 {qc::s3 uri_bucket_object_key: Protocol 4} -body {
-    qc::s3 uri_bucket_object_key "bucket/object_key"
-} -result {bucket object_key}
-
-test s3-uri_bucket_object_key-1.4 {qc::s3 uri_bucket_object_key: No object key 1} -body {
-    qc::s3 uri_bucket_object_key "abcd:1234 £A12 ab1 a"
-} -result {{abcd:1234 £A12 ab1 a} {}}
-
-test s3-uri_bucket_object_key-1.5 {qc::s3 uri_bucket_object_key: No object key 2} -body {
-    qc::s3 uri_bucket_object_key "/abcdef/"
-} -result {abcdef {}}
-
-test s3-uri_bucket_object_key-1.6 {qc::s3 uri_bucket_object_key: Long object key} -body {
-    qc::s3 uri_bucket_object_key "/abcdef/acb/123/xyz.png"
-} -result {abcdef acb/123/xyz.png}
-
-# _s3_endpoint - test for the private proc qc::_s3_endpoint
-test s3-endpoint-1.0 {qc::_s3_endpoint: bucket} -body {
-    qc::_s3_endpoint bucket
-} -result {bucket.s3.amazonaws.com}
-
-test s3-endpoint-1.1 {qc::_s3_endpoint: bucket and key 1} -body {
-    qc::_s3_endpoint bucket ""
-} -result {bucket.s3.amazonaws.com/}
-
-test s3-endpoint-1.2 {qc::_s3_endpoint: bucket and key 2} -body {
-    qc::_s3_endpoint bucket key
-} -result {bucket.s3.amazonaws.com/key}
-
-test s3-endpoint-1.3 {qc::_s3_endpoint: s3_uri 1} -body {
-    qc::_s3_endpoint "s3://bucket"
-} -result {bucket.s3.amazonaws.com/}
-
-test s3-endpoint-1.4 {qc::_s3_endpoint: s3_uri 2} -body {
-    qc::_s3_endpoint "s3://bucket/"
-} -result {bucket.s3.amazonaws.com/}
-
-test s3-endpoint-1.5 {qc::_s3_endpoint: s3_uri 3} -body {
-    qc::_s3_endpoint "s3://bucket/key"
-} -result {bucket.s3.amazonaws.com/key}
-
-# uri - create an S3 URI from a bucket and object_key
-test s3-uri-1.0 {qc::s3 uri: bucket and key} -body {
-    qc::s3 uri "bucket" "key"
-} -result {s3://bucket/key}
-
-test s3-uri-1.1 {qc::s3 uri: bucket only} -body {
-    qc::s3 uri "bucket"
-}  -result {s3://bucket/}
 
 # md5 - Get MD5 of a local file
 test s3-md5-1.0 {qc::s3 md5: Test} -body {
@@ -121,7 +69,7 @@ test s3-ls-1.0 {qc::s3 ls: List available buckets} -constraints {
     requires_s3
 } -body {
     set results [qc::s3 ls]
-    if { $bucket in [ldict_values results Name] } {
+    if { $bucket in [qc::ldict_values results Name] } {
         testConstraint requires_test_bucket true
     }
     return 1
@@ -161,7 +109,7 @@ test s3-put-1.0 {qc::s3 put: bucket local_path remote_filename} -constraints {
     }
 
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         # Put was successful
         return 1
     }
@@ -184,7 +132,7 @@ test s3-put-1.1 {qc::s3 put: s3_url local_filename } -constraints {
     }
 
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         # Put was successful
         testConstraint requires_s3_put true
         return 1
@@ -213,7 +161,7 @@ test s3-delete-1.0 {qc::s3 delete: bucket remote_filename} -constraints {
 
     # Confirm deleted
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 0
     }
 
@@ -240,7 +188,7 @@ test s3-delete-1.1 {qc::s3 delete: s3_url} -constraints {
     # Confirm deleted
     lassign [qc::s3 uri_bucket_object_key $s3_url] . object_key
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 0
     }
 
@@ -369,7 +317,7 @@ test s3-copy-1.0 {qc::s3 copy: bucket remote_filename_to_copy_with_bucket remote
 
     # Check result
     set results [qc::s3 lsbucket $bucket $object_copy]
-    if { $object_copy in [ldict_values results Key] } {
+    if { $object_copy in [qc::ldict_values results Key] } {
         return 1
     }
     return 0
@@ -398,7 +346,7 @@ test s3-copy-1.1 {qc::s3 copy: s3_url_to_copy s3_url_copy} -constraints {
     # Check result
     lassign [qc::s3 uri_bucket_object_key $s3_url_copy] . object_key
     set results [qc::s3 lsbucket $bucket $object_copy]
-    if { $object_copy in [ldict_values results Key] } {
+    if { $object_copy in [qc::ldict_values results Key] } {
         return 1
     }
     return 0
@@ -419,7 +367,7 @@ test s3-upload-1.0 {qc::s3 upload: Testing `init`, `send`, and `complete` v1} -c
     }
 
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 1
     }
     return 0
@@ -440,7 +388,7 @@ test s3-upload-1.1 {qc::s3 upload: Testing `init`, `send`, and `complete` v2} -c
     }
 
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 1
     }
     return 0
@@ -463,7 +411,7 @@ test s3-upload-1.2 {qc::s3 upload: Testing `abort` v1} -constraints {
     qc::s3 upload abort $s3_uri $upload_id
     
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 0
     }
     return 1
@@ -485,7 +433,7 @@ test s3-upload-1.3 {qc::s3 upload: Testing `abort` v2} -constraints {
     qc::s3 upload abort $bucket "/${object_key}" $upload_id
     
     set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [ldict_values results Key] } {
+    if { $object_key in [qc::ldict_values results Key] } {
         return 0
     }
     testConstraint requires_s3_upload_abort true
@@ -508,7 +456,7 @@ test s3-upload-1.4 {qc::s3 upload: Testing `ls`} -constraints {
     }
 
     # Confirm `qc::s3 upload ls` found the partially uploaded object
-    if { $object_key in [ldict_values result Key] } {
+    if { $object_key in [qc::ldict_values result Key] } {
         testConstraint requires_s3_upload_ls true
         return 1
     }
@@ -531,7 +479,7 @@ test s3-upload-1.5 {qc::s3 upload: Testing `lsparts`} -constraints {
         qc::s3 upload abort $bucket "/${object_key}" $upload_id
     }
 
-    if { "\"[dict get $etag_dict 1]\"" in [ldict_values result ETag] } {
+    if { "\"[dict get $etag_dict 1]\"" in [qc::ldict_values result ETag] } {
         return 1
     }
     return 0
@@ -571,7 +519,7 @@ test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constrain
     requires_s3_delete
 } -body {
     set result [qc::s3 lsbucket $bucket "s3_tools_test-"]
-    foreach object_key [ldict_values result Key] {
+    foreach object_key [qc::ldict_values result Key] {
         qc::s3 delete $bucket $object_key
     }
     return 1
