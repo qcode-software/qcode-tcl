@@ -99,7 +99,6 @@ set setup {
     # Establish a connection the qc::db way
     qc::db_connect {*}[array get ::conn_info_test]
     qc::param_set s3_file_bucket mla-dev-files
-    qc::aws_credentials_set_from_ec2_role
     db_dml {
         insert into
         users(user_id,firstname,surname,email,password_hash,user_state)
