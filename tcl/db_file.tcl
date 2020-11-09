@@ -16,6 +16,7 @@ proc qc::db_file_insert {args} {
     }
    
     set file_id [db_seq file_id_seq]
+    qc::aws_credentials_set_from_ec2_role
     set s3_location [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
     # upload file to amazon s3
     qc::s3 put $s3_location $file_path
@@ -72,6 +73,7 @@ proc qc::db_file_export {args} {
         close $id
     } else {
         # file exists on amazon s3
+        qc::aws_credentials_set_from_ec2_role
         qc::s3 get $s3_location $tmp_file
     }
     return $tmp_file
@@ -140,6 +142,7 @@ proc qc::db_file_delete {file_id} {
     }
 
     if { $s3_location ne "" } {
+        qc::aws_credentials_set_from_ec2_role
         qc::s3 delete $s3_location
     }
     db_dml {delete from file where file_id=:file_id}
