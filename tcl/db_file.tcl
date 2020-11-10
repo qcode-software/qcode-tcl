@@ -120,6 +120,7 @@ proc qc::db_file_migrate_to_s3 {file_id} {
     set tmp_file [db_file_export $file_id]
     set s3_location [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
     qc::s3 put $s3_location $tmp_file
+    file delete $tmp_file
     
     set qry {
 	update file
