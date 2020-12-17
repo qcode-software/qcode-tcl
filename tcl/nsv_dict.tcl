@@ -1,7 +1,3 @@
-namespace eval qc {
-    namespace export nsv_dict
-}
-
 namespace eval qc::nsv_dict {
     namespace export exists set unset get lappend
     namespace ensemble create
