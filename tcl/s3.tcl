@@ -89,6 +89,9 @@ proc qc::s3 { args } {
                     error "qc::s3 get: md5 of downloaded file $local_filename ($local_md5) does not match x-amz-meta-content-md5 ($base64_md5)."
                 }
             }
+            if { $file_size != [file size $local_filename] } {
+                error "qc::s3 get: size of downloaded file ([file size $local_filename]) $local_filename does not match expected $file_size"
+            }
         }
         head {
             # usage:
