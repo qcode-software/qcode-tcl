@@ -67,6 +67,9 @@ proc qc::db_file_export {args} {
 
     if { $s3_location eq "" } {
         # file does not exists on amazon s3
+        if { $base64 eq "" } {
+            error "Missing data or s3_location for file $file_id"
+        }
         set id [open $tmp_file w]
         fconfigure $id -translation binary
         puts -nonewline $id [base64::decode $base64]
