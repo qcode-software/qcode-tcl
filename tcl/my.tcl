@@ -1,3 +1,7 @@
+namespace eval qc {
+    namespace export my
+}
+
 proc qc::my {args} {
     #| Multifunction proc to return information about the local OS.
     #| Written to be debian specific but may work on some other Linux distributions.
