@@ -149,14 +149,18 @@ proc qc::tabular_text_parse  {args} {
         }        
         set row {}        
         foreach conf $columns_conf value [split $line \0] {
-            dict2vars $conf trim
+            dict2vars $conf trim type
             default trim true
 
             if { $i == 1 || $trim } {
-                lappend row [trim $value]
-            } else {
-                lappend row $value
+                set value [trim $value]
             }
+            
+            if { $i != 1 && [info exists type] && [qc::castable $type $value] } {
+                set value [qc::cast $type $value]
+            }
+            
+            lappend row $value
         }
         
         lappend table $row

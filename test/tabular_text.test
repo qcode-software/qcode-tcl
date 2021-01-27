@@ -141,4 +141,20 @@ test tabular_text_parse-9.0 {tabular_text_parse - disable auto trim} -setup {
     return [qc::tabular_text_parse $text $conf]
 } -cleanup {} -result {{code qty total} {{ 1  } 1 1.10}}
 
+test tabular_text_parse-10.0 {tabular_text_parse - casting} \
+    -body {
+        set lines [list]
+        lappend lines {Line Num    Value         }
+        lappend lines {1           1,234.22      }
+        lappend lines {2           Not a number  }
+        set text [join $lines \n]
+
+        set conf [list]
+        lappend conf [list label "Line Num" var_name "line_num" type "int"]
+        lappend conf [list label "Value" var_name "value" type "decimal"]
+
+        return [qc::tabular_text_parse $text $conf]
+    } \
+    -result {{line_num value} {1 1234.22} {2 {Not a number}}}
+
 cleanupTests
