@@ -57,13 +57,13 @@ proc qc::conn_location { args } {
     qc::args $args -conn_protocol ? -conn_host ? -conn_port ? --
 
     if { ![info exists conn_protocol] } {
-        set conn_protocol [ns_conn protocol]
+        set conn_protocol [ns_conn protocol]
     }
     if { ![info exists conn_host] } {
-        set conn_host [ns_set iget [ns_conn headers] Host]
+        set conn_host [ns_set iget [ns_conn headers] Host]
     }
     if { ![info exists conn_port] } {
-        set conn_port [ns_set iget [ns_conn headers] Port]
+        set conn_port [ns_set iget [ns_conn headers] Port]
     }
 
     set url ""
