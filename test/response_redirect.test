@@ -1,0 +1,261 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    proc ns_conn { action } {
+        if { $action eq "location" } {
+            return "https://www.fallback.co.uk"
+        } else {
+            error "ns_conn: action $action not supported in this test"
+        }
+    }
+}
+
+test response_redirect1.0 \
+    {response redirect non-legacy 443 relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.1 \
+    {response redirect non-legacy 80 relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    http
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value http://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.2 \
+    {response redirect non-legacy custom relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk:8443
+        set port        ""
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk:8443/admin.tcl}}}
+
+test response_redirect1.3 \
+    {response redirect non-legacy relative anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        set url         /admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.4 \
+    {response redirect non-legacy absolute} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        set url         https://www.qcode.co.uk/admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.5 \
+    {response redirect legacy 443 relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        "443"
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.6 \
+    {response redirect legacy 80 relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        "80"
+        set protocol    http
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value http://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.7 \
+    {response redirect legacy custom relative non-anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        "8443"
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk:8443/admin.tcl}}}
+
+test response_redirect1.8 \
+    {response redirect legacy relative anchored} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        "443"
+        set protocol    https
+        set url         /admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.9 \
+    {response redirect legacy absolute} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        "443"
+        set protocol    https
+        set url         https://www.qcode.co.uk/admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk/admin.tcl}}}
+
+test response_redirect1.10 \
+    {response redirect non-legacy cross domain} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        set url         https://www.anotherdomain.co.uk/admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -returnCodes error \
+    -result {Will not redirect to a different domain. Host www.qcode.co.uk. Redirect to "https://www.anotherdomain.co.uk/admin.tcl"}
+
+test response_redirect1.11 \
+    {response redirect non-legacy invalid} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        set url         "https://www.qcode.co.uk/<script>hello;<script>"
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -returnCodes error \
+    -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
+
+test response_redirect1.12 \
+    {response redirect http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set url         /admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.fallback.co.uk/admin.tcl}}}
+
+test response_redirect1.13 \
+    {response redirect http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.fallback.co.uk/admin.tcl}}}
+
+cleanupTests

@@ -147,47 +147,42 @@ namespace eval qc::response {
         namespace export redirect external_redirect resubmit login
         namespace ensemble create
 
-        proc redirect {url} {
+        proc redirect { args } {
             #| Sets the redirect property with the given internal URL.
+            qc::args $args -conn_protocol ? -conn_host ? -conn_port ? -- url
             global data
             reset
 
             # internal URL
-            set port [ns_set iget [ns_conn headers] Port]
-            set host [ns_set iget [ns_conn headers] Host]
+            if { ![info exists conn_protocol] } {
+                set conn_protocol [ns_conn protocol]
+            }
+            if { ![info exists conn_host] } {
+                set conn_host [ns_set iget [ns_conn headers] Host]
+            }
+            if { ![info exists conn_port] } {
+                set conn_port [ns_set iget [ns_conn headers] Port]
+            }
+
             if { ![regexp {^https?://} $url] } {
                 # Relative url
+                set url [string trimleft $url /]
+                set url "[qc::conn_location \
+                                -conn_protocol  $conn_protocol \
+                                -conn_host      $conn_host \
+                                -conn_port      $conn_port \
+                            ]/$url"
 
-                if { $port ne "" && $host ne ""} {
-                    # Port and host specified in headers (or by proxy)
-                    set url [string trimleft $url /]
-                    if { [eq $port 80] } {
-                        set url "http://$host/$url"
-                    } elseif { [eq $port 443] } {
-                        set url "https://$host/$url"
-                    } elseif { [eq $port 8443] } {
-                        set url "https://$host:8443/$url"
-                    } else  {
-                        set url "http://$host:$port/$url"
-                    } 
-
-                    # check for malicious mal-formed url
-                    if { ![qc::is url $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
-                    
-                } else {
-                    # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
-                    if { ! [qc::is url -relative $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
+                # check for malicious mal-formed url
+                if { ![qc::is url $url] } {
+                    error "\"[html_escape $url]\" is not a valid url."
                 }
 
             } else {
                 # Absolute url
                 # check that redirection is to the same domain
-                if { ![regexp "^https?://${host}(:\[0-9\]+)?(/|\$)" $url] } {
-                    error "Will not redirect to a different domain. Host $host. Redirect to \"[html_escape $url]\""
+                if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $url] } {
+                    error "Will not redirect to a different domain. Host $conn_host. Redirect to \"[html_escape $url]\""
                 }
                 # check for malicious mal-formed url
                 if { ![qc::is url $url] } {
@@ -218,47 +213,43 @@ namespace eval qc::response {
             dict set data action resubmit value true
         }
 
-        proc login {url} {
+        proc login { args } {
             #| Sets the login property with the given internal URL.
+            qc::args $args -conn_protocol ? -conn_host ? -conn_port ? -- url
             global data
             reset
-            
+
             # internal URL
-            set port [ns_set iget [ns_conn headers] Port]
-            set host [ns_set iget [ns_conn headers] Host]
+            if { ![info exists conn_protocol] } {
+                set conn_protocol [ns_conn protocol]
+            }
+            if { ![info exists conn_host] } {
+                set conn_host [ns_set iget [ns_conn headers] Host]
+            }
+            if { ![info exists conn_port] } {
+                set conn_port [ns_set iget [ns_conn headers] Port]
+            }
+
             if { ![regexp {^https?://} $url] } {
                 # Relative url
+                #
+                set url [string trimleft $url /]
+                set url "[qc::conn_location \
+                                -conn_protocol  $conn_protocol \
+                                -conn_host      $conn_host \
+                                -conn_port      $conn_port \
+                            ]/$url"
 
-                if { $port ne "" && $host ne ""} {
-                    # Port and host specified in headers (or by proxy)
-                    set url [string trimleft $url /]
-                    if { [eq $port 80] } {
-                        set url "http://$host/$url"
-                    } elseif { [eq $port 443] } {
-                        set url "https://$host/$url"
-                    } elseif { [eq $port 8443] } {
-                        set url "https://$host:8443/$url"
-                    } else  {
-                        set url "http://$host:$port/$url"
-                    } 
-
-                    # check for malicious mal-formed url
-                    if { ![qc::is url $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
-                    
-                } else {
-                    # Port or host unspecified, so just check that it's a valid relative url and pass to ns_returnredirect
-                    if { ! [qc::is url -relative $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
+                # check for malicious mal-formed url
+                if { ![qc::is url $url] } {
+                    error "\"[html_escape $url]\" is not a valid url."
                 }
 
             } else {
                 # Absolute url
                 # check that redirection is to the same domain
-                if { ![regexp "^https?://${host}(:\[0-9\]+)?(/|\$)" $url] } {
-                    error "Will not redirect to a different domain. Host $host. Redirect to \"[html_escape $url]\""
+                if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $url] } {
+                    error "Will not redirect to a different domain. Host $conn_host. Redirect to \"[html_escape $url]\""
                 }
                 # check for malicious mal-formed url
                 if { ![qc::is url $url] } {

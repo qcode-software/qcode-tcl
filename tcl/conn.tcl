@@ -52,25 +52,44 @@ proc qc::conn_path {args} {
     }
 }
 
-proc qc::conn_location {} {
+proc qc::conn_location { args } {
     #| Try to construct the location
-    set port [ns_set iget [ns_conn headers] Port]
-    set host [ns_set iget [ns_conn headers] Host]
+    qc::args $args -conn_protocol ? -conn_host ? -conn_port ? --
 
-    if { $host ne "" && $port ne "" } {
-        # Proxied through nginx
-	if { [eq $port 80] } {
-	    return "http://$host"
-	} elseif { [eq $port 443] } {
-	    return "https://$host"
-	} elseif { [eq $port 8443] } {
-	    return "https://$host:8443"
-	} else  {
-	    return "http://$host:$port"
-	}
+    if { ![info exists conn_protocol] } {
+        set conn_protocol [ns_conn protocol]
+    }
+    if { ![info exists conn_host] } {
+        set conn_host [ns_set iget [ns_conn headers] Host]
+    }
+    if { ![info exists conn_port] } {
+        set conn_port [ns_set iget [ns_conn headers] Port]
+    }
+
+    set url ""
+    if { $conn_host ne "" && $conn_port ne "" } {
+        # Legacy support - assume if a Port header is present then we're behind a proxy
+        # which is emulating Nginx behaviour.
+        # eg. Host header with no port and separate Port header.
+        switch -exact $conn_port {
+            "80" -
+            "443" {
+                set url "${conn_protocol}://${conn_host}"
+            }
+            default {
+                set url "${conn_protocol}://${conn_host}:${conn_port}"
+            }
+        }
+    } elseif { $conn_host ne "" && $conn_port eq "" } {
+        # Return the Host header
+        set url "${conn_protocol}://${conn_host}"
     } else {
-        # Not proxied
-	return [ns_conn location]
+        set url [ns_conn location]
+    }
+    if { [qc::is url $url] } {
+        return $url
+    } else {
+        error "conn_location: cannot construct location string"
     }
 }
 

@@ -1,0 +1,114 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    # overload ns_conn
+    proc ns_conn { subcmd } {
+        switch -exact $subcmd {
+            "location" {
+                return "https://www.fallback.co.uk"
+            }
+            default {
+                error "ns_conn: $subcmd not implemented in test suite"
+            }
+        }
+    }
+}
+
+test conn_location1.0 \
+    {conn_location 443} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+    } \
+    -result {https://www.qcode.co.uk}
+
+test conn_location1.1 \
+    {conn_location 80} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        ""
+        set protocol    http
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+    } \
+    -result {http://www.qcode.co.uk}
+
+test conn_location1.2 \
+    {conn_location 8443} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk:8443
+        set port        ""
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+    } \
+    -result {https://www.qcode.co.uk:8443}
+
+test conn_location1.3 \
+    {conn_location legacy 443} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        443
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+    } \
+    -result {https://www.qcode.co.uk}
+
+test conn_location1.4 \
+    {conn_location legacy 80} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        80
+        set protocol    http
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+    } \
+    -result {http://www.qcode.co.uk}
+
+test conn_location1.5 \
+    {conn_location legacy 8443} \
+    -setup $setup \
+    -body {
+        set host        www.qcode.co.uk
+        set port        8443
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+    } \
+    -result {https://www.qcode.co.uk:8443}
+
+test conn_location1.6 \
+    {conn_location invalid host} \
+    -setup $setup \
+    -body {
+        set host        www.:qcode:.co.uk
+        set port        ""
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+    } \
+    -returnCodes error \
+    -result {conn_location: cannot construct location string}
+
+test conn_location1.7 \
+    {conn_location fallback} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+    } \
+    -result {https://www.fallback.co.uk}
+
+cleanupTests
