@@ -13,6 +13,13 @@ set setup {
     proc ns_returnredirect { next_url } {
         return $next_url
     }
+    proc ns_conn { action } {
+        if { $action eq "location" } {
+            return "https://www.fallback.co.uk"
+        } else {
+            error "ns_conn: action $action not supported in this test"
+        }
+    }
 }
 
 test return_next1.0 \
@@ -221,5 +228,38 @@ test return_next1.11 \
     -returnCodes error \
     -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
 
+test return_next1.12 \
+    {return_next http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set next_url    /admin.tcl
+        qc::return_next \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $next_url
+    } \
+    -result {https://www.fallback.co.uk/admin.tcl}
+
+test return_next1.13 \
+    {return_next http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set next_url    admin.tcl
+        qc::return_next \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $next_url
+    } \
+    -result {https://www.fallback.co.uk/admin.tcl}
 
 cleanupTests

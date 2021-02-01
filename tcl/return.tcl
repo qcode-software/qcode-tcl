@@ -147,26 +147,16 @@ proc qc::return_next { args } {
     if { ![regexp {^https?://} $next_url] } {
         # Relative url
         
-        if { $conn_host ne ""} {
-            set next_url [string trimleft $next_url /]
-            set next_url "[qc::conn_location \
-                            -conn_protocol  $conn_protocol \
-                            -conn_host      $conn_host \
-                            -conn_port      $conn_port \
-                          ]/$next_url"
+        set next_url [string trimleft $next_url /]
+        set next_url "[qc::conn_location \
+                        -conn_protocol  $conn_protocol \
+                        -conn_host      $conn_host \
+                        -conn_port      $conn_port \
+                      ]/$next_url"
 
-            # check for malicious mal-formed url
-            if { ![qc::is url $next_url] } {
-                error "\"[html_escape $next_url]\" is not a valid url."
-            }
-         
-        } else {
-            # Host unspecified, so just check that it's a valid relative url 
-            # and pass to ns_returnredirect
-            # TODO This shouldn't happen - just error here?
-            if { ! [qc::is url -relative $next_url] } {
-                error "\"[html_escape $next_url]\" is not a valid url."
-            }
+        # check for malicious mal-formed url
+        if { ![qc::is url $next_url] } {
+            error "\"[html_escape $next_url]\" is not a valid url."
         }
 
     } else {

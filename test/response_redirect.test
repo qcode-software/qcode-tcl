@@ -9,6 +9,13 @@ foreach file $files {
 namespace import ::qc::*
 
 set setup {
+    proc ns_conn { action } {
+        if { $action eq "location" } {
+            return "https://www.fallback.co.uk"
+        } else {
+            error "ns_conn: action $action not supported in this test"
+        }
+    }
 }
 
 test response_redirect1.0 \
@@ -217,5 +224,38 @@ test response_redirect1.11 \
     -returnCodes error \
     -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
 
+test response_redirect1.12 \
+    {response redirect http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set url         /admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.fallback.co.uk/admin.tcl}}}
+
+test response_redirect1.13 \
+    {response redirect http/1.0} \
+    -setup $setup \
+    -body {
+        set host        ""
+        set port        ""
+        set protocol    https
+        set url         admin.tcl
+        qc::response action redirect \
+            -conn_host $host \
+            -conn_port $port \
+            -conn_protocol $protocol \
+            -- \
+            $url
+    } \
+    -result {action {redirect {value https://www.fallback.co.uk/admin.tcl}}}
 
 cleanupTests

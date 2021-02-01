@@ -166,25 +166,16 @@ namespace eval qc::response {
 
             if { ![regexp {^https?://} $url] } {
                 # Relative url
-                if { $conn_host ne ""} {
-                    set url [string trimleft $url /]
-                    set url "[qc::conn_location \
-                                    -conn_protocol  $conn_protocol \
-                                    -conn_host      $conn_host \
-                                    -conn_port      $conn_port \
-                                ]/$url"
+                set url [string trimleft $url /]
+                set url "[qc::conn_location \
+                                -conn_protocol  $conn_protocol \
+                                -conn_host      $conn_host \
+                                -conn_port      $conn_port \
+                            ]/$url"
 
-                    # check for malicious mal-formed url
-                    if { ![qc::is url $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
-                    
-                } else {
-                    # Port or host unspecified, so just check that it's a valid relative url
-                    # and pass to ns_returnredirect
-                    if { ! [qc::is url -relative $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
+                # check for malicious mal-formed url
+                if { ![qc::is url $url] } {
+                    error "\"[html_escape $url]\" is not a valid url."
                 }
 
             } else {
@@ -242,25 +233,16 @@ namespace eval qc::response {
             if { ![regexp {^https?://} $url] } {
                 # Relative url
                 #
-                if { $conn_host ne ""} {
-                    set url [string trimleft $url /]
-                    set url "[qc::conn_location \
-                                    -conn_protocol  $conn_protocol \
-                                    -conn_host      $conn_host \
-                                    -conn_port      $conn_port \
-                                ]/$url"
+                set url [string trimleft $url /]
+                set url "[qc::conn_location \
+                                -conn_protocol  $conn_protocol \
+                                -conn_host      $conn_host \
+                                -conn_port      $conn_port \
+                            ]/$url"
 
-                    # check for malicious mal-formed url
-                    if { ![qc::is url $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
-                    
-                } else {
-                    # Port or host unspecified, so just check that it's a valid relative url
-                    # and pass to ns_returnredirect
-                    if { ! [qc::is url -relative $url] } {
-                        error "\"[html_escape $url]\" is not a valid url."
-                    }
+                # check for malicious mal-formed url
+                if { ![qc::is url $url] } {
+                    error "\"[html_escape $url]\" is not a valid url."
                 }
 
             } else {
