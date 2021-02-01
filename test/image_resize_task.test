@@ -1,0 +1,148 @@
+source ./db_setup.tcl
+
+set setup {
+
+    namespace eval qc {
+        namespace export \
+            s3 \
+            aws_credentials_set_from_ec2_role
+    }
+
+    proc qc::s3 {args} {}
+    proc qc::aws_credentials_set_from_ec2_role {args} {}
+    proc ns_pagepath {} {
+        return ""
+    }
+
+    namespace import \
+        qc::s3 \
+        qc::aws_credentials_set_from_ec2_role
+
+    set user_id 0
+
+    qc::auth_as_user $user_id
+
+    set conn [qc::db_connect {*}$conn_info]
+
+    qc::db_trans_start
+
+    set img_path "/home/nsd/mla_erp/test/mla_image_resize_task/mla-text-logo.png"
+
+    qc::dict2vars [qc::image_file_info $img_path] \
+        width \
+        height
+
+    set filename [file tail $img_path]
+    set mime_type "image/png"
+    set id [open $img_path r]	
+    fconfigure $id -translation binary	
+    set data [base64::encode [read $id]]	
+    close $id
+    set file_id [qc::db_seq "file_id_seq"]
+
+    db_dml {
+        insert into file (
+            file_id,
+            user_id,
+            filename,
+            data,
+            mime_type
+        ) values (
+            :file_id,
+            :user_id,
+            :filename,
+            decode(:data, 'base64'),
+            :mime_type
+        );
+    }
+    
+    set cache_dir "/tmp/image-cache-test"
+    set dir_created false
+
+    if { ![file exists $cache_dir] } {
+        file mkdir $cache_dir
+        set dir_created true
+    }
+
+    db_dml "
+        insert into image
+        [qc::sql_insert {*}{
+            file_id
+            height
+            width
+        }]
+    "
+}
+
+set cleanup {
+    qc::db_trans_abort
+    qc::db_disconnect
+    qc::auth_logout
+
+    if { $dir_created } {
+        file delete -force $cache_dir
+    } else {
+        # TO DO - delete cache entries
+    }
+}
+
+test image_resize_task_add-1.0 \
+    {Check that an image resize task can be added.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set row_id [qc::image_resize_task_add $file_id $cache_dir $height $width]
+        set task_state "QUEUED"
+        set expected [qc::dict_from {*}{
+            file_id
+            cache_dir
+            height
+            width
+            task_state
+        }]
+        set task [lindex [qc::db_select_ldict {
+            select
+            file_id,
+            cache_dir,
+            height,
+            width,
+            task_state
+
+            from
+            image_resize_task
+
+            where
+            row_id=:row_id
+        }] 0]
+
+        return [qc::dicts_equal $expected $task]
+    } \
+    -result true
+
+test image_resize_task_process-1.0 \
+    {Check that an image resize task can be processed.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set row_id [qc::image_resize_task_add $file_id $cache_dir $height $width]
+
+        qc::image_resize_task_process $row_id
+
+        set expected "PROCESSED"
+
+        qc::db_1row {
+            select
+            task_state
+
+            from
+            image_resize_task
+
+            where
+            row_id=:row_id
+        }
+
+        return [expr {$expected eq $task_state}]
+    } \
+    -result 1
+
+cleanupTests
