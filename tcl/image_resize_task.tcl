@@ -34,7 +34,7 @@ proc qc::image_resize_task_add {
 }
 
 proc qc::image_resize_task_process { row_id } {
-    #| Resize and cache the image.
+    #| Resize and cache the image from the task queue.
 
     db_trans {
         db_0or1row {
