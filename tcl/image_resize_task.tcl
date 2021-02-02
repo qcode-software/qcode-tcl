@@ -56,9 +56,10 @@ proc qc::image_resize_task_process { row_id } {
             error "No queued image resize task exists for row ${row_id}."
         }
 
+        set date_processed [qc::cast timestamptz "now"]
+
         ::try {
             set task_state "PROCESSED"
-            set date_processed [qc::cast timestamptz "now"]
 
             return [qc::image_data \
                         $cache_dir \
@@ -66,9 +67,7 @@ proc qc::image_resize_task_process { row_id } {
                         $width \
                         $height]
         } on error [list message options] {
-            # TO DO - error immediately or log attempts and error if attempts > x?
             set task_state "ERROR"
-            set date_processed ""
 
             error \
                 $message \
