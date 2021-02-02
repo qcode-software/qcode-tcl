@@ -1,0 +1,251 @@
+package require tcltest
+package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+if { [info commands ns_db] ne "ns_db" } {
+    # Load all .tcl files
+    set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+    foreach file $files {
+        source $file
+    }
+    namespace import ::qc::*
+
+    # Superuser credentials
+    set pgpass_filename $::env(HOME)/.pgpass
+    if { [pgpass_credentials_exist $pgpass_filename template1] } {
+        dict2vars [pgpass_credentials $pgpass_filename template1] {*}{
+            hostname
+            database
+            port
+            username
+            password
+        }
+    } else {
+        error "Missing pgpass entry for db template1"
+    }
+    set ::conn_info_superuser(host) $hostname
+    set ::conn_info_superuser(dbname) $database
+    set ::conn_info_superuser(port) $port
+    set ::conn_info_superuser(user) $username
+    set ::conn_info_superuser(password) $password
+
+    # initialise db credentials
+
+    set ::conn_info_test(host) $hostname
+    set ::conn_info_test(port) $port
+    array set ::conn_info_test {
+        dbname test_database
+        user test_user
+        password test_password
+    }
+}
+
+set db_setup_qry {
+    create type image_resize_task_state as enum (
+        'QUEUED',
+        'PROCESSED',
+        'ERROR'
+    );
+
+    create table if not exists file (
+        file_id int primary key,
+        user_id int not null,
+        filename text not null,
+        data bytea,
+        upload_date timestamp without time zone default now(),
+        mime_type text not null,
+        s3_location text
+    );
+
+    create table if not exists image (
+        file_id int primary key references file(file_id) on delete cascade,
+        width int,
+        height int,
+        autocrop_width int,
+        autocrop_height int
+    );
+
+    create table if not exists image_resize_task (
+        row_id int primary key,
+        file_id int not null references image(file_id) on delete cascade,
+        cache_dir text not null,
+        height int not null,
+        width int not null,
+        date_added timestamptz not null,
+        date_processed timestamptz,
+        task_state image_resize_task_state not null
+    );
+
+    create sequence if not exists file_id_seq;
+    create sequence if not exists row_id_seq;
+}
+
+set db_cleanup_qry {
+    drop table image_resize_task;
+    drop table image;
+    drop table file;
+    drop type image_resize_task_state;
+    drop sequence file_id_seq;
+    drop sequence row_id_seq;
+}
+
+set setup_inside_naviserver {
+    set db [qc::db_get_handle]
+    ns_db dml $db $db_setup_qry
+}
+
+set setup_outside_naviserver {
+    set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
+    pg_execute $conn_superuser {create database test_database}
+    pg_execute $conn_superuser {
+        create user test_user with password 'test_password';
+        grant all privileges on database test_database to test_user;
+    }
+    pg_disconnect $conn_superuser
+
+    set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn $db_setup_qry
+}
+
+set cleanup_inside_naviserver {
+    # Cleanup the qc::db connection
+    set db [qc::db_get_handle]
+    ns_db dml $db $db_cleanup_qry
+}
+
+set cleanup_outside_naviserver {
+    set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    pg_execute $conn $db_cleanup_qry
+    qc::db_disconnect
+
+    set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
+    pg_execute $conn_superuser {
+        drop database if exists test_database
+    }
+    pg_execute $conn_superuser {
+        drop role if exists test_user;
+    }
+    pg_disconnect $conn_superuser
+}
+
+set data_setup {
+    proc ns_pagepath {} {
+        return ""
+    }
+
+    set user_id 0
+
+    qc::auth_as_user $user_id
+
+    qc::db_trans_start
+
+    set filename "logo_qcode_420x120.png"
+    set mime_type "image/png"
+    set width 420
+    set height 120
+    set id [open "./images/${filename}" r]
+    fconfigure $id -translation binary
+    set data [base64::encode [read $id]]
+    close $id
+    set file_id [qc::db_seq "file_id_seq"]
+
+    db_dml {
+        insert into file (
+            file_id,
+            user_id,
+            filename,
+            data,
+            mime_type
+        ) values (
+            :file_id,
+            :user_id,
+            :filename,
+            decode(:data, 'base64'),
+            :mime_type
+        );
+    }
+
+    set cache_dir "/tmp/image-cache-test"
+    set dir_created false
+
+    if { ![file exists $cache_dir] } {
+        file mkdir $cache_dir
+        set dir_created true
+    }
+
+    db_dml "
+        insert into image
+        [qc::sql_insert {*}{
+            file_id
+            height
+            width
+        }]
+    "
+
+    set original_width $width
+    set original_height $height
+    set new_width 210
+    set new_height 60
+}
+
+set data_cleanup {
+    qc::db_trans_abort
+    qc::auth_logout
+
+    if { $dir_created } {
+        file delete -force $cache_dir
+    } else {
+        set filename "${file_id}.png"
+        set img_dir_original "${file_id}-${original_width}x${original_height}"
+        set cache_dir_original "${cache_dir}/${img_dir_original}"
+
+        if { [file exists "${cache_dir_original}/${filename}"] } {
+            file delete -force $cache_dir_original
+        }
+
+        set img_dir_resize "${file_id}-${new_width}x${new_height}"
+        set cache_dir_resize "${cache_dir}/${img_dir_resize}"
+
+        if { [file exists "${cache_dir_resize}/${filename}"] } {
+            file delete -force $cache_dir_resize
+        }
+    }
+}
+
+if { [info commands ns_db] eq "ns_db" } {
+    set setup $setup_inside_naviserver
+    append setup $data_setup
+
+    set cleanup $data_cleanup
+    append cleanup $cleanup_inside_naviserver
+} else {
+    set setup $setup_outside_naviserver
+    append setup $data_setup
+
+    set cleanup $data_cleanup
+    append cleanup $cleanup_outside_naviserver
+}
+
+test image_resize_task_process-1.0 \
+    {Check that an image resize task can be processed.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        # what to do if image isn't queued and isn't cached?
+        #   1. queue and return placeholder
+        #   2. attempt to process on the fly
+        # what to do about autocrop?
+        qc::image_resize_task_add $file_id $cache_dir $new_width $new_height
+        set data [qc::image_data \
+                      -check_queue \
+                      -- \
+                      $cache_dir \
+                      $file_id \
+                      $new_width \
+                      $new_height]
+
+        return $data
+    } \
+    -result {width 100 height 100 url ?}
+
+cleanupTests

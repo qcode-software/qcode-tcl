@@ -12,13 +12,54 @@ proc qc::image_data {args} {
     qc::args $args {*}{
         -autocrop
         -mime_type */*
+        -check_queue
         --
         cache_dir
         file_id
         max_width
         max_height
     }
-    default autocrop false
+
+    default \
+        autocrop false \
+        check_queue false
+
+    if { $check_queue } {
+        # Check if the image is in the queue to be resized and/or cached at the
+        # given dimensions. Return a placeholder image if it has been queued.
+        db_0or1row {
+            select
+            count(*) as count
+
+            from
+            image_resize_task
+
+            where
+            task_state = 'QUEUED'
+            and file_id=:file_id
+            and cache_dir=:cache_dir
+            and (
+                 (
+                  width=:max_width
+                  and height<=:max_height
+                 )
+                 or (
+                     width<=:max_width
+                     and height=:max_height
+                 )
+            )
+        }
+
+        if { $count > 0 } {
+            # TODO return placeholder image
+            return [dict create \
+                        width 100 \
+                        height 100 \
+                        url ? \
+                       ]
+        }
+    }
+
     if { ! [qc::image_cache_exists {*}$caller_args] } {
         # Make sure a cache of the original exists
         if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
