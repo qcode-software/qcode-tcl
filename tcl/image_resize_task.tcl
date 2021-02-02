@@ -7,8 +7,8 @@ namespace eval qc {
 proc qc::image_resize_task_add {
     file_id
     cache_dir
-    height
     width
+    height
 } {
     #| Add a new resize task for an image in the database.
 
@@ -63,8 +63,8 @@ proc qc::image_resize_task_process { row_id } {
             return [qc::image_data \
                         $cache_dir \
                         $file_id \
-                        $height \
-                        $width]
+                        $width \
+                        $height]
         } on error [list message options] {
             # TO DO - error immediately or log attempts and error if attempts > x?
             set task_state "ERROR"
