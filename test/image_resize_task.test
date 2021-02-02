@@ -1,3 +1,7 @@
+package require tcltest
+package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
 if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
     set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
@@ -36,15 +40,15 @@ if { [info commands ns_db] ne "ns_db" } {
     }
 }
 
-set setup_qry {
-    create type if not exists image_resize_task_state as enum (
+set db_setup_qry {
+    create type image_resize_task_state as enum (
         'QUEUED',
         'PROCESSED',
         'ERROR'
     );
 
     create table if not exists file (
-        file_id int primary_key,
+        file_id int primary key,
         user_id int not null,
         filename text not null,
         data bytea,
@@ -64,7 +68,7 @@ set setup_qry {
     create table if not exists image_resize_task (
         row_id int primary key,
         file_id int not null references image(file_id) on delete cascade,
-        cache_dir plain_text not null,
+        cache_dir text not null,
         height int not null,
         width int not null,
         date_added timestamptz not null,
@@ -76,7 +80,7 @@ set setup_qry {
     create sequence if not exists row_id_seq;
 }
 
-set cleanup_qry {
+set db_cleanup_qry {
     drop table image_resize_task;
     drop table image;
     drop table file;
@@ -87,7 +91,7 @@ set cleanup_qry {
 
 set setup_inside_naviserver {
     set db [qc::db_get_handle]
-    ns_db dml $db $setup_qry
+    ns_db dml $db $db_setup_qry
 }
 
 set setup_outside_naviserver {
@@ -100,18 +104,18 @@ set setup_outside_naviserver {
     pg_disconnect $conn_superuser
 
     set conn [qc::db_connect {*}[array get ::conn_info_test]]
-    pg_execute $conn $setup_qry
+    pg_execute $conn $db_setup_qry
 }
 
 set cleanup_inside_naviserver {
     # Cleanup the qc::db connection
     set db [qc::db_get_handle]
-    ns_db dml $db $cleanup_qry
+    ns_db dml $db $db_cleanup_qry
 }
 
 set cleanup_outside_naviserver {
     set conn [qc::db_connect {*}[array get ::conn_info_test]]
-    pg_execute $conn $cleanup_qry
+    pg_execute $conn $db_cleanup_qry
     qc::db_disconnect
 
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
@@ -124,7 +128,7 @@ set cleanup_outside_naviserver {
     pg_disconnect $conn_superuser
 }
 
-set setup {
+set data_setup {
     proc ns_pagepath {} {
         return ""
     }
@@ -137,10 +141,8 @@ set setup {
 
     set filename "logo_qcode_420x120.png"
     set mime_type "image/png"
-    set original_width 420
-    set original_height 120
-    set width 210
-    set height 60
+    set width 420
+    set height 120
     set id [open "./images/${filename}" r]
     fconfigure $id -translation binary
     set data [base64::encode [read $id]]
@@ -179,11 +181,15 @@ set setup {
             width
         }]
     "
+
+    set original_width $width
+    set original_height $height
+    set new_width 210
+    set new_height 60
 }
 
-set cleanup {
+set data_cleanup {
     qc::db_trans_abort
-    qc::db_disconnect
     qc::auth_logout
 
     if { $dir_created } {
@@ -193,26 +199,31 @@ set cleanup {
         set img_dir_original "${file_id}-${original_width}x${original_height}"
         set cache_dir_original "${cache_dir}/${img_dir_original}"
 
-        if { [file exists "$cache_dir_original/$filename"] } {
+        if { [file exists "${cache_dir_original}/${filename}"] } {
             file delete -force $cache_dir_original
         }
 
-        set img_dir_resize "${file_id}-${width}x${height}"
+        set img_dir_resize "${file_id}-${new_width}x${new_height}"
         set cache_dir_resize "${cache_dir}/${img_dir_resize}"
 
-        if { [file exists "$cache_dir_resize/$filename"] } {
+        if { [file exists "${cache_dir_resize}/${filename}"] } {
             file delete -force $cache_dir_resize
         }
     }
 }
 
-# TO DO - fix setup and cleanup scripts.
 if { [info commands ns_db] eq "ns_db" } {
     set setup $setup_inside_naviserver
-    set cleanup $cleanup_inside_naviserver
+    append setup $data_setup
+
+    set cleanup $data_cleanup
+    append cleanup $cleanup_inside_naviserver
 } else {
     set setup $setup_outside_naviserver
-    set cleanup $cleanup_outside_naviserver
+    append setup $data_setup
+
+    set cleanup $data_cleanup
+    append cleanup $cleanup_outside_naviserver
 }
 
 test image_resize_task_add-1.0 \
@@ -220,21 +231,21 @@ test image_resize_task_add-1.0 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $width $height]
+        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
         set task_state "QUEUED"
         set expected [qc::dict_from {*}{
             file_id
             cache_dir
-            height
-            width
+            new_height
+            new_width
             task_state
         }]
         set task [lindex [qc::db_select_ldict {
             select
             file_id,
             cache_dir,
-            height,
-            width,
+            height as new_height,
+            width as new_width,
             task_state
 
             from
@@ -253,7 +264,7 @@ test image_resize_task_process-1.0 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $width $height]
+        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
 
         qc::image_resize_task_process $row_id
 
