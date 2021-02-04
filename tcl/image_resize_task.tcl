@@ -9,6 +9,7 @@ proc qc::image_resize_task_add {
     cache_dir
     width
     height
+    {autocrop false}
 } {
     #| Add a new resize task for an image in the database.
 
@@ -27,6 +28,7 @@ proc qc::image_resize_task_add {
             width
             date_added
             task_state
+            autocrop
         }]
     "
 
@@ -42,7 +44,8 @@ proc qc::image_resize_task_process { row_id } {
             file_id,
             cache_dir,
             height,
-            width
+            width,
+            autocrop
 
             from
             image_resize_task
@@ -61,11 +64,23 @@ proc qc::image_resize_task_process { row_id } {
         ::try {
             set task_state "PROCESSED"
 
-            return [qc::image_data \
+            if { $autocrop } {
+                return [qc::image_data \
+                        -autocrop \
+                        -- \
                         $cache_dir \
                         $file_id \
                         $width \
                         $height]
+            } else {
+                return [qc::image_data \
+                        $cache_dir \
+                        $file_id \
+                        $width \
+                        $height]
+            }
+
+            
         } on error [list message options] {
             set task_state "ERROR"
 

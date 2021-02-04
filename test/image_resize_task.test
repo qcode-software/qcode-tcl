@@ -71,6 +71,7 @@ set db_setup_qry {
         cache_dir text not null,
         height int not null,
         width int not null,
+        autocrop boolean not null,
         date_added timestamptz not null,
         date_processed timestamptz,
         task_state image_resize_task_state not null
@@ -195,20 +196,20 @@ set data_cleanup {
     if { $dir_created } {
         file delete -force $cache_dir
     } else {
-        set filename "${file_id}.png"
         set img_dir_original "${file_id}-${original_width}x${original_height}"
         set cache_dir_original "${cache_dir}/${img_dir_original}"
-
-        if { [file exists "${cache_dir_original}/${filename}"] } {
-            file delete -force $cache_dir_original
-        }
-
         set img_dir_resize "${file_id}-${new_width}x${new_height}"
         set cache_dir_resize "${cache_dir}/${img_dir_resize}"
+        set cache_dir_autocrop "${cache_dir}/${file_id}"
+        set img_link "${cache_dir}/${file_id}.png"
 
-        if { [file exists "${cache_dir_resize}/${filename}"] } {
-            file delete -force $cache_dir_resize
-        }
+        file delete \
+            -force \
+            -- \
+            $cache_dir_original \
+            $cache_dir_resize \
+            $cache_dir_autocrop \
+            $img_link
     }
 }
 
@@ -265,6 +266,37 @@ test image_resize_task_process-1.0 \
     -cleanup $cleanup \
     -body {
         set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
+
+        qc::image_resize_task_process $row_id
+
+        set expected "PROCESSED"
+
+        qc::db_1row {
+            select
+            task_state
+
+            from
+            image_resize_task
+
+            where
+            row_id=:row_id
+        }
+
+        return [expr {$expected eq $task_state}]
+    } \
+    -result 1
+
+test image_resize_task_process-1.1 \
+    {Check that an autocrop image resize task can be processed.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set row_id [qc::image_resize_task_add \
+                        $file_id \
+                        $cache_dir \
+                        $new_width \
+                        $new_height \
+                        true]
 
         qc::image_resize_task_process $row_id
 

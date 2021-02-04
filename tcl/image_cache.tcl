@@ -7,8 +7,8 @@ namespace eval qc {
 
 proc qc::image_data {args} {
     #| Return dict of width, height, & url of an image. Usage:
-    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
-    set caller_args $args
+    #| ?-autocrop? ?-mime_type */*? ?-check_queue? -- cache_dir file_id max_width max_height
+    set caller_args [qc::lexclude $args "-check_queue"]
     qc::args $args {*}{
         -autocrop
         -mime_type */*
@@ -25,8 +25,8 @@ proc qc::image_data {args} {
         check_queue false
 
     if { $check_queue } {
-        # Check if the image is in the queue to be resized and/or cached at the
-        # given dimensions. Return a placeholder image if it has been queued.
+        # Return a placeholder image if the image is in the queue to be cached
+        # at the given dimensions.
         db_0or1row {
             select
             count(*) as count
@@ -38,6 +38,7 @@ proc qc::image_data {args} {
             task_state = 'QUEUED'
             and file_id=:file_id
             and cache_dir=:cache_dir
+            and autocrop=:autocrop
             and (
                  (
                   width=:max_width
@@ -53,8 +54,8 @@ proc qc::image_data {args} {
         if { $count > 0 } {
             # TODO return placeholder image
             return [dict create \
-                        width 100 \
-                        height 100 \
+                        width ? \
+                        height ? \
                         url ? \
                        ]
         }
