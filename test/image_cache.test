@@ -348,9 +348,9 @@ test image_data-1.4 \
     -result true
 
 test image_data-1.5 \
-    {Check that the image is cached at the requested dimensions immediately when
-     it has been queued to be processed at the same dimensions with autocropping.
-     without autocropping.} \
+    {Check that the image is cached at the requested uncropped dimensions
+     immediately when it has been queued to be processed at the same dimensions
+     with autocropping.} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
