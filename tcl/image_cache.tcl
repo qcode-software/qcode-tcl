@@ -52,11 +52,16 @@ proc qc::image_data {args} {
         }
 
         if { $count > 0 } {
-            # TODO return placeholder image
+            set filename "${max_width}x${max_height}.png"
+            set url [qc::url "https://via.placeholder.com/:filename" \
+                         filename $filename \
+                         text "queued for processing" \
+                        ]
+
             return [dict create \
-                        width ? \
-                        height ? \
-                        url ? \
+                        width $max_width \
+                        height $max_height \
+                        url $url \
                        ]
         }
     }

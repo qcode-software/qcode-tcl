@@ -256,6 +256,7 @@ test image_data-1.1 \
     -cleanup $cleanup \
     -body {
         qc::image_resize_task_add $file_id $cache_dir $new_width $new_height
+
         set data [qc::image_data \
                       -check_queue \
                       -- \
@@ -263,10 +264,20 @@ test image_data-1.1 \
                       $file_id \
                       $new_width \
                       $new_height]
+        set filename "${new_width}x${new_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing" \
+                    ]
+        set expected [dict create \
+                          width $new_width \
+                          height $new_height \
+                          url $url \
+                         ]
 
-        return $data
+        return [qc::dicts_equal $expected $data]
     } \
-    -result {width ? height ? url ?}
+    -result true
 
 test image_data-1.2 \
     {Check that a placeholder image is returned when the image is queued to be
@@ -290,10 +301,20 @@ test image_data-1.2 \
                       $file_id \
                       $new_width \
                       $new_height]
+        set filename "${new_width}x${new_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing" \
+                    ]
+        set expected [dict create \
+                          width $new_width \
+                          height $new_height \
+                          url $url \
+                         ]
 
-        return $data
+        return [qc::dicts_equal $expected $data]
     } \
-    -result {width ? height ? url ?}
+    -result true
 
 test image_data-1.3 \
     {Check that the image is cached at the requested dimensions immediately
