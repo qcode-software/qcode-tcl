@@ -7,7 +7,7 @@ namespace eval qc {
 
 proc qc::image_data {args} {
     #| Return dict of width, height, & url of an image. Usage:
-    #| ?-autocrop? ?-mime_type */*? ?-check_queue? -- cache_dir file_id max_width max_height
+    #| ?-autocrop? ?-mime_type */*? -- cache_dir file_id max_width max_height
     set caller_args $args
     qc::args $args {*}{
         -autocrop
