@@ -273,16 +273,28 @@ test image_resize_task_process-1.0 \
 
         qc::db_1row {
             select
-            task_state
+            i.task_state,
+            f.mime_type
 
             from
-            image_resize_task
+            image_resize_task i
+            join file f using (file_id)
 
             where
-            row_id=:row_id
+            i.row_id=:row_id
         }
 
-        return [expr {$expected eq $task_state}]
+        return [expr {
+                      $expected eq $task_state
+                      && [qc::_image_cache_original_exists $cache_dir $file_id]
+                      && [qc::image_cache_exists \
+                              -mime_type $mime_type \
+                              -- \
+                              $cache_dir \
+                              $file_id \
+                              $width \
+                              $height]
+                  }]
     } \
     -result 1
 
@@ -304,16 +316,29 @@ test image_resize_task_process-1.1 \
 
         qc::db_1row {
             select
-            task_state
+            i.task_state,
+            f.mime_type
 
             from
-            image_resize_task
+            image_resize_task i
+            join file f using (file_id)
 
             where
-            row_id=:row_id
+            i.row_id=:row_id
         }
 
-        return [expr {$expected eq $task_state}]
+        return [expr {
+                      $expected eq $task_state
+                      && [qc::_image_cache_original_exists $cache_dir $file_id]
+                      && [qc::image_cache_exists \
+                              -autocrop \
+                              -mime_type $mime_type \
+                              -- \
+                              $cache_dir \
+                              $file_id \
+                              210 \
+                              58]
+                  }]
     } \
     -result 1
 

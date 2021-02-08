@@ -8,11 +8,10 @@ namespace eval qc {
 proc qc::image_data {args} {
     #| Return dict of width, height, & url of an image. Usage:
     #| ?-autocrop? ?-mime_type */*? ?-check_queue? -- cache_dir file_id max_width max_height
-    set caller_args [qc::lexclude $args "-check_queue"]
+    set caller_args $args
     qc::args $args {*}{
         -autocrop
         -mime_type */*
-        -check_queue
         --
         cache_dir
         file_id
@@ -21,68 +20,32 @@ proc qc::image_data {args} {
     }
 
     default \
-        autocrop false \
-        check_queue false
+        autocrop false
 
     if { ! [qc::image_cache_exists {*}$caller_args] } {
+        # Queue the image to be cached and return a placeholder.
 
-        if { $check_queue } {
-            # Check if the image is queued to be resized and cached.
-            db_1row {
-                select
-                count(*) as count
+        qc::image_resize_task_add \
+            $file_id \
+            $cache_dir \
+            $max_width \
+            $max_height \
+            $autocrop
 
-                from
-                image_resize_task
+        set filename "${max_width}x${max_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing" \
+                    ]
 
-                where
-                task_state = 'QUEUED'
-                and file_id=:file_id
-                and cache_dir=:cache_dir
-                and autocrop=:autocrop
-                and (
-                    (
-                     width=:max_width
-                     and height<=:max_height
-                    )
-                    or (
-                        width<=:max_width
-                        and height=:max_height
-                    )
-                )
-            }
+        return [dict create \
+                    width $max_width \
+                    height $max_height \
+                    url $url \
+                   ]
+    }
 
-            if { $count > 0 } {
-                # Image is in the resize queue so return a placeholder image.
-                set filename "${max_width}x${max_height}.png"
-                set url [qc::url "https://via.placeholder.com/:filename" \
-                             filename $filename \
-                             text "queued for processing" \
-                            ]
-
-                return [dict create \
-                            width $max_width \
-                            height $max_height \
-                            url $url \
-                           ]
-            }
-        }
-
-        # Make sure a cache of the original exists
-        if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
-            qc::_image_cache_original_create $cache_dir $file_id
-        }
-        # Ensure we have the file mime type if not specified
-        if { $mime_type eq "*/*" } {
-            set mime_type [qc::mime_type_guess \
-                               [qc::_image_cache_original_file \
-                                    $cache_dir $file_id]]
-        }
-        if { $mime_type ne "image/svg+xml" } {
-            qc::_image_cache_create \
-                $cache_dir $file_id $mime_type $max_width $max_height $autocrop
-        }
-    } elseif { $mime_type eq "*/*" } {
+    if { $mime_type eq "*/*" } {
         # We have a cached file for the args but no mime-type specified
         set available_types \
             [qc::_image_cache_available_mime_types {*}$caller_args]
@@ -100,6 +63,7 @@ proc qc::image_data {args} {
             }
         }
     }
+
     set cache_data \
         [qc::_image_cache_data \
              $cache_dir $file_id $mime_type $max_width $max_height $autocrop]
