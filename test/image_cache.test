@@ -227,79 +227,77 @@ if { [info commands ns_db] eq "ns_db" } {
     append cleanup $cleanup_outside_naviserver
 }
 
-test image_resize_task_add-1.0 \
-    {Check that an image resize task can be added.} \
+test image_data-1.0 \
+    {Check that the image is queued to be cached and a placeholder is returned.} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
-        set task_state "QUEUED"
-        set expected [qc::dict_from {*}{
-            file_id
-            cache_dir
-            new_height
-            new_width
-            task_state
-        }]
-        set task [lindex [qc::db_select_ldict {
+        set data [qc::image_data \
+                      $cache_dir \
+                      $file_id \
+                      $new_width \
+                      $new_height]
+
+        qc::db_0or1row {
             select
-            file_id,
-            cache_dir,
-            height as new_height,
-            width as new_width,
-            task_state
+            true as queued
 
             from
             image_resize_task
 
             where
-            row_id=:row_id
-        }] 0]
+            file_id=:file_id
+            and width=:new_width
+            and height=:new_height
+            and cache_dir=:cache_dir
+            and not autocrop
+            and task_state = 'QUEUED'
+        } {
+            return false
+        }
 
-        return [qc::dicts_equal $expected $task]
+        set filename "${new_width}x${new_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing"]
+        set expected [dict create \
+                          width $new_width \
+                          height $new_height \
+                          url $url]
+
+        return [qc::dicts_equal $expected $data]
     } \
     -result true
 
-test image_resize_task_process-1.0 \
-    {Check that an image resize task can be processed.} \
+test image_data-1.1 \
+    {Check that the image is queued to be autocropped, cached, and a placeholder
+     is returned.} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
+        set data [qc::image_data \
+                      -autocrop \
+                      -- \
+                      $cache_dir \
+                      $file_id \
+                      $new_width \
+                      $new_height]
 
-        qc::image_resize_task_process $row_id
+        set filename "${new_width}x${new_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing"]
+        set expected [dict create \
+                          width $new_width \
+                          height $new_height \
+                          url $url]
 
-        set expected "PROCESSED"
-
-        qc::db_1row {
-            select
-            i.task_state,
-            f.mime_type
-
-            from
-            image_resize_task i
-            join file f using (file_id)
-
-            where
-            i.row_id=:row_id
-        }
-
-        return [expr {
-                      $expected eq $task_state
-                      && [qc::_image_cache_original_exists $cache_dir $file_id]
-                      && [qc::image_cache_exists \
-                              -mime_type $mime_type \
-                              -- \
-                              $cache_dir \
-                              $file_id \
-                              $width \
-                              $height]
-                  }]
+        return [qc::dicts_equal $expected $data]
     } \
-    -result 1
+    -result true
 
-test image_resize_task_process-1.1 \
-    {Check that an autocrop image resize task can be processed.} \
+test image_data-1.2 \
+    {Check that the cached image data is returned.} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
@@ -307,39 +305,23 @@ test image_resize_task_process-1.1 \
                         $file_id \
                         $cache_dir \
                         $new_width \
-                        $new_height \
-                        true]
+                        $new_height]
 
         qc::image_resize_task_process $row_id
 
-        set expected "PROCESSED"
+        set data [qc::image_data \
+                      $cache_dir \
+                      $file_id \
+                      $new_width \
+                      $new_height]
+        set file_url "${cache_dir}/${file_id}-${new_width}x${new_height}/${file_id}.png"
+        set expected [dict create \
+                          width $new_width \
+                          height $new_height \
+                          url $file_url]
 
-        qc::db_1row {
-            select
-            i.task_state,
-            f.mime_type
-
-            from
-            image_resize_task i
-            join file f using (file_id)
-
-            where
-            i.row_id=:row_id
-        }
-
-        return [expr {
-                      $expected eq $task_state
-                      && [qc::_image_cache_original_exists $cache_dir $file_id]
-                      && [qc::image_cache_exists \
-                              -autocrop \
-                              -mime_type $mime_type \
-                              -- \
-                              $cache_dir \
-                              $file_id \
-                              210 \
-                              58]
-                  }]
+        return [qc::dicts_equal $expected $data]
     } \
-    -result 1
+    -result true
 
 cleanupTests

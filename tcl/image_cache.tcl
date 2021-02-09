@@ -18,24 +18,34 @@ proc qc::image_data {args} {
         max_width
         max_height
     }
-    default autocrop false
+
+    default \
+        autocrop false
+
     if { ! [qc::image_cache_exists {*}$caller_args] } {
-        # Make sure a cache of the original exists
-        if { ! [qc::_image_cache_original_exists $cache_dir $file_id] } {
-            qc::_image_cache_original_create $cache_dir $file_id
-        }
-        # Ensure we have the file mime type if not specified
-        if { $mime_type eq "*/*" } {
-            set mime_type [qc::mime_type_guess \
-                               [qc::_image_cache_original_file \
-                                    $cache_dir $file_id]]
-        }
-        if { $mime_type ne "image/svg+xml" } {
-            qc::_image_cache_create \
-                $cache_dir $file_id $mime_type $max_width $max_height $autocrop
-        }
-        
-    } elseif { $mime_type eq "*/*" } {
+        # Queue the image to be cached and return a placeholder.
+
+        qc::image_resize_task_add \
+            $file_id \
+            $cache_dir \
+            $max_width \
+            $max_height \
+            $autocrop
+
+        set filename "${max_width}x${max_height}.png"
+        set url [qc::url "https://via.placeholder.com/:filename" \
+                     filename $filename \
+                     text "queued for processing" \
+                    ]
+
+        return [dict create \
+                    width $max_width \
+                    height $max_height \
+                    url $url \
+                   ]
+    }
+
+    if { $mime_type eq "*/*" } {
         # We have a cached file for the args but no mime-type specified
         set available_types \
             [qc::_image_cache_available_mime_types {*}$caller_args]
@@ -53,6 +63,7 @@ proc qc::image_data {args} {
             }
         }
     }
+
     set cache_data \
         [qc::_image_cache_data \
              $cache_dir $file_id $mime_type $max_width $max_height $autocrop]
