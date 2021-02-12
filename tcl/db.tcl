@@ -1,3 +1,5 @@
+package require crc32
+
 namespace eval qc {
     namespace export db_*
 }

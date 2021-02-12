@@ -1,9 +1,6 @@
-package require crc32
-
 namespace eval qc {
     namespace export \
-        image_resize_task_add \
-        image_resize_task_process
+        image_resize_task_add
 }
 
 proc qc::image_resize_task_add {args} {

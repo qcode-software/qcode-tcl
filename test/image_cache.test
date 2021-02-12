@@ -74,7 +74,8 @@ set db_setup_qry {
         autocrop boolean not null,
         date_added timestamptz not null,
         date_processed timestamptz,
-        task_state image_resize_task_state not null
+        task_state image_resize_task_state not null,
+        mime_type text not null
     );
 
     create sequence if not exists file_id_seq;
@@ -233,6 +234,8 @@ test image_data-1.0 \
     -cleanup $cleanup \
     -body {
         set data [qc::image_data \
+                      -mime_type $mime_type \
+                      -- \
                       $cache_dir \
                       $file_id \
                       $new_width \
@@ -250,6 +253,7 @@ test image_data-1.0 \
             and width=:new_width
             and height=:new_height
             and cache_dir=:cache_dir
+            and mime_type=:mime_type
             and not autocrop
             and task_state = 'QUEUED'
         } {
@@ -270,18 +274,37 @@ test image_data-1.0 \
     -result true
 
 test image_data-1.1 \
-    {Check that the image is queued to be autocropped, cached, and a placeholder
-     is returned.} \
+    {Check that the image is queued to be autocropped and a placeholder is returned.} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
         set data [qc::image_data \
                       -autocrop \
+                      -mime_type $mime_type \
                       -- \
                       $cache_dir \
                       $file_id \
                       $new_width \
                       $new_height]
+
+        qc::db_0or1row {
+            select
+            true as queued
+
+            from
+            image_resize_task
+
+            where
+            file_id=:file_id
+            and width=:new_width
+            and height=:new_height
+            and cache_dir=:cache_dir
+            and mime_type=:mime_type
+            and autocrop
+            and task_state = 'QUEUED'
+        } {
+            return false
+        }
 
         set filename "${new_width}x${new_height}.png"
         set url [qc::url "https://via.placeholder.com/:filename" \
@@ -301,15 +324,17 @@ test image_data-1.2 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add \
-                        $file_id \
-                        $cache_dir \
-                        $new_width \
-                        $new_height]
-
-        qc::image_resize_task_process $row_id
+        qc::_image_cache_create \
+            $cache_dir \
+            $file_id \
+            $mime_type \
+            $new_width \
+            $new_height \
+            false
 
         set data [qc::image_data \
+                      -mime_type $mime_type \
+                      -- \
                       $cache_dir \
                       $file_id \
                       $new_width \
