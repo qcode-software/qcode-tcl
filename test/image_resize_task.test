@@ -74,7 +74,8 @@ set db_setup_qry {
         autocrop boolean not null,
         date_added timestamptz not null,
         date_processed timestamptz,
-        task_state image_resize_task_state not null
+        task_state image_resize_task_state not null,
+        mime_type text not null
     );
 
     create sequence if not exists file_id_seq;
@@ -144,6 +145,8 @@ set data_setup {
     set mime_type "image/png"
     set width 420
     set height 120
+    set new_width 210
+    set new_height 60
     set id [open "./images/${filename}" r]
     fconfigure $id -translation binary
     set data [base64::encode [read $id]]
@@ -167,12 +170,6 @@ set data_setup {
     }
 
     set cache_dir "/tmp/image-cache-test"
-    set dir_created false
-
-    if { ![file exists $cache_dir] } {
-        file mkdir $cache_dir
-        set dir_created true
-    }
 
     db_dml "
         insert into image
@@ -182,35 +179,11 @@ set data_setup {
             width
         }]
     "
-
-    set original_width $width
-    set original_height $height
-    set new_width 210
-    set new_height 60
 }
 
 set data_cleanup {
     qc::db_trans_abort
     qc::auth_logout
-
-    if { $dir_created } {
-        file delete -force $cache_dir
-    } else {
-        set img_dir_original "${file_id}-${original_width}x${original_height}"
-        set cache_dir_original "${cache_dir}/${img_dir_original}"
-        set img_dir_resize "${file_id}-${new_width}x${new_height}"
-        set cache_dir_resize "${cache_dir}/${img_dir_resize}"
-        set cache_dir_autocrop "${cache_dir}/${file_id}"
-        set img_link "${cache_dir}/${file_id}.png"
-
-        file delete \
-            -force \
-            -- \
-            $cache_dir_original \
-            $cache_dir_resize \
-            $cache_dir_autocrop \
-            $img_link
-    }
 }
 
 if { [info commands ns_db] eq "ns_db" } {
@@ -232,7 +205,13 @@ test image_resize_task_add-1.0 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
+        set row_id [qc::image_resize_task_add \
+                        -mime_type $mime_type \
+                        -cache_dir $cache_dir \
+                        -- \
+                        $file_id \
+                        $new_width \
+                        $new_height]
         set task_state "QUEUED"
         set expected [qc::dict_from {*}{
             file_id
@@ -240,6 +219,7 @@ test image_resize_task_add-1.0 \
             new_height
             new_width
             task_state
+            mime_type
         }]
         set task [lindex [qc::db_select_ldict {
             select
@@ -247,7 +227,8 @@ test image_resize_task_add-1.0 \
             cache_dir,
             height as new_height,
             width as new_width,
-            task_state
+            task_state,
+            mime_type
 
             from
             image_resize_task
@@ -259,87 +240,5 @@ test image_resize_task_add-1.0 \
         return [qc::dicts_equal $expected $task]
     } \
     -result true
-
-test image_resize_task_process-1.0 \
-    {Check that an image resize task can be processed.} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        set row_id [qc::image_resize_task_add $file_id $cache_dir $new_width $new_height]
-
-        qc::image_resize_task_process $row_id
-
-        set expected "PROCESSED"
-
-        qc::db_1row {
-            select
-            i.task_state,
-            f.mime_type
-
-            from
-            image_resize_task i
-            join file f using (file_id)
-
-            where
-            i.row_id=:row_id
-        }
-
-        return [expr {
-                      $expected eq $task_state
-                      && [qc::_image_cache_original_exists $cache_dir $file_id]
-                      && [qc::image_cache_exists \
-                              -mime_type $mime_type \
-                              -- \
-                              $cache_dir \
-                              $file_id \
-                              $width \
-                              $height]
-                  }]
-    } \
-    -result 1
-
-test image_resize_task_process-1.1 \
-    {Check that an autocrop image resize task can be processed.} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        set row_id [qc::image_resize_task_add \
-                        $file_id \
-                        $cache_dir \
-                        $new_width \
-                        $new_height \
-                        true]
-
-        qc::image_resize_task_process $row_id
-
-        set expected "PROCESSED"
-
-        qc::db_1row {
-            select
-            i.task_state,
-            f.mime_type
-
-            from
-            image_resize_task i
-            join file f using (file_id)
-
-            where
-            i.row_id=:row_id
-        }
-
-        return [expr {
-                      $expected eq $task_state
-                      && [qc::_image_cache_original_exists $cache_dir $file_id]
-                      && [qc::image_cache_exists \
-                              -autocrop \
-                              -mime_type $mime_type \
-                              -- \
-                              $cache_dir \
-                              $file_id \
-                              210 \
-                              58]
-                  }]
-    } \
-    -result 1
 
 cleanupTests

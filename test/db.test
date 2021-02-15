@@ -153,4 +153,29 @@ test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $c
     db_col_varchar_length courses title
 } -result 40
 
+# db_advisory_trans_lock
+test db_advisory_trans_lock-1.0 \
+    {Check the advisory transaction level lock works.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        db_trans {
+            qc::db_advisory_trans_lock students test
+
+            db_1row {
+                select
+                firstname
+
+                from
+                students
+
+                where
+                student_id = 012345
+            }
+        }
+
+        return $firstname
+    } \
+    -result "John"
+
 cleanupTests

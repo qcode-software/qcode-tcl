@@ -25,12 +25,24 @@ proc qc::image_data {args} {
     if { ! [qc::image_cache_exists {*}$caller_args] } {
         # Queue the image to be cached and return a placeholder.
 
-        qc::image_resize_task_add \
-            $file_id \
-            $cache_dir \
-            $max_width \
-            $max_height \
-            $autocrop
+        if { $autocrop } {
+            qc::image_resize_task_add \
+                -autocrop \
+                -mime_type $mime_type \
+                -cache_dir $cache_dir \
+                -- \
+                $file_id \
+                $max_width \
+                $max_height
+        } else {
+            qc::image_resize_task_add \
+                -mime_type $mime_type \
+                -cache_dir $cache_dir \
+                -- \
+                $file_id \
+                $max_width \
+                $max_height
+        }
 
         set filename "${max_width}x${max_height}.png"
         set url [qc::url "https://via.placeholder.com/:filename" \

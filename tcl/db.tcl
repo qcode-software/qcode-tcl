@@ -1,3 +1,5 @@
+package require crc32
+
 namespace eval qc {
     namespace export db_*
 }
@@ -636,4 +638,17 @@ proc qc::db_disconnect {} {
     global _db
     pg_disconnect $_db
     unset _db
+}
+
+proc qc::db_advisory_trans_lock {class object} {
+    #| Obtain exclusive transaction level advisory lock on an application-defined resource.
+    #  class: identifies the class of resource to be locked
+    #  object: identifies the individual resource to be locked
+
+    # convert class and object identifiers to a 32 bit signed integers
+    set class_id [expr {[crc::crc32 $class] -  (4294967295 + 1)/2}]
+    set object_id [expr {[crc::crc32 $object] -  (4294967295 + 1)/2}]
+
+    # obtain advisory lock
+    db_1row {select pg_advisory_xact_lock(:class_id,:object_id)}
 }
