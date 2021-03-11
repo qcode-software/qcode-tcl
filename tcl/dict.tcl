@@ -67,7 +67,17 @@ proc qc::dict_sort {dictVariable} {
     }
     return $dict
 }
-    
+
+proc qc::dict_sort_keys {args} {
+    #| Return dict sorted by keys
+    set dict [lindex $args end]
+    set options [lindex $args 0 end-1]
+    set result {}
+    foreach key [lsort {*}$options [dict keys $dict]] {
+        dict set result $key [dict get $dict $key]
+    }
+    return $result
+}
 
 proc qc::dict2xml { dict } {
     #| Convert top level {key value} pairs in dict value to xml elements.
