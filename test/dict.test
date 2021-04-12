@@ -59,6 +59,13 @@ test dict_sort-1.2 {dict_sort nested dict check var} -setup {
     set test_dict
 } -cleanup {unset test_dict} -result {b 1 a 3 c {a1 3 a2 1 a3 2}}
 
+test dict_sort_keys-1.0 {Sort dict on keys} -body {
+    dict_sort_keys {e 1 c 3 b 2 a 5 d 1}
+} -result {a 5 b 2 c 3 d 1 e 1}
+test dict_sort_keys-1.1 {Sort dict on keys, with sort options} -body {
+    dict_sort_keys -integer {101 foo 33 bar 2 baz}
+} -result {2 baz 33 bar 101 foo}
+
 test dict2xml-1.0 {dict2xml} -body {
     dict2xml {a 3 b 1 c 2}
 } -result {<a>3</a>

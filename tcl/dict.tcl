@@ -71,7 +71,7 @@ proc qc::dict_sort {dictVariable} {
 proc qc::dict_sort_keys {args} {
     #| Return dict sorted by keys
     set dict [lindex $args end]
-    set options [lindex $args 0 end-1]
+    set options [lrange $args 0 end-1]
     set result {}
     foreach key [lsort {*}$options [dict keys $dict]] {
         dict set result $key [dict get $dict $key]
