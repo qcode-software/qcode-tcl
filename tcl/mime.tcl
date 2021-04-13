@@ -1,3 +1,7 @@
+namespace eval qc {
+    namespace export mime_type_guess
+}
+
 set qc::mime_mappings {
     ".adp" "text/html"
     ".ai" "application/postscript"
