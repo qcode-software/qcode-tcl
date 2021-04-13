@@ -1,4 +1,3 @@
-package require json
 namespace eval qc {
     namespace export aws_metadata aws_credentials_set_from_ec2_role aws_credentials_set aws_region_set
 }
@@ -36,10 +35,11 @@ proc qc::aws_credentials_set_from_ec2_role { {region "eu-west-1"} } {
     # Get role credentials
     qc::aws_region_set $region
     set role_name [qc::aws_metadata iam/security-credentials/]
-    set role_credentials [::json::json2dict [qc::aws_metadata iam/security-credentials/${role_name}]]
-    set access_key [dict get $role_credentials AccessKeyId]
-    set secret_key [dict get $role_credentials SecretAccessKey]
-    set token [dict get $role_credentials Token]
+    set role_credentials_json [qc::aws_metadata iam/security-credentials/${role_name}]
+    set role_credentials_tson [qc::json2tson $role_credentials_json]
+    set access_key [qc::tson_object_get_value $role_credentials_tson AccessKeyId]
+    set secret_key [qc::tson_object_get_value $role_credentials_tson SecretAccessKey]
+    set token [qc::tson_object_get_value $role_credentials_tson Token]
 
     # Set role credentials
     qc::aws_credentials_set $access_key $secret_key $token
