@@ -479,7 +479,7 @@ proc qc::s3 { args } {
             return [list $bucket $object_key]
         }
         default {
-            error "Unknown s3 command."
+            error "Unknown s3 command \"$args\""
         }
     }
 }
