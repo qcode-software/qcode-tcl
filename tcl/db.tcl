@@ -518,6 +518,10 @@ proc qc::db_select_table {args} {
         # Connected with db_connect
         ::try {
             set results [pg_exec $db $qry]
+            set error_msg [pg_result $results -error]
+            if { $error_msg ne "" } {
+                error $error_msg
+            }
             lappend table [pg_result $results -attributes]
             set table [concat $table [pg_result $results -llist]]
             pg_result $results -clear
