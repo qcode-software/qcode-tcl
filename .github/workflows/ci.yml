@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run tests for all exercises
+      - name: Run tests
         run: |
           cd test
           tclsh all.tcl
