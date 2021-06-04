@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Dependencies
+        run: |
+          sudo apt-get update && sudo apt-get -y install tcllib
+
       - name: Checkout
         uses: actions/checkout@v2
 
