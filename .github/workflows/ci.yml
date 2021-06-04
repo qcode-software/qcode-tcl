@@ -14,7 +14,10 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          sudo apt-get update && sudo apt-get -y install tcllib
+          sudo cat <<EOF >/etc/apt/sources.list.d/qcode.list
+          deb http://deb.qcode.co.uk stretch main
+          EOF
+          sudo apt-get update && sudo apt-get -y install tcllib tdom
 
       - name: Checkout
         uses: actions/checkout@v2
