@@ -15,9 +15,11 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          echo "deb http://deb.qcode.co.uk buster main" | sudo tee /etc/apt/sources.list.d/qcode.list
-          wget --quiet -O - http://deb.qcode.co.uk/packages.key | sudo apt-key add -
-          sudo apt-get update && sudo apt-get -y install tcllib tdom tclcurl libpgtcl
+          apt-get update
+          apt-get install -y gnupg2 wget
+          echo "deb http://deb.qcode.co.uk buster main" > /etc/apt/sources.list.d/qcode.list
+          wget --quiet -O - http://deb.qcode.co.uk/packages.key | apt-key add -
+          apt-get update && apt-get -y install tclsh tcllib tdom tclcurl libpgtcl
 
       - name: Checkout
         uses: actions/checkout@v2
