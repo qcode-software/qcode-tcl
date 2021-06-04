@@ -24,4 +24,5 @@ jobs:
       - name: Run tests
         run: |
           cd test
+          cat /etc/debian_version
           tclsh all.tcl
