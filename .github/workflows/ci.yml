@@ -1,0 +1,21 @@
+# Run all tests
+
+name: tcl
+
+on:
+  push:
+    branches:
+      - temp_test
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run tests for all exercises
+        run: |
+          cd test
+          tclsh all.tcl
