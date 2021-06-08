@@ -1,6 +1,6 @@
 # Run all tests
 
-name: tcl
+name: Qcode-tcl CI Workflow
 
 on:
   push:
