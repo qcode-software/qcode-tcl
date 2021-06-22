@@ -524,7 +524,7 @@ proc qc::log {args} {
     } else {
         # Write to stdout
         puts stdout  $message
-    }   
+    }
 }
 
 proc qc::exec_proxy {args} {
@@ -818,4 +818,14 @@ proc qc::control_port_source {filename} {
     rename ::puts {}
     rename ::_puts ::puts
     return $stdout
+}
+
+proc qc::time_start {tag} {
+    global timing
+    set timing($tag) [::tcl::clock::microseconds]
+}
+
+proc qc::time_end {tag} {
+    global timing
+    qc::log "Time for $tag : [expr {double([expr {[::tcl::clock::microseconds] - $timing($tag)}])/1000000}] sec"
 }

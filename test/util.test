@@ -783,4 +783,10 @@ test regexp_escape-1.0 {regexp_escape} -body {
     qc::regexp_escape "*fi+sh(es)?"
 } -result {\*fi\+sh\(es\)\?}
 
+# time start/end
+test time_start_end-1.0 {time_start and time_end} -body {
+    qc::time_start foo
+    qc::time_end foo
+} -match glob -output "*foo*"
+
 cleanupTests
