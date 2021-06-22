@@ -524,7 +524,7 @@ proc qc::log {args} {
     } else {
         # Write to stdout
         puts stdout  $message
-    }   
+    }
 }
 
 proc qc::exec_proxy {args} {
