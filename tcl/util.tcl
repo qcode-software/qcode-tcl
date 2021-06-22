@@ -819,3 +819,13 @@ proc qc::control_port_source {filename} {
     rename ::_puts ::puts
     return $stdout
 }
+
+proc qc::time_start {tag} {
+    global timing
+    set timing($tag) [::tcl::clock::microseconds]
+}
+
+proc qc::time_end {tag} {
+    global timing
+    qc::log "Time for $tag : [expr {double([expr {[::tcl::clock::microseconds] - $timing($tag)}])/1000000}] sec"
+}
