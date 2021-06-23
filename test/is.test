@@ -1,5 +1,6 @@
 package require tcltest
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+source ./db_setup.tcl
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
@@ -3041,5 +3042,13 @@ test is-s3_object_key-1.0 {qc::is s3_object_key: Invalid characters 1}    {qc::i
 test is-s3_object_key-1.1 {qc::is s3_object_key: Invalid characters 2}    {qc::is s3_object_key "file name"}          0
 test is-s3_object_key-1.2 {qc::is s3_object_key: Valid key}               {qc::is s3_object_key "/obj/k!_t/Y*f).png"} 1
 test is-s3_object_key-1.3 {qc::is s3_object_key: Ending in "."}           {qc::is s3_object_key "name."}              0
+
+
+# HTML
+test is-html-1.0 {qc::is html } \
+    -body {
+        qc::is html "<html></html>"
+    } \
+    -result 1
 
 cleanupTests

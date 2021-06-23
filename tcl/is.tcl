@@ -229,7 +229,7 @@ proc qc::is_uri_valid {uri} {
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain html safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -382,6 +382,20 @@ namespace eval qc::is {
         return 0
     }
 
+    proc html {text} {
+        #| Checks if the given text contains valid html.
+        try {
+            # wrap the text up in <root> to preserve text outwith the html
+            set text [qc::h root $text]
+            set doc [dom parse -html $text]
+            set root [$doc documentElement]
+            $doc delete
+            return 1
+        } on error [list error_message options] {
+            return 0
+        }
+    }
+    
     proc safe_html {text} {
         #| Checks if the given text contains only safe html.
         try {
