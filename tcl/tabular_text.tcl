@@ -58,8 +58,8 @@ proc qc::tabular_text_parse  {args} {
             set vertical_whitespaces [qc::lintersect $vertical_whitespaces [regexp -all -inline -indices {\s} $line]]
         }
     }
-    
-    # conbine consecutive vertical whitespace indices 
+
+    # Combine consecutive vertical whitespace indices 
     set column_separators {}
     set i 0
     set group_start 0
@@ -73,19 +73,21 @@ proc qc::tabular_text_parse  {args} {
             set group_start $start
             set group_end $end
         }
-        
-        if { $i == [llength $vertical_whitespaces] } {
-            # last vertical whitespace - close current group then add as column separator
-            set group_end $end
-            lappend column_separators [list $group_start $group_end]
-        } elseif { $start - $group_end > 1 } {
+
+        if { $start - $group_end > 1 } {
             # non-consequetive vertical whitespace - add column separator and start new group
             lappend column_separators [list $group_start $group_end]
             set group_start $start
             set group_end $end
         } else {
-            # consecutive vertical  whitespace - extend current group
+            # consecutive vertical whitespace - extend current group
             set group_end $end
+        }
+
+        if { $i == [llength $vertical_whitespaces] } {
+            # last vertical whitespace - close current group then add as column separator
+            set group_end $end
+            lappend column_separators [list $group_start $group_end]
         }
     }
     

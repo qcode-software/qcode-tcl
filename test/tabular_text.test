@@ -157,4 +157,21 @@ test tabular_text_parse-10.0 {tabular_text_parse - casting} \
     } \
     -result {{line_num value} {1 1234.22} {2 {Not a number}}}
 
+test tabular_text_parse-11.0 {tabular_text_parse - Single column white-spaces} -setup {
+} -body {
+    set lines [list]
+    lappend lines {a    b c d e}
+    lappend lines {1    2 3 4 5}
+    set text [join $lines \n]
+
+    set conf [list]
+    lappend conf [list label a var_name a]
+    lappend conf [list label b var_name b]
+    lappend conf [list label c var_name c]
+    lappend conf [list label d var_name d]
+    lappend conf [list label e var_name e]
+
+    return [qc::tabular_text_parse $text $conf]
+} -cleanup {} -result {{a b c d e} {1 2 3 4 5}}
+
 cleanupTests
