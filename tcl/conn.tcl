@@ -82,25 +82,23 @@ proc qc::conn_location { args } {
 
 proc qc::conn_port {} {
     #| Try to detect connection port
-    if { [regexp {^(https?)://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_host] -> protocol port] } {
-        if { $port eq "" } {
-	    if { [ns_set ifind $headers Port]!=-1 && [qc::is int [ns_set iget $headers Port]]} {
-	        return [ns_set iget $headers Port]
-            } else {
-                return [expr {$protocol eq "http" ? "80" : "443"}]
-            }
-        } else {
-            return $port
-        }
-    } else {
-        error "Can't detect port in url \"[qc::conn_host]\""
+    if { [ns_set ifind $headers Port]!=-1 && [qc::is int [ns_set iget $headers Port]]} {
+        return [ns_set iget $headers Port]
+    } elseif { [ns_set ifind $headers X-Forwarded-Port]!=-1 && [qc::is int [ns_set iget $headers X-Forwarded-Port]]} {
+	return [ns_set iget $headers X-Forwarded-Port]
     }
+    if { [regexp {[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_host] -> port] } {
+        return $port
+    } 
+    return [ns_conn port]
 }
 
 proc qc::conn_protocol {} {
     #| Try to detect the request protocol
     set port [qc::conn_port]
-    if { $port==443 || $port==8443 } {
+     if { [ns_set ifind $headers X-Forwarded-Proto]!=-1 && [qc::is int [ns_set iget $headers X-Forwarded-Proto]]} {
+         return [ns_set iget $headers X-Forwarded-Proto]	
+    elseif { $port==443 || $port==8443 } {
         return "https"
     } else {
         return "http"
