@@ -57,35 +57,24 @@ proc qc::conn_location { args } {
     qc::args $args -conn_protocol ? -conn_host ? -conn_port ? --
 
     if { ![info exists conn_protocol] } {
-        set conn_protocol [ns_conn protocol]
+        set conn_protocol [qc::conn_protocol]
     }
-    if { ![info exists conn_host] } {
-        set conn_host [ns_set iget [ns_conn headers] Host]
+    if { ![info exists conn_host]} {
+        set conn_host [qc::conn_host]
     }
     if { ![info exists conn_port] } {
-        set conn_port [ns_set iget [ns_conn headers] Port]
+        set conn_port [qc::conn_port]
     }
 
-    set url ""
-    if { $conn_host ne "" && $conn_port ne "" } {
-        # Legacy support - assume if a Port header is present then we're behind a proxy
-        # which is emulating Nginx behaviour.
-        # eg. Host header with no port and separate Port header.
-        switch -exact $conn_port {
-            "80" -
-            "443" {
-                set url "${conn_protocol}://${conn_host}"
-            }
-            default {
-                set url "${conn_protocol}://${conn_host}:${conn_port}"
-            }
+    set url "${conn_protocol}://${conn_host}"
+    # Legacy support where port doesn't appear in host header
+    if { $conn_port ne "" && $conn_port != 80 && $conn_port != 443 } {
+        # if Host header doesn't contain port, append it.
+        if { [string first ":" $conn_host] == -1 } {
+            set url "${conn_protocol}://${conn_host}:${conn_port}"
         }
-    } elseif { $conn_host ne "" && $conn_port eq "" } {
-        # Return the Host header
-        set url "${conn_protocol}://${conn_host}"
-    } else {
-        set url [ns_conn location]
     }
+
     if { [qc::is url $url] } {
         return $url
     } else {
@@ -93,31 +82,59 @@ proc qc::conn_location { args } {
     }
 }
 
-proc qc::conn_port {} {
-    #| Try to detect connection port
-    if { [regexp {^(https?)://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_location] -> protocol port] } {
-        if { $port eq "" } {
-            return [expr {$protocol eq "http" ? "80" : "443"}]
-        } else {
-            return $port
-        }
+proc qc::conn_protocol { } {
+    #| Return protocol used by the client
+    set conn_headers [ns_conn headers]
+    
+    # The connection protocol here may be different to the one initiated
+    # by the client. Check X-Forward-Proto for initiating protocol.
+    set client_protocol [ns_set iget $conn_headers "x-forwarded-proto"]
+    if { $client_protocol in [list "https" "http"] } {
+        return $client_protocol
     } else {
-        error "Can't detect port in url \"[qc::conn_location]\""
+        return [ns_conn protocol]
     }
 }
 
-proc qc::conn_protocol {} {
-    #| Try to detect the request protocol
-    if { [regexp {^(https?)://} [qc::conn_location] -> protocol] } {
-        return $protocol
+proc qc::conn_port { } {
+    #| Try to detect connection port
+    set conn_headers [ns_conn headers]
+   
+    # The connection port here may be different to the one initiated
+    # by the client. Check X-Forward-Port for initiating port.
+    set client_port [ns_set iget $conn_headers "x-forwarded-port"]
+    if { $client_port ne "" && [qc::is int $client_port] } {
+        return $client_port
+    } elseif { [set port_header [ns_set iget $conn_headers "port"]] ne "" } {
+        # Legacy support where Port is never included in host header and has its
+        # own header value.
+        return $port_header
     } else {
-        error "Unknown connection protocol"
+        # Otherwise take it from the Host header
+        if { [regexp {[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))} [qc::conn_host] -> port] } {
+            return $port
+        } else {
+            return [expr {[qc::conn_protocol] eq "http" ? "80" : "443"}]
+        }
     }
 }
- 
-proc qc::conn_host {} {
+
+proc qc::conn_host { } {
     #| Return the host indicated in the HTTP/1.1 headers
-    return [ns_set iget [ns_conn headers] Host]
+    set conn_headers [ns_conn headers]
+
+    set host [ns_set iget $conn_headers Host]
+    if { $host eq "" } {
+        # Fallback to NaviServer supplied value which could fallback to driver default
+        # TODO Preserves legacy
+        if { [regexp {^https?://([a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?)} [ns_conn location] -> host] } {
+            return $host
+        } else {
+            error "conn_host: Cannot determine host"
+        }
+    } else {
+        return $host
+    }
 }
 
 proc qc::conn_ie {} {

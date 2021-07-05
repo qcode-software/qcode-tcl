@@ -1,0 +1,101 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    ns_conn _set headers [ns_set create headers]
+}
+
+set cleanup {
+    mock_ns::_reset
+}
+
+test conn_port1.0 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {443}
+
+test conn_port1.1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {80}
+
+test conn_port1.2 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk:8443" \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {8443}
+
+test conn_port1.3 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"             "www.qcode.co.uk" \
+                                "X-Forwarded-Port" 8443 \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {8443}
+
+test conn_port1.4 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"             "www.qcode.co.uk" \
+                                "Port"             8443 \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {8443}
+
+test conn_port1.5 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"             "www.qcode.co.uk" \
+                                "X-Forwarded-Port" "notaport" \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {80}
+
+cleanupTests

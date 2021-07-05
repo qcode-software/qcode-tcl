@@ -1,0 +1,71 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    ns_conn _set headers [ns_set create headers]
+}
+
+set cleanup {
+    mock_ns::_reset
+}
+
+test conn_host1.0 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        return [qc::conn_host]
+    } \
+    -result {www.qcode.co.uk}
+
+test conn_host1.1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk:8443" \
+                             ]
+        return [qc::conn_host]
+    } \
+    -result {www.qcode.co.uk:8443}
+
+
+test conn_host1.2 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        return [qc::conn_host]
+    } \
+    -result {www.fallback.co.uk}
+
+test conn_host1.3 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set location "https://www.fallback.co.uk:8443"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        return [qc::conn_host]
+    } \
+    -result {www.fallback.co.uk:8443}
+
+cleanupTests
