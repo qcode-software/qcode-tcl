@@ -84,4 +84,18 @@ test conn_port1.4 \
     } \
     -result {8443}
 
+test conn_port1.5 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"             "www.qcode.co.uk" \
+                                "X-Forwarded-Port" "notaport" \
+                             ]
+        return [qc::conn_port]
+    } \
+    -result {80}
+
 cleanupTests
