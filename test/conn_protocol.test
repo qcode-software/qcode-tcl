@@ -1,0 +1,79 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    ns_conn _set headers [ns_set create headers]
+}
+
+set cleanup {
+    mock_ns::_reset
+}
+
+test conn_protocol1.0 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        return [qc::conn_protocol]
+    } \
+    -result {http}
+
+test conn_protocol1.1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        return [qc::conn_protocol]
+    } \
+    -result {https}
+
+test conn_protocol1.2 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "X-Forwarded-Proto" "https" \
+                             ]
+        return [qc::conn_protocol]
+    } \
+    -result {https}
+
+test conn_protocol1.3 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "X-Forwarded-Proto" "http" \
+                             ]
+        return [qc::conn_protocol]
+    } \
+    -result {http}
+
+test conn_protocol1.4 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "X-Forwarded-Proto" "none" \
+                             ]
+        return [qc::conn_protocol]
+    } \
+    -result {https}
+
+cleanupTests

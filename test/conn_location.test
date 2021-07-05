@@ -1,5 +1,6 @@
 package require tcltest
-namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
@@ -9,93 +10,104 @@ foreach file $files {
 namespace import ::qc::*
 
 set setup {
-    # overload ns_conn
-    proc ns_conn { subcmd } {
-        switch -exact $subcmd {
-            "location" {
-                return "https://www.fallback.co.uk"
-            }
-            default {
-                error "ns_conn: $subcmd not implemented in test suite"
-            }
-        }
-    }
+    ns_conn _set headers [ns_set create headers]
+}
+
+set cleanup {
+    mock_ns::_reset
 }
 
 test conn_location1.0 \
     {conn_location 443} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {https://www.qcode.co.uk}
 
 test conn_location1.1 \
     {conn_location 80} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    http
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {http://www.qcode.co.uk}
 
 test conn_location1.2 \
     {conn_location 8443} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk:8443
-        set port        ""
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol --
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk:8443" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {https://www.qcode.co.uk:8443}
 
 test conn_location1.3 \
     {conn_location legacy 443} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        443
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "443" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {https://www.qcode.co.uk}
 
 test conn_location1.4 \
     {conn_location legacy 80} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        80
-        set protocol    http
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "80" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {http://www.qcode.co.uk}
 
 test conn_location1.5 \
     {conn_location legacy 8443} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        8443
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "8443" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {https://www.qcode.co.uk:8443}
 
 test conn_location1.6 \
     {conn_location invalid host} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.:qcode:.co.uk
-        set port        ""
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.:qcode:.co.uk" \
+                             ]
+        return [qc::conn_location]
     } \
     -returnCodes error \
     -result {conn_location: cannot construct location string}
@@ -103,12 +115,30 @@ test conn_location1.6 \
 test conn_location1.7 \
     {conn_location fallback} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        ""
-        set port        ""
-        set protocol    https
-        qc::conn_location -conn_host $host -conn_port $port -conn_protocol $protocol
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        return [qc::conn_location]
     } \
     -result {https://www.fallback.co.uk}
+
+test conn_location1.8 \
+    {conn_location fallback} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk:8443"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        return [qc::conn_location]
+    } \
+    -result {https://www.fallback.co.uk:8443}
+
 
 cleanupTests
