@@ -57,35 +57,22 @@ proc qc::conn_location { args } {
     qc::args $args -conn_protocol ? -conn_host ? -conn_port ? --
 
     if { ![info exists conn_protocol] } {
-        set conn_protocol [ns_conn protocol]
+        set conn_protocol [qc::conn_protocol]
     }
     if { ![info exists conn_host] } {
-        set conn_host [ns_set iget [ns_conn headers] Host]
+        set conn_host [qc::conn_host]
     }
     if { ![info exists conn_port] } {
-        set conn_port [ns_set iget [ns_conn headers] Port]
+        set conn_port [qc::conn_port]
     }
 
-    set url ""
-    if { $conn_host ne "" && $conn_port ne "" } {
-        # Legacy support - assume if a Port header is present then we're behind a proxy
-        # which is emulating Nginx behaviour.
-        # eg. Host header with no port and separate Port header.
-        switch -exact $conn_port {
-            "80" -
-            "443" {
-                set url "${conn_protocol}://${conn_host}"
-            }
-            default {
-                set url "${conn_protocol}://${conn_host}:${conn_port}"
-            }
-        }
-    } elseif { $conn_host ne "" && $conn_port eq "" } {
-        # Return the Host header
+   
+    if { $conn_protocol eq "http" && $conn_port==80 || $conn_protocol eq "https" && $conn_port==443 } {
         set url "${conn_protocol}://${conn_host}"
     } else {
-        set url [ns_conn location]
+        set url "${conn_protocol}://${conn_host}:${conn_port}"
     }
+
     if { [qc::is url $url] } {
         return $url
     } else {
@@ -95,23 +82,28 @@ proc qc::conn_location { args } {
 
 proc qc::conn_port {} {
     #| Try to detect connection port
-    if { [regexp {^(https?)://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_location] -> protocol port] } {
+    if { [regexp {^(https?)://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::([0-9]+))?} [qc::conn_host] -> protocol port] } {
         if { $port eq "" } {
-            return [expr {$protocol eq "http" ? "80" : "443"}]
+	    if { [ns_set ifind $headers Port]!=-1 && [qc::is int [ns_set iget $headers Port]]} {
+	        return [ns_set iget $headers Port]
+            } else {
+                return [expr {$protocol eq "http" ? "80" : "443"}]
+            }
         } else {
             return $port
         }
     } else {
-        error "Can't detect port in url \"[qc::conn_location]\""
+        error "Can't detect port in url \"[qc::conn_host]\""
     }
 }
 
 proc qc::conn_protocol {} {
     #| Try to detect the request protocol
-    if { [regexp {^(https?)://} [qc::conn_location] -> protocol] } {
-        return $protocol
+    set port [qc::conn_port]
+    if { $port==443 || $port==8443 } {
+        return "https"
     } else {
-        error "Unknown connection protocol"
+        return "http"
     }
 }
  
