@@ -16,8 +16,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gnupg2 wget tzdata
-          echo "Europe/London" | sudo tee /etc/timezone
-          sudo dpkg-reconfigure --frontend noninteractive tzdata
+          sudo timedatectl set-timezone Europe/London
+          #echo "Europe/London" | sudo tee /etc/timezone
+          #sudo dpkg-reconfigure --frontend noninteractive tzdata
           echo "deb http://deb.qcode.co.uk buster main" | sudo tee /etc/apt/sources.list.d/qcode.list
           wget --quiet -O - http://deb.qcode.co.uk/packages.key | sudo apt-key add -
           sudo apt-get update && sudo apt-get -y install tclsh tcllib tdom tclcurl libpgtcl mock-ns-1.0.2
