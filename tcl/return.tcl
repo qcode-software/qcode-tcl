@@ -130,29 +130,15 @@ proc qc::return_chunk {string} {
     ns_write [format %X [string bytelength $string]]\r\n$string\r\n
 }
 
-proc qc::return_next { args } {
+proc qc::return_next { next_url } {
     #| Redirect to an internal url
-    qc::args $args -conn_protocol ? -conn_host ? -conn_port ? -- next_url
 
-    if { ![info exists conn_protocol] } {
-        set conn_protocol [ns_conn protocol]
-    }
-    if { ![info exists conn_host] } {
-        set conn_host [ns_set iget [ns_conn headers] Host]
-    }
-    if { ![info exists conn_port] } {
-        set conn_port [ns_set iget [ns_conn headers] Port]
-    }
 
     if { ![regexp {^https?://} $next_url] } {
         # Relative url
         
         set next_url [string trimleft $next_url /]
-        set next_url "[qc::conn_location \
-                        -conn_protocol  $conn_protocol \
-                        -conn_host      $conn_host \
-                        -conn_port      $conn_port \
-                      ]/$next_url"
+        set next_url "[qc::conn_location]/$next_url"
 
         # check for malicious mal-formed url
         if { ![qc::is url $next_url] } {
@@ -162,6 +148,7 @@ proc qc::return_next { args } {
     } else {
         # Absolute url
         # check that redirection is to the same domain
+        set conn_host [qc::conn_host]
         if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $next_url] } {
             error "Will not redirect to a different domain. Host $conn_host. Redirect to $next_url"
         }
