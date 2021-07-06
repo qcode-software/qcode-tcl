@@ -1,0 +1,29 @@
+# Run all tests
+
+name: Qcode-tcl CI Workflow
+
+on:
+  push:
+    branches:
+      - conn_tests
+
+jobs:
+  ci:
+    runs-on: self-hosted
+
+    steps:
+      - name: Dependencies
+        run: |
+          apt-get update
+          apt-get install -y gnupg2 wget
+          echo "deb http://deb.qcode.co.uk buster main" > /etc/apt/sources.list.d/qcode.list
+          wget --quiet -O - http://deb.qcode.co.uk/packages.key | apt-key add -
+          apt-get update && apt-get -y install tclsh tcllib tdom tclcurl libpgtcl mock-ns-1.0.2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          cd test
+          cat /etc/debian_version
+          tclsh all.tcl
