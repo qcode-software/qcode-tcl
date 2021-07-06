@@ -1,5 +1,6 @@
 package require tcltest
-namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
@@ -9,199 +10,185 @@ foreach file $files {
 namespace import ::qc::*
 
 set setup {
-    proc ns_conn { action } {
-        if { $action eq "location" } {
-            return "https://www.fallback.co.uk"
-        } else {
-            error "ns_conn: action $action not supported in this test"
-        }
-    }
+    ns_conn _set headers        [ns_set create headers]
+    ns_conn _set outputheaders  [ns_set create outputheaders]
+}
+
+set cleanup {
+    mock_ns::_reset
 }
 
 test response_login1.0 \
     {response login non-legacy 443 relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.1 \
     {response login non-legacy 80 relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    http
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value http://www.qcode.co.uk/admin.tcl}}}
+
+test response_login1.1.1 \
+    {response login non-legacy 80 relative non-anchored proxied} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"              "www.qcode.co.uk" \
+                                "X-Forwarded-Proto" "https" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
+    } \
+    -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.2 \
     {response login non-legacy custom relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk:8443
-        set port        ""
-        set protocol    https
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk:8443" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk:8443/admin.tcl}}}
 
 test response_login1.3 \
     {response login non-legacy relative anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        set url         /admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "/admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.4 \
     {response login non-legacy absolute} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        set url         https://www.qcode.co.uk/admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk/admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.5 \
     {response login legacy 443 relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        "443"
-        set protocol    https
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "443" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.6 \
     {response login legacy 80 relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        "80"
-        set protocol    http
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "80" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value http://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.7 \
     {response login legacy custom relative non-anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        "8443"
-        set protocol    https
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "8443" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk:8443/admin.tcl}}}
 
 test response_login1.8 \
     {response login legacy relative anchored} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        "443"
-        set protocol    https
-        set url         /admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "443" \
+                             ]
+        set url "/admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.9 \
     {response login legacy absolute} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        "443"
-        set protocol    https
-        set url         https://www.qcode.co.uk/admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                                "Port" "443" \
+                             ]
+        set url "https://www.qcode.co.uk/admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.qcode.co.uk/admin.tcl}}}
 
 test response_login1.10 \
     {response login non-legacy cross domain} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        set url         https://www.anotherdomain.co.uk/admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.anotherdomain.co.uk/admin.tcl"
+        return [qc::response action login $url]
     } \
     -returnCodes error \
     -result {Will not redirect to a different domain. Host www.qcode.co.uk. Redirect to "https://www.anotherdomain.co.uk/admin.tcl"}
@@ -209,17 +196,14 @@ test response_login1.10 \
 test response_login1.11 \
     {response login non-legacy invalid} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        www.qcode.co.uk
-        set port        ""
-        set protocol    https
-        set url         "https://www.qcode.co.uk/<script>hello;<script>"
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk/<script>hello;<script>"
+        return [qc::response action login $url]
     } \
     -returnCodes error \
     -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
@@ -227,34 +211,30 @@ test response_login1.11 \
 test response_login1.12 \
     {response login http/1.0} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        ""
-        set port        ""
-        set protocol    https
-        set url         /admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        set url "/admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.fallback.co.uk/admin.tcl}}}
 
 test response_login1.13 \
     {response login http/1.0} \
     -setup $setup \
+    -cleanup $cleanup \
     -body {
-        set host        ""
-        set port        ""
-        set protocol    https
-        set url         admin.tcl
-        qc::response action login \
-            -conn_host $host \
-            -conn_port $port \
-            -conn_protocol $protocol \
-            -- \
-            $url
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        set url "admin.tcl"
+        return [qc::response action login $url]
     } \
     -result {action {login {value https://www.fallback.co.uk/admin.tcl}}}
 

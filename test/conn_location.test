@@ -43,6 +43,20 @@ test conn_location1.1 \
     } \
     -result {http://www.qcode.co.uk}
 
+test conn_location1.1.1 \
+    {conn_location 80 proxied} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"              "www.qcode.co.uk" \
+                                "X-Forwarded-Proto" "https" \
+                             ]
+        return [qc::conn_location]
+    } \
+    -result {https://www.qcode.co.uk}
+
 test conn_location1.2 \
     {conn_location 8443} \
     -setup $setup \

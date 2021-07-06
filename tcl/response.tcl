@@ -147,31 +147,15 @@ namespace eval qc::response {
         namespace export redirect external_redirect resubmit login
         namespace ensemble create
 
-        proc redirect { args } {
+        proc redirect { url } {
             #| Sets the redirect property with the given internal URL.
-            qc::args $args -conn_protocol ? -conn_host ? -conn_port ? -- url
             global data
             reset
-
-            # internal URL
-            if { ![info exists conn_protocol] } {
-                set conn_protocol [ns_conn protocol]
-            }
-            if { ![info exists conn_host] } {
-                set conn_host [ns_set iget [ns_conn headers] Host]
-            }
-            if { ![info exists conn_port] } {
-                set conn_port [ns_set iget [ns_conn headers] Port]
-            }
 
             if { ![regexp {^https?://} $url] } {
                 # Relative url
                 set url [string trimleft $url /]
-                set url "[qc::conn_location \
-                                -conn_protocol  $conn_protocol \
-                                -conn_host      $conn_host \
-                                -conn_port      $conn_port \
-                            ]/$url"
+                set url "[qc::conn_location]/$url"
 
                 # check for malicious mal-formed url
                 if { ![qc::is url $url] } {
@@ -181,6 +165,7 @@ namespace eval qc::response {
             } else {
                 # Absolute url
                 # check that redirection is to the same domain
+                set conn_host [qc::conn_host]
                 if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $url] } {
                     error "Will not redirect to a different domain. Host $conn_host. Redirect to \"[html_escape $url]\""
                 }
@@ -213,32 +198,16 @@ namespace eval qc::response {
             dict set data action resubmit value true
         }
 
-        proc login { args } {
+        proc login { url } {
             #| Sets the login property with the given internal URL.
-            qc::args $args -conn_protocol ? -conn_host ? -conn_port ? -- url
             global data
             reset
-
-            # internal URL
-            if { ![info exists conn_protocol] } {
-                set conn_protocol [ns_conn protocol]
-            }
-            if { ![info exists conn_host] } {
-                set conn_host [ns_set iget [ns_conn headers] Host]
-            }
-            if { ![info exists conn_port] } {
-                set conn_port [ns_set iget [ns_conn headers] Port]
-            }
 
             if { ![regexp {^https?://} $url] } {
                 # Relative url
                 #
                 set url [string trimleft $url /]
-                set url "[qc::conn_location \
-                                -conn_protocol  $conn_protocol \
-                                -conn_host      $conn_host \
-                                -conn_port      $conn_port \
-                            ]/$url"
+                set url "[qc::conn_location]/$url"
 
                 # check for malicious mal-formed url
                 if { ![qc::is url $url] } {
@@ -247,6 +216,7 @@ namespace eval qc::response {
 
             } else {
                 # Absolute url
+                set conn_host [qc::conn_host]
                 # check that redirection is to the same domain
                 if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $url] } {
                     error "Will not redirect to a different domain. Host $conn_host. Redirect to \"[html_escape $url]\""
