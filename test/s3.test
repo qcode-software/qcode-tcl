@@ -3,7 +3,7 @@ package require json
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load all .tcl files
-set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
 foreach file $files {
     source $file
 }
@@ -51,7 +51,6 @@ if { $role_name ne "" } {
 
 # Some tests require other s3 procs to be working
 # Tests are ordered so if a test fails, other test dependent on the failing proc will be skipped
-
 
 # md5 - Get MD5 of a local file
 test s3-md5-1.0 {qc::s3 md5: Test} -body {

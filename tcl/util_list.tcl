@@ -79,8 +79,13 @@ proc qc::lunion { a b } {
 proc qc::ldelete {listVar index} {
     #| Deletes item at $index of list
     upvar 1 $listVar list
-    # Replace a deletion with null, much faster
-    set list [lreplace [K $list [set list {}]] $index $index]
+
+    if { $index < [llength $list] } {
+        # Replace a deletion with null, much faster
+        set list [lreplace [K $list [set list {}]] $index $index]
+    }
+
+    return $list
 }
 
 proc qc::lmove {list from to} {

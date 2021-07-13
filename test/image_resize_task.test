@@ -4,7 +4,7 @@ namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstrai
 
 if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
-    set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+    set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
     foreach file $files {
         source $file
     }
@@ -100,6 +100,8 @@ set setup_outside_naviserver {
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
     pg_execute $conn_superuser {create database test_database}
     pg_execute $conn_superuser {
+        SET client_min_messages TO WARNING;
+        drop user if exists test_user;
         create user test_user with password 'test_password';
         grant all privileges on database test_database to test_user;
     }
@@ -147,7 +149,7 @@ set data_setup {
     set height 120
     set new_width 210
     set new_height 60
-    set id [open "./images/${filename}" r]
+    set id [open "~/qcode-tcl/test/images/${filename}" r]
     fconfigure $id -translation binary
     set data [base64::encode [read $id]]
     close $id

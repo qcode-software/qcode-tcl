@@ -1,7 +1,7 @@
 package require tcltest
 package require Pgtcl
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
-source ./crypt_setup.tcl
+source "~/qcode-tcl/test/crypt_setup.tcl"
 
 # pkcs_padding_append
 test pkcs_padding_append-1.0 {pkcs_padding_append - 1 byte unicode} -setup $setup -cleanup $cleanup -constraints {} -body {

@@ -3,7 +3,7 @@ package require Pgtcl
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
 
 # Load common definitions of setup and cleanup
-source ./db_setup.tcl
+source ~/qcode-tcl/test/db_setup.tcl
 
 ################################################################################
 ###   TESTS
