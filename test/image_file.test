@@ -1,0 +1,38 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+
+foreach file $files {
+    source $file
+}
+
+test is_svg-1.0 \
+    {Test a valid SVG that has an XML declaration.}  \
+    -setup {} \
+    -cleanup {} \
+    -body {
+        qc::is_svg "~/qcode-tcl/test/images/qcode-logo-xml-declaration.svg"
+    } \
+    -result "true"
+
+test is_svg-1.1 \
+    {Test a valid SVG that doesn't have XML declaration.}  \
+    -setup {} \
+    -cleanup {} \
+    -body {
+        qc::is_svg "~/qcode-tcl/test/images/qcode-logo-no-xml-declaration.svg"
+    } \
+    -result "true"
+
+test is_svg-1.2 \
+    {Test a file that isn't an SVG.}  \
+    -setup {} \
+    -cleanup {} \
+    -body {
+        qc::is_svg "~/qcode-tcl/test/images/logo_qcode_420x120.png"
+    } \
+    -result "false"
+
+cleanupTests
