@@ -3,7 +3,7 @@ package require mock_ns
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
 # Load all .tcl files
-set files [lsort [glob -nocomplain [file join [file dirname [file normalize [info script]]] "../tcl" *.tcl]]]
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
 foreach file $files {
     source $file
 }
