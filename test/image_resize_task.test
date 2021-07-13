@@ -100,6 +100,8 @@ set setup_outside_naviserver {
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
     pg_execute $conn_superuser {create database test_database}
     pg_execute $conn_superuser {
+        SET client_min_messages TO WARNING;
+        drop user if exists test_user;
         create user test_user with password 'test_password';
         grant all privileges on database test_database to test_user;
     }

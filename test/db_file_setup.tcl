@@ -60,6 +60,7 @@ set setup {
     db_dml {SET client_min_messages = WARNING}    
     qc::db_init
     db_dml {
+        drop user if exists test_user;
         CREATE USER test_user WITH PASSWORD 'test_password';
         GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
         GRANT ALL PRIVILEGES ON ALL TABLES in SCHEMA public TO test_user;
