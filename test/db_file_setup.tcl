@@ -1,6 +1,6 @@
 if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
-    set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+    set files [lsort [glob -nocomplain [file join [file dirname [file normalize [info script]]] "../tcl" *.tcl]]]
     foreach file $files {
         source $file
     }
@@ -48,35 +48,6 @@ set setup_qry {
 }
 
 set cleanup_qry {
-    drop table if exists param cascade;
-    drop domain if exists plain_text cascade;
-    drop domain if exists plain_string cascade;
-    drop domain if exists url cascade;
-    drop domain if exists url_path cascade;
-    drop type if exists user_state cascade;
-    drop type if exists perm_method cascade;
-    drop sequence if exists user_id_seq cascade; 
-    drop sequence if exists file_id_seq cascade;
-    drop sequence if exists perm_category_id_seq cascade;
-    drop sequence if exists perm_class_id_seq cascade;
-    drop sequence if exists perm_id_seq cascade;
-    drop extension if exists pgcrypto cascade;
-    drop function if exists sha1 cascade;
-    drop table if exists users cascade;
-    drop table if exists file cascade;
-    drop table if exists image cascade;
-    drop table if exists validation_messages cascade;
-    drop table if exists session cascade;
-    drop table if exists schema cascade;
-    drop table if exists perm_category cascade;
-    drop table if exists perm_class cascade;
-    drop table if exists perm cascade;
-    drop table if exists user_perm cascade;
-    drop table if exists sticky cascade;
-    drop table if exists file_alias_path cascade;
-    drop table if exists form cascade;
-    drop table if exists required cascade;
-    drop table if exists optional cascade;
 } 
 
 set setup {
@@ -98,7 +69,21 @@ set setup {
     
     # Establish a connection the qc::db way
     qc::db_connect {*}[array get ::conn_info_test]
-    qc::param_set s3_file_bucket mla-dev-files
+
+    # Local config
+    if { [file exists ~/.qcode-tcl] } {
+        source ~/.qcode-tcl
+    }
+    
+    # Bucket to runs tests against
+    if { ![info exists ::env(aws_s3_test_bucket)] } {
+        puts "==========================================================================================="
+        puts "===== Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file ======="
+        puts "==========================================================================================="
+        error "Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file"
+    }
+    
+    qc::param_set s3_file_bucket $::env(aws_s3_test_bucket)
     db_dml {
         insert into
         users(user_id,firstname,surname,email,password_hash,user_state)

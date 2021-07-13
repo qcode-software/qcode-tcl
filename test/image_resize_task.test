@@ -4,7 +4,7 @@ namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstrai
 
 if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
-    set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+    set files [lsort [glob -nocomplain [file join [file dirname [file normalize [info script]]] "../tcl" *.tcl]]]
     foreach file $files {
         source $file
     }
@@ -147,7 +147,7 @@ set data_setup {
     set height 120
     set new_width 210
     set new_height 60
-    set id [open "./images/${filename}" r]
+    set id [open "~/qcode-tcl/test/images/${filename}" r]
     fconfigure $id -translation binary
     set data [base64::encode [read $id]]
     close $id

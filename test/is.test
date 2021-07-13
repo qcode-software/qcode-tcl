@@ -1,9 +1,9 @@
 package require tcltest
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
-source ./db_setup.tcl
+source ~/qcode-tcl/test/db_setup.tcl
 
 # Load all .tcl files
-set files [lsort [glob -nocomplain [file join "../tcl" *.tcl]]]
+set files [lsort [glob -nocomplain [file join [file dirname [file normalize [info script]]] "../tcl" *.tcl]]]
 foreach file $files {
     source $file
 }

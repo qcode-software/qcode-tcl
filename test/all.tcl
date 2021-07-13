@@ -1,5 +1,6 @@
 package require tcltest
-namespace import ::tcltest::runAllTests
+namespace import ::tcltest::configure ::tcltest::runAllTests
+configure -testdir [file dirname [file normalize [info script]]]
 
 proc tcltest::cleanupTestsHook {} {
     variable numTests
