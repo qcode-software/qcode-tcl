@@ -1,0 +1,32 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import qc::*
+
+test dicts_diff_any-1.0 {Find any diffs between dicts} -body {
+    dicts_diff_any [dict create a 1 b 2 c 3] [dict create a 1 b 2 c 3] 
+} -result ""
+
+test dicts_diff_any-1.1 {In left not right} -body {
+    dicts_diff_any [dict create a 1 b 2 c 3] [dict create a 1 b 2] 
+} -result "Key c not found in right dict"
+
+test dicts_diff_any-1.2 {In right not left} -body {
+    dicts_diff_any [dict create a 1 c 3] [dict create a 1 b 2 c 3] 
+} -result "Key b not found in left dict"
+
+test dicts_diff_any-1.3 {Different key} -body {
+    dicts_diff_any [dict create a 1 b 2 c 3] [dict create a 1 b 2 C 3] 
+} -result "Key C not found in left dict"
+
+test dicts_diff_any-1.4 {Different values} -body {
+    dicts_diff_any [dict create a 1 b 2 c 3] [dict create a 1 b 2 c 4] 
+} -result {Left c : "3" Right c : "4"}
+
+
+cleanupTests

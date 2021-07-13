@@ -1,0 +1,65 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import qc::*
+
+test ldicts_diff_any-1.0 {Find any diffs between dicts} -body {
+    set left_ldict [list]
+    lappend left_ldict [dict create a 1 b 2 c 3]
+    lappend left_ldict [dict create d 4 e 5 f 6]
+
+    set right_ldict [list]
+    lappend right_ldict [dict create a 1 b 2 c 3]
+    lappend right_ldict [dict create d 4 e 5 f 6]
+    
+    return [ldicts_diff_any $left_ldict $right_ldict]
+    
+} -result ""
+
+test ldicts_diff_any-1.1 {Find any diffs between dicts} -body {
+    set left_ldict [list]
+    lappend left_ldict [dict create a 1 b 2 c 3]
+    lappend left_ldict [dict create d 4 e 5 f 6]
+
+    set right_ldict [list]
+    lappend right_ldict [dict create a 1 b 2 c 3]
+    lappend right_ldict [dict create d 4 e 5 f 7]
+    
+    return [ldicts_diff_any $left_ldict $right_ldict]
+    
+} -result {Index 1: Left f : "6" Right f : "7"}
+
+test ldicts_diff_any-1.2 {Find any diffs between dicts} -body {
+    set left_ldict [list]
+    lappend left_ldict [dict create a 1 b 2 c 3]
+    lappend left_ldict [dict create d 4 e 5 f 6]
+
+    set right_ldict [list]
+    lappend right_ldict [dict create a 1 b 2 c 3]
+    lappend right_ldict [dict create d 4 e 5 f 6]
+    lappend right_ldict [dict create g 8 h 9 i 10]
+    
+    return [ldicts_diff_any $left_ldict $right_ldict]
+    
+} -result {Index 2: Key g not found in left dict}
+
+test ldicts_diff_any-1.3 {Find any diffs between dicts} -body {
+    set left_ldict [list]
+    lappend left_ldict [dict create a 1 b 2 c 3]
+    lappend left_ldict [dict create d 4 e 5 f 6]
+    lappend left_ldict [dict create g 8 h 9 i 10]
+
+    set right_ldict [list]
+    lappend right_ldict [dict create a 1 b 2 c 3]
+    lappend right_ldict [dict create d 4 e 5 f 6]
+    
+    return [ldicts_diff_any $left_ldict $right_ldict]
+    
+} -result {Index 2: Key g not found in right dict}
+
+cleanupTests
