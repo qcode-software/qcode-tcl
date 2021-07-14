@@ -389,11 +389,16 @@ proc qc::image_file_convert {old_file mime_type max_width max_height autocrop} {
 proc qc::is_svg {file} {
     #| Test if file is an SVG file
     set f [open $file r]
-    if { [read $f 5] eq "<svg " } {
-        close $f
+    set contents [read $f]
+    close $f
+
+    if { [regexp {^(<\?xml\s+[^>]*\?>).*} $contents -> declaration]
+         && [qc::xml_declaration_valid $declaration]
+         && [regexp {<svg\s+} $contents] } {
+        return true
+    } elseif { [regexp {^\s*<svg\s+} $contents] } {
         return true
     } else {
-        close $f
         return false
     }
 }

@@ -101,3 +101,15 @@ proc qc::xml_encoding {xml} {
     }
 }
 
+proc qc::xml_declaration_valid {declaration} {
+    #| Determines if the given XML declaration is valid.
+
+    set pattern {^<\?xml\s+}
+    append pattern {version\s*=\s*("1\.[0-9]+"|'1\.[0-9]+')}
+    set encoding_value {[a-zA-Z]([a-zA-Z0-9.-_]|-)*}
+    append pattern [subst {(\\s+encoding\\s*=\\s*("$encoding_value"|'$encoding_value'))?}]
+    append pattern {(\s+standalone\s*=\s*("(yes|no)"|'(yes|no)'))?}
+    append pattern {\s*\?>}
+
+    return [regexp $pattern $declaration]
+}
