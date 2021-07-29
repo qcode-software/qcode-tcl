@@ -65,11 +65,11 @@ proc qc::html2svg {args} {
 
     set flags [list]
 
-    if { [info exists $width] } {
+    if { [info exists width] } {
         lappend flags --width $width
     }
 
-    if { [info exists $height] } {
+    if { [info exists height] } {
         lappend flags --height $height
     }
 
