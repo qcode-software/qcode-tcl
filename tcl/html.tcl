@@ -52,6 +52,55 @@ proc qc::html2pdf { args } {
     }
 }
 
+proc qc::html2svg {args} {
+    #| Convert HTML into an SVG.
+    #| Requires wkhtmltoimage.
+
+    qc::args $args \
+        -timeout 200000 \
+        -width ? \
+        -height ? \
+        -- \
+        html
+
+    set flags [list]
+
+    if { [info exists $width] } {
+        lappend flags --width $width
+    }
+
+    if { [info exists $height] } {
+        lappend flags --height $height
+    }
+
+    set wkhtmltoimage [qc::which wkhtmltoimage]
+    package require fileutil
+    set filename [fileutil::tempfile]
+
+    ::try {
+        qc::exec_proxy \
+            -timeout $timeout \
+            -- \
+            << $html \
+            $wkhtmltoimage \
+            --enable-local-file-access \
+            {*}$flags \
+            -q \
+            -f svg \
+            - $filename
+
+        set fh [open $filename r]
+        set svg [read $fh]
+        close $fh
+
+        return $svg
+    } on error [list message options] {
+        error $message [dict get $options -errorinfo] [dict get $options -errorcode]
+    } finally {
+        file delete $filename
+    }
+}
+
 proc qc::html {tagName nodeValue args} {
     #| Deprecated - use qc::h instead.
     #| Generate an html node
