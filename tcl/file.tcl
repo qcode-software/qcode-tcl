@@ -78,7 +78,8 @@ proc qc::file_upload {name chunk chunks file} {
         set file_path /tmp/$id
         set mime_type [qc::mime_type_guess $file]
         if { $mime_type ne "*/*" } {
-            append file_path [qc::mime_file_extension $mime_type]
+            set extension [qc::mime_file_extension $mime_type]
+            append file_path $extension
         }
         
         ::try {
