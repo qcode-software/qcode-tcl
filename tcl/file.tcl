@@ -75,8 +75,14 @@ proc qc::file_upload {name chunk chunks file} {
     }
     if { $complete } {
 	# Join parts together
+        set file_path /tmp/$id
+        set mime_type [qc::mime_type_guess $file]
+        if { $mime_type ne "*/*" } {
+            append file_path [qc::mime_file_extension $mime_type]
+        }
+        
         ::try {
-            exec_proxy cat {*}$files > /tmp/$id
+            exec_proxy cat {*}$files > $file_path
         } finally {
             # Clean up
             foreach file $files {
@@ -85,7 +91,7 @@ proc qc::file_upload {name chunk chunks file} {
         }
 	dict unset dict $id
 	nsv_set uploads $user_id $dict
-	return /tmp/$id
+	return $file_path
     } else {
 	nsv_set uploads $user_id $dict
 	return ""
