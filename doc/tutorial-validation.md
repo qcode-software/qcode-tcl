@@ -114,7 +114,7 @@ Now that we have prepared all of its dependencies, we are ready to include qcode
 
 ```tcl
     append html [h script type "text/javascript" \
-           src "https://d1ab3pgt4r9xn1.cloudfront.net/qcode-ui-4.34.0/js/qcode-ui.js"]
+           src "https://d3nz4z14c0bzit.cloudfront.net/qcode-ui-4.34.0/js/qcode-ui.js"]
 ```
 
 Reload the page, and use your browser's inspector - inside the head of your HTML, you should find all five scripts in their correct order. You now have access to the qcode-ui library, including its validation plugin.
@@ -177,7 +177,7 @@ register GET /entries/new {} {
     append html [h script type "text/javascript" \
 	   src "https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"]
     append html [h script type "text/javascript" \
-	   src "https://d1ab3pgt4r9xn1.cloudfront.net/qcode-ui-4.34.0/js/qcode-ui.js"]
+	   src "https://d3nz4z14c0bzit.cloudfront.net/qcode-ui-4.34.0/js/qcode-ui.js"]
     
     set form ""
     append form [h label "Blog Title:"]
