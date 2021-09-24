@@ -17,12 +17,12 @@ Amend the form.html code to include a `<head>` element with the required librari
     <head>
         <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-        <script src="https://d3nz4z14c0bzit.cloudfront.net/vendor/js-cookie/1.5.1/js-cookie.min.js"></script>
+        <script src="https://js.qcode.co.uk/vendor/js-cookie/1.5.1/js-cookie.min.js"></script>
         <script src="http://cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js"></script>
-        <script src="https://d3nz4z14c0bzit.cloudfront.net/qcode-ui-4.9.0/js/qcode-ui.js"></script>
+        <script src="https://js.qcode.co.uk/qcode-ui-4.9.0/js/qcode-ui.js"></script>
 
         <link rel="stylesheet" href="http://cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css">
-        <link rel="stylesheet" href="https://d3nz4z14c0bzit.cloudfront.net/qcode-ui-4.9.0/css/qcode-ui.css">
+        <link rel="stylesheet" href="https://js.qcode.co.uk/qcode-ui-4.9.0/css/qcode-ui.css">
     </head>
 
     <body>
