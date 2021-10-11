@@ -4,17 +4,9 @@ namespace eval qc {
 
 proc qc::conn_remote_ip {} {
     #| Try to return the remote IP address of the current connection
-    #| Trust that a reverse proxy like nginx is setup to pass an X-Forwarded-For header.
     set headers [ns_conn headers]
-    if { \
-        [ns_set ifind $headers X-Forwarded-For]!=-1 \
-        && ( \
-               [ns_conn peeraddr] eq "127.0.0.1" \
-            || [string match  192.168* [ns_conn peeraddr]] \
-            || [ns_conn peeraddr] eq [ns_info address] \
-            ) \
-        } {
-	# Proxied so trust X-Forwarded-For
+    if { [ns_set ifind $headers X-Forwarded-For]!=-1 } {
+	# Proxied so use X-Forwarded-For
         # X-Forwarded-For can be a list of IPs. The client IP is always leftmost.
 	set forwarded [split [ns_set iget $headers X-Forwarded-For] ,]
         set ip [string trim [lindex $forwarded 0]]
