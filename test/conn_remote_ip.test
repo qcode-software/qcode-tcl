@@ -82,7 +82,7 @@ test conn_remote_ip1.4 \
                              ]
         return [qc::conn_remote_ip]
     } \
-    -result {not an ip}
+    -result {30.30.30.30}
 
 # X-Forwarded-For is lower case
 test conn_remote_ip1.5 \
