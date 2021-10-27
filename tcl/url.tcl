@@ -174,7 +174,7 @@ proc qc::url_path {url} {
     if { ![qc::is uri $url] } {
         error "\"$url\" is not a valid URI."
     }  
-    if { [regexp {^https?://[a-z0-9_]+(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
+    if { [regexp {^https?://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
 	return $path
     } elseif { [regexp {^(/?[^\?]*)} $url -> path] } {
 	return $path 
