@@ -34,6 +34,11 @@ test url_path-1.4 {url_path root url} -setup {
     url_path "https://www.domain.com/"
 } -cleanup {} -result {/}
 
+test url_path-1.5 {url_path contains dash} -setup {
+} -body {
+    url_path "https://domain-name99.co.uk/someplace.html?order_number=911&title=someTitle"
+} -cleanup {} -result {/someplace.html}
+
 # url_encode
 test url_encode-1.0 {url_encode utf-8 safe characters} -body {
     url_encode {.-_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789}
