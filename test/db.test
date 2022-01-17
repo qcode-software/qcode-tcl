@@ -178,4 +178,112 @@ test db_advisory_trans_lock-1.0 \
     } \
     -result "John"
 
+test db_trans_isolation-1 \
+    {Check child db_trans (using different db handle) also rolls back commits by parent db_trans.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        db_dml {truncate students}
+        db_dml {
+            insert into students (student_id,firstname,surname,dob,course_id)
+            values (1,'firstname_1', 'surname_1','2021-01-01',1)
+        }
+
+        ::try {            
+            db_trans {
+                db_dml {
+                    insert into students (student_id,firstname,surname,dob,course_id)
+                    values (2,'firstname_2', 'surname_2','2021-01-01',1)
+                }
+                
+                db_trans -db alt {
+                    db_dml {
+                        insert into students (student_id,firstname,surname,dob,course_id)
+                        values (3,'firstname_3', 'surname_3','2021-01-01',1)
+                    }
+
+                    error "rollback db_trans"
+                }            
+            }
+        } on error {} {
+
+        }
+        
+        return [db_select_ldict {select student_id from students order by student_id}]
+    } \
+    -result [list \
+                 [dict create student_id 1] \
+                ]
+
+test db_trans_isolation-2 \
+    {Check parent db_trans does not rollback commits/trans by other db handles.} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {        
+        db_dml {truncate students}
+        db_dml {
+            insert into students (student_id,firstname,surname,dob,course_id)
+            values (1,'firstname_1', 'surname_1','2021-01-01',1)
+        }
+
+        ::try {            
+            db_trans {
+                db_dml {
+                    insert into students (student_id,firstname,surname,dob,course_id)
+                    values (2,'firstname_2', 'surname_2','2021-01-01',1)
+                }
+                
+                db_trans -db alt {
+                    db_dml -db alt {
+                        insert into students (student_id,firstname,surname,dob,course_id)
+                        values (3,'firstname_3', 'surname_3','2021-01-01',1)
+                    }
+                }
+                
+                error "rollback db_trans"
+            }
+        } on error {} {
+
+        }
+        
+        return [db_select_ldict {select student_id from students order by student_id}]
+    } \
+    -result [list \
+                 [dict create student_id 1] \
+                 [dict create student_id 3] \
+                ]
+
+test db_trans_isolation-3 \
+    {Check parent db_trans with nested db_trans using alt db handle} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {        
+        db_dml {truncate students}
+        db_dml {
+            insert into students (student_id,firstname,surname,dob,course_id)
+            values (1,'firstname_1', 'surname_1','2021-01-01',1)
+        }         
+
+        db_trans {
+            db_dml {
+                insert into students (student_id,firstname,surname,dob,course_id)
+                values (2,'firstname_2', 'surname_2','2021-01-01',1)
+            }
+            
+            db_trans -db alt {
+                db_dml {
+                    insert into students (student_id,firstname,surname,dob,course_id)
+                    values (3,'firstname_3', 'surname_3','2021-01-01',1)
+                }
+            }            
+        }
+        
+        return [db_select_ldict {select student_id from students order by student_id}]
+    } \
+    -result  [list \
+                  [dict create student_id 1] \
+                  [dict create student_id 2] \
+                  [dict create student_id 3] \
+                 ]
+
 cleanupTests

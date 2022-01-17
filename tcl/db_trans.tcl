@@ -66,7 +66,7 @@ proc qc::db_trans_end {{db DEFAULT}} {
     if { $db_trans_level($db) > 1 } {
         db_dml -db $db "RELEASE SAVEPOINT $savepoint"
     } else {
-        db_dml "COMMIT WORK"
+        db_dml -db $db "COMMIT WORK"
     }
     incr db_trans_level($db) -1
 }
