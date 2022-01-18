@@ -197,7 +197,7 @@ test db_trans_isolation-1 \
                 }
                 
                 db_trans -db alt {
-                    db_dml {
+                    db_dml -db alt {
                         insert into students (student_id,firstname,surname,dob,course_id)
                         values (3,'firstname_3', 'surname_3','2021-01-01',1)
                     }
@@ -271,7 +271,7 @@ test db_trans_isolation-3 \
             }
             
             db_trans -db alt {
-                db_dml {
+                db_dml -db alt {
                     insert into students (student_id,firstname,surname,dob,course_id)
                     values (3,'firstname_3', 'surname_3','2021-01-01',1)
                 }
