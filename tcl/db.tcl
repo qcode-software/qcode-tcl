@@ -324,10 +324,10 @@ proc qc::db_get_handle {{poolname DEFAULT}} {
         return $_db($poolname)
     } else {
         # Should be connected with db_connect
-        if { ![info exists _db] } {
+        if { ![info exists _db($poolname)] } {
             error "No database connection"
         }
-        return $_db
+        return $_db($poolname)
     }
 }
 
@@ -589,18 +589,22 @@ proc qc::db_row_exists {args} {
 
 proc qc::db_connect {args} {
     #| Connect to a postgresql database
+    qc::args $args -poolname DEFAULT -- args
+    
     package require Pgtcl
     global _db
-    if { ![info exists _db] } {
-        set _db [pg_connect -connlist $args]
+    if { ![info exists _db($poolname)] } {
+        set _db($poolname) [pg_connect -connlist $args]
     }
-    return $_db
+    return $_db($poolname)
 }
 
-proc qc::db_connected {} {
+proc qc::db_connected {args} {
     #| Is there a database connected?
+    qc::args $args -poolname DEFAULT -- args
+    
     global _db
-    if { [info exists _db] } {
+    if { [info exists _db($poolname)] } {
         return true
     } else {
         return false
@@ -637,11 +641,14 @@ proc qc::db_pg_copy_load { args } {
     exec cat $filename | $psql -w -U $user -h $host $database -c $qry
 }
 
-proc qc::db_disconnect {} {
+proc qc::db_disconnect {args} {
     #| Disconect the global handle
+    qc::args $args -poolname DEFAULT -- args
+    
     global _db
-    pg_disconnect $_db
-    unset _db
+    
+    pg_disconnect $_db($poolname)
+    unset _db($poolname)
 }
 
 proc qc::db_advisory_trans_lock {class object} {

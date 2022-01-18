@@ -87,9 +87,12 @@ set setup_outside_naviserver {
     }
     pg_disconnect $conn_superuser
     
-    # Establish a connection the qc::db way
+    # Establish a connection the qc::db way (default pool)
     set conn [qc::db_connect {*}[array get ::conn_info_test]]
+    # execute setup queries
     pg_execute $conn $setup_qry
+    # Establish a connection the qc::db way (alt pool)
+    qc::db_connect -poolname alt {*}[array get ::conn_info_test]
 }
 
 set cleanup_inside_naviserver {
@@ -99,10 +102,12 @@ set cleanup_inside_naviserver {
 }
 
 set cleanup_outside_naviserver {
-    # Cleanup the qc::db connection
+    # Cleanup the qc::db connection (default pool)
     set conn [qc::db_connect {*}[array get ::conn_info_test]]
     pg_execute $conn $cleanup_qry
     qc::db_disconnect
+    # Cleanup the qc::db connection (alt pool)
+    qc::db_disconnect -poolname alt
     
     # Cleanup 
     set conn_superuser [pg_connect -connlist [array get ::conn_info_superuser]]
