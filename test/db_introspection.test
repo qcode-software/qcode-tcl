@@ -1,0 +1,292 @@
+package require tcltest
+package require Pgtcl
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load common definitions of setup and cleanup
+source ~/qcode-tcl/test/db_setup.tcl
+
+################################################################################
+###   TESTS
+################################################################################
+
+test db_qualify_column-1.0 {db_qualify_column} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualify_column surname
+} -result "public students surname"
+
+test db_qualify_column-1.1 {db_qualify_column} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualify_column courses title
+} -result "public courses title"
+
+test db_qualify_column-1.2 {db_qualify_column} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualify_column public courses title
+} -result "public courses title"
+
+test db_qualify_column-1.3 {db_qualify_column} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualify_column foo bar
+} -returnCodes error -result {The qry <code>
+                    select table_schema
+                    from information_schema.columns
+                    where table_name='foo'
+                    and column_name='bar'
+                    limit 1
+                </code> returned 0 rows}
+
+test db_resolve_field_name-1.0 {db_resolve_field_name} -setup $setup -cleanup $cleanup -body {
+    qc::db_resolve_field_name surname
+} -result "public students surname"
+
+test db_qualify_table-1.0 {db_qualify_table} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualify_table students
+} -result "public students"
+
+test db_col_varchar_length-1.0 {db_col_varchar_length} -setup $setup -cleanup $cleanup -body {
+    qc::db_col_varchar_length surname
+} -result "30"
+
+test db_column_exists-1.0 {db_column_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_exists surname
+} -result "true"
+
+test db_column_exists-1.1 {db_column_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_exists other
+} -result "false"
+
+test db_table_columns-1.0 {db_table_columns} -setup $setup -cleanup $cleanup -body {
+    qc::db_table_columns students
+} -result "student_id firstname surname dob course_id"
+
+test db_column_exists-1.0 {db_column_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_exists surname
+} -result "true"
+
+test db_table_column_exists-1.0 {db_table_column_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_table_column_exists students surname
+} -result "true"
+
+test db_table_column_exists-1.1 {db_table_column_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_table_column_exists students title
+} -result "false"
+
+test db_column_table-1.0 {db_column_table} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_table surname
+} -result "students"
+
+test db_qualified_table_column-1.0 {db_qualified_table_column} -setup $setup -cleanup $cleanup -body {
+    qc::db_qualified_table_column surname
+} -result "students surname"
+
+test db_column_table_primary_exists-1.0 {db_column_table_primary_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_table_primary_exists student_id
+} -result "true"
+
+test db_column_table_primary_exists-1.2 {db_column_table_primary_exists} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_table_primary_exists surname
+} -result "false"
+
+test db_column_table_primary-1.0 {db_column_table_primary} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_table_primary student_id
+} -result "students"
+
+test db_column_type-1.0 {db_column_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_type students student_id
+} -result "int4"
+
+test db_column_type-1.1 {db_column_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_type students firstname
+} -result "varchar(30)"
+
+test db_column_type-1.2 {db_column_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_type students dob
+} -result "date"
+
+test db_table_column_types-1.0 {db_table_column_types} -setup $setup -cleanup $cleanup -body {
+    qc::db_table_column_types students
+} -result "student_id int4 firstname varchar(30) surname varchar(30) dob date course_id int4"
+
+test db_column_nullable-1.0 {db_column_nullable} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_nullable students firstname
+} -result "false"
+
+test db_column_nullable-1.1 {db_column_nullable} -setup $setup -cleanup $cleanup -body {
+    qc::db_column_nullable students dob
+} -result "true"
+
+test db_resolve_type_name-1.0 {db_resolve_type_name} -setup $setup -cleanup $cleanup -body {
+    qc::db_resolve_type_name int4
+} -result "pg_catalog int4"
+
+test db_enum_values-1.0 {db_enum_values} -setup $setup -cleanup $cleanup -body {
+    db_dml {
+        create type state as enum ('READY','RUNNING','PAUSED','CANCELLED','COMPLETE','ERROR');
+    }
+    qc::db_enum_values state
+} -result "READY RUNNING PAUSED CANCELLED COMPLETE ERROR"
+
+set cleanup_extra {
+        db_dml { drop type state }
+}
+append cleanup_extra $cleanup
+
+test db_enum_exists-1.0 {db_enum_exists} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create type state as enum ('READY','RUNNING','PAUSED','CANCELLED','COMPLETE','ERROR');
+    }
+    qc::db_enum_exists state
+} -result "true"
+
+test db_enum_exists-1.1 {db_enum_exists} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_enum_exists state
+} -result "false"
+
+set cleanup_extra {
+        db_dml { drop domain plain_text }
+}
+append cleanup_extra $cleanup
+
+test db_domain_exists-1.0 {db_domain_exists} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create domain plain_text as text
+        check(
+              value !~ '[<>]'
+              );
+    }
+    qc::db_domain_exists plain_text
+} -result "true"
+
+test db_domain_exists-1.1 {db_domain_exists} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_domain_exists plain_text
+} -result "false"
+
+test db_resolve_domain_name-1.0 {db_resolve_domain_name} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create domain plain_text as text
+        check(
+              value !~ '[<>]'
+              );
+    }
+    qc::db_resolve_domain_name plain_text
+} -result "public plain_text"
+
+test db_domain_constraints-1.0 {db_domain_constraints} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create domain plain_text as text
+        check(
+              value !~ '[<>]'
+              );
+    }
+    qc::db_domain_constraints plain_text
+} -result "plain_text_check {((VALUE !~ '\[<>\]'::text))}"
+
+test db_column_constraints-1.0 {db_column_constraints} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    db_dml {
+        alter table students add constraint nohtml check(surname !~ '[<>]')
+    }
+    qc::db_column_constraints students surname
+} -result "nohtml {(((surname)::text !~ '\[<>\]'::text))}"
+
+test db_column_constraints-1.1 {db_column_constraints} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_column_constraints students surname
+} -result ""
+
+test db_eval_constraint-1.0 {db_eval_constraint} -setup $setup -cleanup $cleanup -body {
+    qc::db_eval_constraint -- students {(((surname)::text !~ '[<>]'::text))} surname test
+} -result "t"
+
+test db_eval_constraint-1.0 {db_eval_constraint} -setup $setup -cleanup $cleanup -body {
+    qc::db_eval_constraint -- students {(((surname)::text !~ '[<>]'::text))} surname "<a>html<\a>"
+} -result "f"
+
+test db_eval_domain_constraint-1.0 {db_eval_domain_constraint} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_eval_domain_constraint "test" text {( value !~ '[<>]' )}
+} -result "t"
+
+test db_eval_domain_constraint-1.1 {db_eval_domain_constraint} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_eval_domain_constraint "te<a>st" text {( value !~ '[<>]' )}
+} -result "f"
+
+test db_eval_column_constraints-1.0 {db_eval_column_constraints} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    db_dml {
+        alter table students add constraint nohtml check(surname !~ '[<>]')
+    }
+    qc::db_eval_column_constraints surname [list surname test]
+} -result "nohtml t"
+
+test db_eval_column_constraints-1.1 {db_eval_column_constraints} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    db_dml {
+        alter table students add constraint nohtml check(surname !~ '[<>]')
+    }
+    qc::db_eval_column_constraints surname [list surname "te<a>st"]
+} -result "nohtml f"
+
+set cleanup_extra {
+        db_dml { drop domain plain_text }
+}
+append cleanup_extra $cleanup
+test db_domain_base_type-1.0 {db_domain_base_type} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create domain plain_text as text
+        check(
+              value !~ '[<>]'
+              );
+    }
+    qc::db_domain_base_type plain_text
+} -result "text"
+
+test db_canonical_type-1.0 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type varchar
+} -result "text"
+
+test db_canonical_type-1.1 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type varchar 5
+} -result "varchar(5)"
+
+test db_canonical_type-1.2 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type numeric
+} -result "decimal"
+
+test db_canonical_type-1.3 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type numeric "" 9 3
+} -result "decimal(9,3)"
+
+test db_canonical_type-1.4 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type bpchar 5
+} -result "char(5)"
+
+test db_canonical_type-1.5 {db_canonical_type} -setup $setup -cleanup $cleanup -body {
+    qc::db_canonical_type bit 5
+} -result "bit(5)"
+
+set cleanup_extra {
+        db_dml { drop sequence test_seq }
+}
+append cleanup_extra $cleanup
+test db_sequence_exists-1.0 {db_sequence_exists} -setup $setup -cleanup $cleanup_extra -body {
+    db_cache_clear
+    db_dml {
+        create sequence test_seq;
+    }
+    qc::db_sequence_exists test_seq
+} -result "true"
+
+test db_sequence_exists-1.1 {db_sequence_exists} -setup $setup -cleanup $cleanup -body {
+    db_cache_clear
+    qc::db_sequence_exists test_seq
+} -result "false"
+
+test db_user-1.0 {db_user} -setup $setup -cleanup $cleanup -body {
+    qc::db_user
+} -result "test_user"
+
