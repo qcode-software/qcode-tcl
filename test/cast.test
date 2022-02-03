@@ -397,4 +397,18 @@ test cast-next_url-1.13 \
     } \
     -result {https://www.fallback.co.uk/admin.tcl}
 
+test cast-next_url-1.14 \
+    {cast next_url non-legacy 443 absolute with query string} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk?x=y"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk?x=y}
+
 cleanupTests

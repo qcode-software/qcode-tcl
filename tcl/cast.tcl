@@ -870,7 +870,7 @@ namespace eval qc::cast {
         
         # check that redirection is to the same domain
         set conn_host [qc::conn_host]
-        if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $next_url] } {
+        if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(\\?|/|\$)" $next_url] } {
             return -code error -errorcode CAST "Could not cast \"[html_escape $next_url]\" to valid next_url. Domain must be \"$conn_host\"."
         }       
 
