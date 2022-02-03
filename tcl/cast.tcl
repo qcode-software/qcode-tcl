@@ -281,7 +281,7 @@ proc qc::data_type_error_check {data_type value} {
 
 namespace eval qc::cast {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path s3_uri time interval
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar text enumeration domain safe_html safe_markdown date postcode creditcard period epoch url url_relative url_path s3_uri time interval next_url
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -852,5 +852,28 @@ namespace eval qc::cast {
             return [string tolower $string]
         }
 	return -code error -errorcode CAST "Could not cast $string to an interval"
+    }
+
+    proc next_url {string} {
+        if { ![regexp {^https?://} $string] } {
+            # Relative url            
+            set next_url [string trimleft $string /]
+            set next_url "[qc::conn_location]/$next_url"           
+        } else {
+            set next_url $string
+        }
+
+        # check for malicious mal-formed url
+        if { ![qc::is url $next_url] } {
+            return -code error -errorcode CAST "Could not cast \"[html_escape $next_url]\" to valid next_url. Invalid URL."
+        }
+        
+        # check that redirection is to the same domain
+        set conn_host [qc::conn_host]
+        if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $next_url] } {
+            return -code error -errorcode CAST "Could not cast \"[html_escape $next_url]\" to valid next_url. Domain must be \"$conn_host\"."
+        }       
+
+        return $next_url
     }
 }

@@ -1,5 +1,6 @@
 package require tcltest
-namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
 # Load all .tcl files
 set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
@@ -166,5 +167,234 @@ test cast-s3_uri-1.3 {qc::cast s3_uri: No object_key}       {qc::cast s3_uri "bu
 test cast-s3_uri-1.4 {qc::cast s3_uri: Invalid bucket}     -body {qc::cast s3_uri "%%%%%%%%/object_key"} -returnCodes error -result {Could not cast "%%%%%%%%/object_key" to an s3_uri}
 test cast-s3_uri-1.5 {qc::cast s3_uri: Invalid object_key} -body {qc::cast s3_uri "bucket/invalid."}     -returnCodes error -result {Could not cast "bucket/invalid." to an s3_uri}
 
+# next_url
+set setup {
+    ns_conn _set headers        [ns_set create headers]
+    ns_conn _set outputheaders  [ns_set create outputheaders]
+}
+set cleanup {
+    mock_ns::_reset
+}
+
+test cast-next_url-1.0 \
+    {cast next_url non-legacy 443 relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.1 \
+    {cast next_url non-legacy 80 relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {http://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.1 \
+    {cast next_url non-legacy 80 relative non-anchored proxied} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers [ns_set create headers \
+                                "Host"              "www.qcode.co.uk" \
+                                "X-Forwarded-Proto" "https" \
+                             ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.2 \
+    {cast next_url non-legacy custom relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk:8443" \
+                             ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk:8443/admin.tcl}
+
+test cast-next_url-1.3 \
+    {cast next_url non-legacy relative anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.4 \
+    {cast next_url non-legacy absolute} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.5 \
+    {cast next_url legacy 443 relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers  [ns_set create headers \
+                                 "Host" "www.qcode.co.uk" \
+                                 "Port" "443" \
+                              ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.6 \
+    {cast next_url legacy 80 relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "http"
+        ns_conn _set headers  [ns_set create headers \
+                                 "Host" "www.qcode.co.uk" \
+                                 "Port" "80" \
+                              ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {http://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.7 \
+    {cast next_url legacy custom relative non-anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers  [ns_set create headers \
+                                 "Host" "www.qcode.co.uk" \
+                                 "Port" "8443" \
+                              ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk:8443/admin.tcl}
+
+test cast-next_url-1.8 \
+    {cast next_url legacy relative anchored} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers  [ns_set create headers \
+                                 "Host" "www.qcode.co.uk" \
+                                 "Port" "443" \
+                              ]
+        set next_url "/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.9 \
+    {cast next_url legacy absolute} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers  [ns_set create headers \
+                                 "Host" "www.qcode.co.uk" \
+                                 "Port" "443" \
+                              ]
+        set next_url "https://www.qcode.co.uk/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.qcode.co.uk/admin.tcl}
+
+test cast-next_url-1.10 \
+    {cast next_url non-legacy cross domain} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.anotherdomain.co.uk/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -returnCodes error \
+    -result {Could not cast "https://www.anotherdomain.co.uk/admin.tcl" to valid next_url. Domain must be "www.qcode.co.uk".}
+
+test cast-next_url-1.11 \
+    {cast next_url non-legacy invalid} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk/<script>hello;<script>"
+        return [qc::cast next_url $next_url]
+    } \
+    -returnCodes error \
+    -result {Could not cast "https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" to valid next_url. Invalid URL.}
+
+test cast-next_url-1.12 \
+    {cast next_url http/1.0} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        set next_url "/admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.fallback.co.uk/admin.tcl}
+
+test cast-next_url-1.13 \
+    {cast next_url http/1.0} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+
+        ns_conn _set protocol "https"
+        ns_conn _set location "https://www.fallback.co.uk"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "" \
+                             ]
+        set next_url "admin.tcl"
+        return [qc::cast next_url $next_url]
+    } \
+    -result {https://www.fallback.co.uk/admin.tcl}
 
 cleanupTests
