@@ -132,32 +132,7 @@ proc qc::return_chunk {string} {
 
 proc qc::return_next { next_url } {
     #| Redirect to an internal url
-
-
-    if { ![regexp {^https?://} $next_url] } {
-        # Relative url
-        
-        set next_url [string trimleft $next_url /]
-        set next_url "[qc::conn_location]/$next_url"
-
-        # check for malicious mal-formed url
-        if { ![qc::is url $next_url] } {
-            error "\"[html_escape $next_url]\" is not a valid url."
-        }
-
-    } else {
-        # Absolute url
-        # check that redirection is to the same domain
-        set conn_host [qc::conn_host]
-        if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $next_url] } {
-            error "Will not redirect to a different domain. Host $conn_host. Redirect to $next_url"
-        }
-        # check for malicious mal-formed url
-        if { ![qc::is url $next_url] } {
-            error "\"[html_escape $next_url]\" is not a valid url."
-        }
-    }
-    ns_returnredirect $next_url
+    ns_returnredirect [qc::cast next_url $next_url]
 }
 
 proc ns_returnmoved {url} {

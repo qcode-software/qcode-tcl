@@ -185,10 +185,10 @@ test cast-next_url-1.0 \
         ns_conn _set headers [ns_set create headers \
                                 "Host" "www.qcode.co.uk" \
                              ]
-        set next_url "admin.tcl"
+        set next_url "/"
         return [qc::cast next_url $next_url]
     } \
-    -result {https://www.qcode.co.uk/admin.tcl}
+    -result {https://www.qcode.co.uk/}
 
 test cast-next_url-1.1 \
     {cast next_url non-legacy 80 relative non-anchored} \
