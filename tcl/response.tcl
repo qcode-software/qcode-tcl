@@ -151,31 +151,8 @@ namespace eval qc::response {
             #| Sets the redirect property with the given internal URL.
             global data
             reset
-
-            if { ![regexp {^https?://} $url] } {
-                # Relative url
-                set url [string trimleft $url /]
-                set url "[qc::conn_location]/$url"
-
-                # check for malicious mal-formed url
-                if { ![qc::is url $url] } {
-                    error "\"[html_escape $url]\" is not a valid url."
-                }
-
-            } else {
-                # Absolute url
-                # check that redirection is to the same domain
-                set conn_host [qc::conn_host]
-                if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(/|\$)" $url] } {
-                    error "Will not redirect to a different domain. Host $conn_host. Redirect to \"[html_escape $url]\""
-                }
-                # check for malicious mal-formed url
-                if { ![qc::is url $url] } {
-                    error "\"[html_escape $url]\" is not a valid url."
-                }
-            }
             
-            dict set data action redirect value [url $url]
+            dict set data action redirect value [qc::cast next_url $url]
         }
 
         proc external_redirect {url} {
