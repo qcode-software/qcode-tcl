@@ -3108,4 +3108,13 @@ test is-next-url-1.6 {is next_url of different domain} -setup {
     qc::is next_url https://www.domain1.co.uk
 } -result 0
 
+test is-next-url-1.7 {is next_url with anchor} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain.co.uk#id
+} -result 1
+
+
 cleanupTests
