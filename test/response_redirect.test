@@ -191,7 +191,7 @@ test response_redirect1.10 \
         return [qc::response action redirect $url]
     } \
     -returnCodes error \
-    -result {Will not redirect to a different domain. Host www.qcode.co.uk. Redirect to "https://www.anotherdomain.co.uk/admin.tcl"}
+    -result {Could not cast "https://www.anotherdomain.co.uk/admin.tcl" to valid next_url. Domain must be "www.qcode.co.uk".}
 
 test response_redirect1.11 \
     {response redirect non-legacy invalid} \
@@ -206,7 +206,7 @@ test response_redirect1.11 \
         return [qc::response action redirect $url]
     } \
     -returnCodes error \
-    -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
+    -result {Could not cast "https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" to valid next_url. Invalid URL.}
 
 test response_redirect1.12 \
     {response redirect http/1.0} \
