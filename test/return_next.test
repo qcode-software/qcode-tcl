@@ -239,4 +239,32 @@ test return_next1.13 \
     } \
     -result {https://www.fallback.co.uk/admin.tcl}
 
+test return_next1.14 \
+    {return_next non-legacy 443 with query string} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk?x=y"
+        return [qc::return_next $next_url]
+    } \
+    -result {https://www.qcode.co.uk?x=y}
+
+test return_next1.15 \
+    {return_next non-legacy 443 with anchor} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk#id"
+        return [qc::return_next $next_url]
+    } \
+    -result {https://www.qcode.co.uk#id}
+
 cleanupTests
