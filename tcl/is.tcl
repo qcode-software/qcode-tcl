@@ -229,7 +229,7 @@ proc qc::is_uri_valid {uri} {
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain html safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval
+    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain html safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval next_url
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -975,6 +975,21 @@ namespace eval qc::is {
             [regexp \
                  {((^| +)(\+|-)?[0-9]+ +(year|month|week|day|hour|minute|second)s?)+$} \
                  [string tolower $text]]
+    }
+
+    proc next_url {next_url} {
+        # Absolute next url
+        # check that redirection is to the same domain
+        set conn_host [qc::conn_host]
+        if { ![regexp "^https?://${conn_host}(:\[0-9\]+)?(\\?|#|/|\$)" $next_url] } {
+            return 0
+        }
+        # check for malicious mal-formed url
+        if { ![qc::is url $next_url] } {
+            return 0 
+        }
+        
+        return 1
     }
 }
 

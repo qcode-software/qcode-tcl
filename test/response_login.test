@@ -191,7 +191,7 @@ test response_login1.10 \
         return [qc::response action login $url]
     } \
     -returnCodes error \
-    -result {Will not redirect to a different domain. Host www.qcode.co.uk. Redirect to "https://www.anotherdomain.co.uk/admin.tcl"}
+    -result {Could not cast "https://www.anotherdomain.co.uk/admin.tcl" to valid next_url. Domain must be "www.qcode.co.uk".}
 
 test response_login1.11 \
     {response login non-legacy invalid} \
@@ -206,7 +206,7 @@ test response_login1.11 \
         return [qc::response action login $url]
     } \
     -returnCodes error \
-    -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
+    -result {Could not cast "https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" to valid next_url. Invalid URL.}
 
 test response_login1.12 \
     {response login http/1.0} \
@@ -237,5 +237,33 @@ test response_login1.13 \
         return [qc::response action login $url]
     } \
     -result {action {login {value https://www.fallback.co.uk/admin.tcl}}}
+
+test response_login1.14 \
+    {response login non-legacy 443 with query string} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk?x=y"
+        return [qc::response action login $url]
+    } \
+    -result {action {login {value https://www.qcode.co.uk?x=y}}}
+
+test response_login1.15 \
+    {response login non-legacy 443 with anchor} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk#id"
+        return [qc::response action login $url]
+    } \
+    -result {action {login {value https://www.qcode.co.uk#id}}}
 
 cleanupTests

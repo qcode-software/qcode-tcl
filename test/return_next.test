@@ -191,7 +191,7 @@ test return_next1.10 \
         return [qc::return_next $next_url]
     } \
     -returnCodes error \
-    -result {Will not redirect to a different domain. Host www.qcode.co.uk. Redirect to https://www.anotherdomain.co.uk/admin.tcl}
+    -result {Could not cast "https://www.anotherdomain.co.uk/admin.tcl" to valid next_url. Domain must be "www.qcode.co.uk".}
 
 test return_next1.11 \
     {return_next non-legacy invalid} \
@@ -206,7 +206,7 @@ test return_next1.11 \
         return [qc::return_next $next_url]
     } \
     -returnCodes error \
-    -result {"https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" is not a valid url.}
+    -result {Could not cast "https://www.qcode.co.uk/&lt;script&gt;hello;&lt;script&gt;" to valid next_url. Invalid URL.}
 
 test return_next1.12 \
     {return_next http/1.0} \
@@ -238,5 +238,33 @@ test return_next1.13 \
         return [qc::return_next $next_url]
     } \
     -result {https://www.fallback.co.uk/admin.tcl}
+
+test return_next1.14 \
+    {return_next non-legacy 443 with query string} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk?x=y"
+        return [qc::return_next $next_url]
+    } \
+    -result {https://www.qcode.co.uk?x=y}
+
+test return_next1.15 \
+    {return_next non-legacy 443 with anchor} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set next_url "https://www.qcode.co.uk#id"
+        return [qc::return_next $next_url]
+    } \
+    -result {https://www.qcode.co.uk#id}
 
 cleanupTests

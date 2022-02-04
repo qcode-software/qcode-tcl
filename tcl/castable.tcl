@@ -1,6 +1,6 @@
 namespace eval qc::castable {
     
-    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path s3_uri time interval
+    namespace export integer bigint smallint decimal boolean timestamp timestamptz char varchar enumeration text domain safe_html safe_markdown date postcode creditcard period url relative_url url_path s3_uri time interval next_url
     namespace ensemble create -unknown {
         data_type_parser
     }
@@ -237,5 +237,14 @@ namespace eval qc::castable {
 	} on error [list error_message options] {
 	    return false
 	}        
+    }
+
+    proc next_url {string} {
+        try {
+            qc::cast next_url $string
+            return true
+        } on error [list error_message options] {
+            return false
+        }
     }
 }

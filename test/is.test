@@ -3051,4 +3051,70 @@ test is-html-1.0 {qc::is html } \
     } \
     -result 1
 
+# next_url
+test is-next-url-1.0 {is next_url valid brief} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url www.domain.com
+} -result 0
+
+test is-next-url-1.1 {is next_url valid full uk} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain.co.uk
+} -result 1
+
+test is-next-url-1.2 {is next_url valid full uk with port & form vars} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain.co.uk:433/subdir?formvar1=foo&formvar2=bar#anchor
+} -result 1
+
+test is-next-url-1.3 {is next_url long formvar } -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url "https://www.domain.co.uk/subdir?formvar1=MDgzNjIgMDAwMDAgbiAKMDAwMDExODU1NiAwMDAwMCBuIAowMDAwMDAyODM5IDAwMDAwIG4gCjAwMDAwMDMwMjUgMDAwMDAgbiAKMDAwMDAwMzA0NCAwMDAwMCBuIAowMDAwMDAzODc1IDAwMDAwIG4gCjAwMDAwMDM4OTUgMDAwMDAgbiAKMDAwMDExNDc1NSAwMDAwMCBuIAowMDAwMDA0MTc2IDAwMDAwIG4gCjAwMDAwMDUyNzQgMDAwMDAgbiAKMDAwMDAwNTI5NCAwMDAwMCBuIAowMDAwMDExMzA0IDAwMDAwIG4gCjAwMDAwMTEzMjUgMDAwMDAgbiAKMDAwMDAxMjQ2MSAwMDAwMCBuIAowMDAwMDEyNDgxIDAwMDAwIG4gCjAwMDAwMTc2MTAgMDAwMDAgbiAKMDAwMDAxNzYzMSAwMDAwMCBuIAowMDAwMDE4ODA0IDAwMDAwIG4gCjAwMDAwMTg4MjUgMDAwMDAgbiAKMDAwMDAyNDc3OSAwMDAwMCBuIAowMDAwMDI0ODAwIDAwMDAwIG4gCjAwMDAwMjU4ODAgMDAwMDAgbiAKMDAwMDAyNTkwMCAwMDAwMCBuIAowMDAwMDMwODY2IDAwMDAwIG4gCjAwMDAwMzA4ODcgMDAwMDAgbiAKMDAwMDAzMTIwOSAwMDAwMCBuIAowMDAwMDMxMjI5IDAwMDAwIG4gCjAwMDAwMzIyNDggMDAwMDAgbiAKMDAwMDAzMjI2OCAwMDAwMCBuIAowMDAwMDMyNDQ3IDAwMDAwIG4gCjAwMDAwMzI0NjYgMDAwMDAgbiAKMDAwMDAzMzI5NyAwMDAwMCBuIAowMDAwMDMzMzE3IDAwMDAwIG4gCjAwMDAwMzM1OTggMDAwMDAgbiAKMDAwMDAzODUyNiAwMDAwMCBuIAowMDAwMDM4NTQ3IDAwMDAwIG4gCjAwMDAwNDM2NzEgMDAwMDAgbiAKMDAwMDA0MzY5MiAwMDAwMCBuIAowMDAwMDQzNzI4IDAwMDAwIG4gCjAwMDAwNDczMTMgMDAwMDAgbiAKMDAwMDA0NzMzNCAwMDAwMCBuIAowMDAwMDU2MTQwIDAwMDAwIG4gCjAwMDAwNTYxNjEgMDAwMDAgbiAKMDAwMDA1NjQ1OSAwMDAwMCBuIAowMDAwMDU2NDc5IDAwMDAwIG4gCjAwMDAwNTc1MDQgMDAwMDAgbiAKMDAwMDA1NzUyNCAwMDAwMCBuIAowMDAwMDU3ODUwIDAwMDAwIG4gCjAwMDAwNTc4NzAgMDAwMDAgbiAKMDAwMDA1ODkwMSAwMDAwMCBuIAowMDAwMDU4OTIxIDAwMDAwIG4gCjAwMDAwNTkxMDQgMDAwMDAgbiAKMDAwMDA1OTEyMyAwMDAwMCBuIAowMDAwMDU5OTUzIDAwMDAwIG4gCjAwMDAwNTk5NzMgMDAwMDAgbiAKMDAwMDA5NjUyNyAwMDAwMCBuIAowMDAwMDYwMjU0IDAwMDAwIG4gCjAwMDAwNjA0MjcgMDAwMDAgbiAKMDAwMDA2MDQ0NiAwMDAwMCBuIAowMDAwMDYxMzI1IDAwMDAwIG4gCjAwMDAwNjEzNDUgMDAwMDAgbiAKMDAwMDA2MTM5NyAwMDAwMCBuIAowMDAwMDYxNDQ5IDAwMDAwIG4gCjAwMDAwNjE1MDEgMDAwMDAgbiAKMDAwMDA2MTU1MyAwMDAwMCBuIAowMDAwMDYxNjA1IDAwMDAwIG4gCjAwMDAwNjE2NTcgMDAwMDAgbiAKMDAwMDA2MTcwOSAwMDAwMCBuIAowMDAwMDYxNzYxIDAwMDAwIG4gCjAwMDAwNjE5NDQgMDAwMDAgbiAKMDAwMDA2MjE1OSAwMDAwMCBuIAowMDAwMDYyMzQzIDAwMDAwIG4gCjAwMDAwNjI1MzYgMDAwMDAgbiAKMDAwMDA2MjcxOSAwMDAwMCBuIAowMDAwMDYyOTA4IDAwMDAwIG4gCjAwMDAwNjMwOTggMDAwMDAgbiAKMDAwMDA2MzI4NiAwMDAwMCBuIAowMDAwMDYzNDc4IDAwMDAwIG4gCjAwMDAwNjM2NjMgMDAwMDAgbiAKMDAwMDA2Mzg1OSAwMDAwMCBuIAowMDAwMDY0MDM4IDAwMDAwIG4gCjAwMDAwNjQyMTcgMDAwMDAgbiAKMDAwMDA2NDM4OSAwMDAwMCBuIAowMDAwMDY0NTYyIDAwMDAwIG4gCjAwMDAwNjQ3NDAgMDAwMDAgbiAKMDAwMDA2NDkxMSAwMDAwMCBuIAowMDAwMDY1MTM0IDAwMDAwIG4gCjAwMDAwNjUzNDQgMDAwMDAgbiAKMDAwMDA2NTU1NCAwMDAwMCBuIAowMDAwMDY1NzY0IDAwMDAwIG4gCjAwMDAwNjY3MzggMDAwMDAgbiAKMDAwMDA3MTE5NyAwMDAwMCBuIAowMDAwMDY2MDk3IDAwMDAwIG4gCjAwMDAwNjY1NTUgMDAwMDAgbiAKMDAwMDA3NzA3OCAwMDAwMCBuIAowMDAwMDcxMjE5IDAwMDAwIG4gCjAwMDAwNzE1MDEgMDAwMDAgbiAKMDAwMDA3MTc4MyAwMDAwMCBuIAowMDAwMDcxOTk5IDAwMDAwIG4gCjAwMDAwNzIwMTkgMDAwMDAgbiAKMDAwMDA3MjkzMSAwMDAwMCBuIAowMDAwMDcyOTUyIDAwMDAwIG4gCjAwMDAwNzMyMzQgMDAwMDAgbiAKMDAwMDA3MzUxNiAwMDAwMCBuIAowMDAwMDczNzk4IDAwMDAwIG4gCjAwMDAwNzQwODAgMDAwMDAgbiAKMDAwMDA3NDM2MiAwMDAwMCBuIAowMDAwMDc0NjQ0IDAwMDAwIG4gCjAwMDAwNz"
+} -result 1
+
+test is-next-url-1.4 {is next_url many formvars} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain.co.uk?formvar1=foo&formvar2=foo&formvar3=foo&formvar4=foo&formvar5=foo&formvar6=foo&formvar7=foo&formvar8=foo&formvar9=foo&formvar10=foo&formvar11=foo&formvar12=foo&formvar13=foo&formvar13=foo&formvar14=foo&formvar15=foo&formvar16=foo&formvar17=foo&formvar18=foo&formvar19=foo&formvar20=foo&formvar21=foo&formvar22=foo&formvar23=foo&formvar24=foo&formvar25=foo&formvar26=foo&formvar27=foo&formvar28=foo&formvar29=foo&formvar30=foo&formvar31=foo&formvar32=foo&formvar33=foo&formvar34=foo&formvar35=foo&formvar35=foo&formvar36=foo&formvar37=foo&formvar38=foo&formvar39=foo&formvar40=foo&formvar41=foo&formvar42=foo&formvar43=foo&formvar44=foo&formvar45=foo&formvar46=foo&formvar47=foo&formvar48=foo&formvar49=foo&formvar50=foo&formvar51=foo&formvar52=foo&formvar53=foo&formvar54=foo
+} -result 1
+
+test is-next-url-1.5 {is next_url ftp} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url ftp://www.domain.co.uk
+} -result 0
+
+test is-next-url-1.6 {is next_url of different domain} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain1.co.uk
+} -result 0
+
+test is-next-url-1.7 {is next_url with anchor} -setup {
+    proc qc::conn_host {} {
+        return www.domain.co.uk
+    }
+} -body {
+    qc::is next_url https://www.domain.co.uk#id
+} -result 1
+
+
 cleanupTests
