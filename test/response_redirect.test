@@ -238,4 +238,32 @@ test response_redirect1.13 \
     } \
     -result {action {redirect {value https://www.fallback.co.uk/admin.tcl}}}
 
+test response_redirect1.14 \
+    {response redirect non-legacy 443 with query string} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk?x=y"
+        return [qc::response action redirect $url]
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk?x=y}}}
+
+test response_redirect1.15 \
+    {response redirect non-legacy 443 with anchor} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol "https"
+        ns_conn _set headers [ns_set create headers \
+                                "Host" "www.qcode.co.uk" \
+                             ]
+        set url "https://www.qcode.co.uk#id"
+        return [qc::response action redirect $url]
+    } \
+    -result {action {redirect {value https://www.qcode.co.uk#id}}}
+
 cleanupTests
