@@ -923,6 +923,25 @@ proc qc::db_user_is_superuser {username} {
     }
 }
 
+proc qc::db_user_is_member {username rolename} {
+    #| Returns true if specified username is a member of $rolename
+
+    set qry {
+        select
+        r.rolname,
+        u.rolname
+        FROM pg_catalog.pg_auth_members m
+        JOIN pg_catalog.pg_roles r ON (m.roleid = r.oid)
+        JOIN pg_catalog.pg_roles u ON (m.member=u.oid)
+        where u.rolname=:username and r.rolname=:rolename;
+    }
+    db_0or1row $qry {
+        return false
+    } {
+	return true
+    }
+}
+
 proc qc::db_is {data_type value} {
     #| Determines if the value is a database data type.
     set qry {
