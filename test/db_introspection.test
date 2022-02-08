@@ -290,3 +290,20 @@ test db_user-1.0 {db_user} -setup $setup -cleanup $cleanup -body {
     qc::db_user
 } -result "test_user"
 
+test db_user_is_member-1.0 {} -setup $setup -cleanup $cleanup -body {
+    qc::db_user_is_member test_user_no_membership test_user
+} -result "false"
+
+test db_user_is_member-1.1 {} -setup $setup -cleanup $cleanup -body {
+    qc::db_user_is_member test_user_with_membership test_user
+} -result "true"
+
+test db_user_is_member-1.2 {} -setup $setup -cleanup $cleanup -body {
+    qc::db_user_is_member test_user_with_membership wrong_role
+} -result "false"
+
+test db_user_is_member-1.3 {} -setup $setup -cleanup $cleanup -body {
+    qc::db_user_is_member not_a_user test_user
+} -result "false"
+
+cleanupTests
