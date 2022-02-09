@@ -84,6 +84,8 @@ set setup_outside_naviserver {
         drop user if exists test_user;
         CREATE USER test_user WITH PASSWORD 'test_password';
         GRANT ALL PRIVILEGES ON DATABASE test_database TO test_user;
+        CREATE USER test_user_no_membership;
+        CREATE USER test_user_with_membership in role test_user;
     }
     pg_disconnect $conn_superuser
     
@@ -114,6 +116,8 @@ set cleanup_outside_naviserver {
     pg_execute $conn_superuser {DROP DATABASE IF EXISTS test_database}
     pg_execute $conn_superuser {
         DROP ROLE IF EXISTS test_user;
+        DROP ROLE IF EXISTS test_user_no_membership;
+        DROP ROLE IF EXISTS test_user_with_membership;
     }
     pg_disconnect $conn_superuser
     
