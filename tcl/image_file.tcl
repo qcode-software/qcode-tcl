@@ -294,7 +294,7 @@ proc qc::image_handler {
         return [$image_redirect_handler $cache_dir]
     } on error {error_message options} {
         # Error handler
-        return [$error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]]
+        return [$error_handler $error_message $options]
     }
 }
 
