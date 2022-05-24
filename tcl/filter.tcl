@@ -177,7 +177,7 @@ proc qc::filter_http_request_validate {event {error_handler "qc::error_handler"}
         
         return filter_ok
     } on error {error_message options} {
-        $error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
+        $error_handler $error_message $options
         return filter_return
     }
 }
@@ -220,7 +220,7 @@ proc qc::filter_file_alias_paths {event http_method {error_handler qc::error_han
         }
         return filter_ok
     } on error {error_message options} {
-        $error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]
+        $error_handler $error_message $options
         return filter_return
     }
 }     
@@ -393,8 +393,7 @@ proc qc::filter_form_variables_validate {event args} {
         
         return filter_ok
     } on error {error_message options} {
-        $error_handler $error_message [dict get $options -errorinfo] \
-            [dict get $options -errorcode]
+        $error_handler $error_message $options
         return filter_return
     }
 }

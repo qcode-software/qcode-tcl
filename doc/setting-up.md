@@ -70,7 +70,7 @@ proc conn_marshal {} {
             qc::return2client code 404 html "Not Found"
         }
     } on error [list error_message options] {
-        return [qc::error_handler $error_message [dict get $options -errorinfo] [dict get $options -errorcode]]
+        return [qc::error_handler $error_message $options]
     }
 }
 

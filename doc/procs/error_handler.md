@@ -5,7 +5,7 @@ part of [Docs](../index.md)
 
 Usage
 -----
-`qc::error_handler ?error_message? ?error_info? ?error_code?`
+`qc::error_handler ?error_message? ?(error_info error_code | options)?`
 
 Description
 -----------
