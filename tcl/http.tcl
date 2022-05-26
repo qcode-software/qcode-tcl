@@ -453,8 +453,14 @@ proc qc::IANAEncoding2TclEncoding {IANAName} {
         "gb2312"      {return gb2312}
         "big5"        {return big5}
         "cp866"       {return cp866}
+        
+        "windows-1250" -
         "cp1250"      {return cp1250}
+        
+        "windows-1253" -
         "cp1253"      {return cp1253}
+
+        "windows-1254" -
         "cp1254"      {return cp1254}
 
         "windows-1255" -
