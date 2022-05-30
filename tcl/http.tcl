@@ -380,7 +380,6 @@ proc qc::http_patch {args} {
     #   ?-valid_response_codes 200? \
     #   ?-header 0? \
     #   ?-timeout timeout? \
-    #   ?-infile infile? \
     #   ?-data data? \
     #   ?-headers {name value name value ...}? \
     #   url
