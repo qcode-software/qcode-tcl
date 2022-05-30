@@ -165,4 +165,30 @@ test http_head-1.0 {http_head} -body {
     }
 } -result {hello}
 
+test http_patch-1.0  \
+    {http_post (multipart)} \
+    -setup {} \
+    -body {
+        set data {{"test": "this is a test"}}
+        set response [http_patch \
+                          -headers {Content-Type application/json} \
+                          -data $data -- \
+                          http://httpbin.org/patch]
+        set dict [::json::json2dict $response]
+
+        # Check Content-Type
+        if { [dict get $dict headers "Content-Type"] ne "application/json" } {
+            error "Content-Type mismatch"
+        }
+
+        # Check JSON
+        if { ![dict exists $dict json test] } {
+            error "JSON key missing"
+        } elseif { [dict get $dict json test] ne "this is a test" } {
+            error "JSON value mismatch"
+        }
+
+        return true
+    } -result true
+
 cleanupTests
