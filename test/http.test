@@ -166,17 +166,18 @@ test http_head-1.0 {http_head} -body {
 } -result {hello}
 
 test http_patch-1.0  \
-    {http_post (multipart)} \
+    {Send an HTTP PATCH request with JSON payload.} \
     -setup {} \
     -body {
         set data {{"test": "this is a test"}}
         set response [http_patch \
                           -headers {Content-Type application/json} \
-                          -data $data -- \
+                          -data $data \
+                          -- \
                           http://httpbin.org/patch]
         set dict [::json::json2dict $response]
 
-        # Check Content-Type
+        # Check Content-Type submitted to endpoint.
         if { [dict get $dict headers "Content-Type"] ne "application/json" } {
             error "Content-Type mismatch"
         }
@@ -186,6 +187,46 @@ test http_patch-1.0  \
             error "JSON key missing"
         } elseif { [dict get $dict json test] ne "this is a test" } {
             error "JSON value mismatch"
+        }
+
+        return true
+    } -result true
+
+test http_patch-1.1  \
+    {Send an HTTP PATCH request with JSON payload and include headers and code in response.} \
+    -setup {} \
+    -body {
+        set data {{"test": "this is a test"}}
+        set response [http_patch \
+                          -headers {Content-Type application/json} \
+                          -data $data \
+                          -response_code true \
+                          -response_headers true \
+                          -- \
+                          http://httpbin.org/patch]
+        set dict [::json::json2dict [dict get $response body]]
+
+        # Check Content-Type submitted to endpoint.
+        if { [dict get $dict headers "Content-Type"] ne "application/json" } {
+            error "Content-Type mismatch"
+        }
+
+        # Check JSON
+        if { ![dict exists $dict json test] } {
+            error "JSON key missing"
+        } elseif { [dict get $dict json test] ne "this is a test" } {
+            error "JSON value mismatch"
+        }
+
+        set response_headers [dict get $response headers]
+        set response_code [dict get $response code]
+
+        if { [dict size $response_headers] == 0 } {
+            error "Missing response headers"
+        }
+
+        if { $response_code eq "" } {
+            error "Missing response code"
         }
 
         return true
