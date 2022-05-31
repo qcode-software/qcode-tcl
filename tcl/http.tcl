@@ -390,6 +390,8 @@ proc qc::http_patch {args} {
         -sslversion tlsv1 \
         -headers {} \
         -data ? \
+        -response_headers false \
+        -response_code false \
         url
 
     set httpheaders {}
@@ -425,7 +427,27 @@ proc qc::http_patch {args} {
     switch $curlErrorNumber {
         0 {
             if { $responsecode in $valid_response_codes } {
-                return [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                set response_body [encoding convertfrom \
+                                       [qc::http_encoding $return_headers $html] \
+                                       $html]
+
+                if { !$response_headers && !$response_code } {
+                    return $response_body
+                } else {
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
             }
             switch $responsecode {
                 404 {
