@@ -113,6 +113,58 @@ proc qc::_s3_get { bucket object_key } {
     return $result
 }
 
+proc qc::_s3_exists { bucket object_key } {
+    #| Returns boolean true/false for 200/404 responses, anything else
+    #| returns an error.
+    set timeout 60
+    set url [qc::_s3_endpoint $bucket $object_key]
+
+    set httpheaders [list]
+    foreach {name value} [qc::_s3_auth_headers HEAD $object_key $bucket] {
+	lappend httpheaders [qc::http_header $name $value]
+    }
+
+    dict2vars [qc::http_curl \
+                    -nobody 1 \
+                    -httpheader $httpheaders \
+                    -url $url \
+                    -sslverifypeer 0 \
+                    -sslverifyhost 0 \
+                    -timeout $timeout \
+                    -followlocation 1 \
+               ] responsecode curlErrorNumber
+
+    switch $curlErrorNumber {
+	0 {
+	    switch $responsecode {
+		200 {
+		    # OK
+		    return true
+		}
+		404 {
+                    return false
+                }
+		500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+		default {
+                    return \
+                        -code error \
+                        -errorcode CURL \
+                        "RESPONSE $responsecode while contacting $url"
+                }
+	    }
+	}
+	28 {
+	    return \
+                -code error \
+                -errorcode TIMEOUT \
+                "Timeout after $timeout seconds trying to contact $url"
+	}
+	default {
+	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
+	}
+    }
+}
+
 proc qc::_s3_head { bucket object_key } {
     #| Construct the http HEAD request to S3 including auth headers
     set headers [_s3_auth_headers HEAD $object_key $bucket] 
