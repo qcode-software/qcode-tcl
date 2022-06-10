@@ -9,28 +9,54 @@ foreach file $files {
 
 # _s3_endpoint - test for the private proc qc::_s3_endpoint
 test s3-endpoint-1.0 {qc::_s3_endpoint: bucket} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint bucket
 } -result {bucket.s3.amazonaws.com}
 
 test s3-endpoint-1.1 {qc::_s3_endpoint: bucket and key 1} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint bucket ""
 } -result {bucket.s3.amazonaws.com/}
 
 test s3-endpoint-1.2 {qc::_s3_endpoint: bucket and key 2} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint bucket key
 } -result {bucket.s3.amazonaws.com/key}
 
 test s3-endpoint-1.3 {qc::_s3_endpoint: s3_uri 1} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint "s3://bucket"
 } -result {bucket.s3.amazonaws.com/}
 
 test s3-endpoint-1.4 {qc::_s3_endpoint: s3_uri 2} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint "s3://bucket/"
 } -result {bucket.s3.amazonaws.com/}
 
 test s3-endpoint-1.5 {qc::_s3_endpoint: s3_uri 3} -body {
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        unset ::env(AWS_DEFAULT_REGION)
+    }
     qc::_s3_endpoint "s3://bucket/key"
 } -result {bucket.s3.amazonaws.com/key}
+
+
+test s3-endpoint-1.6 {qc::_s3_endpoint: s3_uri default region set} -body {
+    set ::env(AWS_DEFAULT_REGION) "eu-west-1"
+    set result [qc::_s3_endpoint "s3://bucket/key"]
+    unset ::env(AWS_DEFAULT_REGION)
+    return $result
+} -result {bucket.s3.eu-west-1.amazonaws.com/key}
 
 cleanupTests
 

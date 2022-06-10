@@ -30,9 +30,15 @@ proc qc::_s3_endpoint { args } {
         set object_key_exists true
     } else {
         error "Invalid number of arguments: Usage: \"qc::_s3_endpoint bucket object_key\" or \"qc::_s3_endpoint s3_uri\"."
-    } 
+    }
 
-    set endpoint "s3.amazonaws.com"
+    # Use regional endpoint if default region is set - otherwise default to apex domain.
+    if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+        set endpoint "s3.${::env(AWS_DEFAULT_REGION)}.amazonaws.com"
+    } else {
+        set endpoint "s3.amazonaws.com"
+    }
+
     if { $bucket ne "" } {
         set endpoint [join [list $bucket $endpoint] .]
     }
