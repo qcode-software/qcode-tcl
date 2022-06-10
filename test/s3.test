@@ -590,7 +590,7 @@ test s3-exists-1.3 {qc::s3 exists: s3://bucket/remote_filename} -constraints {
 } -result {false}
 
 # exists - Check an object exists on S3
-test s3-exists-1.4 {qc::s3 exists: bucket remote_filename} -constraints {
+test s3-exists-1.4 {qc::s3 exists: bucket remote_filename permissions failure} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_put
@@ -612,7 +612,7 @@ test s3-exists-1.4 {qc::s3 exists: bucket remote_filename} -constraints {
     return $result
 } -returnCodes {
     error
-} -result {RESPONSE 403 while contacting qcodetcl-tcltest-s3.s3.amazonaws.com/s3_tools_test-exists-1.4-test}
+} -result {RESPONSE 403 while contacting qcodetcl-tcltest-s3.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.4-test}
 
 # Cleanup
 test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
