@@ -213,8 +213,24 @@ proc qc::_s3_delete { bucket object_key } {
 proc qc::_s3_save { args } {
     #| Construct the http SAVE request to S3 including auth headers
     qc::args $args -timeout 60 -- bucket object_key filename
+    set tmp_file "/tmp/s3-[qc::uuid]"
     set headers [_s3_auth_headers GET $object_key $bucket] 
-    return [qc::http_save -timeout  $timeout -headers $headers [_s3_endpoint $bucket $object_key] $filename]
+    set result [qc::http_save \
+                    -timeout $timeout \
+                    -headers $headers \
+                    -headervar return_headers \
+                    [_s3_endpoint $bucket $object_key] \
+                    $tmp_file 
+               ]
+    if { [dict exists $return_headers x-amz-meta-content-md5] } {
+        set base64_md5 [dict get $return_headers x-amz-meta-content-md5]
+        if { [qc::_s3_base64_md5 -file $tmp_file]] ne $base64_md5 } {
+            file delete -force $tmp_file
+            error "qc::_s3_save: md5 of downloaded file does not match x-amz-meta-content-md5 ($base64_md5)."
+        }
+    }
+    file copy $tmp_file $filename
+    file delete -force $tmp_file
 }
 
 proc qc::_s3_put { args } {

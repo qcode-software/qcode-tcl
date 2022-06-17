@@ -75,26 +75,11 @@ proc qc::s3 { args } {
                 error "File $local_filename already exists."
             }
             set head_dict [qc::s3 head $s3_uri]
-            if { [dict exists $head_dict x-amz-meta-content-md5] } {
-                set base64_md5 [dict get $head_dict x-amz-meta-content-md5]
-            }
             set file_size [dict get $head_dict Content-Length]
-            if { $file_size == 0 } {
-                error "Empty file at s3 location $s3_uri"
-            }
             # set timeout - allow 1Mb/s
             set timeout_secs [expr {max( (${file_size}*8)/1000000 , 60)} ]
             log Debug "Timeout set at $timeout_secs seconds"
             qc::_s3_save -timeout $timeout_secs $bucket $object_key $local_filename
-            if { [info exists base64_md5] } {
-                # Check the base64 md5 of the downloaded file matches what we put in the x-amz-meta-content-md5 metadata on upload
-                if { [set local_md5 [qc::_s3_base64_md5 -file $local_filename]] ne $base64_md5 } {
-                    error "qc::s3 get: md5 of downloaded file $local_filename ($local_md5) does not match x-amz-meta-content-md5 ($base64_md5)."
-                }
-            }
-            if { $file_size != [file size $local_filename] } {
-                error "qc::s3 get: size of downloaded file ([file size $local_filename]) $local_filename does not match expected $file_size of $s3_uri"
-            }
         }
         exists {
             # usage:
