@@ -690,14 +690,33 @@ proc qc::http_exists {args} {
 
 proc qc::http_save {args} {
     #| Save the HTTP response to a file.
-    args $args -timeout 60 -headers {} -sslversion tlsv1 -sslverifypeer 0 -sslverifyhost 0 -- url file
+    args $args \
+        -timeout 60 \
+        -headers {} \
+        -sslversion tlsv1 \
+        -sslverifypeer 0 \
+        -sslverifyhost 0 \
+        -response_headers false \
+        -- \
+        url \
+        file
 
     set httpheaders {}
     foreach {name value} $headers {
 	lappend httpheaders [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -httpheader $httpheaders -timeout $timeout -url $url -file $file -sslverifypeer $sslverifypeer -sslverifyhost $sslverifyhost -sslversion $sslversion] responsecode curlErrorNumber
+    dict2vars [qc::http_curl \
+                -httpheader $httpheaders \
+                -headervar return_headers \
+                -timeout $timeout \
+                -url $url \
+                -file $file \
+                -sslverifypeer $sslverifypeer \
+                -sslverifyhost $sslverifyhost \
+                -sslversion $sslversion \
+              ] return_headers responsecode curlErrorNumber
+
     if { $responsecode != 200 } {
 	file delete $file
     }
@@ -712,7 +731,11 @@ proc qc::http_save {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-	    return 1
+            if { $response_headers } {
+                return $return_headers
+            } else {
+	        return 1
+            }
 	}
 	default {
 	    file delete $file
