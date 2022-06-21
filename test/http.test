@@ -257,13 +257,12 @@ test http_save-1.1 {http_save no exists} -body {
 
 test http_save-1.2 {http_save with headers} -body {
     set tmp_file /tmp/[qc::uuid]
-    set return_headers [http_save \
-                            -timeout 5 \
-                            -response_headers true \
-                            -- \
-                            http://httpbin.org/html \
-                            $tmp_file
-                       ]
+    http_save \
+        -timeout 5 \
+        -return_headers_var return_headers \
+        -- \
+        http://httpbin.org/html \
+        $tmp_file
     file delete -force $tmp_file
     return [dict get $return_headers Content-Length]
 } -result {3741}

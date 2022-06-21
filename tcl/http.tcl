@@ -696,7 +696,7 @@ proc qc::http_save {args} {
         -sslversion tlsv1 \
         -sslverifypeer 0 \
         -sslverifyhost 0 \
-        -response_headers false \
+        -return_headers_var {} \
         -- \
         url \
         file
@@ -731,11 +731,10 @@ proc qc::http_save {args} {
     switch $curlErrorNumber {
 	0 {
 	    # OK
-            if { $response_headers } {
-                return $return_headers
-            } else {
-	        return 1
+            if { $return_headers_var ne {} } {
+                upset 1 $return_headers_var $return_headers
             }
+	    return 1
 	}
 	default {
 	    file delete $file
