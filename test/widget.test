@@ -384,5 +384,87 @@ test widget-2.4 {widget unknown } -setup {
     widget type hadron_collider name sex value M options {Male M Female F}
 } -returnCodes 1 -cleanup {} -result {No widget proc defined for hadron_collider}
 
+test widget_datalist-1.0 \
+    "widget_datalist - null_option" \
+    -body {
+        return [widget_datalist \
+                    name letter \
+                    value "" \
+                    options {Alpha A Bravo B Charlie C} \
+                    null_option yes \
+                   ]
+    } \
+    -result {<input style="" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option></datalist>}
+
+test widget_datalist-1.1 \
+    "widget_datalist - tooltip" \
+    -body {
+        return [widget_datalist \
+                    name letter \
+                    value "" \
+                    options {Alpha A Bravo B Charlie C} \
+                    tooltip "This is a tooltip" \
+                   ]
+    } \
+    -result {<input style="" id="letter" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option></datalist>}
+
+test widget_datalist-1.2 \
+    "widget_datalist - title" \
+    -body {
+        return [widget_datalist \
+                    name letter \
+                    value "" \
+                    options {Alpha A Bravo B Charlie C} \
+                    title "This is a tooltip" \
+                   ]
+    } \
+    -result {<input style="" id="letter" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option></datalist>}
+
+test widget_datalist-1.3 \
+    "widget_datalist - width" \
+    -body {
+        return [widget_datalist \
+                    name letter \
+                    value "" \
+                    options {Alpha A Bravo B Charlie C} \
+                    width 100 \
+                   ]
+    } \
+    -result {<input style="width:100px" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option></datalist>}
+
+test widget_datalist-1.4 \
+    "widget_datalist - error missing options" \
+    -body {
+        return [widget_datalist \
+                    name letter \
+                    value "" \
+                   ]
+    } \
+    -returnCodes 1 \
+    -result {Missing value for arg "options" when calling "widget_datalist name letter value {}"}
+
+test widget-1.6 \
+    "widget datalist" \
+    -body {
+        return [widget \
+                    type datalist \
+                    name letter \
+                    value "" \
+                    options {Alpha A Bravo B Charlie C} \
+                   ]
+    } \
+    -result {<input style="" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B">Bravo</option>
+<option value="C">Charlie</option></datalist>}
+
+
 
 cleanupTests

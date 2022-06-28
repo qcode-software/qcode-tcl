@@ -198,6 +198,59 @@ proc qc::widget_select { args } {
     return $html
 }
 
+proc qc::widget_datalist { args } {
+    #| 	Return an HTML datalist.
+    args_check_required $args name value options
+    set name_selected "-"
+    array set this $args
+    if { [info exists this(sticky)] && [true $this(sticky)] } {
+        # sticky values
+        if { [info exists this(sticky_url)] && [sticky_exists -url $this(sticky_url) $this(name)] } {
+            set this(value) [sticky_get -url $this(sticky_url) $this(name)]
+        } elseif { [sticky_exists $this(name)] } {
+            set this(value) [sticky_get $this(name)]
+        }
+    }
+    default this(null_option) no
+    if { [info exists this(name)] } { 
+	default this(id) $this(name)
+    }
+    if { [info exists this(tooltip)] } {
+        set this(title) $this(tooltip)
+    }
+
+    default this(style) ""
+    if { [info exists this(width)] } {
+        set this(style) [qc::style_set $this(style) width $this(width)]
+    }
+    
+    set options_html [list]
+    foreach {name value} $this(options) {
+	if { [string equal $name $this(value)] || [string equal $value $this(value)] } {
+	    set name_selected $name
+	    lappend options_html [html option $name value $value selected true]
+	} else {
+	    lappend options_html [html option $name value $value] 
+	}
+    }
+
+    if { [info exists this(disabled)] && [string is true $this(disabled)] } {
+        set html [html span $name_selected {*}[dict_subset [array get this] title]]
+        append html [html_tag input type hidden {*}[dict_subset [array get this] name value id]]
+    } else {
+        set html [h input \
+                      {*}[qc::dict_exclude [array get this] required label type options null_option value units tooltip width] \
+                      list $this(id)_datalist \
+                     ]
+        append html [h datalist \
+                         id $this(id)_datalist \
+                         [join $options_html \n] \
+                        ]
+    }
+
+    return $html
+}
+
 proc qc::widget_span { args } {
     #| Return a span element showing the value of the widget.
     args_check_required $args name value 
