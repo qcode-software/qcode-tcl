@@ -219,10 +219,12 @@ proc qc::widget_datalist { args } {
         set this(title) $this(tooltip)
     }
 
-    set options_html {}
-    if { [string is true $this(null_option)] } {
-	lappend options_html "<option value=\"\">- Select -</option>"
+    default this(style) ""
+    if { [info exists this(width)] } {
+        set this(style) [qc::style_set $this(style) width $this(width)]
     }
+    
+    set options_html [list]
     foreach {name value} $this(options) {
 	if { [string equal $name $this(value)] || [string equal $value $this(value)] } {
 	    set name_selected $name
@@ -237,7 +239,7 @@ proc qc::widget_datalist { args } {
         append html [html_tag input type hidden {*}[dict_subset [array get this] name value id]]
     } else {
         set html [h input \
-                      {*}[qc::dict_exclude [array get this] required label type options null_option value units tooltip] \
+                      {*}[qc::dict_exclude [array get this] required label type options null_option value units tooltip width] \
                       list $this(id)_datalist \
                      ]
         append html [h datalist \
