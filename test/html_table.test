@@ -349,7 +349,7 @@ test html_table_tfoot_sums-1.0 {html_table_tfoot_sums } -setup {
 test html_table_wants_sum-1.0 {html_table_wants_sum true} -setup {
     set cols {
         {width 50 label Name tfoot Total}
-        {label Balance class money sum yes }
+        {label Balance class money sum yes}
     }
 } -body {
     html_table_wants_sum $cols 
@@ -359,8 +359,8 @@ test html_table_wants_sum-1.0 {html_table_wants_sum true} -setup {
 
 test html_table_wants_sum-1.1 {html_table_wants_sum not present} -setup {
     set cols {
-        {width 50 label Name tfoot Total}
-        {label Balance class money }
+        {width 50 label Name}
+        {label Balance class money}
     }
 } -body {
     html_table_wants_sum $cols 
@@ -370,14 +370,25 @@ test html_table_wants_sum-1.1 {html_table_wants_sum not present} -setup {
 
 test html_table_wants_sum-1.2 {html_table_wants_sum false} -setup {
     set cols {
-        {width 50 label Name tfoot Total}
-        {label Balance class money sum no }
+        {width 50 label Name}
+        {label Balance class money sum no}
     }
 } -body {
     html_table_wants_sum $cols 
 } -cleanup {
     unset cols
 } -result 0
+
+test html_table_wants_sum-1.3 {html_table_wants_sum from tfoot} -setup {
+    set cols {
+        {width 50 label Name tfoot Total}
+        {label Balance class money}
+    }
+} -body {
+    html_table_wants_sum $cols 
+} -cleanup {
+    unset cols
+} -result 1
 
 test html_table_wants_col_labels-1.0 {html_table_wants_col_labels true} -setup {
     set cols {
