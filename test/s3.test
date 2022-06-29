@@ -612,7 +612,7 @@ test s3-exists-1.4 {qc::s3 exists: bucket remote_filename permissions failure} -
     return $result
 } -returnCodes {
     error
-} -result {RESPONSE 403 while contacting qcodetcl-tcltest-s3.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.4-test}
+} -result "RESPONSE 403 while contacting ${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.4-test"
 
 # Cleanup
 test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
