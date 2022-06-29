@@ -263,11 +263,14 @@ proc qc::html_table_tfoot_sums {cols tbodyVar} {
 }
 
 proc qc::html_table_wants_sum {cols} {
-    # look for "sum yes" in any col
+    # look for "sum yes" or "tfoot value" in any col
     foreach col $cols {
 	if { [dict exists $col sum] && [string is true [dict get $col sum]] } {
 	    return 1
 	}
+        if { [dict exists $col tfoot] } {
+            return 1
+        }
     }
     return 0
 }
