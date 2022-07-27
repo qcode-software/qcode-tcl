@@ -1016,7 +1016,7 @@ proc qc::db_table_check_constraints_eval {
     #|     }
     #|   }
     #| }
-    set constraints [qc::memoize db_table_check_constraints $schema $table]
+    set constraints [qc::memoize qc::db_table_check_constraints $schema $table]
     set results [dict create \
                      passed [dict create] \
                      failed [dict create]]
