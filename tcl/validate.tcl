@@ -5,7 +5,8 @@ proc qc::validate2model {dict} {
     #| Validates dictionary against the data model and sets up the record in the global data structure.
     #| First checks all types. If all are valid, proceeds to check constraints.
     set all_valid true
-    set cast_dict [dict create]
+    set cast_values [dict create]
+
     dict for {name value} $dict {
         # Resolve name to column, table, and schema
         lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
@@ -31,7 +32,7 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } elseif {$nullable && $value eq ""} {
-            dict set cast_dict $name ""
+            dict set cast_values $schema $table $column ""
             continue
         }
         # Check value against data type
@@ -40,35 +41,22 @@ proc qc::validate2model {dict} {
             set all_valid false
             continue
         } 
-        dict set cast_dict $name [qc::cast $data_type $value]
+
+        dict set cast_values $schema $table $column [qc::cast $data_type $value]
     }
 
     if { $all_valid } {
-        # continue to do the constraint checking
-        dict for {name value} $cast_dict {
-
-            # Check if null
-            if { $value eq ""} {
-                continue
+        dict for {schema tables} $cast_values {
+            dict for {table columns} $tables {
+                set results [qc::db_table_check_constraints_eval $schema $table $columns]
+                dict for {constraint columns} [dict get $results failed] {
+                    dict for {column value} $columns {
+                        set message [qc::memoize qc::db_validation_message $table $column]
+                        qc::response record invalid $column $value $message
+                        set all_valid false
+                    }
+                }
             }
-
-            # Resolve name to column, table, and schema
-            lassign [qc::memoize qc::db_resolve_field_name $name] {*}{
-                schema
-                table
-                column
-            }
-
-            set message [qc::memoize qc::db_validation_message $table $column]
-
-            # Check constraints
-            set constraint_results [qc::db_eval_column_constraints $schema $table $column $cast_dict]
-            if {[llength $constraint_results] > 0 && ! [expr [join [dict values $constraint_results] " && "]] } {
-                # Constraint checking failed - skip further checks
-                qc::response record invalid $column $value $message
-                set all_valid false
-                continue
-            }         
         }
     }
 
@@ -77,6 +65,6 @@ proc qc::validate2model {dict} {
     } else {
         qc::response status valid
     }
-    
+
     return $all_valid
 }

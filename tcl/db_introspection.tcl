@@ -955,3 +955,105 @@ proc qc::db_is {data_type value} {
         return f
     }
 }
+
+proc qc::db_table_check_constraints {schema table} {
+    #| Get all check constraints for the given table.
+    #| Return value is a list of constraints where each constraint is a dict
+    #| with the following keys:
+    #|   constraint_name - The name of the check constraint.
+    #|   check_clause    - The check constraint clause.
+    #|   column_names    - The columns used in the check constraint clause.
+
+    set qry {
+        select
+        cc.constraint_name,
+        check_clause,
+        array_agg(ccu.column_name) as column_names
+
+        from
+        information_schema.check_constraints cc
+        join information_schema.constraint_column_usage ccu
+            on cc.constraint_name=ccu.constraint_name
+            and ccu.constraint_schema=cc.constraint_schema
+
+        where
+        ccu.table_schema=:schema
+        and ccu.table_name=:table
+
+        group by
+        cc.constraint_name,
+        check_clause
+    }
+
+    set constraints [list]
+
+    qc::db_cache_foreach -ttl 86400 $qry {
+        lappend constraints [dict create \
+                                 constraint_name $constraint_name \
+                                 check_clause $check_clause \
+                                 column_names [qc::sql_array2list $column_names]]
+    }
+
+    return $constraints
+}
+
+proc qc::db_table_check_constraints_eval {
+    schema
+    table
+    column_values
+} {
+    #| Evaluate check constraints in the given table that use columns specified in column_values.
+    #| Returns a dict of passed and failed check constraints e.g.:
+    #| {
+    #|   passed {
+    #|     customer_firstname_check {firstname Joe}
+    #|     customer_surname_check   {surname Bloggs}
+    #|   }
+    #|   failed {
+    #|     customer_invoice_email_check {
+    #|       send_invoice_by EMAIL
+    #|       invoice_email   {}
+    #|     }
+    #|   }
+    #| }
+    set constraints [qc::memoize qc::db_table_check_constraints $schema $table]
+    set results [dict create \
+                     passed [dict create] \
+                     failed [dict create]]
+
+    foreach constraint $constraints {
+
+        qc::dict2vars $constraint {*}{
+            constraint_name
+            check_clause
+            column_names
+        }
+
+        # Narrow down values to pass to db_eval_constraint.
+        # Evaluating a check constraint is much quicker if only the necessary values are given.
+        set check_column_values [dict create]
+
+        dict for {column value} $column_values {
+            if { $column in $column_names } {
+                dict set check_column_values $column $value
+            }
+        }
+
+        if { [dict size $check_column_values] == 0 } {
+            continue
+        }
+
+        if { [qc::db_eval_constraint \
+                 -schema $schema \
+                 -- \
+                 $table \
+                 $check_clause \
+                 {*}$check_column_values] } {
+            dict set results passed $constraint_name $check_column_values
+        } else {
+            dict set results failed $constraint_name $check_column_values
+        }
+    }
+
+    return $results
+}

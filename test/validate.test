@@ -1,0 +1,116 @@
+package require tcltest
+package require Pgtcl
+namespace import {*}{
+    ::tcltest::test
+    ::tcltest::cleanupTests
+    ::tcltest::testConstraint
+}
+
+source ~/qcode-tcl/test/db_setup.tcl
+
+set setup_extra $setup
+append setup_extra {
+    db_cache_clear
+
+    db_dml {
+        create table validation_messages (
+            table_name text not null,
+            column_name text not null,
+            message text not null
+        );
+
+        alter table students
+        add constraint firstname_not_root check(firstname != 'root'),
+        add constraint surname_not_html check(surname !~ '[<>]');
+    }
+
+    set dict [dict create \
+                  students.student_id 1 \
+                  students.firstname Test \
+                  students.surname Tester \
+                  students.dob 2000-01-1 \
+                  courses.course_id 10 \
+                  courses.title Testing]
+}
+
+append cleanup_qry {
+    drop table validation_messages;
+}
+
+test validate2model-1.0 \
+    {Pass type and check constraint validation.} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        set result [qc::validate2model $dict]
+
+        if { $result } {
+            global data
+            return [expr {
+                          [dict get $data status] eq "valid"
+                          && [dict get $data record student_id valid]
+                          && [dict get $data record firstname valid]
+                          && [dict get $data record surname valid]
+                          && [dict get $data record dob valid]
+                          && [dict get $data record course_id valid]
+                          && [dict get $data record title valid]
+                      }]
+        } else {
+            return 0
+        }
+    } \
+    -result 1
+
+test validate2model-1.1 \
+    {Fail type validation.} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        dict set dict students.firstname ""
+        dict set dict students.dob Test
+        set result [qc::validate2model $dict]
+
+        if { !$result } {
+            global data
+            return [expr {
+                          [dict get $data status] eq "invalid"
+                          && [dict get $data record student_id valid]
+                          && ![dict get $data record firstname valid]
+                          && [dict get $data record surname valid]
+                          && ![dict get $data record dob valid]
+                          && [dict get $data record course_id valid]
+                          && [dict get $data record title valid]
+                      }]
+        } else {
+            return 0
+        }
+    } \
+    -result 1
+
+test validate2model-1.2 \
+    {Fail check constraint validation.} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        dict set dict students.firstname root
+        dict set dict students.surname <test>
+        set result [qc::validate2model $dict]
+        
+        if { !$result } {
+            global data
+            return [expr {
+                          [dict get $data status] eq "invalid"
+                          && [dict get $data record student_id valid]
+                          && ![dict get $data record firstname valid]
+                          && ![dict get $data record surname valid]
+                          && [dict get $data record dob valid]
+                          && [dict get $data record course_id valid]
+                          && [dict get $data record title valid]
+                      }]
+        } else {
+            return 0
+        }
+    } \
+    -result 1
+
+cleanupTests

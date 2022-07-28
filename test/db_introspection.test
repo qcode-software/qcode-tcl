@@ -306,4 +306,112 @@ test db_user_is_member-1.3 {} -setup $setup -cleanup $cleanup -body {
     qc::db_user_is_member not_a_user test_user
 } -result "false"
 
+set setup_extra $setup
+append setup_extra {
+    db_cache_clear
+
+    db_dml {
+        alter table students add constraint nohtml check(surname !~ '[<>]')
+    }
+
+    set expected [dict create \
+                      constraint_name nohtml \
+                      check_clause {(((surname)::text !~ '[<>]'::text))} \
+                      column_names [list surname]]
+}
+
+test db_table_check_constraints-1.0 \
+    {Get check constraints for a table} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        set constraints [qc::db_table_check_constraints public students]
+
+        return [expr {[llength $constraints] == 1
+                      && [qc::dicts_diff_any $expected [lindex $constraints 0]] eq ""}]
+    } \
+    -result 1
+
+set setup_extra $setup
+append setup_extra {
+    db_cache_clear
+
+    db_dml {
+        alter table students
+        add constraint firstname_not_root check(firstname != 'root'),
+        add constraint surname_not_html check(surname !~ '[<>]');
+    }
+}
+
+test db_table_check_constraints_eval-1.0 \
+    {Evaluate check constraints for a table - All pass} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        set results [qc::db_table_check_constraints_eval \
+                         public \
+                         students \
+                         [dict create \
+                              firstname John \
+                              surname Doe]]
+
+        return [expr {
+                      [dict exists $results passed firstname_not_root firstname]
+                      && [dict get $results passed firstname_not_root firstname] eq "John"
+                      && [dict exists $results passed surname_not_html surname]
+                      && [dict get $results passed surname_not_html surname] eq "Doe"
+                      && [dict size [dict get $results passed]] == 2
+                      && [dict exists $results failed]
+                      && [dict size [dict get $results failed]] == 0
+                  }]
+    } \
+    -result 1
+
+test db_table_check_constraints_eval-1.1 \
+    {Evaluate check constraints for a table - All fail} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        set results [qc::db_table_check_constraints_eval \
+                         public \
+                         students \
+                         [dict create \
+                              firstname root \
+                              surname {<html>}]]
+
+        return [expr {
+                      [dict exists $results passed]
+                      && [dict size [dict get $results passed]] == 0
+                      && [dict exists $results failed firstname_not_root firstname]
+                      && [dict get $results failed firstname_not_root firstname] eq "root"
+                      && [dict exists $results failed surname_not_html surname]
+                      && [dict get $results failed surname_not_html surname] eq {<html>}
+                      && [dict size [dict get $results failed]] == 2
+                  }]
+    } \
+    -result 1
+
+test db_table_check_constraints_eval-1.2 \
+    {Evaluate check constraints for a table - One pass one fail} \
+    -setup $setup_extra \
+    -cleanup $cleanup \
+    -body {
+        set results [qc::db_table_check_constraints_eval \
+                         public \
+                         students \
+                         [dict create \
+                              firstname John \
+                              surname {<html>}]]
+
+        return [expr {
+                      [dict exists $results passed firstname_not_root firstname]
+                      && [dict get $results passed firstname_not_root firstname] eq "John"
+                      && [dict exists $results failed surname_not_html surname]
+                      && [dict get $results failed surname_not_html surname] eq {<html>}
+                      && [dict size [dict get $results passed]] == 1
+                      && [dict size [dict get $results failed]] == 1
+                  }]
+    } \
+    -result 1
+
 cleanupTests
