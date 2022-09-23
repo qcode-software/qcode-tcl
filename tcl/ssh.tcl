@@ -25,14 +25,15 @@ proc qc::ssh_call_proc {args} {
     set proc_name [qc::lshift args]
     set script [qc::info_proc $proc_name]
     append script \n "puts \[$proc_name $args\]"
-    set filename [qc::file_temp $script]
+    set filename_local  [qc::file_temp $script]
+    set filename_remote "/tmp/tmp-[qc::uuid]"
     ::try {
-	scp $filename ${username}@${host}:$filename
-	set out [ssh ${username}@${host} /usr/bin/tclsh $filename]
-	ssh ${username}@${host} rm $filename    
+	scp $filename_local ${username}@${host}:$filename_remote
+	set out [ssh ${username}@${host} /usr/bin/tclsh $filename_remote]
+	ssh ${username}@${host} rm $filename_remote
     } on error {} {
-	ssh ${username}@${host} rm -f $filename    
+	ssh ${username}@${host} rm -f $filename_remote
     }
-    file delete $filename
+    file delete $filename_local
     return $out
 }
