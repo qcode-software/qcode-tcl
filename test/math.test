@@ -128,6 +128,31 @@ test mult-1.2 {mult large } -setup {
     mult 4e12 4e12
 } -cleanup {} -result {1.6E+25}
 
+test divide-1.0 {divide simple } -setup {
+} -body {
+    divide 2 2
+} -cleanup {} -result {1}
+
+test divide-1.1 {divide 0 by int } -setup {
+} -body {
+    divide 0 4
+} -cleanup {} -result {0}
+
+test divide-1.2 {divide large } -setup {
+} -body {
+    divide 4e12 2e12
+} -cleanup {} -result {2}
+
+test divide-1.3 {divide - avoid floating point issues with result 0.49499999999999994 } -setup {
+} -body {
+    divide [qc::mult 1.65 3] 10
+} -cleanup {} -result {0.495}
+
+test divide-1.4 {divide by 0 } -setup {
+} -body {
+    divide 10 0
+} -cleanup {} -returnCodes 1 -result {divide by zero}
+
 test exp2string-1.0 {exp2string exponential } -setup {
 } -body {
     exp2string -1.23e6
