@@ -1,5 +1,5 @@
 namespace eval qc {
-    namespace export round round_up rshift10 intplaces add sum subtr mult exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
+    namespace export round round_up rshift10 intplaces add sum subtr mult divide exp2string base frombase mantissa_exponent sigfigs sigfigs_ceil
 
     # Import Math functions
     namespace import ::tcl::mathfunc::max
@@ -134,6 +134,16 @@ proc qc::mult { n1 n2 } {
     set n1 [::math::decimal::fromstr $n1]
     set n2 [::math::decimal::fromstr $n2]
     return [::math::decimal::tostr [::math::decimal::multiply $n1 $n2]]
+}
+
+proc qc::divide { n1 n2 } {
+    #| Divides 2 numbers using decimal arithmetic (::math::decimal).
+    if { $n2 == 0 } {
+        error "divide by zero"
+    }
+    set n1 [::math::decimal::fromstr $n1]
+    set n2 [::math::decimal::fromstr $n2]
+    return [::math::decimal::tostr [::math::decimal::divide $n1 $n2]]
 }
 
 proc qc::exp2string { number } {
