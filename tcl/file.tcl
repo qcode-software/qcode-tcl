@@ -55,41 +55,51 @@ proc qc::file_upload {name chunk chunks file} {
 
     # Move the AOLserver generated tmp file to one we will keep
     file rename [ns_getformfile file] $tmp_file
-    if { [nsv_exists uploads $user_id] } {
-	set dict [nsv_get uploads $user_id]
-    } else {
-	set dict {}
-    }
-    dict set dict $id $chunk $tmp_file
-    dict set dict $id chunks $chunks
-    dict set dict $id filename $file
 
-    set complete true
-    foreach chunk [.. 0 $chunks-1] {
-	if { ![dict exists $dict $id $chunk] } {
-	    set complete false
-	    break
-	} else {
-	    lappend files /tmp/$id.$chunk
-	}
+    if { ![nsv_exists locks $user_id] } {
+        nsv_set locks $user_id [ns_mutex create]
     }
-    if { $complete } {
-	# Join parts together
-        ::try {
-            exec_proxy cat {*}$files > /tmp/$id
-        } finally {
-            # Clean up
-            foreach file $files {
-                file delete $file
+
+    ns_mutex eval [nsv_get locks $user_id] {
+        if { [nsv_exists uploads $user_id] } {
+            set dict [nsv_get uploads $user_id]
+        } else {
+            set dict {}
+        }
+        dict set dict $id $chunk $tmp_file
+        dict set dict $id chunks $chunks
+        dict set dict $id filename $file
+
+        set complete true
+        foreach chunk [.. 0 $chunks-1] {
+            if { ![dict exists $dict $id $chunk] } {
+                set complete false
+                break
+            } else {
+                lappend files /tmp/$id.$chunk
             }
         }
-	dict unset dict $id
-	nsv_set uploads $user_id $dict
-	return /tmp/$id
-    } else {
-	nsv_set uploads $user_id $dict
-	return ""
+
+        if { $complete } {
+            # Join parts together
+            ::try {
+                exec_proxy cat {*}$files > /tmp/$id
+            } finally {
+                # Clean up
+                foreach file $files {
+                    file delete $file
+                }
+            }
+            dict unset dict $id
+            nsv_set uploads $user_id $dict
+            set filename "/tmp/$id"
+        } else {
+            nsv_set uploads $user_id $dict
+            set filename ""
+        }
     }
+
+    return $filename
 }
 
 proc qc::cat {filename} {
