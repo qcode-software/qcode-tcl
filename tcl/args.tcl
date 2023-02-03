@@ -32,7 +32,7 @@ proc qc::args2dict {callers_args} {
     }
 }
 
-proc qc::args2vars {callers_args args} {
+proc qc::test_args2vars {callers_args args} {
     #| Parse callers args. Interpret as regular dict unless first item is ~ 
     #| in which case interpret as a list of variable names to pass-by-name.
     #| Dict - set all variables or just those specified that exists in the dict
