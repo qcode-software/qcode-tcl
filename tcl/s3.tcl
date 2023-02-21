@@ -26,7 +26,10 @@ proc qc::s3 { args } {
         }
         ls {
             # usage: s3 ls 
-            set nodes [qc::s3_xml_select [qc::_s3_get "" ""] {/ns:ListAllMyBucketsResult/ns:Buckets/ns:Bucket}]
+            set nodes [qc::s3_xml_select \
+                        [qc::_s3_get "" ""] \
+                        {/ns:ListAllMyBucketsResult/ns:Buckets/ns:Bucket} \
+                      ]
             return [qc::lapply qc::s3_xml_node2dict $nodes]
         }
         lsbucket {
