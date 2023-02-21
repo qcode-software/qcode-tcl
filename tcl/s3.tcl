@@ -30,16 +30,28 @@ proc qc::s3 { args } {
             return [qc::lapply qc::s3_xml_node2dict $nodes]
         }
         lsbucket {
-            # usage: s3 lsbucket bucket {prefix}
+            # usage: s3 lsbucket -max_keys ? bucket {prefix}
             # s3 lsbucket myBucket Photos/
-            if { [llength $args] == 1 || [llength $args] > 3 } {
-                error "Missing argument. Usage: qc::s3 lsbucket mybucket {prefix}"
-            } elseif { [llength $args] == 3 }  {
-                # prefix is specified
-                set xmlDoc [qc::_s3_get [lindex $args 1] "?prefix=[lindex $args 2]"]
-            } else {
-                set xmlDoc [qc::_s3_get [lindex $args 1] ""]
+            set args [lrange $args 1 end]
+            qc::args $args -max_keys "" -- bucket {prefix ""}
+            qc::checks {
+                prefix   STRING 1024
+                bucket   STRING 63 NOT NULL
+                max_keys INT
             }
+            set object_string ""
+            if { $prefix ne "" } {
+                # prefix is specified
+                lappend object_string [join [list "prefix" $prefix] "="]
+            }
+            if { $max_keys ne "" } {
+                # max_items is specified
+                lappend object_string [join [list "max-keys" $max_keys] "="]
+            }
+            if { $object_string ne "" } {
+                set object_string [string cat "?" [join $object_string "&"]]
+            }
+            set xmlDoc [qc::_s3_get $bucket $object_string]
 	    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select $xmlDoc {/ns:ListBucketResult/ns:Contents}]]
         }
         get {

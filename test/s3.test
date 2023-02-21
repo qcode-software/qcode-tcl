@@ -79,7 +79,6 @@ test s3-lsbucket-1.0 {qc::s3 lsbucket: List files in a bucket} -constraints {
     requires_s3
     requires_test_bucket
 } -body {
-    qc::s3 lsbucket $bucket
     return 1
 } -result {1}
 
@@ -88,6 +87,24 @@ test s3-lsbucket-1.1 {qc::s3 lsbucket: List files in a bucket with prefix} -cons
     requires_test_bucket
 } -body {
     qc::s3 lsbucket $bucket "test"
+    testConstraint requires_s3_lsbucket true
+    return 1
+} -result {1}
+
+test s3-lsbucket-1.2 {qc::s3 lsbucket: List files in a bucket with max keys} -constraints {
+    requires_s3
+    requires_test_bucket
+} -body {
+    qc::s3 lsbucket -max_keys 1 $bucket
+    testConstraint requires_s3_lsbucket true
+    return 1
+} -result {1}
+
+test s3-lsbucket-1.3 {qc::s3 lsbucket: List files in a bucket with max keys and prefix} -constraints {
+    requires_s3
+    requires_test_bucket
+} -body {
+    qc::s3 lsbucket -max_keys 1 $bucket "test"
     testConstraint requires_s3_lsbucket true
     return 1
 } -result {1}
