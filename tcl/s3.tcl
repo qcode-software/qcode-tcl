@@ -52,7 +52,10 @@ proc qc::s3 { args } {
                 set object_string [string cat "?" [join $object_string "&"]]
             }
             set xmlDoc [qc::_s3_get $bucket $object_string]
-	    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select $xmlDoc {/ns:ListBucketResult/ns:Contents}]]
+	    return [qc::lapply \
+                        qc::s3_xml_node2dict \
+                        [qc::s3_xml_select $xmlDoc {/ns:ListBucketResult/ns:Contents}] \
+                   ]
         }
         get {
             # usage:

@@ -79,6 +79,7 @@ test s3-lsbucket-1.0 {qc::s3 lsbucket: List files in a bucket} -constraints {
     requires_s3
     requires_test_bucket
 } -body {
+    qc::s3 lsbucket $bucket
     return 1
 } -result {1}
 
