@@ -8,11 +8,17 @@ on:
 jobs:
   linting:
     name: Linting
-    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v1.0.0
+    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v1.2.1
     with:
       files: |
         tcl/**.tcl
+      test_directory: test
       max_line_length: 100
+      max_file_length: 400
+      max_proc_body_length: 80
       check_line_lengths: true
       check_proc_names: true
+      check_procs_have_unit_tests: true
+      check_file_lengths: true
+      check_proc_lengths: true
     secrets: inherit
