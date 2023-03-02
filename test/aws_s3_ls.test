@@ -1,0 +1,32 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    qc::aws_credentials_set_from_ec2_role
+}
+set cleanup {
+}
+
+test aws_s3_ls-1.0 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        proc ::qc::http_get [info args ::qc::http_get] {
+            # TODO finish
+            return  xml_stuff
+        }
+        return [qc::aws s3 ls mybucket ""] 
+    } \
+    -result {https://www.qcode.co.uk/}
+
+
+cleanupTests
