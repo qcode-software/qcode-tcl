@@ -38,25 +38,115 @@ namespace eval qc::aws::s3::rest_api {
         }
     }
 
+    proc _http_headers_canonicalized_resource { s3_uri query_params } {
+        #|
+        dict2vars [qc::aws s3 s3_uri_parse $s3_uri] bucket object_key
+
+        if { $bucket eq "" } {
+            return "/"
+        }
+
+        # Is there a subresource specified?
+        set subresources [list \
+                            "acl" "lifecycle" "location" \
+                            "logging" "notification" "partNumber" \
+                            "policy" "requestPayment" "torrent" \
+                            "uploadId" "uploads" "versionId" \
+                            "versioning" "versions" "website" \
+                            "restore" \
+                         ]
+        set canonicalized_resource "/${bucket}/${object_key}"
+        if { [llength [lintersect $subresources [dict keys $query_params]]] > 0 } {
+            set query_string [qc::url_make [dict create params $query_params]]
+            append canonicalized_resource ${query_string}
+        }
+        return $canonicalized_resource
+    }
+    
+    proc _http_headers_canonicalized_amz_headers { headers } {
+        #|
+        foreach {header value} $headers {
+            if { [info exists header_array([qc::lower $header])] } {
+                lappend header_array([qc::lower $header]) $value
+            } else {
+                set header_array([qc::lower $header]) $value
+            }
+        }
+        set canonicalized_headers  [list]
+        foreach key [lsort [array names header_array]] {
+            lappend canonicalized_headers "${key}:[join $header_array($key) ,]\u000A"
+        }
+        return $canonicalized_headers
+    }
+
+    proc _http_headers_signature { 
+        verb
+        content_md5
+        content_type
+        date
+        canonicalized_amz_headers
+        canonicalized_resource
+    } {
+        #|
+        set     temp [list $verb]
+        lappend temp "$content_md5"  
+        lappend temp "$content_type"  
+        lappend temp "$date"
+        lappend temp "[join ${canonicalized_amz_headers} ""]${canonicalized_resource}"
+
+        return [::base64::encode \
+                    [::sha1::hmac \
+                        -bin \
+                        ${::env(AWS_SECRET_ACCESS_KEY)} \
+                        [join $temp \n] \
+                    ] \
+                ]
+    }
+
     proc _http_headers { args} {
         #| Returns HTTP headers required for REST API auth.
-        #TODO Calls legacy version. To be migrated here in future.
         qc::args $args \
             -amz_headers "" \
             -content_type "" \
             -content_md5 "" \
             -- http_verb s3_uri query_params
+
          _credentials_check
 
-        dict2vars [qc::aws s3 s3_uri_parse $s3_uri] bucket object_key
-        set query_string [qc::url_make [dict create params $query_params]]
-        return [qc::_s3_auth_headers \
-            -amz_headers $amz_headers \
-            -content_type $content_type \
-            -content_md5 $content_md5 \
-            -- \
-            $http_verb "${object_key}${query_string}" $bucket \
-            ]
+        # check for security token
+        if { [info exists ::env(AWS_SESSION_TOKEN)] && $::env(AWS_SESSION_TOKEN) ne "" } {
+            # We're using temporary security credentials - add token header
+            lappend amz_headers x-amz-security-token $::env(AWS_SESSION_TOKEN)
+        }
+
+        set date [qc::format_timestamp_http now]
+        set canonicalized_resource [_http_headers_canonicalized_resource $s3_uri $query_params]
+
+        # amz_headers format {header value header value ...}
+        set canonicalized_amz_headers [_http_headers_canonicalized_amz_headers $amz_headers]
+        set signature [_http_headers_signature \
+                            $http_verb \
+                            $content_md5 \
+                            $content_type \
+                            $date \
+                            $canonicalized_amz_headers \
+                            $canonicalized_resource \
+                      ]
+        # TODO should be signature V4
+        set authorization "AWS ${::env(AWS_ACCESS_KEY_ID)}:$signature"
+
+        set request_headers [dict create \
+                                Host [_endpoint $s3_uri $query_params] \
+                                Date $date \
+                                Authorization $authorization \
+                            ]
+
+        if { [dict exists $amz_headers "x-amz-security-token"] } {
+            dict set request_headers \
+                "x-amz-security-token" [dict get $amz_headers "x-amz-security-token"] 
+        }
+
+        return $request_headers
     }
 
     proc _endpoint { s3_uri query_params } {

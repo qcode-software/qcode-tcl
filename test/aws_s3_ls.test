@@ -9,10 +9,29 @@ foreach file $files {
 }
 namespace import ::qc::*
 
+# Local config
+if { [file exists ~/.qcode-tcl] } {
+    source ~/.qcode-tcl
+}
+
+# Bucket to runs tests against
+if { ![info exists ::env(aws_s3_test_bucket)] } {
+    puts "==========================================================================================="
+    puts "===== Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file ======="
+    puts "==========================================================================================="
+    error "Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file"
+}
+set bucket $::env(aws_s3_test_bucket)
+
 set setup {
     qc::aws_credentials_set_from_ec2_role
+    
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_ls/testfile1.txt] "./test/files/aws_s3_ls_testfile.txt" 
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_ls/testfile2.txt] "./test/files/aws_s3_ls_testfile.txt"
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_ls/testfile3.txt] "./test/files/aws_s3_ls_testfile.txt"
 }
 set cleanup {
+    # TODO delete files
 }
 
 test aws_s3_ls-1.0 \
@@ -20,13 +39,66 @@ test aws_s3_ls-1.0 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        proc ::qc::http_get [info args ::qc::http_get] {
-            # TODO finish
-            return  xml_stuff
-        }
-        return [qc::aws s3 ls mybucket ""] 
-    } \
-    -result {https://www.qcode.co.uk/}
+        set response [qc::aws s3 ls $bucket "aws_s3_ls"] 
 
+        set data [ldict_subsets $response Key]
+        set expected_ldict [list \
+                        [dict create \
+                             Key "aws_s3_ls/testfile1.txt" \
+                            ] \
+                        [dict create \
+                             Key "aws_s3_ls/testfile2.txt" \
+                            ] \
+                        [dict create \
+                             Key "aws_s3_ls/testfile3.txt" \
+                        ] \
+                       ]
+
+        return [ldicts_diff_any $data $expected_ldict]
+    } \
+    -result ""
+
+test aws_s3_ls-1.1 \
+    {No prefix so returns at least the 3 files we uploaded} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set response [qc::aws s3 ls $bucket] 
+        set keys [qc::ldict_values response Key]
+        set expected_keys [list \
+                            "aws_s3_ls/testfile1.txt" \
+                            "aws_s3_ls/testfile2.txt" \
+                            "aws_s3_ls/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result 3
+
+test aws_s3_ls-1.2 \
+    {Nonexistant prefix} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set response [qc::aws s3 ls $bucket "q1w2e3r4t5"] 
+        set keys [qc::ldict_values response Key]
+        return [llength $keys]
+    } \
+    -result 0
+
+test aws_s3_ls-1.4 \
+    {Max keys} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set response [qc::aws s3 ls -max_keys 2 $bucket "aws_s3_ls/testfile"] 
+        set keys [qc::ldict_values response Key]
+        set expected_keys [list \
+                            "aws_s3_ls/testfile1.txt" \
+                            "aws_s3_ls/testfile2.txt" \
+                            "aws_s3_ls/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result 2
 
 cleanupTests
