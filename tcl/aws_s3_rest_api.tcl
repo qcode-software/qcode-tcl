@@ -155,10 +155,23 @@ namespace eval qc::aws::s3::rest_api {
         #| Returns REST API endpoint.
         #| https://mybucket.s3.eu-west-1.amazonaws.com/object_key/?prefix=folder1
         dict2vars [qc::aws s3 s3_uri_parse $s3_uri] . object_key
-        
+
+        set url [list "https://[_endpoint_domain $s3_uri]"]
+
+        # If object_key contains "/" we don't want that url encoded
+        set segments [split $object_key "/"]
+        set index 0
+        set segment_values [list]
+        foreach segment $segments {
+            lappend segment_values segment_${index} $segment
+            set segment_${index} $segment
+            lappend url ":segment_${index}"
+            incr index
+        }
+
         return [qc::url \
-            "https://[_endpoint_domain $s3_uri]/:object_key" \
-            object_key $object_key \
+            [join $url "/"] \
+            {*}$segment_values \
             {*}$query_params \
             ]
     }
