@@ -39,7 +39,7 @@ namespace eval qc::aws::s3::rest_api {
     }
 
     proc _http_headers_canonicalized_resource { s3_uri query_params } {
-        #|
+        #| Create a canonical resource to use in request signing 
         dict2vars [qc::aws s3 s3_uri_parse $s3_uri] bucket object_key
 
         if { $bucket eq "" } {
@@ -64,7 +64,7 @@ namespace eval qc::aws::s3::rest_api {
     }
     
     proc _http_headers_canonicalized_amz_headers { headers } {
-        #|
+        #| Create canonical headers to use in request signing
         foreach {header value} $headers {
             if { [info exists header_array([qc::lower $header])] } {
                 lappend header_array([qc::lower $header]) $value
@@ -87,7 +87,7 @@ namespace eval qc::aws::s3::rest_api {
         canonicalized_amz_headers
         canonicalized_resource
     } {
-        #|
+        #| Calculate request signature
         set     temp [list $verb]
         lappend temp "$content_md5"  
         lappend temp "$content_type"  
