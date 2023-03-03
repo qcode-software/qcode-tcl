@@ -31,7 +31,9 @@ set setup {
     qc::s3 put [qc::s3 uri ${bucket} aws_s3_ls/testfile3.txt] "./test/files/aws_s3_ls_testfile.txt"
 }
 set cleanup {
-    # TODO delete files
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_ls/testfile1.txt]
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_ls/testfile2.txt]
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_ls/testfile3.txt]
 }
 
 test aws_s3_ls-1.0 \

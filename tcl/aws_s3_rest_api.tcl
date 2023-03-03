@@ -124,6 +124,8 @@ namespace eval qc::aws::s3::rest_api {
 
         # amz_headers format {header value header value ...}
         set canonicalized_amz_headers [_http_headers_canonicalized_amz_headers $amz_headers]
+
+
         set signature [_http_headers_signature \
                             $http_verb \
                             $content_md5 \
@@ -136,7 +138,7 @@ namespace eval qc::aws::s3::rest_api {
         set authorization "AWS ${::env(AWS_ACCESS_KEY_ID)}:$signature"
 
         set request_headers [dict create \
-                                Host [_endpoint $s3_uri $query_params] \
+                                Host [_endpoint_domain $s3_uri] \
                                 Date $date \
                                 Authorization $authorization \
                             ]
