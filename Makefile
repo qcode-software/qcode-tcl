@@ -28,7 +28,7 @@ package: check-version
 	--replaces none --conflicts none make install
 
 test: package
-	cd $(TEMP_PATH)/test && tclsh all.tcl
+	cd $(TEMP_PATH) && tclsh test/all.tcl
 
 install:  
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
