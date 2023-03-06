@@ -1,0 +1,114 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+}
+
+set cleanup {
+}
+
+test aws_s3_uri_parse-1.0 \
+    {bucket only} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "S3://mybucket"]
+    } \
+    -result "bucket mybucket object_key {}"
+
+test aws_s3_uri_parse-1.1 \
+    {no leading s3://} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "mybucket/object_key"]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"mybucket/object_key\""
+
+test aws_s3_uri_parse-1.2 \
+    {bucket and object} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://mybucket/object_key"]
+    } \
+    -result "bucket mybucket object_key object_key"
+
+test aws_s3_uri_parse-1.3 \
+    {bucket and longer object} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://mybucket/object_key/more_object_key"]
+    } \
+    -result "bucket mybucket object_key object_key/more_object_key"
+
+test aws_s3_uri_parse-1.4 \
+    {bucket and longer object} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://mybucket/object_key//more_object_key"]
+    } \
+    -result "bucket mybucket object_key object_key//more_object_key"
+
+test aws_s3_uri_parse-1.5 \
+    {bucket too short} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://my/object_key/more_object_key"]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"s3://my/object_key/more_object_key\""
+
+test aws_s3_uri_parse-1.6 \
+    {bucket illegal chars} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://INVALID/object_key/more_object_key"]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"s3://INVALID/object_key/more_object_key\""
+
+test aws_s3_uri_parse-1.7 \
+    {bucket formatted like ip} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://1.2.3.4/object_key/more_object_key"]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"s3://1.2.3.4/object_key/more_object_key\""
+
+test aws_s3_uri_parse-1.8 \
+    {object has trailing dot} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://mybucket/object_key/more_object_key."]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"s3://mybucket/object_key/more_object_key.\""
+
+test aws_s3_uri_parse-1.10 \
+    {object has illegal character} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::aws s3 s3_uri_parse "s3://mybucket/object_key/more&object_key"]
+    } \
+    -returnCodes error \
+    -result "Unable to parse s3 uri, \"s3://mybucket/object_key/more&object_key\""
+
+cleanupTests

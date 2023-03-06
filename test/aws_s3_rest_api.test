@@ -1,0 +1,90 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+# Local config
+if { [file exists ~/.qcode-tcl] } {
+    source ~/.qcode-tcl
+}
+
+# Bucket to runs tests against
+if { ![info exists ::env(aws_s3_test_bucket)] } {
+    puts "==========================================================================================="
+    puts "===== Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file ======="
+    puts "==========================================================================================="
+    error "Please specify the S3 test bucket to use in your ~/.qcode-tcl Tcl config file"
+}
+set bucket $::env(aws_s3_test_bucket)
+
+set setup {
+    qc::aws_credentials_set_from_ec2_role
+    
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_rest_api/testfile1.txt] "./test/files/aws_s3_rest_api_testfile.txt" 
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_rest_api/testfile2.txt] "./test/files/aws_s3_rest_api_testfile.txt" 
+    qc::s3 put [qc::s3 uri ${bucket} aws_s3_rest_api/testfile3.txt] "./test/files/aws_s3_rest_api_testfile.txt" 
+}
+set cleanup {
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_rest_api/testfile1.txt]
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_rest_api/testfile2.txt]
+    qc::s3 delete [qc::s3 uri ${bucket} aws_s3_rest_api/testfile3.txt]
+}
+
+test aws_s3_rest_api_http_get-1.0 \
+    {GET against root and no query params} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set s3_uri [qc::s3 uri ${bucket}]
+        set query_params [list]
+        set response [qc::aws s3 rest_api http_get $s3_uri $query_params]
+
+        set ldict [qc::aws s3 xml2ldict $response {/ns:ListBucketResult/ns:Contents}]
+        set keys [qc::ldict_values ldict Key]
+        set expected_keys [list \
+                            "aws_s3_rest_api/testfile1.txt" \
+                            "aws_s3_rest_api/testfile2.txt" \
+                            "aws_s3_rest_api/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result "3"
+
+test aws_s3_rest_api_http_get-1.1 \
+    {GET against existing object and no query params} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set s3_uri [qc::s3 uri ${bucket} aws_s3_rest_api/testfile1.txt]
+        set query_params [list]
+        return [qc::aws s3 rest_api http_get $s3_uri $query_params] 
+    } \
+    -result "test\n"
+
+test aws_s3_rest_api_http_get-1.2 \
+    {GET against root with multiple query params} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set s3_uri [qc::s3 uri ${bucket}]
+        set query_params [list prefix "aws_s3_rest_api/" max-keys 1]
+        set response [qc::aws s3 rest_api http_get $s3_uri $query_params]
+
+        set ldict [qc::aws s3 xml2ldict $response {/ns:ListBucketResult/ns:Contents}]
+        set keys [qc::ldict_values ldict Key]
+        set expected_keys [list \
+                            "aws_s3_rest_api/testfile1.txt" \
+                            "aws_s3_rest_api/testfile2.txt" \
+                            "aws_s3_rest_api/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result "1"
+
+cleanupTests
