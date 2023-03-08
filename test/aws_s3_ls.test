@@ -92,7 +92,7 @@ test aws_s3_ls-1.4 \
     -setup $setup \
     -cleanup $cleanup \
     -body {
-        set response [qc::aws s3 ls -max_keys 2 $bucket "aws_s3_ls/testfile"] 
+        set response [qc::aws s3 ls -max_keys 2 $bucket "aws_s3_ls/testfile"]
         set keys [qc::ldict_values response Key]
         set expected_keys [list \
                             "aws_s3_ls/testfile1.txt" \
@@ -103,4 +103,19 @@ test aws_s3_ls-1.4 \
     } \
     -result 2
 
+test aws_s3_ls-1.5 \
+    {Timeout} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set response [qc::aws s3 ls -timeout 10 -max_keys 2 $bucket "aws_s3_ls/testfile"]
+        set keys [qc::ldict_values response Key]
+        set expected_keys [list \
+                            "aws_s3_ls/testfile1.txt" \
+                            "aws_s3_ls/testfile2.txt" \
+                            "aws_s3_ls/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result 2
 cleanupTests

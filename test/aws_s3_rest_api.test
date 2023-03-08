@@ -87,4 +87,24 @@ test aws_s3_rest_api_http_get-1.2 \
     } \
     -result "1"
 
+test aws_s3_rest_api_http_get-1.3 \
+    {GET against root with timeout} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set s3_uri [qc::s3 uri ${bucket}]
+        set query_params [list prefix "aws_s3_rest_api/" max-keys 1]
+        set response [qc::aws s3 rest_api http_get -timeout 10 $s3_uri $query_params]
+
+        set ldict [qc::aws s3 xml2ldict $response {/ns:ListBucketResult/ns:Contents}]
+        set keys [qc::ldict_values ldict Key]
+        set expected_keys [list \
+                            "aws_s3_rest_api/testfile1.txt" \
+                            "aws_s3_rest_api/testfile2.txt" \
+                            "aws_s3_rest_api/testfile3.txt" \
+                          ]
+        return [llength [qc::lintersect $keys $expected_keys]]
+    } \
+    -result "1"
+
 cleanupTests
