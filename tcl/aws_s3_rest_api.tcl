@@ -12,9 +12,10 @@ namespace eval qc::aws::s3::rest_api {
     namespace export http_get
     namespace ensemble create
 
-    proc http_get { s3_uri query_params } {
+    proc http_get { args } {
         #| Makes http GET request (including auth headers) to 
         #| S3 API endpoint and returns result.
+        qc::args $args -timeout 60 -- s3_uri query_params
         set headers [_http_headers \
                         GET \
                         $s3_uri \
