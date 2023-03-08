@@ -23,6 +23,7 @@ namespace eval qc::aws::s3::rest_api {
                         ]
         set url [_endpoint $s3_uri $query_params]
         set result [qc::http_get \
+                        -timeout $timeout \
                         -headers $headers \
                         $url \
                     ]
