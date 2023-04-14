@@ -1,0 +1,39 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+
+foreach file $files {
+    source $file
+}
+
+namespace import ::qc::*
+
+test is_webp-1.0 \
+    {Check that a WEBP image is WEBP.} \
+    -body {
+        return [qc::is_webp "~/qcode-tcl/test/images/logo_qcode_420x120.webp"]
+    } \
+    -result 1
+
+test is_webp-2.0 \
+    {Check that a PNG image is not WEBP.} \
+    -body {
+        return [qc::is_webp "~/qcode-tcl/test/images/logo_qcode_420x120.png"]
+    } \
+    -result 0
+
+test is_webp-3.0 \
+    {Check that a small file can be checked.} \
+    -setup {
+        set file [qc::file_temp -binary [binary format c 1]]
+    } \
+    -cleanup {
+        file delete $file
+    } \
+    -body {
+        return [qc::is_webp $file]
+    } \
+    -result 0
+
+cleanupTests
