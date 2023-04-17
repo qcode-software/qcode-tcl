@@ -99,8 +99,9 @@ proc qc::is_date { date } {
 
 proc qc::is_timestamp_http { date } {
     #| Deprecated - see qc::is timestamp_http
-    #| Returns true if date is an acceptable HTTP timestamp. Note although all three should be accepted,
-    #| only RFC 1123 format should be generated.
+    #| Returns true if date is an acceptable HTTP timestamp.
+    #| Note although all three should be accepted, only RFC 1123 format should be
+    #| generated.
     # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
     return [qc::is timestamp_http $date]
 }
@@ -223,20 +224,68 @@ proc qc::is_cidrnetv4 {string} {
 
 proc qc::is_uri_valid {uri} {
     #| Deprecated - see qc::is uri
-    #| Test if the given uri is valid according to rfc3986 (https://tools.ietf.org/html/rfc3986)
+    #| Test if the given uri is valid according to
+    #| rfc3986 (https://tools.ietf.org/html/rfc3986)
     return [qc::is uri $uri]
+}
+
+proc qc::is_webp {file} {
+    #| Deprecated - see qc::is webp
+    #| Check if the file is a webp image.
+
+    return [qc::is webp $file]
 }
 
 namespace eval qc::is {
     
-    namespace export integer smallint bigint boolean decimal timestamp timestamptz char varchar enumeration text domain html safe_html safe_markdown date timestamp_http email postcode creditcard creditcard_masked period base64 hex mobile_number ipv4 cidrnetv4 url uri url_path s3_uri s3_bucket s3_object_key time interval next_url
+    namespace export {*}{
+        integer
+        smallint
+        bigint
+        boolean
+        decimal
+        timestamp
+        timestamptz
+        char
+        varchar
+        enumeration
+        text
+        domain
+        html
+        safe_html
+        safe_markdown
+        date
+        timestamp_http
+        email
+        postcode
+        creditcard
+        creditcard_masked
+        period
+        base64
+        hex
+        mobile_number
+        ipv4
+        cidrnetv4
+        url
+        uri
+        url_path
+        s3_uri
+        s3_bucket
+        s3_object_key
+        time
+        interval
+        next_url
+        webp
+    }
+
     namespace ensemble create -unknown {
         data_type_parser
     }
     
     proc integer {int} {
         #| Checks if the given number is a 32-bit signed integer.
-        if {[string is integer -strict $int] && $int >= -2147483648 && $int <= 2147483647} {
+        if {[string is integer -strict $int]
+            && $int >= -2147483648 && $int <= 2147483647} {
             return 1
         } else {
             return 0
@@ -254,7 +303,9 @@ namespace eval qc::is {
 
     proc bigint {int} {
         #| Checks if the given number is a 64-bit signed integer.
-        if {[string is wideinteger -strict $int] && $int >= -9223372036854775808 && $int <= 9223372036854775807} {
+        if {[string is wideinteger -strict $int]
+            && $int >= -9223372036854775808
+            && $int <= 9223372036854775807} {
             return 1
         } else {
             return 0
@@ -293,7 +344,8 @@ namespace eval qc::is {
 
                 set total_count [expr {$left_count + $right_count}]
                 if { $precision < $total_count } {
-                    # Precision is less than the total number of digits in the given decimal.
+                    # Precision is less than the total number of digits in the given
+                    # decimal.
                     return 0
                 }
                 
@@ -352,7 +404,8 @@ namespace eval qc::is {
 
     proc enumeration {enum_name value} {
         #| Checks if the given value is a value in enumeration enum_name.
-        if {[qc::memoize qc::db_enum_exists $enum_name] && $value in [qc::memoize qc::db_enum_values $enum_name]} {
+        if {[qc::memoize qc::db_enum_exists $enum_name]
+            && $value in [qc::memoize qc::db_enum_values $enum_name]} {
             return 1
         } else {
             return 0
@@ -408,7 +461,8 @@ namespace eval qc::is {
                 $doc delete
                 return 1
             } else {
-                set safe [expr {[qc::safe_elements_check $root] && [qc::safe_attributes_check $root]}]
+                set safe [expr {[qc::safe_elements_check $root]
+                                && [qc::safe_attributes_check $root]}]
                 $doc delete
                 return $safe
             }
@@ -467,8 +521,9 @@ namespace eval qc::is {
     }
 
     proc timestamp_http {date} {
-        #| Checks if the given date is an acceptable HTTP timestamp. Note although all three should be accepted,
-        #| only RFC 1123 format should be generated.
+        #| Checks if the given date is an acceptable HTTP timestamp.
+        #| Note although all three should be accepted, only RFC 1123 format should
+        #| be generated.
         # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
         if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)][,]\s\d{2}\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
             return 1
@@ -502,7 +557,8 @@ namespace eval qc::is {
 
     proc creditcard {number} {
         #| Checks if the given string is an allowable credit card number.
-        #| Checks, number of digits are >13 & <19, all characters are integers, luhn 10 check
+        #| Checks, number of digits are >13 & <19, all characters are integers,
+        #| luhn 10 check
         regsub -all {[ -]} $number "" number
         set mult 1
         set sum 0
@@ -533,12 +589,15 @@ namespace eval qc::is {
         regsub -all {[^0-9\*]} $string "" number
 
         # 13-19 chars masked with < 6 prefix and < 4 suffix digits
-        return [expr [regexp {[0-9\*]{13,19}} $number] && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]]
+        return [expr {[regexp {[0-9\*]{13,19}} $number]
+                      && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]}]
     }
 
     proc period {string} {
         #| Check if the given string is a period.
-        set month_names [list Jan January Feb February Mar March Apr April May Jun June Jul July Aug August Sep September Oct October Nov November Dec December]
+        set month_names [list Jan January Feb February Mar March Apr April May Jun June \
+                             Jul July Aug August Sep September Oct October Nov November \
+                             Dec December]
         set regexp_map [list \$month_names_regexp [join $month_names |]]
 
         if { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
@@ -557,27 +616,40 @@ namespace eval qc::is {
             # Exact match for year eg "2006"
             return 1
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)\s+([12]\d{3})$}] $string -> month_name year] } {
+        } elseif { [regexp -nocase -- \
+                        [string map \
+                             $regexp_map {^($month_names_regexp)\s+([12]\d{3})$}] \
+                        $string -> month_name year] } {
             # Exact match in format "Jan 2006"
             return 1
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)$}] $string -> month_name] } {
+        } elseif { [regexp -nocase -- \
+                        [string map $regexp_map {^($month_names_regexp)$}] \
+                        $string -> month_name] } {
             # Exact match in format "Jan" (assume current year)
             return 1
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)\s+([12]\d{3})$}] $string -> dom month_name year] } {
+        } elseif { [regexp -nocase -- \
+                        [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)\s+([12]\d{3})$}] \
+                        $string -> dom month_name year] } {
             # Exact match for castable date in format "1st Jan 2014"
             return 1
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)$}] $string -> dom month_name] } {
+        } elseif { [regexp -nocase -- \
+                        [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)$}] \
+                        $string -> dom month_name] } {
             # Exact match for castable date in format "1st Jan" (assume current year)
             return 1       
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?\s+([12]\d{3})$}] $string -> month_name dom year] } {
+        } elseif { [regexp -nocase -- \
+                        [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?\s+([12]\d{3})$}] \
+                        $string -> month_name dom year] } {
             # Exact match for castable date in format "Jan 1st 2014"
             return 1
 
-        } elseif { [regexp -nocase -- [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?$}] $string -> month_name dom] } {
+        } elseif { [regexp -nocase -- \
+                        [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?$}] \
+                        $string -> month_name dom] } {
             # Exact match for castable date in format "Jan 1st" (assume current year)
             return 1
 
@@ -621,7 +693,8 @@ namespace eval qc::is {
     }
 
     proc base64 {string} {
-        #| Checks if the given string has only allowable base64 characters and is of the correct format.
+        #| Checks if the given string has only allowable base64 characters and is of the
+        #| correct format.
         if { [regexp {^[A-Za-z0-9/+\r\n]+=*$} $string] \
                  && ([string length $string]-[regexp -all -- \r?\n $string])*6%8==0 } {
             return 1
@@ -705,7 +778,8 @@ namespace eval qc::is {
     }
 
     proc uri {uri} {
-        #| Test if the given uri is valid according to rfc3986 (https://tools.ietf.org/html/rfc3986)
+        #| Test if the given uri is valid according to
+        #| rfc3986 (https://tools.ietf.org/html/rfc3986)
         
         set unreserved {
             (?:[a-zA-Z0-9\-._~])
@@ -899,7 +973,8 @@ namespace eval qc::is {
 
     proc s3_bucket {s3_bucket} {
         #| Checks if the given string is a valid s3 bucket
-        #| Rules from https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+        #| Rules from:
+        #| https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
         
         # Bucket names must be between 3 and 63 characters long
         if { [string length $s3_bucket] < 3 ||
@@ -907,7 +982,8 @@ namespace eval qc::is {
             return 0
         }
 
-        # Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-)
+        # Bucket names can consist only of lowercase letters, numbers, dots (.),
+        # and hyphens (-)
         if { [regexp {[^a-z0-9.-]} $s3_bucket] } {
             return 0
         }
@@ -930,7 +1006,7 @@ namespace eval qc::is {
         #| Checks if the given string is a valid s3 object key
         #| Limits characters to those defined as safe:
         #| https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-keys
-        
+
         # Restrict to safe characters (excluding the starting "/")
         if { [regexp {[^-a-zA-Z0-9/!_.*'()]} $s3_object_key] } {
             return 0
@@ -990,6 +1066,22 @@ namespace eval qc::is {
         }
         
         return 1
+    }
+
+    proc webp {file} {
+        #| Check if the file is a webp image.
+        set fin [open $file rb]
+        set chunk0 [read $fin 12]
+        close $fin
+
+        binary scan $chunk0 "a4ia4" riff size id
+
+        return [expr {
+            [info exists riff]
+            && [info exists id]
+            && $riff eq "RIFF"
+            && $id eq "WEBP"
+        }]
     }
 }
 
