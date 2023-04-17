@@ -524,35 +524,72 @@ namespace eval qc::is {
         #| Checks if the given date is an acceptable HTTP timestamp.
         #| Note although all three should be accepted, only RFC 1123 format should
         #| be generated.
+
+        set short_day {[(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)]}
+        set long_day {[(Monday)|(Tuesday)|(Wednesday)|(Thursday)|(Friday)|}
+        append long_day {(Saturday)|(Sunday)]}
+        set short_month {(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)}
+        set time {[0-2]\d(\:)[0-5]\d(\:)[0-5]\d}
+
         # RFC 1123 - Sun, 06 Nov 1994 08:49:37 GMT
-        if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)][,]\s\d{2}\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
+        set pattern {(?x)
+              $short_day[,]
+              \s\d{2}\s$short_month\s\d{4}
+              \s$time\s(GMT)
+        }
+        set pattern [subst -nobackslashes -nocommands $pattern]
+
+        if { [regexp $pattern $date] } {
             return 1
         }
+
         # RFC 850 - Sunday, 06-Nov-94 08:49:37 GMT
-        if { [regexp {([(Monday)|(Tuesday)|(Wednesday)|(Thursday)|(Friday)|(Saturday)|(Sunday)][,]\s\d{2}-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d\s(GMT))} $date] } {
+        set pattern {(?x)
+            $long_day[,]
+            \s\d{2}-$short_month-\d{2}
+            \s$time\s(GMT)
+        }
+        set pattern [subst -nobackslashes -nocommands $pattern]
+
+        if { [regexp $pattern $date] } {
             return 1
         }
+
         # ANCI C - Sun Nov  6 08:49:37 1994
-        if { [regexp {([(Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)]\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\s|\d)\d\s[0-2]\d(\:)[0-5]\d(\:)[0-5]\d \d{4})} $date] } {
+        set pattern {(?x)
+            $short_day
+            \s$short_month\s(\s|\d)\d
+            \s$time\s\d{4}
+        }
+        set pattern [subst -nobackslashes -nocommands $pattern]
+
+        if { [regexp $pattern $date] } {
             return 1
         }
+
         return 0
     }
 
     proc time {time} {
         #| Check if the given date is a time
         #| in the form 23:59:59 or 23:59:59.01
-        return [regexp {^(([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]|24:00:00)(\.\d{1,6})?$} $time]
+        set pattern {^(([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]|24:00:00)(\.\d{1,6})?$}
+        return [regexp $pattern $time]
     }
 
     proc email {email} {
         #| Checks if the given string follows the form of an email address.
-        return [regexp {^[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+(\.[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+)*@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$} $email]
+        set pattern {^[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+(\.[-a-zA-Z0-9!$&*=^`|~#%'+/?_{}]+)*}
+        append pattern {@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$}
+        return [regexp $pattern $email]
     }
 
     proc postcode {postcode} {
         #| Checks if the given string is a UK postcode.
-        return [expr [regexp {^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$} $postcode] || [regexp {^BFPO ?[0-9]+$} $postcode]]
+        return [expr {[regexp \
+                           {^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][ABD-HJLNP-UW-Z]{2}$} \
+                           $postcode]
+                      || [regexp {^BFPO ?[0-9]+$} $postcode]}]
     }
 
     proc creditcard {number} {
@@ -595,10 +632,6 @@ namespace eval qc::is {
 
     proc period {string} {
         #| Check if the given string is a period.
-        set month_names [list Jan January Feb February Mar March Apr April May Jun June \
-                             Jul July Aug August Sep September Oct October Nov November \
-                             Dec December]
-        set regexp_map [list \$month_names_regexp [join $month_names |]]
 
         if { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
             # Period defined by two periods eg "Jan 2011 to March 2011"
@@ -607,89 +640,71 @@ namespace eval qc::is {
             } else {
                 return 0
             }
+        }
 
-        } elseif { [qc::is date $string] } {
+        if { [qc::is date $string] } {
             # String is an iso date eg "2014-01-01"
             return 1
+        }
 
-        } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
+        if { [regexp {^([12]\d{3})$} $string -> year] } {
             # Exact match for year eg "2006"
             return 1
+        }
 
-        } elseif { [regexp -nocase -- \
-                        [string map \
-                             $regexp_map {^($month_names_regexp)\s+([12]\d{3})$}] \
-                        $string -> month_name year] } {
+        set month_names {Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June}
+        append month_names {|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November}
+        append month_names {|Dec|December}
+
+        set pattern [subst -nocommands -nobackslashes {($month_names)\s+([12]\d{3})$}]
+
+        if { [regexp -nocase -- $pattern $string -> month_name year] } {
             # Exact match in format "Jan 2006"
             return 1
+        }
 
-        } elseif { [regexp -nocase -- \
-                        [string map $regexp_map {^($month_names_regexp)$}] \
-                        $string -> month_name] } {
+        set pattern [subst {^($month_names)$}]
+
+        if { [regexp -nocase -- $pattern $string -> month_name] } {
             # Exact match in format "Jan" (assume current year)
             return 1
+        }
 
-        } elseif { [regexp -nocase -- \
-                        [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)\s+([12]\d{3})$}] \
-                        $string -> dom month_name year] } {
+        set pattern {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names)\s+([12]\d{3})$}
+        set pattern [subst -nocommands -nobackslashes $pattern]
+
+        if { [regexp -nocase -- $pattern $string -> dom month_name year] } {
             # Exact match for castable date in format "1st Jan 2014"
             return 1
+        }
 
-        } elseif { [regexp -nocase -- \
-                        [string map $regexp_map {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names_regexp)$}] \
-                        $string -> dom month_name] } {
+        set pattern {^([0-9]{1,2})(?:st|th|nd|rd)?\s+($month_names)$}
+        set pattern [subst -nocommands -nobackslashes $pattern]
+
+        if { [regexp -nocase -- $pattern $string -> dom month_name] } {
             # Exact match for castable date in format "1st Jan" (assume current year)
             return 1       
 
-        } elseif { [regexp -nocase -- \
-                        [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?\s+([12]\d{3})$}] \
-                        $string -> month_name dom year] } {
+        }
+
+        set pattern {^($month_names)\s+([0-9]{1,2})(?:st|th|nd|rd)?\s+([12]\d{3})$}
+        set pattern [subst -nocommands -nobackslashes $pattern]
+
+        if { [regexp -nocase -- $pattern $string -> month_name dom year] } {
             # Exact match for castable date in format "Jan 1st 2014"
             return 1
+        }
 
-        } elseif { [regexp -nocase -- \
-                        [string map $regexp_map {^($month_names_regexp)\s+([0-9]{1,2})(?:st|th|nd|rd)?$}] \
-                        $string -> month_name dom] } {
+        set pattern {^($month_names)\s+([0-9]{1,2})(?:st|th|nd|rd)?$}
+        set pattern [subst -nocommands -nobackslashes $pattern]
+
+        if { [regexp -nocase -- $pattern $string -> month_name dom] } {
             # Exact match for castable date in format "Jan 1st" (assume current year)
             return 1
-
-        } else {
-            # could not parse string
-            return 0
         }
 
-        if { [regexp -nocase {^\s*(.*?)\s+to\s+(.*?)\s*$} $string -> period1 period2] } {
-            # Period defined by two periods eg "Jan 2011 to March 2011"
-            if { [qc::is period $period1] && [qc::is period $period2] } {
-                return 1
-            } else {
-                return 0
-            }
-
-        } elseif { [qc::is date $string] } {
-            # String is an iso date eg "2014-01-01"
-            return 1
-
-        } elseif { [regexp {^([12]\d{3})$} $string -> year] } {
-            # Exact match for year eg "2006"
-            return 1
-
-        } elseif { [regexp -nocase -- {^([0-9]+)(?:st|th|nd|rd)?\s+(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)(?:\s+([12]\d{3}))?$} $string -> dom month_name year] } {
-            # Exact match for castable date in format "1st Jan 2014" or "1st Jan"
-            return 1
-
-        } elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)\s+([0-9]+)(?:st|th|nd|rd)?(?:\s+([12]\d{3}))?$} $string -> month_name dom year] } {
-            # Exact match for castable date in format "Jan 1st 2014" or "Jan 1st"
-            return 1
-
-        }  elseif { [regexp -nocase -- {^(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sep|September|Oct|October|Nov|November|Dec|December)(?:\s+([12]\d{3}))?$} $string -> month_name year] } {
-            # Exact match in format "Jan 2006" or "Jan"
-            return 1
-
-        }  else {
-            # could not parse string
-            return 0
-        }
+        # could not parse string
+        return 0
     }
 
     proc base64 {string} {
@@ -864,7 +879,13 @@ namespace eval qc::is {
         }]
         
         set host [subst -nocommands -nobackslashes {
-            (?:${ip_literal}|${ipv4_address}|(?:${unreserved}|${pct_encoded}|${sub_delims})*)
+            (?:${ip_literal}
+               |${ipv4_address}
+               |(?:${unreserved}
+                   |${pct_encoded}
+                   |${sub_delims}
+               )*
+            )
         }]
 
         set user_info [subst -nocommands -nobackslashes {
@@ -911,7 +932,11 @@ namespace eval qc::is {
             ^
             (?:
              ${scheme}:
-             (?:(?://${authority}${path_abempty})|${path_absolute}|${path_rootless}|${path_empty})
+             (?:(?://${authority}${path_abempty})
+                |${path_absolute}
+                |${path_rootless}
+                |${path_empty}
+             )
              (?:\?${query_char}*)?
              (?:\#${fragment_char}*)?
              )
