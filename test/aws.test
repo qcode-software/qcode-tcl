@@ -1,0 +1,207 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+# Local config
+if { [file exists ~/.qcode-tcl] } {
+    source ~/.qcode-tcl
+}
+
+test aws_credentials_set-1.0 \
+    {Set Credentials} \
+    -setup {
+        set var_list [list \
+                        AWS_ACCESS_KEY_ID \
+                        AWS_SECRET_ACCESS_KEY \
+                        AWS_SESSION_TOKEN \
+                     ]
+
+        foreach var $var_list {
+            if { [info exists ::env($var)] } {
+                set ${var}_backup $::env($var)
+                unset ::env($var)
+            }
+        }
+    } \
+    -cleanup {
+        foreach var $var_list {
+            if { [info exists ${var}_backup] } {
+                set ::env($var) [set ${var}_backup]
+                unset ${var}_backup
+            }
+        }
+    } \
+    -body {
+
+        qc::aws_credentials_set "KEYKEYKEY" "SECRETSECRETSECRET" "TOKENTOKENTOKENTOKEN"
+
+        if { $::env(AWS_ACCESS_KEY_ID) ne "KEYKEYKEY" } {
+            return false
+        }
+        if { $::env(AWS_SECRET_ACCESS_KEY) ne "SECRETSECRETSECRET" } {
+            return false
+        }
+        if { $::env(AWS_SESSION_TOKEN) ne "TOKENTOKENTOKENTOKEN" } {
+            return false
+        }
+
+
+        return true
+    } \
+    -result "true"
+
+test aws_credentials_set-1.1 \
+    {Set credentials - no token} \
+    -setup {
+        set var_list [list \
+                        AWS_ACCESS_KEY_ID \
+                        AWS_SECRET_ACCESS_KEY \
+                        AWS_SESSION_TOKEN \
+                     ]
+
+        foreach var $var_list {
+            if { [info exists ::env($var)] } {
+                set ${var}_backup $::env($var)
+                unset ::env($var)
+            }
+        }
+    } \
+    -cleanup {
+        foreach var $var_list {
+            if { [info exists ${var}_backup] } {
+                set ::env($var) [set ${var}_backup]
+                unset ${var}_backup
+            }
+        }
+    } \
+    -body {
+
+        qc::aws_credentials_set "KEYKEYKEY" "SECRETSECRETSECRET"
+
+        if { $::env(AWS_ACCESS_KEY_ID) ne "KEYKEYKEY" } {
+            return false
+        }
+        if { $::env(AWS_SECRET_ACCESS_KEY) ne "SECRETSECRETSECRET" } {
+            return false
+        }
+        if { [info exists ::env(AWS_SESSION_TOKEN)] } {
+            return false
+        }
+
+        return true
+    } \
+    -result "true"
+
+test aws_region_set-1.0 \
+    {Set region} \
+    -setup {
+        set var_list [list \
+                        AWS_DEFAULT_REGION \
+                     ]
+
+            if { [info exists ::env(AWS_DEFAULT_REGION)] } {
+                set AWS_DEFAULT_REGION_backup $::env(AWS_DEFAULT_REGION)
+                unset ::env(AWS_DEFAULT_REGION)
+            }
+    } \
+    -cleanup {
+            if { [info exists AWS_DEFAULT_REGION_backup] } {
+                set ::env(AWS_DEFAULT_REGION) $AWS_DEFAULT_REGION_backup
+                unset AWS_DEFAULT_REGION_backup
+            }
+    } \
+    -body {
+
+        qc::aws_region_set "REGIONREGION"
+        return $::env(AWS_DEFAULT_REGION)
+    } \
+    -result "REGIONREGION"
+
+test aws_credentials_set_from_ec2_role-1.0 \
+    {Set credentials from role} \
+    -setup {
+        set var_list [list \
+                        AWS_ACCESS_KEY_ID \
+                        AWS_SECRET_ACCESS_KEY \
+                        AWS_SESSION_TOKEN \
+                        AWS_DEFAULT_REGION \
+                     ]
+
+        foreach var $var_list {
+            if { [info exists ::env($var)] } {
+                set ${var}_backup $::env($var)
+                unset ::env($var)
+            }
+        }
+    } \
+    -cleanup {
+        foreach var $var_list {
+            if { [info exists ${var}_backup] } {
+                set ::env($var) [set ${var}_backup]
+                unset ${var}_backup
+            }
+        }
+    } \
+    -body {
+        proc qc::aws_credentials_get_from_ec2_role {} {
+            return [list \
+                       A \
+                       B \
+                       C \
+                   ]
+        }
+        qc::aws_credentials_set_from_ec2_role D
+
+        if { $::env(AWS_ACCESS_KEY_ID) ne "A" } {
+            return "Incorrect AWS_ACCESS_KEY_ID"
+        }
+        if { $::env(AWS_SECRET_ACCESS_KEY) ne "B" } {
+            return "Incorrect AWS_SECRET_ACCESS_KEY"
+        }
+        if { $::env(AWS_SESSION_TOKEN) ne "C" } {
+            return "Incorrect AWS_SESSION_TOKEN"
+        }
+        if { $::env(AWS_DEFAULT_REGION) ne "D" } {
+            return "Incorrect AWS_DEFAULT_REGION"
+        }
+        return true
+    } \
+    -result "true"
+
+test aws_credentials_get_from_ec2_role-1.0 \
+    {Get credentials from role} \
+    -setup {
+    } \
+    -cleanup {
+    } \
+    -body {
+        proc qc::aws_metadata { path } {
+            if { $path eq "iam/security-credentials/"} {
+                return "role_name"
+            } else {
+                return {{
+  "Code" : "Success",
+  "LastUpdated" : "2023-04-20T15:04:12Z",
+  "Type" : "AWS-HMAC",
+  "AccessKeyId" : "XXXXXXXXXXXXXXXX",
+  "SecretAccessKey" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "Token" : "xxxxxxxxxxxxxxxxxxx//////////xxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxx////////////xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "Expiration" : "2023-04-20T21:32:48Z"
+}
+                }
+            }
+        }
+
+        return [qc::aws_credentials_get_from_ec2_role]
+    } \
+    -result "true"
+
+
+cleanupTests
