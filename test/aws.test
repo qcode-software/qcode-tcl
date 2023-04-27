@@ -267,8 +267,11 @@ test aws_metadata-1.0 \
         ::emulate::proc ::qc::http_get {
             return $args
         }
+        ::emulate::proc ::qc::http_put {
+            return QWERTYQWERTY
+        }
         return [qc::aws_metadata category/path]
     } \
-    -result "-noproxy http://169.254.169.254/latest/meta-data/category/path"
+    -result "-headers {X-aws-ec2-metadata-token QWERTYQWERTY} -noproxy http://169.254.169.254/latest/meta-data/category/path"
 
 cleanupTests
