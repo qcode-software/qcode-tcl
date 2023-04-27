@@ -2,6 +2,65 @@ package require tcltest
 package require mock_ns
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
+namespace eval ::emulate {
+    variable data
+    if { ![info exists data] } {
+        set data [dict create]
+    }
+
+    ::proc proc {proc_name proc_body} {
+        variable data
+        set proc_name_qualified [info command $proc_name]
+
+        if { ![dict exists $data $proc_name_qualified] } {
+            # store backup of original proc
+            dict set data $proc_name_qualified [dict create \
+                                          args [info args $proc_name_qualified] \
+                                          body [info body $proc_name_qualified] \
+                                         ]
+        }
+
+        # override proc_body to perform emulation
+        ::proc \
+            $proc_name_qualified \
+            [dict get $data $proc_name_qualified args] \
+            $proc_body
+    }
+
+    ::proc restore {proc_name} {
+        # restore proc_body to perform with original
+        variable data
+        set proc_name_qualified [info command $proc_name]
+
+        ::proc \
+            $proc_name_qualified \
+            [dict get $data $proc_name_qualified args] \
+            [dict get $data $proc_name_qualified body]
+
+        dict unset data $proc_name_qualified
+    }
+}
+
+proc test {name description args} {
+    qc::args $args -namespace "test" -- args
+
+    namespace eval $namespace \
+        ::tcltest::test [list $name $description {*}$args]
+    # restore any procs emulated during this test
+    foreach proc_name [dict keys $::emulate::data] {
+        ::emulate::restore $proc_name
+    }
+}
+
+proc cleanupTests {args} {
+    qc::args $args -namespace "test" -- args
+
+    namespace eval $namespace \
+        ::tcltest::cleanupTests $args
+
+    namespace delete $namespace
+}
+
 # Load all .tcl files
 set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
 foreach file $files {
@@ -99,6 +158,57 @@ test aws_credentials_set-1.1 \
     } \
     -result "true"
 
+test aws_credentials_set_from_ec2_role-1.0 \
+    {Set credentials from role} \
+    -setup {
+        set var_list [list \
+                        AWS_ACCESS_KEY_ID \
+                        AWS_SECRET_ACCESS_KEY \
+                        AWS_SESSION_TOKEN \
+                        AWS_DEFAULT_REGION \
+                     ]
+
+        foreach var $var_list {
+            if { [info exists ::env($var)] } {
+                set ${var}_backup $::env($var)
+                unset ::env($var)
+            }
+        }
+    } \
+    -cleanup {
+        foreach var $var_list {
+            if { [info exists ${var}_backup] } {
+                set ::env($var) [set ${var}_backup]
+                unset ${var}_backup
+            }
+        }
+    } \
+    -body {
+        ::emulate::proc ::qc::aws_credentials_get_from_ec2_role {
+            return [list \
+                       A \
+                       B \
+                       C \
+                   ]
+        }
+        qc::aws_credentials_set_from_ec2_role D
+
+        if { $::env(AWS_ACCESS_KEY_ID) ne "A" } {
+            return "Incorrect AWS_ACCESS_KEY_ID"
+        }
+        if { $::env(AWS_SECRET_ACCESS_KEY) ne "B" } {
+            return "Incorrect AWS_SECRET_ACCESS_KEY"
+        }
+        if { $::env(AWS_SESSION_TOKEN) ne "C" } {
+            return "Incorrect AWS_SESSION_TOKEN"
+        }
+        if { $::env(AWS_DEFAULT_REGION) ne "D" } {
+            return "Incorrect AWS_DEFAULT_REGION"
+        }
+        return true
+    } \
+    -result "true"
+
 test aws_region_set-1.0 \
     {Set region} \
     -setup {
@@ -127,15 +237,8 @@ test aws_region_set-1.0 \
 test aws_credentials_get_from_ec2_role-1.0 \
     {Get credentials from role} \
     -setup {
-    } \
-    -cleanup {
-    } \
-    -body {
-        proc qc::aws_metadata { path } {
-            if { $path eq "iam/security-credentials/"} {
-                return "role_name"
-            } else {
-                return {{
+        ::emulate::proc ::qc::aws_metadata {
+            return {{
   "Code" : "Success",
   "LastUpdated" : "2023-04-20T15:04:12Z",
   "Type" : "AWS-HMAC",
@@ -144,67 +247,14 @@ test aws_credentials_get_from_ec2_role-1.0 \
   "Token" : "xxxxxxxxxxxxxxxxxxx//////////xxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxx////////////xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "Expiration" : "2023-04-20T21:32:48Z"
 }
-                }
-            }
-        }
-
-        return [qc::aws_credentials_get_from_ec2_role]
-    } \
-    -result "XXXXXXXXXXXXXXXX xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx//////////xxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxx////////////xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-
-test aws_credentials_set_from_ec2_role-1.0 \
-    {Set credentials from role} \
-    -setup {
-        set var_list [list \
-                        AWS_ACCESS_KEY_ID \
-                        AWS_SECRET_ACCESS_KEY \
-                        AWS_SESSION_TOKEN \
-                        AWS_DEFAULT_REGION \
-                     ]
-
-        foreach var $var_list {
-            if { [info exists ::env($var)] } {
-                set ${var}_backup $::env($var)
-                unset ::env($var)
             }
         }
     } \
     -cleanup {
-        foreach var $var_list {
-            if { [info exists ${var}_backup] } {
-                set ::env($var) [set ${var}_backup]
-                unset ${var}_backup
-            }
-        }
     } \
     -body {
-        proc qc::aws_credentials_get_from_ec2_role {} {
-            return [list \
-                       A \
-                       B \
-                       C \
-                   ]
-        }
-        qc::aws_credentials_set_from_ec2_role D
-
-        if { $::env(AWS_ACCESS_KEY_ID) ne "A" } {
-            return "Incorrect AWS_ACCESS_KEY_ID"
-        }
-        if { $::env(AWS_SECRET_ACCESS_KEY) ne "B" } {
-            return "Incorrect AWS_SECRET_ACCESS_KEY"
-        }
-        if { $::env(AWS_SESSION_TOKEN) ne "C" } {
-            return "Incorrect AWS_SESSION_TOKEN"
-        }
-        if { $::env(AWS_DEFAULT_REGION) ne "D" } {
-            return "Incorrect AWS_DEFAULT_REGION"
-        }
-        return true
+        return [::qc::aws_credentials_get_from_ec2_role]
     } \
-    -result "true"
-
-
-
+    -result "XXXXXXXXXXXXXXXX xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx//////////xxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxx////////////xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 cleanupTests
