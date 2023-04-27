@@ -257,4 +257,18 @@ test aws_credentials_get_from_ec2_role-1.0 \
     } \
     -result "XXXXXXXXXXXXXXXX xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx//////////xxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxx////////////xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx+xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
+test aws_metadata-1.0 \
+    {} \
+    -setup {
+    } \
+    -cleanup {
+    } \
+    -body {
+        ::emulate::proc ::qc::http_get {
+            return $args
+        }
+        return [qc::aws_metadata category/path]
+    } \
+    -result "-noproxy http://169.254.169.254/latest/meta-data/category/path"
+
 cleanupTests
