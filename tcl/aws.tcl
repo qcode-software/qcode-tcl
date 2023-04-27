@@ -1,5 +1,10 @@
 namespace eval qc {
-    namespace export aws_metadata aws_credentials_set_from_ec2_role aws_credentials_set aws_region_set
+    namespace export \
+        aws_metadata \
+        aws_credentials_set_from_ec2_role \
+        aws_credentials_get_from_ec2_role \
+        aws_credentials_set \
+        aws_region_set
 }
 
 proc qc::aws_metadata { category } {
