@@ -1,0 +1,5 @@
+line_length = 90
+file_length = 400
+proc_length = 80
+tcl_dir = tcl
+test_dir = test

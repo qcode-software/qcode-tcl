@@ -9,6 +9,35 @@ foreach file $files {
 }
 namespace import ::qc::*
 
+if { [expr {[catch {exec docker ps}] == 0}] } {
+    # Docker installed, try to start httpbin
+    puts "Docker installed..."
+    if { [exec {*}[list docker images -q kennethreitz/httpbin:latest]] eq "" } {
+        # Pull image
+        puts "Pulling kennethreitz/httpbin:latest..."
+        exec {*}[list docker pull kennethreitz/httpbin]
+    } else {
+        puts "Image kennethreitz/httpbin:latest present..."
+    }
+    if { [exec {*}[list docker ps --quiet --filter "name=qcode-tcl-tests"]] eq "" } {
+        puts "httpbin not running - starting..."
+        set container_id [exec {*}[list \
+                            docker run \
+                            --name qcode-tcl-tests \
+                            --detach \
+                            --publish 8081:80 \
+                            kennethreitz/httpbin \
+                          ] \
+                 ]
+        # Hack to ensure the container is fully started
+        after 1000
+    } else {
+        puts "httpbin already running setting httpbin_running constraint"
+    }
+
+    testConstraint httpbin_running true
+}
+
 test http_encoding-1.0 {http_encoding xml } -setup {
 } -body {
     http_encoding {} {<?xml version="1.0" encoding="utf-8"?>
@@ -102,34 +131,52 @@ test http_header-1.1 {http_header error} -setup {} -body {
     http_header Rest-Sign "aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk"
 } -returnCodes 1 -result "The value of http header, \"Rest-Sign: aHNkZnNqa2ZsanNkZmFzZGdkZmFnZmFnYWdmZ2FkZ2FnYXNkZmFmZ2FkZ2Zhc2RmYWdmYWdmZHNh\nZ3dnZXJhZWJ6aHJoYWVk\", contains newline characters."
 
-test http_post-1.0 {http_post} -body {
-    set response [http_post -timeout 30 -content-type "text/plain; charset=utf-8" -- http://httpbin.org/post data "Here's the POST data"]
+test http_post-1.0 {http_post} \
+    -constraints {httpbin_running} \
+    -body {
+    set response [http_post \
+                    -timeout 30 \
+                    -content-type "text/plain; charset=utf-8" \
+                    -- \
+                    http://localhost:8081/post data "Here's the POST data" \
+                 ]
     set dict [::json::json2dict $response]
     dict get $dict data
 } -result {data=Here%27s%20the%20POST%20data}
 
-test http_post-1.1 {http_post (multipart)} -setup {} -body {
-    set data [list {name foo contents Apples} {name bar contents Oranges}]
-    set response [http_post -content-type "multipart/form-data" -data $data http://httpbin.org/post]
-    set dict [::json::json2dict $response]
-    
-    # Check Content-Type
-    if { ! [string match {multipart/form-data; boundary=*} [dict get $dict headers Content-Type]] } {
-        error "Content-Type mismatch"
-    }
+test http_post-1.1 {http_post (multipart)} \
+    -constraints {httpbin_running} \
+    -setup {} \
+    -body {
+        set data [list {name foo contents Apples} {name bar contents Oranges}]
+        set response [http_post \
+                        -content-type "multipart/form-data" \
+                        -data $data \
+                        http://localhost:8081/post \
+                    ]
+        set dict [::json::json2dict $response]
 
-    # Check form data
-    foreach {name value} {
-        foo Apples
-        bar Oranges
-    } {
-        if { [dict get $dict form $name] ne $value } {
-            error "Data mismatch"
+        # Check Content-Type
+        if { ! [string match \
+                    {multipart/form-data; boundary=*} \
+                    [dict get $dict headers Content-Type] \
+               ] } {
+            error "Content-Type mismatch"
         }
-    }
 
-    return true
-} -result true
+        # Check form data
+        foreach {name value} {
+            foo Apples
+            bar Oranges
+        } {
+            if { [dict get $dict form $name] ne $value } {
+                error "Data mismatch"
+            }
+        }
+
+        return true
+    } \
+    -result true
 
 test http_header_parse-1.0 {http_header_parse simple} -setup {} -body {
     return [qc::http_header_parse "Connection" "keep-alive"]
@@ -148,25 +195,37 @@ test http_header_sort_by_weight-1.0 {http_header_sort_values_by_weight OK} -setu
     return [qc::http_header_sort_values_by_weight $accept_header]
 } -result {{token application/json params {indent 4}} {token text/html params {level 1 q 0.9}} {token text/xml params {q 0.7}} {token */* params {q 0.01}}}
 
-test http_exists-1.0 {http_exists true} -body {
-    http_exists -timeout 30 -- http://httpbin.org/
-} -result {true}
+test http_exists-1.0 {http_exists true} \
+    -constraints {httpbin_running} \
+    -body {
+        http_exists -timeout 30 -- http://localhost:8081/
+    } \
+    -result {true}
 
-test http_exists-1.1 {http_exists false} -body {
-    http_exists -timeout 30 -- http://httpbin.org/idontexist
-} -result {false}
+test http_exists-1.1 {http_exists false} \
+    -constraints {httpbin_running} \
+    -body {
+        http_exists -timeout 30 -- http://localhost:8081/idontexist
+    } -result {false}
 
-test http_head-1.0 {http_head} -body {
-    set response [qc::http_head -timeout 30 http://httpbin.org/response-headers?test=hello]
-    if { [dict exists $response test] } {
-        return [dict get $response test]
-    } else {
-        return ""
-    }
-} -result {hello}
+test http_head-1.0 {http_head} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [qc::http_head \
+                            -timeout 30 \
+                            http://localhost:8081/response-headers?test=hello \
+                     ]
+        if { [dict exists $response test] } {
+            return [dict get $response test]
+        } else {
+            return ""
+        }
+    } \
+    -result {hello}
 
 test http_patch-1.0  \
     {Send an HTTP PATCH request with JSON payload.} \
+    -constraints {httpbin_running} \
     -setup {} \
     -body {
         set data {{"test": "this is a test"}}
@@ -174,7 +233,7 @@ test http_patch-1.0  \
                           -headers {Content-Type application/json} \
                           -data $data \
                           -- \
-                          http://httpbin.org/patch]
+                          http://localhost:8081/patch]
         set dict [::json::json2dict $response]
 
         # Check Content-Type submitted to endpoint.
@@ -194,6 +253,7 @@ test http_patch-1.0  \
 
 test http_patch-1.1  \
     {Send an HTTP PATCH request with JSON payload and include headers and code in response.} \
+    -constraints {httpbin_running} \
     -setup {} \
     -body {
         set data {{"test": "this is a test"}}
@@ -203,7 +263,7 @@ test http_patch-1.1  \
                           -response_code true \
                           -response_headers true \
                           -- \
-                          http://httpbin.org/patch]
+                          http://localhost:8081/patch]
         set dict [::json::json2dict [dict get $response body]]
 
         # Check Content-Type submitted to endpoint.
@@ -232,39 +292,64 @@ test http_patch-1.1  \
         return true
     } -result true
 
-test http_save-1.0 {http_save} -body {
-    set tmp_file /tmp/[qc::uuid]
-    http_save \
-        -timeout 5 \
-        -- \
-        http://httpbin.org/html \
-        $tmp_file
-    set fh [open $tmp_file r]
-    set data [read $fh]
-    close $fh
-    file delete -force $tmp_file
-    return [string bytelength $data]
-} -result {3741}
+test http_save-1.0 {http_save} \
+    -constraints {httpbin_running} \
+    -body {
+        set tmp_file /tmp/[qc::uuid]
+        http_save \
+            -timeout 5 \
+            -- \
+            http://localhost:8081/html \
+            $tmp_file
+        set fh [open $tmp_file r]
+        set data [read $fh]
+        close $fh
+        file delete -force $tmp_file
+        return [string bytelength $data]
+    } \
+    -result {3741}
 
-test http_save-1.1 {http_save no exists} -body {
-    http_save \
-        -timeout 5 \
-        -- \
-        http://httpbin.org/dontexist \
-        $tmp_file
-} -returnCodes {error} \
-  -result {URL NOT FOUND http://httpbin.org/dontexist}
+test http_save-1.1 {http_save no exists} \
+    -constraints {httpbin_running} \
+    -body {
+        http_save \
+            -timeout 5 \
+            -- \
+            http://localhost:8081/dontexist \
+            $tmp_file
+    } -returnCodes {error} \
+    -result {URL NOT FOUND http://localhost:8081/dontexist}
 
-test http_save-1.2 {http_save with headers} -body {
-    set tmp_file /tmp/[qc::uuid]
-    http_save \
-        -timeout 5 \
-        -return_headers_var return_headers \
-        -- \
-        http://httpbin.org/html \
-        $tmp_file
-    file delete -force $tmp_file
-    return [dict get $return_headers Content-Length]
-} -result {3741}
+test http_save-1.2 {http_save with headers} \
+    -constraints {httpbin_running} \
+    -body {
+        set tmp_file /tmp/[qc::uuid]
+        http_save \
+            -timeout 5 \
+            -return_headers_var return_headers \
+            -- \
+            http://localhost:8081/html \
+            $tmp_file
+        file delete -force $tmp_file
+        return [dict get $return_headers Content-Length]
+    } \
+    -result {3741}
+
+# Stop container if runnng
+::try {
+    if { [set container_id \
+            [exec {*}[list \
+                        docker ps \
+                            --all \
+                            --quiet \
+                            --filter "name=qcode-tcl-tests" \
+                     ] \
+            ] \
+        ] ne "" } {
+        puts "Shutting down httpbin..."
+        exec {*}[list docker rm -f $container_id]
+    }
+} on error [list error_message options] {
+}
 
 cleanupTests
