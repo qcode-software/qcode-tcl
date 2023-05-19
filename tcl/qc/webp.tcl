@@ -1,4 +1,5 @@
 namespace eval qc {
+    namespace export webpsize
 }
 
 proc qc::webpsize {file} {
