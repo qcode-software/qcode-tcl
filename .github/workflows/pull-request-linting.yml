@@ -11,7 +11,7 @@ jobs:
     uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v2.0.0
     with:
       files: |
-        tcl/**.tcl
+        tcl/**/*.tcl
       tcl_directory: tcl
       test_directory: test
       max_line_length: 100
