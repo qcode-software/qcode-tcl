@@ -1,0 +1,29 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+
+foreach file $files {
+    source $file
+}
+
+namespace import ::qc::*
+
+test webpsize-1.0 \
+    {Get the dimensions of a webp image.} \
+    -setup {
+        set image "images/logo_qcode_420x120.webp"
+
+        if { [file tail [pwd]] ne "test" } {
+            set image [file join [pwd] test $image]
+        } else {
+            set image [file join [pwd] $image]
+        }
+    } \
+    -body {
+        return [qc::webpsize $image]
+    } \
+    -result {420 120}
+
+cleanupTests

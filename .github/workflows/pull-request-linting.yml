@@ -8,10 +8,11 @@ on:
 jobs:
   linting:
     name: Linting
-    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v1.4.0
+    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v2.0.0
     with:
       files: |
         tcl/**.tcl
+      tcl_directory: tcl
       test_directory: test
       max_line_length: 100
       max_file_length: 400

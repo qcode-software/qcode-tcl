@@ -2,7 +2,8 @@
 
 if { [info commands ns_db] ne "ns_db" } {
     # Load all .tcl files
-    set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+    package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
     foreach file $files {
         source $file
     }

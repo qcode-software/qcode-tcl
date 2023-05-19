@@ -3,7 +3,8 @@ namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstrai
 source ~/qcode-tcl/test/db_setup.tcl
 
 # Load all .tcl files
-set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
 foreach file $files {
     source $file
 }
@@ -3116,5 +3117,49 @@ test is-next-url-1.7 {is next_url with anchor} -setup {
     qc::is next_url https://www.domain.co.uk#id
 } -result 1
 
+test webp-1.0 \
+    {Check that a WEBP image is WEBP.} \
+    -setup {
+        set image "images/logo_qcode_420x120.webp"
+
+        if { [file tail [pwd]] ne "test" } {
+            set image [file join [pwd] test $image]
+        } else {
+            set image [file join [pwd] $image]
+        }
+    } \
+    -body {
+        return [qc::is webp $image]
+    } \
+    -result 1
+
+test webp-2.0 \
+    {Check that a PNG image is not WEBP.} \
+    -setup {
+        set image "images/logo_qcode_420x120.png"
+
+        if { [file tail [pwd]] ne "test" } {
+            set image [file join [pwd] test $image]
+        } else {
+            set image [file join [pwd] $image]
+        }
+    } \
+    -body {
+        return [qc::is webp $image]
+    } \
+    -result 0
+
+test webp-3.0 \
+    {Test that a small file can be checked for being a WEBP image.} \
+    -setup {
+        set file [qc::file_temp -binary [binary format c 1]]
+    } \
+    -cleanup {
+        file delete $file
+    } \
+    -body {
+        return [qc::is webp $file]
+    } \
+    -result 0
 
 cleanupTests

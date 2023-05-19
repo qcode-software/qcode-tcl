@@ -1,16 +1,5 @@
 namespace eval qc {
-}
-
-proc qc::is_webp {file} {
-    #| Test whether a given file is a webp image
-    set fin [open $file rb]
-    set chunk0 [read $fin 12]
-    set chunk1 [read $fin 28]
-    close $fin
-
-    binary scan $chunk0 "a4ia4" riff size id
-
-    return [expr {$riff eq "RIFF" && $id eq "WEBP"}]
+    namespace export webpsize
 }
 
 proc qc::webpsize {file} {
