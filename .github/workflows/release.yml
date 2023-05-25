@@ -1,0 +1,45 @@
+name: "Tag and Release"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: "release"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Semantic Version
+        id: version
+        uses: paulhatch/semantic-version@v5.0.0-alpha2
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "(MINOR)"
+          version_format: "${major}.${minor}.${patch}"
+          search_commit_body: true
+
+      - name: "Create release"
+        uses: "actions/github-script@v6"
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            try {
+              await github.rest.repos.createRelease({
+                draft: false,
+                generate_release_notes: true,
+                name: "Release v${{ steps.version.outputs.version }}",
+                owner: context.repo.owner,
+                prerelease: false,
+                repo: context.repo.repo,
+                tag_name: "v${{ steps.version.outputs.version }}",
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
