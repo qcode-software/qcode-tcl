@@ -8,8 +8,5 @@ Git Release Type ( MAJOR | MINOR | PATCH )
 Description
 --------------
 
-Screenshots of GUI Changes
---------------
-
 Test Results
 --------------
