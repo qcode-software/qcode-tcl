@@ -5,8 +5,10 @@ INSTALL_DIR=qcode-tcl
 TEMP_PATH=/tmp/$(INSTALL_DIR)
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=deb
-REMOTEHOST=deb.qcode.co.uk
-REMOTEDIR=deb.qcode.co.uk
+REMOTEHOST=ssh.debian.qcode.co.uk
+REMOTEDIR=debian.qcode.co.uk
+REMOTEHOST2=deb.qcode.co.uk
+REMOTEDIR2=deb.qcode.co.uk
 
 .PHONY: all test
 
@@ -39,6 +41,11 @@ upload: check-version
 	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	ssh $(REMOTEUSER)@$(REMOTEHOST) rm -f $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	# Deploy to legacy host also for now
+	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST2):$(REMOTEDIR2)/debs"
+	ssh $(REMOTEUSER)@$(REMOTEHOST2) reprepro -b $(REMOTEDIR2) includedeb buster $(REMOTEDIR2)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	ssh $(REMOTEUSER)@$(REMOTEHOST2) rm -f $(REMOTEDIR2)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+
 
 clean: check-version
 	rm -rf package
