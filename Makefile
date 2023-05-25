@@ -5,8 +5,10 @@ INSTALL_DIR=qcode-tcl
 TEMP_PATH=/tmp/$(INSTALL_DIR)
 MAINTAINER=hackers@qcode.co.uk
 REMOTEUSER=deb
+
 REMOTEHOST=ssh.debian.qcode.co.uk
 REMOTEDIR=debian.qcode.co.uk
+
 REMOTEHOST2=deb.qcode.co.uk
 REMOTEDIR2=deb.qcode.co.uk
 
