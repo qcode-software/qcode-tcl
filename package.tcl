@@ -10,20 +10,14 @@ if { $argc != 4 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
     error "Usage: package.tcl from_dir to_dir package version"
 }
 
-proc cat {filename} {
-    set file [open $filename r]
-    set contents [read $file]
-    close $file
-    return $contents
-}
+package require fileutil
+set tcl_files [fileutil::findByPattern $from_dir *.tcl]
 
-proc write {filename string} {
-    set file [open $filename w]
-    puts -nonewline $file $string
-    close $file
-    return $string
-}
+foreach tcl_file $tcl_files {
+    set data "package provide $package $version\n"
+    append data [fileutil::cat $tcl_file]
 
-foreach filename [lsort [glob $from_dir/*.tcl]] {
-    write $to_dir/[file tail $filename] "package provide $package $version\n[cat $filename]"
+    set file_out [file join $to_dir [fileutil::stripPath $from_dir $tcl_file]]
+
+    fileutil::writeFile $file_out $data
 }

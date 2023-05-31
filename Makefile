@@ -36,7 +36,7 @@ test: package
 
 install:  
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp package/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp -r package/* /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
 
 upload: check-version
