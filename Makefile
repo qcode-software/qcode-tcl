@@ -25,7 +25,7 @@ package: check-version
 	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl \
 	-xzvf v$(VERSION).tar.gz -C $(TEMP_PATH)
 	./package.tcl $(TEMP_PATH)/tcl package ${NAME} ${VERSION}
-	./pkg_mkIndex package
+	./pkg_mkIndex package ${NAME} ${VERSION}
 	# checkinstall
 	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) \
 	-A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl,tcllib,html2text,curl,tclcurl" \
@@ -36,7 +36,7 @@ test: package
 
 install:  
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp package/*.tcl /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp -r package/* /usr/lib/tcltk/$(NAME)$(VERSION)/
 	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
 
 upload: check-version
