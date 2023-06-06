@@ -3,13 +3,14 @@ namespace eval qc {
 }
 
 proc qc::reload {args} {
+    #| Source files that have changed in this project
     if {[llength $args]==0} {
         set args [nsv_array names tcl_libs]
     }
     set reloaded false
     foreach dir $args {
         nsv_set tcl_libs $dir 1
-        set files [glob -nocomplain [file join $dir *.tcl]]
+        set files [glob_recursive -nocomplain -directory $dir *.tcl]
         foreach file $files {
             set fh [open $file r]
             set md5 [qc::md5 [read $fh]]
