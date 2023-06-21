@@ -279,6 +279,8 @@ proc qc::http_put {args} {
         -headers {} \
         -infile ? \
         -data ? \
+        -response_code false \
+        -response_headers false \
         url 
 
     set httpheaders {}
@@ -337,7 +339,26 @@ proc qc::http_put {args} {
     switch $curlErrorNumber {
 	0 {
             if { $responsecode in $valid_response_codes } {
-	        return [encoding convertfrom [qc::http_encoding $return_headers $html] $html] 
+                set response_body [encoding convertfrom [qc::http_encoding $return_headers $html] $html]
+                if { !$response_headers && !$response_code } {
+                    # Only return the response body.
+                    return $response_body
+                } else {
+                    # User has requested response headers and/or code alongside the response body.
+                    set response [dict create \
+                                      body $response_body \
+                                     ]
+
+                    if { $response_code } {
+                        dict set response code $responsecode
+                    }
+
+                    if { $response_headers } {
+                        dict set response headers $return_headers
+                    }
+
+                    return $response
+                }
             }
 	    switch $responsecode {
 		404 {

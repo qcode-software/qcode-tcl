@@ -135,15 +135,15 @@ test http_header-1.1 {http_header error} -setup {} -body {
 test http_post-1.0 {http_post} \
     -constraints {httpbin_running} \
     -body {
-    set response [http_post \
+        set response [http_post \
                     -timeout 30 \
                     -content-type "text/plain; charset=utf-8" \
                     -- \
                     http://localhost:8081/post data "Here's the POST data" \
                  ]
-    set dict [::json::json2dict $response]
-    dict get $dict data
-} -result {data=Here%27s%20the%20POST%20data}
+        set dict [::json::json2dict $response]
+        dict get $dict data
+    } -result {data=Here%27s%20the%20POST%20data}
 
 test http_post-1.1 {http_post (multipart)} \
     -constraints {httpbin_running} \
@@ -178,6 +178,136 @@ test http_post-1.1 {http_post (multipart)} \
         return true
     } \
     -result true
+
+test http_post-1.2 {http_post resp_code} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_post \
+                    -timeout 30 \
+                    -content-type "text/plain; charset=utf-8" \
+                    -response_code true \
+                    -- \
+                    http://localhost:8081/post data "Here's the POST data" \
+                 ]
+        set data [::json::json2dict [dict get $response body]]
+        return "[dict get $response code] - [dict get $data data]"
+    } -result {200 - data=Here%27s%20the%20POST%20data}
+
+test http_post-1.3 {http_post resp_code_err} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_post \
+                    -timeout 30 \
+                    -content-type "text/plain; charset=utf-8" \
+                    -valid_response_codes [list 200 401] \
+                    -response_code true \
+                    -- \
+                    http://localhost:8081/status/401 data "Here's the POST data" \
+                 ]
+        return "[dict get $response code]"
+    } -result {401}
+
+test http_put-1.0 {http_put} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -headers [list Content-Type "text/plain; charset=utf-8"] \
+                    -data "Here's the PUT data" \
+                    -- \
+                    http://localhost:8081/put \
+                 ]
+        set dict [::json::json2dict $response]
+        dict get $dict data
+    } -result {Here's the PUT data}
+
+test http_put-1.1 {http_put resp_code} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -headers [list Content-Type "text/plain; charset=utf-8"] \
+                    -data "Here's the PUT data" \
+                    -response_code true \
+                    -- \
+                    http://localhost:8081/put \
+                 ]
+        set data [::json::json2dict [dict get $response body]]
+        return "[dict get $response code] - [dict get $data data]"
+    } -result {200 - Here's the PUT data}
+
+test http_put-1.2 {http_put resp_code_err} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -headers [list Content-Type "text/plain; charset=utf-8"] \
+                    -valid_response_codes [list 200 401] \
+                    -response_code true \
+                    -data "Here's the PUT data" \
+                    -- \
+                    http://localhost:8081/status/401 \
+                 ]
+        return "[dict get $response code]"
+    } -result {401}
+
+test http_put-1.3 {http_put resp_headers} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -headers [list Content-Type "text/plain; charset=utf-8"] \
+                    -response_headers true \
+                    -data "Here's the PUT data" \
+                    -- \
+                    http://localhost:8081/put \
+                 ]
+        return "[dict exists $response headers]"
+    } -result {1}
+
+test http_put-1.4 {http_put resp_code_err} \
+    -constraints {httpbin_running} \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -headers [list Content-Type "text/plain; charset=utf-8"] \
+                    -response_headers true \
+                    -response_code true \
+                    -data "Here's the PUT data" \
+                    -- \
+                    http://localhost:8081/put \
+                 ]
+        if { ![dict exists $response code] } {
+            error "Missing response code"
+        }
+        if { ![dict exists $response headers] } {
+            error "Missing response headers"
+        }
+        return true
+    } -result {true}
+
+test http_put-1.5 {http_put infile} \
+    -constraints {httpbin_running} \
+    -setup {
+        qc::file_write /tmp/http_put-1.5.txt [qc::.. 0 100]
+    } \
+    -body {
+        set response [http_put \
+                    -timeout 30 \
+                    -infile /tmp/http_put-1.5.txt \
+                    -- \
+                    http://localhost:8081/put \
+                 ]
+        set dict [::json::json2dict $response]
+        if { [dict get $dict data] eq [qc::.. 0 100] } {
+            return true
+        } else {
+            error "http_put infile mismatch"
+        }
+    } -cleanup {
+        file delete -force /tmp/http_put-1.5.txt
+    } -result {true}
+  
 
 test http_header_parse-1.0 {http_header_parse simple} -setup {} -body {
     return [qc::http_header_parse "Connection" "keep-alive"]
