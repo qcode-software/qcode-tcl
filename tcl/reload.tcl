@@ -1,6 +1,7 @@
 namespace eval qc {
     namespace export reload
 }
+package require fileutil
 
 proc qc::reload {args} {
     #| Source files that have changed in this project
@@ -10,7 +11,7 @@ proc qc::reload {args} {
     set reloaded false
     foreach dir $args {
         nsv_set tcl_libs $dir 1
-        set files [glob_recursive -nocomplain -directory $dir *.tcl]
+        set files [fileutil::findByPattern $dir "*.tcl"]
         foreach file $files {
             set fh [open $file r]
             set md5 [qc::md5 [read $fh]]
