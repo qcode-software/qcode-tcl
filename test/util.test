@@ -790,4 +790,11 @@ test time_start_end-1.0 {time_start and time_end} -body {
     qc::time_end foo
 } -match glob -output "*foo*"
 
+test ./-1.0 \
+    {Returns the patch relative to this file} \
+    -body {
+        return [qc::./ "util.test"]
+    } \
+    -result test/util.test
+
 cleanupTests
