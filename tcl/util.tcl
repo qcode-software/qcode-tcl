@@ -46,6 +46,7 @@ namespace eval qc {
         split_pair2
         string_is_escaped
         control_port_source
+        ./
     }
 }
 
@@ -828,4 +829,9 @@ proc qc::time_start {tag} {
 proc qc::time_end {tag} {
     global timing
     qc::log "Time for $tag : [expr {double([expr {[::tcl::clock::microseconds] - $timing($tag)}])/1000000}] sec"
+}
+
+proc qc::./ {path} {
+    #| Returns the path relative to this file.
+    return [file join [file dirname [info script]] $path]
 }
