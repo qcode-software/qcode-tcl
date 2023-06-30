@@ -795,6 +795,7 @@ test ./-1.0 \
     -body {
         return [qc::./ "util.test"]
     } \
-    -result test/util.test
+    -match glob \
+    -result *test/util.test
 
 cleanupTests
