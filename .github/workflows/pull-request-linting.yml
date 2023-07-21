@@ -8,7 +8,7 @@ on:
 jobs:
   linting:
     name: Linting
-    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v2.0.0
+    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v2.0.1
     with:
       files: |
         tcl/**/*.tcl
