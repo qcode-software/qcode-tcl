@@ -15,16 +15,52 @@ proc qc::aws_metadata { category } {
     # qc::aws_metadata placement/availability-zone
     # See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AESDG-chapter-instancedata.html
     # for a full list of cetegories supported.
+    set token_cache ::env(AWS_METADATA_TOKEN)
+    set token [qc::_aws_metadata_token $token_cache]
+    ::try {
+        return [qc::_aws_metadata_get $token $category]
+    } trap {IMDSV2_TOKEN_EXPIRED} {} {
+        set token [qc::_aws_metadata_token_refresh $token_cache]
+        # Retry
+        return [qc::_aws_metadata_get $token $category]
+    }
+}
+
+proc qc::_aws_metadata_get { token category } {
+    #| Get IMDS request
+    set result [qc::http_get \
+            -headers [list "X-aws-ec2-metadata-token" $token] \
+            -noproxy \
+            -response_code true \
+            -valid_response_codes [list 200 401] \
+            http://169.254.169.254/latest/meta-data/$category \
+        ]
+    set http_response_code [dict get $result code]
+    if { $http_response_code == 401 } {
+        # expired token
+        error "IMDSv2 token expired." {} {IMDSV2_TOKEN_EXPIRED}
+    }
+    return [dict get $result body]
+}
+
+proc qc::_aws_metadata_token { token_cache } {
+    #| Return cached metadata token
+    if { ![info exists $token_cache] } {
+        qc::_aws_metadata_token_refresh $token_cache
+    }
+    return [set $token_cache]
+}
+
+proc qc::_aws_metadata_token_refresh { token_cache } {
+    #| Refresh and cache metadata token
+    qc::log Notice "qc::_aws_metadata_token_refresh on cache $token_cache"
     set token [qc::http_put \
                 -data "" \
                 -headers [list X-aws-ec2-metadata-token-ttl-seconds 21600] \
                 http://169.254.169.254/latest/api/token \
               ]
-    return [qc::http_get \
-            -headers [list "X-aws-ec2-metadata-token" $token] \
-            -noproxy \
-            http://169.254.169.254/latest/meta-data/$category \
-           ]
+    set $token_cache $token
+    return $token
 }
 
 proc qc::aws_credentials_set { access_key secret_key {token ""}} {
