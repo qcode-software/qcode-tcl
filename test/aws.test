@@ -260,15 +260,22 @@ test aws_credentials_get_from_ec2_role-1.0 \
 test aws_metadata-1.0 \
     {Calls _aws_metadata_get token} \
     -setup {
+        if { [info exists ::env(AWS_METADATA_TOKEN)] } {
+            set token_backup $::env(AWS_METADATA_TOKEN)
+        }
+        set ::env(AWS_METADATA_TOKEN) QWERTYQWERTY
     } \
     -cleanup {
+        if { [info exists token_backup] } {
+            set ::env(AWS_METADATA_TOKEN) $token_backup
+            unset token_backup
+        } else {
+            unset ::env(AWS_METADATA_TOKEN)
+        }
     } \
     -body {
         ::emulate::proc ::qc::_aws_metadata_get {
             return [list $token $category]
-        }
-        ::emulate::proc ::qc::_aws_metadata_token {
-            return QWERTYQWERTY
         }
         return [qc::aws_metadata category/path]
     } \
@@ -302,20 +309,6 @@ test _aws_metadata_get-1.1 \
     } \
     -returnCodes {error} \
     -result "IMDSv2 token expired."
-
-test _aws_metadata_token-1.0 \
-    {Returns contents of token cache} \
-    -setup {
-        set ::env(_aws_metadata_token_test) TEST_TOKEN
-    } \
-    -cleanup {
-        unset ::env(_aws_metadata_token_test)
-    } \
-    -body {
-        set token ::env(_aws_metadata_token_test)
-        return [qc::_aws_metadata_token $token]
-    } \
-    -result "TEST_TOKEN"
 
 test _aws_metadata_token_refresh-1.0 \
     {Updates token cache with refreshed token} \

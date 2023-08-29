@@ -15,12 +15,19 @@ proc qc::aws_metadata { category } {
     # qc::aws_metadata placement/availability-zone
     # See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AESDG-chapter-instancedata.html
     # for a full list of cetegories supported.
-    set token_cache ::env(AWS_METADATA_TOKEN)
-    set token [qc::_aws_metadata_token $token_cache]
+
+    # Token init
+    if { ![info exists ::env(AWS_METADATA_TOKEN)] } {
+        qc::_aws_metadata_token_refresh ::env(AWS_METADATA_TOKEN)
+    }
+
+    # Get cached token
+    set token $::env(AWS_METADATA_TOKEN)
+
     ::try {
         return [qc::_aws_metadata_get $token $category]
     } trap {IMDSV2_TOKEN_EXPIRED} {} {
-        set token [qc::_aws_metadata_token_refresh $token_cache]
+        set token [qc::_aws_metadata_token_refresh ::env(AWS_METADATA_TOKEN)]
         # Retry
         return [qc::_aws_metadata_get $token $category]
     }
@@ -41,14 +48,6 @@ proc qc::_aws_metadata_get { token category } {
         error "IMDSv2 token expired." {} {IMDSV2_TOKEN_EXPIRED}
     }
     return [dict get $result body]
-}
-
-proc qc::_aws_metadata_token { token_cache } {
-    #| Return cached metadata token
-    if { ![info exists $token_cache] } {
-        qc::_aws_metadata_token_refresh $token_cache
-    }
-    return [set $token_cache]
 }
 
 proc qc::_aws_metadata_token_refresh { token_cache } {
