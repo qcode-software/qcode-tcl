@@ -50,7 +50,6 @@ proc qc::aws_metadata_get { token category } {
 
 proc qc::aws_metadata_token_refresh { token_cache } {
     #| Refresh and cache metadata token
-    qc::log Notice "qc::aws_metadata_token_refresh on cache $token_cache"
     set token [qc::http_put \
                 -data "" \
                 -headers [list X-aws-ec2-metadata-token-ttl-seconds 21600] \
