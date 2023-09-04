@@ -1,8 +1,6 @@
 namespace eval qc {
     namespace export \
         aws_metadata \
-        aws_metadata_get \
-        aws_metadata_token_refresh \
 }
 
 proc qc::aws_metadata { category } {
