@@ -2762,6 +2762,10 @@ test is-url-1.16 {is url} -body {
     qc::is url https://www.domain.com/a&b.html?foo=bar@&fiz=baz:
 } -result 1
 
+test is-url-1.17 {is url - ;} -body {
+    qc::is url "https://www.domain;.com/a&b;.html?foo=bar@&fiz=baz:;#test;"
+} -result 1
+
 test is-url-path-1.0 {is url_path} -body {
     qc::is url_path /home
 } -result 1
