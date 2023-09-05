@@ -1,0 +1,146 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+namespace eval ::emulate {
+    variable data
+    if { ![info exists data] } {
+        set data [dict create]
+    }
+
+    ::proc proc {proc_name proc_body} {
+        variable data
+        set proc_name_qualified [info command $proc_name]
+
+        if { ![dict exists $data $proc_name_qualified] } {
+            # store backup of original proc
+            dict set data $proc_name_qualified [dict create \
+                                          args [info args $proc_name_qualified] \
+                                          body [info body $proc_name_qualified] \
+                                         ]
+        }
+
+        # override proc_body to perform emulation
+        ::proc \
+            $proc_name_qualified \
+            [dict get $data $proc_name_qualified args] \
+            $proc_body
+    }
+
+    ::proc restore {proc_name} {
+        # restore proc_body to perform with original
+        variable data
+        set proc_name_qualified [info command $proc_name]
+
+        ::proc \
+            $proc_name_qualified \
+            [dict get $data $proc_name_qualified args] \
+            [dict get $data $proc_name_qualified body]
+
+        dict unset data $proc_name_qualified
+    }
+}
+
+proc test {name description args} {
+    qc::args $args -namespace "test" -- args
+
+    namespace eval $namespace \
+        ::tcltest::test [list $name $description {*}$args]
+    # restore any procs emulated during this test
+    foreach proc_name [dict keys $::emulate::data] {
+        ::emulate::restore $proc_name
+    }
+}
+
+proc cleanupTests {args} {
+    qc::args $args -namespace "test" -- args
+
+    namespace eval $namespace \
+        ::tcltest::cleanupTests $args
+
+    namespace delete $namespace
+}
+
+# Load all .tcl files
+set files [lsort [glob -nocomplain "~/qcode-tcl/tcl/*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+# Local config
+if { [file exists ~/.qcode-tcl] } {
+    source ~/.qcode-tcl
+}
+
+test aws_metadata-1.0 \
+    {Calls aws_metadata_get token} \
+    -setup {
+        if { [info exists ::env(AWS_METADATA_TOKEN)] } {
+            set token_backup $::env(AWS_METADATA_TOKEN)
+        }
+        set ::env(AWS_METADATA_TOKEN) QWERTYQWERTY
+    } \
+    -cleanup {
+        if { [info exists token_backup] } {
+            set ::env(AWS_METADATA_TOKEN) $token_backup
+            unset token_backup
+        } else {
+            unset ::env(AWS_METADATA_TOKEN)
+        }
+    } \
+    -body {
+        ::emulate::proc ::qc::aws_metadata_get {
+            return [list $token $category]
+        }
+        return [qc::aws_metadata category/path]
+    } \
+    -result [list QWERTYQWERTY category/path]
+
+test aws_metadata_get-1.0 \
+    {Returns result on 200} \
+    -setup {
+    } \
+    -cleanup {
+    } \
+    -body {
+        ::emulate::proc ::qc::http_get {
+            return [dict create code 200 body "result"]
+        }
+        return [qc::aws_metadata_get token category/path]
+    } \
+    -result "result"
+
+test aws_metadata_get-1.1 \
+    {Returns custom error upon 401} \
+    -setup {
+    } \
+    -cleanup {
+    } \
+    -body {
+        ::emulate::proc ::qc::http_get {
+            return [dict create code 401 body "result"]
+        }
+        qc::aws_metadata_get token "category/path"
+    } \
+    -returnCodes {error} \
+    -result "IMDSv2 token expired."
+
+test aws_metadata_token_refresh-1.0 \
+    {Updates token cache with refreshed token} \
+    -setup {
+        set ::env(aws_metadata_token_test) TEST_TOKEN
+    } \
+    -cleanup {
+        unset ::env(aws_metadata_token_test)
+    } \
+    -body {
+        ::emulate::proc ::qc::http_put {
+            return "REFRESHED_TOKEN"
+        }
+        set token ::env(aws_metadata_token_test)
+        return [qc::aws_metadata_token_refresh $token]
+    } \
+    -result "REFRESHED_TOKEN"
+
+cleanupTests

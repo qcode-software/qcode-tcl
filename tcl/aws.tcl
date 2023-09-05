@@ -1,30 +1,9 @@
 namespace eval qc {
     namespace export \
-        aws_metadata \
         aws_credentials_set_from_ec2_role \
         aws_credentials_get_from_ec2_role \
         aws_credentials_set \
         aws_region_set
-}
-
-proc qc::aws_metadata { category } {
-    #| Simple wrapper which queries AWS instance metadata for the requested category
-    # eg. a request for 
-    # http://169.254.169.254/latest/meta-data/placement/availability-zone
-    # would become
-    # qc::aws_metadata placement/availability-zone
-    # See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AESDG-chapter-instancedata.html
-    # for a full list of cetegories supported.
-    set token [qc::http_put \
-                -data "" \
-                -headers [list X-aws-ec2-metadata-token-ttl-seconds 21600] \
-                http://169.254.169.254/latest/api/token \
-              ]
-    return [qc::http_get \
-            -headers [list "X-aws-ec2-metadata-token" $token] \
-            -noproxy \
-            http://169.254.169.254/latest/meta-data/$category \
-           ]
 }
 
 proc qc::aws_credentials_set { access_key secret_key {token ""}} {
