@@ -10,16 +10,16 @@ A lot of the following commands and edits need administrator level privileges, s
 
 In order to get naviserver up and running on your virtual machine you should first link your debian packages installer to the qcode package repository.
 
-You can do this by adding the following line to your apt sources file (`/etc/apt/sources.list`) substituting stretch for your debian version.
+You can do this by adding the following line to your apt sources file (`/etc/apt/sources.list`) substituting buster for your debian version.
 
 ```
-deb http://deb.qcode.co.uk stretch main
+deb https://debian.qcode.co.uk buster main
 ```
 
-Next you can add the public key to make `http://deb.qcode.co.uk` a trusted source. To do this first download the key then add it to `apt-key`:
+Next you can add the public key to make `https://debian.qcode.co.uk` a trusted source. To do this first download the key then add it to `apt-key`:
 
 ```
-wget http://deb.qcode.co.uk/packages.key
+wget https://debian.qcode.co.uk/packages.key
 apt-key add packages.key
 ```
 
