@@ -39,7 +39,7 @@ namespace eval qc::aws::s3::rest_api {
                         ]
         set url [_endpoint $s3_uri $query_params]
         set result [qc::http_get \
-                        -valid_response_codes {200 403} \
+                        -valid_response_codes {200} \
                         -timeout $timeout \
                         -headers $headers \
                         $url \
