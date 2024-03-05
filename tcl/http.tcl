@@ -534,7 +534,7 @@ proc qc::http_header_encoding {dict} {
     set encoding ""
     foreach key {Content-Type content-type} {
         if { [info exists return_headers($key)] && [regexp -nocase {.*;.*charset=(.*)} $return_headers($key) -> charset] } {
-	    set encoding [IANAEncoding2TclEncoding [string trim $charset]]
+	    set encoding [IANAEncoding2TclEncoding [string trim $charset {"' }]]
         }
     }
     return $encoding
