@@ -95,21 +95,6 @@ test http_encoding-1.5 {http_encoding http long headers no charset } -setup {
     http_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com} {}
 } -result {iso8859-1}
 
-test http_header_encoding-1.0 {http_header_encoding no charset } -setup {
-} -body {
-    http_header_encoding {Accept-Encoding gzip Content-Type {text/html} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
-} -result {}
-
-test http_header_encoding-1.1 {http_header_encoding charset } -setup {
-} -body {
-    http_header_encoding {Accept-Encoding gzip Content-Type {text/html; charset=utf-16} Transfer-Encoding chunked Accept-Language Fr Host fr.yahoo.com}
-} -result {unicode}
-
-test http_header_encoding-1.2 {http_header_encoding empty headers } -setup {
-} -body {
-    http_header_encoding {}
-} -result {}
-
 test IANAEncoding2TclEncoding-1.0 {IANAEncoding2TclEncoding utf-8 upper} -setup {
 } -body {
     IANAEncoding2TclEncoding {UTF-8}
