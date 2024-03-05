@@ -427,6 +427,32 @@ test url_make-1.4 {url_make root only} -body {
     }
 } -result "https://qcode.co.uk:80"
 
+test url_make-1.5 {url_make with segments and path} -body {
+    url_make {
+        protocol "https"
+        domain "qcode.co.uk"
+        port 80
+        segments {
+            "post"
+            123
+        }
+        path "/post/123"
+    }
+} -result "https://qcode.co.uk:80/post/123"
+
+test url_make-1.6 {url_make with segments and empty path} -body {
+    url_make {
+        protocol "https"
+        domain "qcode.co.uk"
+        port 80
+        segments {
+            "post"
+            123
+        }
+        path {}
+    }
+} -result "https://qcode.co.uk:80/post/123"
+
 # url_maker
 test url_maker-1.0 {url_maker base only} -body {
     url_maker "https://qcode.co.uk"
