@@ -362,11 +362,6 @@ proc qc::url_make {dict} {
         }
     }
 
-    # Convert path into segments
-    # if { [info exists path] && ![info exists segments]} {
-    #     set segments [split [string trim [url_decode $path] /] /]
-    # }
-
     # Construct url path (eg. /posts/123/hello-world).
     if { (![info exists path] || $path eq "") && [info exists segments] } {
         set segments_escaped [list]
