@@ -321,6 +321,7 @@ proc qc::url_make {dict} {
     #     domain qcode.co.uk
     #     port 80
     #     segments {posts 123 "hello world"}
+    #     path /posts/123/hello+world
     #     params {tags tcl tags psql author peter}
     #     hash comments
     # }
@@ -329,8 +330,9 @@ proc qc::url_make {dict} {
     #   protocol and domain must be specified)
     # "segments" is a list
     # "params" is a multimap
+    # If a non empty path is specified then segments will be ignored
     # If segments is specified (even as an empty list), the url path will be absolute
-    dict2vars $dict protocol domain port segments params hash
+    dict2vars $dict protocol domain port path segments params hash
 
     # Construct url root (eg. http://qcode.co.uk:80).
     if {
@@ -361,7 +363,7 @@ proc qc::url_make {dict} {
     }
 
     # Construct url path (eg. /posts/123/hello-world).
-    if { [info exists segments] } {
+    if { (![info exists path] || $path eq "") && [info exists segments] } {
         set segments_escaped [list]
         foreach segment $segments {
             lappend segments_escaped [url_encode $segment]
