@@ -230,7 +230,10 @@ namespace eval qc::handlers {
                 }
                 
                 # arg wasn't optional and didn't appear in form
-                return -code error "No matching arg value for \"$arg\" in form." 
+                return \
+                    -code error \
+                    -errorcode INVALID_REQUEST \
+                    "No matching arg value for \"$arg\" in form."
             }
             return $result
         }
