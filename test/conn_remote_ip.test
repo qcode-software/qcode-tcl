@@ -18,85 +18,15 @@ set cleanup {
     mock_ns::_reset
 }
 
-# Standard case where X-Forwarded-For overrides internal peeraddr
+# Standard case
 test conn_remote_ip1.0 \
     {} \
     -setup $setup \
     -cleanup $cleanup \
     -body {
         ns_conn _set peeraddr "192.168.1.12"
-        ns_conn _set headers [ns_set create headers \
-                                "X-Forwarded-For" "10.10.10.10" \
-                             ]
         return [qc::conn_remote_ip]
     } \
-    -result {10.10.10.10}
-
-# Standard case where X-Forwarded-For overrides peeraddr
-test conn_remote_ip1.1 \
-    {} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        ns_conn _set peeraddr "30.30.30.30"
-        ns_conn _set headers [ns_set create headers \
-                                "X-Forwarded-For" "10.10.10.10" \
-                             ]
-        return [qc::conn_remote_ip]
-    } \
-    -result {10.10.10.10}
-
-# X-Forwarded-For not present so return peeraddr
-test conn_remote_ip1.2 \
-    {} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        ns_conn _set peeraddr "30.30.30.30"
-        return [qc::conn_remote_ip]
-    } \
-    -result {30.30.30.30}
-
-# X-Forwarded-For is a list - return leftmost
-test conn_remote_ip1.3 \
-    {} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        ns_conn _set peeraddr "30.30.30.30"
-        ns_conn _set headers [ns_set create headers \
-                                "X-Forwarded-For" "20.20.20.20,10.10.10.10" \
-                             ]
-        return [qc::conn_remote_ip]
-    } \
-    -result {20.20.20.20}
-
-# X-Forwarded-For is not an IP
-test conn_remote_ip1.4 \
-    {} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        ns_conn _set peeraddr "30.30.30.30"
-        ns_conn _set headers [ns_set create headers \
-                                "X-Forwarded-For" "not an ip" \
-                             ]
-        return [qc::conn_remote_ip]
-    } \
-    -result {30.30.30.30}
-
-# X-Forwarded-For is lower case
-test conn_remote_ip1.5 \
-    {} \
-    -setup $setup \
-    -cleanup $cleanup \
-    -body {
-        ns_conn _set peeraddr "30.30.30.30"
-        ns_conn _set headers [ns_set create headers \
-                                "x-forwarded-for" "10.10.10.10" \
-                             ]
-        return [qc::conn_remote_ip]
-    } \
-    -result {10.10.10.10}
+    -result {192.168.1.12}
 
 cleanupTests

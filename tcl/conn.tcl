@@ -3,28 +3,8 @@ namespace eval qc {
 }
 
 proc qc::conn_remote_ip {} {
-    #| Try to return the remote IP address of the current connection
-
-    # Get direct peer IP
-    set ip [ns_conn peeraddr]
-
-    # Check for X-Forwarded-For header
-    set headers [ns_conn headers]
-    if { [ns_set ifind $headers X-Forwarded-For]!=-1 } {
-	# Proxied so use X-Forwarded-For
-
-        # X-Forwarded-For can be a list of IPs. Guess the client IP is leftmost.
-	set forwarded [split [ns_set iget $headers X-Forwarded-For] ,]
-        set ip_forwarded [string trim [lindex $forwarded 0]]
-
-        # Validate X-Forwarded-For value
-        if { [qc::is ipv4 $ip_forwarded] } {
-            # Valid ipv4 so clobber peeraddr
-            set ip $ip_forwarded
-        }
-    }
-
-    return $ip
+    #| Return the remote IP address of the current connection
+    return [ns_conn peeraddr]
 }
 
 proc qc::conn_url {args} {
