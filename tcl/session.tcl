@@ -52,12 +52,12 @@ proc qc::session_sudo_logout {session_id} {
 
 proc qc::session_kill {session_id} {
     #| Kill a session
-    db_dml "delete from session where session_id=:session_id"
+    db_dml "update session set deleted=true where session_id=:session_id"
 }
 
 proc qc::session_exists {session_id} {
     #| Test if a session exists
-    db_1row {select count(*) as count from session where session_id=:session_id}
+    db_1row {select count(*) as count from session where session_id=:session_id and not deleted}
     if { $count==1 } {
 	return true
     } else {
@@ -96,6 +96,7 @@ proc qc::session_valid {args} {
 	from session
 	where
 	session_id=:session_id
+    and not deleted
     }
     db_0or1row $qry {
 	return false
@@ -113,7 +114,11 @@ proc qc::session_valid {args} {
 
 proc qc::session_user_id {session_id} {
     #| Return the user_id owner of this session
-    db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
+    db_1row {
+        select coalesce(effective_user_id,user_id) as user_id 
+        from session 
+        where session_id=:session_id
+    }
     return $user_id
 }
 
@@ -152,6 +157,7 @@ proc qc::anonymous_session_id {} {
         SELECT session_id,(current_timestamp-time_created)>'1 hour'::interval as old 
         FROM session
         WHERE user_id=:user_id
+        and not deleted
         order by time_created DESC LIMIT 1
     } {
         # No session found
