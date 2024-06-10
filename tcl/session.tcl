@@ -83,8 +83,8 @@ proc qc::session_valid {args} {
     }
     
     set qry {
-	select
-	user_id,
+        select
+        user_id,
         CASE 
         WHEN (current_timestamp-time_modified) >:idle_timeout::interval
         THEN true ELSE false
@@ -93,10 +93,10 @@ proc qc::session_valid {args} {
         WHEN (current_timestamp-time_created) >:age_limit::interval
         THEN true ELSE false
         END as age_limit_exceeded
-	from session
-	where
-	session_id=:session_id
-    and not deleted
+        from session
+        where
+        session_id=:session_id
+        and not deleted
     }
     db_0or1row $qry {
 	return false
