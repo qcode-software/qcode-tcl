@@ -114,11 +114,7 @@ proc qc::session_valid {args} {
 
 proc qc::session_user_id {session_id} {
     #| Return the user_id owner of this session
-    db_1row {
-        select coalesce(effective_user_id,user_id) as user_id 
-        from session 
-        where session_id=:session_id
-    }
+    db_1row {select coalesce(effective_user_id,user_id) as user_id from session where session_id=:session_id}
     return $user_id
 }
 
