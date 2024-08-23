@@ -25,7 +25,11 @@ namespace eval qc::handlers {
 
     proc exists {method path} {
         #| Check if a handler exists for the given path and method.
-        return [qc::path_matches $path [get [string toupper $method]]]
+        if { $method eq "" } {
+            return false
+        } else {
+            return [qc::path_matches $path [get [string toupper $method]]]
+        }
     }
 
     proc validate2model {method path} {

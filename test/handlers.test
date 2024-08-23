@@ -1,0 +1,39 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import qc::*
+
+test qc::handlers::exists-1.0 \
+    {method is empty} \
+    -body {
+        return [qc::handlers::exists "" /test]
+    } \
+    -result "false"
+
+test qc::handlers::exists-1.1 \
+    {handler exists} \
+    -body {
+        proc ::qc::handlers::get {args} {
+            return [list /test]
+        }
+        return [qc::handlers::exists "GET" /test]
+    } \
+    -result "true"
+
+test qc::handlers::exists-1.2 \
+    {handler does not exists} \
+    -body {
+        proc ::qc::handlers::get {args} {
+            return [list /test]
+        }
+        return [qc::handlers::exists "GET" /test1]
+    } \
+    -result "false"
+
+cleanupTests
