@@ -718,6 +718,7 @@ proc qc::http_save {args} {
         -sslverifypeer 0 \
         -sslverifyhost 0 \
         -return_headers_var {} \
+        -follow_location 0 \
         -- \
         url \
         file
@@ -736,6 +737,7 @@ proc qc::http_save {args} {
                 -sslverifypeer $sslverifypeer \
                 -sslverifyhost $sslverifyhost \
                 -sslversion $sslversion \
+                -followlocation $follow_location \
               ] return_headers responsecode curlErrorNumber
 
     if { $responsecode != 200 } {
