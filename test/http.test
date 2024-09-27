@@ -469,6 +469,26 @@ test http_save-1.3 {follow_redirect} \
     } \
     -result {3741}
 
+test http_save-1.4 {not_following_redirect} \
+    -constraints {httpbin_running} \
+    -body {
+        set tmp_file /tmp/[qc::uuid]
+        http_save \
+            -timeout 5 \
+            -follow_location 0 \
+            -- \
+            http://localhost:8081/redirect-to?url=/html \
+            $tmp_file
+        set fh [open $tmp_file r]
+        set data [read $fh]
+        close $fh
+        file delete -force $tmp_file
+        return [string bytelength $data]
+    } \
+    -returnCodes {error} \
+    -match glob \
+    -result {RESPONSE 302*}
+
 # Stop container if runnng
 ::try {
     if { [set container_id \
