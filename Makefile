@@ -45,8 +45,7 @@ upload: check-version
 clean: check-version
 	rm -rf package
 	rm -rf $(TEMP_PATH)
-	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk
-	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/DEBIAN
+	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)
 	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
 	rm -f v$(VERSION).tar.gz
 
