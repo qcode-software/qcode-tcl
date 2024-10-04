@@ -16,31 +16,32 @@ package: check-version
 	# Copy files to pristine temporary directory
 	rm -rf $(TEMP_PATH)	
 	mkdir $(TEMP_PATH)
+	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk
+	mkdir -p /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk
+	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/DEBIAN
+	mkdir -p /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/DEBIAN
 	rm -rf package
 	mkdir package
 	curl --fail -K ~/.curlrc_github -L -o v$(VERSION).tar.gz https://api.github.com/repos/qcode-software/qcode-tcl/tarball/v$(VERSION)
 	tar --strip-components=1 --exclude Makefile --exclude description-pak --exclude doc --exclude docs.tcl --exclude package.tcl \
 	-xzvf v$(VERSION).tar.gz -C $(TEMP_PATH)
-	./package.tcl $(TEMP_PATH)/tcl package ${NAME} ${VERSION}
-	./pkg_mkIndex package ${NAME} ${VERSION}
-	# checkinstall
-	fakeroot checkinstall -D --deldoc --backup=no --install=no --pkgname=$(DPKG_NAME) --pkgversion=$(VERSION) --pkgrelease=$(RELEASE) \
-	-A all -y --maintainer $(MAINTAINER) --pkglicense="BSD" --reset-uids=yes --requires "tcl,tcllib,html2text,curl,tclcurl" \
-	--replaces none --conflicts none make install
+	./package.tcl $(TEMP_PATH)/tcl /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk ${NAME} ${VERSION}
+	./control.tcl /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/DEBIAN ${DPKG_NAME} ${VERSION} ${RELEASE} ${MAINTAINER}
+	# build package
+	dpkg-deb --build /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)
 
 test: package
 	cd $(TEMP_PATH) && tclsh test/all.tcl
 
 install:  
 	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp -r package/* /usr/lib/tcltk/$(NAME)$(VERSION)/
-	cp LICENSE /usr/lib/tcltk/$(NAME)$(VERSION)/
+	cp -r /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk/* /usr/lib/tcltk/
 
 upload: check-version
-	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
-	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
+	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) copy bookworm buster $(DPKG_NAME)
-	ssh $(REMOTEUSER)@$(REMOTEHOST) rm -f $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	ssh $(REMOTEUSER)@$(REMOTEHOST) rm -f $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
 
 clean: check-version
 	rm -rf package

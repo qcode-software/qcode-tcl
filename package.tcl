@@ -13,11 +13,11 @@ if { $argc != 4 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
 package require fileutil
 set tcl_files [fileutil::findByPattern $from_dir *.tcl]
 
+set data "package provide $package $version\n"
 foreach tcl_file $tcl_files {
-    set data "package provide $package $version\n"
     append data [fileutil::cat $tcl_file]
-
-    set file_out [file join $to_dir [fileutil::stripPath $from_dir $tcl_file]]
-
-    fileutil::writeFile $file_out $data
+    append data "\n"
 }
+set file_out [file join $to_dir "qcode-${version}.tm"]
+
+fileutil::writeFile $file_out $data
