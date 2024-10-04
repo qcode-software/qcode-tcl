@@ -8,7 +8,7 @@ set version [lindex $argv 2]
 set release [lindex $argv 3]
 set maintainer [lindex $argv 4]
 
-if { $argc != 4 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
+if { $argc != 5 || ![regexp {[0-9]+\.[0-9]+\.[0-9]+} $version] } {
     error "Usage: control.tcl to_dir dpkg_name version release maintainer"
 }
 
