@@ -33,9 +33,8 @@ package: check-version
 test: package
 	cd $(TEMP_PATH) && tclsh test/all.tcl
 
-install:  
-	mkdir -p /usr/lib/tcltk/$(NAME)$(VERSION)
-	cp -r /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk/* /usr/lib/tcltk/
+install:
+	dpkg -i /tmp/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
 
 upload: check-version
 	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
@@ -46,7 +45,9 @@ upload: check-version
 clean: check-version
 	rm -rf package
 	rm -rf $(TEMP_PATH)
-	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/usr/lib/tcltk
+	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)/DEBIAN
+	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
 	rm -f v$(VERSION).tar.gz
 
 check-version:
