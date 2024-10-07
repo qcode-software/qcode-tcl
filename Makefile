@@ -29,7 +29,7 @@ package: check-version
 	./package.tcl $(TEMP_PATH)/tcl ${TEMP_PATH_DEBIAN}/usr/lib/tcltk/tcl8/site-tcl ${NAME} ${VERSION}
 	./control.tcl ${TEMP_PATH_DEBIAN}/DEBIAN ${DPKG_NAME} ${VERSION} ${RELEASE} ${MAINTAINER}
 	# build package
-	dpkg-deb --build ${TEMP_PATH_DEBIAN} $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
+	fakeroot dpkg-deb --build ${TEMP_PATH_DEBIAN} $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 test: package
 	cd $(TEMP_PATH) && tclsh test/all.tcl
