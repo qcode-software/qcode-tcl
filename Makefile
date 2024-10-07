@@ -34,19 +34,19 @@ test: package
 	cd $(TEMP_PATH) && tclsh test/all.tcl
 
 install:
-	dpkg -i /tmp/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
+	dpkg -i /tmp/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 upload: check-version
-	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
-	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
+	scp $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb "$(REMOTEUSER)@$(REMOTEHOST):$(REMOTEDIR)/debs"	
+	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) includedeb buster $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	ssh $(REMOTEUSER)@$(REMOTEHOST) reprepro -b $(REMOTEDIR) copy bookworm buster $(DPKG_NAME)
-	ssh $(REMOTEUSER)@$(REMOTEHOST) rm -f $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
+	ssh $(REMOTEUSER)@$(REMOTEHOST) rm -f $(REMOTEDIR)/debs/$(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 
 clean: check-version
 	rm -rf package
 	rm -rf $(TEMP_PATH)
 	rm -rf /tmp/${DPKG_NAME}_$(VERSION)-$(RELEASE)
-	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE).deb
+	rm $(DPKG_NAME)_$(VERSION)-$(RELEASE)_all.deb
 	rm -f v$(VERSION).tar.gz
 
 check-version:
