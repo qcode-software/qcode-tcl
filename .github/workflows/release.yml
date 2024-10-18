@@ -28,13 +28,6 @@ jobs:
           minor_pattern: "(MINOR)"
           version_format: "${major}.${minor}.${patch}"
           search_commit_body: true
-      - name: Create Deploy Markdown
-        uses: ./actions/tcl-module-deploy-markdown
-        with:
-          version: ${{ steps.version.outputs.version }}
-          release: ${{ env.RELEASE }}
-          repo_name: ${{ env.REPO_NAME }}
-          notes_file: ../notes.md
       - name: Create Tcl Module
         uses: ./actions/tcl-module-build
         with:
@@ -65,6 +58,5 @@ jobs:
         with:
           tag: v${{ steps.version.outputs.version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          notes_file: ../notes.md
           archive_file: ${{ env.REPO_NAME }}-${{ steps.version.outputs.version }}.tar.gz
           debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb

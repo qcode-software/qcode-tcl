@@ -8,11 +8,6 @@ inputs:
     description: 'GitHub Token'
     required: true
     type: string
-  notes_file:
-    description: 'Notes file'
-    required: false
-    default: ''
-    type: string
   archive_file:
     description: 'Archive file'
     required: true
@@ -32,7 +27,6 @@ runs:
         gh release create \
           ${{ inputs.tag }} \
           --generate-notes \
-          --notes-file ${{ inputs.notes_file }} \
           --title "Release ${{ inputs.tag }}" \
           ${{ inputs.archive_file }} ${{ inputs.debian_package_file }}
       shell: bash
