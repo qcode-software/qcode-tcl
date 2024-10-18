@@ -26,7 +26,7 @@ jobs:
           tag_prefix: "v"
           major_pattern: "(MAJOR)"
           minor_pattern: "(MINOR)"
-          version_format: "${major}.${minor}.${patch}"
+          version_format: "${major}.${minor}"
           search_commit_body: true
       - name: Create Tcl Module
         uses: ./actions/tcl-module-build
