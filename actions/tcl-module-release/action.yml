@@ -1,0 +1,38 @@
+name: 'Create Release'
+inputs:
+  tag:
+    description: 'Tag'
+    required: true
+    type: string
+  github_token:
+    description: 'GitHub Token'
+    required: true
+    type: string
+  notes_file:
+    description: 'Notes file'
+    required: false
+    default: ''
+    type: string
+  archive_file:
+    description: 'Archive file'
+    required: true
+    type: string
+  debian_package_file:
+    description: 'Debian package file'
+    required: true
+    type: string
+
+runs:
+  using: "composite"    
+  steps:
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        gh release create \
+          ${{ inputs.tag }} \
+          --generate-notes \
+          --notes-file ${{ inputs.notes_file }} \
+          --title "Release ${{ inputs.tag }}" \
+          ${{ inputs.archive_file }} ${{ inputs.debian_package_file }}
+      shell: bash

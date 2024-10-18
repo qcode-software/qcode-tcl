@@ -1,0 +1,56 @@
+name: 'Create Debian Package'
+inputs:
+  version:
+    description: 'Version'
+    required: true
+    type: string
+  repo_name:
+    description: 'Repository Name'
+    required: true
+    type: string
+  maintainer:
+    description: 'Maintainer'
+    required: true
+    type: string
+  release:
+    description: 'Release'
+    required: true
+    type: string
+  debian_package_file:
+    description: 'Debian package file'
+    required: true
+    type: string
+  debian_package_description:
+    description: 'Debian package description'
+    required: true
+    type: string
+  tcl_module_file:
+    description: 'Tcl Module File'
+    required: true
+    type: string
+  depends:
+    description: 'Depends'
+    required: true
+    type: string
+
+runs:
+  using: "composite"    
+  steps:
+    - name: Create debian package
+      run: |
+        mkdir -p package/usr/lib/tcltk/tcl8/site-tcl
+        cp ${{ inputs.tcl_module_file }} package/usr/lib/tcltk/tcl8/site-tcl/${{ inputs.tcl_module_file }}        
+
+        mkdir -p package/DEBIAN
+        echo "Package: ${{ inputs.repo_name }}" > package/DEBIAN/control
+        echo "Version: ${{ inputs.version }}-${{ inputs.release }}" >> package/DEBIAN/control
+        echo "Section: base" >> package/DEBIAN/control
+        echo "Priority: optional" >> package/DEBIAN/control
+        echo "Architecture: all" >> package/DEBIAN/control
+        echo "Depends: ${{ inputs.depends }}" >> package/DEBIAN/control
+        echo "Maintainer: ${{ inputs.maintainer }}" >> package/DEBIAN/control
+        echo "Description: ${{ inputs.debian_package_description}}" >> package/DEBIAN/control
+        echo "" >> package/DEBIAN/control
+        
+        fakeroot dpkg-deb -Zxz --build package ${{ inputs.debian_package_file }}        
+      shell: bash

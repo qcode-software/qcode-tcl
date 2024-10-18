@@ -9,37 +9,62 @@ jobs:
   release:
     name: "release"
     runs-on: ubuntu-latest
+    env:
+      REPO_NAME: ${{ github.event.repository.name }}
+      RELEASE: 0
+      MAINTAINER: hackers@qcode.co.uk
+      MODULE_NAME: qcode
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Semantic Version
         id: version
-        uses: paulhatch/semantic-version@v5.0.0-alpha2
+        uses: paulhatch/semantic-version@v5.4.0
         with:
           tag_prefix: "v"
           major_pattern: "(MAJOR)"
           minor_pattern: "(MINOR)"
           version_format: "${major}.${minor}.${patch}"
           search_commit_body: true
-
-      - name: "Create release"
-        uses: "actions/github-script@v6"
+      - name: Create Deploy Markdown
+        uses: ./actions/tcl-module-deploy-markdown
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          script: |
-            try {
-              await github.rest.repos.createRelease({
-                draft: false,
-                generate_release_notes: true,
-                name: "Release v${{ steps.version.outputs.version }}",
-                owner: context.repo.owner,
-                prerelease: false,
-                repo: context.repo.repo,
-                tag_name: "v${{ steps.version.outputs.version }}",
-              });
-            } catch (error) {
-              core.setFailed(error.message);
-            }
+          version: ${{ steps.version.outputs.version }}
+          release: ${{ env.RELEASE }}
+          repo_name: ${{ env.REPO_NAME }}
+          notes_file: ../notes.md
+      - name: Create Tcl Module
+        uses: ./actions/tcl-module-build
+        with:
+          source_directory: tcl
+          version: ${{ steps.version.outputs.version }}
+          package: ${{ env.MODULE_NAME }}
+          tcl_module_file: ${{ env.MODULE_NAME }}-${{ steps.version.outputs.version }}.tm
+      - name: Create Archive
+        uses: ./actions/tcl-module-archive
+        with:
+          version: ${{ steps.version.outputs.version }}
+          repo_name: ${{ env.REPO_NAME }}
+          archive_file: ${{ env.REPO_NAME }}-${{ steps.version.outputs.version }}.tar.gz
+          tcl_module_file: ${{ env.MODULE_NAME }}-${{ steps.version.outputs.version }}.tm
+      - name: Create Debian Package
+        uses: ./actions/tcl-module-debian-package
+        with:
+          version: ${{ steps.version.outputs.version }}
+          repo_name: ${{ env.REPO_NAME }}
+          maintainer: ${{ env.MAINTAINER }}
+          release: ${{ env.RELEASE }}
+          debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
+          debian_package_description: "Description: QCode Tcl Debian Package"
+          depends: "tcl,tcllib,html2text,curl,tclcurl"
+          tcl_module_file: ${{ env.MODULE_NAME }}-${{ steps.version.outputs.version }}.tm
+      - name: Create release
+        uses: ./actions/tcl-module-release
+        with:
+          tag: v${{ steps.version.outputs.version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          notes_file: ../notes.md
+          archive_file: ${{ env.REPO_NAME }}-${{ steps.version.outputs.version }}.tar.gz
+          debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
