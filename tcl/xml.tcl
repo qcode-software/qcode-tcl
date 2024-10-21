@@ -113,3 +113,4 @@ proc qc::xml_declaration_valid {declaration} {
 
     return [regexp $pattern $declaration]
 }
+
