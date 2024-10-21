@@ -1,7 +1,7 @@
 Board Ticket #
 --------------
 
-Git Release Type ( MAJOR | MINOR | PATCH )
+Git Release Type ( MAJOR | MINOR )
 --------------
 (MINOR)
 
