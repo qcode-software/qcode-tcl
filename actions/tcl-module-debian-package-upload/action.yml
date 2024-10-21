@@ -28,6 +28,14 @@ inputs:
 runs:
   using: "composite"    
   steps:
+    - name: Add SSH key
+      run: |
+        mkdir .ssh
+        echo "${{ inputs.private_key }}" > .ssh/github
+        chmod 600 .ssh/github
+        ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+        ssh-add .ssh/github
+      shell: bash
     - name: Upload debian package
       run: |
         scp ${{ inputs.debian_package_file }} "${{ inputs.remote_user }}@${{ inputs.remote_host }}:${{ inputs.remote_dir }}/debs"	
