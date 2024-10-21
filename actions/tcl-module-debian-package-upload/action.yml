@@ -1,0 +1,46 @@
+name: 'Upload Debian Package'
+inputs:
+  private_key:
+    description: 'Private key'
+    required: true
+    type: string
+  repo_name:
+    description: 'Repository Name'
+    required: true
+    type: string
+  debian_package_file:
+    description: 'Debian package file'
+    required: true
+    type: string
+  remote_user:
+    description: 'Remote user'
+    required: true
+    type: string
+  remote_host:
+    description: 'Remote host'
+    required: true
+    type: string
+  remote_dir:
+    description: 'Remote directory'
+    required: true
+    type: string
+
+runs:
+  using: "composite"    
+  steps:
+    - name: Add SSH key
+      run: |
+        mkdir .ssh
+        echo "${{ inputs.private_key }}" > .ssh/github
+        chmod 600 .ssh/github
+        ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+        ssh-add .ssh/github
+      shell: bash
+    - name: Upload debian package
+      run: |
+        scp ${{ inputs.debian_package_file }} "${{ inputs.remote_user }}@${{ inputs.remote_host }}:${{ inputs.remote_dir }}/debs"	
+        ssh ${{ inputs.remote_user }}@${{ inputs.remote_host }} reprepro -b ${{ inputs.remote_dir }} includedeb buster ${{ inputs.remote_dir }}/debs/${{ inputs.debian_package_file }}
+        ssh ${{ inputs.remote_user }}@${{ inputs.remote_host }} reprepro -b ${{ inputs.remote_dir }} copy bookworm buster ${{ inputs.repo_name }}
+        ssh ${{ inputs.remote_user }}@${{ inputs.remote_host }} reprepro -b ${{ inputs.remote_dir }} copy bullseye buster ${{ inputs.repo_name }}
+        ssh ${{ inputs.remote_user }}@${{ inputs.remote_host }} rm -f ${{ inputs.remote_dir }}/debs/${{ inputs.debian_package_file }}        
+      shell: bash

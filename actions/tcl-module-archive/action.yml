@@ -1,0 +1,37 @@
+name: 'Create Archive'
+inputs:
+  version:
+    description: 'Version'
+    required: true
+    type: string
+  repo_name:
+    description: 'Repository Name'
+    required: true
+    type: string
+  archive_file:
+    description: 'Archive file'
+    required: true
+    type: string
+  tcl_module_file:
+    description: 'Tcl Module File'
+    required: true
+    type: string
+
+runs:
+  using: "composite"    
+  steps:
+    - name: Create tar.gz archive
+      run: |
+        mkdir -p temp/lib
+        echo ${{ inputs.version }} > temp/lib/VERSION
+        cp ${{ inputs.tcl_module_file }} temp/lib/${{ inputs.tcl_module_file }}
+        tar \
+          --anchored \
+          --no-wildcards-match-slash \
+          --create \
+          --gzip \
+          --verbose \
+          --directory=temp \
+          --file=${{ inputs.archive_file }} \
+          .        
+      shell: bash

@@ -1,0 +1,33 @@
+name: 'Create Tcl Module'
+inputs:
+  source_directory:
+    description: 'Source Directory'
+    required: true
+    type: string
+  version:
+    description: 'Version'
+    required: true
+    type: string
+  package:
+    description: 'Package'
+    required: true
+    type: string
+  tcl_module_file:
+    description: 'Tcl Module File'
+    required: true
+    type: string
+
+runs:
+  using: "composite"    
+  steps:
+    - name: Create tcl module
+      run: |
+        echo "package provide ${{ inputs.package }} ${{ inputs.version }}" >> ${{ inputs.tcl_module_file }}
+        echo "" >> ${{ inputs.tcl_module_file }}
+        for tcl_file in `find ${{ inputs.source_directory }}/ -type f -name "*.tcl"`
+        do    
+          cat $tcl_file >> ${{ inputs.tcl_module_file }}
+          echo "" >> ${{ inputs.tcl_module_file }}
+        done
+
+      shell: bash
