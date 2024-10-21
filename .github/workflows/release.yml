@@ -60,3 +60,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           archive_file: ${{ env.REPO_NAME }}-${{ steps.version.outputs.version }}.tar.gz
           debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
+      - name: Upload Debian Package
+        uses: ./actions/tcl-module-debian-package-upload
+        with:
+          private_key: ${{ secrets.DEB_PRIVATE_KEY }}
+          repo_name: ${{ env.REPO_NAME }}
+          debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
+          remote_user: deb
+          remote_host: ssh.debian.qcode.co.uk
+          remote_dir: debian.qcode.co.uk
