@@ -31,6 +31,7 @@ runs:
     - name: Add SSH key
       run: |
         mkdir .ssh
+        ssh-keyscan ${{ inputs.remote_host }} >> .ssh/known_hosts
         echo "${{ inputs.private_key }}" > .ssh/github
         chmod 600 .ssh/github
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
