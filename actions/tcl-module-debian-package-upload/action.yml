@@ -34,6 +34,7 @@ runs:
         ssh-keyscan ${{ inputs.remote_host }} >> .ssh/known_hosts
         echo "${{ inputs.private_key }}" > .ssh/github
         chmod 600 .ssh/github
+        eval `ssh-agent -s`
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
         ssh-add .ssh/github
       shell: bash
