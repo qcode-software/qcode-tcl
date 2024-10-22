@@ -16,7 +16,7 @@ Then simply run the following commands to install the Qcode Tcl library:
 
 ```
 apt-get update
-apt-get install qcode-tcl-8.12.0
+apt-get install qcode-tcl
 ```
 
 -----
