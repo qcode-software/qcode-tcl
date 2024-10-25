@@ -11,6 +11,7 @@ proc qc::session_new { user_id } {
     set entropy2 [read $file 50]
     close $file
     set uuid [qc::uuid]
+    global session_id
     set session_id [qc::sha1 "$uuid $entropy1"]
     set authenticity_token [qc::sha1 $entropy2]
     if { [qc::conn_open]} {
