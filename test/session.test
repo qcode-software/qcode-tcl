@@ -127,6 +127,25 @@ test session_new-1 \
             error "A session was not created."
         }
 
+        return 1
+    } \
+    -result 1
+
+test session_new_and_login-1 \
+    {Create a new session and log it in .} \
+    -setup [join [list $setup {
+        proc qc::conn_open {} { return false }
+    }]] \
+    -cleanup $cleanup \
+    -body {
+        set session_id [session_new_and_login 1]
+
+        db_1row {select count(*) as count from session where session_id=:session_id}
+
+        if { $count != 1 } {
+            error "A session was not created."
+        }
+
         set global_session_id [qc::session_id]
 
         if { $global_session_id ne $session_id } {
