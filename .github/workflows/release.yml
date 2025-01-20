@@ -62,7 +62,7 @@ jobs:
           archive_file: ${{ env.REPO_NAME }}-${{ steps.version.outputs.version }}.tar.gz
           debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
       - name: Upload Debian Package
-        uses: ./actions/tcl-module-debian-package-upload
+        uses: qcode-software/action-debian-package-upload@v0.3
         with:
           private_key: ${{ secrets.DEB_PRIVATE_KEY }}
           repo_name: ${{ env.REPO_NAME }}
