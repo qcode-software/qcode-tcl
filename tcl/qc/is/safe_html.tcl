@@ -4,7 +4,7 @@ proc qc::is::safe_html {text} {
         # wrap the text up in <root> to preserve text outwith the html
         set text [qc::h root $text]
         set doc [dom parse -html $text]
-        set root [$doc documentElement]
+        set root [$doc selectNodes "//* \[name() = 'root'\]"]
         
         if {$root eq ""} {
             $doc delete
