@@ -3166,4 +3166,12 @@ test webp-3.0 \
     } \
     -result 0
 
+
+test is-safe-html-1.0 {qc::is::safe_html } \
+    -body {
+        qc::is safe_html "<p>hello</p>"
+    } \
+    -result 1
+
+
 cleanupTests
