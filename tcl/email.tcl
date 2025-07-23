@@ -337,7 +337,7 @@ proc qc::email2multimap {text} {
 	    # One part MIME
 	    # Content-Transfer-Encoding
 	    if { [multimap_exists -nocase $email Content-Transfer-Encoding] } {
-                switch [multimap_get_first $email -nocase Content-Transfer-Encoding] {
+                switch [multimap_get_first -nocase $email Content-Transfer-Encoding] {
 		    7bit -
 		    8bit -
 		    binary {
