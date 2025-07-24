@@ -323,10 +323,10 @@ proc qc::email2multimap {text} {
 	lappend email $key [qc::email_header_value_decode $value]
     }
     
-    if { [multimap_exists $email Content-Type] } {
+    if { [multimap_exists -nocase $email Content-Type] } {
         # MIME message
 	set bodies {}
-	array set header [email_header_values Content-Type [multimap_get_first $email Content-Type]]
+	array set header [email_header_values Content-Type [multimap_get_first -nocase $email Content-Type]]
 	if { [string match -nocase multipart/* $header(Content-Type)] } {
             # Multi-part MIME
 	    foreach part [lrange [mcsplit $body "--$header(boundary)"] 1 end-1] {
@@ -336,8 +336,8 @@ proc qc::email2multimap {text} {
 	} else {
 	    # One part MIME
 	    # Content-Transfer-Encoding
-	    if { [multimap_exists $email Content-Transfer-Encoding] } {
-                switch [multimap_get_first $email Content-Transfer-Encoding] {
+	    if { [multimap_exists -nocase $email Content-Transfer-Encoding] } {
+                switch [multimap_get_first -nocase $email Content-Transfer-Encoding] {
 		    7bit -
 		    8bit -
 		    binary {
