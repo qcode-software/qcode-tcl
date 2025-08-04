@@ -14,22 +14,25 @@ proc qc::db_file_insert {args} {
     if { ! [info exists mime_type] } {
         set mime_type [qc::mime_type_guess $filename]
     }
-   
+
+    set key [qc::param_get db_file_encryption_key]
+    set file_path_encrypted [fileutil::tempfile]
+    exec openssl aes-256-cbc -in $file_path -out $file_path_encrypted -pbkdf2 -iter 1000 -md sha512 \
+            -pass pass:$key
     set file_id [db_seq file_id_seq]
     qc::aws_credentials_set_from_ec2_role
     set s3_location [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
     # upload file to amazon s3
-    qc::s3 put $s3_location $file_path
-    
+    qc::s3 put $s3_location $file_path_encrypted
+        
     set qry {
 	insert into file 
-	(file_id,user_id,filename,mime_type,s3_location)
+	(file_id,user_id,filename,mime_type,s3_location,encrypted)
 	values 
-	(:file_id,:user_id,:filename,:mime_type,:s3_location)
+	(:file_id,:user_id,:filename,:mime_type,:s3_location,'t')
     }
     db_dml $qry
     return $file_id
-
 }
 
 proc qc::db_file_copy {file_id} {
@@ -56,11 +59,15 @@ proc qc::db_file_export {args} {
     args $args -tmp_file ? -- file_id
 
     default tmp_file /tmp/[qc::uuid]
+    set tmp_file_encrypted /tmp/[qc::uuid]
+    set key [qc::param_get db_file_encryption_key]
+    
     db_1row {
         select
         filename,
         encode(data,'base64') as base64,
-        s3_location
+        s3_location,
+        encrypted
         from file
         where file_id=:file_id
     }
@@ -76,8 +83,15 @@ proc qc::db_file_export {args} {
         close $id
     } else {
         # file exists on amazon s3
-        qc::aws_credentials_set_from_ec2_role
-        qc::s3 get $s3_location $tmp_file
+        qc::aws_credentials_set_from_ec2_role        
+        if { $encrypted } {
+            qc::s3 get $s3_location $tmp_file_encrypted
+            openssl aes-256-cbc -d -in $tmp_file_encrypted -out $tmp_file -pbkdf2 -iter 1000 -md sha512 \
+                -pass pass:$key
+            file delete $tmp_file_encrypted
+        } else {
+            qc::s3 get $s3_location $tmp_file
+        }
     }
     return $tmp_file
 }
