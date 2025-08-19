@@ -134,17 +134,13 @@ proc qc::_s3_auth_headers { args } {
 proc qc::_s3_get { bucket object_key {encrypted false}} {
     #| Construct the http GET request to S3 including auth headers
     if { $encrypted } {
-        set headers [_s3_auth_headers \
-            -amz_headers [list \
-                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-            ] \
-            GET $object_key $bucket]
-        lappend headers \
+        set amz_headers [list \
             "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
             "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]            
+        set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
+        lappend headers {*}$amz_headers
     } else {
         set headers [_s3_auth_headers GET $object_key $bucket]
     }
@@ -161,17 +157,13 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
     set url "https://[qc::_s3_endpoint $bucket $object_key]"
 
     if { $encrypted } {
-        set headers [_s3_auth_headers \
-            -amz_headers [list \
-                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-            ] \
-            HEAD $object_key $bucket]
-        lappend headers \
+        set amz_headers [list \
             "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
             "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]
+        set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
+        lappend headers {*}$amz_headers
     } else {
         set headers [_s3_auth_headers HEAD $object_key $bucket]
     }
@@ -225,16 +217,13 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
 proc qc::_s3_head { bucket object_key {encrypted false}} {
     #| Construct the http HEAD request to S3 including auth headers
     if { $encrypted } {
-        set headers [_s3_auth_headers \
-            -amz_headers [list \
-                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-            ] \
-            HEAD $object_key $bucket]
-        lappend headers "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                        "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                        "x-amz-server-side-encryption-customer-algorithm" "AES256"
+        set amz_headers [list \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]            
+        set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
+        lappend headers {*}$amz_headers
     } else {
         set headers [_s3_auth_headers HEAD $object_key $bucket]
     }
@@ -296,17 +285,13 @@ proc qc::_s3_post { args } {
 proc qc::_s3_delete { bucket object_key {encrypted false}} {
     #| Construct the http DELETE request to S3 including auth headers
     if { $encrypted } {
-        set headers [_s3_auth_headers \
-            -amz_headers [list \
-                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-            ] \
-            DELETE $object_key $bucket]
-        lappend headers \
+        set amz_headers [list \
             "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
             "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]
+        set headers [_s3_auth_headers -amz_headers $amz_headers DELETE $object_key $bucket]
+        lappend headers {*}$amz_headers
     } else {
         set headers [_s3_auth_headers DELETE $object_key $bucket]
     }
@@ -322,18 +307,13 @@ proc qc::_s3_save { args } {
     set tmp_file "/tmp/s3-[qc::uuid]"
 
     if { $encrypted } {
-        set headers [_s3_auth_headers \
-            -amz_headers [list \
-                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-            ] \
-            GET $object_key $bucket \
-        ]
-        lappend headers \
+        set amz_headers [list \
             "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
             "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]
+        set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
+        lappend headers {*}$amz_headers
     } else {
         set headers [_s3_auth_headers GET $object_key $bucket]
     }
@@ -360,7 +340,15 @@ proc qc::_s3_save { args } {
 proc qc::_s3_put { args } {
     #| Construct the http PUT request to S3 including auth headers
     # _s3_put ?-header 0 ?-infile ? ?-s3_copy ?bucket object_key
-    qc::args $args -nochecksum -header 0 -s3_copy ? -infile ? bucket object_key
+    qc::args $args -nochecksum -header 0 -s3_copy ? -infile ? -encrypted false bucket object_key
+    set amz_headers [list]
+    if { $encrypted } {
+        set amz_headers [list \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]
+    }
     if { [info exists infile]} {
         set content_type [qc::mime_type_guess $infile]
         set content_md5 [qc::_s3_base64_md5 -file $infile]
@@ -368,6 +356,7 @@ proc qc::_s3_put { args } {
         if { [info exists nochecksum] } {
             # Dont send metadata for upload parts
             set headers [_s3_auth_headers \
+                             -amz_headers $amz_headers \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
                              PUT $object_key $bucket]
@@ -376,8 +365,7 @@ proc qc::_s3_put { args } {
             # has a different md5
             # Authentication value needs to use content_* values for hmac signing
             set headers [_s3_auth_headers \
-                             -amz_headers [list "x-amz-meta-content-md5" $content_md5 \
-                             ] \
+                             -amz_headers [list "x-amz-meta-content-md5" $content_md5 {*}$amz_headers] \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
                              PUT $object_key $bucket]
@@ -386,6 +374,9 @@ proc qc::_s3_put { args } {
         lappend headers Content-Length $data_size
         lappend headers Content-MD5 $content_md5
         lappend headers Content-Type $content_type
+        if { $encrypted } {
+            lappend headers {*}$amz_headers
+        }
         # Stop tclcurl from stending Transfer-Encoding header
         lappend headers Transfer-Encoding {}
         lappend headers Expect {}
@@ -404,10 +395,13 @@ proc qc::_s3_put { args } {
         # request with x-amz-copy-source header
         set headers [_s3_auth_headers \
                          -content_type {} \
-                         -amz_headers [list "x-amz-copy-source" $s3_copy] \
+                         -amz_headers [list "x-amz-copy-source" $s3_copy {*}$amz_headers] \
                          PUT $object_key $bucket]
         lappend headers x-amz-copy-source $s3_copy
         lappend headers Content-Type {}
+        if { $encrypted } {
+            lappend headers {*}$amz_headers
+        }
         return [qc::http_put \
                     -header $header \
                     -headers $headers \
