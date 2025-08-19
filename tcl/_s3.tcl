@@ -133,7 +133,12 @@ proc qc::_s3_auth_headers { args } {
 
 proc qc::_s3_get { bucket object_key } {
     #| Construct the http GET request to S3 including auth headers
-    set headers [_s3_auth_headers GET $object_key $bucket]
+    set headers [_s3_auth_headers \
+        -amz_headers [list "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                        "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                        "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+                             ] \
+        GET $object_key $bucket]
     set result [qc::http_get \
                     -headers $headers \
                     "https://[qc::_s3_endpoint $bucket $object_key]"]
@@ -192,9 +197,23 @@ proc qc::_s3_exists { bucket object_key } {
     }
 }
 
-proc qc::_s3_head { bucket object_key } {
+proc qc::_s3_head { bucket object_key {encrypted false}} {
     #| Construct the http HEAD request to S3 including auth headers
-    set headers [_s3_auth_headers HEAD $object_key $bucket]
+    if { $encrypted } {
+        set headers [_s3_auth_headers \
+            -amz_headers [list \
+                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+            ] \
+            HEAD $object_key $bucket]
+        lappend headers "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                        "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                        "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    } else {
+        set headers [_s3_auth_headers HEAD $object_key $bucket]
+    }
+    
     set result [qc::http_head \
                     -headers $headers \
                     "https://[qc::_s3_endpoint $bucket $object_key]"]
@@ -260,9 +279,25 @@ proc qc::_s3_delete { bucket object_key } {
 
 proc qc::_s3_save { args } {
     #| Construct the http SAVE request to S3 including auth headers
-    qc::args $args -timeout 60 -- bucket object_key filename
+    qc::args $args -timeout 60 -encrypted false -- bucket object_key filename
     set tmp_file "/tmp/s3-[qc::uuid]"
-    set headers [_s3_auth_headers GET $object_key $bucket]
+
+    if { $encrypted } {
+        set headers [_s3_auth_headers \
+            -amz_headers [list \
+                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+            ] \
+            GET $object_key $bucket \
+        ]
+        lappend headers \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    } else {
+        set headers [_s3_auth_headers GET $object_key $bucket]
+    }
     qc::http_save \
         -timeout $timeout \
         -headers $headers \
@@ -302,7 +337,11 @@ proc qc::_s3_put { args } {
             # has a different md5
             # Authentication value needs to use content_* values for hmac signing
             set headers [_s3_auth_headers \
-                             -amz_headers [list "x-amz-meta-content-md5" $content_md5] \
+                             -amz_headers [list "x-amz-meta-content-md5" $content_md5 \
+                                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+                             ] \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
                              PUT $object_key $bucket]
