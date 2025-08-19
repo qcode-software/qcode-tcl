@@ -239,20 +239,31 @@ proc qc::_s3_post { args } {
     qc::args $args \
         -amz_headers "" \
         -content_type {application/xml} \
+        -encrypted false \
         -- \
         bucket \
         object_key \
         {data ""}
 
+    if { $encrypted } {
+        lappend amz_headers [list \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+        ]
+    }
+
     if { $data ne "" } {
         # Used for posting XML
         set content_md5 [qc::_s3_base64_md5 -data $data]
         set headers [_s3_auth_headers \
+                         -amz_headers $amz_headers \
                          -content_type $content_type \
                          -content_md5 $content_md5 \
                          POST $object_key $bucket]
         lappend headers Content-MD5 $content_md5
         lappend headers Content-Type $content_type
+        lappend headers {*}$amz_headers
         set result [qc::http_post \
                         -valid_response_codes {100 200 202} \
                         -headers $headers \
