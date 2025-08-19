@@ -154,15 +154,31 @@ proc qc::_s3_get { bucket object_key {encrypted false}} {
     return $result
 }
 
-proc qc::_s3_exists { bucket object_key } {
+proc qc::_s3_exists { bucket object_key {encrypted false} } {
     #| Returns boolean true/false for 200/404 responses, anything else
     #| returns an error.
     set timeout 60
     set url "https://[qc::_s3_endpoint $bucket $object_key]"
 
+    if { $encrypted } {
+        set headers [_s3_auth_headers \
+            -amz_headers [list \
+                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+            ] \
+            HEAD $object_key $bucket]
+        lappend headers \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    } else {
+        set headers [_s3_auth_headers HEAD $object_key $bucket]
+    }
+
     set httpheaders [list]
-    foreach {name value} [qc::_s3_auth_headers HEAD $object_key $bucket] {
-	lappend httpheaders [qc::http_header $name $value]
+    foreach {name value} $headers {
+	    lappend httpheaders [qc::http_header $name $value]
     }
 
     dict2vars [qc::http_curl \
@@ -361,9 +377,6 @@ proc qc::_s3_put { args } {
             # Authentication value needs to use content_* values for hmac signing
             set headers [_s3_auth_headers \
                              -amz_headers [list "x-amz-meta-content-md5" $content_md5 \
-                                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
                              ] \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
