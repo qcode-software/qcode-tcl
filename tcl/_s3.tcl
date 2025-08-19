@@ -131,14 +131,23 @@ proc qc::_s3_auth_headers { args } {
     return $return_headers
 }
 
-proc qc::_s3_get { bucket object_key } {
+proc qc::_s3_get { bucket object_key {encrypted false}} {
     #| Construct the http GET request to S3 including auth headers
-    set headers [_s3_auth_headers \
-        -amz_headers [list "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                        "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-                        "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-                             ] \
-        GET $object_key $bucket]
+    if { $encrypted } {
+        set headers [_s3_auth_headers \
+            -amz_headers [list \
+                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+            ] \
+            GET $object_key $bucket]
+        lappend headers \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    } else {
+        set headers [_s3_auth_headers GET $object_key $bucket]
+    }
     set result [qc::http_get \
                     -headers $headers \
                     "https://[qc::_s3_endpoint $bucket $object_key]"]
@@ -268,9 +277,23 @@ proc qc::_s3_post { args } {
     return $result
 }
 
-proc qc::_s3_delete { bucket object_key } {
+proc qc::_s3_delete { bucket object_key {encrypted false}} {
     #| Construct the http DELETE request to S3 including auth headers
-    set headers [_s3_auth_headers DELETE $object_key $bucket]
+    if { $encrypted } {
+        set headers [_s3_auth_headers \
+            -amz_headers [list \
+                "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+                "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-server-side-encryption-customer-algorithm" "AES256" \
+            ] \
+            DELETE $object_key $bucket]
+        lappend headers \
+            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    } else {
+        set headers [_s3_auth_headers DELETE $object_key $bucket]
+    }
     set result [qc::http_delete \
                     -headers $headers \
                     "https://[_s3_endpoint $bucket $object_key]"]
