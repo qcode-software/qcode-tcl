@@ -246,11 +246,10 @@ proc qc::_s3_post { args } {
         {data ""}
 
     if { $encrypted } {
-        lappend amz_headers [list \
+        lappend amz_headers \
             "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
             "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
     }
 
     if { $data ne "" } {
