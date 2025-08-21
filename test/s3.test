@@ -9,6 +9,14 @@ foreach file $files {
     source $file
 }
 
+proc qc::_s3_encryption_credentials {} {
+    set dict [dict create \
+        customer_key "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
+        customer_key_md5 "hRasmdxgYDKV3nvbahU1MA==" \
+    ]
+    return $dict
+}
+
 # Local config
 if { [file exists ~/.qcode-tcl] } {
     source ~/.qcode-tcl
