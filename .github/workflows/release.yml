@@ -52,7 +52,7 @@ jobs:
           release: ${{ env.RELEASE }}
           debian_package_file: ${{ env.REPO_NAME }}_${{ steps.version.outputs.version }}-${{ env.RELEASE }}_all.deb
           debian_package_description: "Description: QCode Tcl Debian Package"
-          depends: "tcl,tcllib,html2text,curl,tclcurl"
+          depends: "tcl,tcllib,html2text,curl,tclcurl,tcl-trf"
           tcl_module_file: ${{ env.MODULE_NAME }}-${{ steps.version.outputs.version }}.tm
       - name: Create release
         uses: ./actions/tcl-module-release

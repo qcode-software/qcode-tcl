@@ -3,6 +3,7 @@ package require md5
 package require base64
 package require tdom
 package require fileutil
+package require Trf
 
 namespace eval qc {}
 
@@ -456,14 +457,7 @@ proc qc::_s3_base64_md5 { args } {
         # cause problems
         return [::base64::encode [::md5::md5 $data]]
     } elseif {[info exists file]} {
-        # Will not use ::md5 if Trf isn't installed due to incorrect results &
-        # long runtimes for large files
-        if { [qc::in [package names] "Trf"] } {
-            return [::base64::encode [::md5::md5 -file $file]]
-        } else {
-            set openssl [exec which openssl]
-            return [exec $openssl dgst -md5 -binary $file | $openssl enc -base64]
-        }
+        return [::base64::encode [::md5::md5 -file $file]]
     } else {
         error "qc::_s3_base64_md5: 1 of -file or -data must be specified"
     }
