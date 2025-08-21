@@ -131,12 +131,21 @@ proc qc::_s3_auth_headers { args } {
     return $return_headers
 }
 
+proc qc::_s3_encryption_credentials {} {
+    set dict [dict create \
+        customer_key [qc::param_get s3_base64_sse_key] \
+        customer_key_md5 [qc::_s3_base64_md5 [::base64::decode [qc::param_get s3_base64_sse_key]]] \
+    ]
+    return $dict
+}
+
 proc qc::_s3_get { bucket object_key {encrypted false}} {
     #| Construct the http GET request to S3 including auth headers
+    dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
     if { $encrypted } {
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]            
         set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
@@ -157,9 +166,10 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
     set url "https://[qc::_s3_endpoint $bucket $object_key]"
 
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]
         set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
@@ -217,9 +227,10 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
 proc qc::_s3_head { bucket object_key {encrypted false}} {
     #| Construct the http HEAD request to S3 including auth headers
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]            
         set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
@@ -246,9 +257,10 @@ proc qc::_s3_post { args } {
         {data ""}
 
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         lappend amz_headers \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256"
     }
 
@@ -295,9 +307,10 @@ proc qc::_s3_post { args } {
 proc qc::_s3_delete { bucket object_key {encrypted false}} {
     #| Construct the http DELETE request to S3 including auth headers
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]
         set headers [_s3_auth_headers -amz_headers $amz_headers DELETE $object_key $bucket]
@@ -317,9 +330,10 @@ proc qc::_s3_save { args } {
     set tmp_file "/tmp/s3-[qc::uuid]"
 
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]
         set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
@@ -353,9 +367,10 @@ proc qc::_s3_put { args } {
     qc::args $args -nochecksum -header 0 -s3_copy ? -infile ? -encrypted false bucket object_key
     set amz_headers [list]
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-            "x-amz-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
             "x-amz-server-side-encryption-customer-algorithm" "AES256" \
         ]
     }
@@ -404,9 +419,10 @@ proc qc::_s3_put { args } {
         # we're copying a S3 file - skip the data processing and send the PUT
         # request with x-amz-copy-source header
         if { $encrypted } {
+            dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
             lappend amz_headers \
-                "x-amz-copy-source-server-side-encryption-customer-key" "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" \
-                "x-amz-copy-source-server-side-encryption-customer-key-MD5" "hRasmdxgYDKV3nvbahU1MA==" \
+                "x-amz-copy-source-server-side-encryption-customer-key" $customer_key \
+                "x-amz-copy-source-server-side-encryption-customer-key-MD5" $customer_key_md5 \
                 "x-amz-copy-source-server-side-encryption-customer-algorithm" "AES256" \
         }
         set headers [_s3_auth_headers \
