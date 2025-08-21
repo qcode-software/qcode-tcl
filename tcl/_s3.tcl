@@ -58,6 +58,7 @@ proc qc::_s3_auth_headers { args } {
         -amz_headers "" \
         -content_type "" \
         -content_md5 "" \
+        -encrypted false \
         -- \
         verb \
         object_key \
@@ -67,6 +68,14 @@ proc qc::_s3_auth_headers { args } {
     if { [info exists ::env(AWS_SESSION_TOKEN)] && $::env(AWS_SESSION_TOKEN) ne "" } {
         # We're using temporary security credentials - add token header
         lappend amz_headers x-amz-security-token $::env(AWS_SESSION_TOKEN)
+    }
+
+    if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
+        lappend amz_headers \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
     }
 
     set date [qc::format_timestamp_http now]
@@ -129,6 +138,14 @@ proc qc::_s3_auth_headers { args } {
             "x-amz-security-token" [dict get $amz_headers "x-amz-security-token"]
     }
 
+    if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
+        lappend return_headers \
+            "x-amz-server-side-encryption-customer-key" $customer_key \
+            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
+            "x-amz-server-side-encryption-customer-algorithm" "AES256"
+    }
+
     return $return_headers
 }
 
@@ -142,18 +159,7 @@ proc qc::_s3_encryption_credentials {} {
 
 proc qc::_s3_get { bucket object_key {encrypted false}} {
     #| Construct the http GET request to S3 including auth headers
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]            
-        set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
-        lappend headers {*}$amz_headers
-    } else {
-        set headers [_s3_auth_headers GET $object_key $bucket]
-    }
+    set headers [_s3_auth_headers -encrypted $encrypted GET $object_key $bucket]
     set result [qc::http_get \
                     -headers $headers \
                     "https://[qc::_s3_endpoint $bucket $object_key]"]
@@ -166,19 +172,7 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
     set timeout 60
     set url "https://[qc::_s3_endpoint $bucket $object_key]"
 
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]
-        set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
-        lappend headers {*}$amz_headers
-    } else {
-        set headers [_s3_auth_headers HEAD $object_key $bucket]
-    }
-
+    set headers [_s3_auth_headers -encrypted $encrypted HEAD $object_key $bucket]
     set httpheaders [list]
     foreach {name value} $headers {
 	    lappend httpheaders [qc::http_header $name $value]
@@ -227,19 +221,7 @@ proc qc::_s3_exists { bucket object_key {encrypted false} } {
 
 proc qc::_s3_head { bucket object_key {encrypted false}} {
     #| Construct the http HEAD request to S3 including auth headers
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]            
-        set headers [_s3_auth_headers -amz_headers $amz_headers HEAD $object_key $bucket]
-        lappend headers {*}$amz_headers
-    } else {
-        set headers [_s3_auth_headers HEAD $object_key $bucket]
-    }
-    
+    set headers [_s3_auth_headers -encrypted $encrypted HEAD $object_key $bucket]
     set result [qc::http_head \
                     -headers $headers \
                     "https://[qc::_s3_endpoint $bucket $object_key]"]
@@ -257,14 +239,6 @@ proc qc::_s3_post { args } {
         object_key \
         {data ""}
 
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        lappend amz_headers \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256"
-    }
-
     if { $data ne "" } {
         # Used for posting XML
         set content_md5 [qc::_s3_base64_md5 -data $data]
@@ -272,6 +246,7 @@ proc qc::_s3_post { args } {
                          -amz_headers $amz_headers \
                          -content_type $content_type \
                          -content_md5 $content_md5 \
+                         -encrypted $encrypted \
                          POST $object_key $bucket]
         lappend headers Content-MD5 $content_md5
         lappend headers Content-Type $content_type
@@ -286,6 +261,7 @@ proc qc::_s3_post { args } {
             set headers [_s3_auth_headers \
                              -amz_headers $amz_headers \
                              -content_type $content_type \
+                             -encrypted $encrypted \
                              POST $object_key $bucket]
             lappend headers {*}$amz_headers
             lappend headers Content-Type $content_type
@@ -295,6 +271,7 @@ proc qc::_s3_post { args } {
         } else {
             set headers [_s3_auth_headers \
                              -content_type $content_type \
+                             -encrypted $encrypted \
                              POST $object_key $bucket]
             lappend headers Content-Type $content_type
             set result [qc::http_post \
@@ -307,18 +284,7 @@ proc qc::_s3_post { args } {
 
 proc qc::_s3_delete { bucket object_key {encrypted false}} {
     #| Construct the http DELETE request to S3 including auth headers
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]
-        set headers [_s3_auth_headers -amz_headers $amz_headers DELETE $object_key $bucket]
-        lappend headers {*}$amz_headers
-    } else {
-        set headers [_s3_auth_headers DELETE $object_key $bucket]
-    }
+    set headers [_s3_auth_headers -encrypted $encrypted DELETE $object_key $bucket]
     set result [qc::http_delete \
                     -headers $headers \
                     "https://[_s3_endpoint $bucket $object_key]"]
@@ -329,19 +295,7 @@ proc qc::_s3_save { args } {
     #| Construct the http SAVE request to S3 including auth headers
     qc::args $args -timeout 60 -encrypted false -- bucket object_key filename
     set tmp_file "/tmp/s3-[qc::uuid]"
-
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]
-        set headers [_s3_auth_headers -amz_headers $amz_headers GET $object_key $bucket]
-        lappend headers {*}$amz_headers
-    } else {
-        set headers [_s3_auth_headers GET $object_key $bucket]
-    }
+    set headers [_s3_auth_headers -encrypted $encrypted GET $object_key $bucket]
     qc::http_save \
         -timeout $timeout \
         -headers $headers \
@@ -385,6 +339,7 @@ proc qc::_s3_put { args } {
                              -amz_headers $amz_headers \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
+                             -encrypted $encrypted \
                              PUT $object_key $bucket]
         } else {
             # content_md5 header allows AWS to return an error if the file received
@@ -394,15 +349,13 @@ proc qc::_s3_put { args } {
                              -amz_headers [list "x-amz-meta-content-md5" $content_md5 {*}$amz_headers] \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
+                             -encrypted $encrypted \
                              PUT $object_key $bucket]
             lappend headers x-amz-meta-content-md5 $content_md5
         }
         lappend headers Content-Length $data_size
         lappend headers Content-MD5 $content_md5
         lappend headers Content-Type $content_type
-        if { $encrypted } {
-            lappend headers {*}$amz_headers
-        }
         # Stop tclcurl from stending Transfer-Encoding header
         lappend headers Transfer-Encoding {}
         lappend headers Expect {}
@@ -429,12 +382,10 @@ proc qc::_s3_put { args } {
         set headers [_s3_auth_headers \
                          -content_type {} \
                          -amz_headers [list "x-amz-copy-source" $s3_copy {*}$amz_headers] \
+                         -encrypted $encrypted \
                          PUT $object_key $bucket]
         lappend headers x-amz-copy-source $s3_copy
         lappend headers Content-Type {}
-        if { $encrypted } {
-            lappend headers {*}$amz_headers
-        }
         return [qc::http_put \
                     -header $header \
                     -headers $headers \
