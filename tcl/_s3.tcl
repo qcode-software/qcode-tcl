@@ -134,7 +134,7 @@ proc qc::_s3_auth_headers { args } {
 proc qc::_s3_encryption_credentials {} {
     set dict [dict create \
         customer_key [qc::param_get s3_base64_sse_key] \
-        customer_key_md5 [qc::_s3_base64_md5 [::base64::decode [qc::param_get s3_base64_sse_key]]] \
+        customer_key_md5 [qc::_s3_base64_md5 -data [::base64::decode [qc::param_get s3_base64_sse_key]]] \
     ]
     return $dict
 }
