@@ -362,17 +362,17 @@ proc qc::_s3_put { args } {
         # s3_copy must be in the format "bucket/object_key"
         # we're copying a S3 file - skip the data processing and send the PUT
         # request with x-amz-copy-source header
+        set amz_headers [list "x-amz-copy-source" $s3_copy]
         if { $encrypted } {
             dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-            set amz_headers [list \
+            lappend amz_headers \
                 "x-amz-copy-source-server-side-encryption-customer-key" $customer_key \
                 "x-amz-copy-source-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-                "x-amz-copy-source-server-side-encryption-customer-algorithm" "AES256" \
-            ]
+                "x-amz-copy-source-server-side-encryption-customer-algorithm" "AES256"
         }
         set headers [_s3_auth_headers \
                          -content_type {} \
-                         -amz_headers [list "x-amz-copy-source" $s3_copy {*}$amz_headers] \
+                         -amz_headers $amz_headers \
                          -encrypted $encrypted \
                          PUT $object_key $bucket]
         lappend headers x-amz-copy-source $s3_copy
