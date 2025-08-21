@@ -141,8 +141,8 @@ proc qc::_s3_encryption_credentials {} {
 
 proc qc::_s3_get { bucket object_key {encrypted false}} {
     #| Construct the http GET request to S3 including auth headers
-    dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
     if { $encrypted } {
+        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
         set amz_headers [list \
             "x-amz-server-side-encryption-customer-key" $customer_key \
             "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
