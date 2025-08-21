@@ -320,15 +320,6 @@ proc qc::_s3_put { args } {
     #| Construct the http PUT request to S3 including auth headers
     # _s3_put ?-header 0 ?-infile ? ?-s3_copy ?bucket object_key
     qc::args $args -nochecksum -header 0 -s3_copy ? -infile ? -encrypted false bucket object_key
-    set amz_headers [list]
-    if { $encrypted } {
-        dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-        set amz_headers [list \
-            "x-amz-server-side-encryption-customer-key" $customer_key \
-            "x-amz-server-side-encryption-customer-key-MD5" $customer_key_md5 \
-            "x-amz-server-side-encryption-customer-algorithm" "AES256" \
-        ]
-    }
     if { [info exists infile]} {
         set content_type [qc::mime_type_guess $infile]
         set content_md5 [qc::_s3_base64_md5 -file $infile]
@@ -336,7 +327,6 @@ proc qc::_s3_put { args } {
         if { [info exists nochecksum] } {
             # Dont send metadata for upload parts
             set headers [_s3_auth_headers \
-                             -amz_headers $amz_headers \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
                              -encrypted $encrypted \
@@ -346,7 +336,7 @@ proc qc::_s3_put { args } {
             # has a different md5
             # Authentication value needs to use content_* values for hmac signing
             set headers [_s3_auth_headers \
-                             -amz_headers [list "x-amz-meta-content-md5" $content_md5 {*}$amz_headers] \
+                             -amz_headers [list "x-amz-meta-content-md5" $content_md5] \
                              -content_type $content_type \
                              -content_md5 $content_md5 \
                              -encrypted $encrypted \
@@ -374,10 +364,11 @@ proc qc::_s3_put { args } {
         # request with x-amz-copy-source header
         if { $encrypted } {
             dict2vars [qc::_s3_encryption_credentials] customer_key customer_key_md5
-            lappend amz_headers \
+            set amz_headers [list \
                 "x-amz-copy-source-server-side-encryption-customer-key" $customer_key \
                 "x-amz-copy-source-server-side-encryption-customer-key-MD5" $customer_key_md5 \
                 "x-amz-copy-source-server-side-encryption-customer-algorithm" "AES256" \
+            ]
         }
         set headers [_s3_auth_headers \
                          -content_type {} \
