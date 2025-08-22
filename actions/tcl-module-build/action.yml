@@ -24,7 +24,7 @@ runs:
       run: |
         echo "package provide ${{ inputs.package }} ${{ inputs.version }}" >> ${{ inputs.tcl_module_file }}
         echo "" >> ${{ inputs.tcl_module_file }}
-        for tcl_file in `find ${{ inputs.source_directory }}/ -type f -name "*.tcl"`
+        for tcl_file in `find ${{ inputs.source_directory }}/ -type f -name "*.tcl" | env -i LC_COLLATE=C sort`
         do    
           cat $tcl_file >> ${{ inputs.tcl_module_file }}
           echo "" >> ${{ inputs.tcl_module_file }}
