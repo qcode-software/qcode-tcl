@@ -78,10 +78,19 @@ proc qc::s3 { args } {
             }
             set head_dict [qc::s3 head $s3_uri]
             set file_size [dict get $head_dict Content-Length]
+            if { $file_size == 0 } {
+                error "Empty file at s3 location $s3_uri" {} EMPTY_FILE
+            }
             # set timeout - allow 1Mb/s
             set timeout_secs [expr {max( (${file_size}*8)/1000000 , 60)} ]
             log Debug "Timeout set at $timeout_secs seconds"
             qc::_s3_save -timeout $timeout_secs $bucket $object_key $local_filename
+
+            if { $file_size != [file size $local_filename] } {
+                set local_file_size [file size $local_filename]
+                file delete -force $local_filename
+                error "qc::s3 get: size of downloaded file ($local_file_size) $local_filename does not match expected $file_size of $s3_uri"
+            }
         }
         exists {
             # usage:
