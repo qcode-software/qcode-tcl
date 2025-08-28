@@ -78,9 +78,6 @@ proc qc::s3 { args } {
             }
             set head_dict [qc::s3 head $s3_uri]
             set file_size [dict get $head_dict Content-Length]
-            if { $file_size == 0 } {
-                error "Empty file at s3 location $s3_uri" {} EMPTY_FILE
-            }
             # set timeout - allow 1Mb/s
             set timeout_secs [expr {max( (${file_size}*8)/1000000 , 60)} ]
             log Debug "Timeout set at $timeout_secs seconds"
