@@ -280,34 +280,7 @@ test s3-head-1.2 {qc::s3 head: s3_url} -constraints {
 } -result {1}
 
 # copy
-test s3-copy-1.0 {qc::s3 copy: bucket remote_filename_to_copy_with_bucket remote_filename_copy} -constraints {
-    requires_s3
-    requires_test_bucket
-    requires_s3_put
-    requires_s3_lsbucket
-} -body {
-    set local_filename [qc::file_temp "abcdefg"]
-    set object_key "s3_tools_test-copy-1.0-test"
-    set s3_url "s3://${bucket}/${object_key}"
-    ::try {
-        qc::s3 put $s3_url $local_filename
-    } finally {
-        file delete $local_filename
-    }
-
-    # qc::s3 copy
-    set object_copy "${object_key}_copy"
-    qc::s3 copy $bucket "/${object_key}" "/${object_copy}"
-
-    # Check result
-    set results [qc::s3 lsbucket $bucket $object_copy]
-    if { $object_copy in [qc::ldict_values results Key] } {
-        return 1
-    }
-    return 0
-} -result {1}
-
-test s3-copy-1.1 {qc::s3 copy: s3_url_to_copy s3_url_copy} -constraints {
+test s3-copy-1.0 {qc::s3 copy: s3_uri_from s3_uri_to} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_put
@@ -315,6 +288,7 @@ test s3-copy-1.1 {qc::s3 copy: s3_url_to_copy s3_url_copy} -constraints {
 } -body {
     set local_filename [qc::file_temp "abcdefg"]
     set object_key "s3_tools_test-copy-1.1-test"
+    set object_copy "${object_key}_copy"
     set s3_url "s3://${bucket}/${object_key}"
     ::try {
         qc::s3 put $s3_url $local_filename
