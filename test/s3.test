@@ -205,37 +205,7 @@ test s3-delete-1.1 {qc::s3 delete: s3_url} -constraints {
 } -result {1}
 
 # get - Get an object from s3
-test s3-get-1.0 {qc::s3 get: bucket remote_filename local_filename} -constraints {
-    requires_s3
-    requires_test_bucket
-    requires_s3_put
-} -body {
-    set file_string "Test file contents"
-    set local_filename [qc::file_temp $file_string]
-    set remote_filename "/s3_tools_test-get-1.0-test"
-    ::try {
-        qc::s3 put $bucket $local_filename $remote_filename
-    } finally {
-        file delete $local_filename
-    }
-
-    # Get file
-    set local_filename [join [list "/tmp/" [qc::uuid]] ""]
-    set get_file_string ""
-    ::try {
-        qc::s3 get $bucket $remote_filename $local_filename
-        set get_file_string [qc::cat $local_filename]
-    } finally {
-        file delete $local_filename
-    }
-    
-    if { $file_string ne $get_file_string } {
-        return 0
-    }
-    return 1
-} -result {1}
-
-test s3-get-1.1 {qc::s3 get: s3_url local_filename} -constraints {
+test s3-get-1.0 {qc::s3 get: s3_url local_filename} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_put

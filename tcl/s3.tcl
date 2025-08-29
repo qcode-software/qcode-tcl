@@ -46,32 +46,14 @@ proc qc::s3 { args } {
         }
         get {
             # usage:
-            # qc::s3 get bucket remote_filename {local_filename}
             # qc::s3 get s3_uri local_filename
-            if { [llength $args] < 3 || [llength $args] > 4 } {
-                error "Wrong number of arguments. Usage: \"qc::s3 get mybucket remote_filename ?local_filename?\" or \"qc::s3 get s3_uri local_filename\"."
-            } elseif { [llength $args] == 3 } {
-                # Test if args are $bucket and $remote_filename or $s3_uri and $local_filename
-                lassign $args -> arg0 arg1
-                if { [qc::is s3_uri $arg0] } {
-                    # qc::s3 get s3_uri local_filename
-                    set s3_uri $arg0
-                    lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
-                    set local_filename $arg1
-                } else {
-                    # qc::s3 get bucket remote_filename
-                    set bucket $arg0
-                    # Strip the starting "/" from the remote_filename
-                    set object_key [string range $arg1 1 end]
-                    set s3_uri [qc::s3 uri $bucket $object_key]
-                    # No local filename, assume same as remote_filename
-                    set local_filename "./[file tail $remote_filename]"
-                }
+            if { [llength $args] == 3 } {
+                lassign $args -> arg0 arg1                
+                set s3_uri $arg0
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set local_filename $arg1                
             } else {
-                # qc::s3 get bucket remote_filename {local_filename}
-                lassign $args -> bucket remote_filename local_filename
-                set object_key [string range $remote_filename 1 end]
-                set s3_uri [qc::s3 uri $bucket $object_key]
+                error "Wrong number of arguments. Usage: \"qc::s3 get s3_uri local_filename\"."
             }
             if { [file exists $local_filename] } {
                 error "File $local_filename already exists."
