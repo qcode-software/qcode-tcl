@@ -91,37 +91,24 @@ proc qc::s3 { args } {
         }
         exists {
             # usage:
-            # qc::s3 exists bucket remote_path
             # qc::s3 exists s3_uri
-            if { [llength $args] == 3 } {
-                # qc::s3 exists bucket remote_path
-                lassign $args -> bucket remote_path
-                set object_key [string range $remote_path 1 end]
-            } elseif { [llength $args] == 2 } {
-                # qc::s3 exists s3_uri
+            if { [llength $args] == 2 } {
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
-                error "qc::s3 exists: Wrong number of args. Usage \"qc::s3 exists bucket remote_path\" or \"qc::s3 head s3_uri\"."
+                error "qc::s3 exists: Wrong number of args. Usage \"qc::s3 exists s3_uri\"."
             }
             qc::_s3_exists $bucket $object_key
-
         }
         head {
             # usage:
-            # qc::s3 head bucket remote_path
             # qc::s3 head s3_uri
 
-            if { [llength $args] == 3 } {
-                # qc::s3 head bucket remote_path
-                lassign $args -> bucket remote_path
-                set object_key [string range $remote_path 1 end]
-            } elseif { [llength $args] == 2 } {
-                # qc::s3 head s3_uri
+            if { [llength $args] == 2 } {
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
-                error "qc::s3 head: Wrong number of args. Usage \"qc::s3 head bucket remote_path\" or \"qc::s3 head s3_uri\"."
+                error "qc::s3 head: Wrong number of args. Usage \"qc::s3 head s3_uri\"."
             }
 
             qc::_s3_head $bucket $object_key
