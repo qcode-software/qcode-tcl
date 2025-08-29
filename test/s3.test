@@ -242,7 +242,7 @@ test s3-head-1.0 {qc::s3 head: s3_url} -constraints {
     requires_s3_put
 } -body {
     set local_filename [qc::file_temp "1234"]
-    set s3_url "s3://${bucket}/s3_tools_test-head-1.1-test"
+    set s3_url "s3://${bucket}/s3_tools_test-head-1.0-test"
     ::try {
         qc::s3 put $s3_url $local_filename
     } finally {
@@ -255,13 +255,13 @@ test s3-head-1.0 {qc::s3 head: s3_url} -constraints {
 } -result {1}
 
 # Test we can cast an accurate mtime from S3 head Last-Modified
-test s3-head-1.2 {qc::s3 head: s3_url} -constraints {
+test s3-head-1.1 {qc::s3 head: s3_url} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_put
 } -body {
     set local_filename [qc::file_temp "1234"]
-    set s3_url "s3://${bucket}/s3_tools_test-head-1.2-test"
+    set s3_url "s3://${bucket}/s3_tools_test-head-1.1-test"
     ::try {
         qc::s3 put $s3_url $local_filename
     } finally {
@@ -287,7 +287,7 @@ test s3-copy-1.0 {qc::s3 copy: s3_uri_from s3_uri_to} -constraints {
     requires_s3_lsbucket
 } -body {
     set local_filename [qc::file_temp "abcdefg"]
-    set object_key "s3_tools_test-copy-1.1-test"
+    set object_key "s3_tools_test-copy-1.0-test"
     set object_copy "${object_key}_copy"
     set s3_url "s3://${bucket}/${object_key}"
     ::try {
@@ -477,7 +477,7 @@ test s3-exists-1.0 {qc::s3 exists: s3://bucket/remote_filename} -constraints {
 } -body {
     set file_string "Test file contents"
     set local_filename [qc::file_temp $file_string]
-    set remote_filename "/s3_tools_test-exists-1.1-test"
+    set remote_filename "/s3_tools_test-exists-1.0-test"
     ::try {
         qc::s3 put $bucket $local_filename $remote_filename
     } finally {
@@ -492,19 +492,19 @@ test s3-exists-1.1 {qc::s3 exists: s3://bucket/remote_filename} -constraints {
     requires_test_bucket
     requires_s3_put
 } -body {
-    set remote_filename "/s3_tools_test-exists-1.3-test"
+    set remote_filename "/s3_tools_test-exists-1.1-test"
     return [qc::s3 exists "s3://${bucket}${remote_filename}"]
 } -result {false}
 
 # exists - Check an object exists on S3
-test s3-exists-1.4 {qc::s3 exists: s3://bucket/remote_filename permissions failure} -constraints {
+test s3-exists-1.2 {qc::s3 exists: s3://bucket/remote_filename permissions failure} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_put
 } -body {
     set file_string "Test file contents"
     set local_filename [qc::file_temp $file_string]
-    set remote_filename "/s3_tools_test-exists-1.4-test"
+    set remote_filename "/s3_tools_test-exists-1.2-test"
     ::try {
         qc::s3 put $bucket $local_filename $remote_filename
     } finally {
@@ -520,7 +520,7 @@ test s3-exists-1.4 {qc::s3 exists: s3://bucket/remote_filename permissions failu
 } -returnCodes {
     error
 } -result "RESPONSE 403 while contacting\
-           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.4-test"
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.2-test"
 
 # Cleanup
 test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {
