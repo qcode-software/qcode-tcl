@@ -117,8 +117,6 @@ proc qc::s3 { args } {
             # usage:
             # qc::s3 put s3_uri local_filename
             # 5MB limit
-            if { [llength $args] < 3 || [llength $args] > 4 } {
-            } else
             if { [llength $args] == 3 } {
                 lassign $args -> arg0 arg1                
                 set s3_uri $arg0
