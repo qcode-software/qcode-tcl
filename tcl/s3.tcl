@@ -7,7 +7,6 @@ namespace eval qc {
     namespace export s3
 }
 
-# Deprecated.
 # See qc::aws s3
 # Public S3 procs
 proc qc::s3 { args } {
