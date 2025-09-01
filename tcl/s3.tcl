@@ -115,32 +115,15 @@ proc qc::s3 { args } {
         }
         put {
             # usage:
-            # qc::s3 put bucket local_path ?remote_filename?
             # qc::s3 put s3_uri local_filename
             # 5MB limit
-            if { [llength $args] < 3 || [llength $args] > 4 } {
-                error "Wrong number of arguments. Usage: \"qc::s3 put mybucket local_filename ?remote_filename?\" or \"qc::s3 put s3_uri local_filename\"."
-            } elseif { [llength $args] == 3 } {
-                # Test if args are $bucket and $remote_filename or $s3_uri and $local_filename
-                lassign $args -> arg0 arg1
-                if { [qc::is s3_uri $arg0] } {
-                    # qc::s3 put s3_uri local_filename
-                    set s3_uri $arg0
-                    lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
-                    set local_filename $arg1
-                } else {
-                    # qc::s3 put bucket local_path
-                    set bucket $arg0
-                    set local_filename $arg1
-                    # No remote filename, assume same as local_filename
-                    set object_key [file tail $local_filename]
-                    set s3_uri [qc::s3 uri $bucket $object_key]
-                }
+            if { [llength $args] == 3 } {
+                lassign $args -> arg0 arg1                
+                set s3_uri $arg0
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set local_filename $arg1                
             } else {
-                # qc::s3 put bucket local_path remote_filename
-                lassign $args -> bucket local_filename remote_filename
-                set object_key [string range $remote_filename 1 end]
-                set s3_uri [qc::s3 uri $bucket $object_key]
+                error "Wrong number of arguments. Usage: \"qc::s3 put s3_uri local_filename\"."
             }
 
             if { [file size $local_filename] > [expr {1024*1024*5}]} { 
@@ -152,20 +135,13 @@ proc qc::s3 { args } {
         }
         restore {
             # usage:
-            # qc::s3 restore bucket remote_path days
             # qc::s3 restore s3_uri Days
             # Requests restore of object from Glacier storage to S3 storage for $days days
-            lassign $args -> bucket remote_path Days
-            if { [llength $args] == 4  } {
-                 # qc::s3 restore bucket remote_path days
-                lassign $args -> bucket remote_path Days
-                set object_key [string range $remote_path 1 end]
-            } elseif { [llength $args] == 3 } {
-                # qc::s3 restore s3_uri Days
+            if { [llength $args] == 3 } {
                 lassign $args -> s3_uri Days
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
-                error "Invalid number of arguments. Usage: \"qc::s3 restore bucket remote_path days\" or \"qc::s3 restore s3_uri days\"."
+                error "Invalid number of arguments. Usage: \"qc::s3 restore s3_uri days\"."
             }
             set data "<RestoreRequest>[qc::xml_from Days]</RestoreRequest>"
             qc::_s3_post $bucket "${object_key}?restore" $data
@@ -414,18 +390,12 @@ proc qc::s3 { args } {
         }
         delete {
             # usage:
-            # qc::s3 delete bucket remote_file
             # qc::s3 delete s3_uri
-            if {[llength $args] == 3} {
-                # qc::s3 delete bucket remote_file
-                lassign $args -> bucket remote_file
-                set object_key [string range $remote_file 1 end]
-            } elseif {[llength $args] == 2} {
-                # qc::s3 delete s3_uri
+            if {[llength $args] == 2} {
                 lassign $args -> s3_uri
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
-                error "Invalid number of arguments. Usage: \"qc::s3 delete bucket remote_filename\" or \"qc::s3 delete s3_uri\"."
+                error "Invalid number of arguments. Usage: \"qc::s3 delete s3_uri\"."
             }
             
             qc::_s3_delete $bucket $object_key
