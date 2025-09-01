@@ -102,34 +102,12 @@ test s3-lsbucket-1.1 {qc::s3 lsbucket: List files in a bucket with prefix} -cons
 } -result {1}
 
 # put - Upload a file to s3
-test s3-put-1.0 {qc::s3 put: bucket local_path remote_filename} -constraints {
+test s3-put-1.0 {qc::s3 put: s3_url local_filename } -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_lsbucket
 } -body {
     set object_key "s3_tools_test-put-1.0-test"
-    set remote_filename "/${object_key}"
-    set local_filepath [qc::file_temp "1234"]
-    ::try {
-        qc::s3 put $bucket $local_filepath $remote_filename
-    } finally {
-        file delete  $local_filepath
-    }
-
-    set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [qc::ldict_values results Key] } {
-        # Put was successful
-        return 1
-    }
-    return 0
-} -result {1}
-
-test s3-put-1.1 {qc::s3 put: s3_url local_filename } -constraints {
-    requires_s3
-    requires_test_bucket
-    requires_s3_lsbucket
-} -body {
-    set object_key "s3_tools_test-put-1.1-test"
     set s3_url "s3://${bucket}/${object_key}"
     
     set local_filepath [qc::file_temp "1234"]
@@ -149,40 +127,13 @@ test s3-put-1.1 {qc::s3 put: s3_url local_filename } -constraints {
 } -result {1}
 
 # delete - Delete an object from s3
-test s3-delete-1.0 {qc::s3 delete: bucket remote_filename} -constraints {
+test s3-delete-1.0 {qc::s3 delete: s3_url} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_lsbucket
     requires_s3_put
 } -body {
-    set object_key "s3_tools_test-delete-1.0-test"
-    set remote_filename "/${object_key}"
-    set local_filename [qc::file_temp "1234"]
-    ::try {
-        qc::s3 put $bucket $local_filename $remote_filename 
-    } finally {
-        file delete $local_filename
-    }
-    
-    # Delete
-    qc::s3 delete $bucket $remote_filename
-
-    # Confirm deleted
-    set results [qc::s3 lsbucket $bucket $object_key]
-    if { $object_key in [qc::ldict_values results Key] } {
-        return 0
-    }
-
-    return 1
-} -result {1}
-
-test s3-delete-1.1 {qc::s3 delete: s3_url} -constraints {
-    requires_s3
-    requires_test_bucket
-    requires_s3_lsbucket
-    requires_s3_put
-} -body {
-    set s3_url "s3://${bucket}/s3_tools_test-delete-1.1-test"
+    set s3_url "s3://${bucket}/s3_tools_test-delete-1.0-test"
     set local_filename [qc::file_temp "1234"]
     ::try {
         qc::s3 put $s3_url $local_filename
@@ -479,7 +430,7 @@ test s3-exists-1.0 {qc::s3 exists: s3://bucket/remote_filename} -constraints {
     set local_filename [qc::file_temp $file_string]
     set remote_filename "/s3_tools_test-exists-1.0-test"
     ::try {
-        qc::s3 put $bucket $local_filename $remote_filename
+        qc::s3 put "s3://${bucket}${remote_filename}" $local_filename
     } finally {
         file delete $local_filename
     }
@@ -506,7 +457,7 @@ test s3-exists-1.2 {qc::s3 exists: s3://bucket/remote_filename permissions failu
     set local_filename [qc::file_temp $file_string]
     set remote_filename "/s3_tools_test-exists-1.2-test"
     ::try {
-        qc::s3 put $bucket $local_filename $remote_filename
+        qc::s3 put "s3://${bucket}${remote_filename}" $local_filename
     } finally {
         file delete $local_filename
     }

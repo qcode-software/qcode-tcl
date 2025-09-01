@@ -390,18 +390,12 @@ proc qc::s3 { args } {
         }
         delete {
             # usage:
-            # qc::s3 delete bucket remote_file
             # qc::s3 delete s3_uri
-            if {[llength $args] == 3} {
-                # qc::s3 delete bucket remote_file
-                lassign $args -> bucket remote_file
-                set object_key [string range $remote_file 1 end]
-            } elseif {[llength $args] == 2} {
-                # qc::s3 delete s3_uri
+            if {[llength $args] == 2} {
                 lassign $args -> s3_uri
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
             } else {
-                error "Invalid number of arguments. Usage: \"qc::s3 delete bucket remote_filename\" or \"qc::s3 delete s3_uri\"."
+                error "Invalid number of arguments. Usage: \"qc::s3 delete s3_uri\"."
             }
             
             qc::_s3_delete $bucket $object_key
