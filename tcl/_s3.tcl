@@ -375,7 +375,7 @@ proc qc::_s3_put { args } {
                          -amz_headers $amz_headers \
                          -encrypted $encrypted \
                          PUT $object_key $bucket]
-        lappend headers x-amz-copy-source $s3_copy
+        lappend headers {*}$amz_headers
         lappend headers Content-Type {}
         return [qc::http_put \
                     -header $header \
