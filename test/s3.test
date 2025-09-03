@@ -179,6 +179,33 @@ test s3-delete-1.0 {qc::s3 delete: s3_url} -constraints {
     return 1
 } -result {1}
 
+test s3-delete-1.1 {qc::s3 delete: s3_url - encrypted s3 file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_lsbucket
+    requires_s3_put
+} -body {
+    set s3_url "s3://${bucket}/s3_tools_test-delete-1.1-test"
+    set local_filename [qc::file_temp "1234"]
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    # Delete
+    qc::s3 delete $s3_url
+
+    # Confirm deleted
+    lassign [qc::s3 uri_bucket_object_key $s3_url] . object_key
+    set results [qc::s3 lsbucket $bucket $object_key]
+    if { $object_key in [qc::ldict_values results Key] } {
+        return 0
+    }
+
+    return 1
+} -result {1}
+
 # get - Get an object from s3
 test s3-get-1.0 {qc::s3 get: s3_url local_filename} -constraints {
     requires_s3
