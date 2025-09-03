@@ -737,6 +737,70 @@ test s3-exists-1.2 {qc::s3 exists: s3://bucket/remote_filename permissions failu
     error
 } -result "RESPONSE 403 while contacting\
            https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.2-test"
+       
+test s3-exists-1.3 {qc::s3 exists: s3://bucket/remote_filename encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set remote_filename "/s3_tools_test-exists-1.3-test"
+    ::try {
+        qc::s3 put "s3://${bucket}${remote_filename}" $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+    return [qc::s3 exists "s3://${bucket}${remote_filename}" true]
+} -result {true}
+
+# exists - Check an object exists on S3
+test s3-exists-1.4 {qc::s3 exists: s3://bucket/remote_filename encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set remote_filename "/s3_tools_test-exists-1.4-test"
+    return [qc::s3 exists "s3://${bucket}${remote_filename}" true]
+} -result {false}
+
+test s3-exists-1.5 {qc::s3 exists: s3://bucket/remote_filename encrypted - request unencrypted file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set remote_filename "/s3_tools_test-exists-1.5-test"
+    ::try {
+        qc::s3 put "s3://${bucket}${remote_filename}" $local_filename
+    } finally {
+        file delete $local_filename
+    }
+    return [qc::s3 exists "s3://${bucket}${remote_filename}" true]
+} -returnCodes {
+    error
+} -result "RESPONSE 400 while contacting\
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.5-test"
+       
+test s3-exists-1.6 {qc::s3 exists: s3://bucket/remote_filename - request encrypted file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set remote_filename "/s3_tools_test-exists-1.6-test"
+    ::try {
+        qc::s3 put "s3://${bucket}${remote_filename}" $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+    return [qc::s3 exists "s3://${bucket}${remote_filename}"]
+} -returnCodes {
+    error
+} -result "RESPONSE 400 while contacting\
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-exists-1.6-test"
 
 # Cleanup
 test s3-cleanup {Remove files from S3 uploaded by the s3_tools tests} -constraints {

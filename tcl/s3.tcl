@@ -83,14 +83,24 @@ proc qc::s3 { args } {
         }
         exists {
             # usage:
-            # qc::s3 exists s3_uri
-            if { [llength $args] == 2 } {
+            # qc::s3 exists s3_uri {encrypted false}
+            if { [llength $args] == 3 } {
+                lassign $args -> arg0 arg1
+                set s3_uri [qc::cast s3_uri $arg0]
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                if { [qc::castable boolean $arg1] } {
+                    set encrypted $arg1
+                } else {
+                    set encrypted false
+                }
+            } elseif { [llength $args] == 2 } {
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set encrypted false
             } else {
                 error "qc::s3 exists: Wrong number of args. Usage \"qc::s3 exists s3_uri\"."
             }
-            qc::_s3_exists $bucket $object_key
+            qc::_s3_exists $bucket $object_key $encrypted
         }
         head {
             # usage:
