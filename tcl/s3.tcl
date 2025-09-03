@@ -114,22 +114,33 @@ proc qc::s3 { args } {
         }
         put {
             # usage:
-            # qc::s3 put s3_uri local_filename
+            # qc::s3 put s3_uri local_filename {encrypted false}
             # 5MB limit
-            if { [llength $args] == 3 } {
+            if { [llength $args] == 4 } {
+                lassign $args -> arg0 arg1 arg2
+                set s3_uri $arg0
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set local_filename $arg1
+                if { [qc::castable boolean $arg2] } {
+                    set encrypted $arg2
+                } else {
+                    set encrypted false
+                }
+            } elseif { [llength $args] == 3 } {
                 lassign $args -> arg0 arg1                
                 set s3_uri $arg0
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                 set local_filename $arg1                
+                set encrypted false
             } else {
                 error "Wrong number of arguments. Usage: \"qc::s3 put s3_uri local_filename\"."
             }
 
             if { [file size $local_filename] > [expr {1024*1024*5}]} { 
                 # Use multipart upload
-                qc::s3 upload $s3_uri $local_filename
+                qc::s3 upload $s3_uri $local_filename $encrypted
             } else {
-                qc::_s3_put -infile $local_filename $bucket $object_key
+                qc::_s3_put -encrypted $encrypted -infile $local_filename $bucket $object_key
             }
         }
         restore {
@@ -149,20 +160,20 @@ proc qc::s3 { args } {
             switch [lindex $args 1] {
                 init {
                     # Usage:
-                    # qc::s3 upload init s3_uri local_file
+                    # qc::s3 upload init s3_uri local_file encrypted
 
                     set content_type ""
-                    if { [llength $args] == 4 } {
-                        lassign $args -> -> s3_uri local_file
+                    if { [llength $args] == 5 } {
+                        lassign $args -> -> s3_uri local_file encrypted
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
-                        error "Invalid number of arguments. Usage: \"qc::s3 upload init s3_uri local_file\"."
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload init s3_uri local_file encrypted\"."
                     }
                     
                     set content_md5 [qc::_s3_base64_md5 -file $local_file]
                     set content_type [qc::mime_type_guess $local_file]
-                    
-                    set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_post -content_type $content_type -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket "${object_key}?uploads"] {/ns:InitiateMultipartUploadResult}]]
+
+                    set upload_dict [qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_post -encrypted $encrypted -content_type $content_type -amz_headers [list x-amz-meta-content-md5 $content_md5] $bucket "${object_key}?uploads"] {/ns:InitiateMultipartUploadResult}]]
                     set upload_id [dict get $upload_dict UploadId]
                     log Debug "Upload init for $object_key to $bucket."
                     log Debug "Upload_id: $upload_id"
@@ -170,49 +181,49 @@ proc qc::s3 { args } {
                 }
                 abort {
                     # Usage:
-                    # qc::s3 upload abort s3_uri upload_id
-                    if {[llength $args] == 4 } {
-                        lassign $args -> -> s3_uri upload_id
+                    # qc::s3 upload abort s3_uri upload_id encrypted
+                    if {[llength $args] == 5 } {
+                        lassign $args -> -> s3_uri upload_id encrypted
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
-                        error "Invalid number of arguments. Usage: \"qc::s3 upload abort s3_uri upload_id\"."
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload abort s3_uri upload_id encrypted\"."
                     }
-                    return [_s3_delete $bucket "${object_key}?uploadId=$upload_id"]
+                    return [_s3_delete $bucket "${object_key}?uploadId=$upload_id" $encrypted]
                 }
                 ls {
-                    # usage: s3 upload ls bucket 
-                    lassign $args -> -> bucket
-                    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_get $bucket "?uploads"] {/ns:ListMultipartUploadsResult/ns:Upload}]]
+                    # usage: s3 upload ls bucket encrypted
+                    lassign $args -> -> bucket encrypted
+                    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_get $bucket "?uploads" $encrypted] {/ns:ListMultipartUploadsResult/ns:Upload}]]
                 }
                 lsparts {
                     # usage:
-                    # qc::s3 upload lsparts s3_uri upload_id
-                    if {[llength $args] == 4 } {
-                        lassign $args -> -> s3_uri upload_id
+                    # qc::s3 upload lsparts s3_uri upload_id encrypted
+                    if {[llength $args] == 5 } {
+                        lassign $args -> -> s3_uri upload_id encrypted
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
-                        error "Invalid number of arguments. Usage: \"qc::s3 upload lsparts s3_uri upload_id\"."
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload lsparts s3_uri upload_id encrypted\"."
                     }
-                    
-                    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_get $bucket "${object_key}?uploadId=$upload_id"] {/ns:ListPartsResult/ns:Part}]]
+
+                    return [qc::lapply qc::s3_xml_node2dict [qc::s3_xml_select [qc::_s3_get $bucket "${object_key}?uploadId=$upload_id" $encrypted] {/ns:ListPartsResult/ns:Part}]]
                 }
                 cleanup {
-                    # usage: s3 upload cleanup bucket 
+                    # usage: s3 upload cleanup bucket encrypted
                     # aborts any unfinished uploads for bucket
-                    lassign $args -> -> bucket 
-                    foreach dict [qc::s3 upload ls $bucket] {
+                    lassign $args -> -> bucket encrypted
+                    foreach dict [qc::s3 upload ls $bucket $encrypted] {
                         set s3_uri [qc::s3 uri $bucket [dict get $dict Key]]
-                        qc::s3 upload abort $s3_uri [dict get $dict UploadId]
+                        qc::s3 upload abort $s3_uri [dict get $dict UploadId] $encrypted
                     }
                 }
                 complete {
                     # usage:
-                    # qc::s3 upload complete s3_uri upload_id etag_dict
-                    if {[llength $args] == 5} {
-                        lassign $args -> -> s3_uri upload_id etag_dict
+                    # qc::s3 upload complete s3_uri upload_id etag_dict encrypted
+                    if {[llength $args] == 6} {
+                        lassign $args -> -> s3_uri upload_id etag_dict encrypted
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
-                        error "Invalid number of arguments. Usage: \"qc::s3 upload complete s3_uri upload_id etag_dict\"."
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload complete s3_uri upload_id etag_dict encrypted\"."
                     }
                     set xml {<CompleteMultipartUpload>}
                     foreach PartNumber [dict keys $etag_dict] {
@@ -221,17 +232,17 @@ proc qc::s3 { args } {
                     }
                     lappend xml {</CompleteMultipartUpload>}
                     log Debug "Completing Upload to $object_key in $bucket."
-                    return [qc::_s3_post $bucket "${object_key}?uploadId=$upload_id" [join $xml \n]]
+                    return [qc::_s3_post -encrypted $encrypted $bucket "${object_key}?uploadId=$upload_id" [join $xml \n]]
                 }
                 send {
                     # Perform upload
                     # usage:
-                    # qc::s3 upload send s3_uri local_path upload_id
-                    if {[llength $args] == 5} {
-                        lassign $args -> -> s3_uri local_path upload_id
+                    # qc::s3 upload send s3_uri local_path upload_id encrypted
+                    if {[llength $args] == 6} {
+                        lassign $args -> -> s3_uri local_path upload_id encrypted
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
                     } else {
-                        error "Invalid number of arguments. Usage: \"qc::s3 upload send s3_uri local_path upload_id\"."
+                        error "Invalid number of arguments. Usage: \"qc::s3 upload send s3_uri local_path upload_id encrypted\"."
                     }
                     
                     # bytes
@@ -264,7 +275,7 @@ proc qc::s3 { args } {
                         set attempt 1
                         while { !$s3_timeout($upload_id) && $attempt<=$max_attempt && !$success } {
                             try {
-                                set response [qc::_s3_put -header 1 -nochecksum -infile $tempfile $bucket "${object_key}?partNumber=${part_index}&uploadId=$upload_id"]
+                                set response [qc::_s3_put -encrypted $encrypted -header 1 -nochecksum -infile $tempfile $bucket "${object_key}?partNumber=${part_index}&uploadId=$upload_id"]
                                 set success true
                             } {
                                 log Debug "Failed - retrying part $part_index of ${num_parts}... "
@@ -275,7 +286,7 @@ proc qc::s3 { args } {
                         if { $s3_timeout($upload_id) || $attempt>$max_attempt } {
                             #TODO should we abort or leave for potential recovery later?
                             ::try {
-                                qc::s3 upload abort [qc::s3 uri $bucket $object_key] $upload_id
+                                qc::s3 upload abort [qc::s3 uri $bucket $object_key] $upload_id $encrypted
                             } on error [list error_message options] {
                                 # error when attempting to abort upload; do nothing
                             }
@@ -307,18 +318,27 @@ proc qc::s3 { args } {
                 default {
                     # Top level multipart upload
                     # usage:
-                    # qc::s3 upload s3_uri local_file
+                    # qc::s3 upload s3_uri local_file {encrypted false}
                     # TODO could be extended to retry upload part failures
-                    if {[llength $args] == 3} {
+                    if { [llength $args] == 4 } {
+                        lassign $args -> s3_uri local_file encrypted
+                        lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                        if { [qc::castable boolean $encrypted] } {
+                            set encrypted $encrypted
+                        } else {
+                            set encrypted false
+                        }
+                    } elseif { [llength $args] == 3 } {
                         lassign $args -> s3_uri local_file
                         lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                        set encrypted false
                     } else {
                         error "Invalid number of arguments. Usage: \"qc::s3 upload s3_uri local_file\"."
                     }
-                    
-                    set upload_id [qc::s3 upload init [qc::s3 uri $bucket $object_key] $local_file]
-                    set etag_dict [qc::s3 upload send [qc::s3 uri $bucket $object_key] $local_file $upload_id]
-                    qc::s3 upload complete [qc::s3 uri $bucket $object_key] $upload_id $etag_dict
+
+                    set upload_id [qc::s3 upload init [qc::s3 uri $bucket $object_key] $local_file $encrypted]
+                    set etag_dict [qc::s3 upload send [qc::s3 uri $bucket $object_key] $local_file $upload_id $encrypted]
+                    qc::s3 upload complete [qc::s3 uri $bucket $object_key] $upload_id $etag_dict $encrypted
                 }
             }
         }

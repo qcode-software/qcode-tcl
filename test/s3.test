@@ -126,6 +126,30 @@ test s3-put-1.0 {qc::s3 put: s3_url local_filename } -constraints {
     return 0
 } -result {1}
 
+test s3-put-1.1 {qc::s3 put: s3_url local_filename encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_lsbucket
+} -body {
+    set object_key "s3_tools_test-put-1.1-test"
+    set s3_url "s3://${bucket}/${object_key}"
+    
+    set local_filepath [qc::file_temp "1234"]
+    ::try {
+        qc::s3 put $s3_url $local_filepath true
+    } finally {
+        file delete $local_filepath
+    }
+
+    set results [qc::s3 lsbucket $bucket $object_key]
+    if { $object_key in [qc::ldict_values results Key] } {
+        # Put was successful
+        testConstraint requires_s3_put true
+        return 1
+    }
+    return 0
+} -result {1}
+
 # delete - Delete an object from s3
 test s3-delete-1.0 {qc::s3 delete: s3_url} -constraints {
     requires_s3
@@ -292,12 +316,12 @@ test s3-upload-1.1 {qc::s3 upload: Testing `abort` v1} -constraints {
     set object_key "s3_tools_test-upload-1.1-test"
     set s3_uri [qc::s3 uri $bucket $object_key]
     ::try {
-        set upload_id [qc::s3 upload init $s3_uri $local_filename]
+        set upload_id [qc::s3 upload init $s3_uri $local_filename false]
     } finally {
         file delete $local_filename
     }
 
-    qc::s3 upload abort $s3_uri $upload_id
+    qc::s3 upload abort $s3_uri $upload_id false
     
     set results [qc::s3 lsbucket $bucket $object_key]
     if { $object_key in [qc::ldict_values results Key] } {
@@ -317,11 +341,11 @@ test s3-upload-1.2 {qc::s3 upload: Testing `ls`} -constraints {
     set object_key "s3_tools_test-upload-1.2-test"
     set s3_uri [qc::s3 uri $bucket $object_key]
     ::try {
-        set upload_id [qc::s3 upload init $s3_uri $local_filename]
-        set result [qc::s3 upload ls $bucket]
+        set upload_id [qc::s3 upload init $s3_uri $local_filename false]
+        set result [qc::s3 upload ls $bucket false]
     } finally {
         file delete $local_filename
-        qc::s3 upload abort $s3_uri $upload_id
+        qc::s3 upload abort $s3_uri $upload_id false
     }
 
     # Confirm `qc::s3 upload ls` found the partially uploaded object
@@ -341,12 +365,12 @@ test s3-upload-1.3 {qc::s3 upload: Testing `lsparts`} -constraints {
     set object_key "s3_tools_test-upload-1.3-test"
     set s3_uri [qc::s3 uri $bucket $object_key]
     ::try {
-        set upload_id [qc::s3 upload init $s3_uri $local_filename]
-        set etag_dict [qc::s3 upload send $s3_uri $local_filename $upload_id]
-        set result [qc::s3 upload lsparts $s3_uri $upload_id]
+        set upload_id [qc::s3 upload init $s3_uri $local_filename false]
+        set etag_dict [qc::s3 upload send $s3_uri $local_filename $upload_id false]
+        set result [qc::s3 upload lsparts $s3_uri $upload_id false]
     } finally {
         file delete $local_filename
-        qc::s3 upload abort $s3_uri $upload_id
+        qc::s3 upload abort $s3_uri $upload_id false
     }
 
     if { "\"[dict get $etag_dict 1]\"" in [qc::ldict_values result ETag] } {
@@ -355,22 +379,142 @@ test s3-upload-1.3 {qc::s3 upload: Testing `lsparts`} -constraints {
     return 0
 } -result {1}
 
-test s3-upload-1.5 {qc::s3 upload: Testing `cleanup`} -constraints {
+test s3-upload-1.4 {qc::s3 upload: Testing `cleanup`} -constraints {
     requires_s3
     requires_test_bucket
     requires_s3_upload_abort
     requires_s3_upload_ls
 } -body {
     set local_filename [qc::file_temp "abcdefg"]
+    set object_key "s3_tools_test-upload-1.4-test"
+    set s3_uri [qc::s3 uri $bucket $object_key]
+    ::try {
+        set upload_id [qc::s3 upload init $s3_uri $local_filename false]
+        #set etag_dict [qc::s3 upload send $s3_uri $local_filename $upload_id]
+
+        qc::s3 upload cleanup $bucket false
+
+        set result [qc::s3 upload ls $bucket false]
+    } finally {
+        file delete $local_filename
+    }
+
+    if { [llength $result] == 0 } {
+        return 1
+    }
+    
+    return 0
+} -result {1}
+
+test s3-upload-1.5 {qc::s3 upload: Testing `init`, `send`, and `complete` v1 - encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_lsbucket
+} -body {
+    set local_filename [qc::file_temp "abcdefg"]
     set object_key "s3_tools_test-upload-1.5-test"
     set s3_uri [qc::s3 uri $bucket $object_key]
     ::try {
-        set upload_id [qc::s3 upload init $s3_uri $local_filename]
+        qc::s3 upload $s3_uri $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    set results [qc::s3 lsbucket $bucket $object_key]
+    if { $object_key in [qc::ldict_values results Key] } {
+        return 1
+    }
+    return 0
+} -result {1}
+
+test s3-upload-1.6 {qc::s3 upload: Testing `abort` v1 - encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_lsbucket
+} -body {
+    set local_filename [qc::file_temp "abcdefg"]
+    set object_key "s3_tools_test-upload-1.6-test"
+    set s3_uri [qc::s3 uri $bucket $object_key]
+    ::try {
+        set upload_id [qc::s3 upload init $s3_uri $local_filename true]
+    } finally {
+        file delete $local_filename
+    }
+
+    qc::s3 upload abort $s3_uri $upload_id true
+    
+    set results [qc::s3 lsbucket $bucket $object_key]
+    if { $object_key in [qc::ldict_values results Key] } {
+        return 0
+    }
+
+    testConstraint requires_s3_upload_abort true
+    return 1
+} -result {1}
+
+test s3-upload-1.7 {qc::s3 upload: Testing `ls` - encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_upload_abort
+} -body {
+    set local_filename [qc::file_temp "abcdefg"]
+    set object_key "s3_tools_test-upload-1.7-test"
+    set s3_uri [qc::s3 uri $bucket $object_key]
+    ::try {
+        set upload_id [qc::s3 upload init $s3_uri $local_filename true]
+        set result [qc::s3 upload ls $bucket true]
+    } finally {
+        file delete $local_filename
+        qc::s3 upload abort $s3_uri $upload_id true
+    }
+
+    # Confirm `qc::s3 upload ls` found the partially uploaded object
+    if { $object_key in [qc::ldict_values result Key] } {
+        testConstraint requires_s3_upload_ls true
+        return 1
+    }
+    return 0
+} -result {1}
+
+test s3-upload-1.8 {qc::s3 upload: Testing `lsparts` - encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_upload_abort
+} -body {
+    set local_filename [qc::file_temp "abcdefg"]
+    set object_key "s3_tools_test-upload-1.8-test"
+    set s3_uri [qc::s3 uri $bucket $object_key]
+    ::try {
+        set upload_id [qc::s3 upload init $s3_uri $local_filename true]
+        set etag_dict [qc::s3 upload send $s3_uri $local_filename $upload_id true]
+        set result [qc::s3 upload lsparts $s3_uri $upload_id true]
+    } finally {
+        file delete $local_filename
+        qc::s3 upload abort $s3_uri $upload_id true
+    }
+
+    if { "\"[dict get $etag_dict 1]\"" in [qc::ldict_values result ETag] } {
+        return 1
+    }
+    return 0
+} -result {1}
+
+test s3-upload-1.10 {qc::s3 upload: Testing `cleanup` - encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_upload_abort
+    requires_s3_upload_ls
+} -body {
+    set local_filename [qc::file_temp "abcdefg"]
+    set object_key "s3_tools_test-upload-1.10-test"
+    set s3_uri [qc::s3 uri $bucket $object_key]
+    ::try {
+        set upload_id [qc::s3 upload init $s3_uri $local_filename true]
         #set etag_dict [qc::s3 upload send $s3_uri $local_filename $upload_id]
 
-        qc::s3 upload cleanup $bucket
+        qc::s3 upload cleanup $bucket true
 
-        set result [qc::s3 upload ls $bucket]
+        set result [qc::s3 upload ls $bucket true]
     } finally {
         file delete $local_filename
     }
