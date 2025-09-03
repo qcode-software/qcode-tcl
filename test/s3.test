@@ -210,6 +210,102 @@ test s3-get-1.0 {qc::s3 get: s3_url local_filename} -constraints {
     return 1
 } -result {1}
 
+test s3-get-1.1 {qc::s3 get: s3_url local_filename encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set s3_url "s3://${bucket}/s3_tools_test-get-1.1-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    # Get file
+    set local_filename [join [list "/tmp/" [qc::uuid]] ""]
+    set get_file_string ""
+    ::try {
+        qc::s3 get $s3_url $local_filename true
+        set get_file_string [qc::cat $local_filename]
+    } finally {
+        file delete $local_filename
+    }
+    
+    if { $file_string ne $get_file_string } {
+        return 0
+    }
+    return 1
+} -result {1}
+
+test s3-get-1.2 {qc::s3 get: s3_url local_filename encrypted - request unencrypted file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set s3_url "s3://${bucket}/s3_tools_test-get-1.2-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    # Get file
+    set local_filename [join [list "/tmp/" [qc::uuid]] ""]
+    set get_file_string ""
+    ::try {
+        qc::s3 get $s3_url $local_filename 
+        set get_file_string [qc::cat $local_filename]
+    } finally {
+        file delete $local_filename
+    }
+    
+    if { $file_string ne $get_file_string } {
+        return 0
+    }
+    return 1
+} -returnCodes {
+    error
+} -result "RESPONSE 400 while contacting\
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-get-1.2-test"
+       
+test s3-get-1.3 {qc::s3 get: s3_url local_filename - request encrypted file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set file_string "Test file contents"
+    set local_filename [qc::file_temp $file_string]
+    set s3_url "s3://${bucket}/s3_tools_test-get-1.3-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename
+    } finally {
+        file delete $local_filename
+    }
+
+    # Get file
+    set local_filename [join [list "/tmp/" [qc::uuid]] ""]
+    set get_file_string ""
+    ::try {
+        qc::s3 get $s3_url $local_filename true
+        set get_file_string [qc::cat $local_filename]
+    } finally {
+        file delete $local_filename
+    }
+    
+    if { $file_string ne $get_file_string } {
+        return 0
+    }
+    return 1
+} -returnCodes {
+    error
+} -result "RESPONSE 400 while contacting\
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-get-1.3-test"
+
 # head - Get 
 test s3-head-1.0 {qc::s3 head: s3_url} -constraints {
     requires_s3
@@ -253,6 +349,69 @@ test s3-head-1.1 {qc::s3 head: s3_url} -constraints {
         return 0
     }
 } -result {1}
+
+test s3-head-1.2 {qc::s3 head: s3_url encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set local_filename [qc::file_temp "1234"]
+    set s3_url "s3://${bucket}/s3_tools_test-head-1.2-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    # qc::s3 head
+    set result [qc::s3 head $s3_url true]
+    return [regexp {200 OK$} [dict get $result http]]
+} -result {1}
+
+# Test we can cast an accurate mtime from S3 head Last-Modified
+test s3-head-1.3 {qc::s3 head: s3_url encrypted} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set local_filename [qc::file_temp "1234"]
+    set s3_url "s3://${bucket}/s3_tools_test-head-1.3-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    after 2000
+    set result [qc::s3 head $s3_url true]
+    set mtime [clock scan [dict get $result Last-Modified] -gmt 1]
+    set now [qc::cast epoch [qc::cast timestamp "now"]]
+    if { [expr {$now - $mtime}] <= 2 && [expr {$now - $mtime}] > 0 } {
+        return 1
+    } else {
+        return 0
+    }
+} -result {1}
+
+test s3-head-1.4 {qc::s3 head: request without encryption for an encrypted file} -constraints {
+    requires_s3
+    requires_test_bucket
+    requires_s3_put
+} -body {
+    set local_filename [qc::file_temp "1234"]
+    set s3_url "s3://${bucket}/s3_tools_test-head-1.4-test"
+    ::try {
+        qc::s3 put $s3_url $local_filename true
+    } finally {
+        file delete $local_filename
+    }
+
+    after 2000
+    set result [qc::s3 head $s3_url]
+} -returnCodes {
+    error
+} -result "RESPONSE 400 while contacting\
+           https://${bucket}.s3.eu-west-1.amazonaws.com/s3_tools_test-head-1.4-test"
 
 # copy
 test s3-copy-1.0 {qc::s3 copy: s3_uri_from s3_uri_to} -constraints {

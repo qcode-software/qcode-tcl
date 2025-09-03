@@ -45,24 +45,35 @@ proc qc::s3 { args } {
         }
         get {
             # usage:
-            # qc::s3 get s3_uri local_filename
-            if { [llength $args] == 3 } {
+            # qc::s3 get s3_uri local_filename {encrypted false}
+            if { [llength $args] == 4 } {
+                lassign $args -> arg0 arg1 arg2
+                set s3_uri $arg0
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set local_filename $arg1       
+                if { [qc::castable boolean $arg2] } {
+                    set encrypted $arg2
+                } else {
+                    set encrypted false
+                }         
+            } elseif { [llength $args] == 3 } {
                 lassign $args -> arg0 arg1                
                 set s3_uri $arg0
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
-                set local_filename $arg1                
+                set local_filename $arg1
+                set encrypted false
             } else {
                 error "Wrong number of arguments. Usage: \"qc::s3 get s3_uri local_filename\"."
             }
             if { [file exists $local_filename] } {
                 error "File $local_filename already exists."
             }
-            set head_dict [qc::s3 head $s3_uri]
+            set head_dict [qc::s3 head $s3_uri $encrypted]
             set file_size [dict get $head_dict Content-Length]
             # set timeout - allow 1Mb/s
             set timeout_secs [expr {max( (${file_size}*8)/1000000 , 60)} ]
             log Debug "Timeout set at $timeout_secs seconds"
-            qc::_s3_save -timeout $timeout_secs $bucket $object_key $local_filename
+            qc::_s3_save -encrypted $encrypted -timeout $timeout_secs $bucket $object_key $local_filename
 
             if { $file_size != [file size $local_filename] } {
                 set local_file_size [file size $local_filename]
@@ -83,17 +94,27 @@ proc qc::s3 { args } {
         }
         head {
             # usage:
-            # qc::s3 head s3_uri
+            # qc::s3 head s3_uri {encrypted false}
 
-            if { [llength $args] == 2 } {
+            if { [llength $args] == 3 } {
+                lassign $args -> arg0 arg1
+                set s3_uri [qc::cast s3_uri $arg0]
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                if { [qc::castable boolean $arg1] } {
+                    set encrypted $arg1
+                } else {
+                    set encrypted false
+                }
+            } elseif { [llength $args] == 2 } {
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set encrypted false
             } else {
                 error "qc::s3 head: Wrong number of args. Usage \"qc::s3 head s3_uri\"."
             }
 
-            qc::_s3_head $bucket $object_key
-        }       
+            qc::_s3_head $bucket $object_key $encrypted
+        }
         copy {
             # usage:
             # qc::s3 copy s3_uri_from s3_uri_to
