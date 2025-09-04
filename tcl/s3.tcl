@@ -83,14 +83,24 @@ proc qc::s3 { args } {
         }
         exists {
             # usage:
-            # qc::s3 exists s3_uri
-            if { [llength $args] == 2 } {
+            # qc::s3 exists s3_uri {encrypted false}
+            if { [llength $args] == 3 } {
+                lassign $args -> arg0 arg1
+                set s3_uri [qc::cast s3_uri $arg0]
+                lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                if { [qc::castable boolean $arg1] } {
+                    set encrypted $arg1
+                } else {
+                    set encrypted false
+                }
+            } elseif { [llength $args] == 2 } {
                 set s3_uri [qc::cast s3_uri [lindex $args 1]]
                 lassign [qc::s3 uri_bucket_object_key $s3_uri] bucket object_key
+                set encrypted false
             } else {
                 error "qc::s3 exists: Wrong number of args. Usage \"qc::s3 exists s3_uri\"."
             }
-            qc::_s3_exists $bucket $object_key
+            qc::_s3_exists $bucket $object_key $encrypted
         }
         head {
             # usage:
@@ -117,9 +127,22 @@ proc qc::s3 { args } {
         }
         copy {
             # usage:
-            # qc::s3 copy s3_uri_from s3_uri_to
+            # qc::s3 copy s3_uri_from s3_uri_to {encrypted false}
 
-            if {[llength $args] == 3} {
+            if { [llength $args] == 4 } {
+                lassign $args -> s3_uri_to_copy s3_uri_copy encrypted
+                lassign [qc::s3 uri_bucket_object_key $s3_uri_to_copy] bucket object_key
+                set file_to_copy "${bucket}/${object_key}"
+                lassign [qc::s3 uri_bucket_object_key $s3_uri_copy] bucket_to object_key_copy
+                if { $bucket ne $bucket_to } {
+                    error "qc::s3 copy: The s3_uri to copy to must be in the same bucket as the s3_uri to copy from."
+                }
+                if { [qc::castable boolean $encrypted] } {
+                    set encrypted $encrypted
+                } else {
+                    set encrypted false
+                }
+            } elseif { [llength $args] == 3 } {
                 lassign $args -> s3_uri_to_copy s3_uri_copy
                 lassign [qc::s3 uri_bucket_object_key $s3_uri_to_copy] bucket object_key
                 set file_to_copy "${bucket}/${object_key}"
@@ -127,11 +150,12 @@ proc qc::s3 { args } {
                 if { $bucket ne $bucket_to } {
                     error "qc::s3 copy: The s3_uri to copy to must be in the same bucket as the s3_uri to copy from."
                 }
+                set encrypted false
             } else {
                 error "qc::s3 copy: Wrong number of args. Usage \"qc::s3 copy s3_uri_from s3_uri_to\"."
             }
 
-            qc::_s3_put -s3_copy $file_to_copy $bucket $object_key_copy
+            qc::_s3_put -encrypted $encrypted -s3_copy $file_to_copy $bucket $object_key_copy
         }
         put {
             # usage:
