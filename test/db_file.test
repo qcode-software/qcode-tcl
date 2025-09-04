@@ -30,6 +30,29 @@ test db_file_insert-1.0 {Upload a file to s3 and record the file info in the dat
     } \
     -result "Hello World"
 
+test db_file_copy-1.0 {Make a copy of a file on s3 and record the new file info in the database} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        set filepath [qc::file_temp "Hello World"]
+        file rename $filepath ${filepath}.txt
+        set filepath ${filepath}.txt
+
+        set file_id [qc::db_file_insert -user_id 0 $filepath]
+        file delete $filepath
+
+        set new_file_id [qc::db_file_copy $file_id]
+        set filepath [qc::db_file_export $new_file_id]
+        set result [qc::cat $filepath]
+        file delete $filepath
+
+        qc::db_file_delete $new_file_id
+        qc::db_file_delete $file_id
+        
+        return $result        
+    } \
+    -result "Hello World"
+
 
 test db_file_migrate-1.0 {Migrate a file from data to S3} \
     -setup $setup \
