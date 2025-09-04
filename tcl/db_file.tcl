@@ -35,6 +35,11 @@ proc qc::db_file_insert {args} {
 proc qc::db_file_copy {file_id} {
     #| Make a copy of this file
     set new_file_id [db_seq file_id_seq]
+
+    qc::aws_credentials_set_from_ec2_role
+    set s3_location_from [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
+    set s3_location_to [qc::s3 uri [qc::param_get s3_file_bucket] $new_file_id]
+    qc::s3 copy $s3_location_from $s3_location_to
     db_dml {
         insert into file 
         (file_id,user_id,filename,data,mime_type,s3_location)
@@ -44,7 +49,7 @@ proc qc::db_file_copy {file_id} {
         filename,
         data,
         mime_type,
-        s3_location
+        :s3_location_to
         from file
         where file_id=:file_id
     }
