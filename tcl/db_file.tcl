@@ -42,10 +42,24 @@ proc qc::db_file_copy {file_id} {
     #| Make a copy of this file
     set new_file_id [db_seq file_id_seq]
 
+    db_1row {
+        select
+        s3_location
+        from file
+        where file_id=:file_id
+    }
+    if { [regexp -nocase {\.enc$} $s3_location] } {
+        set new_s3_filename "${new_file_id}.enc"
+        set encrypted true
+    } else {
+        set new_s3_filename $new_file_id
+        set encrypted false
+    }
+
     qc::aws_credentials_set_from_ec2_role
-    set s3_location_from [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
-    set s3_location_to [qc::s3 uri [qc::param_get s3_file_bucket] $new_file_id]
-    qc::s3 copy $s3_location_from $s3_location_to
+    set s3_location_from $s3_location
+    set s3_location_to [qc::s3 uri [qc::param_get s3_file_bucket] $new_s3_filename]
+    qc::s3 copy $s3_location_from $s3_location_to $encrypted
     db_dml {
         insert into file 
         (file_id,user_id,filename,data,mime_type,s3_location)
