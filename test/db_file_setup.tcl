@@ -71,7 +71,8 @@ set setup {
     
     # Establish a connection the qc::db way
     qc::db_connect {*}[array get ::conn_info_test]
-
+    qc::db_trans_start    
+    qc::param_set file_encryption_key "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
     # Local config
     if { [file exists ~/.qcode-tcl] } {
         source ~/.qcode-tcl
@@ -96,6 +97,7 @@ set setup {
 
 set cleanup {
     # Cleanup the qc::db connection
+    qc::db_trans_abort
     qc::db_disconnect
     
     qc::db_connect {*}[array get ::conn_info_superuser_test_db]
@@ -108,4 +110,21 @@ set cleanup {
     db_dml {DROP DATABASE IF EXISTS test_database}
     db_dml {DROP ROLE IF EXISTS test_user;}
     qc::db_disconnect    
+}
+
+
+set setup_no_file_encryption {
+    rename qc::param_exists qc::param_exists_old
+    proc qc::param_exists {param_name} {
+        if { $param_name eq "file_encryption_key" } {
+            return false
+        } else {
+            return [qc::param_exists_old $param_name]
+        }
+    }
+}
+
+set cleanup_no_file_encryption {
+    rename qc::param_exists ""
+    rename qc::param_exists_old qc::param_exists
 }
