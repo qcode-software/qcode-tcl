@@ -16,10 +16,16 @@ proc qc::db_file_insert {args} {
     }
    
     set file_id [db_seq file_id_seq]
+    set s3_filename $file_id
+    set encrypted false
+    if { [param_exists file_encryption_key] } {
+        append s3_filename ".enc"
+        set encrypted true
+    }
     qc::aws_credentials_set_from_ec2_role
-    set s3_location [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
+    set s3_location [qc::s3 uri [qc::param_get s3_file_bucket] $s3_filename]
     # upload file to amazon s3
-    qc::s3 put $s3_location $file_path
+    qc::s3 put $s3_location $file_path $encrypted
     
     set qry {
 	insert into file 
@@ -36,10 +42,24 @@ proc qc::db_file_copy {file_id} {
     #| Make a copy of this file
     set new_file_id [db_seq file_id_seq]
 
+    db_1row {
+        select
+        s3_location
+        from file
+        where file_id=:file_id
+    }
+    if { [regexp -nocase {\.enc$} $s3_location] } {
+        set new_s3_filename "${new_file_id}.enc"
+        set encrypted true
+    } else {
+        set new_s3_filename $new_file_id
+        set encrypted false
+    }
+
     qc::aws_credentials_set_from_ec2_role
-    set s3_location_from [qc::s3 uri [qc::param_get s3_file_bucket] $file_id]
-    set s3_location_to [qc::s3 uri [qc::param_get s3_file_bucket] $new_file_id]
-    qc::s3 copy $s3_location_from $s3_location_to
+    set s3_location_from $s3_location
+    set s3_location_to [qc::s3 uri [qc::param_get s3_file_bucket] $new_s3_filename]
+    qc::s3 copy $s3_location_from $s3_location_to $encrypted
     db_dml {
         insert into file 
         (file_id,user_id,filename,data,mime_type,s3_location)
@@ -82,7 +102,12 @@ proc qc::db_file_export {args} {
     } else {
         # file exists on amazon s3
         qc::aws_credentials_set_from_ec2_role
-        qc::s3 get $s3_location $tmp_file
+        if { [regexp -nocase {\.enc$} $s3_location] } {
+            set encrypted true
+        } else {
+            set encrypted false
+        }
+        qc::s3 get $s3_location $tmp_file $encrypted
     }
     return $tmp_file
 }
