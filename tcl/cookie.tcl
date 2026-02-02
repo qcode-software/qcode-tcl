@@ -123,6 +123,10 @@ proc qc::cookie_set {name value args} {
         append cookie "; HttpOnly"
     }
 
+    if { [info exists option(same_site)] } {
+        append cookie "; SameSite=$option(same_site)"
+    }
+
     ns_set put $headers "Set-Cookie" $cookie
 }
 
