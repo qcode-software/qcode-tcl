@@ -138,7 +138,9 @@ proc qc::db_init {} {
 					 data bytea,
                                          s3_location text,
 					 upload_date timestamp without time zone DEFAULT now(),
-					 mime_type text NOT NULL
+					 mime_type text NOT NULL,
+                     deleted boolean not null default false,
+                     s3_deleted boolean not null default false
 					 );
 
         CREATE TABLE IF NOT EXISTS image (
