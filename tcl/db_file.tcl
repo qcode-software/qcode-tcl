@@ -181,3 +181,32 @@ proc qc::db_file_delete {file_id} {
     }
     db_dml {delete from file where file_id=:file_id}
 }
+
+proc qc::db_file_delete_soft { file_id } {
+    #| Soft deleted file by updateing file.deleted
+    db_dml {
+        update file
+        set deleted=true
+        where file_id=:file_id
+    }
+}
+
+proc qc::db_file_delete_s3 { file_id } {
+    #| Delete from S3 store and update file.deleted & file.s3_deleted
+    db_1row {
+        select
+        s3_location
+        from file
+        where
+        file_id=:file_id
+    }
+
+    qc::aws_credentials_set_from_ec2_role
+    qc::s3 delete $s3_location
+    
+    db_dml {
+        update file
+        set deleted=true, s3_deleted=true
+        where file_id=:file_id
+    }
+}

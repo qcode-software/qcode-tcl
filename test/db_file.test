@@ -172,4 +172,38 @@ test db_file_legacy_export {Export a file from data} \
     } \
     -result "Hello World"
 
+test db_file_delete_soft-1.0 {soft delete db file} \
+    -setup [join [list $setup $setup_no_file_encryption]] \
+    -cleanup [join [list $cleanup $cleanup_no_file_encryption]] \
+    -body {
+        set filepath [qc::file_temp "Hello World"]
+        file rename $filepath ${filepath}.txt
+        set filepath ${filepath}.txt
+
+        set file_id [qc::db_file_insert -user_id 0 $filepath]
+        file delete $filepath
+
+        qc::db_file_delete_soft $file_id
+        
+        return true
+    } \
+    -result true
+
+test db_file_delete_s3-1.0 {delete db file from s3 file store} \
+    -setup [join [list $setup $setup_no_file_encryption]] \
+    -cleanup [join [list $cleanup $cleanup_no_file_encryption]] \
+    -body {
+        set filepath [qc::file_temp "Hello World"]
+        file rename $filepath ${filepath}.txt
+        set filepath ${filepath}.txt
+
+        set file_id [qc::db_file_insert -user_id 0 $filepath]
+        file delete $filepath
+
+        qc::db_file_delete_s3 $file_id
+        
+        return true
+    } \
+    -result true
+
 cleanupTests
