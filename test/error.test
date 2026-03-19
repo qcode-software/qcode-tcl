@@ -1,0 +1,192 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+}
+
+set cleanup {
+    mock_ns::_reset
+}
+
+# Standard case
+test qc::error_report-1 \
+    {ns isconnected = 0} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set isconnected 0
+        return [qc::error_report "Test error message" "Test error info" "TEST_ERROR_CODE"]
+    } \
+    -match glob \
+    -result {*<h2>Software Bug</h2>*}
+
+test qc::error_report-2 \
+    {ns isconnected = 1} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set location  https://test.co.uk/tcl/test.json
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test.json"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+                                  Cookie "" \
+                                 ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+        ns_conn _set form [ns_set create form \
+                                var1 "value1" \
+                                var2 [string repeat "value2" 500] \
+                             ]
+        return [qc::error_report "Test error message" "Test error info" "TEST_ERROR_CODE"]
+    } \
+    -match glob \
+    -result {*<h2>Software Bug</h2>*}
+
+test qc::error_report-3 \
+    {fallback to global args} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set isconnected 0
+        set ::errorMessage "Test error message"
+        set ::errorInfo "Test error info"
+        set ::errorCode "TEST_ERROR_CODE"  
+        return [qc::error_report]
+    } \
+    -match glob \
+    -result {*<h2>Software Bug</h2>*}
+
+test qc::error_report_no_conn-1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        return [qc::error_report_no_conn "Test error message" "Test error info" "TEST_ERROR_CODE"]
+    } \
+    -match glob \
+    -result {*<h2>Software Bug</h2>*}
+
+test qc::error_report_form_vars-2 \
+    {form vars exist} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set location  https://test.co.uk/tcl/test.json
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test.json"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+                                  Cookie "" \
+                                 ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+        ns_conn _set form [ns_set create form \
+                                var1 "value1" \
+                                var2 [string repeat "value2" 500] \
+                             ]
+        return [qc::error_report_form_vars]
+    } \
+    -match glob \
+    -result {*<b>var1</b>*}
+
+test qc::error_report_form_vars-2 \
+    {no form vars} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set location  https://test.co.uk/tcl/test.json
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test.json"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+                                  Cookie "" \
+                                 ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+        ns_conn _set form [ns_set create form]
+        return [qc::error_report_form_vars]
+    } \
+    -match glob \
+    -result {}
+
+test qc::error_report_locals-1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        proc test_proc {} {
+            set var1 "value1" 
+            set var2 [string repeat "value2" 500] 
+            return [qc::error_report_locals]
+        }
+        return [test_proc]
+    } \
+    -match glob \
+    -result {*<b>var1</b>*}
+
+test qc::error_report_cookies-1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set location  https://test.co.uk/tcl/test.json
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test.json"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+            Cookie "cookie1=value1;" \
+        ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+        ns_conn _set form [ns_set create form]
+        return [qc::error_report_cookies]
+    } \
+    -match glob \
+    -result {*<b>cookie1</b>*}
+
+test qc::error_report_headers-1 \
+    {} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set location  https://test.co.uk/tcl/test.json
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test.json"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+            Cookie "cookie1=value1;" \
+        ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+        ns_conn _set form [ns_set create form]
+        return [qc::error_report_headers]
+    } \
+    -match glob \
+    -result {*<b>Cookie</b>*}
+
+cleanupTests
