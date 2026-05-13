@@ -90,7 +90,12 @@ proc qc::json_quote {value} {
 
 proc qc::tson2json { args } {
     #| Convert tson to json
-    qc::args $args -compact false -- tson
+    qc::args $args -compact -- tson
+
+    set switches [list]
+    if { [info exists compact] } {
+        lappend switches "-compact"
+    } 
 
     switch -- [lindex $tson 0] {
 
@@ -98,14 +103,14 @@ proc qc::tson2json { args } {
             set list {}
 
             foreach {name value} [lrange $tson 1 end] {
-                if { $compact } {
-                    lappend list "[json_quote $name]:[qc::tson2json -compact $compact $value]"
+                if { [info exists compact] } {
+                    lappend list "[json_quote $name]:[qc::tson2json {*}$switches $value]"
                 } else {
-                    lappend list "[json_quote $name]: [qc::tson2json -compact $compact $value]"
+                    lappend list "[json_quote $name]: [qc::tson2json {*}$switches $value]"
                 }
             }
 
-            if { $compact } {
+            if { [info exists compact] } {
                 return "\{[join $list ,]\}"
             } else {
                 return "\{\n[join $list ",\n"]\n\}"
@@ -116,10 +121,10 @@ proc qc::tson2json { args } {
             set list {}
 
             foreach value [lrange $tson 1 end] {
-                lappend list [qc::tson2json -compact $compact $value]
+                lappend list [qc::tson2json {*}$switches $value]
             }
 
-            if {$compact} {
+            if { [info exists compact] } {
                 return "\[[join $list ,]\]"
             } else {
                 return "\[[join $list ,]\]"

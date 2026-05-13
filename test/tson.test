@@ -55,7 +55,7 @@ test json_quote-1.0 {json_quote } -setup {
 }
 }}
 
-    test tson_object_from-1.0 {tson_object_from } -setup {
+test tson_object_from-1.0 {tson_object_from } -setup {
         set firstname Aiden
         set surname Soppit
         set location "Copper Top"
@@ -91,6 +91,51 @@ test json_quote-1.0 {json_quote } -setup {
 <Height>125</Height>
 <Width>100</Width></Thumbnail>
 <IDs><item>116</item><item>943</item><item>234</item><item>38793</item></IDs></Image>}
+
+test tson_object_from-1.0 {tson_object_from } -setup {
+        set firstname Aiden
+        set surname Soppit
+        set location "Copper Top"
+        set id 1471
+    } -body {
+        tson_object_from firstname surname location id
+    } -cleanup {
+        unset firstname
+        unset surname
+        unset location
+        unset id
+    } -result {object firstname {string Aiden} surname {string Soppit} location {string {Copper Top}} id {number 1471}}
+
+test tson2json-1 {} -setup {
+        set tson [list object \
+            Key1 [list string Value1] \
+            Key2 [list object \
+                Key2.1 [list array Value1 Value2] \
+            ]
+        ]
+    } -body {
+        tson2json $tson
+    } -cleanup {
+        unset tson
+    } -result {{
+"Key1": "Value1",
+"Key2": {
+"Key2.1": ["Value1","Value2"]
+}
+}}
+
+test tson2json-2 {compact JSON} -setup {
+        set tson [list object \
+            Key1 [list string Value1] \
+            Key2 [list object \
+                Key2.1 [list array Value1 Value2] \
+            ]
+        ]
+    } -body {
+        tson2json -compact $tson
+    } -cleanup {
+        unset tson
+    } -result {{"Key1":"Value1","Key2":{"Key2.1":["Value1","Value2"]}}}
 
 
 
