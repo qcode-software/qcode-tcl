@@ -98,7 +98,6 @@ proc qc::tson2json { args } {
     } 
 
     switch -- [lindex $tson 0] {
-
         object {
             set list {}
 
@@ -116,7 +115,6 @@ proc qc::tson2json { args } {
                 return "\{\n[join $list ",\n"]\n\}"
             }
         }
-
         array {
             set list {}
 
@@ -130,19 +128,15 @@ proc qc::tson2json { args } {
                 return "\[[join $list ,]\]"
             }
         }
-
         string {
             return [json_quote [lindex $tson 1]]
         }
-
         number {
             return [lindex $tson 1]
         }
-
         boolean {
             return [lindex $tson 1]
         }
-
         default {
             if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
                 return $tson
