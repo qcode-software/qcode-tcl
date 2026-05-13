@@ -88,39 +88,63 @@ proc qc::json_quote {value} {
     return "\"[string map {\" \\\" \\ \\\\ \n \\n \r \\r \f \\f \b \\b \t \\t} $value]\""
 }
 
-proc qc::tson2json { tson } {
+proc qc::tson2json { args } {
     #| Convert tson to json
+    qc::args $args -compact false -- tson
+
     switch -- [lindex $tson 0] {
-	object {
-	    set list {}
-	    foreach {name value} [lrange $tson 1 end] {
-		lappend list "[json_quote $name]: [tson2json $value]"
-	    }
-	    return "\{\n[join $list ",\n"]\n\}"
-	}
-	array {
-	    set list {}
-	    foreach value [lrange $tson 1 end] {
-		lappend list [tson2json $value]
-	    }
-	    return "\[[join $list ,]\]"
-	}
-	string {
-	    return [json_quote [lindex $tson 1]]
-	}
+
+        object {
+            set list {}
+
+            foreach {name value} [lrange $tson 1 end] {
+                if { $compact } {
+                    lappend list "[json_quote $name]:[qc::tson2json -compact $compact $value]"
+                } else {
+                    lappend list "[json_quote $name]: [qc::tson2json -compact $compact $value]"
+                }
+            }
+
+            if { $compact } {
+                return "\{[join $list ,]\}"
+            } else {
+                return "\{\n[join $list ",\n"]\n\}"
+            }
+        }
+
+        array {
+            set list {}
+
+            foreach value [lrange $tson 1 end] {
+                lappend list [qc::tson2json -compact $compact $value]
+            }
+
+            if {$compact} {
+                return "\[[join $list ,]\]"
+            } else {
+                return "\[[join $list ,]\]"
+            }
+        }
+
+        string {
+            return [json_quote [lindex $tson 1]]
+        }
+
         number {
             return [lindex $tson 1]
         }
+
         boolean {
             return [lindex $tson 1]
         }
-	default {
-	    if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
-		return $tson
-	    } else {
-		return [json_quote $tson]
-	    }
-	}
+
+        default {
+            if { ([string is double -strict $tson] && [qc::upper $tson] ni [list NAN INF]) || [in {true false null} $tson]} {
+                return $tson
+            } else {
+                return [json_quote $tson]
+            }
+        }
     }
 }
 
