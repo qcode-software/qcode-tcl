@@ -181,7 +181,7 @@ test db_domain_constraints-1.0 {db_domain_constraints} -setup $setup -cleanup $c
               );
     }
     qc::db_domain_constraints plain_text
-} -result "plain_text_check {((VALUE !~ '\[<>\]'::text))}"
+} -result "plain_text_check {(VALUE !~ '\[<>\]'::text)}"
 
 test db_column_constraints-1.0 {db_column_constraints} -setup $setup -cleanup $cleanup -body {
     db_cache_clear
@@ -189,7 +189,7 @@ test db_column_constraints-1.0 {db_column_constraints} -setup $setup -cleanup $c
         alter table students add constraint nohtml check(surname !~ '[<>]')
     }
     qc::db_column_constraints students surname
-} -result "nohtml {(((surname)::text !~ '\[<>\]'::text))}"
+} -result "nohtml {((surname)::text !~ '\[<>\]'::text)}"
 
 test db_column_constraints-1.1 {db_column_constraints} -setup $setup -cleanup $cleanup -body {
     db_cache_clear
@@ -316,7 +316,7 @@ append setup_extra {
 
     set expected [dict create \
                       constraint_name nohtml \
-                      check_clause {(((surname)::text !~ '[<>]'::text))} \
+                      check_clause {((surname)::text !~ '[<>]'::text)} \
                       column_names [list surname]]
 }
 
@@ -326,7 +326,6 @@ test db_table_check_constraints-1.0 \
     -cleanup $cleanup \
     -body {
         set constraints [qc::db_table_check_constraints public students]
-
         return [expr {[llength $constraints] == 1
                       && [qc::dicts_diff_any $expected [lindex $constraints 0]] eq ""}]
     } \
