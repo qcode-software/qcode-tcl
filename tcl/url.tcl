@@ -172,7 +172,7 @@ proc qc::url_decode {string {charset utf-8}} {
 proc qc::url_path {url} {
     # Return just the url path
     if { ![qc::is uri $url] } {
-        error "\"$url\" is not a valid URI."
+        error "\"$url\" is not a valid URI." {} INVALID_URI
     }  
     if { [regexp {^https?://[a-z0-9_][a-z0-9_\-]*(?:\.[a-z0-9_\-]+)+(?::[0-9]+)?(/[^\?]*)} $url -> path] } {
 	return $path
