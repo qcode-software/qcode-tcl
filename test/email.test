@@ -647,7 +647,7 @@ set test_body {
 }
 test email_support-1.0 {email_support text} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup
 
-# email_support test 1.0 - html
+# email_support test 2.0 - html
 set mail_from nsd@test.com 
 set rcpts support@test.com 
 set lines [list "This is a test email containing plaintext."]
@@ -662,7 +662,7 @@ set test_body {
     proc ::qc::param_get {args} {
         return support@test.com
     }
-    email_support subject "Test Email" html "This is a test email containing plaintext."
+    email_support subject "Test Email" html "This is a test email containing html."
 
     return true
 }
