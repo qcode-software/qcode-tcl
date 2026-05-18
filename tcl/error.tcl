@@ -33,8 +33,8 @@ proc qc::error_handler {{error_message "NULL"} args} {
     }
     
     switch -glob -- $error_code {
-	USER* {
-	    switch $media_type {
+        USER* {
+            switch $media_type {
                 xml {
                     set body [qc::xml error $error_message]
                 }
@@ -130,9 +130,15 @@ proc qc::error_handler {{error_message "NULL"} args} {
             }
             return [return2client code 400 $media_type $body]
         }
-	default {
-	    log Error $error_info
-            if {  [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
+        default {
+
+            // Check form data for sensitive data that should be masked in logs and email reports.
+            // Inspection needs to be done before return to client whilst form data is still available.
+            set sensitive_values [dict values [qc::form_sesitive_data]]
+
+            log Error [qc::text_mask $error_info $sensitive_values]
+
+            if { [info exists ::env(ENVIRONMENT)] && $::env(ENVIRONMENT) ne "LIVE" } {
                 switch $media_type {
                     xml {
                         set body [qc::xml error "Software Bug - [string range $error_message 0 75]"]
@@ -149,7 +155,7 @@ proc qc::error_handler {{error_message "NULL"} args} {
                     }
                 }
             } else {
-	        # LIVE
+                # LIVE
                 switch $media_type {
                     xml {
                         set body [qc::xml error "Internal Server Error. An email report has been sent to our engineers"]
@@ -169,12 +175,20 @@ proc qc::error_handler {{error_message "NULL"} args} {
             }
 
             return2client code 500 $media_type $body filter_cc yes
-            
-	    if { [qc::param_exists email_support] } {
-		set subject "[string toupper [ns_info server]] Bug - [string range $error_message 0 75]"
-		qc::email_support subject $subject html [qc::error_report $error_message $error_info $error_code] 
+                
+            if { [qc::param_exists email_support] } {
+                set subject [qc::text_mask \
+                    "[string toupper [ns_info server]] Bug - [string range $error_message 0 75]" \
+                    $sensitive_values \
+                ]
+                set html [qc::text_mask \
+                    [qc::error_report $error_message $error_info $error_code] \
+                    $sensitive_values \
+                ]
+                
+                qc::email_support subject $subject html $html
+            }
 	    }
-	}
     }
 }
 

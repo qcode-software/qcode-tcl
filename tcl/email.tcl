@@ -529,7 +529,7 @@ proc qc::email_token2dict {token} {
 
 proc qc::email_support { args } {
     #| Send email to support.
-    # Masking any card numbers and passwords before sending.
+    # Masking any card numbers before sending.
     # Usage: email_support subject $subject ?html $html? ?text $text?
 
     qc::args2vars $args subject html text
@@ -538,22 +538,13 @@ proc qc::email_support { args } {
     } else {
         set hostname [ns_info hostname]
     }
-
-    # mask credit cards and passwords
-    foreach var [list subject html text] {
-        if { [info exists $var] } {
-            set sanatized_$var [qc::format_cc_masked_string [set $var]]
-            set sanatised_$var [qc::format_password_masked_string [set sanatized_$var]]
-        }
-    }
-
     set email_args [list from "nsd@$hostname"]
     lappend email_args to [qc::param_get email_support]
-    lappend email_args subject $sanatized_subject
+    lappend email_args subject [qc::format_cc_masked_string $subject]
     if { [info exists html] } {
-        lappend email_args html $sanatized_html
+	lappend email_args html [qc::format_cc_masked_string $html]
     } else {
-        lappend email_args text $sanatized_text
+	lappend email_args text [qc::format_cc_masked_string $text]
     }
     qc::email_send {*}$email_args
 }
