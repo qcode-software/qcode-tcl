@@ -110,6 +110,24 @@ proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
     return $masked_string
 }
 
+proc qc::format_password_masked_string {string} {
+    #| Mask any form variable password values with ***MASKED***
+
+    set passwords [list]
+    if { [info commands ns_conn] eq "ns_conn" && [ns_conn isconnected] } {
+        set passwords [qc::form_passwords]
+    }
+
+    foreach value $passwords {
+        if { $value ne "" } {
+            set pattern [qc::regexp_escape $value]
+            regsub -all -nocase -- $pattern $string "***MASKED***" string
+        }
+    }
+
+    return $string
+}
+
 proc qc::format_ordinal {number} {
     #| Format number with suffix 23 -> 23rd or 4 -> 4th
     # Taken from TCL Wiki RS

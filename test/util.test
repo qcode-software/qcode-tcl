@@ -1,5 +1,6 @@
 package require tcltest
-namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint ::mock_ns::*
 
 # Load all .tcl files
 package require fileutil
@@ -788,7 +789,8 @@ test regexp_escape-1.0 {regexp_escape} -body {
 test time_start_end-1.0 {time_start and time_end} -body {
     qc::time_start foo
     qc::time_end foo
-} -match glob -output "*foo*"
+    return true
+} -match glob -output "*foo*" -result true
 
 test ./-1.0 \
     {Returns the patch relative to this file} \
@@ -797,5 +799,33 @@ test ./-1.0 \
     } \
     -match glob \
     -result *test/util.test
+
+test debug-1 {} -body {
+    rename ::ns_log ::ns_log_bak
+    qc::debug "Debug message"
+    rename ::ns_log_bak ::ns_log
+    return true 
+} -match glob -output "Debug message*" -result true
+
+test log-1 {debug without ns_log} -body {
+    rename ::ns_log ::ns_log_bak
+    qc::log "Notice message"
+    rename ::ns_log_bak ::ns_log
+    return true
+} -match glob -output "Notice message*" -result true
+
+test log-2 {error without ns_log } -body {
+    rename ::ns_log ::ns_log_bak
+    qc::log Error "Error message"
+    rename ::ns_log_bak ::ns_log
+    return true
+} -match glob -errorOutput "Error message*" -result true
+
+test log-3 {ns_log} -body {
+    qc::log Error "Error message"
+    return true
+} -match glob -errorOutput "App:Error - Error message*" -result true
+
+    
 
 cleanupTests

@@ -482,15 +482,17 @@ proc qc::.. {from to {step 1} {limit ""}} {
 proc qc::debug {message} {
     #| If running in naviserver and debugging is switched on then write message to nsd log.
     #| Otherwise write message to stdout.
-    #| Filter message by masking anything that looks like a card number.
-    log Debug [qc::format_cc_masked_string $message]
+    #| Mask anything that looks like a card number or matching password form variables.
+    set sanatized_message [qc::format_cc_masked_string $message]
+    set sanatised_message [qc::format_password_masked_string $sanatized_message]
+    log Debug [qc::format_cc_masked_string $sanatised_message]
 }
 
 proc qc::log {args} {
     #| If running in naviserver then write message to nsd log using App: prefix. 
     #| Otherwise write message to stout or stderr.
     #| Default severity argument to "Notice". 
-    #| Filter message by masking anything that looks like a card number.
+    #| Mask anything that looks like a card number or matching password form variables.
     #| Usage: qc::log ?Severity? message
     
     # Parse args
@@ -508,23 +510,24 @@ proc qc::log {args} {
 	error "Invalid args: usage log ?severity? message"
     }    
     
-    # Mask anything in message that looks like a card number 
-    set message [qc::format_cc_masked_string $message]
+    # Mask anything that looks like a card number or matching password form variables.
+    set sanatized_message [qc::format_cc_masked_string $message]
+    set sanatised_message [qc::format_password_masked_string $sanatized_message]
 
-    # Output message
+    # Output sanatized_message
     if { [info commands ns_log] eq "ns_log" } {
         # Write to naviserver's nsd log
         if { "App:$severity" ni [ns_logctl severities] } {
             # turn on this log level.
             ns_logctl severity App:$severity on
         }
-        ns_log "App:$severity" $message
+        ns_log "App:$severity" $sanatized_message
     } elseif { $severity eq "Error" } {
         # Write to stderr
-        puts stderr $message
+        puts stderr $sanatized_message
     } else {
         # Write to stdout
-        puts stdout  $message
+        puts stdout  $sanatized_message
     }
 }
 
