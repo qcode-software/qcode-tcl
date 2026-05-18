@@ -21,7 +21,7 @@ set cleanup {
     unset -nocomplain {*}[lexclude [info vars ::*] {*}$global_vars]
 }
 
-test form_passwords-1 {no passwords} {
+test form_sensitive_data-1 {no sensitive data} {
     ns_conn _set protocol https
     ns_conn _set isconnected 1
     ns_conn _set version 1.1
@@ -38,10 +38,10 @@ test form_passwords-1 {no passwords} {
     ns_conn _set outputheaders [ns_set create headers]
     ns_conn _set peeraddr 1.1.1.1
     
-    return [qc::form_passwords]
+    return [qc::form_sensitive_data [qc::form2dict]]
 } [list]
 
-test form_passwords-2 {passwords} {
+test form_sensitive_data-2 {passwords} {
     ns_conn _set protocol https
     ns_conn _set isconnected 1
     ns_conn _set version 1.1
@@ -59,8 +59,8 @@ test form_passwords-2 {passwords} {
     ns_conn _set outputheaders [ns_set create headers]
     ns_conn _set peeraddr 1.1.1.1
     
-    return [qc::form_passwords]
-} [list SECRET_1 SECRET_2]
+    return [qc::form_sensitive_data [qc::form2dict]]
+} [list password SECRET_1 password_confirm SECRET_2]
 
 
 cleanupTests
