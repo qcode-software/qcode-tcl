@@ -541,17 +541,19 @@ proc qc::email_support { args } {
 
     # mask credit cards and passwords
     foreach var [list subject html text] {
-        set sanatized_$var [qc::format_cc_masked_string [set $var]]
-        set sanatised_$var [qc::format_password_masked_string [set sanatized_$var]]
+        if { [info exists $var] } {
+            set sanatized_$var [qc::format_cc_masked_string [set $var]]
+            set sanatised_$var [qc::format_password_masked_string [set sanatized_$var]]
+        }
     }
 
     set email_args [list from "nsd@$hostname"]
     lappend email_args to [qc::param_get email_support]
-    lappend email_args subject $sanatised_subject
+    lappend email_args subject $sanatized_subject
     if { [info exists html] } {
-        lappend email_args html $sanatised_html
+        lappend email_args html $sanatized_html
     } else {
-        lappend email_args text $sanatised_text
+        lappend email_args text $sanatized_text
     }
     qc::email_send {*}$email_args
 }

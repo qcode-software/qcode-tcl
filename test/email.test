@@ -628,6 +628,48 @@ set test_body {
 }
 test email_send-1.14 {email_send sender} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup 
 
+# email_support test 1.0 - plaintext
+set mail_from nsd@test.com 
+set rcpts support@test.com 
+set lines [list "This is a test email containing plaintext."]
+set body [join $lines \r\n]
+set headers [list From nsd@test.com To support@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}]
+set result [dict_from mail_from rcpts body headers]
+
+set test_body {
+    proc ::ns_info {args} {
+        return test.com
+    }
+    proc ::qc::param_get {args} {
+        return support@test.com
+    }
+    email_support subject "Test Email" text "This is a test email containing plaintext."
+}
+test email_support-1.0 {email_support text} -setup $email_send_setup -body $test_body -result $result -cleanup $email_send_cleanup
+
+# email_support test 1.0 - html
+set mail_from nsd@test.com 
+set rcpts support@test.com 
+set lines [list "This is a test email containing plaintext."]
+set body [join $lines \r\n]
+set headers [list From nsd@test.com To support@test.com Subject {Test Email} Date {Wed, 6 Mar 2013 09:32:02 +0000} MIME-Version 1.0 Content-Transfer-Encoding quoted-printable Content-Type {text/plain; charset=utf-8}]
+set result [dict_from mail_from rcpts body headers]
+
+set test_body {
+    proc ::ns_info {args} {
+        return test.com
+    }
+    proc ::qc::param_get {args} {
+        return support@test.com
+    }
+    email_support subject "Test Email" html "This is a test email containing plaintext."
+
+    return true
+}
+test email_support-2.0 {email_support html} -setup $email_send_setup -body $test_body -result true -cleanup $email_send_cleanup
+
+
+
 # Email header split
 test email_header_split-1.0 {email_header_split} -body {
     qc::email_header_split {Test filename is hello.png} " "
