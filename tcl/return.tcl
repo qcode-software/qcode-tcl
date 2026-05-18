@@ -9,8 +9,14 @@ proc qc::return2client { args } {
     set headers [lexclude $arg_names html xml text json csv file filename download code content-type filter_cc]
     default code 200
     default filter_cc no
-    default filename [string trimleft [qc::url_path [ns_conn url]] /]
 
+    ::try {
+        default filename [string trimleft [qc::url_path [ns_conn url]] /]
+    } trap {INVALID_URI} {} {
+        # If request url is not a valid URI, default filename to "content"
+        default filename "content"
+    }
+    
     # Determine type of payload and configure defaults
     if { [info exists file] } {
         # File
