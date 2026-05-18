@@ -132,9 +132,9 @@ proc qc::error_handler {{error_message "NULL"} args} {
         }
         default {
 
-            // Check form data for sensitive data that should be masked in logs and email reports.
-            // Inspection needs to be done before return to client whilst form data is still available.
-            set sensitive_values [dict values [qc::form_sesitive_data]]
+            # Check form data for sensitive data that should be masked in logs and email reports.
+            # Inspection needs to be done before return to client whilst form data is still available.
+            set sensitive_values [dict values [qc::form_sensitive_data [qc::form2dict]]]
 
             log Error [qc::text_mask $error_info $sensitive_values]
 
