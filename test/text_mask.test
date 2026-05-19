@@ -1,0 +1,21 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+test text_mask-1 {} {
+    qc::text_mask "SECRET is my password" [list]
+} "SECRET is my password"
+
+test text_mask-2 {} {
+    qc::text_mask "SECRET is my password" [list "SECRET"]
+} "***MASKED*** is my password"
+
+cleanupTests

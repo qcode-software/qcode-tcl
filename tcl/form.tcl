@@ -149,3 +149,14 @@ proc qc::form_authenticity_token {} {
     return [h input type hidden name _authenticity_token value $authenticity_token]
 }
 
+proc qc::form_sensitive_data { form } {
+    #| Return a dict of all the sensitive form data
+    set sensitive_data [dict create]
+    dict for {name value} $form {
+        if { $value ne "" && [regexp -nocase {password} $name] } {
+                dict set sensitive_data $name $value
+        }
+    }
+
+    return $sensitive_data
+}

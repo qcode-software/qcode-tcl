@@ -1,0 +1,66 @@
+package require tcltest
+package require mock_ns
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
+
+# Load all .tcl files
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+set setup {
+    set global_vars [info vars ::*]
+}
+
+set cleanup {
+    mock_ns::_reset
+    ns_conn _reset
+    # unset any global variables created by mock_http
+    unset -nocomplain {*}[lexclude [info vars ::*] {*}$global_vars]
+}
+
+test form_sensitive_data-1 {no sensitive data} {
+    ns_conn _set protocol https
+    ns_conn _set isconnected 1
+    ns_conn _set version 1.1
+    ns_conn _set form [ns_set create form \
+        ignore secret \
+    ]
+    ns_conn _set location  https://www.dev.tlc-direct.co.uk/tcl/test.json
+    ns_conn _set port 443
+    ns_conn _set url "/tcl/test.json"       
+    ns_conn _set method GET
+    ns_conn _set headers [ns_set create headers \
+                                Cookie "" \
+                                ]
+    ns_conn _set outputheaders [ns_set create headers]
+    ns_conn _set peeraddr 1.1.1.1
+    
+    return [qc::form_sensitive_data [qc::form2dict]]
+} [list]
+
+test form_sensitive_data-2 {passwords} {
+    ns_conn _set protocol https
+    ns_conn _set isconnected 1
+    ns_conn _set version 1.1
+    ns_conn _set form [ns_set create form \
+        password SECRET_1 \
+        password_confirm SECRET_2 \
+    ]
+    ns_conn _set location  https://www.dev.tlc-direct.co.uk/tcl/test.json
+    ns_conn _set port 443
+    ns_conn _set url "/tcl/test.json"       
+    ns_conn _set method GET
+    ns_conn _set headers [ns_set create headers \
+                                Cookie "" \
+                                ]
+    ns_conn _set outputheaders [ns_set create headers]
+    ns_conn _set peeraddr 1.1.1.1
+    
+    return [qc::form_sensitive_data [qc::form2dict]]
+} [list password SECRET_1 password_confirm SECRET_2]
+
+
+cleanupTests

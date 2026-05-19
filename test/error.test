@@ -1,4 +1,5 @@
 package require tcltest
+package require json
 package require mock_ns
 namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint mock_ns::*
 
@@ -11,6 +12,13 @@ foreach file $files {
 namespace import ::qc::*
 
 set setup {
+    proc ::qc::param_get { param_name } {
+        switch $param_name {
+            email_support {
+                return support@qcode.co.uk
+            }
+        }
+    }
 }
 
 set cleanup {
@@ -188,5 +196,82 @@ test qc::error_report_headers-1 \
     } \
     -match glob \
     -result {*<b>Cookie</b>*}
+
+test qc::error_handler-1 \
+    {DEFAULT JSON} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set form [ns_set create form]
+        ns_conn _set location  https://www.test.co.uk/tcl/test
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+                                  Cookie "" \
+                                  Accept "application/json" \
+                                 ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+
+        set result [qc::error_handler "DEFAULT Error" [dict create -errorcode DEFAULT -errorinfo INFO]]
+
+        set response_code [ns_conn status]
+        set expected_response_code 500
+        if { $response_code != $expected_response_code } {
+            error "Expected response code, \"$response_code\" to be \"$expected_response_code\""
+        }
+
+        set response_body $mock_ns::mock_http_response_body
+        set tson [json2tson $response_body]
+        if { [dict get [::json::json2dict $response_body] status] ne "invalid" } {
+            error "Expected qc::response status, \"[qc::tson_get $response_body status]\", to be invalid"
+        }
+
+        return [dict get [::json::json2dict $response_body] message error value]
+    } \
+     -match glob \
+    -errorOutput * \
+    -result "*Software Bug - DEFAULT Error*"
+
+test qc::error_handler-1 \
+    {DEFAULT HTML} \
+    -setup $setup \
+    -cleanup $cleanup \
+    -body {
+        ns_conn _set protocol https
+        ns_conn _set isconnected 1
+        ns_conn _set version 1.1
+        ns_conn _set form [ns_set create form]
+        ns_conn _set location  https://www.test.co.uk/tcl/test
+        ns_conn _set port 443
+        ns_conn _set url "/tcl/test"       
+        ns_conn _set method GET
+        ns_conn _set headers [ns_set create headers \
+                                  Cookie "" \
+                                  Accept "text/html" \
+                                 ]
+        ns_conn _set outputheaders [ns_set create headers]
+        ns_conn _set peeraddr 1.1.1.1
+
+        set result [qc::error_handler "DEFAULT Error" [dict create -errorcode DEFAULT -errorinfo INFO]]
+
+        set response_code [ns_conn status]
+        set expected_response_code 500
+        if { $response_code != $expected_response_code } {
+            error "Expected response code, \"$response_code\" to be \"$expected_response_code\""
+        }
+
+        set response_body $mock_ns::mock_http_response_body
+        return $response_body
+    } \
+     -match glob \
+    -errorOutput * \
+    -result "*<b>errorMessage:</b> DEFAULT Error<br>*"
+
+
 
 cleanupTests
