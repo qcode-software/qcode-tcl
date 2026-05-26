@@ -1,0 +1,27 @@
+package require tcltest
+namespace import ::tcltest::test ::tcltest::cleanupTests ::tcltest::testConstraint
+
+# Load all .tcl files
+package require fileutil
+set files [lsort [fileutil::findByPattern "~/qcode-tcl/tcl" "*.tcl"]]
+foreach file $files {
+    source $file
+}
+namespace import ::qc::*
+
+test plain_text2html-1.0 \
+    {tson_object } \
+    -body {
+        plain_text2html {A message with 
+
+
+
+several newlines
+and <script>attack code</script>
+markup and
+&amp; entities}
+
+    } \
+    -result {A message with <br><br><br><br>several newlines<br>and &lt;script&gt;attack code&lt;/script&gt;<br>markup and<br>&amp;amp; entities}
+
+cleanupTests
