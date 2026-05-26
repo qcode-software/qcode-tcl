@@ -9,10 +9,10 @@ foreach file $files {
 }
 namespace import ::qc::*
 
-test plain_text2html-1.0 \
-    {tson_object } \
+test qc::plain_text2html-1.0 \
+    {} \
     -body {
-        plain_text2html {A message with 
+        qc::plain_text2html {A message with 
 
 
 
