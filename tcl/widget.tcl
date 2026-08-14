@@ -239,7 +239,7 @@ proc qc::widget_datalist { args } {
         append html [html_tag input type hidden {*}[dict_subset [array get this] name value id]]
     } else {
         set html [h input \
-                      {*}[qc::dict_exclude [array get this] required label type options null_option value units tooltip width] \
+                      {*}[qc::dict_exclude [array get this] required label type options null_option units tooltip width] \
                       list $this(id)_datalist \
                      ]
         append html [h datalist \
