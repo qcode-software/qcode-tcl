@@ -395,7 +395,7 @@ test widget_datalist-1.0 \
                     null_option yes \
                    ]
     } \
-    -result {<input style="" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+    -result {<input style="" id="letter" value="" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></datalist>}
 
@@ -409,7 +409,7 @@ test widget_datalist-1.1 \
                     tooltip "This is a tooltip" \
                    ]
     } \
-    -result {<input style="" id="letter" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+    -result {<input style="" id="letter" value="" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></datalist>}
 
@@ -423,7 +423,7 @@ test widget_datalist-1.2 \
                     title "This is a tooltip" \
                    ]
     } \
-    -result {<input style="" id="letter" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+    -result {<input style="" id="letter" value="" name="letter" title="This is a tooltip" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></datalist>}
 
@@ -437,7 +437,7 @@ test widget_datalist-1.3 \
                     width 100 \
                    ]
     } \
-    -result {<input style="width:100px" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+    -result {<input style="width:100px" id="letter" value="" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
 <option value="B">Bravo</option>
 <option value="C">Charlie</option></datalist>}
 
@@ -458,14 +458,12 @@ test widget-1.6 \
         return [widget \
                     type datalist \
                     name letter \
-                    value "" \
+                    value "B" \
                     options {Alpha A Bravo B Charlie C} \
                    ]
     } \
-    -result {<input style="" id="letter" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
-<option value="B">Bravo</option>
+    -result {<input style="" id="letter" value="B" name="letter" list="letter_datalist"/><datalist id="letter_datalist"><option value="A">Alpha</option>
+<option value="B" selected="selected">Bravo</option>
 <option value="C">Charlie</option></datalist>}
-
-
 
 cleanupTests
