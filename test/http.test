@@ -192,6 +192,105 @@ test http_post-1.3 {http_post resp_code_err} \
         return "[dict get $response code]"
     } -result {401}
 
+test qc::http_delete-1 \
+    {Return 1 for a successful DELETE without response options} \
+    -constraints [list httpbin_running] \
+    -body {
+        qc::http_delete -timeout 5 http://localhost:8081/status/204
+    } \
+    -result 1
+
+test qc::http_delete-2 \
+    {Return the code and empty body for an explicitly accepted authentication failure} \
+    -constraints [list httpbin_running] \
+    -body {
+        qc::http_delete -timeout 5 \
+            -valid_response_codes [list 401] \
+            -response_code true \
+            http://localhost:8081/status/401
+    } \
+    -result [dict create body "" code 401]
+
+test qc::http_delete-3 \
+    {Return headers and body, omit code, and forward request headers} \
+    -constraints [list httpbin_running] \
+    -body {
+        set response [qc::http_delete -timeout 5 \
+            -headers [dict create X-Test delete-test] \
+            -response_headers true \
+            http://localhost:8081/delete]
+        set body [::json::json2dict [dict get $response body]]
+        list [dict get $body headers X-Test] \
+            [expr {[dict size [dict get $response headers]] > 0}] \
+            [dict exists $response code]
+    } \
+    -result [list delete-test 1 0]
+
+test qc::http_delete-4 \
+    {Return both headers and code with an empty body for a 204 response} \
+    -constraints [list httpbin_running] \
+    -body {
+        set response [qc::http_delete -timeout 5 \
+            -response_code true \
+            -response_headers true \
+            http://localhost:8081/status/204]
+        list [dict get $response body] [dict get $response code] \
+            [expr {[dict size [dict get $response headers]] > 0}]
+    } \
+    -result [list "" 204 1]
+
+test qc::http_delete-5 \
+    {Reject a missing resource} \
+    -constraints [list httpbin_running] \
+    -body {
+        qc::http_delete -timeout 5 http://localhost:8081/status/404
+    } \
+    -returnCodes error \
+    -errorCode CURL \
+    -result {URL NOT FOUND http://localhost:8081/status/404}
+
+test qc::http_delete-6 \
+    {Reject a server error} \
+    -constraints [list httpbin_running] \
+    -body {
+        qc::http_delete -timeout 5 http://localhost:8081/status/500
+    } \
+    -returnCodes error \
+    -errorCode CURL \
+    -result {SERVER ERROR http://localhost:8081/status/500}
+
+test qc::http_delete-7 \
+    {Reject an authentication failure unless explicitly accepted} \
+    -constraints [list httpbin_running] \
+    -body {
+        qc::http_delete -timeout 5 http://localhost:8081/status/401
+    } \
+    -returnCodes error \
+    -errorCode CURL \
+    -result {RESPONSE 401 while contacting http://localhost:8081/status/401}
+
+test qc::http_delete-8 \
+    {Report the cURL timeout instead of an HTTP status error when no response arrives} \
+    -setup {
+        package require TclCurl
+        set server_socket [socket -server [list apply {{channel address port} {
+            #| Close connections if the event loop processes an accept callback.
+            close $channel
+        }}] -myaddr 127.0.0.1 0]
+        set server_port [lindex [fconfigure $server_socket -sockname] end]
+    } \
+    -body {
+        set error_code [catch {
+            qc::http_delete -timeout 1 "http://127.0.0.1:$server_port/"
+        } message options]
+        list $error_code [dict get $options -errorcode] \
+            [expr {$message eq [curl::easystrerror 28]}]
+    } \
+    -cleanup {
+        close $server_socket
+    } \
+    -result [list 1 CURL 1]
+
 test http_put-1.0 {http_put} \
     -constraints {httpbin_running} \
     -body {
