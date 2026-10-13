@@ -794,15 +794,16 @@ proc qc::http_delete {args} {
     set http_response_code [dict get $result responsecode]
     set curl_error_number [dict get $result curlErrorNumber]
 
+    if { $curl_error_number != 0 } {
+        return -code error -errorcode CURL [curl::easystrerror $curl_error_number]
+    }
+
     if { $http_response_code ni $valid_response_codes } {
         switch $http_response_code {
             404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
             500 {return -code error -errorcode CURL "SERVER ERROR $url"}
             default {return -code error -errorcode CURL "RESPONSE $http_response_code while contacting $url"}
         }
-    }
-    if { $curl_error_number != 0 } {
-        return -code error -errorcode CURL [curl::easystrerror $curl_error_number]
     }
     if { !$response_headers && !$response_code } {
         return 1
