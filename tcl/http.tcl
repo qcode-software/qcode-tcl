@@ -767,33 +767,58 @@ proc qc::http_save {args} {
 }
 
 proc qc::http_delete {args} {
-    #| Send http DELETE request
-    args $args -timeout 60 -headers {} -- url
+    #| Send an HTTP DELETE request and return 1, or a response dict when headers or code are requested.
+    args $args \
+        -timeout 60 \
+        -headers [list] \
+        -valid_response_codes [list 200 204] \
+        -response_code false \
+        -response_headers false \
+        -- url
 
-    set httpheaders {}
+    set http_headers [list]
     foreach {name value} $headers {
-	lappend httpheaders [qc::http_header $name $value]
+        lappend http_headers [qc::http_header $name $value]
     }
 
-    dict2vars [qc::http_curl -customrequest DELETE -httpheader $httpheaders -timeout $timeout -url $url -sslverifypeer 0 -sslverifyhost 0] responsecode curlErrorNumber
-    switch $responsecode {
-        204 -
-	200 { 
-	    # OK 
-	}
-	404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
-	500 {return -code error -errorcode CURL "SERVER ERROR $url"}
-	default {return -code error -errorcode CURL "RESPONSE $responsecode while contacting $url"}
+    set result [qc::http_curl \
+        -customrequest DELETE \
+        -headervar return_headers \
+        -bodyvar response_body \
+        -httpheader $http_headers \
+        -timeout $timeout \
+        -url $url \
+        -sslverifypeer 0 \
+        -sslverifyhost 0 \
+    ]
+    set http_response_code [dict get $result responsecode]
+    set curl_error_number [dict get $result curlErrorNumber]
+
+    if { $http_response_code ni $valid_response_codes } {
+        switch $http_response_code {
+            404 {return -code error -errorcode CURL "URL NOT FOUND $url"}
+            500 {return -code error -errorcode CURL "SERVER ERROR $url"}
+            default {return -code error -errorcode CURL "RESPONSE $http_response_code while contacting $url"}
+        }
     }
-    switch $curlErrorNumber {
-	0 {
-	    # OK
-	    return 1
-	}
-	default {
-	    return -code error -errorcode CURL [curl::easystrerror $curlErrorNumber]
-	}
+    if { $curl_error_number != 0 } {
+        return -code error -errorcode CURL [curl::easystrerror $curl_error_number]
     }
+    if { !$response_headers && !$response_code } {
+        return 1
+    }
+
+    set return_headers [dict get $result return_headers]
+    set response_body [dict get $result response_body]
+    set response [dict create body [encoding convertfrom \
+        [qc::http_encoding $return_headers $response_body] $response_body]]
+    if { $response_code } {
+        dict set response code $http_response_code
+    }
+    if { $response_headers } {
+        dict set response headers $return_headers
+    }
+    return $response
 }
 
 proc qc::http_url_resolve {args} {
