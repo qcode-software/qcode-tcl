@@ -269,6 +269,28 @@ test qc::http_delete-7 \
     -errorCode CURL \
     -result {RESPONSE 401 while contacting http://localhost:8081/status/401}
 
+test qc::http_delete-8 \
+    {Report the cURL timeout instead of an HTTP status error when no response arrives} \
+    -setup {
+        package require TclCurl
+        set server_socket [socket -server [list apply {{channel address port} {
+            #| Close connections if the event loop processes an accept callback.
+            close $channel
+        }}] -myaddr 127.0.0.1 0]
+        set server_port [lindex [fconfigure $server_socket -sockname] end]
+    } \
+    -body {
+        set error_code [catch {
+            qc::http_delete -timeout 1 "http://127.0.0.1:$server_port/"
+        } message options]
+        list $error_code [dict get $options -errorcode] \
+            [expr {$message eq [curl::easystrerror 28]}]
+    } \
+    -cleanup {
+        close $server_socket
+    } \
+    -result [list 1 CURL 1]
+
 test http_put-1.0 {http_put} \
     -constraints {httpbin_running} \
     -body {
