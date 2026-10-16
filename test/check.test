@@ -209,7 +209,23 @@ test check-1.22 {check NOT CREDITCARDS failure} -setup {
     qc::check text NOT CREDITCARDS
 } -cleanup {
     unset text
-} -returnCodes error -result "\"This is a valid CC number 4111111111111111 \" contains a creditcard number which is not allowed for text"
+} -returnCodes error -result "The value contains a creditcard number which is not allowed for text"
+
+test check-1.22b {check NOT CREDITCARDS failure does not echo 2-series number} -setup {
+    set text "Card 2223003122003222 please"
+} -body {
+    qc::check text NOT CREDITCARDS
+} -cleanup {
+    unset text
+} -returnCodes error -result "The value contains a creditcard number which is not allowed for text"
+
+test check-1.22c {check CREDITCARD failure does not echo value} -setup {
+    set cc 4111111111111112
+} -body {
+    qc::check cc CREDITCARD
+} -cleanup {
+    unset cc
+} -returnCodes error -result "Not a valid creditcard for cc"
 
 
 test check-1.23 {check PRICE success} -setup {
@@ -262,6 +278,6 @@ test checks-1.01 {checks failure} -setup {
     unset dec
     unset cc
     unset html
-} -returnCodes error -match glob -result "*\"999\" is not a valid creditcard for cc*" 
+} -returnCodes error -match glob -result "*Not a valid creditcard for cc*" 
 
 cleanupTests
