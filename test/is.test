@@ -2697,6 +2697,16 @@ test contains_creditcard-1.9 {contains_creditcard pipe is not a leading digit} -
     contains_creditcard "|111111111111111"
 } -result false
 
+test contains_creditcard-1.10 {contains_creditcard invalid 2-series then valid card} -setup {
+} -body {
+    contains_creditcard 2223003122003223,4111111111111111
+} -result true
+
+test contains_creditcard-1.11 {contains_creditcard invalid card then valid card} -setup {
+} -body {
+    contains_creditcard "4111111111111112, 4111111111111111"
+} -result true
+
 test is-hex-1.0 {is hex valid} -setup {
 } -body {
     qc::is hex 9F

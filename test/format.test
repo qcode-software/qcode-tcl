@@ -93,6 +93,18 @@ test format_cc_masked_string-1.5 {format_cc_masked_string 2-series mastercard in
 test format_cc_masked_string-1.6 {format_cc_masked_string 2-series fails luhn} -body {
     qc::format_cc_masked_string 2223003122003223
 } -result "2223003122003223"
+test format_cc_masked_string-1.7 {format_cc_masked_string digits before card are not swallowed} -body {
+    qc::format_cc_masked_string "20 4111111111111111"
+} -result "20 4111 11** **** 1111"
+test format_cc_masked_string-1.8 {format_cc_masked_string invalid 2-series then valid card} -body {
+    qc::format_cc_masked_string 2223003122003223,4111111111111111
+} -result "2223003122003223,4111 11** **** 1111"
+test format_cc_masked_string-1.9 {format_cc_masked_string invalid card then valid card} -body {
+    qc::format_cc_masked_string 4111111111111112,4111111111111111
+} -result "4111111111111112,4111 11** **** 1111"
+test format_cc_masked_string-1.10 {format_cc_masked_string two valid adjacent cards} -body {
+    qc::format_cc_masked_string 2223003122003222,4111111111111111
+} -result "2223 00** **** 3222,4111 11** **** 1111"
 
 test format_ordinal-1.0 {format_ordinal eleventh} {qc::format_ordinal 411} "411th"
 test format_ordinal-1.1 {format_ordinal st} {qc::format_ordinal 421} "421st"

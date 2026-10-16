@@ -13,7 +13,7 @@ proc qc::contains_creditcard {string} {
 	 # other cards 16 digits long (including Mastercard 2-series)
 	 (?:[2-6]\d{3}[ \-\.]*\d{4}[ \-\.]*\d{4}[ \-\.]*\d{4})
 	 )
-	(?:[^0-9]|$)
+	(?![0-9])
     }
     foreach {match cc_no} [regexp -inline -all -expanded $re $string] {
 	if { [is_creditcard [string map {" " "" - "" . ""} $cc_no]] } {
