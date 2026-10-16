@@ -426,6 +426,16 @@ test is-creditcard_masked-1.4 {is creditcard_masked dashes valid} -setup {
     qc::is creditcard_masked 4111-11**-****-1111
 } -result 1
 
+test is-creditcard_masked-1.5 {is creditcard_masked 2-series mastercard} -setup {
+} -body {
+    qc::is creditcard_masked 222300******3222
+} -result 1
+
+test is-creditcard_masked-1.6 {is creditcard_masked 2-series unmasked} -setup {
+} -body {
+    qc::is creditcard_masked 2223003122003222
+} -result 0
+
 test is-varchar-1.0 {is varchar too long} -setup {
 } -body {
     qc::is varchar 12 "Too long a string"
@@ -2665,6 +2675,26 @@ test contains_creditcard-1.4 {contains_creditcard invalid cc no} -setup {
 test contains_creditcard-1.5 {contains_creditcard masked} -setup {
 } -body {
     contains_creditcard "The cc number 411111******1111 is in the middle of this string."
+} -result false
+
+test contains_creditcard-1.6 {contains_creditcard 2-series mastercard} -setup {
+} -body {
+    contains_creditcard "The cc number 2223003122003222 is in the middle of this string."
+} -result true
+
+test contains_creditcard-1.7 {contains_creditcard 2-series mastercard with spaces} -setup {
+} -body {
+    contains_creditcard "2223 0031 2200 3222"
+} -result true
+
+test contains_creditcard-1.8 {contains_creditcard 2-series invalid luhn} -setup {
+} -body {
+    contains_creditcard "The cc number 2223003122003223 is in the middle of this string."
+} -result false
+
+test contains_creditcard-1.9 {contains_creditcard pipe is not a leading digit} -setup {
+} -body {
+    contains_creditcard "|111111111111111"
 } -result false
 
 test is-hex-1.0 {is hex valid} -setup {

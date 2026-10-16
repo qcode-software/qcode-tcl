@@ -10,8 +10,8 @@ proc qc::contains_creditcard {string} {
 	 # amex 15 digits long
 	 (?:3\d{3}[ \-\.]*\d{6}[ \-\.]*\d{5})
 	 |
-	 # other cards 16 digits long
-	 (?:[4|5|6]\d{3}[ \-\.]*\d{4}[ \-\.]*\d{4}[ \-\.]*\d{4})
+	 # other cards 16 digits long (including Mastercard 2-series)
+	 (?:[2-6]\d{3}[ \-\.]*\d{4}[ \-\.]*\d{4}[ \-\.]*\d{4})
 	 )
 	(?:[^0-9]|$)
     }

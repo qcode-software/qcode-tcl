@@ -85,7 +85,7 @@ proc qc::format_cc_masked_string {string {prefix 6} {suffix 4}} {
     if { $prefix > 6 } { error "prefix must be less than 6" }
     if { $suffix > 4 } { error "suffix must be less than 4" }
     
-    set cc_no_pattern {(?:^|[^0-9]\.|[^\.\+0-9])([3456](?:\d[ \-\.]*){11,17}\d)(?:[^0-9]|$)}
+    set cc_no_pattern {(?:^|[^0-9]\.|[^\.\+0-9])([23456](?:\d[ \-\.]*){11,17}\d)(?:[^0-9]|$)}
     set indices [regexp -inline -indices -all -nocase $cc_no_pattern $string]
     set start 0
     set masked_string ""
