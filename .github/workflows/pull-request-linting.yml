@@ -5,6 +5,10 @@ on:
     paths:
       - '**.tcl'
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   linting:
     name: Linting
