@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
       - name: Calculate next version
         id: version
-        uses: qcode-software/ci-development/.github/actions/version-increment@v2.5.0
+        uses: ./actions/version-increment
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Tcl Module

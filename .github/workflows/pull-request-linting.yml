@@ -12,19 +12,105 @@ permissions:
 jobs:
   linting:
     name: Linting
-    uses: qcode-software/ci-development/.github/workflows/qcode-ci.yml@v2.3.1
-    with:
-      files: |
-        tcl/**/*.tcl
+    runs-on: ubuntu-latest
+    env:
+      scripts_path: ${{ github.workspace }}/.github/scripts
       tcl_directory: tcl
       test_directory: test
       max_line_length: 100
       max_file_length: 400
       max_proc_body_length: 80
-      check_line_lengths: true
-      check_proc_names: true
-      check_procs_have_unit_tests: true
-      check_file_lengths: true
-      check_proc_lengths: true
-      check_proc_comments: true
-    secrets: inherit
+    steps:
+      - name: Dependencies
+        run: |
+          wget https://debian.qcode.co.uk/packages.key
+          gpg --no-default-keyring --keyring ./temp-keyring.gpg --import packages.key
+          gpg --no-default-keyring --keyring ./temp-keyring.gpg --export --output qcode-packages.gpg
+          rm temp-keyring.gpg
+          sudo mv qcode-packages.gpg /etc/apt/keyrings/
+          echo "deb [signed-by=/etc/apt/keyrings/qcode-packages.gpg] https://debian.qcode.co.uk bookworm main" | sudo tee /etc/apt/sources.list.d/qcode.list
+          sudo apt-get update
+          sudo apt-get install -y tcl tcllib tdom tclcurl libpgtcl qcode-linter-2.3.0
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Tcl Script Files
+        id: changed-files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            tcl/**/*.tcl
+
+      - name: Check for Lines Exceeding Max Chars
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh line-length-check.tcl \
+            ${{ env.max_line_length }} \
+            ${{ github.workspace }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: Check for Proc Names Not Prefixed with File Name
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh proc-name-check.tcl \
+            ${{ github.workspace }} \
+            ${{ env.tcl_directory }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: Check for Proc Bodies Exceeding Max Lines
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh proc-length-check.tcl \
+            ${{ env.max_proc_body_length }} \
+            ${{ github.workspace }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: Check Procs Have Unit Tests
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh procs-have-unit-tests-check.tcl \
+            ${{ github.workspace }} \
+            ${{ env.test_directory }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: Check for Files Exceeding Max Lines
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh file-length-check.tcl \
+            ${{ env.max_file_length }} \
+            ${{ github.workspace }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: 'Check Procs Have #| Comments'
+        if: >
+          always()
+          && steps.changed-files.outcome == 'success'
+          && steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          cd ${{ env.scripts_path }}
+          tclsh proc-comment-check.tcl \
+            ${{ github.workspace }} \
+            ${{ steps.changed-files.outputs.all_changed_files }}
