@@ -47,3 +47,8 @@ proc qc::aws_credentials_get_from_ec2_role { } {
                 $token \
             ]
 }
+
+proc qc::aws_negative_test {} {
+    set x "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
+    return $x
+}
