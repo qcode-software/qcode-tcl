@@ -33,13 +33,13 @@ jobs:
           sudo apt-get install -y tcl tcllib tdom tclcurl libpgtcl qcode-linter-2.3.0
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get Changed Tcl Script Files
         id: changed-files
-        uses: tj-actions/changed-files@v35.9.2
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files: |
             tcl/**/*.tcl
