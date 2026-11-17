@@ -1,0 +1,36 @@
+name: "Next Version"
+description: "Get latest GitHub release tag and increment rightmost semver part (x.y or x.y.z)"
+inputs:
+  github_token:
+    description: "GitHub token for gh CLI"
+    required: true
+outputs:
+  version:
+    description: "Next version"
+    value: ${{ steps.calc.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: calc
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: |
+        set -euo pipefail
+
+        LATEST_VERSION="$(gh release list --json tagName,isLatest --jq '.[] | select(.isLatest == true) | .tagName' | head -n1)"
+        LATEST_VERSION="${LATEST_VERSION#v}"
+
+        if [ -z "${LATEST_VERSION}" ]; then
+          echo "No latest version found, setting next to 0.1"
+          NEXT_VERSION="0.1"
+        elif [[ "${LATEST_VERSION}" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+          NEXT_VERSION="$(echo "${LATEST_VERSION}" | awk -F. 'BEGIN{OFS="."} {$NF=$NF+1; print}')"
+          echo "Incrementing ${LATEST_VERSION} to ${NEXT_VERSION}"
+        else
+          echo "Latest version '${LATEST_VERSION}' is not in the expected format."
+          exit 1
+        fi
+
+        echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
