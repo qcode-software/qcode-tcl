@@ -7,9 +7,9 @@ limits, and enabled checks. Honour any overrides in the workflow that calls
 
 ## Checks
 
-1. **Line length.** Flag lines longer than 90 characters. Count indentation and
+1. **Line length.** Flag lines longer than 100 characters. Count indentation and
    trailing whitespace. Count each tab as one character.
-2. **File length.** Flag files longer than 500 lines. Count the whole file, including
+2. **File length.** Flag files longer than 400 lines. Count the whole file, including
    blank lines. For compatibility with Qcode CI, a trailing newline contributes
    an empty final line to the count. An empty file has zero lines.
 3. **Procedure body length.** Flag procedure bodies longer than 80 lines. Count the
