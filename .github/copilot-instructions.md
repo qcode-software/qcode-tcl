@@ -33,4 +33,9 @@ Use the full changed file for file and procedure counts and the repository's tes
 files for test matching. Report only violations you can verify. Leave an inline
 comment on the changed line or nearest relevant changed line. Include the observed
 count and configured limit for length findings, and suggest a specific fix when
-possible. Group repeated findings where one fix addresses them.
+possible.
+
+For each procedure-level violation, leave a separate inline comment on the
+affected procedure declaration or the specific line that violates the rule.
+Name the procedure in the comment. Keep each comment focused on one
+procedure and one lint rule, even when several procedures have the same issue.
