@@ -143,6 +143,9 @@ proc qc::check {args} {
 		} else {
 		    default errorMessage [not_$type $varName $varValue] 
 		}
+	    } elseif { $type eq "creditcard" } {
+		# Never echo a mistyped card number back to the user
+		default errorMessage "Not a valid creditcard for $varName"
 	    } else {
 		default errorMessage "\"[html_escape $varValue]\" is not a valid $type for $varName"
 	    }
@@ -157,7 +160,7 @@ proc qc::check {args} {
 
     # Check contains creditcard by default
     if { !$allow_creditcards && [contains_creditcard $varValue] } {
-	error [expr {[info exists errorMessage] ? $errorMessage : "\"[html_escape $varValue]\" contains a creditcard number which is not allowed for $varName"}] {} USER
+	error [expr {[info exists errorMessage] ? $errorMessage : "The value contains a creditcard number which is not allowed for $varName"}] {} USER
     }
 
     return true

@@ -33,5 +33,5 @@ proc qc::is::creditcard_masked {string} {
 
     # 13-19 chars masked with < 6 prefix and < 4 suffix digits
     return [expr {[regexp {[0-9\*]{13,19}} $number]
-                  && [regexp {^[3-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]}]
+                  && [regexp {^[2-6\*][0-9]{0,5}\*+[0-9]{0,4}$} $number]}]
 }
