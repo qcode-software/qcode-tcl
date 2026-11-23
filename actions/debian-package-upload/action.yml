@@ -1,0 +1,52 @@
+name: 'Upload Debian Package'
+inputs:
+  private_key:
+    description: 'Private key'
+    required: true
+    type: string
+  debian_package_file:
+    description: 'Debian package file'
+    required: true
+    type: string
+  remote_user:
+    description: 'Remote user'
+    required: true
+    type: string
+  remote_host:
+    description: 'Remote host'
+    required: true
+    type: string
+  remote_dir:
+    description: 'Remote directory'
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Add SSH key
+      env:
+        PRIVATE_KEY: ${{ inputs.private_key }}
+        REMOTE_HOST: ${{ inputs.remote_host }}
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan "$REMOTE_HOST" >> ~/.ssh/known_hosts
+        echo "$PRIVATE_KEY" > ~/.ssh/github
+        chmod 600 ~/.ssh/github
+        ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+        SSH_AUTH_SOCK=/tmp/ssh_agent.sock ssh-add ~/.ssh/github
+      shell: bash
+    - name: Upload debian package
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        DEBIAN_PACKAGE_FILE: ${{ inputs.debian_package_file }}
+        REMOTE: ${{ inputs.remote_user }}@${{ inputs.remote_host }}
+        REMOTE_DIR: ${{ inputs.remote_dir }}
+      shell: bash
+      run: |
+        scp "$DEBIAN_PACKAGE_FILE" "$REMOTE:$REMOTE_DIR/debs"
+        ssh "$REMOTE" reprepro \
+          --basedir "$REMOTE_DIR" \
+          includedeb \
+          bookworm \
+          "$REMOTE_DIR/debs/$DEBIAN_PACKAGE_FILE"
